@@ -1,48 +1,81 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Star, Github } from "lucide-react";
 import type { Project } from "@/lib/content";
 
 export default function ProjectCard({ project }: { project: Project }) {
+  // Extract star count from badge if it contains "stars" (e.g., "2.8K stars", "100 stars")
+  const starMatch = project.badge?.match(/^([\d.]+[KkMm]?)\s+stars?$/);
+  const starCount = starMatch ? starMatch[1] : null;
+  const displayBadge = starCount ? null : project.badge;
+  const isGitHub = project.href.includes("github.com/");
+
   return (
-    <article className="group flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-lg shadow-slate-950/70 ring-sky-500/0 transition-all hover:-translate-y-1.5 hover:border-sky-500/60 hover:ring-2">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
-            {project.kind === "product" ? "Product" : "Open source"}
+    <Link href={project.href} target="_blank" rel="noopener noreferrer" className="block">
+      <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-gradient-to-br from-slate-950/90 via-slate-950/80 to-slate-900/90 p-5 shadow-lg shadow-slate-950/70 ring-sky-500/0 backdrop-blur-sm transition-all hover:-translate-y-1.5 hover:border-sky-500/60 hover:shadow-sky-500/10 hover:ring-2">
+        {/* Subtle gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-500/0 via-violet-500/0 to-emerald-400/0 opacity-0 transition-opacity duration-300 group-hover:opacity-5" />
+
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
+                  {project.kind === "product" ? "Product" : "Open source"}
+                </p>
+                {isGitHub && (
+                  <Github className="h-3 w-3 text-slate-500" aria-hidden="true" />
+                )}
+              </div>
+              <h3 className="mt-1 text-base font-semibold text-slate-50 transition-colors group-hover:text-sky-200">
+                {project.name}
+              </h3>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {starCount && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/10 to-yellow-500/10 px-2.5 py-1 text-[0.65rem] font-semibold text-amber-200 ring-1 ring-amber-500/20">
+                  <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  {starCount}
+                </span>
+              )}
+              {displayBadge && (
+                <span className="rounded-full bg-sky-500/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-sky-200 ring-1 ring-sky-500/20">
+                  {displayBadge}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs leading-relaxed text-slate-400">
+            {project.short}
           </p>
-          <h3 className="mt-1 text-base font-semibold text-slate-50">
-            {project.name}
-          </h3>
+
+          <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-300">
+            {project.description}
+          </p>
+
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-1.5">
+              {project.tags.slice(0, 4).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-md bg-slate-900/80 px-2 py-0.5 text-[0.7rem] text-slate-400 ring-1 ring-slate-800/60 transition-colors group-hover:bg-slate-800/80 group-hover:text-slate-300"
+                >
+                  {tag}
+                </span>
+              ))}
+              {project.tags.length > 4 && (
+                <span className="rounded-md bg-slate-900/80 px-2 py-0.5 text-[0.7rem] text-slate-500 ring-1 ring-slate-800/60">
+                  +{project.tags.length - 4}
+                </span>
+              )}
+            </div>
+            <div className="inline-flex items-center gap-1 text-xs font-medium text-sky-300 transition-colors group-hover:text-sky-200">
+              View
+              <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </div>
+          </div>
         </div>
-        {project.badge && (
-          <span className="rounded-full bg-sky-500/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-sky-200">
-            {project.badge}
-          </span>
-        )}
-      </div>
-      <p className="mt-3 text-xs text-slate-400">{project.short}</p>
-      <p className="mt-3 flex-1 text-sm text-slate-300">
-        {project.description}
-      </p>
-      <div className="mt-4 flex items-center justify-between gap-4">
-        <div className="flex flex-wrap gap-1">
-          {project.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-slate-900/80 px-2 py-0.5 text-[0.7rem] text-slate-400"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-        <Link
-          href={project.href}
-          className="inline-flex items-center gap-1 text-xs font-medium text-sky-300 hover:text-sky-200"
-        >
-          View
-          <ArrowUpRight className="h-3 w-3" />
-        </Link>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 }
