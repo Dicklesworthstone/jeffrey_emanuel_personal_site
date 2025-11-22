@@ -7,6 +7,7 @@ import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import ErrorBoundary from "@/components/error-boundary";
 import ScrollToTop from "@/components/scroll-to-top";
+import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import { useMobileOptimizations } from "@/hooks/use-mobile-optimizations";
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
         </AnimatePresence>
         <SiteFooter />
         <ScrollToTop />
+        <PWAInstallPrompt />
       </div>
     </ErrorBoundary>
   );
