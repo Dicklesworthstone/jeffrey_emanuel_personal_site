@@ -14,37 +14,17 @@ export function useMobileOptimizations() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (!isMobile) return;
 
-    // Prevent iOS elastic bounce on body (but allow on scrollable elements)
-    const preventBounce = (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      // Allow scroll on elements with overflow
-      if (
-        target.scrollHeight > target.clientHeight ||
-        target.closest(".overflow-scroll") ||
-        target.closest(".overflow-auto")
-      ) {
-        return;
-      }
-      // Prevent bounce on body (single-touch scroll past edge)
-      // Note: CSS overscroll-behavior-y: none on body handles this too
-      // This is a fallback for older iOS versions
-      e.preventDefault();
-    };
+    // NOTE: Removed preventBounce touchmove handler as it was blocking scroll
+    // CSS overscroll-behavior-y: none on body already handles iOS bounce
 
-    document.body.addEventListener("touchmove", preventBounce, {
-      passive: false,
-    });
-
-    // Improve tap responsiveness on iOS
-    const touchHandler = () => {};
-    const elements = document.querySelectorAll("a, button, [role='button']");
-    elements.forEach((el) => {
-      el.addEventListener("touchstart", touchHandler, { passive: true });
-    });
-
-    // Prevent accidental zooms on double-tap (iOS)
+    // Prevent accidental zooms on double-tap (iOS) - only on non-input elements
     let lastTouchEnd = 0;
     const preventDoubleTapZoom = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      // Allow double-tap on inputs/textareas for text selection
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        return;
+      }
       const now = Date.now();
       if (now - lastTouchEnd <= 300) {
         e.preventDefault();
@@ -69,13 +49,8 @@ export function useMobileOptimizations() {
 
     // Cleanup
     return () => {
-      document.body.removeEventListener("touchmove", preventBounce);
       document.removeEventListener("touchend", preventDoubleTapZoom);
       window.removeEventListener("orientationchange", handleOrientationChange);
-      // Remove touch listeners from all elements
-      elements.forEach((el) => {
-        el.removeEventListener("touchstart", touchHandler);
-      });
     };
   }, []);
 }
