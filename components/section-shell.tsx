@@ -28,34 +28,45 @@ export default function SectionShell({
       ref={ref as React.RefObject<HTMLElement>}
       data-section
       id={id}
-      className="mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-20 lg:px-8 lg:py-24"
+      className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 md:py-32 lg:px-8"
     >
       <motion.div
-        initial={{ opacity: 0, y: 32 }}
-        animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
-        transition={{ type: "spring", stiffness: 120, damping: 22 }}
+        initial={{ opacity: 0, y: 40 }}
+        animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }} // Custom ease for "slick" feel
+        className="relative z-10"
       >
-      <div className="mb-8 max-w-3xl md:mb-12">
-        {eyebrow && (
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-300/90 md:text-sm">
-            {eyebrow}
-          </p>
-        )}
-        <div className="mt-3 flex items-center gap-3 md:mt-4 md:gap-4">
-          {Icon && (
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800/80 bg-slate-900/70 text-sky-300 md:h-11 md:w-11">
-              <Icon className="h-5 w-5 md:h-5 md:w-5" />
+        <div className="mb-16 max-w-3xl md:mb-24">
+          {eyebrow && (
+            <div className="mb-4 flex items-center gap-3">
+              <span className="h-px w-8 bg-sky-500/50"></span>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-400">
+                {eyebrow}
+              </p>
             </div>
           )}
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl md:text-4xl">
-            {title}
-          </h2>
+          
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-4">
+              {Icon && (
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/50 text-sky-400 shadow-lg shadow-sky-900/10 backdrop-blur-sm">
+                  <Icon className="h-6 w-6" />
+                </div>
+              )}
+              <h2 className="text-balance-pro text-3xl font-bold tracking-tighter text-slate-50 sm:text-4xl md:text-5xl">
+                {title}
+              </h2>
+            </div>
+            
+            {kicker && (
+              <p className="text-pretty-pro max-w-2xl text-lg font-light leading-relaxed text-slate-400 md:text-xl md:leading-relaxed">
+                {kicker}
+              </p>
+            )}
+          </div>
         </div>
-        {kicker && (
-          <p className="mt-4 text-base leading-relaxed text-slate-400 md:mt-5 md:text-lg md:leading-relaxed">{kicker}</p>
-        )}
-      </div>
-        <div className="space-y-6 md:space-y-8">
+
+        <div className="relative">
           {children}
         </div>
       </motion.div>
