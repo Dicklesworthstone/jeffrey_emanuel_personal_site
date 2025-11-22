@@ -12,6 +12,15 @@ const isMobileDevice = () => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
+// Detect slow network connections
+const isSlowConnection = () => {
+  if (typeof window === "undefined" || !("connection" in navigator)) return false;
+  const conn = (navigator as any).connection;
+  if (!conn) return false;
+  // Slow if: 2G, slow-2g, or save-data enabled
+  return conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.saveData === true;
+};
+
 function FloatingPolyhedron(props: JSX.IntrinsicElements["mesh"]) {
   const ref = useRef<THREE.Mesh>(null!);
   useFrame((state) => {
@@ -53,8 +62,15 @@ function StarField() {
   const ref = useRef<THREE.Points>(null);
 
   const [positions] = useState(() => {
-    // Determine star count based on device (check on client-side only)
-    const numPoints = typeof window !== "undefined" && isMobileDevice() ? 200 : 420;
+    // Determine star count based on device and network (check on client-side only)
+    let numPoints = 420; // Default for desktop
+    if (typeof window !== "undefined") {
+      if (isSlowConnection()) {
+        numPoints = 100; // Very few stars on slow connections
+      } else if (isMobileDevice()) {
+        numPoints = 200; // Reduced stars on mobile
+      }
+    }
     const pts = new Float32Array(numPoints * 3);
     for (let i = 0; i < numPoints; i++) {
       const r = 5 + Math.random() * 4;
@@ -103,14 +119,21 @@ function StarField() {
 
 export default function ThreeScene() {
   const isMobile = isMobileDevice();
+  const isSlowNetwork = isSlowConnection();
+
+  // Adjust quality based on device and network
+  const quality = isSlowNetwork ? "low" : isMobile ? "medium" : "high";
+  const dpr: [number, number] = isSlowNetwork ? [0.5, 1] : isMobile ? [1, 1.5] : [1, 2];
+  const autoRotateSpeed = isSlowNetwork ? 0.1 : isMobile ? 0.2 : 0.3;
 
   return (
     <Canvas
       camera={{ position: [0, 0, 5.5], fov: 40 }}
-      className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]"
-      // Mobile performance optimizations
-      dpr={isMobile ? [1, 1.5] : [1, 2]} // Lower pixel ratio on mobile
-      performance={{ min: 0.5 }} // Adaptive performance
+      className="h-[280px] w-full touch-none sm:h-[380px] md:h-[420px] lg:h-[460px]"
+      // Network and device-aware performance optimizations
+      dpr={dpr}
+      performance={{ min: 0.3 }} // More aggressive throttling
+      style={{ touchAction: "none" }} // Prevent scroll interference on canvas
     >
       <color attach="background" args={["#020617"]} />
       <StarField />
@@ -129,10 +152,11 @@ export default function ThreeScene() {
       </group>
       <OrbitControls
         enableZoom={false}
-        autoRotate
-        autoRotateSpeed={isMobile ? 0.2 : 0.3} // Slower on mobile to save battery
+        autoRotate={quality !== "low"} // Disable auto-rotate on slow connections
+        autoRotateSpeed={autoRotateSpeed}
         enablePan={false}
-        enableDamping={!isMobile} // Disable damping on mobile
+        enableRotate={!isMobile} // Disable rotation on mobile to prevent scroll conflicts
+        enableDamping={quality === "high"} // Only enable damping on high quality
         makeDefault
       />
     </Canvas>
