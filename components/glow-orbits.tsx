@@ -4,12 +4,16 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
 export default function GlowOrbits() {
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!rootRef.current) return;
+
     const ctx = gsap.context(() => {
       const rings = gsap.utils.toArray<HTMLElement>(".glow-ring");
+
+      if (rings.length === 0) return;
+
       gsap.to(rings, {
         rotate: 360,
         duration: 48,
@@ -18,6 +22,7 @@ export default function GlowOrbits() {
         transformOrigin: "50% 50%",
         stagger: 0.2,
       });
+
       gsap.to(rings, {
         yoyo: true,
         repeat: -1,
@@ -27,7 +32,10 @@ export default function GlowOrbits() {
         stagger: 0.28,
       });
     }, rootRef);
-    return () => ctx.revert();
+
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
   return (
