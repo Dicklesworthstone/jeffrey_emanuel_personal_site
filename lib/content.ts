@@ -53,8 +53,9 @@ export const heroContent = {
   eyebrow: "Founder • Engineer • Former Hedge Fund Analyst",
   title: "Building the tools that sit between markets and frontier AI.",
   body: [
-    "I run Lumera Network (formerly Pastel Network), a Cosmos-based L1 for storage, AI, and interoperability.",
-    "I also build tools like SmartEdgar, MCP Agent Mail, and Ultimate Bug Scanner—plus an ecosystem of open-source infrastructure for AI agents and serious research workflows.",
+    "I build tools like SmartEdgar, MCP Agent Mail, and Ultimate Bug Scanner, plus an ecosystem of open-source infrastructure for AI agents and serious research workflows.",
+    "And I consult to PE funds and hedge funds about AI automation after a decade as an analyst in the long/short equity hedge fund space.",
+    "I also founded and run Lumera Network (formerly Pastel Network), a Cosmos-based L1 for storage, AI, and interoperability.",
   ],
   primaryCta: {
     label: "Work with me",
