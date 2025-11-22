@@ -1,65 +1,155 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Hero from "@/components/hero";
+import SectionShell from "@/components/section-shell";
+import ProjectCard from "@/components/project-card";
+import Timeline from "@/components/timeline";
+import { Cpu, GitBranch, PenSquare } from "lucide-react";
+import { careerTimeline, projects, threads, writingHighlights } from "@/lib/content";
+
+export default function HomePage() {
+  const featuredProjects = projects.slice(0, 3);
+  const featuredWriting = writingHighlights.slice(0, 3);
+  const featuredThreads = threads.slice(0, 3);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <Hero />
+
+      <SectionShell
+        id="snapshot"
+        icon={Cpu}
+        eyebrow="Snapshot"
+        title="Where I sit in the AI stack"
+        kicker="Three overlapping threads: infrastructure, tools for agents, and research that actually moves markets."
+      >
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-lg shadow-slate-950/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300/80">
+              Infrastructure
+            </p>
+            <h3 className="mt-2 text-sm font-semibold text-slate-50">
+              Lumera Network
+            </h3>
+            <p className="mt-2 text-sm text-slate-300">
+              A Cosmos-based L1 for durable storage and AI verification, aimed
+              at the world where agents talk to chains as fluently as to APIs.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-lg shadow-slate-950/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300/80">
+              Agent tooling
+            </p>
+            <h3 className="mt-2 text-sm font-semibold text-slate-50">
+              SmartEdgar, MCP Agent Mail, UBS
+            </h3>
+            <p className="mt-2 text-sm text-slate-300">
+              Tools that let analysts and LLMs cooperate instead of fighting
+              PDFs, Git diffs, and static analyzers.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-lg shadow-slate-950/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300/80">
+              Markets & research
+            </p>
+            <h3 className="mt-2 text-sm font-semibold text-slate-50">
+              Essays that move numbers
+            </h3>
+            <p className="mt-2 text-sm text-slate-300">
+              Long-form work that connects model internals and infrastructure
+              economics all the way back to cash flows and valuations.
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </SectionShell>
+
+      <SectionShell
+        id="projects"
+        icon={GitBranch}
+        eyebrow="Projects"
+        title="Products and open source"
+        kicker="A small sample of what I’m building right now. See the projects page for the expanded list."
+      >
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {featuredProjects.map((project) => (
+            <ProjectCard key={project.name} project={project} />
+          ))}
         </div>
-      </main>
-    </div>
+      </SectionShell>
+
+      <SectionShell
+        id="writing"
+        icon={PenSquare}
+        eyebrow="Writing"
+        title="Essays, memos, and research notes"
+        kicker="A mix of public writing and GitHub-native research artifacts."
+      >
+        <div className="grid gap-5 md:grid-cols-3">
+          {featuredWriting.map((item) => (
+            <a
+              key={item.title}
+              href={item.href}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 text-sm shadow-lg shadow-slate-950/80 transition hover:-translate-y-1 hover:border-sky-500/70"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                {item.source} • {item.category}
+              </p>
+              <h3 className="mt-2 text-sm font-semibold text-slate-50 group-hover:text-sky-100">
+                {item.title}
+              </h3>
+              <p className="mt-2 flex-1 text-xs text-slate-400">{item.blurb}</p>
+              <span className="mt-3 text-xs font-medium text-sky-300 group-hover:text-sky-200">
+                Read the essay →
+              </span>
+            </a>
+          ))}
+        </div>
+      </SectionShell>
+
+      <SectionShell
+        id="timeline"
+        icon={Cpu}
+        eyebrow="Background"
+        title="From hedge funds to agents and chains"
+        kicker="A condensed view of the path that got me here."
+      >
+        <Timeline items={careerTimeline} />
+      </SectionShell>
+
+      <SectionShell
+        id="threads"
+        icon={PenSquare}
+        eyebrow="Threads"
+        title="Selected X posts"
+        kicker="I write a lot more informally on X. Here are a few good entry points."
+      >
+        <div className="grid gap-5 md:grid-cols-3">
+          {featuredThreads.map((thread) => (
+            <a
+              key={thread.href}
+              href={thread.href}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 text-sm shadow-lg shadow-slate-950/80 transition hover:-translate-y-1 hover:border-sky-500/70"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Thread on X
+              </p>
+              <h3 className="mt-2 text-sm font-semibold text-slate-50 group-hover:text-sky-100">
+                {thread.title}
+              </h3>
+              <p className="mt-2 flex-1 text-xs text-slate-400">
+                {thread.blurb}
+              </p>
+              <span className="mt-3 text-xs font-medium text-sky-300 group-hover:text-sky-200">
+                Open thread →
+              </span>
+            </a>
+          ))}
+        </div>
+      </SectionShell>
+    </>
   );
 }
