@@ -2,6 +2,7 @@
 
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
+import VirtualProjectGrid from "@/components/virtual-project-grid";
 import { projects } from "@/lib/content";
 import { GitBranch } from "lucide-react";
 
@@ -30,11 +31,11 @@ export default function ProjectsPage() {
         <h3 className="mt-10 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
           Open-source tooling
         </h3>
-        <div className="mt-3 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {ossProjects.map((project) => (
-            <ProjectCard key={project.name} project={project} />
-          ))}
-        </div>
+        {/* Use virtual scrolling for OSS projects (many items) */}
+        <VirtualProjectGrid
+          projects={ossProjects}
+          className="mt-3 grid gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3"
+        />
 
         <p className="mt-6 text-xs text-slate-400">
           For the full constellation of experiments, research repos, and niche
