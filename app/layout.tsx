@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   title: siteConfig.title,
   description: siteConfig.description,
   metadataBase: new URL("https://jeffreyemanuel.com"),
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -31,6 +32,15 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false, // Prevent auto-linking phone numbers
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
   },
   openGraph: {
     title: siteConfig.title,
