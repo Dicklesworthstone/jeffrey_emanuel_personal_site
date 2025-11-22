@@ -2,6 +2,22 @@
 
 Modern personal portfolio site built with Next.js 16, TypeScript, Tailwind CSS v4, and React Three Fiber.
 
+## ⚠️ IMPORTANT: BUN ONLY
+
+**This project uses BUN as the package manager. DO NOT use npm, yarn, or pnpm.**
+
+```bash
+# ✅ Correct
+bun install
+bun run dev
+
+# ❌ NEVER do this
+npm install   # Will error
+npm run dev   # Don't even think about it
+```
+
+The project has safeguards in place to prevent npm usage. If you accidentally try to use npm, you'll see an error message.
+
 ## Tech Stack
 
 - **Next.js 16** (App Router) with React 19
