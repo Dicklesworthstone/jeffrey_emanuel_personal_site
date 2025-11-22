@@ -2,14 +2,19 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import { Suspense } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Cpu, LineChart } from "lucide-react";
+import { ArrowRight, BookOpen, Cpu } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
 import StatsGrid from "@/components/stats-grid";
+import ErrorBoundary from "@/components/error-boundary";
+import ThreeSceneLoading from "@/components/three-scene-loading";
 import { heroContent, heroStats, siteConfig } from "@/lib/content";
 
 const ThreeScene = dynamic(() => import("@/components/three-scene"), {
   ssr: false,
+  loading: () => <ThreeSceneLoading />,
 });
 
 export default function Hero() {
@@ -21,10 +26,31 @@ export default function Hero() {
       <GlowOrbits />
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-14 pt-14 sm:px-6 md:gap-10 md:pb-16 md:pt-16 lg:flex-row lg:items-center lg:px-8 lg:pb-20 lg:pt-20">
         <div className="relative z-10 flex-1 space-y-6">
-          <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-sky-200 floating-chip">
-            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            {heroContent.eyebrow}
-          </span>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="flex items-center gap-4"
+          >
+            <div className="relative">
+              {/* Enhanced blur glow - increased opacity and blur radius */}
+              <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-sky-500/30 via-violet-500/30 to-emerald-400/30 blur-2xl" />
+              <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-slate-700/60 bg-slate-900/80 shadow-lg shadow-slate-950/70 ring-1 ring-sky-500/20 sm:h-24 sm:w-24">
+                <Image
+                  src="/jeff_emanuel_headshot.jpg"
+                  alt={siteConfig.name}
+                  fill
+                  sizes="(max-width: 639px) 80px, 96px"
+                  className="object-cover object-center"
+                  priority
+                />
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-sky-200 floating-chip">
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              {heroContent.eyebrow}
+            </span>
+          </motion.div>
           <motion.h1
             className="text-3xl font-semibold leading-tight tracking-tight text-slate-50 sm:text-4xl md:text-5xl"
             initial={{ opacity: 0, y: 16 }}
@@ -79,35 +105,18 @@ export default function Hero() {
         </div>
 
         <div className="relative z-10 flex-1">
-          <div className="relative rounded-3xl border border-slate-800/80 bg-slate-950/80 p-4 shadow-[0_40px_120px_rgba(15,23,42,0.95)] ring-1 ring-sky-500/10">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Live surface
-                </p>
-                <p className="mt-1 text-sm font-medium text-slate-100">
-                  Agents • Markets • Infrastructure
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1 text-[0.65rem] text-emerald-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  Online
-                </span>
-                <LineChart className="h-4 w-4 text-sky-300" />
-              </div>
-            </div>
-            <div className="overflow-hidden rounded-2xl border border-slate-800/90 bg-slate-950">
-              <ThreeScene />
-            </div>
-            <p className="mt-3 text-[0.7rem] text-slate-400">
-              Rendering a small piece of how I think about the world: structured
-              orbits around a moving core, with agents reading from the field.
-            </p>
-            <p className="mt-2 text-[0.7rem] text-slate-500">
-              Based in {siteConfig.location}. Most days are split between
-              writing, building, and helping funds make sense of AI.
-            </p>
+          <div className="overflow-hidden rounded-2xl border border-slate-800/90 bg-slate-950 shadow-[0_40px_120px_rgba(15,23,42,0.95)] ring-1 ring-sky-500/10">
+            <ErrorBoundary
+              fallback={
+                <div className="flex h-[280px] w-full items-center justify-center text-sm text-slate-400 sm:h-[380px] md:h-[420px] lg:h-[460px]">
+                  Visualization temporarily unavailable
+                </div>
+              }
+            >
+              <Suspense fallback={<ThreeSceneLoading />}>
+                <ThreeScene />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </div>
       </div>
