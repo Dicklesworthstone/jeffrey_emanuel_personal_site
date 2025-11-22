@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { navItems, siteConfig } from "@/lib/content";
@@ -12,8 +12,8 @@ export default function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-900/80 bg-gradient-to-b from-slate-950/95 via-slate-950/80 to-slate-950/60 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-slate-900/80 bg-gradient-to-b from-slate-950/95 via-slate-950/80 to-slate-950/60 backdrop-blur-xl safe-top">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400 shadow-lg shadow-slate-900/70">
             <Sparkles className="h-4 w-4 text-slate-50" />
@@ -63,37 +63,52 @@ export default function SiteHeader() {
         </Link>
 
         <button
-          className="ml-3 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700/80 bg-slate-900/80 text-slate-200 hover:border-slate-500 hover:bg-slate-900 md:hidden"
+          className="ml-3 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-700/80 bg-slate-900/80 text-slate-200 transition-transform active:scale-95 hover:border-slate-500 hover:bg-slate-900 md:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle navigation"
+          aria-expanded={open}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {open && (
-        <div className="border-t border-slate-900/80 bg-slate-950/95 md:hidden">
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="border-t border-slate-900/80 bg-slate-950/95 md:hidden"
+          >
           <nav className="mx-auto flex max-w-6xl flex-col px-4 py-3 text-sm">
-            {navItems.map((item) => {
+            {navItems.map((item, index) => {
               const active = pathname === item.href;
               return (
-                <Link
+                <motion.div
                   key={item.href}
-                  href={item.href}
-                  className={`rounded-lg px-3 py-2 ${
-                    active
-                      ? "bg-slate-900 text-slate-50"
-                      : "text-slate-300 hover:bg-slate-900 hover:text-slate-50"
-                  }`}
-                  onClick={() => setOpen(false)}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  {item.label}
-                </Link>
+                  <Link
+                    href={item.href}
+                    className={`block rounded-lg px-4 py-3 transition-all active:scale-[0.98] ${
+                      active
+                        ? "bg-slate-900 text-slate-50"
+                        : "text-slate-300 active:bg-slate-900/70 hover:bg-slate-900 hover:text-slate-50"
+                    }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                </motion.div>
               );
             })}
           </nav>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

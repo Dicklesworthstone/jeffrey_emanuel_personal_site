@@ -6,6 +6,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { JSX } from "react";
 import * as THREE from "three";
 
+// Detect mobile devices for performance optimization
+const isMobileDevice = () => {
+  if (typeof window === "undefined") return false;
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
 function FloatingPolyhedron(props: JSX.IntrinsicElements["mesh"]) {
   const ref = useRef<THREE.Mesh>(null!);
   useFrame((state) => {
@@ -45,8 +51,10 @@ function OrbitalRing(props: { radius: number; tilt: number; color: string }) {
 
 function StarField() {
   const ref = useRef<THREE.Points>(null);
+
   const [positions] = useState(() => {
-    const numPoints = 420;
+    // Determine star count based on device (check on client-side only)
+    const numPoints = typeof window !== "undefined" && isMobileDevice() ? 200 : 420;
     const pts = new Float32Array(numPoints * 3);
     for (let i = 0; i < numPoints; i++) {
       const r = 5 + Math.random() * 4;
@@ -94,10 +102,15 @@ function StarField() {
 }
 
 export default function ThreeScene() {
+  const isMobile = isMobileDevice();
+
   return (
     <Canvas
       camera={{ position: [0, 0, 5.5], fov: 40 }}
       className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]"
+      // Mobile performance optimizations
+      dpr={isMobile ? [1, 1.5] : [1, 2]} // Lower pixel ratio on mobile
+      performance={{ min: 0.5 }} // Adaptive performance
     >
       <color attach="background" args={["#020617"]} />
       <StarField />
@@ -106,7 +119,7 @@ export default function ThreeScene() {
         position={[4, 6, 4]}
         intensity={1.3}
         color={"#e5e7eb"}
-        castShadow
+        castShadow={!isMobile} // Disable shadows on mobile for performance
       />
       <FloatingPolyhedron position={[0, 0, 0]} />
       <group scale={1.4}>
@@ -117,8 +130,10 @@ export default function ThreeScene() {
       <OrbitControls
         enableZoom={false}
         autoRotate
-        autoRotateSpeed={0.3}
+        autoRotateSpeed={isMobile ? 0.2 : 0.3} // Slower on mobile to save battery
         enablePan={false}
+        enableDamping={!isMobile} // Disable damping on mobile
+        makeDefault
       />
     </Canvas>
   );
