@@ -17,7 +17,7 @@ export default function SiteHeader() {
   // Shrink header on scroll (mobile only)
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 20);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -25,67 +25,91 @@ export default function SiteHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-900/80 bg-gradient-to-b from-slate-950/95 via-slate-950/80 to-slate-950/60 backdrop-blur-xl transition-all duration-300 safe-top">
-      <div className={`mx-auto flex max-w-6xl items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-8 ${scrolled ? "py-2 md:py-3" : "py-3 sm:py-4"}`}>
-        <Link href="/" className="flex items-center gap-2">
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400 shadow-lg shadow-slate-900/70">
-            <Sparkles className="h-4 w-4 text-slate-50" />
-            <div className="absolute inset-0 rounded-xl bg-white/10 mix-blend-soft-light" />
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-xs font-medium uppercase tracking-[0.25em] text-slate-400">
-              {siteConfig.location}
-            </span>
-            <span className="text-sm font-semibold text-slate-50 sm:text-base">
-              {siteConfig.name}
-            </span>
-          </div>
-        </Link>
+    <>
+      <header 
+        className={`sticky top-0 z-40 border-b border-slate-900/50 bg-slate-950/70 backdrop-blur-xl transition-all duration-300 safe-top ${
+          scrolled ? "shadow-lg shadow-slate-950/50" : ""
+        }`}
+      >
+        <div className={`mx-auto flex max-w-6xl items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-8 ${scrolled ? "py-3" : "py-4 sm:py-5"}`}>
+          <Link href="/" className="group flex items-center gap-2.5" onClick={() => setOpen(false)}>
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400 shadow-lg shadow-slate-900/50 transition-transform group-hover:scale-105">
+              <Sparkles className="h-5 w-5 text-white" />
+              <div className="absolute inset-0 rounded-xl bg-white/20 mix-blend-overlay" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 transition-colors group-hover:text-sky-400">
+                {siteConfig.location.split(",")[0]}
+              </span>
+              <span className="mt-0.5 text-base font-bold text-slate-100">
+                {siteConfig.name}
+              </span>
+            </div>
+          </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 md:flex">
-          {navItems.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <Link key={item.href} href={item.href} className="relative">
-                {active && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    className="absolute inset-0 rounded-full bg-sky-500/18"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
+          <nav className="hidden items-center gap-1 md:flex">
+            {navItems.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link key={item.href} href={item.href} className="relative px-3 py-2 text-sm font-medium transition-colors hover:text-slate-100">
+                  {active && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 rounded-full bg-slate-800/50"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <span className={`relative z-10 ${active ? "text-sky-100" : "text-slate-400"}`}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <Link
+              href="/contact"
+              onTouchStart={mediumTap}
+              className="hidden md:inline-flex items-center justify-center rounded-full border border-slate-700/60 bg-slate-800/40 px-4 py-2 text-sm font-semibold text-slate-200 shadow-sm shadow-slate-950/50 ring-1 ring-inset ring-white/5 transition-all hover:bg-slate-800 hover:text-white hover:ring-white/10 active:scale-95"
+            >
+              Let&apos;s talk
+            </Link>
+
+            <button
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-slate-800/50 hover:text-white md:hidden"
+              onClick={() => setOpen((v) => !v)}
+              onTouchStart={lightTap}
+              aria-label="Toggle navigation"
+              aria-expanded={open}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {open ? (
+                  <motion.div
+                    key="close"
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="h-6 w-6" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ opacity: 0, rotate: 90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: -90 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Menu className="h-6 w-6" />
+                  </motion.div>
                 )}
-                <span
-                  className={`relative px-3 py-1 transition-colors ${
-                    active
-                      ? "text-slate-50"
-                      : "text-slate-300 hover:text-slate-100"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <Link
-          href="/contact"
-          onTouchStart={mediumTap}
-          className="inline-flex items-center justify-center rounded-lg border border-slate-700/80 bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-slate-100 shadow-sm shadow-slate-900/70 hover:border-slate-500 hover:bg-slate-900 md:text-sm"
-        >
-          Let&apos;s talk
-        </Link>
-
-        <button
-          className="ml-3 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-700/80 bg-slate-900/80 text-slate-200 transition-transform active:scale-95 hover:border-slate-500 hover:bg-slate-900 md:hidden"
-          onClick={() => setOpen((v) => !v)}
-          onTouchStart={lightTap}
-          aria-label="Toggle navigation"
-          aria-expanded={open}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
+              </AnimatePresence>
+            </button>
+          </div>
+        </div>
+      </header>
 
       <AnimatePresence>
         {open && (
@@ -93,38 +117,52 @@ export default function SiteHeader() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="border-t border-slate-900/80 bg-slate-950/95 md:hidden"
+            transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            className="fixed top-[60px] left-0 right-0 z-30 overflow-hidden border-b border-slate-800/50 bg-slate-950/95 backdrop-blur-xl md:hidden"
+            style={{ position: "absolute", top: "100%" }} // Position relative to the sticky header
           >
-          <nav className="mx-auto flex max-w-6xl flex-col px-4 py-3 text-sm">
-            {navItems.map((item, index) => {
-              const active = pathname === item.href;
-              return (
-                <motion.div
-                  key={item.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Link
-                    href={item.href}
-                    className={`block rounded-lg px-4 py-3 transition-all active:scale-[0.98] ${
-                      active
-                        ? "bg-slate-900 text-slate-50"
-                        : "text-slate-300 active:bg-slate-900/70 hover:bg-slate-900 hover:text-slate-50"
-                    }`}
-                    onClick={() => setOpen(false)}
-                    onTouchStart={lightTap}
+            <nav className="flex flex-col px-4 py-6">
+              {navItems.map((item, index) => {
+                const active = pathname === item.href;
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
                   >
-                    {item.label}
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </nav>
-        </motion.div>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center justify-between border-b border-slate-800/30 py-4 text-lg font-medium transition-colors ${
+                        active ? "text-sky-400" : "text-slate-300"
+                      }`}
+                      onClick={() => setOpen(false)}
+                      onTouchStart={lightTap}
+                    >
+                      {item.label}
+                      {active && <div className="h-1.5 w-1.5 rounded-full bg-sky-400" />}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-6"
+              >
+                <Link
+                  href="/contact"
+                  className="flex w-full items-center justify-center rounded-xl bg-sky-500 py-3 text-base font-bold text-slate-950 shadow-lg shadow-sky-500/25 transition-transform active:scale-[0.98]"
+                  onClick={() => setOpen(false)}
+                >
+                  Get in touch
+                </Link>
+              </motion.div>
+            </nav>
+          </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }
