@@ -262,6 +262,32 @@ section[data-section] {
   padding-top: max(1rem, env(safe-area-inset-top));
 }
 
+/* ========================================
+   MOTION PREFERENCES - ACCESSIBILITY
+   ======================================== */
+
+/* Respect user's motion preferences - CRITICAL for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable background animations */
+  body::before {
+    animation: none !important;
+  }
+
+  /* Disable floating chip animation */
+  .floating-chip {
+    animation: none !important;
+  }
+}
+
 /* Mobile: Optimized card interactions */
 @media (max-width: 640px) and (hover: none) {
   /* Project cards - high specificity to override hover states */
@@ -285,20 +311,28 @@ section[data-section] {
     font-size: 15px;
   }
 
-  /* Headers with better mobile sizing */
+  /* Headers with better mobile sizing and text wrapping */
   h1 {
     font-size: 1.875rem; /* 30px */
     line-height: 1.2;
+    text-wrap: balance; /* Better line breaks, no orphans */
   }
 
   h2 {
     font-size: 1.5rem; /* 24px */
     line-height: 1.25;
+    text-wrap: balance;
   }
 
   h3 {
     font-size: 1.125rem; /* 18px */
     line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  /* Paragraphs with pretty text wrapping */
+  p {
+    text-wrap: pretty; /* Avoids orphans and improves readability */
   }
 }
 

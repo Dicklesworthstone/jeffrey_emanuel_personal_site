@@ -4,16 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { navItems, siteConfig } from "@/lib/content";
+import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 
 export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { lightTap, mediumTap } = useHapticFeedback();
+
+  // Shrink header on scroll (mobile only)
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-900/80 bg-gradient-to-b from-slate-950/95 via-slate-950/80 to-slate-950/60 backdrop-blur-xl safe-top">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-slate-900/80 bg-gradient-to-b from-slate-950/95 via-slate-950/80 to-slate-950/60 backdrop-blur-xl transition-all duration-300 safe-top">
+      <div className={`mx-auto flex max-w-6xl items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-8 ${scrolled ? "py-2 md:py-3" : "py-3 sm:py-4"}`}>
         <Link href="/" className="flex items-center gap-2">
           <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400 shadow-lg shadow-slate-900/70">
             <Sparkles className="h-4 w-4 text-slate-50" />
@@ -57,6 +70,7 @@ export default function SiteHeader() {
 
         <Link
           href="/contact"
+          onTouchStart={mediumTap}
           className="inline-flex items-center justify-center rounded-lg border border-slate-700/80 bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-slate-100 shadow-sm shadow-slate-900/70 hover:border-slate-500 hover:bg-slate-900 md:text-sm"
         >
           Let&apos;s talk
@@ -65,6 +79,7 @@ export default function SiteHeader() {
         <button
           className="ml-3 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-700/80 bg-slate-900/80 text-slate-200 transition-transform active:scale-95 hover:border-slate-500 hover:bg-slate-900 md:hidden"
           onClick={() => setOpen((v) => !v)}
+          onTouchStart={lightTap}
           aria-label="Toggle navigation"
           aria-expanded={open}
         >
@@ -99,6 +114,7 @@ export default function SiteHeader() {
                         : "text-slate-300 active:bg-slate-900/70 hover:bg-slate-900 hover:text-slate-50"
                     }`}
                     onClick={() => setOpen(false)}
+                    onTouchStart={lightTap}
                   >
                     {item.label}
                   </Link>

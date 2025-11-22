@@ -11,6 +11,7 @@ import StatsGrid from "@/components/stats-grid";
 import ErrorBoundary from "@/components/error-boundary";
 import ThreeSceneLoading from "@/components/three-scene-loading";
 import { heroContent, heroStats, siteConfig } from "@/lib/content";
+import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 
 const ThreeScene = dynamic(() => import("@/components/three-scene"), {
   ssr: false,
@@ -18,6 +19,8 @@ const ThreeScene = dynamic(() => import("@/components/three-scene"), {
 });
 
 export default function Hero() {
+  const { mediumTap } = useHapticFeedback();
+
   return (
     <section
       data-section
@@ -37,7 +40,7 @@ export default function Hero() {
               <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-sky-500/30 via-violet-500/30 to-emerald-400/30 blur-2xl" />
               <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-slate-700/60 bg-slate-900/80 shadow-lg shadow-slate-950/70 ring-1 ring-sky-500/20 sm:h-24 sm:w-24">
                 <Image
-                  src="/jeff_emanuel_headshot.jpg"
+                  src="/jeff_emanuel_headshot.webp"
                   alt={siteConfig.name}
                   fill
                   sizes="(max-width: 639px) 80px, 96px"
@@ -67,6 +70,7 @@ export default function Hero() {
           <div className="flex flex-wrap items-center gap-3 pt-2 sm:gap-4">
             <Link
               href={heroContent.primaryCta.href}
+              onTouchStart={mediumTap}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-sky-500/40 transition hover:bg-sky-400 sm:w-auto"
             >
               <Cpu className="h-4 w-4" />
@@ -77,6 +81,7 @@ export default function Hero() {
               href={heroContent.secondaryCta.href}
               target="_blank"
               rel="noreferrer noopener"
+              onTouchStart={mediumTap}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/80 bg-slate-950/70 px-4 py-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-900 sm:w-auto sm:text-sm"
             >
               <BookOpen className="h-4 w-4" />
