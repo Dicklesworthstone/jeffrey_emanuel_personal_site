@@ -3,43 +3,36 @@ import { siteConfig } from "@/lib/content";
 
 export default function SiteFooter() {
   return (
-    <footer className="border-top-muted mt-16 bg-slate-950/90">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div>
-          <p className="text-sm font-medium text-slate-100">
+    <footer className="relative mt-32 border-t border-white/5 bg-slate-950/30 backdrop-blur-lg">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-16">
+        <div className="max-w-md space-y-2">
+          <p className="text-lg font-bold tracking-tight text-slate-100">
             {siteConfig.name}
           </p>
-          <p className="mt-1 text-xs text-slate-400">
-            Infrastructure and tools for AI agents, investors, and serious
-            research workflows.
+          <p className="text-sm leading-relaxed text-slate-500">
+            Building durable infrastructure for the agentic future.
+            <br />
+            &copy; {new Date().getFullYear()} Jeffrey Emanuel. All rights reserved.
           </p>
         </div>
+        
         <div className="flex items-center gap-4">
-          <a
-            href={`mailto:${siteConfig.email}`}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/80 bg-slate-950/90 text-slate-200 hover:border-slate-500 hover:text-slate-50"
-            aria-label="Email"
-          >
-            <Mail className="h-4 w-4" />
-          </a>
-          <a
-            href={siteConfig.social.github}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/80 bg-slate-950/90 text-slate-200 hover:border-slate-500 hover:text-slate-50"
-            aria-label="GitHub"
-          >
-            <Github className="h-4 w-4" />
-          </a>
-          <a
-            href={siteConfig.social.x}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/80 bg-slate-950/90 text-slate-200 hover:border-slate-500 hover:text-slate-50"
-            aria-label="X profile"
-          >
-            <Twitter className="h-4 w-4" />
-          </a>
+          {[
+            { href: `mailto:${siteConfig.email}`, icon: Mail, label: "Email" },
+            { href: siteConfig.social.github, icon: Github, label: "GitHub" },
+            { href: siteConfig.social.x, icon: Twitter, label: "X (Twitter)" },
+          ].map((social) => (
+            <a
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all hover:border-white/10 hover:bg-white/10 hover:text-white hover:scale-110"
+              aria-label={social.label}
+            >
+              <social.icon className="h-5 w-5 transition-transform group-hover:rotate-12" />
+            </a>
+          ))}
         </div>
       </div>
     </footer>
