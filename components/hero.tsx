@@ -24,105 +24,113 @@ export default function Hero() {
   return (
     <section
       data-section
-      className="relative overflow-hidden border-b border-slate-900/80 bg-gradient-to-b from-slate-950 via-slate-950/90 to-slate-950"
+      className="relative min-h-[90vh] w-full overflow-hidden bg-[#020617]"
     >
       <GlowOrbits />
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-14 pt-14 sm:px-6 md:gap-10 md:pb-16 md:pt-16 lg:flex-row lg:items-center lg:px-8 lg:pb-20 lg:pt-20">
-        <div className="relative z-10 flex-1 space-y-6">
+      
+      <div className="relative mx-auto flex h-full max-w-7xl flex-col px-4 pb-20 pt-32 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:pt-40">
+        
+        {/* Text Content */}
+        <div className="relative z-20 flex max-w-3xl flex-col gap-8 lg:max-w-2xl">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="flex items-center gap-4"
           >
-            <div className="relative">
-              {/* Enhanced blur glow - increased opacity and blur radius */}
-              <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-sky-500/30 via-violet-500/30 to-emerald-400/30 blur-2xl" />
-              <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-slate-700/60 bg-slate-900/80 shadow-lg shadow-slate-950/70 ring-1 ring-sky-500/20 sm:h-24 sm:w-24">
-                <Image
-                  src="/jeff_emanuel_headshot.webp"
-                  alt={siteConfig.name}
-                  fill
-                  sizes="(max-width: 639px) 80px, 96px"
-                  className="object-cover object-center"
-                  priority
-                />
-              </div>
+            <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-slate-800/50 bg-slate-900 shadow-2xl ring-2 ring-slate-900/50 sm:h-20 sm:w-20">
+              <Image
+                src="/jeff_emanuel_headshot.webp"
+                alt={siteConfig.name}
+                fill
+                sizes="80px"
+                className="object-cover"
+                priority
+              />
             </div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-sky-200 floating-chip">
-              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              {heroContent.eyebrow}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold tracking-wide text-slate-200">
+                {siteConfig.name}
+              </span>
+              <span className="text-xs font-medium uppercase tracking-widest text-sky-400">
+                Founder & CEO
+              </span>
+            </div>
           </motion.div>
-          <motion.h1
-            className="text-3xl font-semibold leading-tight tracking-tight text-slate-50 sm:text-4xl md:text-5xl"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 130, damping: 22 }}
-          >
-            {heroContent.title}
-          </motion.h1>
-          <div className="space-y-2 text-sm text-slate-300 sm:text-base">
-            {heroContent.body.map((p) => (
-              <p key={p}>{p}</p>
-            ))}
+
+          <div className="space-y-6">
+            <motion.h1
+              className="text-5xl font-bold leading-[0.95] tracking-tighter text-white sm:text-7xl lg:text-8xl"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              Building the <br className="hidden sm:block" />
+              <span className="bg-gradient-to-r from-sky-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent">
+                AI Infrastructure
+              </span>{" "}
+              <br className="hidden sm:block" />
+              of the future.
+            </motion.h1>
+
+            <motion.div
+              className="max-w-xl space-y-4 text-lg leading-relaxed text-slate-400 md:text-xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.4 }}
+            >
+              {heroContent.body.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </motion.div>
           </div>
-          <div className="flex flex-wrap items-center gap-3 pt-2 sm:gap-4">
+
+          <motion.div
+            className="flex flex-wrap gap-4 pt-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
             <Link
               href={heroContent.primaryCta.href}
               onTouchStart={mediumTap}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-sky-500/40 transition hover:bg-sky-400 sm:w-auto"
+              className="group inline-flex h-12 items-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-slate-950 transition-transform hover:scale-105 active:scale-95"
             >
               <Cpu className="h-4 w-4" />
               {heroContent.primaryCta.label}
-              <ArrowRight className="h-3 w-3" />
             </Link>
             <Link
               href={heroContent.secondaryCta.href}
               target="_blank"
-              rel="noreferrer noopener"
-              onTouchStart={mediumTap}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/80 bg-slate-950/70 px-4 py-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-900 sm:w-auto sm:text-sm"
+              className="group inline-flex h-12 items-center gap-2 rounded-full border border-slate-800 bg-slate-950/50 px-8 text-sm font-bold text-white backdrop-blur-sm transition-colors hover:border-slate-600 hover:bg-slate-900"
             >
-              <BookOpen className="h-4 w-4" />
+              <BookOpen className="h-4 w-4 text-slate-400 group-hover:text-white" />
               {heroContent.secondaryCta.label}
             </Link>
-          </div>
-          <div className="pt-4 text-xs text-slate-400">
-            <p>
-              Founder & CEO of Lumera Network. Former long/short generalist at
-              multi‑manager platforms. Author of the Nvidia short essay that
-              helped move the stock.
-            </p>
-          </div>
-          <div className="pt-4 md:pt-6">
-            <StatsGrid stats={heroStats} />
-          </div>
+          </motion.div>
+
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 0.85, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="relative flex items-center gap-3 text-[11px] text-slate-400"
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             transition={{ duration: 1, delay: 0.8 }}
+             className="pt-12"
           >
-            <div className="h-px w-10 bg-gradient-to-r from-sky-400/80 via-cyan-300/70 to-transparent" />
-            <span>Scroll to explore Lumera, projects, writing, and more.</span>
+            <StatsGrid stats={heroStats} />
           </motion.div>
         </div>
 
-        <div className="relative z-10 flex-1">
-          <div className="overflow-hidden rounded-2xl border border-slate-800/90 bg-slate-950 shadow-[0_40px_120px_rgba(15,23,42,0.95)] ring-1 ring-sky-500/10">
-            <ErrorBoundary
-              fallback={
-                <div className="flex h-[280px] w-full items-center justify-center text-sm text-slate-400 sm:h-[380px] md:h-[420px] lg:h-[460px]">
-                  Visualization temporarily unavailable
-                </div>
-              }
+        {/* 3D Scene - Positioned absolutely on desktop for layered feel */}
+        <div className="relative mt-12 h-[400px] w-full lg:absolute lg:right-0 lg:top-1/2 lg:mt-0 lg:h-[800px] lg:w-[900px] lg:-translate-y-1/2 lg:opacity-100">
+           <div className="absolute inset-0 z-10 bg-gradient-to-l from-transparent via-[#020617]/10 to-[#020617] lg:via-[#020617]/50" />
+           <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#020617] to-transparent lg:hidden" />
+           
+           <ErrorBoundary
+              fallback={null}
             >
               <Suspense fallback={<ThreeSceneLoading />}>
                 <ThreeScene />
               </Suspense>
             </ErrorBoundary>
-          </div>
         </div>
       </div>
     </section>
