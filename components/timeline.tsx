@@ -2,13 +2,14 @@ import type { TimelineItem } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export default function Timeline({ items }: { items: TimelineItem[] }) {
+  const latestIndex = items.findIndex((item) => item.period.includes("Present"));
   return (
     <div className="relative space-y-8 pl-2 md:space-y-12 md:pl-0">
       {/* Vertical track - Optimized for depth */}
       <div className="absolute left-6 top-4 bottom-4 hidden w-px bg-gradient-to-b from-sky-500/50 via-white/5 to-transparent md:block" />
 
       {items.map((item, index) => {
-        const isLatest = index === 0;
+        const isLatest = latestIndex === -1 ? index === 0 : index === latestIndex;
         
         return (
           <div key={`${item.org}-${item.period}`} className="group relative md:pl-20">

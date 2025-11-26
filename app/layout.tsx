@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/content";
 import ClientShell from "@/components/client-shell";
 import { GoogleAnalytics } from "@/components/analytics";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const sourceSerif = Source_Serif_4({ subsets: ["latin"], variable: "--font-serif" });
 
 // Viewport configuration for mobile optimization
 export const viewport = {
@@ -32,6 +33,13 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false, // Prevent auto-linking phone numbers
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": [
+        { url: "/rss.xml", title: "Jeffrey Emanuel - RSS Feed" },
+      ],
+    },
   },
   icons: {
     icon: [
@@ -63,7 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="h-full scroll-smooth bg-slate-950 text-slate-100">
       <body
-        className={`${inter.variable} flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased`}
+        className={`${inter.variable} ${sourceSerif.variable} flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased`}
       >
         <GoogleAnalytics gaId={gaId} />
         <ClientShell>{children}</ClientShell>

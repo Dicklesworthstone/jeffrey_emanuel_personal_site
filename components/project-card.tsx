@@ -1,11 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Star, Github } from "lucide-react";
+import { ArrowUpRight, Star, GitFork, Box, Beaker } from "lucide-react";
 import { useRef, useState } from "react";
 import type { Project } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
+
+const KindIcon = ({ kind }: { kind: Project["kind"] }) => {
+  switch (kind) {
+    case "product":
+      return <Box className="h-3 w-3" />;
+    case "oss":
+      return <GitFork className="h-3 w-3" />;
+    case "research":
+      return <Beaker className="h-3 w-3" />;
+  }
+};
 
 export default function ProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
@@ -34,7 +45,35 @@ export default function ProjectCard({ project }: { project: Project }) {
   const starMatch = project.badge?.match(/^([\d.]+[KkMm]?)\s+stars?$/);
   const starCount = starMatch ? starMatch[1] : null;
   const displayBadge = starCount ? null : project.badge;
-  const isGitHub = project.href.includes("github.com/");
+  
+  // Determine base colors based on kind or custom gradient
+  const isProduct = project.kind === "product";
+  const isResearch = project.kind === "research";
+  
+  let accentColor = "text-emerald-400";
+  let accentBg = "bg-emerald-400";
+  let spotlightColor = "52, 211, 153"; // Emerald
+  let hoverBorder = "group-hover:border-emerald-500/30";
+  
+  if (project.gradient) {
+     // If a custom gradient is provided, we use a neutral white/slate base and let the gradient do the work
+     accentColor = "text-white";
+     accentBg = "bg-white";
+     spotlightColor = "255, 255, 255";
+     hoverBorder = "group-hover:border-white/30";
+  } else if (isProduct) {
+    accentColor = "text-sky-400";
+    accentBg = "bg-sky-400";
+    spotlightColor = "56, 189, 248"; // Sky
+    hoverBorder = "group-hover:border-sky-500/30";
+  } else if (isResearch) {
+    accentColor = "text-purple-400";
+    accentBg = "bg-purple-400";
+    spotlightColor = "192, 132, 252"; // Purple
+    hoverBorder = "group-hover:border-purple-500/30";
+  }
+
+  const isLarge = project.size === "large";
 
   return (
     <Link 
@@ -50,19 +89,25 @@ export default function ProjectCard({ project }: { project: Project }) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "glass-card group relative flex h-full flex-col overflow-hidden rounded-3xl p-6 md:p-8"
+          "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/5 bg-black/20 p-6 transition-all duration-300 md:p-8 hover:bg-black/40",
+          hoverBorder
         )}
       >
+        {/* Custom Gradient Background */}
+        {project.gradient && (
+           <div className={cn("absolute inset-0 opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15] bg-gradient-to-br", project.gradient)} />
+        )}
+
         {/* Dynamic Spotlight Effect */}
         <div
           className="pointer-events-none absolute -inset-px transition-opacity duration-500"
           style={{
             opacity,
-            background: `radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(56, 189, 248, 0.12), transparent 40%)`,
+            background: `radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(${spotlightColor}, 0.12), transparent 40%)`,
           }}
         />
         
-        {/* Subtle gradient stroke on top border for "light hitting top" feel */}
+        {/* Subtle gradient stroke on top border */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" />
 
         <div className="relative z-10 flex flex-1 flex-col">
@@ -70,14 +115,19 @@ export default function ProjectCard({ project }: { project: Project }) {
             <div className="flex-1">
               <div className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-widest">
                 <span className={cn(
-                  "inline-block h-2 w-2 rounded-full shadow-[0_0_8px_currentColor]",
-                  project.kind === "product" ? "bg-sky-400 text-sky-400" : "bg-emerald-400 text-emerald-400"
-                )} />
+                  "flex h-5 w-5 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10",
+                  accentColor
+                )}>
+                  <KindIcon kind={project.kind} />
+                </span>
                 <span className="text-slate-500">
-                  {project.kind === "product" ? "Product" : "Open Source"}
+                  {project.kind}
                 </span>
               </div>
-              <h3 className="mt-4 text-2xl font-bold leading-tight text-white transition-colors group-hover:text-sky-200">
+              <h3 className={cn(
+                "font-bold leading-tight text-white transition-colors group-hover:text-white",
+                isLarge ? "mt-4 text-3xl md:text-4xl" : "mt-4 text-xl md:text-2xl"
+              )}>
                 {project.name}
               </h3>
             </div>
@@ -96,17 +146,21 @@ export default function ProjectCard({ project }: { project: Project }) {
             </div>
           </div>
 
-          <p className="mt-4 text-lg font-medium leading-relaxed text-slate-200">
+          <p className={cn(
+            "font-medium leading-relaxed text-slate-200",
+            isLarge ? "mt-6 text-xl" : "mt-4 text-base"
+          )}>
             {project.short}
           </p>
 
-          <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-400">
+          {/* Only show full description on large cards or if there's space (visual logic) */}
+          <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-400 line-clamp-4">
             {project.description}
           </p>
 
           <div className="mt-8 flex items-center justify-between gap-4 border-t border-white/5 pt-6">
             <div className="flex flex-wrap gap-2">
-              {project.tags.slice(0, 3).map((tag) => (
+              {project.tags.slice(0, isLarge ? 5 : 3).map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center rounded-md bg-white/5 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-slate-400 transition-colors group-hover:bg-white/10 group-hover:text-slate-300"
@@ -115,7 +169,7 @@ export default function ProjectCard({ project }: { project: Project }) {
                 </span>
               ))}
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
+            <div className={cn("flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors group-hover:text-white", accentColor)}>
               View
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </div>

@@ -27,28 +27,44 @@ export default function VirtualProjectGrid({
     return 3; // Desktop: 3 columns
   };
 
-  const [columnsPerRow, setColumnsPerRow] = useState(getColumnsPerRow);
+  // Start with a default to match SSR (desktop layout is the "default" structure)
+  const [columnsPerRow, setColumnsPerRow] = useState(3);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Calculate initial items to show
+  // Initial load: show a reasonable batch (e.g. 3 rows of 3) so content is present for SEO/SSR
+  // but won't cause hydration mismatch if the user is actually on mobile.
   const BUFFER_ROWS = 2;
-  const initialItemCount = columnsPerRow * (3 + BUFFER_ROWS * 2);
-
   const [visibleRange, setVisibleRange] = useState({
     start: 0,
-    end: Math.min(initialItemCount, projects.length),
+    end: 9 + (BUFFER_ROWS * 3), // 9 initial + buffer
   });
+
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // 1. Handle initial client-side sizing (fixes hydration mismatch)
   useEffect(() => {
+    setIsMounted(true);
+    const correctColumns = getColumnsPerRow();
+    setColumnsPerRow(correctColumns);
+    
+    // Adjust initial range based on actual screen size once mounted
+    const initialCount = correctColumns * (3 + BUFFER_ROWS * 2);
+    setVisibleRange(prev => ({
+      ...prev,
+      end: Math.min(initialCount, projects.length)
+    }));
+
     const handleResize = () => setColumnsPerRow(getColumnsPerRow());
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [projects.length]);
 
+
+  // 2. Handle infinite scroll logic
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !isMounted) return;
 
     // Use Intersection Observer to detect when to load more
     const sentinel = document.createElement("div");
@@ -80,7 +96,7 @@ export default function VirtualProjectGrid({
         sentinel.parentNode.removeChild(sentinel);
       }
     };
-  }, [columnsPerRow, projects.length]);
+  }, [columnsPerRow, projects.length, isMounted]);
 
   const visibleProjects = useMemo(
     () => projects.slice(visibleRange.start, visibleRange.end),

@@ -58,9 +58,11 @@ export default function SiteHeader() {
               <div className="absolute inset-0 rounded-xl bg-white/20 mix-blend-overlay" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 transition-colors group-hover:text-sky-400">
-                {siteConfig.location.split(",")[0]}
-              </span>
+              {siteConfig.location && (
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 transition-colors group-hover:text-sky-400">
+                  {siteConfig.location.split(",")[0]}
+                </span>
+              )}
               <span className="mt-0.5 text-lg font-bold tracking-tight text-slate-100">
                 {siteConfig.name}
               </span>
@@ -194,14 +196,16 @@ export default function SiteHeader() {
             </nav>
             
             {/* Footer info in menu */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="relative p-8 text-xs font-medium uppercase tracking-widest text-slate-600"
-            >
-               {siteConfig.location}
-            </motion.div>
+            {siteConfig.location && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="relative p-8 text-xs font-medium uppercase tracking-widest text-slate-600"
+              >
+                 {siteConfig.location}
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

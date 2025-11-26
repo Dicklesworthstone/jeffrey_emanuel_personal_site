@@ -1,13 +1,17 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
+@import "highlight.js/styles/github-dark.css";
 
 :root {
   color-scheme: dark;
+  /* Use the Next.js font variable we injected, falling back to system serifs */
+  --font-serif-stack: var(--font-serif), "Charter", "Georgia", "Cambria", "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 ::selection {
-  background-color: rgba(124, 58, 237, 0.3);
+  background-color: rgba(56, 189, 248, 0.2); /* Softer sky blue selection */
   color: #ffffff;
-  text-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
 }
 
 * {
@@ -20,7 +24,7 @@ html {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss03"; /* More open, geometric feel */
+  font-feature-settings: "kern", "liga";
   touch-action: manipulation;
 }
 
@@ -28,7 +32,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   background-color: #020617;
   color: #e2e8f0;
   position: relative;
@@ -66,9 +70,8 @@ body::after {
   height: 100%;
   z-index: -2;
   background: 
-    radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.06), transparent 40%),
-    radial-gradient(circle at 90% 20%, rgba(124, 58, 237, 0.06), transparent 40%),
-    radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.04), transparent 50%),
+    radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.04), transparent 45%),
+    radial-gradient(circle at 85% 25%, rgba(124, 58, 237, 0.04), transparent 45%),
     linear-gradient(to bottom, #020617, #0B1120);
   pointer-events: none;
 }
@@ -79,18 +82,210 @@ body::after {
   ========================================
 */
 
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.03em; /* Tighter tracking for headings */
+/* WORLD CLASS EDITORIAL TYPOGRAPHY */
+
+.prose {
+  /* Optimal reading width */
+  max-width: 68ch; 
+  font-family: var(--font-serif-stack);
+  color: #cbd5e1; /* Slate-300 - slightly softer than pure white */
+  font-size: 1.125rem; /* 18px base size for better readability */
+  line-height: 1.75;
+}
+
+/* Paragraphs - The Rhythm */
+.prose p {
+  margin-bottom: 1.5em; /* Critical: Space between paragraphs */
+  margin-top: 0;
+  text-wrap: pretty;
+}
+
+/* Headings - The Structure */
+.prose h1, 
+.prose h2, 
+.prose h3, 
+.prose h4 {
+  font-family: var(--font-sans);
+  color: #f1f5f9; /* Slate-100 */
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.prose h2 {
+  margin-top: 3em; /* Huge breathing room before new sections */
+  margin-bottom: 1em;
+  font-size: 1.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  padding-bottom: 0.3em;
+}
+
+.prose h3 {
+  margin-top: 2.5em;
+  margin-bottom: 0.75em;
+  font-size: 1.4rem;
+}
+
+.prose h4 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* Lists - The Detail */
+.prose ul, 
+.prose ol {
+  margin-top: 1em;
+  margin-bottom: 1.5em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.6em; /* Space between list items */
+  padding-left: 0.3em;
+}
+
+.prose ul > li::marker {
+  color: #7dd3fc; /* Sky-300 */
+}
+
+.prose ol > li::marker {
+  color: #94a3b8;
+  font-weight: 500;
+  font-feature-settings: "tnum";
+}
+
+/* Quotes - The Emphasis */
+.prose blockquote {
+  margin: 2.5em 0;
+  padding: 1em 1.5em;
+  border-left: 3px solid #38bdf8; /* Sky-400 highlight */
+  background: rgba(56, 189, 248, 0.05);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #e2e8f0;
+  font-size: 1.15em;
+  line-height: 1.7;
+}
+
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Code - The Technical */
+.prose code:not(.hljs) {
+  font-family: "Berkeley Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.85em;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  color: #7dd3fc; /* Sky-300 */
+  white-space: nowrap;
+}
+
+.prose pre {
+  margin: 2em 0; /* Space around code blocks */
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: #0f172a !important; /* Slate-900 force */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  padding: 1.25rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.prose pre code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-family: "Berkeley Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: inherit;
+  white-space: pre;
+}
+
+/* Inline Links */
+.prose a {
+  color: #7dd3fc;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(125, 211, 252, 0.3);
+  transition: all 0.2s ease;
+}
+
+.prose a:hover {
+  color: #38bdf8;
+  text-decoration-color: #38bdf8;
+}
+
+/* Images */
+.prose img {
+  margin: 2.5em auto;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  max-width: 100%;
+  display: block;
+}
+
+.prose strong {
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+/* Tables */
+.prose table {
+  width: 100%;
+  margin: 2.5em 0;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.prose th {
+  text-align: left;
+  padding: 0.75em 1em;
+  border-bottom: 2px solid rgba(148, 163, 184, 0.2);
+  color: #f1f5f9;
   font-weight: 600;
 }
 
-p {
-  letter-spacing: -0.015em;
+.prose td {
+  padding: 0.75em 1em;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
+}
+
+/* Horizontal Rule */
+.prose hr {
+  border: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  margin: 4em 0;
+}
+
+/* 
+  ========================================
+  UI COMPONENTS
+  ========================================
+*/
+
+.reading-surface {
+  /* Removed background/border for a cleaner, more open editorial feel per "finest" request 
+     Using just spacing and typography to define the column. */
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
 }
 
 .text-balance-pro {
   text-wrap: balance;
 }
+
 
 .text-pretty-pro {
   text-wrap: pretty;
@@ -190,4 +385,3 @@ section[data-section] {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import Hero from "@/components/hero";
+import Link from "next/link";
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
@@ -10,9 +11,9 @@ import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 
 export default function HomePage() {
-  const featuredProjects = projects.slice(0, 3);
-  const featuredWriting = writingHighlights.slice(0, 3);
-  const featuredThreads = threads.slice(0, 3);
+  const featuredProjects = projects;
+  const featuredWriting = writingHighlights;
+  const featuredThreads = threads;
   const { lightTap } = useHapticFeedback();
 
   return (
@@ -27,18 +28,6 @@ export default function HomePage() {
         kicker="Three overlapping threads: infrastructure, tools for agents, and research that actually moves markets."
       >
         <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar">
-          <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400 shadow-sky-500/20 drop-shadow-sm">
-              Infrastructure
-            </p>
-            <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
-              Lumera Network
-            </h3>
-            <p className="mt-4 text-base leading-relaxed text-slate-400">
-              A Cosmos-based L1 for durable storage and AI verification, aimed
-              at the world where agents talk to chains as fluently as to APIs.
-            </p>
-          </div>
           <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8">
             <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 shadow-emerald-500/20 drop-shadow-sm">
               Agent tooling
@@ -63,6 +52,18 @@ export default function HomePage() {
               economics all the way back to cash flows and valuations.
             </p>
           </div>
+          <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400 shadow-sky-500/20 drop-shadow-sm">
+              Infrastructure
+            </p>
+            <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
+              Lumera Network
+            </h3>
+            <p className="mt-4 text-base leading-relaxed text-slate-400">
+              A Cosmos-based L1 for durable storage and AI verification, aimed
+              at the world where agents talk to chains as fluently as to APIs.
+            </p>
+          </div>
         </div>
       </SectionShell>
 
@@ -71,7 +72,7 @@ export default function HomePage() {
         icon={GitBranch}
         eyebrow="Projects"
         title="Products and open source"
-        kicker="A small sample of what I’m building right now. See the projects page for the expanded list."
+        kicker="A comprehensive collection of the tools, protocols, and experiments I’m building."
       >
         <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar">
           {featuredProjects.map((project) => (
@@ -91,11 +92,9 @@ export default function HomePage() {
       >
         <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar">
           {featuredWriting.map((item) => (
-            <a
+            <Link
               key={item.title}
               href={item.href}
-              target="_blank"
-              rel="noreferrer noopener"
               onTouchStart={lightTap}
               className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
             >
@@ -117,7 +116,7 @@ export default function HomePage() {
                 Read the essay
                 <span className="text-lg leading-none">→</span>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </SectionShell>

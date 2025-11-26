@@ -1,16 +1,23 @@
 export const siteConfig = {
   name: "Jeffrey Emanuel",
-  title: "Jeffrey Emanuel – Lumera, SmartEdgar, Agents & Markets",
+  title: "Jeffrey Emanuel – SmartEdgar, Agents & Markets, Lumera",
   description:
     "Founder & CEO of Lumera Network. Building agent-first infrastructure and research tools: SmartEdgar, MCP Agent Mail, Ultimate Bug Scanner, and more.",
   email: "jeffreyemanuel@gmail.com",
-  location: "Westchester, New York",
+  location: "",
   social: {
     x: "https://x.com/doodlestein",
     github: "https://github.com/Dicklesworthstone",
     linkedin: "https://www.linkedin.com/in/jeffreyemanuel",
   },
-} as const;
+} satisfies {
+  name: string;
+  title: string;
+  description: string;
+  email: string;
+  location: string;
+  social: { x: string; github: string; linkedin: string };
+};
 
 export type NavItem = { href: string; label: string };
 
@@ -63,30 +70,46 @@ export const heroContent = {
   },
   secondaryCta: {
     label: "Read the Nvidia essay",
-    href: "https://youtubetranscriptoptimizer.com/blog/05_the_short_case_for_nvda",
+    href: "/writing/the_short_case_for_nvda",
   },
 } as const;
 
 export type Project = {
   name: string;
-  kind: "product" | "oss";
+  kind: "product" | "oss" | "research";
   badge?: string;
   href: string;
   short: string;
   description: string;
   tags: string[];
+  size?: "wide" | "tall" | "large" | "normal";
+  gradient?: string;
 };
 
 export const projects: Project[] = [
   {
-    name: "Lumera Network",
-    kind: "product",
-    badge: "Layer‑1 protocol",
-    href: "https://pastel.network",
-    short: "Cosmos-based L1 for decentralized storage, AI inference, and cross‑chain interoperability.",
+    name: "Bio-Inspired Nanochat",
+    kind: "research",
+    badge: "Active Research",
+    href: "https://github.com/Dicklesworthstone/bio_inspired_nanochat",
+    short: "Replacing static transformer weights with fluid, metabolic biological analogs.",
     description:
-      "Originally launched as Pastel Network, Lumera is a sovereign Cosmos chain designed for long-lived storage of digital assets, on-chain AI authenticity, and agentic access to data and compute across ecosystems.",
-    tags: ["L1", "Cosmos", "Storage", "AI", "Interoperability"],
+      "A research fork of GPT that implements 'living' weights. It introduces presynaptic fatigue (to prevent repetition), postsynaptic fast-weights (for infinite local context), and structural plasticity (experts that are born and die based on energy usage). Optimized via CMA-ES on a 48-parameter biological search space.",
+    tags: ["Neuroscience", "Triton", "Rust", "ALife", "Transformer"],
+    size: "large",
+    gradient: "from-rose-500/20 via-purple-500/20 to-indigo-500/20",
+  },
+  {
+    name: "Model-Guided Research",
+    kind: "research",
+    badge: "Math + AI",
+    href: "https://github.com/Dicklesworthstone/model_guided_research",
+    short: "11 exotic mathematical frameworks for AI, proposed and designed by GPT-5.",
+    description:
+      "An experimental collaboration where the AI model itself proposed, scored, and helped implement new research directions. Includes JAX demos and PyTorch implementations of Lie group attention, p-adic ultrametric spaces, tropical geometry (max-plus), knot-theoretic braiding, and nonstandard analysis optimizers.",
+    tags: ["JAX", "PyTorch", "Math", "Geometry", "Automated Research"],
+    size: "wide",
+    gradient: "from-blue-500/20 via-cyan-500/20 to-teal-500/20",
   },
   {
     name: "SmartEdgar",
@@ -97,26 +120,126 @@ export const projects: Project[] = [
     description:
       "SmartEdgar pulls, normalizes, and slices SEC filings into agent‑ready formats. It exposes a clean MCP API so analysts and AI tools can ask structured questions about filings instead of fighting PDFs.",
     tags: ["EDGAR", "MCP", "Agents", "Finance"],
+    size: "large",
+    gradient: "from-emerald-500/20 via-teal-500/20 to-cyan-500/20",
   },
   {
-    name: "LLM-Aided OCR",
-    kind: "oss",
-    badge: "2.8K stars",
-    href: "https://github.com/Dicklesworthstone/llm_aided_ocr",
-    short: "Enhances Tesseract OCR output for scanned PDFs using LLM corrections.",
+    name: "Lumera Network",
+    kind: "product",
+    badge: "Layer‑1 protocol",
+    href: "https://pastel.network",
+    short: "Cosmos-based L1 for decentralized storage, AI inference, and cross‑chain interoperability.",
     description:
-      "An advanced system that significantly improves OCR quality by leveraging large language models to convert raw OCR text into accurate, well-formatted documents. Supports local and cloud-based LLMs, includes smart text chunking, markdown formatting, async processing, and quality assessment.",
-    tags: ["OCR", "Tesseract", "LLMs", "PDF", "NLP"],
+      "Originally launched as Pastel Network, Lumera is a sovereign Cosmos chain designed for long-lived storage of digital assets, on-chain AI authenticity, and agentic access to data and compute across ecosystems.",
+    tags: ["L1", "Cosmos", "Storage", "AI", "Interoperability"],
+    size: "wide",
+    gradient: "from-indigo-500/20 via-purple-500/20 to-pink-500/20",
   },
   {
-    name: "Swiss Army Llama",
+    name: "Rust ScriptBots",
     kind: "oss",
-    badge: "1K stars",
-    href: "https://github.com/Dicklesworthstone/swiss_army_llama",
-    short: "FastAPI service for semantic text search using embeddings.",
+    badge: "Simulation",
+    href: "https://github.com/Dicklesworthstone/rust_scriptbots",
+    short: "Deterministic, GPU-accelerated artificial life simulator written in idiomatic Rust.",
     description:
-      "Swiss Army Llama is a FastAPI-based service enabling semantic text search through precomputed embeddings and sophisticated similarity calculations. It supports multiple file formats via textract, includes audio transcription with Whisper, and offers advanced semantic search using FAISS and specialized similarity measures.",
-    tags: ["FastAPI", "Embeddings", "Semantic Search", "LLMs", "Vector Similarity"],
+      "A modern reimplementation of Andrej Karpathy's ScriptBots. Features a deterministic tick pipeline, GPUI rendering, massive parallelism, and pluggable 'brains' to study emergent behavior in evolving agent populations.",
+    tags: ["Rust", "Simulation", "ALife", "GPUI", "GPU"],
+    size: "tall",
+  },
+  {
+    name: "Fast CMA-ES",
+    kind: "oss",
+    badge: "Rust",
+    href: "https://github.com/Dicklesworthstone/fast_cmaes",
+    short: "Hyper-optimized, SIMD-accelerated CMA-ES implementation in Rust with Python bindings.",
+    description:
+      "A high-performance evolution strategy optimizer. Features SIMD acceleration, Rayon parallelism, deterministic seeding, and a rich TUI. Designed for heavy optimization tasks where Python's GIL is a bottleneck.",
+    tags: ["Rust", "Python", "Optimization", "SIMD", "CMA-ES"],
+  },
+  {
+    name: "WASM CMA-ES",
+    kind: "oss",
+    badge: "WebAssembly",
+    href: "https://github.com/Dicklesworthstone/wasm_cmaes",
+    short: "Run high-performance optimization algorithms directly in the browser via WebAssembly.",
+    description:
+      "Brings the power of the Rust CMA-ES engine to the web. Includes a visual interactive playground using Three.js and D3 to visualize convergence in real-time without server-side processing.",
+    tags: ["WASM", "Rust", "Visualization", "Three.js", "Optimization"],
+  },
+  {
+    name: "CMA-ES Explainer",
+    kind: "oss",
+    badge: "Education",
+    href: "https://github.com/Dicklesworthstone/cmaes_explainer",
+    short: "Interactive deep dive into the Covariance Matrix Adaptation Evolution Strategy.",
+    description:
+      "A comprehensive educational resource demystifying evolutionary algorithms. Features interactive visualizations to demonstrate how CMA-ES adapts to high-dimensional, non-convex landscapes where gradient descent fails.",
+    tags: ["Algorithms", "Education", "Visualization", "Math"],
+    size: "wide",
+    gradient: "from-orange-500/20 via-amber-500/20 to-yellow-500/20",
+  },
+  {
+    name: "Markdown Web Browser",
+    kind: "oss",
+    badge: "Agent Tool",
+    href: "https://github.com/Dicklesworthstone/markdown_web_browser",
+    short: "Headless browser that renders modern websites into clean, proven Markdown for agents.",
+    description:
+      "Transforms complex, JavaScript-heavy web pages into structured Markdown. Uses deterministic Chrome for Testing to capture screenshots, perform OCR, and stitch everything into a format LLMs can actually read and cite.",
+    tags: ["Python", "Agents", "Scraping", "OCR", "LLM"],
+  },
+  {
+    name: "UltraSearch",
+    kind: "oss",
+    badge: "Rust",
+    href: "https://github.com/Dicklesworthstone/ultrasearch",
+    short: "Instant file search engine for Windows using NTFS USN journals and Tantivy.",
+    description:
+      "A modern 'Everything' alternative written in Rust. Indexes metadata and content in real-time using low-level NTFS hooks. Features a memory-efficient background service and a GPUI-based frontend for instant results.",
+    tags: ["Rust", "Search", "Windows", "NTFS", "Systems"],
+  },
+  {
+    name: "System Resource Protection",
+    kind: "oss",
+    badge: "Linux/WSL",
+    href: "https://github.com/Dicklesworthstone/system_resource_protection_script",
+    short: "Intelligent resource guardrails to prevent dev tools from freezing your Linux desktop.",
+    description:
+      "A comprehensive tuning script that wires together `ananicy-cpp`, `earlyoom`, and kernel tweaks. Prevents runaway builds or IDEs from locking up your UI by intelligently prioritizing interactive processes.",
+    tags: ["Linux", "WSL", "Performance", "DevOps", "Bash"],
+  },
+  {
+    name: "Coding Agent Search",
+    kind: "oss",
+    badge: "Rust",
+    href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
+    short: "Unified TUI for searching local history across multiple AI coding assistants.",
+    description:
+      "A centralized search interface for your coding sessions. Indexes history from tools like Codex, Claude Code, and Cline using Tantivy, allowing you to find that one snippet you generated three weeks ago.",
+    tags: ["Rust", "TUI", "Search", "DevTools", "AI"],
+  },
+  {
+    name: "Claude Code Agent Farm",
+    kind: "oss",
+    badge: "574 stars",
+    href: "https://github.com/Dicklesworthstone/claude_code_agent_farm",
+    short: "Orchestrate an army of Claude Code agents to autonomously improve codebases.",
+    description:
+      "Transforms code improvement into a scalable, parallel process by deploying a coordinated team of AI developers. This framework orchestrates multiple Claude Code sessions simultaneously to fix bugs, refactor legacy code, and implement best practices across 34 different tech stacks without conflict.",
+    tags: ["Agents", "Automation", "Claude", "DevOps"],
+    size: "large",
+    gradient: "from-purple-600/20 via-fuchsia-500/20 to-pink-500/20",
+  },
+  {
+    name: "Ultimate MCP Client",
+    kind: "oss",
+    badge: "139 stars",
+    href: "https://github.com/Dicklesworthstone/ultimate_mcp_client",
+    short: "Universal bridge for AI models to interact with the real world via MCP.",
+    description:
+      "A comprehensive, feature-rich client for the Model Context Protocol that unlocks complex, stateful AI capabilities. It includes both CLI and Web UIs, advanced conversation state management, and deep observability, serving as the robust connective tissue between LLMs and external tools, servers, and data.",
+    tags: ["MCP", "AI Tools", "Interoperability", "Python"],
+    size: "wide",
   },
   {
     name: "MCP Agent Mail",
@@ -127,86 +250,182 @@ export const projects: Project[] = [
     description:
       "Provides inboxes, search, threads, and advisory file leases so coding agents and humans can coordinate without trampling edits. Git‑backed so everything is auditable.",
     tags: ["MCP", "Agents", "Developer Tools", "Git", "Collaboration"],
+    size: "wide",
   },
   {
-    name: "Your Source to Prompt",
+    name: "Mindmap Generator",
     kind: "oss",
-    badge: "679 stars",
-    href: "https://github.com/Dicklesworthstone/your-source-to-prompt.html",
-    short: "Convert code projects into LLM prompts securely offline.",
+    badge: "127 stars",
+    href: "https://github.com/Dicklesworthstone/mindmap-generator",
+    short: "Intelligently distills documents into hierarchical, context-aware mindmaps.",
     description:
-      "A single HTML file providing a browser-based GUI for selecting and combining code files into structured prompts for large language models. The tool runs entirely locally using the File System Access API, ensuring complete privacy while offering preset management, file filtering, and context awareness.",
-    tags: ["LLMs", "Prompts", "Developer Tools", "Privacy", "Browser"],
+      "Transforms dense documents into clear, structured visual maps using advanced LLM techniques. It verifies content against the source to prevent hallucinations, eliminates redundancy, and outputs in multiple formats, making it a powerful tool for rapid knowledge extraction and synthesis.",
+    tags: ["LLM", "Visualization", "Knowledge Management", "NLP"],
+    size: "tall",
   },
   {
-    name: "Bulk YouTube Transcriber",
+    name: "LLM-Aided OCR",
     kind: "oss",
-    badge: "611 stars",
-    href: "https://github.com/Dicklesworthstone/bulk_transcribe_youtube_videos_from_playlist",
-    short: "Transcribe YouTube playlists using Whisper speech-to-text.",
+    badge: "2.8K stars",
+    href: "https://github.com/Dicklesworthstone/llm_aided_ocr",
+    short: "Tesseract + LLMs = Perfect PDFs. Corrects OCR errors with language models.",
     description:
-      "This Python tool automates transcription of YouTube videos and playlists using OpenAI's Whisper model with optional GPU acceleration via CUDA. It generates transcripts in multiple formats and includes an interactive HTML reader for formatted viewing with customizable display options.",
-    tags: ["YouTube", "Whisper", "Transcription", "Audio-to-Text", "Python"],
+      "Dramatically improves the quality of scanned documents by using Large Language Models to intelligently correct Tesseract's raw output. It handles smart chunking, layout preservation, and markdown formatting, turning messy scans into pristine, semantic digital text.",
+    tags: ["OCR", "LLM", "Python", "PDF"],
+    size: "wide",
+    gradient: "from-green-500/20 via-emerald-500/20 to-teal-500/20",
   },
   {
-    name: "Claude Code Agent Farm",
+    name: "Swiss Army Llama",
     kind: "oss",
-    badge: "574 stars",
-    href: "https://github.com/Dicklesworthstone/claude_code_agent_farm",
-    short: "Orchestrate multiple Claude Code agents in parallel for automated codebase improvements.",
+    badge: "1K stars",
+    href: "https://github.com/Dicklesworthstone/swiss_army_llama",
+    short: "A high-performance 'Swiss Army Knife' FastAPI service for local LLMs.",
     description:
-      "A powerful orchestration framework that runs multiple Claude Code sessions simultaneously to systematically enhance codebases. Supports 34 technology stacks with features including parallel processing, agent coordination, smart monitoring, auto-recovery, and context management for large-scale code improvements.",
-    tags: ["Claude AI", "Code Generation", "Automation", "Parallel Processing", "Multi-Agent"],
-  },
-  {
-    name: "Automatic Log Collector",
-    kind: "oss",
-    badge: "411 stars",
-    href: "https://github.com/Dicklesworthstone/automatic_log_collector_and_analyzer",
-    short: "Collect and analyze logs from remote machines effortlessly.",
-    description:
-      "This Python application automates downloading and parsing log files from remote servers, storing them in SQLite, and exposing results via a web interface. Originally designed for blockchain logs, it's adaptable to any standard format and handles gigabytes of data from dozens of machines efficiently.",
-    tags: ["Logging", "DevOps", "SQLite", "Web Interface", "Automation"],
-  },
-  {
-    name: "Fast Vector Similarity",
-    kind: "oss",
-    badge: "408 stars",
-    href: "https://github.com/Dicklesworthstone/fast_vector_similarity",
-    short: "High-performance Rust library for vector similarity computation.",
-    description:
-      "A Rust-based tool designed to efficiently compute multiple similarity measures between vectors, including Spearman's correlation, Kendall's Tau, and distance correlation. It provides Python bindings for seamless integration and includes bootstrapping functionality for robust statistical analysis using parallel processing.",
-    tags: ["Vector Similarity", "Statistics", "Rust", "Python Bindings", "Performance"],
-  },
-  {
-    name: "SQLAlchemy Data Model Visualizer",
-    kind: "oss",
-    badge: "281 stars",
-    href: "https://github.com/Dicklesworthstone/sqlalchemy_data_model_visualizer",
-    short: "Convert SQLAlchemy models to visual SVG diagrams.",
-    description:
-      "A Python utility that automatically generates visual representations of SQLAlchemy ORM models. The tool converts database schemas into directed graphs rendered as SVG files, making it easier to understand table relationships and database architecture at a glance.",
-    tags: ["SQLAlchemy", "Visualization", "Database", "Python", "SVG"],
+      "Streamlines complex local LLM operations into a unified API. It handles multi-modal embedding generation, sophisticated semantic search, and grammar-enforced text completions with aggressive caching and RAM disk optimization for maximum efficiency.",
+    tags: ["FastAPI", "Local LLM", "Embeddings", "Search"],
   },
   {
     name: "Visual A* Pathfinding",
     kind: "oss",
     badge: "177 stars",
     href: "https://github.com/Dicklesworthstone/visual_astar_python",
-    short: "Animated maze generation and A* pathfinding visualization.",
+    short: "Captivating, cinematic visualizations of pathfinding algorithms in action.",
     description:
-      "A high-performance implementation of the A* pathfinding algorithm with 15+ maze generation techniques. The system creates visually striking animated demonstrations showing how pathfinding algorithms navigate through algorithmically-generated mazes, with support for MP4 video output and high-resolution rendering.",
-    tags: ["A*", "Pathfinding", "Visualization", "Algorithms", "Python"],
+      "Turns abstract computer science concepts into visual art. Features a high-performance A* implementation navigating through intricately generated mazes (using algorithms like Wave Function Collapse), offering a beautiful and intuitive way to understand algorithmic behavior.",
+    tags: ["Algorithms", "Visualization", "Python", "Education"],
+    size: "large",
+    gradient: "from-red-500/20 via-orange-500/20 to-yellow-500/20",
   },
   {
-    name: "Ultimate MCP Client",
+    name: "Your Source to Prompt",
     kind: "oss",
-    badge: "139 stars",
-    href: "https://github.com/Dicklesworthstone/ultimate_mcp_client",
-    short: "Comprehensive async client for Model Context Protocol with dual Web UI and CLI.",
+    badge: "679 stars",
+    href: "https://github.com/Dicklesworthstone/your-source-to-prompt.html",
+    short: "Secure, browser-based tool to turn codebases into optimized LLM prompts.",
     description:
-      "A feature-rich asynchronous client for the Model Context Protocol (MCP) that bridges AI models like Claude with external tools and data sources. Offers dual interfaces (modern Web UI and interactive CLI), advanced state management with branching conversations, intelligent server discovery, and built-in observability via OpenTelemetry.",
-    tags: ["MCP", "Claude Integration", "Async Python", "Web UI", "CLI"],
+      "A single-file HTML tool that runs entirely locally to protect your IP. It allows you to filter, combine, and minify code files from your machine into context-aware prompts for LLMs, streamlining the workflow for AI-assisted development without sending code to a third-party server.",
+    tags: ["Developer Tools", "Privacy", "Prompt Engineering"],
+  },
+  {
+    name: "Bulk YouTube Transcriber",
+    kind: "oss",
+    badge: "611 stars",
+    href: "https://github.com/Dicklesworthstone/bulk_transcribe_youtube_videos_from_playlist",
+    short: "Convert entire playlists into structured, searchable text with Whisper.",
+    description:
+      "Automates the ingestion of massive amounts of video content. leveraging GPU-accelerated Whisper models to generate high-fidelity transcripts with timestamps. Includes an interactive HTML reader and NLP processing to turn hours of video into a queryable knowledge base.",
+    tags: ["YouTube", "Whisper", "NLP", "Data Mining"],
+  },
+  {
+    name: "Automatic Log Collector",
+    kind: "oss",
+    badge: "411 stars",
+    href: "https://github.com/Dicklesworthstone/automatic_log_collector_and_analyzer",
+    short: "Open-source Splunk alternative for efficient multi-server log analysis.",
+    description:
+      "A cost-effective solution for aggregatng and analyzing gigabytes of logs from distributed fleets. It uses aggressive parallelization to pull data, stores it in SQLite/Datasette for instant querying, and provides a lightweight web interface for deep insights without the enterprise price tag.",
+    tags: ["DevOps", "Logging", "SQLite", "Automation"],
+  },
+  {
+    name: "Fast Vector Similarity",
+    kind: "oss",
+    badge: "408 stars",
+    href: "https://github.com/Dicklesworthstone/fast_vector_similarity",
+    short: "Lightning-fast Rust library for complex vector similarity metrics.",
+    description:
+      "Delivers robust, high-performance computation of advanced similarity measures like Hoeffding's D and Kendall's Tau. Built in Rust with seamless Python bindings, it's essential for statistical analysis of large-scale embeddings where standard cosine similarity isn't enough.",
+    tags: ["Rust", "Python", "Math", "Vector DB"],
+  },
+  {
+    name: "SQLAlchemy Visualizer",
+    kind: "oss",
+    badge: "281 stars",
+    href: "https://github.com/Dicklesworthstone/sqlalchemy_data_model_visualizer",
+    short: "Instantly turns SQLAlchemy ORM models into interactive SVG diagrams.",
+    description:
+      "Eliminates the need to manually diagram database schemas. This utility parses your Python code and generates clear, directed graphs of your data models, making it effortless to visualize and communicate complex database architectures.",
+    tags: ["Database", "Visualization", "Python", "ORM"],
+  },
+  {
+    name: "Next.js GitHub Blog",
+    kind: "oss",
+    badge: "81 stars",
+    href: "https://github.com/Dicklesworthstone/nextjs-github-markdown-blog",
+    short: "Seamless blogging platform using your GitHub repo as a CMS.",
+    description:
+      "Transforms a standard GitHub repository of Markdown files into a high-performance, SEO-optimized blog. It combines the developer-friendly workflow of git-based content management with the speed and polish of a modern Next.js 14 application.",
+    tags: ["Next.js", "CMS", "Blogging", "React"],
+  },
+  {
+    name: "LLM Tournament",
+    kind: "oss",
+    badge: "25 stars",
+    href: "https://github.com/Dicklesworthstone/llm-tournament",
+    short: "Arena for LLMs to compete and collaborate on coding challenges.",
+    description:
+      "An automated framework where multiple LLMs iteratively refine solutions to complex problems. It fosters a 'survival of the fittest' evolution of code, using peer feedback to break out of local optima and produce solutions superior to any single model.",
+    tags: ["AI Research", "Evaluation", "Agents"],
+  },
+  {
+    name: "ACIP",
+    kind: "oss",
+    badge: "Security",
+    href: "https://github.com/Dicklesworthstone/acip",
+    short: "AI Cognitive Inoculation Protocol: Defense against prompt injection.",
+    description:
+      "A security framework that 'inoculates' LLMs against semantic attacks. Inspired by cognitive psychology, it uses narrative directives and few-shot examples to help models recognize and neutralize sophisticated prompt injection attempts before they can execute.",
+    tags: ["Security", "AI Safety", "Prompt Injection"],
+  },
+  {
+    name: "Anti-Alzheimer's Flasher",
+    kind: "oss",
+    badge: "Experimental",
+    href: "https://github.com/Dicklesworthstone/anti_alzheimers_flasher",
+    short: "Web-based therapeutic tool exploring 40Hz neural stimulation.",
+    description:
+      "An accessible implementation of 40Hz gamma entrainment therapy. This web app delivers precise light and sound stimulation directly in the browser, democratizing access to promising non-invasive experimental treatments for Alzheimer's.",
+    tags: ["Health Tech", "Web Audio", "Neuroscience"],
+  },
+  {
+    name: "GitHub Repo Stars Analyzer",
+    kind: "oss",
+    badge: "17 stars",
+    href: "https://github.com/Dicklesworthstone/most-influential-github-repo-stars",
+    short: "Discover who *really* matters among your stargazers.",
+    description:
+      "Goes beyond vanity metrics to calculate an 'influencer score' for everyone who stars your repo. It helps maintainers identify key community members by analyzing the reach and activity of their stargazers.",
+    tags: ["Analytics", "GitHub", "Community"],
+  },
+  {
+    name: "PPP Loan Fraud Analysis",
+    kind: "oss",
+    badge: "Data Science",
+    href: "https://github.com/Dicklesworthstone/ppp_loan_fraud_analysis",
+    short: "Forensic data science tool for unmasking financial fraud.",
+    description:
+      "A powerful analytical engine that applies network analysis and XGBoost to massive loan datasets. It successfully identifies suspicious patterns, synthetic identities, and coordinated fraud rings that slipped past standard banking checks.",
+    tags: ["Fraud", "Data Science", "Machine Learning"],
+  },
+  {
+    name: "Multivariate Normality Testing",
+    kind: "oss",
+    badge: "Math",
+    href: "https://github.com/Dicklesworthstone/multivariate_normality_testing",
+    short: "Interactive 3D visualization for high-dimensional statistical testing.",
+    description:
+      "Tackles the curse of dimensionality by projecting complex data onto random 3D subspaces. It fits ellipsoids and compares error distributions to provide a visual and statistical assessment of normality in high-dimensional datasets.",
+    tags: ["Statistics", "Visualization", "3D", "Math"],
+  },
+  {
+    name: "Letter Learning Game",
+    kind: "oss",
+    badge: "Education",
+    href: "https://github.com/Dicklesworthstone/letter_learning_game",
+    short: "Adaptive, browser-based literacy tool for early childhood education.",
+    description:
+      "A comprehensive single-file React application that teaches the alphabet through phonics, tracing, and gamification. It features adaptive difficulty and local progress tracking, making high-quality educational software accessible without backend infrastructure.",
+    tags: ["Education", "React", "Game"],
   },
   {
     name: "Ultimate Bug Scanner",
@@ -219,36 +438,6 @@ export const projects: Project[] = [
     tags: ["Static Analysis", "Agents", "Code Quality", "CI/CD", "Multi-Language"],
   },
   {
-    name: "Mindmap Generator",
-    kind: "oss",
-    badge: "127 stars",
-    href: "https://github.com/Dicklesworthstone/mindmap-generator",
-    short: "Generates intelligent, hierarchical mindmaps from documents using LLMs.",
-    description:
-      "An intelligent document analysis tool that leverages LLMs to create comprehensive mindmaps from text documents. Adapts to different document types, creates multi-level hierarchical representations, supports multiple LLM providers (OpenAI, Anthropic, DeepSeek, Google), and outputs in Mermaid, HTML, and Markdown formats.",
-    tags: ["LLMs", "Mindmaps", "Document Analysis", "NLP", "Visualization"],
-  },
-  {
-    name: "LLM Docs",
-    kind: "oss",
-    badge: "11 stars",
-    href: "https://github.com/Dicklesworthstone/llm_docs",
-    short: "Pipeline that ingests and distills Python library docs into LLM‑friendly bundles.",
-    description:
-      "Automatically discovers, scrapes, and compresses Python docs into high‑signal corpora that can be plugged into toolchains, retrieval systems, or vendor‑specific knowledge formats.",
-    tags: ["Documentation", "Python", "LLMs", "Pipeline", "Knowledge"],
-  },
-  {
-    name: "Next.js GitHub Markdown Blog",
-    kind: "oss",
-    badge: "81 stars",
-    href: "https://github.com/Dicklesworthstone/nextjs-github-markdown-blog",
-    short: "NextJS blogging system using GitHub Repo as CMS.",
-    description:
-      "A modern blogging platform leveraging GitHub as a content management system. This project transforms Markdown files stored in a GitHub repository into a beautiful, responsive blog with minimal configuration. It includes static site generation, SEO optimization, and customizable design through Tailwind CSS.",
-    tags: ["Next.js", "Markdown", "CMS", "GitHub", "Blogging"],
-  },
-  {
     name: "Kissinger Thesis Reader",
     kind: "oss",
     badge: "45 stars",
@@ -257,76 +446,6 @@ export const projects: Project[] = [
     description:
       "Takes a painful scanned PDF and turns it into a clean, phone‑friendly reading experience, with structure that plays nicely with modern models and human readers.",
     tags: ["History", "PDF", "Reading", "Education", "OCR"],
-  },
-  {
-    name: "LLM Tournament",
-    kind: "oss",
-    badge: "25 stars",
-    href: "https://github.com/Dicklesworthstone/llm-tournament",
-    short: "Automated tournament where multiple LLMs compete and refine coding solutions.",
-    description:
-      "This project implements an automated coding tournament featuring multiple advanced LLMs that collaboratively compete and iteratively refine solutions across multiple rounds. It harnesses collective intelligence through continual peer feedback and code synthesis, tracking comprehensive performance metrics including complexity, efficiency, and robustness indicators.",
-    tags: ["LLM Agents", "Code Generation", "AI Collaboration", "Competition"],
-  },
-  {
-    name: "Anti-Alzheimer's Flasher",
-    kind: "oss",
-    badge: "22 stars",
-    href: "https://github.com/Dicklesworthstone/anti_alzheimers_flasher",
-    short: "Web app exploring 40Hz light and sound stimulation therapy.",
-    description:
-      "An experimental web-based application exploring potential therapeutic benefits of 40Hz light and sound stimulation for Alzheimer's disease management. The tool delivers immersive therapy sessions with educational content about the scientific research underlying this approach, with responsive design supporting mobile devices.",
-    tags: ["Healthcare", "Therapy", "Wellness", "40Hz", "Web"],
-  },
-  {
-    name: "GitHub Repo Stars Analyzer",
-    kind: "oss",
-    badge: "17 stars",
-    href: "https://github.com/Dicklesworthstone/most-influential-github-repo-stars",
-    short: "Analyzes influential users who have starred or forked GitHub repos by importance score.",
-    description:
-      "A tool that examines stargazers and forkers to calculate an influencer importance score based on GitHub activity metrics. Features SQLite caching, API rate limit handling, and custom GitHub API key support.",
-    tags: ["GitHub", "Analytics", "Open Source", "Data Analysis"],
-  },
-  {
-    name: "PPP Loan Fraud Analysis",
-    kind: "oss",
-    badge: "13 stars",
-    href: "https://github.com/Dicklesworthstone/ppp_loan_fraud_analysis",
-    short: "Analyzes PPP loan data to detect fraud using machine learning and statistical methods.",
-    description:
-      "A Python-based data analysis tool employing a three-step fraud detection process: risk scoring using heuristics, sorting by risk, and statistical/ML analysis. Uses XGBoost and advanced techniques to uncover patterns in PPP loan fraud.",
-    tags: ["Fraud Detection", "Data Analysis", "Machine Learning", "XGBoost"],
-  },
-  {
-    name: "ACIP: AI Cognitive Inoculation Protocol",
-    kind: "oss",
-    badge: "7 stars",
-    href: "https://github.com/Dicklesworthstone/acip",
-    short: "Security framework enhancing LLM resilience against prompt injection attacks.",
-    description:
-      "ACIP is an engineered defense mechanism that inoculates large language models through detailed guidance and examples of malicious prompt strategies. It combines directive frameworks with real-world injection examples to help models detect and neutralize sophisticated attacks leveraging semantic nuance, psychological manipulation, and obfuscation techniques.",
-    tags: ["Prompt Injection", "LLM Security", "AI Safety", "Prompt Engineering"],
-  },
-  {
-    name: "Multivariate Normality Testing",
-    kind: "oss",
-    badge: "3 stars",
-    href: "https://github.com/Dicklesworthstone/multivariate_normality_testing",
-    short: "Interactive web app testing multivariate normality via 3D projections.",
-    description:
-      "This application implements a novel approach to multivariate normality testing using random 3D projections. It examines whether high-dimensional data is normally distributed by analyzing ellipsoid fit errors across multiple random projections, providing both statistical tests and interactive 3D visualizations.",
-    tags: ["Statistics", "3D Projections", "Data Visualization", "Linear Algebra"],
-  },
-  {
-    name: "Letter Learning Game",
-    kind: "oss",
-    badge: "Educational",
-    href: "https://github.com/Dicklesworthstone/letter_learning_game",
-    short: "Educational game helping children learn the alphabet through sound and drawing.",
-    description:
-      "A browser-based learning tool with three core modes: Find Letters, Word Builder, and Tracing Practice. Features adaptive difficulty tracking, phonics instruction, mini-games, achievement systems, and local data persistence with no backend required.",
-    tags: ["Education", "Children", "Game", "Alphabet", "Learning"],
   },
   {
     name: "Jazz Chord Progression Editor",
@@ -350,18 +469,18 @@ export type TimelineItem = {
 
 export const careerTimeline: TimelineItem[] = [
   {
-    title: "Founder & CEO",
-    org: "Lumera Network (formerly Pastel Network)",
-    period: "Dec 2021 – Present",
-    location: "New York / Remote",
-    body: "Building a Cosmos-based L1 focused on long-term storage, AI verification, and cross-chain interoperability.",
-  },
-  {
     title: "Senior Analyst",
     org: "Balyasny Asset Management L.P.",
     period: "Aug 2020 – Dec 2021",
     location: "New York",
     body: "Generalist long/short equity role at a multi-manager platform, covering both longs and shorts across sectors.",
+  },
+  {
+    title: "Founder & CEO",
+    org: "Lumera Network (formerly Pastel Network)",
+    period: "Dec 2021 – Present",
+    location: "New York / Remote",
+    body: "Building a Cosmos-based L1 focused on long-term storage, AI verification, and cross-chain interoperability.",
   },
   {
     title: "Analyst",
@@ -420,159 +539,214 @@ export type WritingItem = {
   source: "YTO" | "FMD" | "GitHub";
   category: string;
   blurb: string;
+  date: string; // ISO 8601 date string (YYYY-MM-DD)
+  featured?: boolean;
+  gradient?: string;
 };
-
-export const writingHighlights: WritingItem[] = [
-  {
-    title: "The Short Case for Nvidia Stock",
-    href: "https://youtubetranscriptoptimizer.com/blog/05_the_short_case_for_nvda",
-    source: "YTO",
-    category: "Markets & AI",
-    blurb:
-      "A 12,000-word deep dive into how AI economics, models like DeepSeek, and GPU supply can collide with valuation narratives.",
-  },
-  {
-    title: "Hoeffding's D: A Statistical Measure Explained",
-    href: "https://github.com/Dicklesworthstone/hoeffdings_d_explainer",
-    source: "GitHub",
-    category: "Statistics",
-    blurb:
-      "Educational guide comparing Hoeffding's D to Pearson's correlation and Kendall's Tau, with intuitive explanations and Python implementation.",
-  },
-  {
-    title: "Lamport's Bakery Algorithm for Concurrent Locking",
-    href: "https://github.com/Dicklesworthstone/bakery_algorithm",
-    source: "GitHub",
-    category: "Algorithms",
-    blurb:
-      "Python implementation demonstrating mutual exclusion in multi-threaded environments using Lamport's classic concurrency algorithm.",
-  },
-  {
-    title: "LLM Introspective Compression and Metacognition",
-    href: "https://github.com/Dicklesworthstone/llm_introspective_compression_and_metacognition",
-    source: "GitHub",
-    category: "AI Research",
-    blurb:
-      "Novel approach enabling transformers to save, compress, and manipulate internal thought states for reasoning backtracking and metacognitive control.",
-  },
-  {
-    title: "Multi-Round LLM Coding Tournament",
-    href: "https://github.com/Dicklesworthstone/llm_multi_round_coding_tournament",
-    source: "GitHub",
-    category: "AI Research",
-    blurb:
-      "Competitive framework where multiple LLMs iteratively refine coding solutions by reviewing and learning from each other's approaches.",
-  },
-  {
-    title: "Factor Risk Models and the Hedge Fund Business",
-    href: "https://fixmydocuments.com/blog/01_factor_risk_models_and_the_hedge_fund_business",
-    source: "FMD",
-    category: "Investing",
-    blurb:
-      "Explains how factor models really get used inside funds, and where they quietly distort incentives and risk taking.",
-  },
-  {
-    title: "Acting as Claude's Research Helper in AI",
-    href: "https://fixmydocuments.com/blog/07_acting_as_claudes_research_helper_in_ai",
-    source: "FMD",
-    category: "AI Research",
-    blurb:
-      "Very-long-form exploration of using LLMs to probe mathematical structures that might inspire new model architectures.",
-  },
-  {
-    title: "PPP Loan Fraud: A Data Science Detective Story",
-    href: "https://fixmydocuments.com/blog/06_ppp_loan_fraud_a_data_science_detective_story",
-    source: "FMD",
-    category: "Data Science",
-    blurb:
-      "Reconstructs fraud patterns in the PPP loan program and shows how simple tools could have caught much of it.",
-  },
-  {
-    title: "The Most Impressive Prediction of All Time",
-    href: "https://youtubetranscriptoptimizer.com/blog/04_the_most_impressive_prediction_of_all_time",
-    source: "YTO",
-    category: "History",
-    blurb:
-      "Uses a forgotten historical prediction as a lens on evidence, updating, and how we reason under massive uncertainty.",
-  },
-];
 
 export type MediaItem = {
   title: string;
+  href: string;
   outlet: string;
-  kind: "Article" | "Podcast" | "Video";
+  kind: "Article" | "Podcast";
+  blurb: string;
+};
+
+export const mediaItems: MediaItem[] = [];
+
+export type ThreadItem = {
+  title: string;
   href: string;
   blurb: string;
 };
 
-export const mediaItems: MediaItem[] = [
-  {
-    title: "The blogger who helped spark Nvidia’s $600 billion stock collapse",
-    outlet: "MarketWatch",
-    kind: "Article",
-    href: "https://www.marketwatch.com/story/the-blogger-who-helped-spark-nvidias-600-billion-stock-collapse-and-a-panic-in-silicon-valley-52aba340",
-    blurb:
-      "Profile on how the Nvidia essay moved from an obscure blog post into trading desks and boardrooms.",
-  },
-  {
-    title: "Nvidia stock crash: how a Brooklyn-based blogger fueled the AI giant’s selloff",
-    outlet: "Mint",
-    kind: "Article",
-    href: "https://www.livemint.com/market/stock-market-news/nvidia-stock-crash-how-a-brooklyn-based-blogger-fueled-the-ai-giants-600-bn-market-collapse-heres-what-report-says-11738580355807.html",
-    blurb:
-      "Covers the Nvidia drawdown and the role of the essay in reframing risk for global investors.",
-  },
-  {
-    title: "Jeffrey Emanuel and the lessons we should all learn from the $2 trillion DeepSeek AI market correction",
-    outlet: "Diginomica",
-    kind: "Article",
-    href: "https://diginomica.com/jeffrey-emanuel-and-lessons-we-should-all-learn-2-trillion-deepseek-ai-market-correction",
-    blurb:
-      "Places the post inside the broader DeepSeek-driven repricing of AI and compute-heavy names.",
-  },
-  {
-    title: "DeepSeek R1 & The Short Case For Nvidia Stock",
-    outlet: "Bankless",
-    kind: "Podcast",
-    href: "https://www.bankless.com/podcast/deepseek-r1-the-short-case-for-nvidia-stock-jeffrey-emanuel",
-    blurb:
-      "Long-form conversation on DeepSeek, Nvidia, market reflexivity, and what the next decade of AI might look like.",
-  },
-  {
-    title: "Jeffrey Emanuel: Viral Author of The Short Case for Nvidia Stock",
-    outlet: "Delphi / YouTube",
-    kind: "Video",
-    href: "https://www.youtube.com/watch?v=3x-KxQ4p8J0",
-    blurb:
-      "Covers background, Lumera, and how a long blog post ended up moving billions in market cap.",
-  },
-];
+export const threads: ThreadItem[] = [];
 
-export type Thread = { title: string; href: string; blurb: string };
-
-export const threads: Thread[] = [
+export const writingHighlights: WritingItem[] = [
   {
-    title: "A vibe-coded reader for Kissinger’s thesis",
-    href: "https://x.com/doodlestein/status/1961817172516168098",
+    title: "Building a Brain, Not a Calculator: Bio-Inspired Nanochat",
+    href: "/writing/bio_inspired_architecture",
+    source: "GitHub",
+    category: "Frontier Research",
     blurb:
-      "Turning a 400-page scanned thesis into something that feels native on a modern phone and for LLMs.",
+      "A deep technical dive into replacing static Transformer weights with metabolic, fatigue-prone, and evolving biological analogs. Explores presynaptic fatigue, Hebbian fast-weights, and structural plasticity.",
+    date: "2025-11-22",
+    featured: true,
+    gradient: "from-pink-500/20 via-rose-500/20 to-red-500/20",
   },
   {
-    title: "Python 3.14, the GIL, and AI-powered refactors",
-    href: "https://x.com/doodlestein/status/1976478297744699771",
+    title: "11 Ways to Break the Transformer: Model-Guided Research",
+    href: "/writing/model_guided_math",
+    source: "GitHub",
+    category: "Frontier Research",
     blurb:
-      "Story of upgrading a complex codebase to GIL‑less Python using AI coding tools, plus real benchmarks.",
+      "What happens when GPT-5 acts as Principal Investigator? An exploration of 11 exotic architectures including Matrix Exponential Gauge Learning, Tropical Geometry, and p-adic Attention.",
+    date: "2025-11-22",
+    featured: true,
+    gradient: "from-cyan-500/20 via-blue-500/20 to-indigo-500/20",
   },
   {
-    title: "DeepSeek, OCR tokens, and a new scaling law",
-    href: "https://x.com/doodlestein/status/1980282222893535376",
+    title: "The Incredible Magic of CMA-ES",
+    href: "/writing/cmaes_explainer",
+    source: "GitHub",
+    category: "Algorithms",
     blurb:
-      "Argues that vision tokens as compressed text tokens change how we think about long context and memory.",
+      "An interactive deep dive into the Covariance Matrix Adaptation Evolution Strategy. Explains how it adapts to high-dimensional, non-convex landscapes where gradient descent fails.",
+    date: "2025-02-25",
   },
   {
-    title: "Project organization for SmartEdgar and agent tooling",
-    href: "https://x.com/doodlestein/status/1985405083488755740",
+    title: "The Short Case for Nvidia Stock",
+    href: "/writing/the_short_case_for_nvda",
+    source: "YTO",
+    category: "Markets & AI",
     blurb:
-      "Notes on keeping a large constellation of agent‑focused projects coherent with a simple filesystem discipline.",
+      "A 12,000-word deep dive into how AI economics, models like DeepSeek, and GPU supply can collide with valuation narratives. Explores the potential reflexivity of the AI capex cycle.",
+    date: "2025-01-25",
+    featured: true,
+    gradient: "from-amber-500/20 via-orange-500/20 to-red-500/20",
+  },
+  {
+    title: "The Most Impressive Prediction of All Time",
+    href: "/writing/the_most_impressive_prediction_of_all_time",
+    source: "YTO",
+    category: "History & Science",
+    blurb:
+      "Uses a forgotten historical prediction—the wave theory of light and the Poisson Spot—as a lens on evidence, updating priors, and how we reason under massive uncertainty.",
+    date: "2025-01-16",
+  },
+  {
+    title: "Factor Risk Models and the Hedge Fund Business",
+    href: "/writing/barra_factor_model_article",
+    source: "FMD",
+    category: "Investing",
+    blurb:
+      "An insider's look at how 'smart' risk models like Barra often unknowingly distort incentives, encourage crowding, and create hidden systemic risks within multi-manager platforms.",
+    date: "2025-09-23",
+  },
+  {
+    title: "LLM Introspective Compression",
+    href: "/writing/llm_introspective_compression",
+    source: "GitHub",
+    category: "AI Research",
+    blurb:
+      "Proposes treating LLM context as a 'save state'. By allowing models to compress and manipulate their own internal thought states, we unlock capabilities like reasoning backtracking and reinforcement learning.",
+    date: "2025-11-22",
+  },
+  {
+    title: "PPP Loan Fraud: A Data Science Detective Story",
+    href: "/writing/ppp_loan_fraud_analysis",
+    source: "FMD",
+    category: "Data Science",
+    blurb:
+      "Reconstructs massive fraud patterns in the PPP loan program. Shows how network analysis and simple heuristics could have caught billions in theft that standard banking checks missed.",
+    date: "2025-02-20",
+  },
+  {
+    title: "Multi-Round LLM Coding Tournament",
+    href: "/writing/llm_multi_round_coding_tournament",
+    source: "GitHub",
+    category: "AI Research",
+    blurb:
+      "Demonstrates that collective intelligence outperforms individual genius. A framework where multiple LLMs iteratively refine coding solutions via peer review to break out of local optima.",
+    date: "2025-11-22",
+  },
+  {
+    title: "Dr. GPT: Empowering Your Healthcare Decisions",
+    href: "/writing/dr_gpt_empowering_your_healthcare_with_ai",
+    source: "FMD",
+    category: "Healthcare & AI",
+    blurb:
+      "How to use AI as a tireless patient advocate. Describes a method for synthesizing scattered medical records into a unified dossier to catch missed diagnoses and dangerous drug interactions.",
+    date: "2025-03-20",
+  },
+  {
+    title: "Protecting Against AI Prompt Injection",
+    href: "/writing/protecting_against_prompt_injection",
+    source: "FMD",
+    category: "Security",
+    blurb:
+      "Traces the history of 'jailbreaking' from simple commands to recursive meta-prompts. Argues that internal guardrails always fail and proposes external 'inoculation' strategies.",
+    date: "2025-04-20",
+  },
+  {
+    title: "Making Complex Code Changes with Claude Code",
+    href: "/writing/making_complex_code_changes_with_cc",
+    source: "FMD",
+    category: "Dev Workflow",
+    blurb:
+      "Advocates for 'separating cognition' when using agents. Instead of asking for code directly, use agents to generate granular plans first, spreading the reasoning load across more tokens.",
+    date: "2025-08-16",
+  },
+  {
+    title: "Some Thoughts on AI Alignment",
+    href: "/writing/some_thoughts_on_ai_alignment",
+    source: "FMD",
+    category: "AI Safety",
+    blurb:
+      "Argues that internal alignment (Asimov's laws) is a losing battle. Proposes an external 'criminal justice system' for AI: helper models that monitor and police the primary model's output.",
+    date: "2024-06-20",
+  },
+  {
+    title: "The Lessons of Hermann Grassmann",
+    href: "/writing/hermann_grassmann_nature_of_abstractions",
+    source: "FMD",
+    category: "History of Math",
+    blurb:
+      "The story of the self-taught genius who invented linear algebra (the wedge product) decades before it was understood. A lesson on how radical abstractions are often rejected by the establishment.",
+    date: "2024-06-01",
+  },
+  {
+    title: "Engineering the Mindmap Generator",
+    href: "/writing/making_of_the_mindmap_generator",
+    source: "FMD",
+    category: "Software Architecture",
+    blurb:
+      "Why pipelines aren't enough. Details the 'non-linear exploration model' architecture needed to extract deep, hierarchical structure from complex documents without hallucination.",
+    date: "2025-02-25",
+  },
+  {
+    title: "Building the Python Backend for YTO",
+    href: "/writing/what_i_learned_making_the_python_backend_for_yto",
+    source: "YTO",
+    category: "Engineering",
+    blurb:
+      "A technical retrospective on using FastAPI, SQLModel, and Pydantic to build a heavy-duty async backend. Covers Whisper integration and optimizing for concurrency.",
+    date: "2024-10-09",
+  },
+  {
+    title: "TaxGPT: Using AI for Tax Prep",
+    href: "/writing/tax_gpt_using_ai_for_tax_prep",
+    source: "FMD",
+    category: "Utility",
+    blurb:
+      "A practical guide to decomposing tax returns into context-sized chunks for AI analysis. How to find deductions, spot errors, and out-perform human accountants on complex personal returns.",
+    date: "2025-03-18",
+  },
+  {
+    title: "Hoeffding's D Explained",
+    href: "/writing/hoeffdings_d_explainer",
+    source: "GitHub",
+    category: "Statistics",
+    blurb:
+      "Standard correlation misses non-linear relationships. This guide explains Hoeffding's D, a powerful non-parametric measure that detects complex dependencies where Pearson and Spearman fail.",
+    date: "2025-11-22",
+  },
+  {
+    title: "Lamport's Bakery Algorithm",
+    href: "/writing/bakery_algorithm",
+    source: "GitHub",
+    category: "Algorithms",
+    blurb:
+      "A visual, Pythonic implementation of Leslie Lamport's classic solution to the mutual exclusion problem. Illustrates how fair concurrency can be achieved without atomic hardware primitives.",
+    date: "2025-11-22",
+  },
+  {
+    title: "Next.js GitHub Markdown Blog System",
+    href: "/writing/nextjs_github_blogging_system",
+    source: "YTO",
+    category: "Web Dev",
+    blurb:
+      "Explains the architecture behind the open-source blogging engine. How to treat GitHub as a headless CMS, using static generation for speed and Git for version control.",
+    date: "2024-03-30",
   },
 ];
