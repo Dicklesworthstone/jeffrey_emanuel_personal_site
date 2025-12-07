@@ -1,0 +1,6 @@
+{
+  "installCommand": "cd jeffreyemanuel-site && bun install --frozen-lockfile",
+  "buildCommand": "cd jeffreyemanuel-site && bun run build",
+  "outputDirectory": "jeffreyemanuel-site/.next",
+  "bunVersion": "1.3.3"
+}

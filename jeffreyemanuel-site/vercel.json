@@ -1,0 +1,10 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "installCommand": "bun install --frozen-lockfile",
+  "buildCommand": "bun run build"
+}

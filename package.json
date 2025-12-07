@@ -1,0 +1,14 @@
+{
+  "name": "jeffrey_emanuel_monorepo",
+  "private": true,
+  "packageManager": "bun@1.3.3",
+  "workspaces": [
+    "jeffreyemanuel-site"
+  ],
+  "scripts": {
+    "build": "cd jeffreyemanuel-site && bun run build",
+    "dev": "cd jeffreyemanuel-site && bun run dev",
+    "start": "cd jeffreyemanuel-site && bun run start",
+    "lint": "cd jeffreyemanuel-site && bun run lint"
+  }
+}
