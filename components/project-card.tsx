@@ -41,8 +41,8 @@ export default function ProjectCard({ project }: { project: Project }) {
     setOpacity(0);
   };
 
-  // Extract star count from badge
-  const starMatch = project.badge?.match(/^([\d.]+[KkMm]?)\s+stars?$/);
+  // Extract star count from badge (handles formats like "123 stars", "1,001 stars", "2.8K stars")
+  const starMatch = project.badge?.match(/^([\d,]+\.?\d*[KkMm]?)\s+stars?$/);
   const starCount = starMatch ? starMatch[1] : null;
   const displayBadge = starCount ? null : project.badge;
   

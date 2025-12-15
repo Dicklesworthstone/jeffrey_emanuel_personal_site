@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Suspense } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Cpu } from "lucide-react";
+import { ArrowRight, Briefcase, Workflow } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
 import StatsGrid from "@/components/stats-grid";
 import ErrorBoundary from "@/components/error-boundary";
@@ -106,20 +106,20 @@ export default function Hero() {
               href={heroContent.primaryCta.href}
               onTouchStart={mediumTap}
               className={cn(
-                "group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-white px-8 text-sm font-bold tracking-wide text-slate-950 transition-all hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] active:scale-95",
+                "group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.5)] active:scale-95",
               )}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-sky-100 to-white opacity-0 transition-opacity group-hover:opacity-100" />
-              <Cpu className="relative z-10 h-4 w-4 transition-transform group-hover:rotate-12" />
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity group-hover:opacity-100" />
+              <Workflow className="relative z-10 h-4 w-4 transition-transform group-hover:rotate-12" />
               <span className="relative z-10">{heroContent.primaryCta.label}</span>
+              <ArrowRight className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
 
             <Link
               href={heroContent.secondaryCta.href}
-              target="_blank"
               className="group inline-flex h-14 items-center gap-2.5 rounded-full border border-slate-700/50 bg-slate-900/40 px-8 text-sm font-bold tracking-wide text-white backdrop-blur-md transition-all hover:border-slate-600 hover:bg-slate-800/60 active:scale-95"
             >
-              <BookOpen className="h-4 w-4 text-slate-400 transition-colors group-hover:text-sky-300" />
+              <Briefcase className="h-4 w-4 text-slate-400 transition-colors group-hover:text-sky-300" />
               <span>{heroContent.secondaryCta.label}</span>
             </Link>
           </motion.div>
