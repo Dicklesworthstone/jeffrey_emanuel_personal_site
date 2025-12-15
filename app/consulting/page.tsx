@@ -10,7 +10,7 @@ export default function ConsultingPage() {
         id="consulting-hero"
         icon={Cpu}
         eyebrow="Consulting"
-        title="AI, workflows, and markets — for people who live inside risk limits"
+        title="AI, workflows, and markets for people who live inside risk limits"
         kicker="I work with hedge funds, multi‑manager platforms, PE firms, and large allocators who need to reason clearly about AI and compute."
       >
         <p>

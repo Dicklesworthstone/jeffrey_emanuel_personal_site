@@ -11,6 +11,9 @@ interface UseIntersectionObserverOptions {
 /**
  * Hook to detect when an element enters the viewport
  * More performant than Framer Motion's whileInView for many elements
+ *
+ * Note: Starts with isIntersecting=true to prevent flash of invisible content
+ * during SSR/hydration. The observer will correct this if element is not visible.
  */
 export function useIntersectionObserver({
   threshold = 0.1,
@@ -18,23 +21,30 @@ export function useIntersectionObserver({
   triggerOnce = true,
 }: UseIntersectionObserverOptions = {}) {
   const ref = useRef<HTMLElement>(null);
-  const [isIntersecting, setIsIntersecting] = useState(false);
+  // Start true to prevent flash of invisible content during hydration
+  const [isIntersecting, setIsIntersecting] = useState(true);
   const hasTriggeredRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
 
-    // If triggerOnce and already triggered, don't observe
+    // If triggerOnce and already triggered, keep showing as intersecting
     if (triggerOnce && hasTriggeredRef.current) {
-      setIsIntersecting(true); // Keep showing as intersecting
+      setIsIntersecting(true);
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         const isNowIntersecting = entry.isIntersecting;
-        setIsIntersecting(isNowIntersecting);
+
+        // Only update state after initial check or if becoming visible
+        if (hasInitializedRef.current || isNowIntersecting) {
+          setIsIntersecting(isNowIntersecting);
+        }
+        hasInitializedRef.current = true;
 
         if (isNowIntersecting && triggerOnce) {
           hasTriggeredRef.current = true;
@@ -50,7 +60,7 @@ export function useIntersectionObserver({
     return () => {
       observer.disconnect();
     };
-  }, [threshold, rootMargin, triggerOnce]); // Removed hasTriggered from dependencies
+  }, [threshold, rootMargin, triggerOnce]);
 
   return { ref, isIntersecting };
 }

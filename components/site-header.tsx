@@ -70,15 +70,15 @@ export default function SiteHeader() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-4 md:flex lg:gap-8">
             {navItems.map((item) => {
               const active = pathname === item.href;
               return (
-                <Link 
-                  key={item.href} 
-                  href={item.href} 
+                <Link
+                  key={item.href}
+                  href={item.href}
                   className={cn(
-                    "text-sm font-medium transition-all hover:text-white",
+                    "text-sm font-medium transition-all hover:text-white whitespace-nowrap",
                     active ? "text-white" : "text-slate-400"
                   )}
                 >
@@ -93,11 +93,11 @@ export default function SiteHeader() {
                 </Link>
               );
             })}
-            
+
             <Link
               href="/contact"
               onTouchStart={mediumTap}
-              className="ml-4 inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+              className="ml-2 lg:ml-4 inline-flex shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 lg:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
             >
               Let&apos;s talk
             </Link>

@@ -11,8 +11,6 @@ source: "GitHub"
 
 **by Jeffrey Emanuel**
 
-![Illustration](cmaes_illustration.webp)
-
 If you live anywhere near modern machine learning, “optimization” almost automatically means *gradients*. Adam, Adafactor, Lion, SGD with warm restarts—pick your favorite flavor, they’re all dancing to the same tune: move parameters downhill along a gradient you can compute cheaply.
 
 But there’s a big category of problems where the gradient either doesn’t exist, is meaningless, or is so expensive to approximate that you might as well not bother. In that world—what people call *black‑box optimization*—my favorite tool by a wide margin is **CMA‑ES**, the Covariance Matrix Adaptation Evolution Strategy. ([CMA Evolution Strategy][1])
