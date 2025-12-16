@@ -728,6 +728,637 @@ function SceneGyroid({ palette, seed }: { palette: Palette; seed: number }) {
 }
 
 // ---------------------------------------------------------------------------
+// Variant: Möbius Strip with flowing particles
+// ---------------------------------------------------------------------------
+function MobiusStrip({ palette, seed }: { palette: Palette; seed: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const particlesRef = useRef<THREE.InstancedMesh>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  // Create the Möbius strip geometry
+  const stripGeom = useMemo(() => {
+    const segments = 200;
+    const width = 0.4;
+    const positions: number[] = [];
+    const indices: number[] = [];
+
+    for (let i = 0; i <= segments; i++) {
+      const u = (i / segments) * Math.PI * 2;
+      for (let j = 0; j <= 1; j++) {
+        const v = (j - 0.5) * width;
+        // Möbius parametric equations
+        const x = (1 + v * Math.cos(u / 2)) * Math.cos(u);
+        const y = (1 + v * Math.cos(u / 2)) * Math.sin(u);
+        const z = v * Math.sin(u / 2);
+        positions.push(x * 1.5, y * 1.5, z * 1.5);
+      }
+    }
+
+    for (let i = 0; i < segments; i++) {
+      const a = i * 2;
+      const b = i * 2 + 1;
+      const c = i * 2 + 2;
+      const d = i * 2 + 3;
+      indices.push(a, b, c, b, d, c);
+    }
+
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geom.setIndex(indices);
+    geom.computeVertexNormals();
+    return geom;
+  }, []);
+
+  const stripMat = useMemo(
+    () => new THREE.MeshStandardMaterial({
+      color: palette[0],
+      emissive: palette[1],
+      emissiveIntensity: 0.6,
+      metalness: 0.4,
+      roughness: 0.3,
+      side: THREE.DoubleSide,
+    }),
+    [palette]
+  );
+
+  const particleGeom = useMemo(() => new THREE.SphereGeometry(0.06, 8, 8), []);
+  const particleMat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[2], emissive: palette[3], emissiveIntensity: 1.2 }),
+    [palette]
+  );
+
+  const particleCount = 80;
+  const particlePhases = useMemo(() =>
+    Array.from({ length: particleCount }, () => rand() * Math.PI * 2),
+    [rand]
+  );
+
+  useEffect(() => () => {
+    stripGeom.dispose();
+    stripMat.dispose();
+    particleGeom.dispose();
+    particleMat.dispose();
+  }, [stripGeom, stripMat, particleGeom, particleMat]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current || !particlesRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.15;
+    groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.2;
+
+    const dummy = new THREE.Object3D();
+    particlePhases.forEach((phase, i) => {
+      const u = ((t * 0.4 + phase) % (Math.PI * 2));
+      const v = Math.sin(t * 2 + i) * 0.15;
+      const x = (1 + v * Math.cos(u / 2)) * Math.cos(u);
+      const y = (1 + v * Math.cos(u / 2)) * Math.sin(u);
+      const z = v * Math.sin(u / 2);
+      dummy.position.set(x * 1.5, y * 1.5, z * 1.5);
+      dummy.scale.setScalar(0.8 + Math.sin(t * 3 + i) * 0.3);
+      dummy.updateMatrix();
+      particlesRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    particlesRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <mesh geometry={stripGeom} material={stripMat} />
+      <instancedMesh ref={particlesRef} args={[particleGeom, particleMat, particleCount]} />
+    </group>
+  );
+}
+
+function SceneMobius({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[3, 3, 3]} intensity={1.2} color={palette[0]} />
+      <pointLight position={[-3, -3, 3]} intensity={0.8} color={palette[2]} />
+      <MobiusStrip palette={palette} seed={seed} />
+      <StarField density={280} color={palette[3]} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Spherical Harmonics - beautiful deformed spheres
+// ---------------------------------------------------------------------------
+function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const geom = useMemo(() => new THREE.SphereGeometry(1.3, 64, 64), []);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({
+      color: palette[0],
+      emissive: palette[1],
+      emissiveIntensity: 0.7,
+      metalness: 0.5,
+      roughness: 0.25,
+    }),
+    [palette]
+  );
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  // Spherical harmonic coefficients
+  const coeffs = useMemo(() => ({
+    l: Math.floor(rand() * 4) + 2,
+    m: Math.floor(rand() * 5),
+    amplitude: 0.3 + rand() * 0.4,
+  }), [rand]);
+
+  // Store original positions
+  const originalPositions = useMemo(() => {
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+    return new Float32Array(pos.array);
+  }, [geom]);
+
+  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+
+    for (let i = 0; i < pos.count; i++) {
+      const ox = originalPositions[i * 3];
+      const oy = originalPositions[i * 3 + 1];
+      const oz = originalPositions[i * 3 + 2];
+
+      // Convert to spherical coordinates
+      const r = Math.sqrt(ox * ox + oy * oy + oz * oz);
+      const theta = Math.acos(oy / r);
+      const phi = Math.atan2(oz, ox);
+
+      // Simplified spherical harmonic Y_l^m
+      const harmonic = Math.cos(coeffs.m * phi + t * 0.5) *
+                       Math.pow(Math.sin(theta), coeffs.m) *
+                       Math.cos(coeffs.l * theta + t * 0.3);
+
+      const displacement = 1 + coeffs.amplitude * harmonic * Math.sin(t * 0.8 + i * 0.01);
+
+      pos.setXYZ(i, ox * displacement, oy * displacement, oz * displacement);
+    }
+    pos.needsUpdate = true;
+    geom.computeVertexNormals();
+
+    meshRef.current.rotation.y = t * 0.2;
+    meshRef.current.rotation.x = Math.sin(t * 0.4) * 0.15;
+  });
+
+  return <mesh ref={meshRef} geometry={geom} material={mat} />;
+}
+
+function SceneHarmonics({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <directionalLight position={[4, 4, 2]} intensity={1.3} color={palette[2]} />
+      <pointLight position={[-3, 2, 3]} intensity={0.8} color={palette[0]} />
+      <SphericalHarmonics palette={palette} seed={seed} />
+      <StarField density={350} color={palette[3]} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Trefoil Knot with energy flow
+// ---------------------------------------------------------------------------
+function TrefoilKnot({ palette, seed }: { palette: Palette; seed: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const particlesRef = useRef<THREE.InstancedMesh>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  // Trefoil parametric curve
+  const trefoilPoint = (t: number, scale = 1.2) => {
+    const x = Math.sin(t) + 2 * Math.sin(2 * t);
+    const y = Math.cos(t) - 2 * Math.cos(2 * t);
+    const z = -Math.sin(3 * t);
+    return new THREE.Vector3(x * scale * 0.5, y * scale * 0.5, z * scale * 0.5);
+  };
+
+  const tubeGeom = useMemo(() => {
+    const points: THREE.Vector3[] = [];
+    for (let i = 0; i <= 200; i++) {
+      points.push(trefoilPoint((i / 200) * Math.PI * 2));
+    }
+    const curve = new THREE.CatmullRomCurve3(points, true);
+    return new THREE.TubeGeometry(curve, 200, 0.08, 16, true);
+  }, []);
+
+  const tubeMat = useMemo(
+    () => new THREE.MeshStandardMaterial({
+      color: palette[0],
+      emissive: palette[1],
+      emissiveIntensity: 0.5,
+      metalness: 0.6,
+      roughness: 0.2,
+    }),
+    [palette]
+  );
+
+  const particleGeom = useMemo(() => new THREE.OctahedronGeometry(0.08, 0), []);
+  const particleMat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[2], emissive: palette[3], emissiveIntensity: 1.5 }),
+    [palette]
+  );
+
+  const particleCount = 60;
+  const particleOffsets = useMemo(() =>
+    Array.from({ length: particleCount }, () => rand() * Math.PI * 2),
+    [rand]
+  );
+
+  useEffect(() => () => {
+    tubeGeom.dispose();
+    tubeMat.dispose();
+    particleGeom.dispose();
+    particleMat.dispose();
+  }, [tubeGeom, tubeMat, particleGeom, particleMat]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current || !particlesRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.2;
+    groupRef.current.rotation.x = Math.sin(t * 0.5) * 0.3;
+
+    const dummy = new THREE.Object3D();
+    particleOffsets.forEach((offset, i) => {
+      const param = ((t * 0.6 + offset) % (Math.PI * 2));
+      const pos = trefoilPoint(param);
+      dummy.position.copy(pos);
+      dummy.rotation.set(t * 2 + i, t * 3 + i * 0.5, 0);
+      dummy.scale.setScalar(0.7 + Math.sin(t * 4 + i * 0.3) * 0.4);
+      dummy.updateMatrix();
+      particlesRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    particlesRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <mesh geometry={tubeGeom} material={tubeMat} />
+      <instancedMesh ref={particlesRef} args={[particleGeom, particleMat, particleCount]} />
+    </group>
+  );
+}
+
+function SceneTrefoil({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <pointLight position={[2, 3, 3]} intensity={1.3} color={palette[0]} />
+      <pointLight position={[-2, -2, 2]} intensity={0.7} color={palette[2]} />
+      <TrefoilKnot palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Perlin Flow Field - mesmerizing 3D particle flow
+// ---------------------------------------------------------------------------
+function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; seed: number; count?: number }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const geom = useMemo(() => new THREE.SphereGeometry(0.025, 6, 6), []);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 1.0, roughness: 0.4 }),
+    [palette]
+  );
+
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  // Initialize particle positions
+  const particles = useMemo(() => {
+    return Array.from({ length: count }, () => ({
+      pos: new THREE.Vector3(
+        (rand() - 0.5) * 5,
+        (rand() - 0.5) * 5,
+        (rand() - 0.5) * 5
+      ),
+      vel: new THREE.Vector3(0, 0, 0),
+      life: rand(),
+    }));
+  }, [count, rand]);
+
+  // Simple 3D noise function
+  const noise3D = (x: number, y: number, z: number, t: number) => {
+    return Math.sin(x * 1.5 + t) * Math.cos(y * 1.3 + t * 0.7) * Math.sin(z * 1.1 + t * 0.5) +
+           Math.sin(x * 0.7 - t * 0.5) * Math.cos(z * 0.9 + t * 0.3);
+  };
+
+  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime() * 0.5;
+    const dummy = new THREE.Object3D();
+
+    particles.forEach((p, i) => {
+      // Calculate flow field direction using noise
+      const nx = noise3D(p.pos.x * 0.3, p.pos.y * 0.3, p.pos.z * 0.3, t);
+      const ny = noise3D(p.pos.y * 0.3, p.pos.z * 0.3, p.pos.x * 0.3, t + 100);
+      const nz = noise3D(p.pos.z * 0.3, p.pos.x * 0.3, p.pos.y * 0.3, t + 200);
+
+      p.vel.set(nx, ny, nz).multiplyScalar(0.015);
+      p.pos.add(p.vel);
+
+      // Wrap around bounds
+      const bound = 2.5;
+      if (Math.abs(p.pos.x) > bound) p.pos.x *= -0.9;
+      if (Math.abs(p.pos.y) > bound) p.pos.y *= -0.9;
+      if (Math.abs(p.pos.z) > bound) p.pos.z *= -0.9;
+
+      dummy.position.copy(p.pos);
+      const speed = p.vel.length();
+      dummy.scale.setScalar(0.8 + speed * 20);
+      dummy.updateMatrix();
+      meshRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, count]} />;
+}
+
+function SceneFlowField({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+      <pointLight position={[0, 0, 4]} intensity={1.5} color={palette[2]} />
+      <PerlinFlowField palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: 3D Spirograph (Epitrochoid)
+// ---------------------------------------------------------------------------
+function Spirograph3D({ palette, seed }: { palette: Palette; seed: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  // Generate multiple spirograph curves with different parameters
+  const curves = useMemo(() => {
+    const result: { geometry: THREE.BufferGeometry; color: string }[] = [];
+
+    for (let c = 0; c < 4; c++) {
+      const R = 1.0 + rand() * 0.5;
+      const r = 0.3 + rand() * 0.4;
+      const d = 0.5 + rand() * 0.8;
+      const zFreq = 2 + Math.floor(rand() * 4);
+      const zAmp = 0.3 + rand() * 0.5;
+
+      const points: THREE.Vector3[] = [];
+      const steps = 800;
+
+      for (let i = 0; i <= steps; i++) {
+        const t = (i / steps) * Math.PI * 2 * (Math.floor(rand() * 5) + 3);
+        // Epitrochoid equations with z oscillation
+        const x = (R - r) * Math.cos(t) + d * Math.cos(((R - r) / r) * t);
+        const y = (R - r) * Math.sin(t) - d * Math.sin(((R - r) / r) * t);
+        const z = zAmp * Math.sin(zFreq * t);
+        points.push(new THREE.Vector3(x, y, z));
+      }
+
+      const curve = new THREE.CatmullRomCurve3(points);
+      const geometry = new THREE.TubeGeometry(curve, 600, 0.02, 8, false);
+      result.push({ geometry, color: palette[c % palette.length] });
+    }
+
+    return result;
+  }, [palette, rand]);
+
+  const materials = useMemo(
+    () => curves.map(c => new THREE.MeshStandardMaterial({
+      color: c.color,
+      emissive: c.color,
+      emissiveIntensity: 0.8,
+      metalness: 0.3,
+      roughness: 0.4,
+    })),
+    [curves]
+  );
+
+  useEffect(() => () => {
+    curves.forEach(c => c.geometry.dispose());
+    materials.forEach(m => m.dispose());
+  }, [curves, materials]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.15;
+    groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.2;
+    groupRef.current.rotation.z = Math.cos(t * 0.2) * 0.1;
+  });
+
+  return (
+    <group ref={groupRef} scale={0.9}>
+      {curves.map((c, i) => (
+        <mesh key={i} geometry={c.geometry} material={materials[i]} />
+      ))}
+    </group>
+  );
+}
+
+function SceneSpirograph({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[3, 4, 3]} intensity={1.2} color={palette[0]} />
+      <Spirograph3D palette={palette} seed={seed} />
+      <StarField density={250} color={palette[3]} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Phyllotaxis Fibonacci Sphere (sunflower seed pattern)
+// ---------------------------------------------------------------------------
+function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; seed: number; count?: number }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const geom = useMemo(() => new THREE.DodecahedronGeometry(0.06, 0), []);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.7, metalness: 0.4, roughness: 0.3 }),
+    [palette]
+  );
+
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const dummy = new THREE.Object3D();
+
+    for (let i = 0; i < count; i++) {
+      // Fibonacci sphere distribution
+      const theta = i * goldenAngle + t * 0.2;
+      const y = 1 - (i / (count - 1)) * 2; // -1 to 1
+      const radius = Math.sqrt(1 - y * y);
+
+      // Animated pulsing radius
+      const pulseRadius = 1.8 + 0.2 * Math.sin(t * 1.5 + i * 0.02);
+
+      const x = Math.cos(theta) * radius * pulseRadius;
+      const z = Math.sin(theta) * radius * pulseRadius;
+
+      dummy.position.set(x, y * pulseRadius, z);
+      dummy.lookAt(0, 0, 0);
+
+      // Size varies based on position
+      const scale = 0.6 + 0.5 * Math.sin(t * 2 + i * 0.05);
+      dummy.scale.setScalar(scale);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+    meshRef.current.rotation.y = t * 0.1;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, count]} />;
+}
+
+function ScenePhyllotaxis({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[0, 3, 3]} intensity={1.3} color={palette[2]} />
+      <pointLight position={[0, -3, -3]} intensity={0.7} color={palette[0]} />
+      <PhyllotaxisSphere palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Aizawa Attractor (beautiful strange attractor)
+// ---------------------------------------------------------------------------
+function AizawaAttractor({ palette, seed }: { palette: Palette; seed: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const geometry = useMemo(() => {
+    const points: THREE.Vector3[] = [];
+    let x = 0.1, y = 0, z = 0;
+    const a = 0.95, b = 0.7, c = 0.6, d = 3.5, e = 0.25, f = 0.1;
+    const dt = 0.005;
+
+    for (let i = 0; i < 25000; i++) {
+      const dx = ((z - b) * x - d * y) * dt;
+      const dy = (d * x + (z - b) * y) * dt;
+      const dz = (c + a * z - (z * z * z) / 3 - (x * x + y * y) * (1 + e * z) + f * z * x * x * x) * dt;
+      x += dx;
+      y += dy;
+      z += dz;
+      if (i % 2 === 0) {
+        points.push(new THREE.Vector3(x * 0.8, y * 0.8, z * 0.8));
+      }
+    }
+
+    const geom = new THREE.BufferGeometry().setFromPoints(points);
+    return geom;
+  }, []);
+
+  const material = useMemo(
+    () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.85 }),
+    [palette]
+  );
+
+  useEffect(() => () => { geometry.dispose(); material.dispose(); }, [geometry, material]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.15;
+    groupRef.current.rotation.x = Math.sin(t * 0.4) * 0.3;
+    material.opacity = 0.7 + Math.sin(t * 0.8) * 0.2;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <lineSegments geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function SceneAizawa({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+      <pointLight position={[2, 3, 3]} intensity={1.2} color={palette[0]} />
+      <AizawaAttractor palette={palette} seed={seed} />
+      <StarField density={300} color={palette[2]} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Reaction-Diffusion Waves on a Torus
+// ---------------------------------------------------------------------------
+function ReactionDiffusionTorus({ palette, seed }: { palette: Palette; seed: number }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const geom = useMemo(() => new THREE.TorusGeometry(1.2, 0.5, 64, 128), []);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({
+      color: palette[0],
+      emissive: palette[1],
+      emissiveIntensity: 0.6,
+      metalness: 0.5,
+      roughness: 0.3,
+    }),
+    [palette]
+  );
+
+  const originalPositions = useMemo(() => {
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+    return new Float32Array(pos.array);
+  }, [geom]);
+
+  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+
+    for (let i = 0; i < pos.count; i++) {
+      const ox = originalPositions[i * 3];
+      const oy = originalPositions[i * 3 + 1];
+      const oz = originalPositions[i * 3 + 2];
+
+      // Create reaction-diffusion-like patterns
+      const angle1 = Math.atan2(oy, ox);
+      const angle2 = Math.atan2(oz, Math.sqrt(ox * ox + oy * oy) - 1.2);
+
+      const wave1 = Math.sin(angle1 * 8 + t * 2) * Math.cos(angle2 * 6 - t * 1.5);
+      const wave2 = Math.cos(angle1 * 5 - t * 1.2) * Math.sin(angle2 * 7 + t * 0.8);
+      const displacement = 1 + 0.08 * (wave1 + wave2);
+
+      pos.setXYZ(i, ox * displacement, oy * displacement, oz * displacement);
+    }
+    pos.needsUpdate = true;
+    geom.computeVertexNormals();
+
+    meshRef.current.rotation.y = t * 0.2;
+    meshRef.current.rotation.x = t * 0.1;
+  });
+
+  return <mesh ref={meshRef} geometry={geom} material={mat} />;
+}
+
+function SceneReactionDiffusion({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[3, 4, 2]} intensity={1.2} color={palette[2]} />
+      <pointLight position={[-2, -2, 3]} intensity={0.8} color={palette[0]} />
+      <ReactionDiffusionTorus palette={palette} seed={seed} />
+      <StarField density={280} color={palette[3]} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Variant map and hourly plan
 // ---------------------------------------------------------------------------
 type VariantKey =
@@ -742,7 +1373,15 @@ type VariantKey =
   | "supershape"
   | "hopf"
   | "ikeda"
-  | "gyroid";
+  | "gyroid"
+  | "mobius"
+  | "harmonics"
+  | "trefoil"
+  | "flowfield"
+  | "spirograph"
+  | "phyllotaxis"
+  | "aizawa"
+  | "reactiondiffusion";
 
 const scenes: Record<VariantKey, (opts: { palette: Palette; seed: number }) => JSX.Element> = {
   orbits: ({ palette }) => <SceneOrbits palette={palette} />,
@@ -757,33 +1396,48 @@ const scenes: Record<VariantKey, (opts: { palette: Palette; seed: number }) => J
   hopf: ({ palette, seed }) => <SceneHopf palette={palette} seed={seed} />,
   ikeda: ({ palette, seed }) => <SceneIkeda palette={palette} seed={seed} />,
   gyroid: ({ palette, seed }) => <SceneGyroid palette={palette} seed={seed} />,
+  mobius: ({ palette, seed }) => <SceneMobius palette={palette} seed={seed} />,
+  harmonics: ({ palette, seed }) => <SceneHarmonics palette={palette} seed={seed} />,
+  trefoil: ({ palette, seed }) => <SceneTrefoil palette={palette} seed={seed} />,
+  flowfield: ({ palette, seed }) => <SceneFlowField palette={palette} seed={seed} />,
+  spirograph: ({ palette, seed }) => <SceneSpirograph palette={palette} seed={seed} />,
+  phyllotaxis: ({ palette, seed }) => <ScenePhyllotaxis palette={palette} seed={seed} />,
+  aizawa: ({ palette, seed }) => <SceneAizawa palette={palette} seed={seed} />,
+  reactiondiffusion: ({ palette, seed }) => <SceneReactionDiffusion palette={palette} seed={seed} />,
 };
 
 const hourlyPlan: { variant: VariantKey; palette: number; seed: number; background?: string }[] = [
-  { variant: "supershape", palette: 3, seed: 101 },
-  { variant: "orbits", palette: 0, seed: 1 },
-  { variant: "lissajous", palette: 1, seed: 2 },
-  { variant: "wave", palette: 2, seed: 3 },
-  { variant: "torus", palette: 3, seed: 4 },
-  { variant: "lorenz", palette: 4, seed: 5 },
-  { variant: "helix", palette: 5, seed: 6 },
-  { variant: "flock", palette: 0, seed: 7 },
-  { variant: "clifford", palette: 2, seed: 33 },
-  { variant: "gyroid", palette: 5, seed: 41 },
-  { variant: "hopf", palette: 1, seed: 55 },
-  { variant: "ikeda", palette: 4, seed: 66 },
-  { variant: "wave", palette: 5, seed: 15 },
-  { variant: "lissajous", palette: 0, seed: 16 },
-  { variant: "torus", palette: 1, seed: 17 },
-  { variant: "helix", palette: 3, seed: 18 },
-  { variant: "lorenz", palette: 2, seed: 19 },
-  { variant: "flock", palette: 5, seed: 20 },
-  { variant: "gyroid", palette: 0, seed: 77 },
-  { variant: "clifford", palette: 4, seed: 88 },
-  { variant: "supershape", palette: 5, seed: 111 },
-  { variant: "hopf", palette: 2, seed: 122 },
-  { variant: "ikeda", palette: 3, seed: 133 },
-  { variant: "orbits", palette: 1, seed: 24 },
+  // Midnight - 5am: Mysterious & ethereal
+  { variant: "aizawa", palette: 4, seed: 200 },           // 12am - Strange attractor
+  { variant: "flowfield", palette: 5, seed: 201 },       // 1am - Mesmerizing particle flow
+  { variant: "lorenz", palette: 4, seed: 5 },            // 2am - Chaotic butterfly
+  { variant: "ikeda", palette: 3, seed: 133 },           // 3am - Ikeda map cloud
+  { variant: "clifford", palette: 2, seed: 33 },         // 4am - Clifford ribbons
+  { variant: "harmonics", palette: 1, seed: 202 },       // 5am - Spherical harmonics dawn
+
+  // 6am - 11am: Morning energy & geometry
+  { variant: "phyllotaxis", palette: 0, seed: 203 },     // 6am - Fibonacci sunrise
+  { variant: "trefoil", palette: 5, seed: 204 },         // 7am - Knot energy
+  { variant: "mobius", palette: 2, seed: 205 },          // 8am - Möbius topology
+  { variant: "spirograph", palette: 1, seed: 206 },      // 9am - Complex curves
+  { variant: "supershape", palette: 3, seed: 101 },      // 10am - Morphing forms
+  { variant: "helix", palette: 0, seed: 6 },             // 11am - DNA ribbons
+
+  // Noon - 5pm: Peak activity & vibrant
+  { variant: "torus", palette: 3, seed: 4 },             // 12pm - Torus garden
+  { variant: "wave", palette: 2, seed: 3 },              // 1pm - Interference patterns
+  { variant: "lissajous", palette: 1, seed: 2 },         // 2pm - Lissajous swarm
+  { variant: "reactiondiffusion", palette: 0, seed: 207 }, // 3pm - Turing patterns
+  { variant: "hopf", palette: 5, seed: 55 },             // 4pm - Hopf fibration
+  { variant: "orbits", palette: 0, seed: 1 },            // 5pm - Classic orbital
+
+  // 6pm - 11pm: Evening elegance
+  { variant: "gyroid", palette: 5, seed: 41 },           // 6pm - Minimal surface
+  { variant: "flock", palette: 4, seed: 7 },             // 7pm - Boid swarm
+  { variant: "harmonics", palette: 3, seed: 208 },       // 8pm - Evening harmonics
+  { variant: "spirograph", palette: 2, seed: 209 },      // 9pm - Night curves
+  { variant: "trefoil", palette: 1, seed: 210 },         // 10pm - Glowing knot
+  { variant: "phyllotaxis", palette: 4, seed: 211 },     // 11pm - Golden spiral night
 ];
 
 // ---------------------------------------------------------------------------
