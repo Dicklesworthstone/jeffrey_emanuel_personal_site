@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 interface TypingAnimationProps {
   /** Array of words/phrases to cycle through */
   words: string[];
-  /** Time in ms to display each word before switching */
-  displayDuration?: number;
   /** Typing speed in ms per character */
   typingSpeed?: number;
   /** Deleting speed in ms per character */
@@ -29,7 +27,6 @@ interface TypingAnimationProps {
  */
 export default function TypingAnimation({
   words,
-  displayDuration = 2000,
   typingSpeed = 80,
   deletingSpeed = 50,
   pauseAfterTyping = 1500,

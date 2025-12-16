@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
-import { ArrowRight, BrainCircuit, FlaskConical, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowRight, BrainCircuit, FlaskConical, ExternalLink } from "lucide-react";
 import { Project } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
