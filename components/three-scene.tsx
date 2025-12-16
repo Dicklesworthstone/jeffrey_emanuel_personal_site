@@ -162,6 +162,7 @@ function SceneOrbits({ palette }: { palette: Palette }) {
 // ---------------------------------------------------------------------------
 function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed: number; count?: number }) {
   const ref = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
   const geom = useMemo(() => new THREE.SphereGeometry(0.04, 12, 12), []);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.8, metalness: 0.1, roughness: 0.4 }),
@@ -187,7 +188,7 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
   useFrame(({ clock }) => {
     if (!ref.current) return;
     const t = clock.getElapsedTime() * 0.35;
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
     for (let i = 0; i < count; i++) {
       const k = (i / count) * Math.PI * 2;
       const x = Math.sin(params.ax * k + t) * Math.cos(params.bx * k + params.phase) * 2.2;
@@ -232,6 +233,7 @@ function SceneLissajous({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 function WaveGrid({ palette, seed, size = 15 }: { palette: Palette; seed: number; size?: number }) {
   const ref = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
   const geom = useMemo(() => new THREE.BoxGeometry(0.18, 0.18, 0.18), []);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[2], metalness: 0.2, roughness: 0.5 }), [palette]);
 
@@ -242,7 +244,7 @@ function WaveGrid({ palette, seed, size = 15 }: { palette: Palette; seed: number
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
     const t = clock.getElapsedTime();
     let i = 0;
     for (let x = -size; x <= size; x++) {
@@ -429,6 +431,7 @@ function SceneTorus({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 function IcosaFlock({ palette, seed, count = 140 }: { palette: Palette; seed: number; count?: number }) {
   const ref = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
   const geom = useMemo(() => new THREE.IcosahedronGeometry(0.09, 0), []);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[0], emissiveIntensity: 0.8, metalness: 0.5, roughness: 0.2 }), [palette]);
   useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
@@ -444,7 +447,7 @@ function IcosaFlock({ palette, seed, count = 140 }: { palette: Palette; seed: nu
   useFrame(({ clock }) => {
     if (!ref.current) return;
     const t = clock.getElapsedTime();
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
     seeds.forEach((s, i) => {
       const angle = t * s.speed + s.phase;
       dummy.position.set(Math.cos(angle) * s.radius, Math.sin(t * 0.7 + s.phase) * s.height, Math.sin(angle) * s.radius);
@@ -545,6 +548,7 @@ function supershape(theta: number, m: number, n1: number, n2: number, n3: number
 
 function SuperShapeBlob({ palette, seed }: { palette: Palette; seed: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const tempVec = useRef(new THREE.Vector3());
   const geom = useMemo(() => new THREE.IcosahedronGeometry(1.1, 4), []);
   useEffect(() => () => geom.dispose(), [geom]);
   const rand = useMemo(() => seededRandom(seed), [seed]);
@@ -553,12 +557,20 @@ function SuperShapeBlob({ palette, seed }: { palette: Palette; seed: number }) {
     [rand],
   );
 
+  // Store original positions for stable calculations
+  const originalPositions = useMemo(() => {
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+    return new Float32Array(pos.array);
+  }, [geom]);
+
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const pos = geom.attributes.position as THREE.BufferAttribute;
     const t = clock.getElapsedTime();
+    const v = tempVec.current;
     for (let i = 0; i < pos.count; i++) {
-      const v = new THREE.Vector3().fromBufferAttribute(pos, i).normalize();
+      // Read from original positions to avoid drift
+      v.set(originalPositions[i * 3], originalPositions[i * 3 + 1], originalPositions[i * 3 + 2]).normalize();
       const r1 = supershape(Math.atan2(v.y, v.x), params.m1, params.n1, params.n2, params.n3);
       const r2 = supershape(Math.acos(v.z), params.m2, params.n1, params.n2, params.n3);
       const r = 1 + 0.55 * r1 * r2 + 0.15 * Math.sin(t * 1.2 + i * 0.3);
@@ -640,10 +652,11 @@ function SceneHopf({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 function IkedaCloud({ palette, seed, count = 4800 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const yAxisRef = useRef(new THREE.Vector3(0, 1, 0));
   const geom = useMemo(() => new THREE.SphereGeometry(0.05, 10, 10), []);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.7, roughness: 0.35 }), [palette]);
   const points = useMemo(() => {
-    const rand = seededRandom(seed);
     const arr: THREE.Vector3[] = [];
     let x = 0.1, y = 0, z = 0;
     for (let i = 0; i < count; i++) {
@@ -654,17 +667,18 @@ function IkedaCloud({ palette, seed, count = 4800 }: { palette: Palette; seed: n
       arr.push(new THREE.Vector3((x - 1.2) * 0.6, y * 0.6, z * 0.6));
     }
     return arr;
-  }, [seed, count]);
+  }, [count]);
 
   useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
+    const yAxis = yAxisRef.current;
     const t = clock.getElapsedTime();
     points.forEach((p, i) => {
       dummy.position.copy(p);
-      dummy.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), t * 0.2);
+      dummy.position.applyAxisAngle(yAxis, t * 0.2);
       dummy.scale.setScalar(0.6 + 0.3 * Math.sin(t + i * 0.1));
       dummy.updateMatrix();
       meshRef.current!.setMatrixAt(i, dummy.matrix);
@@ -733,6 +747,7 @@ function SceneGyroid({ palette, seed }: { palette: Palette; seed: number }) {
 function MobiusStrip({ palette, seed }: { palette: Palette; seed: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const particlesRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
   const rand = useMemo(() => seededRandom(seed), [seed]);
 
   // Create the Möbius strip geometry
@@ -806,7 +821,7 @@ function MobiusStrip({ palette, seed }: { palette: Palette; seed: number }) {
     groupRef.current.rotation.y = t * 0.15;
     groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.2;
 
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
     particlePhases.forEach((phase, i) => {
       const u = ((t * 0.4 + phase) % (Math.PI * 2));
       const v = Math.sin(t * 2 + i) * 0.15;
@@ -926,20 +941,24 @@ function SceneHarmonics({ palette, seed }: { palette: Palette; seed: number }) {
 function TrefoilKnot({ palette, seed }: { palette: Palette; seed: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const particlesRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const tempVec = useRef(new THREE.Vector3());
   const rand = useMemo(() => seededRandom(seed), [seed]);
 
-  // Trefoil parametric curve
-  const trefoilPoint = (t: number, scale = 1.2) => {
+  // Trefoil parametric curve - reuses tempVec to avoid GC pressure
+  const trefoilPoint = (t: number, scale = 1.2, out: THREE.Vector3) => {
     const x = Math.sin(t) + 2 * Math.sin(2 * t);
     const y = Math.cos(t) - 2 * Math.cos(2 * t);
     const z = -Math.sin(3 * t);
-    return new THREE.Vector3(x * scale * 0.5, y * scale * 0.5, z * scale * 0.5);
+    return out.set(x * scale * 0.5, y * scale * 0.5, z * scale * 0.5);
   };
 
   const tubeGeom = useMemo(() => {
     const points: THREE.Vector3[] = [];
+    const temp = new THREE.Vector3();
     for (let i = 0; i <= 200; i++) {
-      points.push(trefoilPoint((i / 200) * Math.PI * 2));
+      trefoilPoint((i / 200) * Math.PI * 2, 1.2, temp);
+      points.push(temp.clone());
     }
     const curve = new THREE.CatmullRomCurve3(points, true);
     return new THREE.TubeGeometry(curve, 200, 0.08, 16, true);
@@ -981,11 +1000,12 @@ function TrefoilKnot({ palette, seed }: { palette: Palette; seed: number }) {
     groupRef.current.rotation.y = t * 0.2;
     groupRef.current.rotation.x = Math.sin(t * 0.5) * 0.3;
 
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
+    const temp = tempVec.current;
     particleOffsets.forEach((offset, i) => {
       const param = ((t * 0.6 + offset) % (Math.PI * 2));
-      const pos = trefoilPoint(param);
-      dummy.position.copy(pos);
+      trefoilPoint(param, 1.2, temp);
+      dummy.position.copy(temp);
       dummy.rotation.set(t * 2 + i, t * 3 + i * 0.5, 0);
       dummy.scale.setScalar(0.7 + Math.sin(t * 4 + i * 0.3) * 0.4);
       dummy.updateMatrix();
@@ -1018,6 +1038,7 @@ function SceneTrefoil({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
   const geom = useMemo(() => new THREE.SphereGeometry(0.025, 6, 6), []);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 1.0, roughness: 0.4 }),
@@ -1050,7 +1071,7 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime() * 0.5;
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
 
     particles.forEach((p, i) => {
       // Calculate flow field direction using noise
@@ -1106,12 +1127,13 @@ function Spirograph3D({ palette, seed }: { palette: Palette; seed: number }) {
       const d = 0.5 + rand() * 0.8;
       const zFreq = 2 + Math.floor(rand() * 4);
       const zAmp = 0.3 + rand() * 0.5;
+      const rotations = Math.floor(rand() * 5) + 3; // Full rotations for this curve
 
       const points: THREE.Vector3[] = [];
       const steps = 800;
 
       for (let i = 0; i <= steps; i++) {
-        const t = (i / steps) * Math.PI * 2 * (Math.floor(rand() * 5) + 3);
+        const t = (i / steps) * Math.PI * 2 * rotations;
         // Epitrochoid equations with z oscillation
         const x = (R - r) * Math.cos(t) + d * Math.cos(((R - r) / r) * t);
         const y = (R - r) * Math.sin(t) - d * Math.sin(((R - r) / r) * t);
@@ -1176,6 +1198,7 @@ function SceneSpirograph({ palette, seed }: { palette: Palette; seed: number }) 
 // ---------------------------------------------------------------------------
 function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
   const geom = useMemo(() => new THREE.DodecahedronGeometry(0.06, 0), []);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.7, metalness: 0.4, roughness: 0.3 }),
@@ -1183,14 +1206,13 @@ function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; s
   );
 
   const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
-  const rand = useMemo(() => seededRandom(seed), [seed]);
 
   useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
-    const dummy = new THREE.Object3D();
+    const dummy = dummyRef.current;
 
     for (let i = 0; i < count; i++) {
       // Fibonacci sphere distribution

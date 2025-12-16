@@ -27,7 +27,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         // remark/rehype stack to the client. Math is rendered through KaTeX.
         rehypePlugins={[rehypeSlug, [rehypeKatex, { strict: false }]]}
         components={{
-          code({ node, inline, className, children, ...props }: any) {
+          code({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) {
             const match = /language-(\w+)/.exec(className || "");
             return !inline && match ? (
               <SyntaxHighlighter

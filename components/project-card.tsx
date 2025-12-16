@@ -49,26 +49,22 @@ export default function ProjectCard({ project }: { project: Project }) {
   // Determine base colors based on kind or custom gradient
   const isProduct = project.kind === "product";
   const isResearch = project.kind === "research";
-  
+
   let accentColor = "text-emerald-400";
-  let accentBg = "bg-emerald-400";
   let spotlightColor = "52, 211, 153"; // Emerald
   let hoverBorder = "group-hover:border-emerald-500/30";
-  
+
   if (project.gradient) {
      // If a custom gradient is provided, we use a neutral white/slate base and let the gradient do the work
      accentColor = "text-white";
-     accentBg = "bg-white";
      spotlightColor = "255, 255, 255";
      hoverBorder = "group-hover:border-white/30";
   } else if (isProduct) {
     accentColor = "text-sky-400";
-    accentBg = "bg-sky-400";
     spotlightColor = "56, 189, 248"; // Sky
     hoverBorder = "group-hover:border-sky-500/30";
   } else if (isResearch) {
     accentColor = "text-purple-400";
-    accentBg = "bg-purple-400";
     spotlightColor = "192, 132, 252"; // Purple
     hoverBorder = "group-hover:border-purple-500/30";
   }

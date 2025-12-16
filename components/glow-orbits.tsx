@@ -16,7 +16,7 @@ export default function GlowOrbits() {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mediaQuery.matches) return;
 
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       const rings = gsap.utils.toArray<HTMLElement>(".glow-ring");
 
       if (rings.length === 0) return;

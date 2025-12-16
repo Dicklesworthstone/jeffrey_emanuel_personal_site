@@ -81,20 +81,22 @@ export default function ProjectsPage() {
       </LayoutGroup>
 
       {/* Flywheel Visualization - only shown for "all" or "flywheel" filters */}
-      {showFlywheel && (
-        <motion.div
-          key="flywheel"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="mb-12 sm:mb-16 overflow-hidden"
-        >
-          <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-violet-950/20 via-black/40 to-black/20 p-4 sm:p-6 md:p-8 lg:p-12 backdrop-blur-sm">
-            <FlywheelVisualization />
-          </div>
-        </motion.div>
-      )}
+      <AnimatePresence mode="wait">
+        {showFlywheel && (
+          <motion.div
+            key="flywheel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="mb-12 sm:mb-16 overflow-hidden"
+          >
+            <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-violet-950/20 via-black/40 to-black/20 p-4 sm:p-6 md:p-8 lg:p-12 backdrop-blur-sm">
+              <FlywheelVisualization />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* The Grid - moves up immediately when flywheel is hidden */}
       <motion.div

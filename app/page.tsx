@@ -169,8 +169,9 @@ export default function HomePage() {
                             tool.color
                           )}
                           style={{
-                            left: `calc(50% + ${xPercent}% - 6px)`,
-                            top: `calc(50% + ${yPercent}% - 6px)`,
+                            left: `calc(50% + ${xPercent}%)`,
+                            top: `calc(50% + ${yPercent}%)`,
+                            transform: "translate(-50%, -50%)",
                           }}
                           initial={{ scale: 0, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}

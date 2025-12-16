@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import type { Stat } from "@/lib/content";
 
@@ -40,19 +40,24 @@ function AnimatedNumber({
   duration?: number;
   isVisible: boolean;
 }) {
-  const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const frameRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-
   // Check for reduced motion preference (SSR-safe via Framer Motion)
   const prefersReducedMotion = useReducedMotion();
+
+  // Initialize state based on reduced motion preference
+  const [count, setCount] = useState(() => prefersReducedMotion ? end : 0);
+  const [hasAnimated, setHasAnimated] = useState(() => Boolean(prefersReducedMotion));
+  const frameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   // Easing function - smooth deceleration
   const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
-  const animate = useCallback(
-    (timestamp: number) => {
+  useEffect(() => {
+    // Skip animation if reduced motion or already animated
+    if (prefersReducedMotion || !isVisible || hasAnimated) return;
+
+    // Animation function defined inside effect to avoid stale closures
+    const animate = (timestamp: number) => {
       if (startTimeRef.current === null) {
         startTimeRef.current = timestamp;
       }
@@ -70,19 +75,7 @@ function AnimatedNumber({
         setCount(end);
         setHasAnimated(true);
       }
-    },
-    [duration, end]
-  );
-
-  useEffect(() => {
-    // Skip animation if reduced motion or already animated
-    if (prefersReducedMotion) {
-      setCount(end);
-      setHasAnimated(true);
-      return;
-    }
-
-    if (!isVisible || hasAnimated) return;
+    };
 
     // Start animation
     setCount(0);
@@ -94,7 +87,7 @@ function AnimatedNumber({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [isVisible, hasAnimated, animate, end, prefersReducedMotion]);
+  }, [isVisible, hasAnimated, end, duration, prefersReducedMotion]);
 
   // Format number - show integer for whole numbers, one decimal otherwise
   const displayNumber =
