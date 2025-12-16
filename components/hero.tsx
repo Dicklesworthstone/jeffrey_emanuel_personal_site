@@ -10,10 +10,13 @@ import GlowOrbits from "@/components/glow-orbits";
 import StatsGrid from "@/components/stats-grid";
 import ErrorBoundary from "@/components/error-boundary";
 import ThreeSceneLoading from "@/components/three-scene-loading";
+import ThreeSceneFallback from "@/components/three-scene-fallback";
 import { heroContent, heroStats, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { useClickParticles } from "@/hooks/use-click-particles";
 import { cn } from "@/lib/utils";
 
+// Only load Three.js on larger screens to save mobile bandwidth/battery
 const ThreeScene = dynamic(() => import("@/components/three-scene"), {
   ssr: false,
   loading: () => <ThreeSceneLoading />,
@@ -21,6 +24,10 @@ const ThreeScene = dynamic(() => import("@/components/three-scene"), {
 
 export default function Hero() {
   const { mediumTap } = useHapticFeedback();
+  const spawnParticles = useClickParticles({
+    colors: ["#8b5cf6", "#d946ef", "#a855f7", "#38bdf8", "#22c55e"],
+    count: 16,
+  });
 
   return (
     <section
@@ -105,6 +112,7 @@ export default function Hero() {
             <Link
               href={heroContent.primaryCta.href}
               onTouchStart={mediumTap}
+              onClick={spawnParticles}
               className={cn(
                 "group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.5)] active:scale-95",
               )}
@@ -134,13 +142,19 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* 3D Scene - Positioned to be non-intrusive but present */}
+        {/* 3D Scene - Full Three.js on desktop, lightweight fallback on mobile */}
         <div className="relative mt-12 h-[400px] w-full lg:absolute lg:-right-[10%] lg:top-1/2 lg:mt-0 lg:h-[900px] lg:w-[1000px] lg:-translate-y-1/2 lg:opacity-100 pointer-events-none">
            <div className="absolute inset-0 z-10 bg-gradient-to-l from-transparent via-[#020617]/20 to-[#020617] lg:via-[#020617]/60" />
            <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#020617] to-transparent lg:hidden" />
-           
-           <div className="pointer-events-auto h-full w-full">
-             <ErrorBoundary fallback={null}>
+
+           {/* Mobile: Lightweight CSS/SVG animation fallback */}
+           <div className="h-full w-full lg:hidden">
+             <ThreeSceneFallback />
+           </div>
+
+           {/* Desktop: Full Three.js WebGL scene */}
+           <div className="pointer-events-auto hidden h-full w-full lg:block">
+             <ErrorBoundary fallback={<ThreeSceneFallback />}>
                 <Suspense fallback={<ThreeSceneLoading />}>
                   <ThreeScene />
                 </Suspense>
