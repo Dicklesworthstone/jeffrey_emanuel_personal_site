@@ -43,7 +43,7 @@ export function getPostSlugs() {
   return fs.readdirSync(postsDirectory).filter((file) => file.endsWith(".md"));
 }
 
-export function getPostBySlug(slug: string, fields: string[] = []) {
+export function getPostBySlug(slug: string) {
   const realSlug = slug.replace(/\.md$/, "");
   const fullPath = path.join(postsDirectory, `${realSlug}.md`);
   
@@ -66,13 +66,13 @@ export function getPostBySlug(slug: string, fields: string[] = []) {
   return items;
 }
 
-export function getAllPosts(fields: string[] = []) {
+export function getAllPosts() {
   const slugs = getPostSlugs();
   const posts: Post[] = [];
 
   for (const slug of slugs) {
     try {
-      posts.push(getPostBySlug(slug, fields));
+      posts.push(getPostBySlug(slug));
     } catch (err) {
       // Skip malformed markdown/frontmatter instead of breaking the whole build
       console.warn(`[content] Skipping ${slug}: ${(err as Error).message}`);

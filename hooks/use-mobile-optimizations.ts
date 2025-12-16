@@ -56,16 +56,15 @@ export function useMobileOptimizations() {
 }
 
 /**
- * Utility function to detect if user is on mobile device
- * Note: Not a React hook despite the name - kept for API consistency
- * with mobile optimization hooks
+ * Utility function to detect if user is on mobile device.
+ * This is NOT a React hook - it's a simple detection function.
  */
-export function useIsMobile() {
+export function checkIsMobile(): boolean {
   if (typeof window === "undefined") return false;
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 }
 
 /**
- * Alternative export without 'use' prefix for clarity
+ * Alias for checkIsMobile for convenience
  */
-export const isMobile = useIsMobile;
+export const isMobile = checkIsMobile;

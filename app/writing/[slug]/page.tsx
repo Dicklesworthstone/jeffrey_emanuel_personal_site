@@ -9,7 +9,7 @@ import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 
 export async function generateStaticParams() {
-  const posts = getAllPosts(["slug"]);
+  const posts = getAllPosts();
   return posts.map((post) => ({
     slug: post.slug,
   }));
@@ -19,7 +19,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   let post;
   try {
-    post = getPostBySlug(slug, ["title", "date", "slug", "content", "excerpt", "author", "category", "tags"]);
+    post = getPostBySlug(slug);
   } catch (e) {
     console.error("[writing] failed to load post", slug, e);
     notFound();
