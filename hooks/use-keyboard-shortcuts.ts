@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { navItems } from "@/lib/content";
 
 interface UseKeyboardShortcutsOptions {
   onOpenCommandPalette?: () => void;
@@ -67,21 +68,11 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      // Number keys 1-7: Navigate to pages
-      const routes = [
-        "/",           // 1: Home
-        "/about",      // 2: About
-        "/consulting", // 3: Consulting
-        "/projects",   // 4: Projects
-        "/writing",    // 5: Writing
-        "/media",      // 6: Media
-        "/contact",    // 7: Contact
-      ];
-
+      // Number keys 1-9: Navigate to pages based on navItems order
       const keyNum = parseInt(event.key);
-      if (keyNum >= 1 && keyNum <= 7) {
+      if (keyNum >= 1 && keyNum <= navItems.length) {
         event.preventDefault();
-        router.push(routes[keyNum - 1]);
+        router.push(navItems[keyNum - 1].href);
         return;
       }
 
@@ -108,13 +99,11 @@ export const keyboardShortcutsList: Array<{
   category: "navigation" | "actions" | "general";
 }> = [
   // Navigation
-  { keys: ["1"], description: "Go to Home", category: "navigation" },
-  { keys: ["2"], description: "Go to About", category: "navigation" },
-  { keys: ["3"], description: "Go to Consulting", category: "navigation" },
-  { keys: ["4"], description: "Go to Projects", category: "navigation" },
-  { keys: ["5"], description: "Go to Writing", category: "navigation" },
-  { keys: ["6"], description: "Go to Media", category: "navigation" },
-  { keys: ["7"], description: "Go to Contact", category: "navigation" },
+  ...navItems.map((item, index) => ({
+    keys: [(index + 1).toString()],
+    description: `Go to ${item.label}`,
+    category: "navigation" as const,
+  })),
   // Actions
   { keys: ["⌘", "K"], description: "Open command palette", category: "actions" },
   { keys: ["/"], description: "Quick search", category: "actions" },

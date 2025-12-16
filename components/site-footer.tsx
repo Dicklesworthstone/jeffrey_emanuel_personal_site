@@ -1,4 +1,4 @@
-import { Github, Twitter, Mail } from "lucide-react";
+import { Github, Twitter, Mail, Linkedin } from "lucide-react";
 import { siteConfig } from "@/lib/content";
 
 export default function SiteFooter() {
@@ -25,6 +25,7 @@ export default function SiteFooter() {
             { href: `mailto:${siteConfig.email}`, icon: Mail, label: "Email" },
             { href: siteConfig.social.github, icon: Github, label: "GitHub" },
             { href: siteConfig.social.x, icon: Twitter, label: "X (Twitter)" },
+            { href: siteConfig.social.linkedin, icon: Linkedin, label: "LinkedIn" },
           ].map((social) => (
             <a
               key={social.label}

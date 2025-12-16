@@ -155,7 +155,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
              transition={{ duration: 1, delay: 0.8 }}
              className="pt-12 lg:pt-16"
           >
-            <StatsGrid stats={heroStats} />
+            <StatsGrid stats={stats} />
           </motion.div>
         </div>
 

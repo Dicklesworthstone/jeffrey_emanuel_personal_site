@@ -10,6 +10,15 @@ export interface GitHubStats {
   fetchedAt: number;
 }
 
+interface GitHubUser {
+  public_repos: number;
+  followers: number;
+}
+
+interface GitHubRepo {
+  stargazers_count: number;
+}
+
 const GITHUB_USERNAME = "Dicklesworthstone";
 
 /**
@@ -39,9 +48,10 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
       throw new Error(`GitHub API error: ${userResponse.status}`);
     }
 
-    const userData = await userResponse.json();
+    const userData = (await userResponse.json()) as GitHubUser;
     const publicRepos = userData.public_repos || 0;
-    const pages = Math.ceil(publicRepos / 100);
+    // Cap at 5 pages (500 repos) to avoid rate limits and timeouts
+    const pages = Math.min(Math.ceil(publicRepos / 100), 5);
 
     // Fetch repositories in parallel
     const pagePromises = [];
@@ -60,7 +70,7 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
           }
         ).then((res) => {
           if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
-          return res.json();
+          return res.json() as Promise<GitHubRepo[]>;
         })
       );
     }

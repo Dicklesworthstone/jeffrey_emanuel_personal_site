@@ -29,11 +29,14 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Search,
 };
 
-// Layout constants
+// Layout constants - base values for desktop (scaled down on mobile via CSS transform)
 const CONTAINER_SIZE = 420;
 const RADIUS = 150;
 const CENTER = CONTAINER_SIZE / 2;
 const NODE_SIZE = 72;
+
+// Mobile scale factor - fit 420px into ~300px viewport with padding
+const MOBILE_SCALE = 0.72;
 
 // Calculate node positions in a circle
 function getNodePosition(index: number, total: number) {
@@ -299,8 +302,7 @@ const ToolNode = React.memo(function ToolNode({
   );
 });
 
-// Center hub with pulsing animation
-function CenterHub({ reducedMotion }: { reducedMotion: boolean }) {
+const CenterHub = React.memo(function CenterHub({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <div
       className="absolute"
@@ -330,10 +332,10 @@ function CenterHub({ reducedMotion }: { reducedMotion: boolean }) {
       </motion.div>
     </div>
   );
-}
+});
 
 // Tool detail panel
-function ToolDetailPanel({
+const ToolDetailPanel = React.memo(function ToolDetailPanel({
   tool,
   onClose,
   reducedMotion,
@@ -435,7 +437,7 @@ function ToolDetailPanel({
       </div>
     </motion.div>
   );
-}
+});
 
 // Placeholder panel
 function PlaceholderPanel() {
@@ -462,7 +464,7 @@ function PlaceholderPanel() {
 }
 
 // Mobile bottom sheet
-function MobileBottomSheet({
+const MobileBottomSheet = React.memo(function MobileBottomSheet({
   tool,
   onClose,
   reducedMotion,
@@ -595,7 +597,7 @@ function MobileBottomSheet({
       )}
     </AnimatePresence>
   );
-}
+});
 
 export default function FlywheelVisualization() {
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
@@ -689,9 +691,15 @@ export default function FlywheelVisualization() {
           role="img"
           aria-label="Interactive flywheel showing tool connections"
         >
+          {/* Mobile-responsive wrapper: scales 420px flywheel to fit smaller screens */}
           <div
-            className="relative"
-            style={{ width: CONTAINER_SIZE, height: CONTAINER_SIZE }}
+            className="relative origin-center scale-[var(--flywheel-scale)] md:scale-100"
+            style={{
+              width: CONTAINER_SIZE,
+              height: CONTAINER_SIZE,
+              // CSS custom property for mobile scale - 420*0.72 ≈ 302px fits nicely on 375px screens
+              "--flywheel-scale": MOBILE_SCALE,
+            } as React.CSSProperties}
           >
             {/* SVG for connection lines */}
             <svg

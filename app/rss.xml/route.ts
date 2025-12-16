@@ -1,5 +1,6 @@
 import { Feed } from "feed";
 import { writingHighlights, siteConfig } from "@/lib/content";
+import { getAllPosts } from "@/lib/mdx";
 
 export async function GET() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jeffreyemanuel.com";
@@ -20,28 +21,39 @@ export async function GET() {
     },
   });
 
-  // Sort articles by date (newest first) with validation
-  const sortedArticles = [...writingHighlights]
-    .filter((article) => {
-      // Validate date format
-      const date = new Date(article.date);
-      return !isNaN(date.getTime());
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return dateB - dateA;
-    });
+  // Helper to normalize date
+  const getDate = (d: string | Date) => new Date(d);
 
-  sortedArticles.forEach((article) => {
-    const articleUrl = `${siteUrl}${article.href}`;
+  // 1. Get all dynamic MDX posts
+  const mdxItems = getAllPosts().map((post) => ({
+    title: post.title,
+    id: `${siteUrl}/writing/${post.slug}`,
+    link: `${siteUrl}/writing/${post.slug}`,
+    description: post.excerpt,
+    content: post.excerpt,
+    author: [
+      {
+        name: siteConfig.name,
+        email: siteConfig.email,
+        link: siteUrl,
+      },
+    ],
+    date: getDate(post.date),
+    category: [
+      { name: post.category || "Essay" },
+      { name: (post.source as string) || "Blog" },
+    ],
+  }));
 
-    feed.addItem({
-      title: article.title,
-      id: articleUrl,
-      link: articleUrl,
-      description: article.blurb,
-      content: article.blurb,
+  // 2. Get external curated links from highlights
+  const externalItems = writingHighlights
+    .filter((item) => item.href.startsWith("http"))
+    .map((post) => ({
+      title: post.title,
+      id: post.href,
+      link: post.href,
+      description: post.blurb,
+      content: post.blurb,
       author: [
         {
           name: siteConfig.name,
@@ -49,13 +61,17 @@ export async function GET() {
           link: siteUrl,
         },
       ],
-      date: new Date(article.date),
-      category: [
-        { name: article.category },
-        { name: article.source },
-      ],
-    });
-  });
+      date: getDate(post.date),
+      category: [{ name: post.category || "" }, { name: post.source || "" }],
+    }));
+
+  // 3. Combine and sort
+  const allItems = [...mdxItems, ...externalItems].sort(
+    (a, b) => b.date.getTime() - a.date.getTime()
+  );
+
+  // 4. Add to feed
+  allItems.forEach((item) => feed.addItem(item));
 
   return new Response(feed.rss2(), {
     headers: {

@@ -32,7 +32,6 @@ export function useIntersectionObserver({
 
     // If triggerOnce and already triggered, keep showing as intersecting
     if (triggerOnce && hasTriggeredRef.current) {
-      setIsIntersecting(true);
       return;
     }
 
@@ -40,15 +39,17 @@ export function useIntersectionObserver({
       ([entry]) => {
         const isNowIntersecting = entry.isIntersecting;
 
-        // Always update state to reflect reality
+        // If triggerOnce and we intersect, lock it and disconnect
+        if (triggerOnce && isNowIntersecting) {
+          setIsIntersecting(true);
+          hasTriggeredRef.current = true;
+          observer.disconnect();
+          return;
+        }
+
+        // Otherwise update standard state
         setIsIntersecting(isNowIntersecting);
         hasInitializedRef.current = true;
-
-        if (isNowIntersecting && triggerOnce) {
-          hasTriggeredRef.current = true;
-          // Disconnect observer after first trigger to save resources
-          observer.disconnect();
-        }
       },
       { threshold, rootMargin }
     );

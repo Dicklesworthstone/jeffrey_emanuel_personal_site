@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -41,48 +41,48 @@ export default function TypingAnimation({
 
   const currentWord = words[currentWordIndex];
 
-  // If reduced motion, just show the first word without animation
-  const handleTyping = useCallback(() => {
-    if (prefersReducedMotion) {
-      setCurrentText(words[0]);
-      return;
-    }
+  useEffect(() => {
+    // If reduced motion, we don't need to run the animation logic at all
+    if (prefersReducedMotion) return;
 
-    if (!isDeleting) {
-      // Typing
-      if (currentText.length < currentWord.length) {
-        const timeout = setTimeout(() => {
-          setCurrentText(currentWord.slice(0, currentText.length + 1));
-        }, typingSpeed);
-        return () => clearTimeout(timeout);
-      } else {
-        // Finished typing, pause then start deleting
-        const timeout = setTimeout(() => {
-          setIsDeleting(true);
-        }, pauseAfterTyping);
-        return () => clearTimeout(timeout);
-      }
-    } else {
-      // Deleting
+    let timeout: NodeJS.Timeout;
+
+    if (isDeleting) {
       if (currentText.length > 0) {
-        const timeout = setTimeout(() => {
-          setCurrentText(currentText.slice(0, -1));
+        // Deleting
+        timeout = setTimeout(() => {
+          setCurrentText((prev) => prev.slice(0, -1));
         }, deletingSpeed);
-        return () => clearTimeout(timeout);
       } else {
         // Finished deleting, move to next word
-        setIsDeleting(false);
-        if (loop || currentWordIndex < words.length - 1) {
-          setCurrentWordIndex((prev) => (prev + 1) % words.length);
-        }
+        timeout = setTimeout(() => {
+          setIsDeleting(false);
+          if (loop || currentWordIndex < words.length - 1) {
+            setCurrentWordIndex((prev) => (prev + 1) % words.length);
+          }
+        }, deletingSpeed);
+      }
+    } else {
+      if (currentText.length < currentWord.length) {
+        // Typing
+        timeout = setTimeout(() => {
+          setCurrentText(currentWord.slice(0, currentText.length + 1));
+        }, typingSpeed);
+      } else {
+        // Finished typing, pause then start deleting
+        timeout = setTimeout(() => {
+          setIsDeleting(true);
+        }, pauseAfterTyping);
       }
     }
+
+    return () => clearTimeout(timeout);
   }, [
     currentText,
     currentWord,
     isDeleting,
-    words,
     currentWordIndex,
+    words.length,
     loop,
     typingSpeed,
     deletingSpeed,
@@ -90,12 +90,7 @@ export default function TypingAnimation({
     prefersReducedMotion,
   ]);
 
-  useEffect(() => {
-    const cleanup = handleTyping();
-    return cleanup;
-  }, [handleTyping]);
-
-  // For reduced motion, just show the first word
+  // For reduced motion, just show the first word (or current word if logic allows)
   if (prefersReducedMotion) {
     return <span className={className}>{words[0]}</span>;
   }

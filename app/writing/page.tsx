@@ -11,12 +11,13 @@ export default function WritingPage() {
   const mdxItems: WritingItem[] = allPosts.map((post) => ({
     title: post.title,
     href: `/writing/${post.slug}`,
-    source: post.source || "Blog",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    source: (post.source as any) || "Blog",
     category: post.category || "Essay",
     blurb: post.excerpt,
     date: post.date,
-    featured: post.featured,
-    gradient: post.gradient,
+    featured: post.featured as boolean | undefined,
+    gradient: post.gradient as string | undefined,
   }));
 
   // Get featured items from manual highlights (curated)

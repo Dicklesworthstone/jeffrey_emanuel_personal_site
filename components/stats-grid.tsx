@@ -53,15 +53,8 @@ function AnimatedNumber({
   const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
   useEffect(() => {
-    // Immediately show final value if reduced motion is preferred
-    if (prefersReducedMotion) {
-      setCount(end);
-      setHasAnimated(true);
-      return;
-    }
-
-    // Skip animation if already animated or not visible
-    if (!isVisible || hasAnimated) return;
+    // Skip animation if reduced motion is preferred, already animated, or not visible
+    if (prefersReducedMotion || !isVisible || hasAnimated) return;
 
     // Animation function defined inside effect to avoid stale closures
     const animate = (timestamp: number) => {
@@ -85,7 +78,6 @@ function AnimatedNumber({
     };
 
     // Start animation
-    setCount(0);
     startTimeRef.current = null;
     frameRef.current = requestAnimationFrame(animate);
 
@@ -96,9 +88,11 @@ function AnimatedNumber({
     };
   }, [isVisible, hasAnimated, end, duration, prefersReducedMotion]);
 
+  const currentCount = prefersReducedMotion ? end : count;
+
   // Format number - show integer for whole numbers, one decimal otherwise
   const displayNumber =
-    end % 1 === 0 ? Math.round(count).toString() : count.toFixed(1);
+    end % 1 === 0 ? Math.round(currentCount).toString() : currentCount.toFixed(1);
 
   return (
     <span className="tabular-nums">

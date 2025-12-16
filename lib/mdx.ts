@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import matter from "gray-matter";
+import { cache } from "react";
 
 // Turbopack sometimes runs with process.cwd() at the monorepo root, and the
 // compiled server chunks live inside .next/. Walk upward from both the module
@@ -33,7 +34,7 @@ export type Post = {
   category?: string;
   tags?: string[];
   coverImage?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export function getPostSlugs() {
@@ -43,7 +44,7 @@ export function getPostSlugs() {
   return fs.readdirSync(postsDirectory).filter((file) => file.endsWith(".md"));
 }
 
-export function getPostBySlug(slug: string) {
+export const getPostBySlug = cache((slug: string) => {
   const realSlug = slug.replace(/\.md$/, "");
   const fullPath = path.join(postsDirectory, `${realSlug}.md`);
   
@@ -64,7 +65,7 @@ export function getPostBySlug(slug: string) {
   };
 
   return items;
-}
+});
 
 export function getAllPosts() {
   const slugs = getPostSlugs();
@@ -81,6 +82,10 @@ export function getAllPosts() {
 
   // sort posts by date in descending order
   return posts.sort((post1, post2) => {
-    return new Date(post2.date).getTime() - new Date(post1.date).getTime();
+    const t1 = new Date(post1.date).getTime();
+    const t2 = new Date(post2.date).getTime();
+    if (isNaN(t1)) return 1;
+    if (isNaN(t2)) return -1;
+    return t2 - t1;
   });
 }

@@ -17,6 +17,7 @@ const isMobileDevice = () => {
 
 const isSlowConnection = () => {
   if (typeof window === "undefined" || !("connection" in navigator)) return false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const conn = (navigator as any).connection;
   if (!conn) return false;
   return conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.saveData === true;
@@ -141,7 +142,7 @@ function OrbitalRing(props: { radius: number; tilt: number; color: string }) {
   );
 }
 
-function SceneOrbits({ palette }: { palette: Palette }) {
+function SceneOrbits({ palette }: { palette: Palette; seed: number }) {
   return (
     <>
       <StarField color={palette[0]} />
@@ -169,10 +170,9 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
     [palette],
   );
 
-  useEffect(() => () => {
-    geom.dispose();
-    mat.dispose();
-  }, [geom, mat]);
+  useEffect(() => () => geom.dispose(), [geom]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => mat.dispose(), [mat]);
 
   const rand = useMemo(() => seededRandom(seed), [seed]);
   const params = useMemo(() => ({
@@ -237,7 +237,8 @@ function WaveGrid({ palette, seed, size = 15 }: { palette: Palette; seed: number
   const geom = useMemo(() => new THREE.BoxGeometry(0.18, 0.18, 0.18), []);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[2], metalness: 0.2, roughness: 0.5 }), [palette]);
 
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
 
   const rand = useMemo(() => seededRandom(seed), [seed]);
   const frequencies = useMemo(() => [0.6 + rand() * 0.4, 0.8 + rand() * 0.4, 0.9 + rand() * 0.3], [rand]);
@@ -312,7 +313,8 @@ function LorenzRibbons({ palette }: { palette: Palette }) {
   );
 }
 
-function SceneLorenz({ palette }: { palette: Palette }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function SceneLorenz({ palette, seed: _seed }: { palette: Palette; seed: number }) {
   return (
     <>
       <StarField density={260} color={palette[2]} />
@@ -368,7 +370,8 @@ function HelixLines({ palette, turns = 5, strands = 4 }: { palette: Palette; tur
   );
 }
 
-function SceneHelix({ palette }: { palette: Palette }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function SceneHelix({ palette, seed: _seed }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.6} />
@@ -433,8 +436,12 @@ function IcosaFlock({ palette, seed, count = 140 }: { palette: Palette; seed: nu
   const ref = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
   const geom = useMemo(() => new THREE.IcosahedronGeometry(0.09, 0), []);
-  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[0], emissiveIntensity: 0.8, metalness: 0.5, roughness: 0.2 }), [palette]);
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[2], emissiveIntensity: 0.6, roughness: 0.3 }),
+    [palette]
+  );
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
 
   const rand = useMemo(() => seededRandom(seed), [seed]);
   const seeds = useMemo(() => Array.from({ length: count }, () => ({
@@ -511,7 +518,7 @@ function Clifford({ palette, seed, count = 42000 }: { palette: Palette; seed: nu
     geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geom.computeBoundingSphere();
     return () => geom.dispose();
-  }, [geom, seed]);
+  }, [geom, seed, count]);
 
   useFrame(({ clock }) => {
     if (!group.current) return;
@@ -577,6 +584,7 @@ function SuperShapeBlob({ palette, seed }: { palette: Palette; seed: number }) {
       v.multiplyScalar(r);
       pos.setXYZ(i, v.x, v.y, v.z);
     }
+    // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
     geom.computeVertexNormals();
     meshRef.current.rotation.y = t * 0.25;
@@ -669,7 +677,8 @@ function IkedaCloud({ palette, seed, count = 4800 }: { palette: Palette; seed: n
     return arr;
   }, [count]);
 
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
@@ -707,9 +716,8 @@ function GyroidSurface({ palette, seed, resolution = 70 }: { palette: Palette; s
   const geom = useMemo(() => new THREE.PlaneGeometry(4, 4, resolution, resolution), [resolution]);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.35, side: THREE.DoubleSide }), [palette]);
   const rand = useMemo(() => seededRandom(seed), [seed]);
-  const noisePhase = useMemo(() => rand() * Math.PI * 2, [rand]);
-
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
@@ -717,9 +725,10 @@ function GyroidSurface({ palette, seed, resolution = 70 }: { palette: Palette; s
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const y = pos.getY(i);
-      const g = Math.sin(x + t * 0.8) * Math.cos(y + t * 0.6) + Math.sin(y + t * 0.4) * Math.cos(x + noisePhase + t * 0.5);
+      const g = Math.sin(x + t * 0.8) * Math.cos(y + t * 0.6) + Math.sin(y + t * 0.4) * Math.cos(x + t * 0.5);
       pos.setZ(i, g * 0.6);
     }
+    // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
     geom.computeVertexNormals();
     if (meshRef.current) {
@@ -810,10 +819,13 @@ function MobiusStrip({ palette, seed }: { palette: Palette; seed: number }) {
 
   useEffect(() => () => {
     stripGeom.dispose();
-    stripMat.dispose();
     particleGeom.dispose();
+  }, [stripGeom, particleGeom]);
+
+  useEffect(() => () => {
+    stripMat.dispose();
     particleMat.dispose();
-  }, [stripGeom, stripMat, particleGeom, particleMat]);
+  }, [stripMat, particleMat]);
 
   useFrame(({ clock }) => {
     if (!groupRef.current || !particlesRef.current) return;
@@ -887,7 +899,8 @@ function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number 
     return new Float32Array(pos.array);
   }, [geom]);
 
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
@@ -913,6 +926,7 @@ function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number 
 
       pos.setXYZ(i, ox * displacement, oy * displacement, oz * displacement);
     }
+    // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
     geom.computeVertexNormals();
 
@@ -989,10 +1003,13 @@ function TrefoilKnot({ palette, seed }: { palette: Palette; seed: number }) {
 
   useEffect(() => () => {
     tubeGeom.dispose();
-    tubeMat.dispose();
     particleGeom.dispose();
+  }, [tubeGeom, particleGeom]);
+
+  useEffect(() => () => {
+    tubeMat.dispose();
     particleMat.dispose();
-  }, [tubeGeom, tubeMat, particleGeom, particleMat]);
+  }, [tubeMat, particleMat]);
 
   useFrame(({ clock }) => {
     if (!groupRef.current || !particlesRef.current) return;
@@ -1066,7 +1083,8 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
            Math.sin(x * 0.7 - t * 0.5) * Math.cos(z * 0.9 + t * 0.3);
   };
 
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
@@ -1160,9 +1178,11 @@ function Spirograph3D({ palette, seed }: { palette: Palette; seed: number }) {
     [curves]
   );
 
-  useEffect(() => () => {
-    curves.forEach(c => c.geometry.dispose());
-    materials.forEach(m => m.dispose());
+  useEffect(() => {
+    return () => {
+      curves.forEach(c => c.geometry.dispose());
+      materials.forEach(m => m.dispose());
+    };
   }, [curves, materials]);
 
   useFrame(({ clock }) => {
@@ -1207,7 +1227,8 @@ function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; s
 
   const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
 
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
@@ -1293,6 +1314,7 @@ function AizawaAttractor({ palette, seed }: { palette: Palette; seed: number }) 
     const t = clock.getElapsedTime();
     groupRef.current.rotation.y = t * 0.15;
     groupRef.current.rotation.x = Math.sin(t * 0.4) * 0.3;
+    // eslint-disable-next-line react-hooks/immutability
     material.opacity = 0.7 + Math.sin(t * 0.8) * 0.2;
   });
 
@@ -1303,12 +1325,12 @@ function AizawaAttractor({ palette, seed }: { palette: Palette; seed: number }) 
   );
 }
 
-function SceneAizawa({ palette, seed }: { palette: Palette; seed: number }) {
+function SceneAizawa({ palette }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.4} />
       <pointLight position={[2, 3, 3]} intensity={1.2} color={palette[0]} />
-      <AizawaAttractor palette={palette} seed={seed} />
+      <AizawaAttractor palette={palette} seed={0} />
       <StarField density={300} color={palette[2]} />
     </>
   );
@@ -1317,7 +1339,7 @@ function SceneAizawa({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 // Variant: Reaction-Diffusion Waves on a Torus
 // ---------------------------------------------------------------------------
-function ReactionDiffusionTorus({ palette, seed }: { palette: Palette; seed: number }) {
+function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const geom = useMemo(() => new THREE.TorusGeometry(1.2, 0.5, 64, 128), []);
   const mat = useMemo(
@@ -1336,7 +1358,10 @@ function ReactionDiffusionTorus({ palette, seed }: { palette: Palette; seed: num
     return new Float32Array(pos.array);
   }, [geom]);
 
-  useEffect(() => () => { geom.dispose(); mat.dispose(); }, [geom, mat]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => geom.dispose(), [geom]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
@@ -1368,13 +1393,13 @@ function ReactionDiffusionTorus({ palette, seed }: { palette: Palette; seed: num
   return <mesh ref={meshRef} geometry={geom} material={mat} />;
 }
 
-function SceneReactionDiffusion({ palette, seed }: { palette: Palette; seed: number }) {
+function SceneReactionDiffusion({ palette }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.5} />
       <directionalLight position={[3, 4, 2]} intensity={1.2} color={palette[2]} />
       <pointLight position={[-2, -2, 3]} intensity={0.8} color={palette[0]} />
-      <ReactionDiffusionTorus palette={palette} seed={seed} />
+      <ReactionDiffusionTorus palette={palette} seed={0} />
       <StarField density={280} color={palette[3]} />
     </>
   );
@@ -1406,11 +1431,11 @@ type VariantKey =
   | "reactiondiffusion";
 
 const scenes: Record<VariantKey, (opts: { palette: Palette; seed: number }) => JSX.Element> = {
-  orbits: ({ palette }) => <SceneOrbits palette={palette} />,
+  orbits: ({ palette, seed }) => <SceneOrbits palette={palette} seed={seed} />,
   lissajous: ({ palette, seed }) => <SceneLissajous palette={palette} seed={seed} />,
   wave: ({ palette, seed }) => <SceneWaveGrid palette={palette} seed={seed} />,
-  lorenz: ({ palette }) => <SceneLorenz palette={palette} />,
-  helix: ({ palette }) => <SceneHelix palette={palette} />,
+  lorenz: ({ palette, seed }) => <SceneLorenz palette={palette} seed={seed} />,
+  helix: ({ palette, seed }) => <SceneHelix palette={palette} seed={seed} />,
   torus: ({ palette, seed }) => <SceneTorus palette={palette} seed={seed} />,
   flock: ({ palette, seed }) => <SceneFlock palette={palette} seed={seed} />,
   clifford: ({ palette, seed }) => <SceneClifford palette={palette} seed={seed} />,

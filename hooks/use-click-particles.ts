@@ -95,43 +95,52 @@ export function useClickParticles({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const loop = () => {
+      const currentCanvas = canvasRef.current;
+      if (!currentCanvas) return;
+      const currentCtx = currentCanvas.getContext("2d");
+      if (!currentCtx) return;
 
-    const particles = particlesRef.current;
-    const aliveParticles: Particle[] = [];
+      currentCtx.clearRect(0, 0, currentCanvas.width, currentCanvas.height);
 
-    for (const p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.15; // gravity
-      p.life -= 1 / 60;
+      const particles = particlesRef.current;
+      const aliveParticles: Particle[] = [];
 
-      if (p.life > 0) {
-        aliveParticles.push(p);
-        const alpha = Math.max(0, p.life);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-        ctx.fillStyle = p.color.replace(")", `, ${alpha})`).replace("rgb", "rgba");
-        ctx.fill();
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15; // gravity
+        p.life -= 1 / 60;
+
+        if (p.life > 0) {
+          aliveParticles.push(p);
+          const alpha = Math.max(0, p.life);
+          currentCtx.beginPath();
+          currentCtx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+          currentCtx.fillStyle = p.color.replace(")", `, ${alpha})`).replace("rgb", "rgba");
+          currentCtx.fill();
+        }
       }
-    }
 
-    particlesRef.current = aliveParticles;
+      particlesRef.current = aliveParticles;
 
-    if (aliveParticles.length > 0) {
-      animationRef.current = requestAnimationFrame(animate);
-    } else {
-      // Clean up canvas and event listener when no particles
-      if (resizeHandlerRef.current) {
-        window.removeEventListener("resize", resizeHandlerRef.current);
-        resizeHandlerRef.current = null;
+      if (aliveParticles.length > 0) {
+        animationRef.current = requestAnimationFrame(loop);
+      } else {
+        // Clean up canvas and event listener when no particles
+        if (resizeHandlerRef.current) {
+          window.removeEventListener("resize", resizeHandlerRef.current);
+          resizeHandlerRef.current = null;
+        }
+        if (currentCanvas.parentNode) {
+          currentCanvas.parentNode.removeChild(currentCanvas);
+        }
+        canvasRef.current = null;
+        animationRef.current = null;
       }
-      if (canvas.parentNode) {
-        canvas.parentNode.removeChild(canvas);
-      }
-      canvasRef.current = null;
-      animationRef.current = null;
-    }
+    };
+    
+    loop();
   }, []);
 
   // Spawn particles at click position

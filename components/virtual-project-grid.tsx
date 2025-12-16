@@ -42,10 +42,16 @@ export default function VirtualProjectGrid({
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // 1. Handle initial client-side sizing (fixes hydration mismatch)
+  // 1. Handle mounting state
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
+  }, []);
+
+  // 2. Handle sizing and updates
+  useEffect(() => {
     const correctColumns = getColumnsPerRow();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setColumnsPerRow(correctColumns);
     
     // Adjust initial range based on actual screen size once mounted
@@ -58,7 +64,7 @@ export default function VirtualProjectGrid({
     const handleResize = () => setColumnsPerRow(getColumnsPerRow());
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [projects.length]);
+  }, [projects.length]); // Re-run if project count changes
 
 
   // 2. Handle infinite scroll logic

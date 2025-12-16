@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
@@ -82,7 +83,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <GoogleAnalytics gaId={gaId} />
+        <Suspense fallback={null}>
+          <GoogleAnalytics gaId={gaId} />
+        </Suspense>
         <ClientShell>{children}</ClientShell>
       </body>
     </html>
