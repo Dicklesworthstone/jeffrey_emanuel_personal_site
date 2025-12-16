@@ -62,15 +62,11 @@ export default function VirtualProjectGrid({
 
 
   // 2. Handle infinite scroll logic
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || !isMounted) return;
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-    // Use Intersection Observer to detect when to load more
-    const sentinel = document.createElement("div");
-    sentinel.style.height = "1px";
-    sentinel.setAttribute("data-sentinel", "true");
-    container.appendChild(sentinel);
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !isMounted) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -91,10 +87,6 @@ export default function VirtualProjectGrid({
 
     return () => {
       observer.disconnect();
-      // Safely remove sentinel even if container changed
-      if (sentinel.parentNode) {
-        sentinel.parentNode.removeChild(sentinel);
-      }
     };
   }, [columnsPerRow, projects.length, isMounted]);
 
@@ -110,6 +102,9 @@ export default function VirtualProjectGrid({
       {visibleProjects.map((project) => (
         <ProjectCard key={project.name} project={project} />
       ))}
+
+      {/* Sentinel for infinite scroll */}
+      <div ref={sentinelRef} style={{ height: "1px" }} />
 
       {/* Show loading skeletons while more items load */}
       {isLoading && (

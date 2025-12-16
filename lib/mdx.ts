@@ -80,5 +80,7 @@ export function getAllPosts() {
   }
 
   // sort posts by date in descending order
-  return posts.sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
+  return posts.sort((post1, post2) => {
+    return new Date(post2.date).getTime() - new Date(post1.date).getTime();
+  });
 }

@@ -27,6 +27,7 @@ function slugify(text: string): string {
  */
 export function extractHeadings(content: string): TocHeading[] {
   const headings: TocHeading[] = [];
+  const slugCounts = new Map<string, number>();
 
   // Match markdown headings (## and ###)
   // Avoid matching headings inside code blocks
@@ -42,21 +43,45 @@ export function extractHeadings(content: string): TocHeading[] {
 
     if (inCodeBlock) continue;
 
-    // Match h2 (##) and h3 (###) headings
-    const h2Match = line.match(/^##\s+(.+)$/);
-    const h3Match = line.match(/^###\s+(.+)$/);
+    // Match h2 (##) and h3 (###) headings, allowing for optional trailing hashes
+    const h2Match = line.match(/^##\s+(.*?)(?:\s+#+)?$/);
+    const h3Match = line.match(/^###\s+(.*?)(?:\s+#+)?$/);
 
     if (h2Match) {
       const text = h2Match[1].trim();
+      const baseSlug = slugify(text);
+      let slug = baseSlug;
+      
+      // Handle duplicates
+      if (slugCounts.has(baseSlug)) {
+        const count = slugCounts.get(baseSlug)! + 1;
+        slugCounts.set(baseSlug, count);
+        slug = `${baseSlug}-${count - 1}`;
+      } else {
+        slugCounts.set(baseSlug, 1);
+      }
+
       headings.push({
-        id: slugify(text),
+        id: slug,
         text,
         level: 2,
       });
     } else if (h3Match) {
       const text = h3Match[1].trim();
+      const baseSlug = slugify(text);
+      let slug = baseSlug;
+      
+      // Handle duplicates
+      if (slugCounts.has(baseSlug)) {
+        const count = slugCounts.get(baseSlug)! + 1;
+        slugCounts.set(baseSlug, count);
+        slug = `${baseSlug}-${count - 1}`;
+      } else {
+        slugCounts.set(baseSlug, 1);
+      }
+
       headings.push({
-        id: slugify(text),
+        id: slug,
         text,
         level: 3,
       });

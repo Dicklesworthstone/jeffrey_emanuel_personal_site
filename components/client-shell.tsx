@@ -30,6 +30,14 @@ export default function ClientShell({ children }: { children: React.ReactNode })
     setIsShortcutsModalOpen(true);
   }, []);
 
+  const closeCommandPalette = useCallback(() => {
+    setIsCommandPaletteOpen(false);
+  }, []);
+
+  const closeShortcutsModal = useCallback(() => {
+    setIsShortcutsModalOpen(false);
+  }, []);
+
   useKeyboardShortcuts({
     onOpenCommandPalette: openCommandPalette,
     onOpenHelp: openShortcutsModal,
@@ -67,11 +75,11 @@ export default function ClientShell({ children }: { children: React.ReactNode })
         {/* Global modals */}
         <CommandPalette
           isOpen={isCommandPaletteOpen}
-          onClose={() => setIsCommandPaletteOpen(false)}
+          onClose={closeCommandPalette}
         />
         <KeyboardShortcutsModal
           isOpen={isShortcutsModalOpen}
-          onClose={() => setIsShortcutsModalOpen(false)}
+          onClose={closeShortcutsModal}
         />
       </div>
     </ErrorBoundary>

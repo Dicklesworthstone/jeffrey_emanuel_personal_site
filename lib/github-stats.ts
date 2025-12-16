@@ -11,11 +11,6 @@ export interface GitHubStats {
 }
 
 const GITHUB_USERNAME = "Dicklesworthstone";
-const CACHE_DURATION = 3600000; // 1 hour in milliseconds
-
-// In-memory cache
-let cachedStats: GitHubStats | null = null;
-let lastFetchTime = 0;
 
 /**
  * Fetch total star count and other stats from GitHub API.
@@ -24,13 +19,8 @@ let lastFetchTime = 0;
 export async function fetchGitHubStats(): Promise<GitHubStats> {
   const now = Date.now();
 
-  // Return cached data if still valid
-  if (cachedStats && now - lastFetchTime < CACHE_DURATION) {
-    return cachedStats;
-  }
-
   try {
-    // Fetch user data for follower count
+    // Fetch user data for follower count and repo count
     const userResponse = await fetch(
       `https://api.github.com/users/${GITHUB_USERNAME}`,
       {
@@ -50,68 +40,51 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
     }
 
     const userData = await userResponse.json();
+    const publicRepos = userData.public_repos || 0;
+    const pages = Math.ceil(publicRepos / 100);
 
-    // Fetch repositories (paginated, max 100 per page)
+    // Fetch repositories in parallel
+    const pagePromises = [];
+    for (let i = 1; i <= pages; i++) {
+      pagePromises.push(
+        fetch(
+          `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&page=${i}&sort=updated`,
+          {
+            headers: {
+              Accept: "application/vnd.github.v3+json",
+              ...(process.env.GITHUB_TOKEN && {
+                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+              }),
+            },
+            next: { revalidate: 3600 },
+          }
+        ).then((res) => {
+          if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+          return res.json();
+        })
+      );
+    }
+
+    const results = await Promise.all(pagePromises);
+    
     let totalStars = 0;
     let repoCount = 0;
-    let page = 1;
-    let hasMore = true;
 
-    while (hasMore) {
-      const reposResponse = await fetch(
-        `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&page=${page}&sort=updated`,
-        {
-          headers: {
-            Accept: "application/vnd.github.v3+json",
-            ...(process.env.GITHUB_TOKEN && {
-              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-            }),
-          },
-          next: { revalidate: 3600 },
-        }
-      );
-
-      if (!reposResponse.ok) {
-        throw new Error(`GitHub API error: ${reposResponse.status}`);
-      }
-
-      const repos = await reposResponse.json();
-
-      if (repos.length === 0) {
-        hasMore = false;
-      } else {
-        for (const repo of repos) {
-          totalStars += repo.stargazers_count || 0;
-          repoCount++;
-        }
-        page++;
-
-        // Safety limit to prevent infinite loops
-        if (page > 10) {
-          hasMore = false;
-        }
+    for (const repos of results) {
+      for (const repo of repos) {
+        totalStars += repo.stargazers_count || 0;
+        repoCount++;
       }
     }
 
-    const stats: GitHubStats = {
+    return {
       totalStars,
       repoCount,
       followers: userData.followers || 0,
       fetchedAt: now,
     };
-
-    // Update cache
-    cachedStats = stats;
-    lastFetchTime = now;
-
-    return stats;
   } catch (error) {
     console.error("Failed to fetch GitHub stats:", error);
-
-    // Return fallback data if available, otherwise return defaults
-    if (cachedStats) {
-      return cachedStats;
-    }
 
     return {
       totalStars: 10000, // Fallback from static content

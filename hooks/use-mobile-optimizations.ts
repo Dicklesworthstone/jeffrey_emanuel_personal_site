@@ -17,25 +17,6 @@ export function useMobileOptimizations() {
     // NOTE: Removed preventBounce touchmove handler as it was blocking scroll
     // CSS overscroll-behavior-y: none on body already handles iOS bounce
 
-    // Prevent accidental zooms on double-tap (iOS) - only on non-input elements
-    let lastTouchEnd = 0;
-    const preventDoubleTapZoom = (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      // Allow double-tap on inputs/textareas for text selection
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
-        return;
-      }
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-      }
-      lastTouchEnd = now;
-    };
-
-    document.addEventListener("touchend", preventDoubleTapZoom, {
-      passive: false,
-    });
-
     // Add orientation change listener for better UX
     const handleOrientationChange = () => {
       // Trigger resize to recalculate viewport and fix any layout issues
@@ -49,7 +30,6 @@ export function useMobileOptimizations() {
 
     // Cleanup
     return () => {
-      document.removeEventListener("touchend", preventDoubleTapZoom);
       window.removeEventListener("orientationchange", handleOrientationChange);
     };
   }, []);

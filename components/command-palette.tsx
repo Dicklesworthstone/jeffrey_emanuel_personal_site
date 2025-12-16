@@ -224,7 +224,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         case "ArrowUp":
           e.preventDefault();
           setSelectedIndex((i) =>
-            i > 0 ? i - 1 : filteredCommands.length - 1
+            i > 0 ? i - 1 : Math.max(0, filteredCommands.length - 1)
           );
           break;
         case "Enter":

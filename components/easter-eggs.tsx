@@ -14,31 +14,37 @@ import { useKonamiCode } from "@/hooks/use-konami";
 export default function EasterEggs() {
   const [showCelebration, setShowCelebration] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasLoggedRef = useRef(false);
 
   // Console message for developers
   useEffect(() => {
-    console.log(
-      `%c
-    ╔═══════════════════════════════════════════╗
-    ║                                           ║
-    ║   👋 Hey, fellow developer!               ║
-    ║                                           ║
-    ║   Thanks for inspecting the code.         ║
-    ║   This site is built with:                ║
-    ║                                           ║
-    ║   • Next.js 16 + React 19                 ║
-    ║   • Tailwind CSS v4                       ║
-    ║   • Three.js for 3D visualizations        ║
-    ║   • Framer Motion for animations          ║
-    ║                                           ║
-    ║   Try the Konami code! ↑↑↓↓←→←→BA        ║
-    ║                                           ║
-    ║   github.com/Dicklesworthstone            ║
-    ║                                           ║
-    ╚═══════════════════════════════════════════╝
-`,
-      "color: #38bdf8; font-family: monospace; font-size: 12px;"
-    );
+    if (hasLoggedRef.current) return;
+    hasLoggedRef.current = true;
+
+    // Use an array join to avoid template literal issues with special characters
+    const message = [
+      "",
+      "    +-------------------------------------------+",
+      "    |                                           |",
+      "    |   Hey, fellow developer!                  |",
+      "    |                                           |",
+      "    |   Thanks for inspecting the code.         |",
+      "    |   This site is built with:                |",
+      "    |                                           |",
+      "    |   - Next.js 16 + React 19                 |",
+      "    |   - Tailwind CSS v4                       |",
+      "    |   - Three.js for 3D visualizations        |",
+      "    |   - Framer Motion for animations          |",
+      "    |                                           |",
+      "    |   Try the Konami code!                    |",
+      "    |                                           |",
+      "    |   github.com/Dicklesworthstone            |",
+      "    |                                           |",
+      "    +-------------------------------------------+",
+      "",
+    ].join("\n");
+
+    console.log("%c" + message, "color: #38bdf8; font-family: monospace; font-size: 12px;");
   }, []);
 
   // Cleanup timeout on unmount

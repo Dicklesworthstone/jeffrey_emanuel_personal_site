@@ -48,9 +48,23 @@ export default function ArticleProgress() {
     window.addEventListener("scroll", calculateProgress, { passive: true });
     window.addEventListener("resize", calculateProgress, { passive: true });
 
+    // Use ResizeObserver to detect layout changes (e.g. images loading)
+    const article = document.querySelector("article");
+    let resizeObserver: ResizeObserver | null = null;
+    
+    if (article) {
+      resizeObserver = new ResizeObserver(() => {
+        calculateProgress();
+      });
+      resizeObserver.observe(article);
+    }
+
     return () => {
       window.removeEventListener("scroll", calculateProgress);
       window.removeEventListener("resize", calculateProgress);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
     };
   }, [scaleX]);
 

@@ -53,8 +53,15 @@ function AnimatedNumber({
   const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
   useEffect(() => {
-    // Skip animation if reduced motion or already animated
-    if (prefersReducedMotion || !isVisible || hasAnimated) return;
+    // Immediately show final value if reduced motion is preferred
+    if (prefersReducedMotion) {
+      setCount(end);
+      setHasAnimated(true);
+      return;
+    }
+
+    // Skip animation if already animated or not visible
+    if (!isVisible || hasAnimated) return;
 
     // Animation function defined inside effect to avoid stale closures
     const animate = (timestamp: number) => {

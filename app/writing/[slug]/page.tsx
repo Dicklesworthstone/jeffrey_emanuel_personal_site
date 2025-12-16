@@ -7,12 +7,40 @@ import { calculateReadingTime } from "@/lib/reading-time";
 import { extractHeadings } from "@/lib/extract-headings";
 import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
   return posts.map((post) => ({
     slug: post.slug,
   }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const post = getPostBySlug(slug);
+    return {
+      title: post.title,
+      description: post.excerpt,
+      openGraph: {
+        title: post.title,
+        description: post.excerpt,
+        type: "article",
+        publishedTime: post.date,
+        authors: ["Jeffrey Emanuel"],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description: post.excerpt,
+      },
+    };
+  } catch {
+    return {
+      title: "Article Not Found",
+    };
+  }
 }
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Briefcase, Workflow } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
@@ -11,7 +11,7 @@ import StatsGrid from "@/components/stats-grid";
 import ErrorBoundary from "@/components/error-boundary";
 import ThreeSceneLoading from "@/components/three-scene-loading";
 import ThreeSceneFallback from "@/components/three-scene-fallback";
-import { heroContent, heroStats, siteConfig } from "@/lib/content";
+import { heroContent, heroStats, siteConfig, type Stat } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useClickParticles } from "@/hooks/use-click-particles";
 import { cn } from "@/lib/utils";
@@ -22,12 +22,29 @@ const ThreeScene = dynamic(() => import("@/components/three-scene"), {
   loading: () => <ThreeSceneLoading />,
 });
 
-export default function Hero() {
+interface HeroProps {
+  stats?: Stat[];
+}
+
+export default function Hero({ stats = heroStats }: HeroProps) {
   const { mediumTap } = useHapticFeedback();
   const spawnParticles = useClickParticles({
     colors: ["#8b5cf6", "#d946ef", "#a855f7", "#38bdf8", "#22c55e"],
     count: 16,
   });
+
+  const [shouldRenderScene, setShouldRenderScene] = useState(false);
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      // Match Tailwind 'lg' breakpoint (1024px)
+      setShouldRenderScene(window.matchMedia("(min-width: 1024px)").matches);
+    };
+    
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
 
   return (
     <section
@@ -152,12 +169,16 @@ export default function Hero() {
              <ThreeSceneFallback />
            </div>
 
-           {/* Desktop: Full Three.js WebGL scene */}
+           {/* Desktop: Full Three.js WebGL scene - Only rendered if screen is large enough */}
            <div className="pointer-events-auto hidden h-full w-full lg:block">
              <ErrorBoundary fallback={<ThreeSceneFallback />}>
-                <Suspense fallback={<ThreeSceneLoading />}>
-                  <ThreeScene />
-                </Suspense>
+                {shouldRenderScene ? (
+                  <Suspense fallback={<ThreeSceneLoading />}>
+                    <ThreeScene />
+                  </Suspense>
+                ) : (
+                  <ThreeSceneFallback />
+                )}
              </ErrorBoundary>
            </div>
         </div>

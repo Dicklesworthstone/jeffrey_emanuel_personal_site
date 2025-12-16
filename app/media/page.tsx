@@ -45,11 +45,22 @@ export default function MediaPage() {
         title="Press, podcasts, and long-form conversations"
         kicker="Some of the public coverage around the Nvidia essay, Lumera, and how AI is reshaping markets."
       >
-        <div className="grid gap-5 md:grid-cols-2">
-          {mediaItems.map((item) => (
-            <MediaRow key={item.title} item={item} />
-          ))}
-        </div>
+        {mediaItems.length > 0 ? (
+          <div className="grid gap-5 md:grid-cols-2">
+            {mediaItems.map((item) => (
+              <MediaRow key={item.title} item={item} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/5 py-12 text-center">
+            <p className="text-sm font-medium text-slate-400">
+              No media appearances to show yet.
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Check back soon for updates.
+            </p>
+          </div>
+        )}
       </SectionShell>
     </>
   );

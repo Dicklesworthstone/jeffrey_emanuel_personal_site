@@ -40,10 +40,8 @@ export function useIntersectionObserver({
       ([entry]) => {
         const isNowIntersecting = entry.isIntersecting;
 
-        // Only update state after initial check or if becoming visible
-        if (hasInitializedRef.current || isNowIntersecting) {
-          setIsIntersecting(isNowIntersecting);
-        }
+        // Always update state to reflect reality
+        setIsIntersecting(isNowIntersecting);
         hasInitializedRef.current = true;
 
         if (isNowIntersecting && triggerOnce) {

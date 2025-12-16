@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -92,7 +92,7 @@ function FlowingParticle({
 }
 
 // Connection line with optional flowing particles
-function ConnectionLine({
+const ConnectionLine = React.memo(function ConnectionLine({
   fromPos,
   toPos,
   isHighlighted,
@@ -190,10 +190,10 @@ function ConnectionLine({
       )}
     </g>
   );
-}
+});
 
 // Tool node component
-function ToolNode({
+const ToolNode = React.memo(function ToolNode({
   tool,
   position,
   index,
@@ -297,7 +297,7 @@ function ToolNode({
       </motion.button>
     </motion.div>
   );
-}
+});
 
 // Center hub with pulsing animation
 function CenterHub({ reducedMotion }: { reducedMotion: boolean }) {
