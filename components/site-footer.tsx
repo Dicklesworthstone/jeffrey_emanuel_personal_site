@@ -3,7 +3,11 @@ import { siteConfig } from "@/lib/content";
 
 export default function SiteFooter() {
   return (
-    <footer className="relative mt-32 border-t border-white/5 bg-slate-950/30 backdrop-blur-lg">
+    <footer
+      className="relative mt-32 border-t border-white/5 bg-slate-950/30 backdrop-blur-lg"
+      role="contentinfo"
+      aria-label="Site footer"
+    >
       <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-16">
         <div className="max-w-md space-y-2">
           <p className="text-lg font-bold tracking-tight text-slate-100">

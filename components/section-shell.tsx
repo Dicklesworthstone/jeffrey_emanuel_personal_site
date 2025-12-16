@@ -26,13 +26,17 @@ export default function SectionShell({
 }: Props) {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
 
+  // Generate a unique heading ID for aria-labelledby
+  const headingId = id ? `${id}-heading` : undefined;
+
   return (
     <section
       ref={ref as React.RefObject<HTMLElement>}
       data-section
       id={id}
+      aria-labelledby={headingId}
       className={cn(
-        "relative mx-auto max-w-7xl px-4 py-24 sm:px-6 md:py-32 lg:px-8 lg:py-40",
+        "relative mx-auto max-w-7xl px-4 py-28 sm:px-6 md:py-36 lg:px-8 lg:py-44",
         className
       )}
     >
@@ -51,7 +55,7 @@ export default function SectionShell({
               </p>
             </div>
           )}
-          
+
           <div className="flex flex-col gap-6">
             <div className="flex items-start gap-5 md:items-center">
               {Icon && (
@@ -59,7 +63,10 @@ export default function SectionShell({
                   <Icon className="h-5 w-5" />
                 </div>
               )}
-              <h2 className="text-balance-pro text-3xl font-bold tracking-tighter text-white sm:text-4xl md:text-5xl lg:text-6xl">
+              <h2
+                id={headingId}
+                className="text-balance-pro text-3xl font-bold tracking-tighter text-white sm:text-4xl md:text-5xl lg:text-6xl"
+              >
                 {title}
               </h2>
             </div>

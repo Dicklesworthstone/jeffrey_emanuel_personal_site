@@ -39,13 +39,14 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header 
+      <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300",
-          scrolled 
-            ? "border-slate-950/50 bg-slate-950/80 backdrop-blur-xl py-3" 
+          scrolled
+            ? "border-slate-950/50 bg-slate-950/80 backdrop-blur-xl py-3"
             : "border-transparent bg-transparent py-5"
         )}
+        role="banner"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link 
@@ -70,7 +71,10 @@ export default function SiteHeader() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden items-center gap-4 md:flex lg:gap-8">
+          <nav
+            className="hidden items-center gap-4 md:flex lg:gap-8"
+            aria-label="Main navigation"
+          >
             {navItems.map((item) => {
               const active = pathname === item.href;
               return (
