@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   id?: string;
   icon?: LucideIcon;
+  iconNode?: React.ReactNode;
   eyebrow?: string;
   title: string;
   kicker?: string;
@@ -18,6 +19,7 @@ type Props = {
 export default function SectionShell({
   id,
   icon: Icon,
+  iconNode,
   eyebrow,
   title,
   kicker,
@@ -58,9 +60,9 @@ export default function SectionShell({
 
           <div className="flex flex-col gap-6">
             <div className="flex items-start gap-5 md:items-center">
-              {Icon && (
+              {(Icon || iconNode) && (
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/50 text-sky-400 shadow-lg shadow-sky-900/10 backdrop-blur-sm">
-                  <Icon className="h-5 w-5" />
+                  {iconNode || (Icon && <Icon className="h-5 w-5" />)}
                 </div>
               )}
               <h2

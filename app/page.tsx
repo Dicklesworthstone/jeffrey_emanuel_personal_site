@@ -1,5 +1,3 @@
-"use client";
-
 import Hero from "@/components/hero";
 import Link from "next/link";
 import SectionShell from "@/components/section-shell";
@@ -7,24 +5,33 @@ import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
 import AnimatedGrid from "@/components/animated-grid";
 import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight } from "lucide-react";
-import { careerTimeline, projects, threads, writingHighlights, flywheelTools } from "@/lib/content";
+import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
 import { cn } from "@/lib/utils";
-import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
+import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
 import { motion } from "framer-motion";
 
-export default function HomePage() {
+export default async function HomePage() {
   const featuredProjects = projects;
   const featuredWriting = writingHighlights;
   const featuredThreads = threads;
-  const { lightTap } = useHapticFeedback();
+  
+  // Fetch live stats
+  const githubStats = await fetchGitHubStats();
+  const liveStats = heroStats.map((stat) => {
+    if (stat.label === "GitHub Stars") {
+      return { ...stat, value: formatStarsDisplay(githubStats.totalStars) };
+    }
+    return stat;
+  });
 
   return (
     <>
-      <Hero />
+      <Hero stats={liveStats} />
 
       <SectionShell
         id="snapshot"
-        icon={Cpu}
+        iconNode={<Cpu className="h-5 w-5" />}
         eyebrow="Snapshot"
         title="Where I sit in the AI stack"
         kicker="Three overlapping threads: an ecosystem of agent tools I use to run 10+ agents simultaneously, research that moves markets, and protocol infrastructure."
@@ -103,10 +110,9 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.08),transparent_70%)]" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Link
+          <HapticLink
             href="/projects"
             className="group block"
-            onTouchStart={lightTap}
           >
             <div className="relative rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-black/40 to-black/20 p-8 sm:p-12 backdrop-blur-sm transition-all duration-300 hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10">
               {/* Decorative elements */}
@@ -139,9 +145,9 @@ export default function HomePage() {
                 {/* Mini flywheel preview */}
                 <div className="mt-8 lg:mt-0 flex flex-col items-center">
                   <div className="relative flex h-32 w-32 sm:h-40 sm:w-40 items-center justify-center">
-                    {/* Animated dashed ring */}
+                    {/* Animated dashed ring - Use CSS animation instead of Framer Motion for Server Component */}
                     <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100">
-                      <motion.circle
+                      <circle
                         cx="50"
                         cy="50"
                         r="48"
@@ -149,9 +155,7 @@ export default function HomePage() {
                         stroke="rgba(139, 92, 246, 0.3)"
                         strokeWidth="1"
                         strokeDasharray="8 4"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                        style={{ transformOrigin: "center" }}
+                        className="animate-[spin_20s_linear_infinite] origin-center"
                       />
                     </svg>
                     {/* Tool dots - positioned using percentages for responsive scaling */}
@@ -162,20 +166,18 @@ export default function HomePage() {
                       const xPercent = Math.cos(angle) * radiusPercent;
                       const yPercent = Math.sin(angle) * radiusPercent;
                       return (
-                        <motion.div
+                        <div
                           key={tool.id}
                           className={cn(
-                            "absolute h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-gradient-to-br shadow-lg",
+                            "absolute h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-gradient-to-br shadow-lg animate-[pulse_3s_ease-in-out_infinite]",
                             tool.color
                           )}
                           style={{
                             left: `calc(50% + ${xPercent}%)`,
                             top: `calc(50% + ${yPercent}%)`,
                             transform: "translate(-50%, -50%)",
+                            animationDelay: `${i * 0.1}s`
                           }}
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: i * 0.1 }}
                         />
                       );
                     })}
@@ -192,13 +194,13 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </Link>
+          </HapticLink>
         </div>
       </section>
 
       <SectionShell
         id="projects"
-        icon={GitBranch}
+        iconNode={<GitBranch className="h-5 w-5" />}
         eyebrow="Projects"
         title="Products and open source"
         kicker="A comprehensive collection of the tools, protocols, and experiments I'm building."
@@ -217,7 +219,7 @@ export default function HomePage() {
 
       <SectionShell
         id="writing"
-        icon={PenSquare}
+        iconNode={<PenSquare className="h-5 w-5" />}
         eyebrow="Writing"
         title="Essays, memos, and research notes"
         kicker="A mix of public writing and GitHub-native research artifacts."
@@ -227,10 +229,9 @@ export default function HomePage() {
           staggerDelay={0.1}
         >
           {featuredWriting.map((item) => (
-            <Link
+            <HapticLink
               key={item.title}
               href={item.href}
-              onTouchStart={lightTap}
               className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
             >
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -251,14 +252,14 @@ export default function HomePage() {
                 Read the essay
                 <span className="text-lg leading-none">→</span>
               </div>
-            </Link>
+            </HapticLink>
           ))}
         </AnimatedGrid>
       </SectionShell>
 
       <SectionShell
         id="timeline"
-        icon={Cpu}
+        iconNode={<Cpu className="h-5 w-5" />}
         eyebrow="Background"
         title="From hedge funds to agents and chains"
         kicker="A condensed view of the path that got me here."
@@ -269,7 +270,7 @@ export default function HomePage() {
       {featuredThreads.length > 0 && (
         <SectionShell
           id="threads"
-          icon={PenSquare}
+          iconNode={<PenSquare className="h-5 w-5" />}
           eyebrow="Threads"
           title="Selected X posts"
           kicker="I write a lot more informally on X. Here are a few good entry points."
@@ -279,12 +280,11 @@ export default function HomePage() {
             staggerDelay={0.1}
           >
             {featuredThreads.map((thread) => (
-              <a
+              <HapticExternalLink
                 key={thread.href}
                 href={thread.href}
                 target="_blank"
                 rel="noreferrer noopener"
-                onTouchStart={lightTap}
                 className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
               >
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -300,7 +300,7 @@ export default function HomePage() {
                   Open thread
                   <span className="text-lg leading-none">→</span>
                 </div>
-              </a>
+              </HapticExternalLink>
             ))}
           </AnimatedGrid>
         </SectionShell>
