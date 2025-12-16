@@ -87,7 +87,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       });
     });
 
-    // Projects (top 10 by name)
+    // Projects (top 15)
     projects.slice(0, 15).forEach((project) => {
       cmds.push({
         id: `project-${project.name}`,

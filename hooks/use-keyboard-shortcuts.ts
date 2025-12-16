@@ -3,15 +3,6 @@
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-export interface KeyboardShortcut {
-  key: string;
-  ctrl?: boolean;
-  meta?: boolean;
-  shift?: boolean;
-  description: string;
-  action: () => void;
-}
-
 interface UseKeyboardShortcutsOptions {
   onOpenCommandPalette?: () => void;
   onOpenHelp?: () => void;

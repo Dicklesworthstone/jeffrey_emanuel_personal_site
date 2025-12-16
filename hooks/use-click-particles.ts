@@ -45,6 +45,8 @@ export function useClickParticles({
   const animationRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
 
+  const resizeHandlerRef = useRef<(() => void) | null>(null);
+
   // Get or create the canvas element
   const getCanvas = useCallback(() => {
     if (canvasRef.current) return canvasRef.current;
@@ -79,6 +81,7 @@ export function useClickParticles({
         canvasRef.current.height = window.innerHeight;
       }
     };
+    resizeHandlerRef.current = handleResize;
     window.addEventListener("resize", handleResize);
 
     return canvas;
@@ -118,11 +121,16 @@ export function useClickParticles({
     if (aliveParticles.length > 0) {
       animationRef.current = requestAnimationFrame(animate);
     } else {
-      // Clean up canvas when no particles
+      // Clean up canvas and event listener when no particles
+      if (resizeHandlerRef.current) {
+        window.removeEventListener("resize", resizeHandlerRef.current);
+        resizeHandlerRef.current = null;
+      }
       if (canvas.parentNode) {
         canvas.parentNode.removeChild(canvas);
       }
       canvasRef.current = null;
+      animationRef.current = null;
     }
   }, []);
 
