@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0",
+  "baseline_date": "2025-12-16T00:02:00.000Z",
+  "environment": {
+    "node_version": "v24.12.0",
+    "next_version": "16.0.10",
+    "build_mode": "production"
+  },
+  "pages": {
+    "home": {
+      "lighthouse_score": 71,
+      "metrics": {
+        "first_contentful_paint_ms": 1208,
+        "largest_contentful_paint_ms": 6627,
+        "total_blocking_time_ms": 238,
+        "cumulative_layout_shift": 0,
+        "speed_index_ms": 3958
+      },
+      "notes": "LCP is high (6.6s) due to hero 3D visualization. TBT of 238ms indicates JavaScript overhead."
+    },
+    "projects": {
+      "lighthouse_score": 91,
+      "metrics": {
+        "first_contentful_paint_ms": 1205,
+        "largest_contentful_paint_ms": 3506,
+        "total_blocking_time_ms": 38,
+        "cumulative_layout_shift": 0,
+        "speed_index_ms": 1375
+      },
+      "notes": "Good performance. CLS of 0 indicates no layout shifts."
+    }
+  },
+  "bundle_analysis": {
+    "largest_chunks_kb": {
+      "d57a2a36398234dd.js": 874,
+      "8e6be85fd3485d8b.js": 209,
+      "f16ded47a1d63df5.js": 147,
+      "a6dad97d9634a72d.js": 110,
+      "8bc65d9f8514509f.js": 89
+    },
+    "total_js_estimate_kb": 1750,
+    "notes": "874KB chunk likely contains Three.js. Should verify code splitting is working correctly."
+  },
+  "targets": {
+    "lighthouse_score": ">= 90",
+    "lcp_ms": "<= 2500",
+    "fcp_ms": "<= 1800",
+    "tbt_ms": "<= 200",
+    "cls": "<= 0.1"
+  },
+  "improvement_areas": [
+    "Home page LCP (6.6s) exceeds target (2.5s) - likely due to 3D visualization",
+    "Home page TBT (238ms) slightly exceeds target (200ms)",
+    "Large 874KB chunk should be investigated for code splitting",
+    "Consider mobile 3D fallback to improve mobile LCP"
+  ]
+}
