@@ -22,29 +22,31 @@ const KONAMI_CODE = [
  */
 export function useKonamiCode(callback: () => void): void {
   const inputRef = useRef<string[]>([]);
+  const callbackRef = useRef(callback);
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      // Add the key to our input array
-      inputRef.current.push(event.code);
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
-      // Keep only the last N keys (where N is the length of the Konami code)
-      if (inputRef.current.length > KONAMI_CODE.length) {
-        inputRef.current.shift();
-      }
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Add the key to our input array
+    inputRef.current.push(event.code);
 
-      // Check if the input matches the Konami code
-      if (
-        inputRef.current.length === KONAMI_CODE.length &&
-        inputRef.current.every((key, index) => key === KONAMI_CODE[index])
-      ) {
-        callback();
-        // Reset the input
-        inputRef.current = [];
-      }
-    },
-    [callback]
-  );
+    // Keep only the last N keys (where N is the length of the Konami code)
+    if (inputRef.current.length > KONAMI_CODE.length) {
+      inputRef.current.shift();
+    }
+
+    // Check if the input matches the Konami code
+    if (
+      inputRef.current.length === KONAMI_CODE.length &&
+      inputRef.current.every((key, index) => key === KONAMI_CODE[index])
+    ) {
+      callbackRef.current();
+      // Reset the input
+      inputRef.current = [];
+    }
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);

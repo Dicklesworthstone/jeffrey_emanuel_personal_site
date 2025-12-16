@@ -2,11 +2,23 @@
 
 import SectionShell from "@/components/section-shell";
 import { MediaItem, mediaItems } from "@/lib/content";
-import { Newspaper, Podcast } from "lucide-react";
+import { Newspaper, Podcast, PenLine, User } from "lucide-react";
+
+function getIcon(kind: MediaItem["kind"]) {
+  switch (kind) {
+    case "Podcast":
+      return Podcast;
+    case "Blog":
+      return PenLine;
+    case "Profile":
+      return User;
+    default:
+      return Newspaper;
+  }
+}
 
 function MediaRow({ item }: { item: MediaItem }) {
-  const isAudio = item.kind === "Podcast";
-  const Icon = isAudio ? Podcast : Newspaper;
+  const Icon = getIcon(item.kind);
   return (
     <a
       href={item.href}
@@ -35,7 +47,32 @@ function MediaRow({ item }: { item: MediaItem }) {
   );
 }
 
+function MediaSection({
+  title,
+  items,
+}: {
+  title: string;
+  items: MediaItem[];
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="mb-10">
+      <h2 className="mb-5 text-lg font-semibold text-slate-200">{title}</h2>
+      <div className="grid gap-5 md:grid-cols-2">
+        {items.map((item) => (
+          <MediaRow key={item.title} item={item} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function MediaPage() {
+  const podcasts = mediaItems.filter((item) => item.kind === "Podcast");
+  const articles = mediaItems.filter((item) => item.kind === "Article");
+  const blogs = mediaItems.filter((item) => item.kind === "Blog");
+  const profiles = mediaItems.filter((item) => item.kind === "Profile");
+
   return (
     <>
       <SectionShell
@@ -43,14 +80,15 @@ export default function MediaPage() {
         icon={Newspaper}
         eyebrow="Media"
         title="Press, podcasts, and long-form conversations"
-        kicker="Some of the public coverage around the Nvidia essay, Lumera, and how AI is reshaping markets."
+        kicker="Coverage of the Nvidia essay that contributed to a $600B single-day market cap drop, my agentic coding tools, Lumera Network, and how AI is reshaping markets."
       >
         {mediaItems.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2">
-            {mediaItems.map((item) => (
-              <MediaRow key={item.title} item={item} />
-            ))}
-          </div>
+          <>
+            <MediaSection title="Podcasts" items={podcasts} />
+            <MediaSection title="News Articles" items={articles} />
+            <MediaSection title="Tech Blogs" items={blogs} />
+            <MediaSection title="Profiles" items={profiles} />
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/5 py-12 text-center">
             <p className="text-sm font-medium text-slate-400">

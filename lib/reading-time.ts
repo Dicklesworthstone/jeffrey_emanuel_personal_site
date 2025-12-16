@@ -26,10 +26,6 @@ interface ReadingTimeResult {
 export function calculateReadingTime(content: string): ReadingTimeResult {
   // Strip markdown/HTML tags
   const plainText = content
-    // Remove code blocks
-    .replace(/```[\s\S]*?```/g, "")
-    // Remove inline code
-    .replace(/`[^`]*`/g, "")
     // Remove HTML tags
     .replace(/<[^>]*>/g, "")
     // Remove markdown images BEFORE links (images are ![alt](url), links are [text](url))

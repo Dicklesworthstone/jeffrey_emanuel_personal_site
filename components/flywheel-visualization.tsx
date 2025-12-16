@@ -426,7 +426,7 @@ const ToolDetailPanel = React.memo(function ToolDetailPanel({
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white">{targetTool.shortName}</p>
                     <p className="text-xs text-slate-400 line-clamp-1">
-                      {tool.connectionDescriptions[targetId]}
+                      {tool.connectionDescriptions[targetId] || "Integration"}
                     </p>
                   </div>
                 </div>
@@ -582,7 +582,7 @@ const MobileBottomSheet = React.memo(function MobileBottomSheet({
                               {targetTool.shortName}
                             </p>
                             <p className="text-xs text-slate-400">
-                              {tool.connectionDescriptions[targetId]}
+                              {tool.connectionDescriptions[targetId] || "Integration"}
                             </p>
                           </div>
                         </div>

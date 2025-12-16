@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useSpring, useReducedMotion } from "framer-motion";
+import { useEffect } from "react";
+import { motion, useSpring, useReducedMotion, useMotionValue } from "framer-motion";
 
 /**
  * Reading progress indicator that shows scroll progress through an article.
  * Displays as a thin bar at the top of the viewport.
  */
 export default function ArticleProgress() {
-  const [progress, setProgress] = useState(0);
-
-  // Use spring for smooth animation
-  const scaleX = useSpring(0, { stiffness: 100, damping: 30 });
+  const progress = useMotionValue(0);
+  // Use spring for smooth animation derived from the motion value
+  const scaleX = useSpring(progress, { stiffness: 100, damping: 30 });
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
+    let ticking = false;
+
     const calculateProgress = () => {
       const article = document.querySelector("article");
       if (!article) return;
@@ -29,24 +31,32 @@ export default function ArticleProgress() {
       const scrollRange = end - start;
 
       if (scrollRange <= 0) {
-        setProgress(100);
-        scaleX.set(1);
+        progress.set(1);
         return;
       }
 
       const currentProgress = Math.min(
-        100,
-        Math.max(0, ((scrollY - start) / scrollRange) * 100)
+        1,
+        Math.max(0, (scrollY - start) / scrollRange)
       );
 
-      setProgress(currentProgress);
-      scaleX.set(currentProgress / 100);
+      progress.set(currentProgress);
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          calculateProgress();
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     // Calculate on mount and scroll
     calculateProgress();
-    window.addEventListener("scroll", calculateProgress, { passive: true });
-    window.addEventListener("resize", calculateProgress, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
 
     // Use ResizeObserver to detect layout changes (e.g. images loading)
     const article = document.querySelector("article");
@@ -54,28 +64,25 @@ export default function ArticleProgress() {
     
     if (article) {
       resizeObserver = new ResizeObserver(() => {
-        calculateProgress();
+        onScroll();
       });
       resizeObserver.observe(article);
     }
 
     return () => {
-      window.removeEventListener("scroll", calculateProgress);
-      window.removeEventListener("resize", calculateProgress);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
     };
-  }, [scaleX]);
-
-  // Check for reduced motion preference (SSR-safe via Framer Motion)
-  const prefersReducedMotion = useReducedMotion();
+  }, [progress]);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-900/50">
       <motion.div
         className="h-full bg-gradient-to-r from-sky-500 to-violet-500 origin-left"
-        style={{ scaleX: prefersReducedMotion ? progress / 100 : scaleX }}
+        style={{ scaleX: prefersReducedMotion ? progress : scaleX }}
         initial={{ scaleX: 0 }}
       />
     </div>

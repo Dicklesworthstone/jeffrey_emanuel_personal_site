@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
-import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 
 type LinkProps = ComponentProps<typeof Link>;

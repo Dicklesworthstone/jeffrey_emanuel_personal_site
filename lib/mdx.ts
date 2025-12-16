@@ -34,6 +34,9 @@ export type Post = {
   category?: string;
   tags?: string[];
   coverImage?: string;
+  source?: string;
+  featured?: boolean;
+  gradient?: string;
   [key: string]: unknown;
 };
 
@@ -58,7 +61,7 @@ export const getPostBySlug = cache((slug: string) => {
   const items: Post = {
     slug: realSlug,
     title: data.title || realSlug.replace(/-/g, " "),
-    date: data.date || new Date().toISOString(),
+    date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
     excerpt: data.excerpt || "",
     content: content,
     ...data,

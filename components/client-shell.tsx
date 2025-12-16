@@ -3,15 +3,22 @@
 import { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import ErrorBoundary from "@/components/error-boundary";
 import ScrollToTop from "@/components/scroll-to-top";
 import EasterEggs from "@/components/easter-eggs";
-import CommandPalette from "@/components/command-palette";
-import KeyboardShortcutsModal from "@/components/keyboard-shortcuts-modal";
 import { useMobileOptimizations } from "@/hooks/use-mobile-optimizations";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+
+// Lazy load modals to reduce initial bundle size
+const CommandPalette = dynamic(() => import("@/components/command-palette"), {
+  ssr: false,
+});
+const KeyboardShortcutsModal = dynamic(() => import("@/components/keyboard-shortcuts-modal"), {
+  ssr: false,
+});
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

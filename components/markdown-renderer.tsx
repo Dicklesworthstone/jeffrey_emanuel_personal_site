@@ -61,7 +61,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
              return (
                  <figure className="block my-8">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt={alt} loading="lazy" className="rounded-xl border border-slate-800 shadow-2xl mx-auto" />
+                    <img src={src} alt={alt} loading="lazy" decoding="async" className="rounded-xl border border-slate-800 shadow-2xl mx-auto" />
                     {alt && <figcaption className="block text-center text-sm text-slate-500 mt-2 italic">{alt}</figcaption>}
                  </figure>
              )

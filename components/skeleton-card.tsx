@@ -1,6 +1,9 @@
 export default function SkeletonCard() {
   return (
-    <div className="animate-pulse rounded-2xl border border-slate-800/80 bg-slate-950/80 p-6 shadow-lg shadow-slate-950/80 md:p-8">
+    <div
+      className="animate-pulse rounded-2xl border border-slate-800/80 bg-slate-950/80 p-6 shadow-lg shadow-slate-950/80 md:p-8"
+      aria-hidden="true"
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">

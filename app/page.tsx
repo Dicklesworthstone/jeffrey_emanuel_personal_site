@@ -12,9 +12,9 @@ import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
 import { motion } from "framer-motion";
 
 export default async function HomePage() {
-  const featuredProjects = projects;
-  const featuredWriting = writingHighlights;
-  const featuredThreads = threads;
+  const featuredProjects = projects.slice(0, 6);
+  const featuredWriting = writingHighlights.slice(0, 6);
+  const featuredThreads = threads.slice(0, 6);
   
   // Fetch live stats
   const githubStats = await fetchGitHubStats();

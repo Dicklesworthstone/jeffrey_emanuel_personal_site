@@ -11,8 +11,7 @@ export default function WritingPage() {
   const mdxItems: WritingItem[] = allPosts.map((post) => ({
     title: post.title,
     href: `/writing/${post.slug}`,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    source: (post.source as any) || "Blog",
+    source: (post.source as "YTO" | "FMD" | "GitHub") || "Blog",
     category: post.category || "Essay",
     blurb: post.excerpt,
     date: post.date,
@@ -32,7 +31,14 @@ export default function WritingPage() {
   // Combine MDX posts and external archive, filtering out duplicates already in featured
   const archive = [...mdxItems, ...externalArchive]
     .filter((item) => !featuredHrefs.has(item.href))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => {
+      // Handle potential invalid dates gracefully
+      const t1 = new Date(a.date).getTime();
+      const t2 = new Date(b.date).getTime();
+      if (isNaN(t1)) return 1;
+      if (isNaN(t2)) return -1;
+      return t2 - t1;
+    });
 
   return (
     <div>

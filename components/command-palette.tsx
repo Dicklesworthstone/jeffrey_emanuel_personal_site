@@ -263,6 +263,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   }, [isOpen]);
 
   let globalIndex = 0;
+  const activeId = filteredCommands[selectedIndex]?.id;
 
   return (
     <AnimatePresence>
@@ -303,6 +304,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                   placeholder="Search pages, projects, writing..."
                   className="flex-1 bg-transparent text-white placeholder-slate-500 outline-none"
                   aria-label="Search commands"
+                  aria-activedescendant={activeId}
+                  aria-controls="command-results"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"
@@ -316,6 +319,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               {/* Results */}
               <div
                 ref={listRef}
+                id="command-results"
                 className="max-h-[60vh] overflow-y-auto p-2"
                 role="listbox"
               >
@@ -335,6 +339,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         return (
                           <button
                             key={cmd.id}
+                            id={cmd.id}
                             data-index={index}
                             onClick={cmd.action}
                             onMouseEnter={() => setSelectedIndex(index)}

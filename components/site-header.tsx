@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { navItems, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
+import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -150,10 +151,13 @@ export default function SiteHeader() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             className="fixed inset-0 z-40 flex flex-col bg-slate-950/95 backdrop-blur-2xl md:hidden overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
           >
-             {/* Background Noise */}
+            {/* Background Noise */}
             <div className="absolute inset-0 pointer-events-none opacity-20" 
-                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }} 
+                 style={{ backgroundImage: `url("${NOISE_SVG_DATA_URI}")` }} 
             />
             
             <nav className="relative flex flex-1 flex-col justify-center px-8">

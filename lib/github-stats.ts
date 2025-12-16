@@ -1,3 +1,5 @@
+import { siteConfig } from "@/lib/content";
+
 /**
  * Fetch GitHub statistics for a user.
  * Aggregates star counts across all public repositories.
@@ -19,7 +21,7 @@ interface GitHubRepo {
   stargazers_count: number;
 }
 
-const GITHUB_USERNAME = "Dicklesworthstone";
+const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop() || "Dicklesworthstone";
 
 /**
  * Fetch total star count and other stats from GitHub API.

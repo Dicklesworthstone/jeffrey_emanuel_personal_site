@@ -1,6 +1,9 @@
 export default function SkeletonStats() {
   return (
-    <dl className="grid gap-4 text-sm text-slate-200 sm:grid-cols-2 lg:grid-cols-4">
+    <dl
+      className="grid gap-4 text-sm text-slate-200 sm:grid-cols-2 lg:grid-cols-4"
+      aria-hidden="true"
+    >
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}

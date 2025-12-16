@@ -5,6 +5,7 @@ import ArticleProgress from "@/components/article-progress";
 import TableOfContents from "@/components/table-of-contents";
 import { calculateReadingTime } from "@/lib/reading-time";
 import { extractHeadings } from "@/lib/extract-headings";
+import { cn, formatDate } from "@/lib/utils";
 import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -37,9 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       },
     };
   } catch {
-    return {
-      title: "Article Not Found",
-    };
+    notFound();
   }
 }
 
@@ -85,11 +84,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                   <div className="flex items-center gap-2">
                     <span className="h-1 w-1 rounded-full bg-slate-600" />
                     <time dateTime={post.date}>
-                      {new Date(post.date).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                      {formatDate(post.date)}
                     </time>
                   </div>
                 )}

@@ -68,6 +68,7 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
         "grid grid-cols-1 gap-5 md:gap-6 lg:gap-8 md:grid-cols-3 auto-rows-[minmax(180px,auto)]",
         className
       )}
+      role="list"
     >
       <AnimatePresence mode="popLayout">
         {projects.map((project) => (
@@ -81,6 +82,7 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
               project.size === "wide" && "md:col-span-2",
               project.size === "tall" && "md:row-span-2"
             )}
+            role="listitem"
           >
             <ProjectCard project={project} />
           </motion.div>

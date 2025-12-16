@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { List, ChevronRight, X } from "lucide-react";
 import type { TocHeading } from "@/lib/extract-headings";
@@ -20,17 +20,25 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
   const prefersReducedMotion = useReducedMotion();
 
   // Scroll-spy: track which heading is currently in view
+  const visibleIds = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (headings.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the first heading that's intersecting
-        for (const entry of entries) {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-            break;
+            visibleIds.current.add(entry.target.id);
+          } else {
+            visibleIds.current.delete(entry.target.id);
           }
+        });
+
+        // Find the first heading that is currently visible
+        const visibleHeading = headings.find((h) => visibleIds.current.has(h.id));
+        if (visibleHeading) {
+          setActiveId(visibleHeading.id);
         }
       },
       {

@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
+import { type ReactNode, Children } from "react";
 
 interface AnimatedGridProps {
   children: ReactNode;
@@ -69,15 +69,11 @@ export default function AnimatedGrid({
       viewport={{ once: true, margin: "-50px" }}
       className={cn(className)}
     >
-      {Array.isArray(children) ? (
-        children.map((child, index) => (
-          <motion.div key={index} variants={variants}>
-            {child}
-          </motion.div>
-        ))
-      ) : (
-        <motion.div variants={variants}>{children}</motion.div>
-      )}
+      {Children.map(children, (child, index) => (
+        <motion.div key={index} variants={variants}>
+          {child}
+        </motion.div>
+      ))}
     </motion.div>
   );
 }

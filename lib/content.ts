@@ -744,7 +744,7 @@ export const careerTimeline: TimelineItem[] = [
 export type WritingItem = {
   title: string;
   href: string;
-  source: "YTO" | "FMD" | "GitHub";
+  source: "YTO" | "FMD" | "GitHub" | "Blog";
   category: string;
   blurb: string;
   date: string; // ISO 8601 date string (YYYY-MM-DD)
@@ -756,16 +756,21 @@ export type MediaItem = {
   title: string;
   href: string;
   outlet: string;
-  kind: "Article" | "Podcast";
+  kind: "Article" | "Podcast" | "Blog" | "Profile";
+  category: "Nvidia & Markets" | "AI & Agents" | "Lumera/Pastel" | "Profile";
   blurb: string;
 };
 
 export const mediaItems: MediaItem[] = [
+  // =============================================================================
+  // PODCASTS
+  // =============================================================================
   {
     title: "DeepSeek R1 & The Short Case For Nvidia Stock",
     href: "https://www.bankless.com/podcast/deepseek-r1-the-short-case-for-nvidia-stock-jeffrey-emanuel",
     outlet: "Bankless Podcast",
     kind: "Podcast",
+    category: "Nvidia & Markets",
     blurb:
       "In-depth discussion of my viral 12,000-word analysis on Nvidia's competitive vulnerabilities, DeepSeek's efficiency breakthroughs, and the shifting landscape of AI infrastructure. This episode aired January 28, 2025, the day after Nvidia's historic $600B single-day market cap drop.",
   },
@@ -774,14 +779,38 @@ export const mediaItems: MediaItem[] = [
     href: "https://members.delphidigital.io/media/jeffrey-emanuel-viral-author-of-the-short-case-for-nvidia-stock-cohosted-by-pondering-durian",
     outlet: "Delphi Digital Podcast",
     kind: "Podcast",
+    category: "Nvidia & Markets",
     blurb:
       "Tom Shaughnessy and Pondering Durian host an exploration of AI infrastructure disruption, open-source model innovation, and the societal implications of accelerating AGI development. Deep dive into model distillation, scaling laws, and US vs China AI development.",
   },
+  {
+    title: "Viral NVIDIA Short on Record Breaking $600B Loss",
+    href: "https://open.spotify.com/episode/59UKRipYaHjsrQjEXHFR5z",
+    outlet: "Farzad Podcast",
+    kind: "Podcast",
+    category: "Nvidia & Markets",
+    blurb:
+      "A 2+ hour conversation covering why, despite being bullish on AI, I'm skeptical about Nvidia's ability to sustain its enormous profit margins. Also explores Elon Musk's XAI, Tesla's FSD, and the transformative potential of humanoid robots.",
+  },
+  {
+    title: "CEO Jeff Emanuel Interviewed by CGTN America",
+    href: "https://lumera.io/ceo-jeff-emanuel-interviewed-by-cgtn-america/",
+    outlet: "CGTN America",
+    kind: "Podcast",
+    category: "Lumera/Pastel",
+    blurb:
+      "Television interview discussing Pastel Network's vision for decentralized digital art infrastructure, eliminating intermediaries in art trading, and the future of blockchain-based creative markets.",
+  },
+
+  // =============================================================================
+  // NEWS ARTICLES
+  // =============================================================================
   {
     title: "Jeffrey Emanuel and the lessons we should all learn from the $2 trillion DeepSeek AI market correction",
     href: "https://diginomica.com/jeffrey-emanuel-and-lessons-we-should-all-learn-2-trillion-deepseek-ai-market-correction",
     outlet: "Diginomica",
     kind: "Article",
+    category: "Nvidia & Markets",
     blurb:
       "In-depth interview covering the story behind writing 'The Short Case for Nvidia Stock,' the unexpected viral spread through Chamath Palihapitiya and Naval Ravikant's networks, and broader lessons about AI market dynamics and the Dunning-Kruger effect in tech investing.",
   },
@@ -790,38 +819,96 @@ export const mediaItems: MediaItem[] = [
     href: "https://hardware.slashdot.org/story/25/02/01/2235213/one-blogger-helped-spark-nvidias-600b-stock-collapse",
     outlet: "Slashdot",
     kind: "Article",
+    category: "Nvidia & Markets",
     blurb:
       "Coverage of how a 12,000-word blog post written from my Brooklyn apartment contributed to the largest single-day market cap drop in stock market history. Bloomberg's Matt Levine called it 'a candidate for the most impactful short research report ever.'",
   },
   {
-    title: "The impact of competition and DeepSeek on Nvidia",
-    href: "https://simonwillison.net/2025/Jan/27/deepseek-nvidia/",
-    outlet: "Simon Willison's Weblog",
+    title: "DeepSeek Disruption Has Its Upside",
+    href: "https://www.bloomberg.com/opinion/articles/2025-01-28/deepseek-disruption-has-its-upside",
+    outlet: "Bloomberg (Matt Levine)",
     kind: "Article",
+    category: "Nvidia & Markets",
     blurb:
-      "Simon Willison's analysis calling my piece 'Long, excellent...capturing the current state of the AI/LLM industry' and noting my 'rare combination of experience in both computer science and investment analysis.'",
+      "Matt Levine's Money Stuff column where he characterized my analysis as 'a candidate for the most impactful short research report ever' and noted the online chatter claiming my post 'was an important catalyst' for the stock-market selloff.",
+  },
+  {
+    title: "Is CoreWeave another WeWork? Blogger who caused Nvidia market cap to drop by $600 billion thinks so",
+    href: "https://www.techradar.com/pro/is-coreweave-another-wework-blogger-who-caused-nvidia-market-capitalization-to-drop-by-usd600-billion-in-a-day-thinks-so",
+    outlet: "TechRadar",
+    kind: "Article",
+    category: "Nvidia & Markets",
+    blurb:
+      "Coverage of my analysis calling CoreWeave 'the WeWork of AI' due to its reliance on quickly depreciating GPUs, lack of durable moat, and structural disadvantages versus hyperscalers. I noted: 'If it really IPOs for $30b+ then it's a much better short than NVDA ever was.'",
   },
   {
     title: "A bear case for Nvidia: hardware competitors, LLM code translation, DeepSeek breakthroughs",
     href: "https://www.techmeme.com/250126/p10",
     outlet: "Techmeme",
     kind: "Article",
+    category: "Nvidia & Markets",
     blurb:
       "Featured on Techmeme's front page covering Nvidia's four-part moat (Linux drivers, CUDA lock-in, Mellanox interconnect, R&D flywheel) and the emerging threats to each pillar from competitors and efficiency breakthroughs.",
   },
   {
-    title: "CEO Jeff Emanuel Interviewed by CGTN America",
-    href: "https://lumera.io/ceo-jeff-emanuel-interviewed-by-cgtn-america/",
-    outlet: "CGTN America",
-    kind: "Podcast",
+    title: "Quote: Jeffrey Emanuel",
+    href: "https://globaladvisors.biz/2025/01/27/quote-jeffrey-emanuel/",
+    outlet: "Global Advisors",
+    kind: "Article",
+    category: "Nvidia & Markets",
     blurb:
-      "Television interview discussing Pastel Network's vision for decentralized digital art infrastructure, eliminating intermediaries in art trading, and the future of blockchain-based creative markets.",
+      "Global Advisors highlighted my analysis of DeepSeek's R1 model, which made significant strides in enabling step-by-step reasoning without traditional reliance on vast supervised datasets—a groundbreaking achievement in AI.",
   },
+
+  // =============================================================================
+  // TECH BLOGS
+  // =============================================================================
+  {
+    title: "The impact of competition and DeepSeek on Nvidia",
+    href: "https://simonwillison.net/2025/Jan/27/deepseek-nvidia/",
+    outlet: "Simon Willison's Weblog",
+    kind: "Blog",
+    category: "Nvidia & Markets",
+    blurb:
+      "Simon Willison's analysis calling my piece 'Long, excellent...capturing the current state of the AI/LLM industry' and noting my 'rare combination of experience in both computer science and investment analysis.'",
+  },
+  {
+    title: "Two good Deepseek explainers",
+    href: "https://ericholscher.com/blog/2025/jan/27/two-good-deepseek-explainers/",
+    outlet: "Eric Holscher's Blog",
+    kind: "Blog",
+    category: "Nvidia & Markets",
+    blurb:
+      "Read the Docs founder Eric Holscher recommended my piece as one of two essential DeepSeek explainers, describing it as 'a long post (~60m read time) that goes through the whole context of R1 in great depth, but very readable with a bit of technical knowledge.'",
+  },
+  {
+    title: "Six New Tips for Better Coding With Agents",
+    href: "https://steve-yegge.medium.com/six-new-tips-for-better-coding-with-agents-d4e9c86e42a9",
+    outlet: "Steve Yegge (Medium)",
+    kind: "Blog",
+    category: "AI & Agents",
+    blurb:
+      "Steve Yegge features my 'Rule of Five' discovery: forcing agents to review their work 4-5 times leads to the best designs and implementations. Each iteration uses slightly broader reviews until the agent declares it's converged.",
+  },
+  {
+    title: "Beads Best Practices",
+    href: "https://steve-yegge.medium.com/beads-best-practices-2db636b9760c",
+    outlet: "Steve Yegge (Medium)",
+    kind: "Blog",
+    category: "AI & Agents",
+    blurb:
+      "Steve Yegge calls me 'a top-tier engineer, mathematician, AI researcher, and hedge-fund financier, equally rarified-air at all of them' and notes I 'wiped 2 trillion dollars off the global stock market' with my Nvidia essay. Features my MCP Agent Mail integration with Beads.",
+  },
+
+  // =============================================================================
+  // PROFILES & ENCYCLOPEDIAS
+  // =============================================================================
   {
     title: "Jeffrey Emanuel Profile",
     href: "https://wikitia.com/wiki/Jeffrey_Emanuel",
     outlet: "Wikitia",
-    kind: "Article",
+    kind: "Profile",
+    category: "Profile",
     blurb:
       "Comprehensive biographical profile covering my background from Reed College mathematics to Wall Street hedge fund analyst roles at Millennium and Balyasny, two-time Value Investors Club Best Idea Award winner, and transition to AI infrastructure and blockchain.",
   },
