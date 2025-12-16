@@ -31,7 +31,13 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
     >
       <div
         onMouseMove={handleMouseMove}
-        className="relative flex min-h-[300px] flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/50 transition-colors duration-500 hover:border-white/20 md:flex-row"
+        className={cn(
+          "relative flex min-h-[300px] flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/50 md:flex-row",
+          "transition-all duration-300 ease-out",
+          "hover:border-white/20 hover:scale-[1.01] hover:shadow-2xl hover:shadow-purple-900/20",
+          "focus-within:scale-[1.01] focus-within:shadow-2xl focus-within:shadow-purple-900/20",
+          "will-change-transform"
+        )}
       >
         {/* Animated Spotlight Background */}
         <motion.div

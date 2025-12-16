@@ -5,6 +5,7 @@ import Link from "next/link";
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
+import AnimatedGrid from "@/components/animated-grid";
 import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,10 @@ export default function HomePage() {
         title="Where I sit in the AI stack"
         kicker="Three overlapping threads: an ecosystem of agent tools I use to run 10+ agents simultaneously, research that moves markets, and protocol infrastructure."
       >
-        <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar">
+        <AnimatedGrid
+          className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+          staggerDelay={0.12}
+        >
           <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 border border-violet-500/20 bg-gradient-to-br from-violet-950/20 to-transparent">
             <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400 shadow-violet-500/20 drop-shadow-sm">
               The Flywheel
@@ -89,11 +93,11 @@ export default function HomePage() {
               <ArrowRight className="h-4 w-4" />
             </a>
           </div>
-        </div>
+        </AnimatedGrid>
       </SectionShell>
 
       {/* Flywheel Preview Banner */}
-      <section className="relative overflow-hidden py-16 sm:py-24">
+      <section className="relative overflow-hidden py-20 sm:py-28 lg:py-32">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-violet-950/10 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.08),transparent_70%)]" />
@@ -198,13 +202,16 @@ export default function HomePage() {
         title="Products and open source"
         kicker="A comprehensive collection of the tools, protocols, and experiments I'm building."
       >
-        <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar">
+        <AnimatedGrid
+          className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 lg:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+          staggerDelay={0.08}
+        >
           {featuredProjects.map((project) => (
              <div key={project.name} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
                 <ProjectCard project={project} />
              </div>
           ))}
-        </div>
+        </AnimatedGrid>
       </SectionShell>
 
       <SectionShell
@@ -214,7 +221,10 @@ export default function HomePage() {
         title="Essays, memos, and research notes"
         kicker="A mix of public writing and GitHub-native research artifacts."
       >
-        <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar">
+        <AnimatedGrid
+          className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+          staggerDelay={0.1}
+        >
           {featuredWriting.map((item) => (
             <Link
               key={item.title}
@@ -227,22 +237,22 @@ export default function HomePage() {
                 <span className="h-0.5 w-0.5 rounded-full bg-slate-500" />
                 <span>{item.category}</span>
               </div>
-              
+
               <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 transition-colors group-hover:text-sky-200">
                 {item.title}
               </h3>
-              
+
               <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
                 {item.blurb}
               </p>
-              
+
               <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
                 Read the essay
                 <span className="text-lg leading-none">→</span>
               </div>
             </Link>
           ))}
-        </div>
+        </AnimatedGrid>
       </SectionShell>
 
       <SectionShell
@@ -263,7 +273,10 @@ export default function HomePage() {
           title="Selected X posts"
           kicker="I write a lot more informally on X. Here are a few good entry points."
         >
-          <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar">
+          <AnimatedGrid
+            className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+            staggerDelay={0.1}
+          >
             {featuredThreads.map((thread) => (
               <a
                 key={thread.href}
@@ -288,7 +301,7 @@ export default function HomePage() {
                 </div>
               </a>
             ))}
-          </div>
+          </AnimatedGrid>
         </SectionShell>
       )}
     </>

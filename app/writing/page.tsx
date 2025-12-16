@@ -1,33 +1,52 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import SectionShell from "@/components/section-shell";
 import WritingCard from "@/components/writing-card";
 import { writingHighlights } from "@/lib/content";
 import { PenSquare, Sparkles, BookOpen } from "lucide-react";
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
+// Scroll-triggered stagger container
+const containerVariants = {
+  hidden: { opacity: 1 },
+  visible: {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
+      delayChildren: 0.05,
     },
   },
 };
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+// Individual item animation
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.21, 0.47, 0.32, 0.98],
+    },
+  },
+};
+
+// Reduced motion - instant, no animation
+const reducedItemVariants = {
+  hidden: { opacity: 1, y: 0 },
+  visible: { opacity: 1, y: 0 },
 };
 
 export default function WritingPage() {
+  const prefersReducedMotion = useReducedMotion();
+  const item = prefersReducedMotion ? reducedItemVariants : itemVariants;
+
   // Separate featured items from the rest
   const featured = writingHighlights.filter((w) => w.featured);
   const standard = writingHighlights.filter((w) => !w.featured);
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show">
+    <div>
       <SectionShell
         id="writing-main"
         icon={PenSquare}
@@ -35,14 +54,20 @@ export default function WritingPage() {
         title="Essays, research notes, and deep dives"
         kicker="I write to think. This is a collection of my technical essays on AI architecture, market mechanics, and software engineering. No fluff, just density."
       >
-        
+
         {/* Featured Section */}
-        <div className="mb-16">
+        <motion.div
+          className="mb-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           <motion.div variants={item} className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
             <Sparkles className="h-4 w-4 text-amber-400" />
             <span>Featured Essays</span>
           </motion.div>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
             {featured.map((post) => (
               <motion.div key={post.title} variants={item} className={post.featured ? "md:col-span-2" : ""}>
@@ -50,15 +75,20 @@ export default function WritingPage() {
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Standard Grid */}
-        <motion.div variants={item}>
-          <div className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+        {/* Standard Grid - separate scroll trigger */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
+          <motion.div variants={item} className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
             <BookOpen className="h-4 w-4 text-slate-500" />
             <span>Archive</span>
-          </div>
-          
+          </motion.div>
+
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {standard.map((post) => (
               <motion.div key={post.title} variants={item} className="h-full">
@@ -69,6 +99,6 @@ export default function WritingPage() {
         </motion.div>
 
       </SectionShell>
-    </motion.div>
+    </div>
   );
 }

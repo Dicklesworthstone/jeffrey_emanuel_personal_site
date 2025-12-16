@@ -89,7 +89,11 @@ export default function ProjectCard({ project }: { project: Project }) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/5 bg-black/20 p-6 transition-all duration-300 md:p-8 hover:bg-black/40",
+          "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/5 bg-black/20 p-6 md:p-8",
+          "transition-all duration-300 ease-out",
+          "hover:bg-black/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
+          "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
+          "will-change-transform",
           hoverBorder
         )}
       >

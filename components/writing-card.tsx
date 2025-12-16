@@ -56,9 +56,13 @@ export default function WritingCard({ item }: { item: WritingItem }) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 transition-all duration-300 md:p-8",
+          "group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 md:p-8",
+          "transition-all duration-300 ease-out",
+          "hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
+          "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
+          "will-change-transform",
           borderClass,
-          item.featured ? "bg-black/40" : "bg-black/20 hover:bg-black/30"
+          item.featured ? "bg-black/40 hover:bg-black/50" : "bg-black/20 hover:bg-black/30"
         )}
       >
         {/* Featured Gradient Background */}

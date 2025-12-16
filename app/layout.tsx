@@ -70,9 +70,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" className="h-full scroll-smooth bg-slate-950 text-slate-100">
+      <head>
+        {/* Preconnect to external domains for faster resource loading */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
       <body
         className={`${inter.variable} ${sourceSerif.variable} flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased`}
       >
+        {/* Skip link for keyboard navigation accessibility */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <GoogleAnalytics gaId={gaId} />
         <ClientShell>{children}</ClientShell>
       </body>

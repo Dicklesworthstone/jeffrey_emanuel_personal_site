@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "Jeffrey Emanuel",
-  title: "Jeffrey Emanuel – Agentic Coding Tooling, AI Infrastructure & Markets",
+  title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
   description:
     "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 7 interconnected tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 30+ open-source projects with 10K+ GitHub stars.",
   email: "jeffreyemanuel@gmail.com",
@@ -247,7 +247,7 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "1,001 stars",
     href: "https://github.com/Dicklesworthstone/mcp_agent_mail",
-    short: "Gmail for your coding agents—coordination layer with messaging, file leases, and audit trails.",
+    short: "Gmail for your coding agents. A coordination layer with messaging, file leases, and audit trails.",
     description:
       "A complete coordination system for multi-agent workflows. Agents register identities, send/receive GitHub-flavored Markdown messages, search conversation history, and declare advisory file reservations to prevent edit conflicts. Git-backed for full auditability with optional web UI for human oversight.",
     tags: ["MCP", "Agents", "Developer Tools", "Git", "Collaboration", "Flywheel"],
@@ -271,7 +271,7 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "15 stars",
     href: "https://github.com/Dicklesworthstone/ntm",
-    short: "Multi-agent tmux orchestration—spawn and coordinate Claude Code, Codex, and Gemini agents.",
+    short: "Multi-agent tmux orchestration. Spawn and coordinate Claude Code, Codex, and Gemini agents.",
     description:
       "Transform tmux into a multi-agent command center. Spawn named agent panes, broadcast prompts to specific agent types, capture outputs with regex filtering, and manage persistent SSH-compatible sessions. Features real-time dashboard, command palette, and pre/post hooks for automation.",
     tags: ["Go", "Tmux", "Multi-Agent", "Claude Code", "DevTools", "Flywheel"],
@@ -282,7 +282,7 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "20 stars",
     href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
-    short: "Two-person rule for AI agents—peer review before dangerous commands execute.",
+    short: "Two-person rule for AI agents: peer review before dangerous commands execute.",
     description:
       "Adds safety friction for autonomous agents. Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION), cryptographic command binding with SHA256+HMAC, dynamic quorum based on active agents, and complete audit trails. Integrates with Claude Code hooks and MCP Agent Mail for notifications.",
     tags: ["Go", "Security", "Multi-Agent", "Safety", "Audit", "Flywheel"],
@@ -292,7 +292,7 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "60 stars",
     href: "https://github.com/Dicklesworthstone/cass_memory_system",
-    short: "ACE-framework persistent memory for coding agents—procedural, episodic, and semantic.",
+    short: "ACE-framework persistent memory for coding agents. Stores procedural, episodic, and semantic knowledge.",
     description:
       "Implements the Autonomous Cognitive Entity framework to give agents human-like memory. Stores procedural knowledge (how-to playbooks), episodic memory (session histories), and semantic facts. Exposes MCP tools so agents can recall context across sessions without re-learning.",
     tags: ["TypeScript", "MCP", "Memory", "ACE Framework", "Agents", "Flywheel"],
@@ -874,7 +874,7 @@ export const writingHighlights: WritingItem[] = [
     source: "YTO",
     category: "History & Science",
     blurb:
-      "Uses a forgotten historical prediction—the wave theory of light and the Poisson Spot—as a lens on evidence, updating priors, and how we reason under massive uncertainty.",
+      "Uses a forgotten historical prediction (the wave theory of light and the Poisson Spot) as a lens on evidence, updating priors, and how we reason under massive uncertainty.",
     date: "2025-01-16",
   },
   {
