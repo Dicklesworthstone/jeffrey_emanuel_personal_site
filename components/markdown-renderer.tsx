@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import rehypeSlug from "rehype-slug";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,10 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: true }]]}
+        // rehype-slug adds IDs to headings for TOC navigation
         // Keep HTML generation on the server so we don't ship the entire
         // remark/rehype stack to the client. Math is rendered through KaTeX.
-        rehypePlugins={[[rehypeKatex, { strict: false }]]}
+        rehypePlugins={[rehypeSlug, [rehypeKatex, { strict: false }]]}
         components={{
           code({ node, inline, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || "");
