@@ -604,6 +604,9 @@ export default function FlywheelVisualization() {
   const reducedMotion = prefersReducedMotion ?? false;
 
   const activeToolId = selectedToolId || hoveredToolId;
+  // Show detail panel for hovered tool (desktop) or selected tool (mobile/click)
+  const displayedTool = flywheelTools.find((t) => t.id === activeToolId) ?? null;
+  // For mobile bottom sheet, only show on explicit click/selection
   const selectedTool = flywheelTools.find((t) => t.id === selectedToolId) ?? null;
 
   // Calculate node positions
@@ -776,13 +779,13 @@ export default function FlywheelVisualization() {
           </div>
         </div>
 
-        {/* Detail panel (desktop) */}
+        {/* Detail panel (desktop) - shows on hover or click */}
         <div className="hidden lg:flex lg:flex-col">
           <AnimatePresence mode="wait">
-            {selectedTool ? (
+            {displayedTool ? (
               <ToolDetailPanel
-                key={selectedTool.id}
-                tool={selectedTool}
+                key={displayedTool.id}
+                tool={displayedTool}
                 onClose={handleCloseDetail}
                 reducedMotion={reducedMotion}
               />
@@ -793,7 +796,7 @@ export default function FlywheelVisualization() {
         </div>
       </div>
 
-      {/* Mobile bottom sheet */}
+      {/* Mobile bottom sheet - only shows on explicit click */}
       <MobileBottomSheet
         tool={selectedTool}
         onClose={handleCloseDetail}
