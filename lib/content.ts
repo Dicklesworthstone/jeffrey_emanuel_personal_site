@@ -760,7 +760,72 @@ export type MediaItem = {
   blurb: string;
 };
 
-export const mediaItems: MediaItem[] = [];
+export const mediaItems: MediaItem[] = [
+  {
+    title: "DeepSeek R1 & The Short Case For Nvidia Stock",
+    href: "https://www.bankless.com/podcast/deepseek-r1-the-short-case-for-nvidia-stock-jeffrey-emanuel",
+    outlet: "Bankless Podcast",
+    kind: "Podcast",
+    blurb:
+      "In-depth discussion of my viral 12,000-word analysis on Nvidia's competitive vulnerabilities, DeepSeek's efficiency breakthroughs, and the shifting landscape of AI infrastructure. This episode aired January 28, 2025, the day after Nvidia's historic $600B single-day market cap drop.",
+  },
+  {
+    title: "Viral Author of The Short Case for Nvidia Stock",
+    href: "https://members.delphidigital.io/media/jeffrey-emanuel-viral-author-of-the-short-case-for-nvidia-stock-cohosted-by-pondering-durian",
+    outlet: "Delphi Digital Podcast",
+    kind: "Podcast",
+    blurb:
+      "Tom Shaughnessy and Pondering Durian host an exploration of AI infrastructure disruption, open-source model innovation, and the societal implications of accelerating AGI development. Deep dive into model distillation, scaling laws, and US vs China AI development.",
+  },
+  {
+    title: "Jeffrey Emanuel and the lessons we should all learn from the $2 trillion DeepSeek AI market correction",
+    href: "https://diginomica.com/jeffrey-emanuel-and-lessons-we-should-all-learn-2-trillion-deepseek-ai-market-correction",
+    outlet: "Diginomica",
+    kind: "Article",
+    blurb:
+      "In-depth interview covering the story behind writing 'The Short Case for Nvidia Stock,' the unexpected viral spread through Chamath Palihapitiya and Naval Ravikant's networks, and broader lessons about AI market dynamics and the Dunning-Kruger effect in tech investing.",
+  },
+  {
+    title: "One Blogger Helped Spark NVIDIA's $600B Stock Collapse",
+    href: "https://hardware.slashdot.org/story/25/02/01/2235213/one-blogger-helped-spark-nvidias-600b-stock-collapse",
+    outlet: "Slashdot",
+    kind: "Article",
+    blurb:
+      "Coverage of how a 12,000-word blog post written from my Brooklyn apartment contributed to the largest single-day market cap drop in stock market history. Bloomberg's Matt Levine called it 'a candidate for the most impactful short research report ever.'",
+  },
+  {
+    title: "The impact of competition and DeepSeek on Nvidia",
+    href: "https://simonwillison.net/2025/Jan/27/deepseek-nvidia/",
+    outlet: "Simon Willison's Weblog",
+    kind: "Article",
+    blurb:
+      "Simon Willison's analysis calling my piece 'Long, excellent...capturing the current state of the AI/LLM industry' and noting my 'rare combination of experience in both computer science and investment analysis.'",
+  },
+  {
+    title: "A bear case for Nvidia: hardware competitors, LLM code translation, DeepSeek breakthroughs",
+    href: "https://www.techmeme.com/250126/p10",
+    outlet: "Techmeme",
+    kind: "Article",
+    blurb:
+      "Featured on Techmeme's front page covering Nvidia's four-part moat (Linux drivers, CUDA lock-in, Mellanox interconnect, R&D flywheel) and the emerging threats to each pillar from competitors and efficiency breakthroughs.",
+  },
+  {
+    title: "CEO Jeff Emanuel Interviewed by CGTN America",
+    href: "https://lumera.io/ceo-jeff-emanuel-interviewed-by-cgtn-america/",
+    outlet: "CGTN America",
+    kind: "Podcast",
+    blurb:
+      "Television interview discussing Pastel Network's vision for decentralized digital art infrastructure, eliminating intermediaries in art trading, and the future of blockchain-based creative markets.",
+  },
+  {
+    title: "Jeffrey Emanuel Profile",
+    href: "https://wikitia.com/wiki/Jeffrey_Emanuel",
+    outlet: "Wikitia",
+    kind: "Article",
+    blurb:
+      "Comprehensive biographical profile covering my background from Reed College mathematics to Wall Street hedge fund analyst roles at Millennium and Balyasny, two-time Value Investors Club Best Idea Award winner, and transition to AI infrastructure and blockchain.",
+  },
+];
 
 export type ThreadItem = {
   title: string;

@@ -38,10 +38,9 @@ const palettes: Palette[] = [
 ];
 
 const useHour = () => {
-  const [hour, setHour] = useState(0);
+  const [hour, setHour] = useState(() => new Date().getHours());
   useEffect(() => {
     const update = () => setHour(new Date().getHours());
-    update();
     const id = setInterval(update, 60_000);
     return () => clearInterval(id);
   }, []);
@@ -1325,7 +1324,7 @@ function AizawaAttractor({ palette, seed }: { palette: Palette; seed: number }) 
   );
 }
 
-function SceneAizawa({ palette }: { palette: Palette; seed: number }) {
+function SceneAizawa({ palette, seed: _seed }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -1383,6 +1382,7 @@ function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number })
 
       pos.setXYZ(i, ox * displacement, oy * displacement, oz * displacement);
     }
+    // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
     geom.computeVertexNormals();
 
@@ -1393,7 +1393,7 @@ function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number })
   return <mesh ref={meshRef} geometry={geom} material={mat} />;
 }
 
-function SceneReactionDiffusion({ palette }: { palette: Palette; seed: number }) {
+function SceneReactionDiffusion({ palette, seed: _seed }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.5} />
