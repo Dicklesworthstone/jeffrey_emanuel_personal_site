@@ -206,7 +206,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     if (isOpen) {
       setQuery("");
       setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timeoutId = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timeoutId);
     }
   }, [isOpen]);
 
