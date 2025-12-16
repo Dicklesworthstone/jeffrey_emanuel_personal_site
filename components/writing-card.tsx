@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Star } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useRef, useState } from "react";
 import type { WritingItem } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";

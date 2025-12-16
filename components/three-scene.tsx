@@ -482,6 +482,7 @@ function Clifford({ palette, seed, count = 42000 }: { palette: Palette; seed: nu
     () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.7 }),
     [palette],
   );
+  useEffect(() => () => mat.dispose(), [mat]);
   const group = useRef<THREE.Group>(null);
 
   useEffect(() => {
@@ -545,6 +546,7 @@ function supershape(theta: number, m: number, n1: number, n2: number, n3: number
 function SuperShapeBlob({ palette, seed }: { palette: Palette; seed: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const geom = useMemo(() => new THREE.IcosahedronGeometry(1.1, 4), []);
+  useEffect(() => () => geom.dispose(), [geom]);
   const rand = useMemo(() => seededRandom(seed), [seed]);
   const params = useMemo(
     () => ({ m1: 3 + Math.floor(rand() * 8), m2: 4 + Math.floor(rand() * 6), n1: 0.2 + rand() * 1.8, n2: 0.2 + rand() * 1.8, n3: 0.2 + rand() * 1.8 }),
