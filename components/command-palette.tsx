@@ -80,12 +80,18 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchIndex, setSearchIndex] = useState<SearchIndexItem[]>([]);
   const [fuse, setFuse] = useState<Fuse<SearchIndexItem> | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Fetch search index on load (or on first open)
   useEffect(() => {
-    if (isOpen && searchIndex.length === 0) {
+    if (isOpen && searchIndex.length === 0 && !isLoading && !hasError) {
+      setIsLoading(true);
       fetch("/api/search")
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch search index");
+          return res.json();
+        })
         .then((data) => {
           setSearchIndex(data);
           const fuseInstance = new Fuse<SearchIndexItem>(data, {
@@ -101,9 +107,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           });
           setFuse(fuseInstance);
         })
-        .catch((err) => console.error("Failed to load search index", err));
+        .catch((err) => {
+          console.error("Failed to load search index", err);
+          setHasError(true);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
-  }, [isOpen, searchIndex.length]);
+  }, [isOpen, searchIndex.length, isLoading, hasError]);
 
   // Build static commands list
   const staticCommands = useMemo<Command[]>(() => {
@@ -394,8 +406,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                   </div>
                 ) : (
                   Object.entries(groupedCommands).map(([category, cmds]) => (
-                    <div key={category} className="mb-2">
-                      <div className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+                    <div
+                      key={category}
+                      className="mb-2"
+                      role="group"
+                      aria-label={categoryLabels[category as CommandCategory]}
+                    >
+                      <div className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-500" aria-hidden="true">
                         {categoryLabels[category as CommandCategory]}
                       </div>
                       {cmds?.map((cmd) => {
