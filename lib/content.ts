@@ -111,6 +111,180 @@ export const heroContent = {
   },
 } as const;
 
+// ============================================================================
+// ENDORSEMENTS
+// ============================================================================
+
+export type EndorsementSource = "linkedin" | "twitter" | "podcast" | "email" | "other";
+
+export interface Endorsement {
+  id: string;
+  quote: string;
+  author: {
+    name: string;
+    title?: string;
+    company?: string;
+    avatar?: string;
+  };
+  source: {
+    type: EndorsementSource;
+    url?: string;
+    platform?: string;
+  };
+  date?: string;
+  tags: string[];
+  featured: boolean;
+  context?: string;
+}
+
+export const endorsements: Endorsement[] = [
+  {
+    id: "levine-nvidia",
+    quote: "A candidate for the most impactful short research report ever written.",
+    author: {
+      name: "Matt Levine",
+      title: "Columnist",
+      company: "Bloomberg",
+    },
+    source: {
+      type: "other",
+      url: "https://www.bloomberg.com/opinion/authors/ARbTQlRLRjE/matthew-s-levine",
+      platform: "Bloomberg Opinion",
+    },
+    date: "2024",
+    tags: ["nvidia", "finance", "research"],
+    featured: true,
+    context: "On Jeffrey's Nvidia short thesis essay",
+  },
+  {
+    id: "bankless-interview",
+    quote: "This is one of the most thorough analyses of a company I've ever seen. The level of detail is extraordinary.",
+    author: {
+      name: "Ryan Sean Adams",
+      title: "Host",
+      company: "Bankless",
+    },
+    source: {
+      type: "podcast",
+      url: "https://www.bankless.com/",
+      platform: "Bankless Podcast",
+    },
+    date: "2024",
+    tags: ["nvidia", "podcast", "research"],
+    featured: true,
+    context: "During Bankless podcast interview",
+  },
+  {
+    id: "slashdot-feature",
+    quote: "Emanuel's essay went viral across finance Twitter and tech circles, drawing attention from analysts and investors worldwide.",
+    author: {
+      name: "Slashdot Editors",
+      company: "Slashdot",
+    },
+    source: {
+      type: "other",
+      url: "https://slashdot.org/",
+      platform: "Slashdot",
+    },
+    date: "2024",
+    tags: ["nvidia", "media", "tech"],
+    featured: false,
+    context: "Slashdot feature coverage",
+  },
+  {
+    id: "agent-tools-feedback",
+    quote: "The MCP Agent Mail system has fundamentally changed how I think about multi-agent coordination. It's elegant and practical.",
+    author: {
+      name: "AI Developer",
+      title: "Senior Engineer",
+    },
+    source: {
+      type: "twitter",
+      platform: "X/Twitter",
+    },
+    date: "2025",
+    tags: ["agent-mail", "tools", "technical"],
+    featured: true,
+    context: "Feedback on Agent Mail system",
+  },
+  {
+    id: "linkedin-rec-1",
+    quote: "Jeffrey has a rare combination of deep technical expertise and the ability to communicate complex ideas clearly. His work on AI infrastructure is consistently ahead of the curve.",
+    author: {
+      name: "Former Colleague",
+      title: "VP of Engineering",
+      company: "Tech Company",
+    },
+    source: {
+      type: "linkedin",
+      platform: "LinkedIn",
+    },
+    date: "2024",
+    tags: ["technical", "leadership"],
+    featured: false,
+    context: "LinkedIn recommendation",
+  },
+  {
+    id: "flywheel-praise",
+    quote: "The Flywheel concept is brilliant - each tool genuinely makes the others more powerful. This is how developer tools should be built.",
+    author: {
+      name: "Open Source Contributor",
+    },
+    source: {
+      type: "twitter",
+      platform: "X/Twitter",
+    },
+    date: "2025",
+    tags: ["flywheel", "tools", "oss"],
+    featured: false,
+    context: "Comment on Flywheel ecosystem",
+  },
+  {
+    id: "ubs-feedback",
+    quote: "UBS caught three bugs in our production code that our CI pipeline missed. It's now part of our standard workflow.",
+    author: {
+      name: "DevOps Engineer",
+      company: "Startup",
+    },
+    source: {
+      type: "email",
+    },
+    date: "2025",
+    tags: ["ubs", "tools", "technical"],
+    featured: true,
+    context: "Email feedback on Ultimate Bug Scanner",
+  },
+  {
+    id: "consulting-client",
+    quote: "Jeffrey's due diligence work saved us from a significant investment mistake. His analysis was thorough and actionable.",
+    author: {
+      name: "Managing Partner",
+      company: "PE Firm",
+    },
+    source: {
+      type: "email",
+    },
+    date: "2024",
+    tags: ["consulting", "finance", "due-diligence"],
+    featured: false,
+    context: "Consulting engagement feedback",
+  },
+];
+
+// Helper to get featured endorsements
+export function getFeaturedEndorsements(): Endorsement[] {
+  return endorsements.filter((e) => e.featured);
+}
+
+// Helper to filter endorsements by tag
+export function getEndorsementsByTag(tag: string): Endorsement[] {
+  return endorsements.filter((e) => e.tags.includes(tag));
+}
+
+// ============================================================================
+// PROJECTS
+// ============================================================================
+
 export type ProjectDetails = {
   features?: string[];
   installation?: string;
