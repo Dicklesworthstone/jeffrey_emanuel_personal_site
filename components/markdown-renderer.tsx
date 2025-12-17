@@ -1,19 +1,64 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import ErrorBoundary from "@/components/error-boundary";
 
+// Dynamically import syntax highlighter to reduce initial bundle size (~600KB)
+const SyntaxHighlighter = dynamic(
+  () => import("react-syntax-highlighter/dist/esm/prism-light").then(mod => mod.default),
+  {
+    ssr: false,
+    loading: () => null // Will use fallback code block while loading
+  }
+);
+
+// Dynamically import the theme
+const oneDarkPromise = import("react-syntax-highlighter/dist/esm/styles/prism/one-dark").then(mod => mod.default);
+
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+}
+
+// Lazy-loaded code block with syntax highlighting
+function CodeBlock({ language, children }: { language: string; children: string }) {
+  const [style, setStyle] = useState<Record<string, React.CSSProperties> | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    oneDarkPromise.then((theme) => {
+      setStyle(theme);
+      setIsLoaded(true);
+    });
+  }, []);
+
+  // Show simple code block while loading
+  if (!isLoaded || !style) {
+    return (
+      <pre className="overflow-x-auto rounded-lg bg-slate-900/80 p-4 text-sm">
+        <code className="font-mono text-slate-300">{children}</code>
+      </pre>
+    );
+  }
+
+  return (
+    <SyntaxHighlighter
+      style={style}
+      language={language}
+      PreTag="div"
+      customStyle={{ margin: 0, padding: 0, background: 'transparent' }}
+    >
+      {children}
+    </SyntaxHighlighter>
+  );
 }
 
 export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
@@ -43,15 +88,9 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           code({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) {
             const match = /language-(\w+)/.exec(className || "");
             return !inline && match ? (
-              <SyntaxHighlighter
-                {...props}
-                style={oneDark}
-                language={match[1]}
-                PreTag="div"
-                customStyle={{ margin: 0, padding: 0, background: 'transparent' }}
-              >
+              <CodeBlock language={match[1]}>
                 {String(children).replace(/\n$/, "")}
-              </SyntaxHighlighter>
+              </CodeBlock>
             ) : (
               <code {...props} className={cn("bg-slate-800/50 rounded px-1.5 py-0.5 text-sm font-mono text-sky-200", className)}>
                 {children}
