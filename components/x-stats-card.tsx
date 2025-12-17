@@ -112,6 +112,7 @@ export default function XStatsCard() {
   // Track if we've ever expanded (for animation purposes)
   useEffect(() => {
     if (isExpanded && !hasExpandedOnce) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time animation trigger based on user interaction
       setHasExpandedOnce(true);
     }
   }, [isExpanded, hasExpandedOnce]);

@@ -746,6 +746,7 @@ export default function HeaderIcon3D() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration detection for client-only 3D rendering
     setMounted(true);
     // Check reduced motion preference
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");

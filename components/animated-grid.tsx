@@ -228,6 +228,7 @@ export function LazySection({
 
     // If not in viewport, set to not visible and wait for intersection
     if (!hasTriggeredRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Initial visibility detection based on viewport position
       setIsVisible(false);
     }
 

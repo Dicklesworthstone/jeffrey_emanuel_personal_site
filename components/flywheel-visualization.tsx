@@ -67,6 +67,7 @@ function useSupportsMotionPath() {
   useEffect(() => {
     // Check if CSS Motion Path is supported
     if (typeof CSS !== "undefined" && CSS.supports) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Browser feature detection requires effect
       setSupported(CSS.supports("offset-path", "path('M 0 0')"));
     }
   }, []);

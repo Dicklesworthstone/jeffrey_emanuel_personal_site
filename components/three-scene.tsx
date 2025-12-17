@@ -157,7 +157,7 @@ function OrbitalRing(props: { radius: number; tilt: number; color: string }) {
   );
 }
 
-function SceneOrbits({ palette, seed: _seed }: { palette: Palette; seed: number }) {
+function SceneOrbits({ palette, seed: _ }: { palette: Palette; seed: number }) {
   return (
     <>
       <StarField color={palette[0]} />
@@ -330,8 +330,7 @@ function LorenzRibbons({ palette }: { palette: Palette }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function SceneLorenz({ palette, seed: _seed }: { palette: Palette; seed: number }) {
+function SceneLorenz({ palette, seed: _ }: { palette: Palette; seed: number }) {
   return (
     <>
       <StarField density={260} color={palette[2]} />
@@ -387,8 +386,7 @@ function HelixLines({ palette, turns = 5, strands = 4 }: { palette: Palette; tur
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function SceneHelix({ palette, seed: _seed }: { palette: Palette; seed: number }) {
+function SceneHelix({ palette, seed: _ }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.6} />
@@ -677,7 +675,7 @@ function SceneHopf({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 // Variant: Ikeda cloud
 // ---------------------------------------------------------------------------
-function IkedaCloud({ palette, seed: _seed, count = 4800 }: { palette: Palette; seed: number; count?: number }) {
+function IkedaCloud({ palette, seed: _, count = 4800 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
   const yAxisRef = useRef(new THREE.Vector3(0, 1, 0));
@@ -730,7 +728,7 @@ function SceneIkeda({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 // Variant: Gyroid displacement surface
 // ---------------------------------------------------------------------------
-function GyroidSurface({ palette, seed: _seed, resolution = 70 }: { palette: Palette; seed: number; resolution?: number }) {
+function GyroidSurface({ palette, seed: _, resolution = 70 }: { palette: Palette; seed: number; resolution?: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const geom = useMemo(() => new THREE.PlaneGeometry(4, 4, resolution, resolution), [resolution]);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.35, side: THREE.DoubleSide }), [palette]);
@@ -1238,7 +1236,7 @@ function SceneSpirograph({ palette, seed }: { palette: Palette; seed: number }) 
 // ---------------------------------------------------------------------------
 // Variant: Phyllotaxis Fibonacci Sphere (sunflower seed pattern)
 // ---------------------------------------------------------------------------
-function PhyllotaxisSphere({ palette, seed: _seed, count = 800 }: { palette: Palette; seed: number; count?: number }) {
+function PhyllotaxisSphere({ palette, seed: _, count = 800 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
   const { quality } = useQuality();
@@ -1301,7 +1299,7 @@ function ScenePhyllotaxis({ palette, seed }: { palette: Palette; seed: number })
 // ---------------------------------------------------------------------------
 // Variant: Aizawa Attractor (beautiful strange attractor)
 // ---------------------------------------------------------------------------
-function AizawaAttractor({ palette, seed: _seed }: { palette: Palette; seed: number }) {
+function AizawaAttractor({ palette, seed: _ }: { palette: Palette; seed: number }) {
   const groupRef = useRef<THREE.Group>(null);
 
   const geometry = useMemo(() => {
@@ -1349,7 +1347,7 @@ function AizawaAttractor({ palette, seed: _seed }: { palette: Palette; seed: num
   );
 }
 
-function SceneAizawa({ palette, seed: _seed }: { palette: Palette; seed: number }) {
+function SceneAizawa({ palette, seed: _ }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -1416,7 +1414,7 @@ function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number })
   return <mesh ref={meshRef} geometry={geom} material={mat} />;
 }
 
-function SceneReactionDiffusion({ palette, seed: _seed }: { palette: Palette; seed: number }) {
+function SceneReactionDiffusion({ palette, seed: _ }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.5} />
@@ -1525,6 +1523,7 @@ export default function ThreeScene() {
 
   // Sync currentDpr with quality changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing state with prop changes for adaptive quality
     setCurrentDpr(quality.maxDpr);
   }, [quality.maxDpr]);
 

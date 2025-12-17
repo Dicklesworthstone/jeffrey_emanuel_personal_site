@@ -82,7 +82,7 @@ self.addEventListener("fetch", (event) => {
             cache.put(request, networkResponse.clone());
           }
           return networkResponse;
-        } catch (error) {
+        } catch {
           // Network failed, try cache
           const cachedResponse = await caches.match(request);
           if (cachedResponse) {
@@ -125,7 +125,7 @@ self.addEventListener("fetch", (event) => {
             cache.put(request, networkResponse.clone());
           }
           return networkResponse;
-        } catch (error) {
+        } catch {
           // Return empty response for failed asset requests
           return new Response("", { status: 404 });
         }
@@ -152,7 +152,7 @@ self.addEventListener("fetch", (event) => {
             cache.put(request, networkResponse.clone());
           }
           return networkResponse;
-        } catch (error) {
+        } catch {
           return new Response("", { status: 404 });
         }
       })()

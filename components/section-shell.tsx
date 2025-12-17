@@ -37,6 +37,7 @@ export default function SectionShell({
   // Track if we've mounted on client to avoid hydration mismatch
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard hydration detection pattern
     setHasMounted(true);
   }, []);
 

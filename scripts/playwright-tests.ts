@@ -6,7 +6,7 @@
  * Usage: npx tsx scripts/playwright-tests.ts
  */
 
-import { chromium, type BrowserContext, type Page } from "playwright";
+import { chromium, type BrowserContext } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 
