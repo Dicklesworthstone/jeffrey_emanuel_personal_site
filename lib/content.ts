@@ -74,6 +74,13 @@ export const heroContent = {
   },
 } as const;
 
+export type ProjectDetails = {
+  features?: string[];
+  installation?: string;
+  usage?: string;
+  relatedProjects?: string[]; // slugs of related projects
+};
+
 export type Project = {
   name: string;
   kind: "product" | "oss" | "research";
@@ -84,7 +91,19 @@ export type Project = {
   tags: string[];
   size?: "wide" | "tall" | "large" | "normal";
   gradient?: string;
+  slug?: string; // If provided, project has a detail page at /projects/[slug]
+  details?: ProjectDetails;
 };
+
+// Helper to get project by slug
+export function getProjectBySlug(slug: string): Project | undefined {
+  return projects.find((p) => p.slug === slug);
+}
+
+// Get all projects with slugs (for generateStaticParams)
+export function getProjectSlugs(): string[] {
+  return projects.filter((p) => p.slug).map((p) => p.slug!);
+}
 
 export const projects: Project[] = [
   {
@@ -218,6 +237,22 @@ export const projects: Project[] = [
       "A centralized search interface for all your AI coding sessions. Indexes conversation history from Claude Code, Codex, Cursor, Gemini, ChatGPT, and Cline using Tantivy full-text search. Find that solution you generated weeks ago and prevent re-solving problems.",
     tags: ["Rust", "TUI", "Search", "DevTools", "Agents", "Flywheel"],
     size: "wide",
+    slug: "cass",
+    details: {
+      features: [
+        "Unified search across Claude Code, Codex, Cursor, Gemini, ChatGPT, Cline",
+        "Tantivy full-text search engine for instant results",
+        "TUI with Vim-style navigation",
+        "Robot mode for AI agent integration",
+        "Auto-discovery of session files",
+        "Result highlighting and context preview",
+        "Export sessions to Markdown",
+        "Health check and index management",
+      ],
+      installation: "```bash\n# Install via Cargo\ncargo install coding_agent_session_search\n\n# Or download pre-built binary from releases\n# https://github.com/Dicklesworthstone/coding_agent_session_search/releases\n```",
+      usage: "```bash\n# Interactive TUI mode\ncass\n\n# Search with query\ncass search \"Three.js performance\"\n\n# Robot mode for agents (NEVER use bare cass in agents!)\ncass search \"error handling\" --robot --limit 5\ncass health  # Check index status\n```",
+      relatedProjects: ["cass-memory-system", "beads-viewer", "mcp-agent-mail"],
+    },
   },
   {
     name: "Claude Code Agent Farm",
@@ -253,6 +288,22 @@ export const projects: Project[] = [
     tags: ["MCP", "Agents", "Developer Tools", "Git", "Collaboration", "Flywheel"],
     size: "wide",
     gradient: "from-violet-500/20 via-purple-500/20 to-fuchsia-500/20",
+    slug: "mcp-agent-mail",
+    details: {
+      features: [
+        "Agent identity registration with persistent profiles",
+        "GitHub-flavored Markdown messaging between agents",
+        "Full-text search across conversation history",
+        "Advisory file reservations to prevent edit conflicts",
+        "Thread-based conversations with reply threading",
+        "Git-backed storage for complete audit trails",
+        "MCP server protocol for easy integration",
+        "Optional web UI for human oversight",
+      ],
+      installation: "```bash\n# Install via npm\nnpx @anthropic/mcp-agent-mail\n\n# Or clone and run locally\ngit clone https://github.com/Dicklesworthstone/mcp_agent_mail\ncd mcp_agent_mail\nbun install\nbun run start\n```",
+      usage: "Add to your Claude Code MCP settings:\n\n```json\n{\n  \"mcpServers\": {\n    \"agent-mail\": {\n      \"command\": \"npx\",\n      \"args\": [\"@anthropic/mcp-agent-mail\"]\n    }\n  }\n}\n```\n\nAgents can then register, send messages, and coordinate work through the MCP tools.",
+      relatedProjects: ["beads-viewer", "cass", "named-tmux-manager"],
+    },
   },
   {
     name: "Beads Viewer",
@@ -265,6 +316,22 @@ export const projects: Project[] = [
     tags: ["Go", "TUI", "Task Management", "Graph Analytics", "Agents", "Flywheel"],
     size: "wide",
     gradient: "from-emerald-500/20 via-teal-500/20 to-cyan-500/20",
+    slug: "beads-viewer",
+    details: {
+      features: [
+        "9 graph metrics: PageRank, Betweenness, HITS, Critical Path, and more",
+        "Robot protocol (--robot-*) for AI-ready JSON output",
+        "Time-travel diffing across git revisions",
+        "60fps TUI rendering via Bubble Tea",
+        "Dependency-aware task prioritization",
+        "Cycle detection and resolution suggestions",
+        "Integration with bd (beads CLI)",
+        "Vim-style keyboard navigation",
+      ],
+      installation: "```bash\n# Install via Go\ngo install github.com/Dicklesworthstone/beads_viewer@latest\n\n# Or download pre-built binary from releases\n# https://github.com/Dicklesworthstone/beads_viewer/releases\n```",
+      usage: "```bash\n# Interactive TUI mode\nbv\n\n# Robot mode for AI agents (REQUIRED for agents)\nbv --robot-priority    # Get priority recommendations\nbv --robot-plan        # Get execution plan with parallel tracks\nbv --robot-insights    # Get graph metrics as JSON\n```",
+      relatedProjects: ["mcp-agent-mail", "cass", "ultimate-bug-scanner"],
+    },
   },
   {
     name: "Named Tmux Manager",
@@ -276,6 +343,22 @@ export const projects: Project[] = [
       "Transform tmux into a multi-agent command center. Spawn named agent panes, broadcast prompts to specific agent types, capture outputs with regex filtering, and manage persistent SSH-compatible sessions. Features real-time dashboard, command palette, and pre/post hooks for automation.",
     tags: ["Go", "Tmux", "Multi-Agent", "Claude Code", "DevTools", "Flywheel"],
     size: "tall",
+    slug: "named-tmux-manager",
+    details: {
+      features: [
+        "Named agent panes with type classification (Claude, Codex, Gemini)",
+        "Broadcast prompts to specific agent types or all agents",
+        "Capture outputs with regex filtering",
+        "Persistent SSH-compatible sessions",
+        "Real-time dashboard showing agent status",
+        "Command palette for quick actions",
+        "Pre/post hooks for automation",
+        "Session persistence across reboots",
+      ],
+      installation: "```bash\n# Install via Go\ngo install github.com/Dicklesworthstone/ntm@latest\n\n# Requires tmux to be installed\nsudo apt install tmux  # Debian/Ubuntu\nbrew install tmux      # macOS\n```",
+      usage: "```bash\n# Start the manager\nntm\n\n# Spawn agents\nntm spawn claude my-project\nntm spawn codex backend-work\n\n# Broadcast to all agents\nntm broadcast \"Check the latest changes\"\n```",
+      relatedProjects: ["mcp-agent-mail", "simultaneous-launch-button", "cass"],
+    },
   },
   {
     name: "Simultaneous Launch Button",
@@ -286,6 +369,22 @@ export const projects: Project[] = [
     description:
       "Adds safety friction for autonomous agents. Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION), cryptographic command binding with SHA256+HMAC, dynamic quorum based on active agents, and complete audit trails. Integrates with Claude Code hooks and MCP Agent Mail for notifications.",
     tags: ["Go", "Security", "Multi-Agent", "Safety", "Audit", "Flywheel"],
+    slug: "simultaneous-launch-button",
+    details: {
+      features: [
+        "Three-tier risk classification: CRITICAL, DANGEROUS, CAUTION",
+        "Cryptographic command binding with SHA256+HMAC",
+        "Dynamic quorum based on active agents",
+        "Complete audit trails for all operations",
+        "Integration with Claude Code hooks",
+        "MCP Agent Mail notifications for approvals",
+        "Configurable timeout and approval thresholds",
+        "Command replay protection",
+      ],
+      installation: "```bash\n# Install via Go\ngo install github.com/Dicklesworthstone/simultaneous_launch_button@latest\n```",
+      usage: "```bash\n# Request approval for a dangerous command\nslb request --command \"rm -rf /tmp/build\" --risk DANGEROUS\n\n# Approve a pending request (from another agent)\nslb approve <request-id>\n\n# List pending requests\nslb list\n```",
+      relatedProjects: ["mcp-agent-mail", "named-tmux-manager", "ultimate-bug-scanner"],
+    },
   },
   {
     name: "CASS Memory System",
@@ -296,6 +395,22 @@ export const projects: Project[] = [
     description:
       "Implements the Autonomous Cognitive Entity framework to give agents human-like memory. Stores procedural knowledge (how-to playbooks), episodic memory (session histories), and semantic facts. Exposes MCP tools so agents can recall context across sessions without re-learning.",
     tags: ["TypeScript", "MCP", "Memory", "ACE Framework", "Agents", "Flywheel"],
+    slug: "cass-memory-system",
+    details: {
+      features: [
+        "ACE (Autonomous Cognitive Entity) framework implementation",
+        "Procedural memory for how-to playbooks",
+        "Episodic memory for session histories",
+        "Semantic memory for facts and knowledge",
+        "MCP tools for agent memory access",
+        "Cross-session context persistence",
+        "Memory consolidation and summarization",
+        "Integration with CASS search",
+      ],
+      installation: "```bash\n# Clone and install\ngit clone https://github.com/Dicklesworthstone/cass_memory_system\ncd cass_memory_system\nbun install\nbun run build\n```",
+      usage: "Add to your MCP settings to give agents persistent memory:\n\n```json\n{\n  \"mcpServers\": {\n    \"cass-memory\": {\n      \"command\": \"node\",\n      \"args\": [\"path/to/cass_memory_system/dist/index.js\"]\n    }\n  }\n}\n```",
+      relatedProjects: ["cass", "mcp-agent-mail", "beads-viewer"],
+    },
   },
   {
     name: "Mindmap Generator",
@@ -482,6 +597,22 @@ export const projects: Project[] = [
       "Wraps best‑in‑class static analyzers (ESLint, Ruff, Clippy, golangci-lint, and more) with a consistent JSON interface. Perfect as a pre-commit hook or post-processing step for autonomous agents to catch bugs before they ship.",
     tags: ["Static Analysis", "Agents", "Code Quality", "CI/CD", "Multi-Language", "Flywheel"],
     size: "wide",
+    slug: "ultimate-bug-scanner",
+    details: {
+      features: [
+        "Wraps best-in-class analyzers: ESLint, Ruff, Clippy, golangci-lint, and more",
+        "Consistent JSON output for all languages",
+        "Auto-detects project languages",
+        "Exit code 0 = safe, >0 = issues found",
+        "Fix suggestions with line:column references",
+        "Perfect for pre-commit hooks",
+        "Designed for AI agent post-processing",
+        "Supports TypeScript, Python, Rust, Go, and more",
+      ],
+      installation: "```bash\n# Install via pip (recommended)\npip install ultimate-bug-scanner\n\n# Or install from source\ngit clone https://github.com/Dicklesworthstone/ultimate_bug_scanner\ncd ultimate_bug_scanner\npip install -e .\n```",
+      usage: "```bash\n# Scan specific files (fastest)\nubs file.ts file2.py\n\n# Scan staged files before commit\nubs $(git diff --name-only --cached)\n\n# Scan entire project\nubs .\n\n# Language filter\nubs --only=ts,tsx components/\n```",
+      relatedProjects: ["beads-viewer", "simultaneous-launch-button", "cass"],
+    },
   },
   {
     name: "Kissinger Thesis Reader",

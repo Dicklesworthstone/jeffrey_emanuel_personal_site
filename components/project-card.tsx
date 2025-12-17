@@ -29,7 +29,7 @@ export default function ProjectCard({ project }: { project: Project }) {
     const rect = div.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     requestAnimationFrame(() => {
       div.style.setProperty("--mouse-x", `${x}px`);
       div.style.setProperty("--mouse-y", `${y}px`);
@@ -48,7 +48,7 @@ export default function ProjectCard({ project }: { project: Project }) {
   const starMatch = project.badge?.match(/^([\d,]+\.?\d*[KkMm]?\+?)\s+stars?$/);
   const starCount = starMatch ? starMatch[1] : null;
   const displayBadge = starCount ? null : project.badge;
-  
+
   // Determine base colors based on kind or custom gradient
   const isProduct = project.kind === "product";
   const isResearch = project.kind === "research";
@@ -74,12 +74,15 @@ export default function ProjectCard({ project }: { project: Project }) {
 
   const isLarge = project.size === "large";
 
+  // Determine if this is an internal link (has detail page) or external link
+  const isInternalLink = Boolean(project.slug);
+  const linkHref = isInternalLink ? `/projects/${project.slug}` : project.href;
+
   return (
-    <Link 
-      href={project.href} 
-      target="_blank" 
-      rel="noopener noreferrer" 
-      className="block h-full" 
+    <Link
+      href={linkHref}
+      {...(isInternalLink ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+      className="block h-full"
       onTouchStart={lightTap}
     >
       <article
@@ -173,7 +176,7 @@ export default function ProjectCard({ project }: { project: Project }) {
               ))}
             </div>
             <div className={cn("flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors group-hover:text-white", accentColor)}>
-              View
+              {isInternalLink ? "Details" : "View"}
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </div>
           </div>
