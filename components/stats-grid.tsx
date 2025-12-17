@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import type { Stat } from "@/lib/content";
+import XStatsCard from "@/components/x-stats-card";
 
 /**
  * Parse a stat value string like "10K+" into animated components
@@ -140,6 +141,11 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
       className="grid gap-px overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-800/60 text-sm text-slate-200 shadow-xl shadow-slate-950/20 sm:grid-cols-2 lg:grid-cols-4"
     >
       {stats.map((stat, index) => {
+        // Use special X stats card for the Twitter/X stat
+        if (stat.label === "Audience on X") {
+          return <XStatsCard key={stat.label} />;
+        }
+
         const parsed = parseStatValue(stat.value);
 
         return (
