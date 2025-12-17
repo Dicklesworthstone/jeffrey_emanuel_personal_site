@@ -189,7 +189,6 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
   );
 
   useEffect(() => () => geom.dispose(), [geom]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => mat.dispose(), [mat]);
 
   const rand = useMemo(() => seededRandom(seed), [seed]);
@@ -1383,9 +1382,7 @@ function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number })
     return new Float32Array(pos.array);
   }, [geom]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => geom.dispose(), [geom]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
