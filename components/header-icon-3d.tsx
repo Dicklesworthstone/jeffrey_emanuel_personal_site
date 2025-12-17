@@ -1,9 +1,34 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState, Suspense } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense, Component, type ReactNode } from "react";
 import * as THREE from "three";
 import { Sparkles } from "lucide-react";
+
+// ---------------------------------------------------------------------------
+// Error Boundary for 3D content
+// ---------------------------------------------------------------------------
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ThreeErrorBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Hour-based animation selector (24 different micro-animations)
@@ -12,9 +37,18 @@ const useHour = () => {
   const [hour, setHour] = useState(() => new Date().getHours());
   useEffect(() => {
     const update = () => setHour(new Date().getHours());
-    const id = setInterval(update, 60_000);
-    update();
-    return () => clearInterval(id);
+    // Calculate ms until next hour to sync properly
+    const now = new Date();
+    const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
+
+    // Initial timeout to sync to hour boundary, then hourly interval
+    const timeout = setTimeout(() => {
+      update();
+      const id = setInterval(update, 60 * 60 * 1000); // Check every hour
+      return () => clearInterval(id);
+    }, msUntilNextHour);
+
+    return () => clearTimeout(timeout);
   }, []);
   return hour;
 };
@@ -206,6 +240,15 @@ function MicroWireSphere() {
 // 10: Cube with edges
 function MicroCubeEdges() {
   const ref = useRef<THREE.Group>(null);
+  const edgesGeom = useMemo(() => {
+    const boxGeom = new THREE.BoxGeometry(0.56, 0.56, 0.56);
+    const edges = new THREE.EdgesGeometry(boxGeom);
+    boxGeom.dispose(); // dispose the source geometry immediately
+    return edges;
+  }, []);
+
+  useEffect(() => () => edgesGeom.dispose(), [edgesGeom]);
+
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.rotation.x = clock.getElapsedTime() * 0.5;
@@ -217,8 +260,7 @@ function MicroCubeEdges() {
         <boxGeometry args={[0.55, 0.55, 0.55]} />
         <meshStandardMaterial color={colors.emerald} emissive={colors.violet} emissiveIntensity={0.4} transparent opacity={0.7} />
       </mesh>
-      <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(0.56, 0.56, 0.56)]} />
+      <lineSegments geometry={edgesGeom}>
         <lineBasicMaterial color={colors.white} />
       </lineSegments>
     </group>
@@ -240,6 +282,8 @@ function MicroTrefoil() {
     const curve = new THREE.CatmullRomCurve3(points, true);
     return new THREE.TubeGeometry(curve, 64, 0.05, 8, true);
   }, []);
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -270,6 +314,8 @@ function MicroLissajous() {
     return new THREE.TubeGeometry(curve, 100, 0.025, 6, true);
   }, []);
 
+  useEffect(() => () => geometry.dispose(), [geometry]);
+
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.rotation.y = clock.getElapsedTime() * 0.4;
@@ -299,6 +345,8 @@ function MicroStar() {
     return new THREE.ExtrudeGeometry(shape, { depth: 0.15, bevelEnabled: false });
   }, []);
 
+  useEffect(() => () => geometry.dispose(), [geometry]);
+
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.rotation.y = clock.getElapsedTime() * 0.5;
@@ -325,6 +373,8 @@ function MicroSpiral() {
     const curve = new THREE.CatmullRomCurve3(points, false);
     return new THREE.TubeGeometry(curve, 80, 0.025, 6, false);
   }, []);
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -358,6 +408,11 @@ function MicroHelix() {
       new THREE.TubeGeometry(curve2, 50, 0.025, 6, false),
     ];
   }, []);
+
+  useEffect(() => () => {
+    geom1.dispose();
+    geom2.dispose();
+  }, [geom1, geom2]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -506,6 +561,8 @@ function MicroMobius() {
     return geom;
   }, []);
 
+  useEffect(() => () => geometry.dispose(), [geometry]);
+
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.rotation.x = clock.getElapsedTime() * 0.3;
@@ -540,23 +597,24 @@ function MicroKlein() {
 // 22: Flower of life pattern
 function MicroFlower() {
   const ref = useRef<THREE.Group>(null);
+  const r = 0.18;
+
+  // Memoize circle positions to avoid recalculating every render
+  const circleData = useMemo(() => {
+    return Array.from({ length: 6 }, (_, i) => {
+      const angle = (i / 6) * Math.PI * 2;
+      return {
+        key: i,
+        position: [Math.cos(angle) * r, Math.sin(angle) * r, 0] as [number, number, number],
+        color: i % 2 === 0 ? colors.sky : colors.violet,
+      };
+    });
+  }, []);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.rotation.z = clock.getElapsedTime() * 0.3;
   });
-
-  const circles = [];
-  const r = 0.18;
-  for (let i = 0; i < 6; i++) {
-    const angle = (i / 6) * Math.PI * 2;
-    circles.push(
-      <mesh key={i} position={[Math.cos(angle) * r, Math.sin(angle) * r, 0]}>
-        <torusGeometry args={[r, 0.02, 8, 32]} />
-        <meshBasicMaterial color={i % 2 === 0 ? colors.sky : colors.violet} />
-      </mesh>
-    );
-  }
 
   return (
     <group ref={ref}>
@@ -564,7 +622,12 @@ function MicroFlower() {
         <torusGeometry args={[r, 0.02, 8, 32]} />
         <meshBasicMaterial color={colors.emerald} />
       </mesh>
-      {circles}
+      {circleData.map(({ key, position, color }) => (
+        <mesh key={key} position={position}>
+          <torusGeometry args={[r, 0.02, 8, 32]} />
+          <meshBasicMaterial color={color} />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -695,25 +758,27 @@ export default function HeaderIcon3D() {
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400" />
 
-      {/* 3D Canvas */}
-      <Suspense fallback={<StaticFallback />}>
-        <Canvas
-          camera={{ position: [0, 0, 2], fov: 45 }}
-          dpr={1}
-          gl={{
-            antialias: false,
-            alpha: true,
-            powerPreference: "low-power",
-          }}
-          style={{ background: "transparent" }}
-          onCreated={({ gl }) => {
-            gl.setClearColor(0x000000, 0);
-          }}
-          onError={() => setHasError(true)}
-        >
-          <Scene />
-        </Canvas>
-      </Suspense>
+      {/* 3D Canvas with error boundary */}
+      <ThreeErrorBoundary fallback={<StaticFallback />}>
+        <Suspense fallback={<StaticFallback />}>
+          <Canvas
+            camera={{ position: [0, 0, 2], fov: 45 }}
+            dpr={1}
+            gl={{
+              antialias: false,
+              alpha: true,
+              powerPreference: "low-power",
+            }}
+            style={{ background: "transparent" }}
+            onCreated={({ gl }) => {
+              gl.setClearColor(0x000000, 0);
+            }}
+            onError={() => setHasError(true)}
+          >
+            <Scene />
+          </Canvas>
+        </Suspense>
+      </ThreeErrorBoundary>
 
       {/* Glass overlay */}
       <div className="pointer-events-none absolute inset-0 rounded-xl bg-white/10 mix-blend-overlay" />
