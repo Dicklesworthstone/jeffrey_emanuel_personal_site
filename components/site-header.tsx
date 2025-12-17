@@ -2,13 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { navItems, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
+
+// Dynamically import 3D header icon to avoid SSR issues
+const HeaderIcon3D = dynamic(() => import("@/components/header-icon-3d"), {
+  ssr: false,
+  loading: () => (
+    <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400 shadow-lg shadow-sky-500/20">
+      <Sparkles className="h-5 w-5 text-white" />
+      <div className="absolute inset-0 rounded-xl bg-white/20 mix-blend-overlay" />
+    </div>
+  ),
+});
 
 interface SiteHeaderProps {
   onOpenCommandPalette?: () => void;
@@ -55,14 +67,13 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
         role="banner"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link 
-            href="/" 
-            className="group flex items-center gap-3" 
+          <Link
+            href="/"
+            className="group flex items-center gap-3"
             onClick={() => setOpen(false)}
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400 shadow-lg shadow-sky-500/20 transition-transform group-hover:scale-105">
-              <Sparkles className="h-5 w-5 text-white" />
-              <div className="absolute inset-0 rounded-xl bg-white/20 mix-blend-overlay" />
+            <div className="transition-transform group-hover:scale-105">
+              <HeaderIcon3D />
             </div>
             <div className="flex flex-col leading-none">
               {siteConfig.location && (
