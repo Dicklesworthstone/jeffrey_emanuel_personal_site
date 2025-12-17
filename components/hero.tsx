@@ -71,7 +71,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               <div className="absolute inset-0 animate-pulse bg-sky-500/20 blur-md group-hover:bg-sky-400/30" />
               <Image
                 src={headshot}
-                alt={siteConfig.name}
+                alt={`Headshot photo of ${siteConfig.name}`}
                 fill
                 sizes="80px"
                 placeholder="blur"

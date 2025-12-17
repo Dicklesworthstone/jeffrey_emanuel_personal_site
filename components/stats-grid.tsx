@@ -94,11 +94,19 @@ function AnimatedNumber({
   const displayNumber =
     end % 1 === 0 ? Math.round(currentCount).toString() : currentCount.toFixed(1);
 
+  // Final value for screen readers (immediate, no animation)
+  const finalValue = end % 1 === 0 ? end.toString() : end.toFixed(1);
+
   return (
-    <span className="tabular-nums">
-      {displayNumber}
-      {suffix}
-    </span>
+    <>
+      {/* Screen reader sees final value immediately */}
+      <span className="sr-only">{finalValue}{suffix}</span>
+      {/* Visual animated number */}
+      <span className="tabular-nums" aria-hidden="true">
+        {displayNumber}
+        {suffix}
+      </span>
+    </>
   );
 }
 

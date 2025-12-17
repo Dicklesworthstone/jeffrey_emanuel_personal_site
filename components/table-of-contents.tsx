@@ -222,6 +222,16 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
             </p>
           </div>
         )}
+
+        {/* Screen reader announcement for section changes */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {activeHeading ? `Now reading: ${activeHeading.text}` : ""}
+        </div>
       </aside>
     </>
   );

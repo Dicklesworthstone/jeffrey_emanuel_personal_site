@@ -393,6 +393,22 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 </kbd>
               </div>
 
+              {/* Screen reader status announcements */}
+              <div
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="sr-only"
+              >
+                {isLoading
+                  ? "Loading search index..."
+                  : query.trim()
+                  ? filteredCommands.length === 0
+                    ? `No results found for "${query}"`
+                    : `${filteredCommands.length} results found`
+                  : ""}
+              </div>
+
               {/* Results */}
               <div
                 ref={listRef}
@@ -401,7 +417,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 role="listbox"
               >
                 {filteredCommands.length === 0 ? (
-                  <div className="px-4 py-8 text-center text-sm text-slate-500">
+                  <div className="px-4 py-8 text-center text-sm text-slate-500" aria-hidden="true">
                     No results found for &quot;{query}&quot;
                   </div>
                 ) : (

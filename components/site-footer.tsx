@@ -35,7 +35,7 @@ export default function SiteFooter() {
               className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all hover:border-white/10 hover:bg-white/10 hover:text-white hover:scale-110"
               aria-label={social.label}
             >
-              <social.icon className="h-5 w-5 transition-transform group-hover:rotate-12" />
+              <social.icon className="h-5 w-5 transition-transform group-hover:rotate-12" aria-hidden="true" />
             </a>
           ))}
         </div>
