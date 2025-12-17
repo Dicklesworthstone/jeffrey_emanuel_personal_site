@@ -11,6 +11,8 @@
     "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('npm') !== -1) { console.error('\\n\\n❌ ERROR: This project uses BUN, not npm!\\n\\nPlease use: bun install\\n\\n'); process.exit(1); }\"",
     "dev": "next dev",
     "build": "rm -rf .next && next build",
+    "build:with-stats": "bun run update-stats && rm -rf .next && next build",
+    "update-stats": "bun run scripts/update-stats.ts",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
