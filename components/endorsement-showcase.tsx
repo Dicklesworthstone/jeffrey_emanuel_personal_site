@@ -106,9 +106,22 @@ export function EndorsementShowcase({
     return filteredEndorsements.filter((e) => e.id !== featuredItem.id);
   }, [filteredEndorsements, featuredItem]);
 
+  // Compute safe carousel index that's always within bounds
+  // This handles the case where filters shrink the array while carouselIndex is high
+  const safeCarouselIndex = useMemo(() => {
+    if (layout === "carousel") {
+      // For carousel layout, clamp to filteredEndorsements length
+      if (filteredEndorsements.length === 0) return 0;
+      return Math.min(carouselIndex, filteredEndorsements.length - 1);
+    }
+    // For featured layout, clamp to otherItems length
+    if (otherItems.length === 0) return 0;
+    return Math.min(carouselIndex, otherItems.length - 1);
+  }, [layout, carouselIndex, filteredEndorsements.length, otherItems.length]);
+
   // Carousel navigation
-  const canGoPrev = carouselIndex > 0;
-  const canGoNext = carouselIndex < otherItems.length - 1;
+  const canGoPrev = safeCarouselIndex > 0;
+  const canGoNext = safeCarouselIndex < otherItems.length - 1;
 
   const goToPrev = useCallback(() => {
     if (canGoPrev) {
@@ -256,12 +269,12 @@ export function EndorsementShowcase({
               onClick={() => setCarouselIndex(idx)}
               className={cn(
                 "h-2 w-2 rounded-full transition-all",
-                idx === carouselIndex
+                idx === safeCarouselIndex
                   ? "w-6 bg-sky-400"
                   : "bg-slate-600 hover:bg-slate-500"
               )}
               role="tab"
-              aria-selected={idx === carouselIndex}
+              aria-selected={idx === safeCarouselIndex}
               aria-label={`Go to endorsement ${idx + 1}`}
             />
           ))}
@@ -350,7 +363,7 @@ export function EndorsementShowcase({
 
   // Carousel layout - single item visible with navigation
   if (layout === "carousel") {
-    const currentItem = filteredEndorsements[carouselIndex];
+    const currentItem = filteredEndorsements[safeCarouselIndex];
 
     return (
       <section className={cn("", className)} aria-label="Endorsements carousel">
@@ -419,12 +432,12 @@ export function EndorsementShowcase({
                   onClick={() => setCarouselIndex(idx)}
                   className={cn(
                     "h-2 w-2 rounded-full transition-all",
-                    idx === carouselIndex
+                    idx === safeCarouselIndex
                       ? "w-6 bg-sky-400"
                       : "bg-slate-600 hover:bg-slate-500"
                   )}
                   role="tab"
-                  aria-selected={idx === carouselIndex}
+                  aria-selected={idx === safeCarouselIndex}
                   aria-label={`Go to endorsement ${idx + 1}`}
                 />
               ))}
@@ -498,21 +511,21 @@ export function EndorsementShowcase({
               More Endorsements
             </h3>
             <span className="text-xs text-slate-600">
-              {carouselIndex + 1} of {otherItems.length}
+              {safeCarouselIndex + 1} of {otherItems.length}
             </span>
           </div>
 
           <AnimatePresence mode="wait">
-            {otherItems[carouselIndex] && (
+            {otherItems[safeCarouselIndex] && (
               <motion.div
-                key={otherItems[carouselIndex].id}
+                key={otherItems[safeCarouselIndex].id}
                 initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: prefersReducedMotion ? 0 : -30 }}
                 transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
               >
                 <EndorsementCard
-                  {...toCardProps(otherItems[carouselIndex])}
+                  {...toCardProps(otherItems[safeCarouselIndex])}
                   variant="standard"
                 />
               </motion.div>
