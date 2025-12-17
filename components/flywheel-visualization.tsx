@@ -113,7 +113,7 @@ function FlowingParticle({
   );
 }
 
-// Connection line with optional flowing particles
+// Connection line with animated data flow
 const ConnectionLine = React.memo(function ConnectionLine({
   fromPos,
   toPos,
@@ -137,6 +137,7 @@ const ConnectionLine = React.memo(function ConnectionLine({
 }) {
   const path = getCurvedPath(fromPos, toPos);
   const gradientId = `gradient-${connectionId}`;
+  const flowGradientId = `flow-gradient-${connectionId}`;
 
   // Extract color values for gradient
   const getGradientColor = (colorClass: string) => {
@@ -160,14 +161,27 @@ const ConnectionLine = React.memo(function ConnectionLine({
   const color1 = getGradientColor(fromColor);
   const color2 = getGradientColor(toColor);
 
+  // Calculate path length for dash animation (approximate)
+  const dx = toPos.x - fromPos.x;
+  const dy = toPos.y - fromPos.y;
+  const pathLength = Math.sqrt(dx * dx + dy * dy) * 1.2; // 1.2 accounts for curve
+
   return (
     <g>
-      {/* Gradient definition for this line */}
+      {/* Gradient definitions */}
       <defs>
+        {/* Static gradient for base line */}
         <linearGradient id={gradientId} gradientUnits="userSpaceOnUse"
           x1={fromPos.x} y1={fromPos.y} x2={toPos.x} y2={toPos.y}>
           <stop offset="0%" stopColor={color1} stopOpacity={isHighlighted ? 0.9 : 0.3} />
           <stop offset="100%" stopColor={color2} stopOpacity={isHighlighted ? 0.9 : 0.3} />
+        </linearGradient>
+        {/* Animated gradient for flow effect */}
+        <linearGradient id={flowGradientId} gradientUnits="userSpaceOnUse"
+          x1={fromPos.x} y1={fromPos.y} x2={toPos.x} y2={toPos.y}>
+          <stop offset="0%" stopColor={color1} stopOpacity={isHighlighted ? 0.8 : 0.5} />
+          <stop offset="50%" stopColor={color2} stopOpacity={isHighlighted ? 0.9 : 0.6} />
+          <stop offset="100%" stopColor={color1} stopOpacity={isHighlighted ? 0.8 : 0.5} />
         </linearGradient>
       </defs>
 
@@ -186,7 +200,7 @@ const ConnectionLine = React.memo(function ConnectionLine({
         />
       )}
 
-      {/* Main connection line */}
+      {/* Base connection line */}
       <motion.path
         d={path}
         fill="none"
@@ -203,6 +217,26 @@ const ConnectionLine = React.memo(function ConnectionLine({
           opacity: { duration: reducedMotion ? 0 : 0.3 },
         }}
       />
+
+      {/* Continuous flowing data animation - subtle pulsing dash */}
+      {!reducedMotion && (
+        <motion.path
+          d={path}
+          fill="none"
+          stroke={`url(#${flowGradientId})`}
+          strokeWidth={isHighlighted ? 2 : 1}
+          strokeLinecap="round"
+          strokeDasharray={`${pathLength * 0.15} ${pathLength * 0.35}`}
+          initial={{ strokeDashoffset: 0 }}
+          animate={{ strokeDashoffset: -pathLength * 0.5 }}
+          transition={{
+            duration: isHighlighted ? 1.5 : 3,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          style={{ opacity: isHighlighted ? 0.7 : 0.3 }}
+        />
+      )}
 
       {/* Flowing particles when active - only on devices that support CSS Motion Path */}
       {isActive && !reducedMotion && supportsMotionPath && (
