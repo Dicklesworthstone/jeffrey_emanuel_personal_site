@@ -4,7 +4,7 @@ import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
 import AnimatedGrid, { LazySection, TimelineSkeleton } from "@/components/animated-grid";
-import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote } from "lucide-react";
+import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
@@ -12,6 +12,7 @@ import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/content";
 import EndorsementShowcase from "@/components/endorsement-showcase";
+import DemoShowcase from "@/components/demo-showcase";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
@@ -313,6 +314,20 @@ export default async function HomePage() {
         <LazySection minHeight="800px" skeleton={<TimelineSkeleton itemCount={careerTimeline.length} />}>
           <Timeline items={careerTimeline} />
         </LazySection>
+      </SectionShell>
+
+      {/* Try It - Live Demos */}
+      <SectionShell
+        id="demos"
+        iconNode={<Play className="h-5 w-5" />}
+        eyebrow="Try It"
+        title="Live demos you can explore"
+        kicker="Interactive projects running in your browser right now."
+      >
+        <DemoShowcase
+          heading=""
+          className="mt-2"
+        />
       </SectionShell>
 
       {featuredThreads.length > 0 && (
