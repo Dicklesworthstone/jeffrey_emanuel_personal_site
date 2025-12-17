@@ -119,9 +119,11 @@ export function EndorsementShowcase({
     return Math.min(carouselIndex, otherItems.length - 1);
   }, [layout, carouselIndex, filteredEndorsements.length, otherItems.length]);
 
-  // Carousel navigation
+  // Carousel navigation - use correct array length based on layout
   const canGoPrev = safeCarouselIndex > 0;
-  const canGoNext = safeCarouselIndex < otherItems.length - 1;
+  const canGoNext = layout === "carousel"
+    ? safeCarouselIndex < filteredEndorsements.length - 1
+    : safeCarouselIndex < otherItems.length - 1;
 
   const goToPrev = useCallback(() => {
     if (canGoPrev) {
