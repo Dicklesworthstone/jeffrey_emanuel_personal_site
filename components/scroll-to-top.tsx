@@ -10,19 +10,28 @@ export default function ScrollToTop() {
   const { mediumTap } = useHapticFeedback();
 
   useEffect(() => {
+    let ticking = false;
+
     const toggleVisibility = () => {
-      // Show button when page is scrolled down 400px
       if (window.scrollY > 400) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
       }
+      ticking = false;
     };
 
-    window.addEventListener("scroll", toggleVisibility, { passive: true });
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(toggleVisibility);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", toggleVisibility);
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
