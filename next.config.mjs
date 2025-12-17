@@ -9,6 +9,22 @@ const nextConfig = {
   turbopack: {
     root: path.join(__dirname, ".."),
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "tse3.mm.bing.net",
+      },
+      {
+        protocol: "https",
+        hostname: "www.mql5.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

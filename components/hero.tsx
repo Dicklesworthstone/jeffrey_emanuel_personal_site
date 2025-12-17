@@ -15,6 +15,7 @@ import { heroContent, heroStats, siteConfig, type Stat } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useClickParticles } from "@/hooks/use-click-particles";
 import { cn } from "@/lib/utils";
+import headshot from "@/assets/jeff_emanuel_headshot.webp";
 
 // Only load Three.js on larger screens to save mobile bandwidth/battery
 const ThreeScene = dynamic(() => import("@/components/three-scene"), {
@@ -69,10 +70,11 @@ export default function Hero({ stats = heroStats }: HeroProps) {
             <div className="group relative h-16 w-16 overflow-hidden rounded-full shadow-2xl sm:h-20 sm:w-20">
               <div className="absolute inset-0 animate-pulse bg-sky-500/20 blur-md group-hover:bg-sky-400/30" />
               <Image
-                src="/jeff_emanuel_headshot.webp"
+                src={headshot}
                 alt={siteConfig.name}
                 fill
                 sizes="80px"
+                placeholder="blur"
                 className="relative z-10 object-cover ring-2 ring-slate-800/50 transition-transform duration-500 group-hover:scale-110"
                 priority
               />

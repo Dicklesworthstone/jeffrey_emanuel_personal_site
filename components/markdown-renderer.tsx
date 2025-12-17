@@ -6,6 +6,7 @@ import rehypeSlug from "rehype-slug";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface MarkdownRendererProps {
   content: string;
@@ -58,10 +59,21 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             return <td className="px-6 py-4 border-b border-slate-800/50 text-slate-400 whitespace-nowrap">{children}</td>;
           },
           img({ src, alt }) {
+             // For external images where we can't control the size, use fill or width/height 0
+             // We need to handle relative URLs (local images) vs absolute URLs
              return (
-                 <figure className="block my-8">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt={alt} loading="lazy" decoding="async" className="rounded-xl border border-slate-800 shadow-2xl mx-auto" />
+                 <figure className="block my-8 relative">
+                    <div className="relative w-full h-auto">
+                      <Image 
+                        src={(src as string) || ""} 
+                        alt={alt || ""}
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        className="rounded-xl border border-slate-800 shadow-2xl mx-auto w-full h-auto"
+                        loading="lazy"
+                      />
+                    </div>
                     {alt && <figcaption className="block text-center text-sm text-slate-500 mt-2 italic">{alt}</figcaption>}
                  </figure>
              )
