@@ -44,7 +44,7 @@ export default function AboutPage() {
           the others.
         </p>
         <p>
-          My GitHub squares get darker green each month because the flywheel keeps
+          The cadence of my GitHub commits increases more and more each passing week because the flywheel keeps
           spinning faster. I make sure to make forward progress on every active
           project each day, even when I&apos;m too busy to spend real mental bandwidth
           on all of them. I&apos;ve developed prompts that keep the agents always

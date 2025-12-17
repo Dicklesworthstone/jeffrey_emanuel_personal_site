@@ -60,8 +60,8 @@ export const heroContent = {
   eyebrow: "Founder • Engineer • Former Hedge Fund Analyst",
   title: "Building the tools that sit between markets and frontier AI.",
   body: [
-    "I built the Agentic Coding Tooling Flywheel: 7 interconnected tools including MCP Agent Mail (1K+ stars), Beads Viewer, and CASS that let coding agents collaborate, coordinate, and remember. I run 10+ agents simultaneously on complex projects using these.",
-    "My 30+ open-source projects span agent infrastructure, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; my GitHub squares get darker green each month because each tool amplifies the others.",
+    "Beginning in October of 2025, I began developing what I call my \"Agentic Coding Flywheel\": a collection of 7 interconnected tools that include MCP Agent Mail (\"Gmail for Agents\" with 1K+ stars), BV (\"Beads Viewer\"; Use advanced graph theory to optimize the order of task execution by agents), Cass (Coding Agent Session Search; search all your past coding agent chats instantly), Cass Memory (Use Cass as the basis of a powerful continual learning and memory system), UBS (Ultimate Bug Scanner, a polyglot static analysis tool designed specifically for use by agents), and several others. Using these tools, I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines (for example, the BV tool was created entirely in one day, and is over 20k lines of sophisticated golang code; more importantly it is loved by thousands of users with over 500 GitHub stars in under a month).",
+    "My 30+ open-source projects span agent infrastructure, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
     "I also founded Lumera Network (formerly Pastel), a Cosmos L1 for storage and AI verification. I consult to PE and hedge funds on AI automation after a decade as a long/short equity analyst.",
   ],
   primaryCta: {
@@ -979,37 +979,6 @@ export const threads: ThreadItem[] = [
 
 export const writingHighlights: WritingItem[] = [
   {
-    title: "Building a Brain, Not a Calculator: Bio-Inspired Nanochat",
-    href: "/writing/bio_inspired_architecture",
-    source: "GitHub",
-    category: "Frontier Research",
-    blurb:
-      "A deep technical dive into replacing static Transformer weights with metabolic, fatigue-prone, and evolving biological analogs. Explores presynaptic fatigue, Hebbian fast-weights, and structural plasticity.",
-    date: "2025-11-22",
-    featured: true,
-    gradient: "from-pink-500/20 via-rose-500/20 to-red-500/20",
-  },
-  {
-    title: "11 Ways to Break the Transformer: Model-Guided Research",
-    href: "/writing/model_guided_math",
-    source: "GitHub",
-    category: "Frontier Research",
-    blurb:
-      "What happens when GPT-5 acts as Principal Investigator? An exploration of 11 exotic architectures including Matrix Exponential Gauge Learning, Tropical Geometry, and p-adic Attention.",
-    date: "2025-11-22",
-    featured: true,
-    gradient: "from-cyan-500/20 via-blue-500/20 to-indigo-500/20",
-  },
-  {
-    title: "The Incredible Magic of CMA-ES",
-    href: "/writing/cmaes_explainer",
-    source: "GitHub",
-    category: "Algorithms",
-    blurb:
-      "An interactive deep dive into the Covariance Matrix Adaptation Evolution Strategy. Explains how it adapts to high-dimensional, non-convex landscapes where gradient descent fails.",
-    date: "2025-02-25",
-  },
-  {
     title: "The Short Case for Nvidia Stock",
     href: "/writing/the_short_case_for_nvda",
     source: "YTO",
@@ -1026,8 +995,30 @@ export const writingHighlights: WritingItem[] = [
     source: "YTO",
     category: "History & Science",
     blurb:
-      "Uses a forgotten historical prediction (the wave theory of light and the Poisson Spot) as a lens on evidence, updating priors, and how we reason under massive uncertainty.",
+      "Analyzes Pyotr Durnovo's 1914 memorandum to Tsar Nicholas II—an eerily accurate forecast of WWI, the exact alignment of powers, and the inevitable Russian Revolution that would follow.",
     date: "2025-01-16",
+    featured: true,
+    gradient: "from-cyan-500/20 via-blue-500/20 to-indigo-500/20",
+  },
+  {
+    title: "The Lessons of Hermann Grassmann",
+    href: "/writing/hermann_grassmann_nature_of_abstractions",
+    source: "FMD",
+    category: "History of Math",
+    blurb:
+      "The story of the self-taught genius who invented linear algebra (the wedge product) decades before it was understood. A lesson on how radical abstractions are often rejected by the establishment.",
+    date: "2024-06-01",
+    featured: true,
+    gradient: "from-pink-500/20 via-rose-500/20 to-red-500/20",
+  },
+  {
+    title: "The Incredible Magic of CMA-ES",
+    href: "/writing/cmaes_explainer",
+    source: "GitHub",
+    category: "Algorithms",
+    blurb:
+      "An interactive deep dive into the Covariance Matrix Adaptation Evolution Strategy. Explains how it adapts to high-dimensional, non-convex landscapes where gradient descent fails.",
+    date: "2025-02-25",
   },
   {
     title: "Factor Risk Models and the Hedge Fund Business",
@@ -1101,15 +1092,7 @@ export const writingHighlights: WritingItem[] = [
       "Argues that internal alignment (Asimov's laws) is a losing battle. Proposes an external 'criminal justice system' for AI: helper models that monitor and police the primary model's output.",
     date: "2024-06-20",
   },
-  {
-    title: "The Lessons of Hermann Grassmann",
-    href: "/writing/hermann_grassmann_nature_of_abstractions",
-    source: "FMD",
-    category: "History of Math",
-    blurb:
-      "The story of the self-taught genius who invented linear algebra (the wedge product) decades before it was understood. A lesson on how radical abstractions are often rejected by the establishment.",
-    date: "2024-06-01",
-  },
+
   {
     title: "Engineering the Mindmap Generator",
     href: "/writing/making_of_the_mindmap_generator",
