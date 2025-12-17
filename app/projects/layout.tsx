@@ -5,6 +5,9 @@ import { projects } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Projects | Jeffrey Emanuel",
   description: "A catalog of experiments, open source tools, and products. The Agentic Coding Tooling Flywheel, Lumera Network, and more.",
+  alternates: {
+    canonical: "/projects",
+  },
   openGraph: {
     title: "Projects | Jeffrey Emanuel",
     description: "A catalog of experiments, open source tools, and products. The Agentic Coding Tooling Flywheel, Lumera Network, and more.",

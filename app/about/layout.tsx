@@ -6,6 +6,9 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About | Jeffrey Emanuel",
   description: "From hedge funds to AI agent infrastructure. Background and career timeline.",
+  alternates: {
+    canonical: "/about",
+  },
 };
 
 export default function AboutLayout({ children }: { children: React.ReactNode }) {

@@ -36,6 +36,7 @@ export const metadata: Metadata = {
     telephone: false, // Prevent auto-linking phone numbers
   },
   alternates: {
+    canonical: "/",
     types: {
       "application/rss+xml": [
         { url: "/rss.xml", title: "Jeffrey Emanuel - RSS Feed" },
