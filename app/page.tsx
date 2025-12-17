@@ -4,13 +4,14 @@ import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
 import AnimatedGrid, { LazySection, TimelineSkeleton } from "@/components/animated-grid";
-import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight } from "lucide-react";
+import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
 import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/content";
+import EndorsementShowcase from "@/components/endorsement-showcase";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
@@ -241,6 +242,23 @@ export default async function HomePage() {
             ))}
           </AnimatedGrid>
         </LazySection>
+      </SectionShell>
+
+      {/* Endorsements - Social proof after projects */}
+      <SectionShell
+        id="endorsements"
+        iconNode={<Quote className="h-5 w-5" />}
+        eyebrow="Recognition"
+        title="What people are saying"
+        kicker="From industry leaders, investors, and fellow engineers."
+      >
+        <EndorsementShowcase
+          layout="featured"
+          featuredOnly
+          maxItems={5}
+          heading=""
+          className="mt-2"
+        />
       </SectionShell>
 
       <SectionShell
