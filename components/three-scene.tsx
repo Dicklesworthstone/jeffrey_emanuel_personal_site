@@ -1525,13 +1525,16 @@ export default function ThreeScene() {
   const palette = palettes[plan.palette % palettes.length];
 
   // Dynamic DPR state for performance scaling
-  // Initialize with maxDpr from quality settings
+  // Use a ref to track quality.maxDpr and only update if it actually changed
+  const maxDprRef = useRef(quality.maxDpr);
   const [currentDpr, setCurrentDpr] = useState<number>(quality.maxDpr);
-  
-  // Sync currentDpr with quality changes
-  useEffect(() => {
+
+  // Sync currentDpr with quality changes (only when maxDpr actually changes)
+  if (maxDprRef.current !== quality.maxDpr) {
+    maxDprRef.current = quality.maxDpr;
+    // This is safe because it only runs when the prop actually changes
     setCurrentDpr(quality.maxDpr);
-  }, [quality.maxDpr]);
+  }
 
   // Performance regression handler - lower DPR when FPS drops
   const handleDecline = useCallback(() => {
