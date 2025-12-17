@@ -200,7 +200,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                         "h-3 w-3 transition-transform",
                         activeId === heading.id
                           ? "text-violet-400"
-                          : "text-slate-600 group-hover:text-slate-400"
+                          : "text-slate-500 group-hover:text-slate-400"
                       )}
                     />
                     <span className="line-clamp-2">{heading.text}</span>

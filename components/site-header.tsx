@@ -111,7 +111,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             >
               <Search className="h-4 w-4" />
               <span className="hidden lg:inline">Search</span>
-              <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 lg:inline-block">
+              <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-slate-300 lg:inline-block">
                 ⌘K
               </kbd>
             </button>
@@ -235,7 +235,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="relative p-8 text-xs font-medium uppercase tracking-widest text-slate-600"
+                className="relative p-8 text-xs font-medium uppercase tracking-widest text-slate-500"
               >
                  {siteConfig.location}
               </motion.div>

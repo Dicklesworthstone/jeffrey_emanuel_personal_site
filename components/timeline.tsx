@@ -55,7 +55,7 @@ export default function Timeline({ items }: { items: TimelineItem[] }) {
                   {item.body}
                 </p>
                 
-                <div className="mt-6 flex items-center gap-2 text-xs font-medium text-slate-600">
+                <div className="mt-6 flex items-center gap-2 text-xs font-medium text-slate-500">
                    <span className="h-1 w-1 rounded-full bg-slate-700" />
                    <span className="uppercase tracking-wider">{item.location}</span>
                 </div>

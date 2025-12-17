@@ -388,7 +388,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                   autoCapitalize="off"
                   spellCheck={false}
                 />
-                <kbd className="hidden rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-400 sm:inline-block">
+                <kbd className="hidden rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 sm:inline-block">
                   ESC
                 </kbd>
               </div>
@@ -462,7 +462,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                   "h-4 w-4 transition-transform",
                                   isSelected
                                     ? "translate-x-1 text-violet-400"
-                                    : "text-slate-600"
+                                    : "text-slate-500"
                                 )}
                               />
                             )}
@@ -478,20 +478,20 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-xs text-slate-500">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5">
+                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-slate-300">
                       ↑↓
                     </kbd>
                     <span>Navigate</span>
                   </span>
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5">
+                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-slate-300">
                       ↵
                     </kbd>
                     <span>Select</span>
                   </span>
                 </div>
                 <span className="flex items-center gap-1">
-                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5">
+                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-slate-300">
                     ?
                   </kbd>
                   <span>All shortcuts</span>
