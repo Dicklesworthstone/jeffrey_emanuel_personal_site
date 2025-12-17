@@ -81,6 +81,7 @@ export default function MediaPage() {
         eyebrow="Media"
         title="Press, podcasts, and long-form conversations"
         kicker="Coverage of the Nvidia essay that contributed to a $600B single-day market cap drop, my agentic coding tools, Lumera Network, and how AI is reshaping markets."
+        headingLevel={1}
       >
         {mediaItems.length > 0 ? (
           <>

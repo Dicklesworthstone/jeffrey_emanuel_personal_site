@@ -40,6 +40,7 @@ export default function ProjectsPage() {
       eyebrow="The Constellation"
       title="A catalog of experiments and products"
       kicker="Explore the ecosystem of tools, protocols, and research papers I've built. Filter by category or browse the full grid."
+      headingLevel={1}
     >
       {/* Filter Controls */}
       <LayoutGroup>

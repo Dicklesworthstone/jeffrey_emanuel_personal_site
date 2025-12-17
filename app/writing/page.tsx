@@ -59,6 +59,7 @@ export default function WritingPage() {
         eyebrow="The Library"
         title="Essays, research notes, and deep dives"
         kicker="I write to think. This is a collection of my technical essays on AI architecture, market mechanics, and software engineering. No fluff, just density."
+        headingLevel={1}
       >
         <WritingGrid featured={featured} archive={archive} />
       </SectionShell>

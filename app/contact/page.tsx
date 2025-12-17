@@ -12,7 +12,8 @@ export default function ContactPage() {
         icon={Mail}
         eyebrow="Contact"
         title="Get in touch"
-        kicker="For consulting, collaborations, or media, email is best. I read everything, though my response time depends on what I’m building that week."
+        kicker="For consulting, collaborations, or media, email is best. I read everything, though my response time depends on what I'm building that week."
+        headingLevel={1}
       >
         <div className="grid gap-8 md:grid-cols-[2fr,1fr]">
           <div className="space-y-4 text-sm text-slate-300">

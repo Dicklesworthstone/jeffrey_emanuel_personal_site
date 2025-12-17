@@ -15,6 +15,7 @@ export default function AboutPage() {
         eyebrow="About"
         title="From hedge funds to AI agent infrastructure"
         kicker="A decade underwriting businesses, now building the tools that let AI coding agents work together at scale."
+        headingLevel={1}
       >
         <p>
           I studied mathematics at Reed College and then spent roughly a decade

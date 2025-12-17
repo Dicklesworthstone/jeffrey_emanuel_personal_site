@@ -14,6 +14,8 @@ type Props = {
   kicker?: string;
   children: React.ReactNode;
   className?: string;
+  /** Use headingLevel={1} for the first section on a page to ensure proper h1 hierarchy */
+  headingLevel?: 1 | 2;
 };
 
 export default function SectionShell({
@@ -25,7 +27,9 @@ export default function SectionShell({
   kicker,
   children,
   className,
+  headingLevel = 2,
 }: Props) {
+  const HeadingTag = `h${headingLevel}` as const;
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
 
   // Generate a unique heading ID for aria-labelledby
@@ -65,12 +69,12 @@ export default function SectionShell({
                   {iconNode || (Icon && <Icon className="h-5 w-5" />)}
                 </div>
               )}
-              <h2
+              <HeadingTag
                 id={headingId}
                 className="text-balance-pro text-3xl font-bold tracking-tighter text-white sm:text-4xl md:text-5xl lg:text-6xl"
               >
                 {title}
-              </h2>
+              </HeadingTag>
             </div>
             
             {kicker && (

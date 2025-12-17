@@ -12,6 +12,7 @@ export default function ConsultingPage() {
         eyebrow="Consulting"
         title="AI, workflows, and markets for people who live inside risk limits"
         kicker="I work with hedge funds, multi‑manager platforms, PE firms, and large allocators who need to reason clearly about AI and compute."
+        headingLevel={1}
       >
         <p>
           Most AI conversations aimed at investors are either thinly disguised
