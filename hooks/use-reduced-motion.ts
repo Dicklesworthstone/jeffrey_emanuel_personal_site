@@ -13,13 +13,13 @@ import { useEffect, useState } from "react";
  * - Reduce visual complexity
  */
 export function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    
+    // Set initial value
+    setPrefersReducedMotion(mediaQuery.matches);
     
     const handler = (event: MediaQueryListEvent) => {
       setPrefersReducedMotion(event.matches);
@@ -27,7 +27,7 @@ export function useReducedMotion(): boolean {
 
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
-  }, [prefersReducedMotion]);
+  }, []);
 
   return prefersReducedMotion;
 }

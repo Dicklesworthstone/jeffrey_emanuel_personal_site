@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
@@ -23,6 +23,7 @@ export default function BottomSheet({
   children,
 }: BottomSheetProps) {
   const { mediumTap } = useHapticFeedback();
+  const titleId = useId();
 
   // Lock body scroll when open
   useEffect(() => {
@@ -73,6 +74,9 @@ export default function BottomSheet({
               damping: 40,
             }}
             className="fixed inset-x-0 bottom-0 z-50 max-h-[90vh] overflow-hidden rounded-t-3xl border-t border-slate-700/80 bg-slate-950 shadow-2xl md:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
           >
             {/* Drag handle */}
             <div className="flex justify-center py-3">
@@ -81,7 +85,7 @@ export default function BottomSheet({
 
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-800/80 px-6 pb-4">
-              <h2 className="text-lg font-semibold text-slate-50">{title}</h2>
+              <h2 id={titleId} className="text-lg font-semibold text-slate-50">{title}</h2>
               <button
                 onClick={onClose}
                 onTouchStart={mediumTap}
