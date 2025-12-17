@@ -655,6 +655,58 @@ const MobileBottomSheet = React.memo(function MobileBottomSheet({
   );
 });
 
+// Ecosystem vitality badge component
+const EcosystemVitalityBadge = React.memo(function EcosystemVitalityBadge({
+  toolCount,
+  reducedMotion,
+}: {
+  toolCount: number;
+  reducedMotion: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.8 }}
+      className="mt-6 flex justify-center"
+    >
+      <div className="inline-flex items-center gap-3 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-2 backdrop-blur-sm">
+        {/* Tool count */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/20">
+            <Zap className="h-3 w-3 text-violet-400" />
+          </div>
+          <span className="text-sm font-semibold text-white">{toolCount}</span>
+          <span className="text-xs text-slate-400">tools</span>
+        </div>
+
+        <div className="h-4 w-px bg-violet-500/30" />
+
+        {/* Stars estimate */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-semibold text-white">10K+</span>
+          <span className="text-xs text-slate-400">GitHub stars</span>
+        </div>
+
+        <div className="h-4 w-px bg-violet-500/30" />
+
+        {/* Synergy indicator */}
+        <div className="flex items-center gap-1">
+          <motion.div
+            className="h-2 w-2 rounded-full bg-emerald-400"
+            animate={reducedMotion ? {} : {
+              scale: [1, 1.3, 1],
+              opacity: [0.7, 1, 0.7],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <span className="text-xs text-emerald-400">Active</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
 export default function FlywheelVisualization() {
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
   const [hoveredToolId, setHoveredToolId] = useState<string | null>(null);
@@ -843,6 +895,12 @@ export default function FlywheelVisualization() {
               />
             ))}
           </div>
+
+          {/* Ecosystem vitality badge */}
+          <EcosystemVitalityBadge
+            toolCount={flywheelTools.length}
+            reducedMotion={reducedMotion}
+          />
         </div>
 
         {/* Detail panel (desktop) - shows on hover or click */}
