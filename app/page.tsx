@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
 import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
 import { motion } from "framer-motion";
+import { JsonLd } from "@/components/json-ld";
+import { siteConfig } from "@/lib/content";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
@@ -25,8 +27,31 @@ export default async function HomePage() {
     return stat;
   });
 
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: siteConfig.name,
+    jobTitle: "Founder & CEO",
+    worksFor: {
+      "@type": "Organization",
+      name: "Lumera Network",
+    },
+    url: "https://jeffreyemanuel.com",
+    sameAs: [
+      siteConfig.social.x,
+      siteConfig.social.github,
+      siteConfig.social.linkedin,
+    ],
+    alumniOf: {
+      "@type": "CollegeOrUniversity",
+      name: "Reed College",
+    },
+    knowsAbout: ["AI Agents", "Markets", "Software Engineering", "Mathematics", "Finance"],
+  };
+
   return (
     <>
+      <JsonLd data={personSchema} />
       <Hero stats={liveStats} />
 
       <SectionShell

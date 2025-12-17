@@ -9,6 +9,7 @@ import { cn, formatDate } from "@/lib/utils";
 import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -58,8 +59,35 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   // Extract headings for table of contents
   const headings = extractHeadings(post.content || "");
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    datePublished: post.date,
+    dateModified: post.date,
+    description: post.excerpt,
+    author: {
+      "@type": "Person",
+      name: "Jeffrey Emanuel",
+      url: "https://jeffreyemanuel.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Jeffrey Emanuel",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://jeffreyemanuel.com/icon-192.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://jeffreyemanuel.com/writing/${slug}`,
+    },
+  };
+
   return (
     <>
+      <JsonLd data={articleSchema} />
       {/* Reading progress bar */}
       <ArticleProgress />
 
