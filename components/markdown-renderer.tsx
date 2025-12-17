@@ -71,6 +71,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
                         height={0}
                         sizes="100vw"
                         className="rounded-xl border border-slate-800 shadow-2xl mx-auto w-full h-auto"
+                        style={{ width: '100%', height: 'auto' }}
                         loading="lazy"
                       />
                     </div>
