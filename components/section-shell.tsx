@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -33,8 +34,19 @@ export default function SectionShell({
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
   const prefersReducedMotion = useReducedMotion();
 
+  // Track if we've mounted on client to avoid hydration mismatch
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   // Generate a unique heading ID for aria-labelledby
   const headingId = id ? `${id}-heading` : undefined;
+
+  // Always start visible to prevent flash of invisible content
+  // Only animate from slightly offset position when intersection triggers
+  // Content is NEVER hidden - we just animate from a subtle offset
+  const animateIn = hasMounted && isIntersecting && !prefersReducedMotion;
 
   return (
     <section
@@ -48,10 +60,14 @@ export default function SectionShell({
       )}
     >
       <motion.div
-        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 30 }}
-        animate={prefersReducedMotion ? { opacity: 1, y: 0 } : (isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 })}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+        initial={false}
+        animate={{
+          opacity: 1,
+          y: animateIn ? 0 : (hasMounted ? 10 : 0)
+        }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
         className="relative z-10"
+        style={{ opacity: 1 }}
       >
         <div className="mb-16 max-w-3xl md:mb-24">
           {eyebrow && (

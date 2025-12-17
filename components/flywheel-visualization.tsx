@@ -61,18 +61,36 @@ function getCurvedPath(from: { x: number; y: number }, to: { x: number; y: numbe
   return `M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}`;
 }
 
+// Check if CSS Motion Path is supported (not on mobile Safari < 15.4)
+function useSupportsMotionPath() {
+  const [supported, setSupported] = useState(false);
+  useEffect(() => {
+    // Check if CSS Motion Path is supported
+    if (typeof CSS !== "undefined" && CSS.supports) {
+      setSupported(CSS.supports("offset-path", "path('M 0 0')"));
+    }
+  }, []);
+  return supported;
+}
+
 // Animated particle that flows along a connection
+// Uses CSS Motion Path which has limited mobile support
 function FlowingParticle({
   path,
   delay,
   duration,
   color,
+  enabled,
 }: {
   path: string;
   delay: number;
   duration: number;
   color: string;
+  enabled: boolean;
 }) {
+  // Don't render if not enabled (mobile devices without support)
+  if (!enabled) return null;
+
   return (
     <motion.circle
       r="3"
@@ -104,6 +122,7 @@ const ConnectionLine = React.memo(function ConnectionLine({
   toColor,
   reducedMotion,
   connectionId,
+  supportsMotionPath,
 }: {
   fromPos: { x: number; y: number };
   toPos: { x: number; y: number };
@@ -113,6 +132,7 @@ const ConnectionLine = React.memo(function ConnectionLine({
   toColor: string;
   reducedMotion: boolean;
   connectionId: string;
+  supportsMotionPath: boolean;
 }) {
   const path = getCurvedPath(fromPos, toPos);
   const gradientId = `gradient-${connectionId}`;
@@ -183,12 +203,12 @@ const ConnectionLine = React.memo(function ConnectionLine({
         }}
       />
 
-      {/* Flowing particles when active */}
-      {isActive && !reducedMotion && (
+      {/* Flowing particles when active - only on devices that support CSS Motion Path */}
+      {isActive && !reducedMotion && supportsMotionPath && (
         <>
-          <FlowingParticle path={path} delay={0} duration={2} color={color1} />
-          <FlowingParticle path={path} delay={0.7} duration={2} color={color2} />
-          <FlowingParticle path={path} delay={1.4} duration={2} color={color1} />
+          <FlowingParticle path={path} delay={0} duration={2} color={color1} enabled={supportsMotionPath} />
+          <FlowingParticle path={path} delay={0.7} duration={2} color={color2} enabled={supportsMotionPath} />
+          <FlowingParticle path={path} delay={1.4} duration={2} color={color1} enabled={supportsMotionPath} />
         </>
       )}
     </g>
@@ -605,6 +625,7 @@ export default function FlywheelVisualization() {
   const [hoveredToolId, setHoveredToolId] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
+  const supportsMotionPath = useSupportsMotionPath();
 
   const activeToolId = selectedToolId || hoveredToolId;
   // Show detail panel for hovered tool (desktop) or selected tool (mobile/click)
@@ -762,6 +783,7 @@ export default function FlywheelVisualization() {
                     toColor={toTool.color}
                     reducedMotion={reducedMotion}
                     connectionId={`${from}-${to}`}
+                    supportsMotionPath={supportsMotionPath}
                   />
                 );
               })}
