@@ -1,3 +1,5 @@
+"use client";
+
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -7,6 +9,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import ErrorBoundary from "@/components/error-boundary";
 
 interface MarkdownRendererProps {
   content: string;
@@ -15,13 +18,22 @@ interface MarkdownRendererProps {
 
 export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
   return (
-    <div
-      className={cn(
-        "prose prose-lg prose-invert max-w-none prose-pre:bg-slate-900/50 prose-pre:border prose-pre:border-slate-800 prose-headings:font-semibold prose-a:text-sky-300 hover:prose-a:text-sky-200 prose-img:rounded-xl",
-        className
-      )}
+    <ErrorBoundary
+      fallback={
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-6 text-center">
+          <p className="text-sm text-amber-200/80">
+            Unable to render this content. The article may contain formatting that couldn&apos;t be processed.
+          </p>
+        </div>
+      }
     >
-      <ReactMarkdown
+      <div
+        className={cn(
+          "prose prose-lg prose-invert max-w-none prose-pre:bg-slate-900/50 prose-pre:border prose-pre:border-slate-800 prose-headings:font-semibold prose-a:text-sky-300 hover:prose-a:text-sky-200 prose-img:rounded-xl",
+          className
+        )}
+      >
+        <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: true }]]}
         // rehype-slug adds IDs to headings for TOC navigation
         // Keep HTML generation on the server so we don't ship the entire
@@ -83,6 +95,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       >
         {content}
       </ReactMarkdown>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

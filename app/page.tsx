@@ -9,7 +9,6 @@ import { careerTimeline, projects, threads, writingHighlights, flywheelTools, he
 import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
 import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
-import { motion } from "framer-motion";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/content";
 

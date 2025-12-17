@@ -5,7 +5,7 @@ import ArticleProgress from "@/components/article-progress";
 import TableOfContents from "@/components/table-of-contents";
 import { calculateReadingTime } from "@/lib/reading-time";
 import { extractHeadings } from "@/lib/extract-headings";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";

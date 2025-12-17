@@ -5,6 +5,7 @@ import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import SectionShell from "@/components/section-shell";
 import BentoGrid from "@/components/bento-grid";
 import FlywheelVisualization from "@/components/flywheel-visualization";
+import ErrorBoundary from "@/components/error-boundary";
 import { projects } from "@/lib/content";
 import { GitBranch, Layers, Zap, Beaker, Box, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -92,7 +93,15 @@ export default function ProjectsPage() {
             className="mb-12 sm:mb-16 overflow-hidden"
           >
             <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-violet-950/20 via-black/40 to-black/20 p-4 sm:p-6 md:p-8 lg:p-12 backdrop-blur-sm">
-              <FlywheelVisualization />
+              <ErrorBoundary
+                fallback={
+                  <div className="flex min-h-[300px] items-center justify-center text-slate-400">
+                    <p className="text-sm">Unable to load flywheel visualization</p>
+                  </div>
+                }
+              >
+                <FlywheelVisualization />
+              </ErrorBoundary>
             </div>
           </motion.div>
         )}
@@ -105,7 +114,15 @@ export default function ProjectsPage() {
         layout
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
-        <BentoGrid projects={filteredProjects} />
+        <ErrorBoundary
+          fallback={
+            <div className="flex min-h-[200px] items-center justify-center text-slate-400">
+              <p className="text-sm">Unable to load projects grid</p>
+            </div>
+          }
+        >
+          <BentoGrid projects={filteredProjects} />
+        </ErrorBoundary>
       </motion.div>
 
       <div className="mt-12 sm:mt-16 text-center">
