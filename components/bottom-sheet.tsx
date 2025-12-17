@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 
@@ -24,6 +24,7 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   const { mediumTap } = useHapticFeedback();
   const titleId = useId();
+  const prefersReducedMotion = useReducedMotion();
 
   // Lock body scroll when open
   useEffect(() => {
@@ -54,10 +55,10 @@ export default function BottomSheet({
         <>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
             className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm md:hidden"
             onClick={onClose}
             onTouchStart={mediumTap}
@@ -65,10 +66,10 @@ export default function BottomSheet({
 
           {/* Bottom Sheet */}
           <motion.div
-            initial={{ y: "100%" }}
+            initial={prefersReducedMotion ? { y: 0 } : { y: "100%" }}
             animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{
+            exit={prefersReducedMotion ? { y: 0, opacity: 0 } : { y: "100%" }}
+            transition={prefersReducedMotion ? { duration: 0 } : {
               type: "spring",
               stiffness: 400,
               damping: 40,

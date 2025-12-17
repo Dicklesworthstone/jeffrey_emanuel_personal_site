@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ export default function SectionShell({
 }: Props) {
   const HeadingTag = `h${headingLevel}` as const;
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
+  const prefersReducedMotion = useReducedMotion();
 
   // Generate a unique heading ID for aria-labelledby
   const headingId = id ? `${id}-heading` : undefined;
@@ -47,9 +48,9 @@ export default function SectionShell({
       )}
     >
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-        transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 30 }}
+        animate={prefersReducedMotion ? { opacity: 1, y: 0 } : (isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 })}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
         className="relative z-10"
       >
         <div className="mb-16 max-w-3xl md:mb-24">

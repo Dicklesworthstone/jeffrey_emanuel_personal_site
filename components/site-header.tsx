@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { navItems, siteConfig } from "@/lib/content";
@@ -19,6 +19,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { lightTap, mediumTap } = useHapticFeedback();
+  const prefersReducedMotion = useReducedMotion();
 
   // Shrink header on scroll (mobile only)
   useEffect(() => {
@@ -94,9 +95,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                   {item.label}
                   {active && (
                     <motion.div
-                      layoutId="nav-dot"
+                      layoutId={prefersReducedMotion ? undefined : "nav-dot"}
                       className="mx-auto mt-1 h-1 w-1 rounded-full bg-sky-400"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
                 </Link>
@@ -144,20 +145,20 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 {open ? (
                   <motion.div
                     key="close"
-                    initial={{ opacity: 0, rotate: -90 }}
+                    initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, rotate: -90 }}
                     animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: 90 }}
-                    transition={{ duration: 0.2 }}
+                    exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, rotate: 90 }}
+                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
                   >
                     <X className="h-5 w-5" />
                   </motion.div>
                 ) : (
                   <motion.div
                     key="menu"
-                    initial={{ opacity: 0, rotate: 90 }}
+                    initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, rotate: 90 }}
                     animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: -90 }}
-                    transition={{ duration: 0.2 }}
+                    exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, rotate: -90 }}
+                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
                   >
                     <Menu className="h-5 w-5" />
                   </motion.div>
@@ -172,10 +173,10 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             className="fixed inset-0 z-40 flex flex-col bg-slate-950/95 backdrop-blur-2xl md:hidden overflow-y-auto"
             role="dialog"
             aria-modal="true"
@@ -193,9 +194,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                   return (
                     <motion.div
                       key={item.href}
-                      initial={{ opacity: 0, y: 40 }}
+                      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 + index * 0.05, duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+                      transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.1 + index * 0.05, duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
                     >
                       <Link
                         href={item.href}
@@ -214,9 +215,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               </div>
 
               <motion.div
-                initial={{ opacity: 0, y: 40 }}
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.4, duration: 0.5 }}
                 className="mt-16"
               >
                 <Link
@@ -231,10 +232,10 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             
             {/* Footer info in menu */}
             {siteConfig.location && (
-              <motion.div 
-                initial={{ opacity: 0 }}
+              <motion.div
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.6 }}
                 className="relative p-8 text-xs font-medium uppercase tracking-widest text-slate-500"
               >
                  {siteConfig.location}

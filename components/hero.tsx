@@ -4,7 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Suspense, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Briefcase, Workflow } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
 import StatsGrid from "@/components/stats-grid";
@@ -33,6 +33,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
     colors: ["#8b5cf6", "#d946ef", "#a855f7", "#38bdf8", "#22c55e"],
     count: 16,
   });
+  const prefersReducedMotion = useReducedMotion();
 
   const [shouldRenderScene, setShouldRenderScene] = useState(false);
 
@@ -62,9 +63,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
         {/* Text Content */}
         <div className="relative z-20 flex max-w-4xl flex-col gap-10 lg:max-w-3xl lg:pr-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="flex items-center gap-5"
           >
             <div className="group relative h-16 w-16 overflow-hidden rounded-full shadow-2xl sm:h-20 sm:w-20">
@@ -98,9 +99,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
           <div className="space-y-8">
             <motion.h1
               className="text-balance-pro text-5xl font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl lg:text-[5.5rem] xl:text-[6rem]"
-              initial={{ opacity: 0, y: 40 }}
+              initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               Building the <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-sky-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent filter drop-shadow-sm">
@@ -112,9 +113,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
             <motion.div
               className="max-w-2xl space-y-4 text-lg font-medium leading-relaxed text-slate-400/90 md:text-xl md:leading-loose"
-              initial={{ opacity: 0 }}
+              initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.4 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 1, delay: 0.4 }}
             >
               {heroContent.body.map((p, i) => (
                 <p key={i}>{p}</p>
@@ -124,9 +125,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
           <motion.div
             className="flex flex-wrap gap-4 pt-2"
-            initial={{ opacity: 0, y: 20 }}
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.6 }}
           >
             <Link
               href={heroContent.primaryCta.href}
@@ -152,9 +153,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
           </motion.div>
 
           <motion.div
-             initial={{ opacity: 0 }}
+             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
              animate={{ opacity: 1 }}
-             transition={{ duration: 1, delay: 0.8 }}
+             transition={prefersReducedMotion ? { duration: 0 } : { duration: 1, delay: 0.8 }}
              className="pt-12 lg:pt-16"
           >
             <StatsGrid stats={stats} />

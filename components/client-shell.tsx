@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
@@ -24,6 +24,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // Enable mobile-specific optimizations
   useMobileOptimizations();
@@ -64,10 +65,10 @@ export default function ClientShell({ children }: { children: React.ReactNode })
           <motion.main
             id="main-content"
             key={pathname}
-            initial={{ opacity: 0, y: 16 }}
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }}
             className="flex-1"
             tabIndex={-1}
             role="main"
