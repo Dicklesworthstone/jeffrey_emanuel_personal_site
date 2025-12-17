@@ -37,7 +37,11 @@ export default class ErrorBoundary extends Component<
       }
 
       return (
-        <div className="mx-auto flex min-h-[400px] max-w-2xl flex-col items-center justify-center px-4 py-12 text-center">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mx-auto flex min-h-[400px] max-w-2xl flex-col items-center justify-center px-4 py-12 text-center"
+        >
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300">
             <AlertTriangle className="h-8 w-8" />
           </div>
