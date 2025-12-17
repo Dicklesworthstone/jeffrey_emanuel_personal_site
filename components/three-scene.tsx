@@ -1,27 +1,44 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { OrbitControls, PerformanceMonitor } from "@react-three/drei";
+import { useEffect, useMemo, useRef, useState, useCallback, createContext, useContext } from "react";
 import type { JSX } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
+import {
+  useDeviceCapabilities,
+  type QualitySettings,
+} from "@/hooks/use-mobile-optimizations";
 
 // ---------------------------------------------------------------------------
-// Environment helpers
+// Quality context for child components
 // ---------------------------------------------------------------------------
-const isMobileDevice = () => {
-  if (typeof window === "undefined") return false;
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-};
+interface QualityContextValue {
+  quality: QualitySettings;
+  tier: "low" | "medium" | "high";
+}
 
-const isSlowConnection = () => {
-  if (typeof window === "undefined" || !("connection" in navigator)) return false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conn = (navigator as any).connection;
-  if (!conn) return false;
-  return conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.saveData === true;
-};
+const QualityContext = createContext<QualityContextValue | null>(null);
+
+function useQuality() {
+  const context = useContext(QualityContext);
+  if (!context) {
+    throw new Error("useQuality must be used within a QualityProvider");
+  }
+  return context;
+}
+
+// ---------------------------------------------------------------------------
+// Helper to scale counts based on quality
+// ---------------------------------------------------------------------------
+function scaleCount(baseCount: number, q: QualitySettings): number {
+  return Math.max(10, Math.floor(baseCount * q.particleMultiplier));
+}
+
+function scaleSegments(baseSegments: number, q: QualitySettings): number {
+  return Math.max(8, Math.floor(baseSegments * q.geometryDetail));
+}
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -56,15 +73,14 @@ const seededRandom = (seed: number) => {
   };
 };
 
-// Starfield reused by multiple scenes
+// Starfield reused by multiple scenes - now quality-aware
 function StarField({ density = 420, color = "#38bdf8" }: { density?: number; color?: string }) {
   const ref = useRef<THREE.Points>(null);
+  const { quality } = useQuality();
+
   const [positions] = useState(() => {
-    let numPoints = density;
-    if (typeof window !== "undefined") {
-      if (isSlowConnection()) numPoints = Math.min(120, density);
-      else if (isMobileDevice()) numPoints = Math.min(220, density);
-    }
+    // Scale density based on quality settings
+    const numPoints = scaleCount(density, quality);
     const pts = new Float32Array(numPoints * 3);
     for (let i = 0; i < numPoints; i++) {
       const r = 5 + Math.random() * 4;
@@ -163,7 +179,10 @@ function SceneOrbits({ palette }: { palette: Palette; seed: number }) {
 function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed: number; count?: number }) {
   const ref = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
-  const geom = useMemo(() => new THREE.SphereGeometry(0.04, 12, 12), []);
+  const { quality } = useQuality();
+  const actualCount = scaleCount(count, quality);
+  const sphereSegments = scaleSegments(12, quality);
+  const geom = useMemo(() => new THREE.SphereGeometry(0.04, sphereSegments, sphereSegments), [sphereSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.8, metalness: 0.1, roughness: 0.4 }),
     [palette],
@@ -188,8 +207,8 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
     if (!ref.current) return;
     const t = clock.getElapsedTime() * 0.35;
     const dummy = dummyRef.current;
-    for (let i = 0; i < count; i++) {
-      const k = (i / count) * Math.PI * 2;
+    for (let i = 0; i < actualCount; i++) {
+      const k = (i / actualCount) * Math.PI * 2;
       const x = Math.sin(params.ax * k + t) * Math.cos(params.bx * k + params.phase) * 2.2;
       const y = Math.sin(params.ay * k + t * 1.1) * Math.sin(params.by * k + params.phase) * 2.2;
       const z = Math.cos(params.az * k + t * 0.8) * Math.cos(params.bz * k + params.phase) * 2.2;
@@ -213,7 +232,7 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
     };
   }, []);
 
-  return <instancedMesh ref={ref} args={[geom, mat, count]} />;
+  return <instancedMesh ref={ref} args={[geom, mat, actualCount]} />;
 }
 
 function SceneLissajous({ palette, seed }: { palette: Palette; seed: number }) {
@@ -434,6 +453,8 @@ function SceneTorus({ palette, seed }: { palette: Palette; seed: number }) {
 function IcosaFlock({ palette, seed, count = 140 }: { palette: Palette; seed: number; count?: number }) {
   const ref = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
+  const { quality } = useQuality();
+  const actualCount = scaleCount(count, quality);
   const geom = useMemo(() => new THREE.IcosahedronGeometry(0.09, 0), []);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[2], emissiveIntensity: 0.6, roughness: 0.3 }),
@@ -443,12 +464,12 @@ function IcosaFlock({ palette, seed, count = 140 }: { palette: Palette; seed: nu
   useEffect(() => () => mat.dispose(), [mat]);
 
   const rand = useMemo(() => seededRandom(seed), [seed]);
-  const seeds = useMemo(() => Array.from({ length: count }, () => ({
+  const seeds = useMemo(() => Array.from({ length: actualCount }, () => ({
     phase: rand() * Math.PI * 2,
     radius: 0.8 + rand() * 2.4,
     speed: 0.4 + rand() * 0.7,
     height: 0.4 + rand() * 1.4,
-  })), [count, rand]);
+  })), [actualCount, rand]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -466,7 +487,7 @@ function IcosaFlock({ palette, seed, count = 140 }: { palette: Palette; seed: nu
     ref.current.instanceMatrix.needsUpdate = true;
   });
 
-  return <instancedMesh ref={ref} args={[geom, mat, count]} />;
+  return <instancedMesh ref={ref} args={[geom, mat, actualCount]} />;
 }
 
 function SceneFlock({ palette, seed }: { palette: Palette; seed: number }) {
@@ -1055,7 +1076,11 @@ function SceneTrefoil({ palette, seed }: { palette: Palette; seed: number }) {
 function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
-  const geom = useMemo(() => new THREE.SphereGeometry(0.025, 6, 6), []);
+  const { quality } = useQuality();
+  // Heavy limit on particles for this scene
+  const actualCount = Math.min(scaleCount(count, quality), quality.maxParticles);
+  const sphereSegments = scaleSegments(6, quality);
+  const geom = useMemo(() => new THREE.SphereGeometry(0.025, sphereSegments, sphereSegments), [sphereSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 1.0, roughness: 0.4 }),
     [palette]
@@ -1065,7 +1090,7 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
 
   // Initialize particle positions
   const particles = useMemo(() => {
-    return Array.from({ length: count }, () => ({
+    return Array.from({ length: actualCount }, () => ({
       pos: new THREE.Vector3(
         (rand() - 0.5) * 5,
         (rand() - 0.5) * 5,
@@ -1074,7 +1099,7 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
       vel: new THREE.Vector3(0, 0, 0),
       life: rand(),
     }));
-  }, [count, rand]);
+  }, [actualCount, rand]);
 
   // Simple 3D noise function
   const noise3D = (x: number, y: number, z: number, t: number) => {
@@ -1114,7 +1139,7 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
     meshRef.current.instanceMatrix.needsUpdate = true;
   });
 
-  return <instancedMesh ref={meshRef} args={[geom, mat, count]} />;
+  return <instancedMesh ref={meshRef} args={[geom, mat, actualCount]} />;
 }
 
 function SceneFlowField({ palette, seed }: { palette: Palette; seed: number }) {
@@ -1218,6 +1243,8 @@ function SceneSpirograph({ palette, seed }: { palette: Palette; seed: number }) 
 function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
+  const { quality } = useQuality();
+  const actualCount = scaleCount(count, quality);
   const geom = useMemo(() => new THREE.DodecahedronGeometry(0.06, 0), []);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.7, metalness: 0.4, roughness: 0.3 }),
@@ -1234,10 +1261,10 @@ function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; s
     const t = clock.getElapsedTime();
     const dummy = dummyRef.current;
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < actualCount; i++) {
       // Fibonacci sphere distribution
       const theta = i * goldenAngle + t * 0.2;
-      const y = 1 - (i / (count - 1)) * 2; // -1 to 1
+      const y = 1 - (i / (actualCount - 1)) * 2; // -1 to 1
       const radius = Math.sqrt(1 - y * y);
 
       // Animated pulsing radius
@@ -1259,7 +1286,7 @@ function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; s
     meshRef.current.rotation.y = t * 0.1;
   });
 
-  return <instancedMesh ref={meshRef} args={[geom, mat, count]} />;
+  return <instancedMesh ref={meshRef} args={[geom, mat, actualCount]} />;
 }
 
 function ScenePhyllotaxis({ palette, seed }: { palette: Palette; seed: number }) {
@@ -1491,35 +1518,68 @@ const hourlyPlan: { variant: VariantKey; palette: number; seed: number; backgrou
 // Main exported component
 // ---------------------------------------------------------------------------
 export default function ThreeScene() {
-  const isMobile = isMobileDevice();
-  const isSlowNetwork = isSlowConnection();
+  const { capabilities, quality } = useDeviceCapabilities();
+  const { isMobile, tier } = capabilities;
   const hour = useHour();
   const plan = hourlyPlan[hour % 24];
   const palette = palettes[plan.palette % palettes.length];
 
-  const quality = isSlowNetwork ? "low" : isMobile ? "medium" : "high";
-  const dpr: [number, number] = isSlowNetwork ? [0.5, 1] : isMobile ? [1, 1.5] : [1, 2];
-  const autoRotateSpeed = isSlowNetwork ? 0.08 : isMobile ? 0.18 : 0.28;
+  // Dynamic DPR state for performance scaling
+  // Initialize with maxDpr from quality settings
+  const [currentDpr, setCurrentDpr] = useState<number>(quality.maxDpr);
+  
+  // Sync currentDpr with quality changes
+  useEffect(() => {
+    setCurrentDpr(quality.maxDpr);
+  }, [quality.maxDpr]);
+
+  // Performance regression handler - lower DPR when FPS drops
+  const handleDecline = useCallback(() => {
+    setCurrentDpr((prev) => Math.max(0.5, prev - 0.25));
+  }, []);
+
+  // Performance improvement handler - raise DPR when FPS is good
+  const handleIncline = useCallback(() => {
+    setCurrentDpr((prev) => Math.min(quality.maxDpr, prev + 0.25));
+  }, [quality.maxDpr]);
+
+  const autoRotateSpeed = tier === "low" ? 0.08 : tier === "medium" ? 0.18 : 0.28;
+
+  // Context value
+  const contextValue: QualityContextValue = useMemo(() => ({
+    quality,
+    tier
+  }), [quality, tier]);
 
   return (
     <Canvas
       camera={{ position: [0, 0, 6], fov: 40 }}
       className="h-[280px] w-full touch-none sm:h-[380px] md:h-[420px] lg:h-[460px]"
-      dpr={dpr}
+      dpr={currentDpr}
       performance={{ min: 0.3 }}
       style={{ touchAction: "none" }}
+      frameloop={tier === "low" ? "demand" : "always"}
     >
-      <color attach="background" args={[plan.background ?? "#020617"]} />
-      {scenes[plan.variant]({ palette, seed: plan.seed })}
-      <OrbitControls
-        enableZoom={false}
-        autoRotate={quality !== "low"}
-        autoRotateSpeed={autoRotateSpeed}
-        enablePan={false}
-        enableRotate={!isMobile}
-        enableDamping={quality === "high"}
-        makeDefault
+      {/* Performance monitoring - automatically scales DPR based on FPS */}
+      <PerformanceMonitor
+        onDecline={handleDecline}
+        onIncline={handleIncline}
+        flipflops={3}
+        bounds={() => (tier === "high" ? [50, 60] : [25, 35])}
       />
+      <QualityContext.Provider value={contextValue}>
+        <color attach="background" args={[plan.background ?? "#020617"]} />
+        {scenes[plan.variant]({ palette, seed: plan.seed })}
+        <OrbitControls
+          enableZoom={false}
+          autoRotate={tier !== "low"}
+          autoRotateSpeed={autoRotateSpeed}
+          enablePan={false}
+          enableRotate={!isMobile}
+          enableDamping={tier === "high"}
+          makeDefault
+        />
+      </QualityContext.Provider>
     </Canvas>
   );
 }

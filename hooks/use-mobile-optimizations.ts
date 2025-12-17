@@ -1,6 +1,228 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+/**
+ * Device capability tiers for adaptive rendering
+ */
+export type DeviceTier = "low" | "medium" | "high";
+
+/**
+ * Comprehensive device capabilities for adaptive rendering
+ */
+export interface DeviceCapabilities {
+  tier: DeviceTier;
+  isMobile: boolean;
+  isSlowConnection: boolean;
+  hardwareConcurrency: number;
+  devicePixelRatio: number;
+  prefersReducedMotion: boolean;
+  hasLowMemory: boolean;
+  isLowPowerMode: boolean;
+  maxTextureSize: number;
+  supportsWebGL2: boolean;
+}
+
+/**
+ * Quality settings derived from device capabilities
+ */
+export interface QualitySettings {
+  particleMultiplier: number;      // 0.25 - 1.0
+  geometryDetail: number;          // 0.5 - 1.0 (segment multiplier)
+  maxDpr: number;                  // 1 - 2
+  enableShadows: boolean;
+  enablePostProcessing: boolean;
+  maxParticles: number;            // Absolute cap
+  targetFps: number;               // 30 or 60
+}
+
+/**
+ * Detect device capabilities for adaptive rendering
+ */
+function detectCapabilities(): DeviceCapabilities {
+  if (typeof window === "undefined") {
+    return {
+      tier: "medium",
+      isMobile: false,
+      isSlowConnection: false,
+      hardwareConcurrency: 4,
+      devicePixelRatio: 1,
+      prefersReducedMotion: false,
+      hasLowMemory: false,
+      isLowPowerMode: false,
+      maxTextureSize: 4096,
+      supportsWebGL2: true,
+    };
+  }
+
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Check connection speed
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const conn = (navigator as any).connection;
+  const isSlowConnection = conn
+    ? conn.effectiveType === "slow-2g" ||
+      conn.effectiveType === "2g" ||
+      conn.saveData === true
+    : false;
+
+  // Hardware concurrency (CPU cores)
+  const hardwareConcurrency = navigator.hardwareConcurrency || 4;
+
+  // Device pixel ratio
+  const devicePixelRatio = window.devicePixelRatio || 1;
+
+  // Reduced motion preference
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  // Low memory detection (Chrome only)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hasLowMemory = (navigator as any).deviceMemory
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? (navigator as any).deviceMemory <= 4
+    : isMobile;
+
+  // Low power mode detection (heuristic: iOS low power mode reduces CPU frequency)
+  const isLowPowerMode = isSlowConnection || hasLowMemory;
+
+  // WebGL capabilities
+  let maxTextureSize = 4096;
+  let supportsWebGL2 = false;
+  try {
+    const canvas = document.createElement("canvas");
+    const gl2 = canvas.getContext("webgl2");
+    if (gl2) {
+      supportsWebGL2 = true;
+      maxTextureSize = gl2.getParameter(gl2.MAX_TEXTURE_SIZE);
+    } else {
+      const gl1 = canvas.getContext("webgl");
+      if (gl1) {
+        maxTextureSize = gl1.getParameter(gl1.MAX_TEXTURE_SIZE);
+      }
+    }
+  } catch {
+    // WebGL not available
+  }
+
+  // Determine tier based on capabilities
+  let tier: DeviceTier = "high";
+
+  // Downgrade based on indicators
+  let score = 0;
+  if (isMobile) score += 2;
+  if (isSlowConnection) score += 3;
+  if (hardwareConcurrency <= 2) score += 2;
+  if (hardwareConcurrency <= 4) score += 1;
+  if (hasLowMemory) score += 2;
+  if (devicePixelRatio > 2.5) score += 1; // High DPR = more GPU work
+  if (!supportsWebGL2) score += 1;
+  if (maxTextureSize < 4096) score += 1;
+  if (prefersReducedMotion) score += 2;
+
+  if (score >= 6) tier = "low";
+  else if (score >= 3) tier = "medium";
+
+  return {
+    tier,
+    isMobile,
+    isSlowConnection,
+    hardwareConcurrency,
+    devicePixelRatio,
+    prefersReducedMotion,
+    hasLowMemory,
+    isLowPowerMode,
+    maxTextureSize,
+    supportsWebGL2,
+  };
+}
+
+/**
+ * Generate quality settings from device capabilities
+ */
+function getQualitySettings(caps: DeviceCapabilities): QualitySettings {
+  switch (caps.tier) {
+    case "low":
+      return {
+        particleMultiplier: 0.25,
+        geometryDetail: 0.5,
+        maxDpr: 1,
+        enableShadows: false,
+        enablePostProcessing: false,
+        maxParticles: 200,
+        targetFps: 30,
+      };
+    case "medium":
+      return {
+        particleMultiplier: 0.5,
+        geometryDetail: 0.75,
+        maxDpr: 1.5,
+        enableShadows: false,
+        enablePostProcessing: false,
+        maxParticles: 500,
+        targetFps: 30,
+      };
+    case "high":
+    default:
+      return {
+        particleMultiplier: 1.0,
+        geometryDetail: 1.0,
+        maxDpr: 2,
+        enableShadows: true,
+        enablePostProcessing: true,
+        maxParticles: 2000,
+        targetFps: 60,
+      };
+  }
+}
+
+/**
+ * Hook to get device capabilities and quality settings for Three.js rendering.
+ * Re-evaluates on visibility change and orientation change.
+ */
+export function useDeviceCapabilities() {
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities>(() =>
+    detectCapabilities()
+  );
+
+  useEffect(() => {
+    // Re-detect on visibility change (user might have changed power settings)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setCapabilities(detectCapabilities());
+      }
+    };
+
+    // Re-detect on orientation change
+    const handleOrientationChange = () => {
+      setTimeout(() => setCapabilities(detectCapabilities()), 100);
+    };
+
+    // Listen for reduced motion preference changes
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleMotionChange = () => {
+      setCapabilities(detectCapabilities());
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("orientationchange", handleOrientationChange);
+    motionQuery.addEventListener("change", handleMotionChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+      motionQuery.removeEventListener("change", handleMotionChange);
+    };
+  }, []);
+
+  const quality = useMemo(
+    () => getQualitySettings(capabilities),
+    [capabilities]
+  );
+
+  return { capabilities, quality };
+}
 
 /**
  * Mobile-specific optimizations and enhancements
@@ -48,3 +270,17 @@ export function checkIsMobile(): boolean {
  * Alias for checkIsMobile for convenience
  */
 export const isMobile = checkIsMobile;
+
+/**
+ * Get static device capabilities (non-reactive, for use in non-component contexts)
+ */
+export function getDeviceCapabilities(): DeviceCapabilities {
+  return detectCapabilities();
+}
+
+/**
+ * Get static quality settings (non-reactive, for use in non-component contexts)
+ */
+export function getStaticQualitySettings(): QualitySettings {
+  return getQualitySettings(detectCapabilities());
+}
