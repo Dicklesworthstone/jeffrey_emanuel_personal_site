@@ -3,6 +3,17 @@ import WritingGrid from "@/components/writing-grid";
 import { writingHighlights, type WritingItem } from "@/lib/content";
 import { getAllPosts } from "@/lib/mdx";
 import { PenSquare } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Writing | Jeffrey Emanuel",
+  description: "Essays, research notes, and deep dives on AI architecture, market mechanics, and software engineering.",
+  openGraph: {
+    title: "Writing | Jeffrey Emanuel",
+    description: "Essays, research notes, and deep dives on AI architecture, market mechanics, and software engineering.",
+    url: "https://jeffreyemanuel.com/writing",
+  },
+};
 
 export default function WritingPage() {
   const allPosts = getAllPosts();
