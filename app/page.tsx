@@ -250,37 +250,39 @@ export default async function HomePage() {
         title="Essays, memos, and research notes"
         kicker="A mix of public writing and GitHub-native research artifacts."
       >
-        <AnimatedGrid
-          className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
-          staggerDelay={0.1}
-        >
-          {featuredWriting.map((item) => (
-            <HapticLink
-              key={item.title}
-              href={item.href}
-              className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
-            >
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                <span>{item.source}</span>
-                <span className="h-0.5 w-0.5 rounded-full bg-slate-500" />
-                <span>{item.category}</span>
-              </div>
+        <LazySection minHeight="400px" skeletonCards={6}>
+          <AnimatedGrid
+            className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+            staggerDelay={0.1}
+          >
+            {featuredWriting.map((item) => (
+              <HapticLink
+                key={item.title}
+                href={item.href}
+                className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
+              >
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  <span>{item.source}</span>
+                  <span className="h-0.5 w-0.5 rounded-full bg-slate-500" />
+                  <span>{item.category}</span>
+                </div>
 
-              <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 transition-colors group-hover:text-sky-200">
-                {item.title}
-              </h3>
+                <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 transition-colors group-hover:text-sky-200">
+                  {item.title}
+                </h3>
 
-              <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
-                {item.blurb}
-              </p>
+                <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
+                  {item.blurb}
+                </p>
 
-              <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
-                Read the essay
-                <span className="text-lg leading-none">→</span>
-              </div>
-            </HapticLink>
-          ))}
-        </AnimatedGrid>
+                <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
+                  Read the essay
+                  <span className="text-lg leading-none">→</span>
+                </div>
+              </HapticLink>
+            ))}
+          </AnimatedGrid>
+        </LazySection>
       </SectionShell>
 
       <SectionShell
