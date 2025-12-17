@@ -59,7 +59,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   return (
     <ErrorBoundary>
       <div className="flex min-h-screen flex-col">
-        <SiteHeader />
+        <SiteHeader onOpenCommandPalette={openCommandPalette} />
         <AnimatePresence mode="wait">
           <motion.main
             id="main-content"

@@ -17,7 +17,9 @@ import {
   Twitter,
   Linkedin,
   ArrowRight,
+  FileText,
 } from "lucide-react";
+import Fuse from "fuse.js";
 import { navItems, projects, writingHighlights, siteConfig } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +28,7 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-type CommandCategory = "pages" | "projects" | "writing" | "social" | "actions";
+type CommandCategory = "pages" | "projects" | "writing" | "social" | "actions" | "search_results";
 
 interface Command {
   id: string;
@@ -36,6 +38,15 @@ interface Command {
   category: CommandCategory;
   action: () => void;
   keywords?: string[];
+}
+
+interface SearchIndexItem {
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  tags: string[];
+  content: string;
 }
 
 const pageIcons: Record<string, React.ReactNode> = {
@@ -54,6 +65,7 @@ const categoryLabels: Record<CommandCategory, string> = {
   writing: "Writing",
   social: "Social",
   actions: "Actions",
+  search_results: "Content Search",
 };
 
 /**
@@ -66,9 +78,35 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const listRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [searchIndex, setSearchIndex] = useState<SearchIndexItem[]>([]);
+  const [fuse, setFuse] = useState<Fuse<SearchIndexItem> | null>(null);
 
-  // Build commands list
-  const commands = useMemo<Command[]>(() => {
+  // Fetch search index on load (or on first open)
+  useEffect(() => {
+    if (isOpen && searchIndex.length === 0) {
+      fetch("/api/search")
+        .then((res) => res.json())
+        .then((data) => {
+          setSearchIndex(data);
+          const fuseInstance = new Fuse<SearchIndexItem>(data, {
+            keys: [
+              { name: "title", weight: 0.7 },
+              { name: "tags", weight: 0.5 },
+              { name: "category", weight: 0.4 },
+              { name: "excerpt", weight: 0.3 },
+              { name: "content", weight: 0.1 },
+            ],
+            threshold: 0.4,
+            includeScore: true,
+          });
+          setFuse(fuseInstance);
+        })
+        .catch((err) => console.error("Failed to load search index", err));
+    }
+  }, [isOpen, searchIndex.length]);
+
+  // Build static commands list
+  const staticCommands = useMemo<Command[]>(() => {
     const cmds: Command[] = [];
 
     // Navigation pages
@@ -110,8 +148,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       });
     });
 
-    // Writing
-    writingHighlights.slice(0, 10).forEach((item) => {
+    // Featured Writing (Keep these as they are high priority)
+    writingHighlights.forEach((item) => {
       cmds.push({
         id: `writing-${item.title}`,
         title: item.title,
@@ -171,18 +209,45 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     return cmds;
   }, [router, onClose]);
 
-  // Filter commands based on query
+  // Combined results (Static + Fuse)
   const filteredCommands = useMemo(() => {
-    if (!query.trim()) return commands;
+    if (!query.trim()) return staticCommands;
 
     const lowerQuery = query.toLowerCase();
-    return commands.filter((cmd) => {
+    
+    // 1. Filter static commands
+    const staticMatches = staticCommands.filter((cmd) => {
       const titleMatch = cmd.title.toLowerCase().includes(lowerQuery);
       const subtitleMatch = cmd.subtitle?.toLowerCase().includes(lowerQuery);
       const keywordMatch = cmd.keywords?.some((k) => k.includes(lowerQuery));
       return titleMatch || subtitleMatch || keywordMatch;
     });
-  }, [commands, query]);
+
+    // 2. Search dynamic index with Fuse
+    const fuseMatches: Command[] = [];
+    if (fuse) {
+      const results = fuse.search(query, { limit: 5 });
+      results.forEach((result) => {
+        // Avoid duplicates if they are already in static list (by title)
+        const isDuplicate = staticMatches.some(c => c.title === result.item.title);
+        if (!isDuplicate) {
+          fuseMatches.push({
+            id: `search-result-${result.item.slug}`,
+            title: result.item.title,
+            subtitle: result.item.excerpt.slice(0, 60) + "...",
+            icon: <FileText className="h-4 w-4" />,
+            category: "search_results",
+            action: () => {
+              router.push(`/writing/${result.item.slug}`);
+              onClose();
+            },
+          });
+        }
+      });
+    }
+
+    return [...staticMatches, ...fuseMatches];
+  }, [staticCommands, query, fuse, router, onClose]);
 
   // Group by category
   const groupedCommands = useMemo(() => {

@@ -3,14 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { navItems, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 
-export default function SiteHeader() {
+interface SiteHeaderProps {
+  onOpenCommandPalette?: () => void;
+}
+
+export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -99,6 +103,19 @@ export default function SiteHeader() {
               );
             })}
 
+            {/* Search Button */}
+            <button
+              onClick={onOpenCommandPalette}
+              className="group flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+              aria-label="Search site (Cmd+K)"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden lg:inline">Search</span>
+              <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 lg:inline-block">
+                ⌘K
+              </kbd>
+            </button>
+
             <Link
               href="/contact"
               onTouchStart={mediumTap}
@@ -108,14 +125,22 @@ export default function SiteHeader() {
             </Link>
           </nav>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="relative z-50 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-colors md:hidden"
-            onClick={() => setOpen((v) => !v)}
-            onTouchStart={lightTap}
-            aria-label="Toggle navigation"
-          >
-             <AnimatePresence mode="wait" initial={false}>
+          {/* Mobile Menu Toggle & Search */}
+          <div className="flex items-center gap-4 md:hidden">
+            <button
+              onClick={onOpenCommandPalette}
+              className="text-slate-400 hover:text-white"
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+            <button
+              className="relative z-50 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-colors"
+              onClick={() => setOpen((v) => !v)}
+              onTouchStart={lightTap}
+              aria-label="Toggle navigation"
+            >
+               <AnimatePresence mode="wait" initial={false}>
                 {open ? (
                   <motion.div
                     key="close"
@@ -139,6 +164,7 @@ export default function SiteHeader() {
                 )}
               </AnimatePresence>
           </button>
+        </div>
         </div>
       </header>
 
