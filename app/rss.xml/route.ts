@@ -66,9 +66,14 @@ export async function GET() {
     }));
 
   // 3. Combine and sort
-  const allItems = [...mdxItems, ...externalItems].sort(
-    (a, b) => b.date.getTime() - a.date.getTime()
-  );
+  const allItems = [...mdxItems, ...externalItems].sort((a, b) => {
+    const t1 = a.date.getTime();
+    const t2 = b.date.getTime();
+    // Handle invalid dates (treat as old)
+    const v1 = isNaN(t1) ? 0 : t1;
+    const v2 = isNaN(t2) ? 0 : t2;
+    return v2 - v1;
+  });
 
   // 4. Add to feed
   allItems.forEach((item) => feed.addItem(item));
