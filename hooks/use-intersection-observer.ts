@@ -24,7 +24,6 @@ export function useIntersectionObserver({
   // Start true to prevent flash of invisible content during hydration
   const [isIntersecting, setIsIntersecting] = useState(true);
   const hasTriggeredRef = useRef(false);
-  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     const element = ref.current;
@@ -49,7 +48,6 @@ export function useIntersectionObserver({
 
         // Otherwise update standard state
         setIsIntersecting(isNowIntersecting);
-        hasInitializedRef.current = true;
       },
       { threshold, rootMargin }
     );
