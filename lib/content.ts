@@ -282,6 +282,74 @@ export function getEndorsementsByTag(tag: string): Endorsement[] {
 }
 
 // ============================================================================
+// LIVE DEMOS
+// ============================================================================
+
+export type DemoCategory = "ai-tools" | "education" | "developer-tools";
+
+export interface LiveDemo {
+  id: string;
+  title: string;
+  url: string;
+  description: string;
+  longDescription?: string;
+  previewImage?: string;
+  technologies: string[];
+  category: DemoCategory;
+  featured: boolean;
+  githubUrl?: string;
+}
+
+export const liveDemos: LiveDemo[] = [
+  {
+    id: "agent-mail-viewer",
+    title: "Agent Mail Viewer",
+    url: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
+    description: "Real-time viewer for multi-agent coordination and messaging",
+    longDescription:
+      "An interactive web interface for monitoring MCP Agent Mail communications. Watch agents coordinate in real-time, browse message threads, and understand how multiple AI coding agents collaborate on complex tasks.",
+    technologies: ["React", "TypeScript", "MCP Protocol", "WebSocket"],
+    category: "ai-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/cass-memory-system-agent-mailbox-viewer",
+  },
+  {
+    id: "beads-viewer-demo",
+    title: "Beads Viewer",
+    url: "https://dicklesworthstone.github.io/beads_viewer-pages/",
+    description: "Visual explorer for the beads distributed issue tracking system",
+    longDescription:
+      "A web-based interface for exploring Beads issue tracking data. Visualize task dependencies as directed graphs, analyze project health metrics, and understand complex multi-agent workflows. Features real-time graph rendering and filtering.",
+    technologies: ["React", "D3.js", "Git Integration", "Graph Visualization"],
+    category: "developer-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/beads_viewer",
+  },
+  {
+    id: "phage-explorer",
+    title: "Phage Explorer",
+    url: "https://phage-explorer.org/",
+    description: "Interactive educational site exploring bacteriophages and their potential",
+    longDescription:
+      "An immersive educational experience about bacteriophages - viruses that infect bacteria. Features 3D visualizations, genome browsers, and interactive lessons about phage therapy's potential to combat antibiotic-resistant infections.",
+    technologies: ["Next.js", "Three.js", "Scientific Visualization", "WebGL"],
+    category: "education",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/phage_explorer",
+  },
+];
+
+// Helper to get featured demos
+export function getFeaturedDemos(): LiveDemo[] {
+  return liveDemos.filter((d) => d.featured);
+}
+
+// Helper to filter demos by category
+export function getDemosByCategory(category: DemoCategory): LiveDemo[] {
+  return liveDemos.filter((d) => d.category === category);
+}
+
+// ============================================================================
 // PROJECTS
 // ============================================================================
 
