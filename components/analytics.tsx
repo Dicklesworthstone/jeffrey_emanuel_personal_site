@@ -13,6 +13,9 @@ export function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // Only track in production
+    if (process.env.NODE_ENV !== "production") return;
+
     if (pathname && window.gtag) {
       window.gtag("config", gaId, {
         page_path: pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""),
