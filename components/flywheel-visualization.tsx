@@ -480,6 +480,7 @@ const MobileBottomSheet = React.memo(function MobileBottomSheet({
         document.body.style.overflow = "";
       };
     }
+    return;
   }, [tool]);
 
   // Get icon for the tool (or fallback)

@@ -287,6 +287,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       const timeoutId = setTimeout(() => inputRef.current?.focus(), 50);
       return () => clearTimeout(timeoutId);
     }
+    return;
   }, [isOpen]);
 
   // Handle keyboard navigation
