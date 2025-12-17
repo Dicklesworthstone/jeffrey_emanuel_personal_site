@@ -157,7 +157,7 @@ function OrbitalRing(props: { radius: number; tilt: number; color: string }) {
   );
 }
 
-function SceneOrbits({ palette }: { palette: Palette; seed: number }) {
+function SceneOrbits({ palette, seed: _seed }: { palette: Palette; seed: number }) {
   return (
     <>
       <StarField color={palette[0]} />
@@ -678,7 +678,7 @@ function SceneHopf({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 // Variant: Ikeda cloud
 // ---------------------------------------------------------------------------
-function IkedaCloud({ palette, seed, count = 4800 }: { palette: Palette; seed: number; count?: number }) {
+function IkedaCloud({ palette, seed: _seed, count = 4800 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
   const yAxisRef = useRef(new THREE.Vector3(0, 1, 0));
@@ -731,11 +731,10 @@ function SceneIkeda({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 // Variant: Gyroid displacement surface
 // ---------------------------------------------------------------------------
-function GyroidSurface({ palette, seed, resolution = 70 }: { palette: Palette; seed: number; resolution?: number }) {
+function GyroidSurface({ palette, seed: _seed, resolution = 70 }: { palette: Palette; seed: number; resolution?: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const geom = useMemo(() => new THREE.PlaneGeometry(4, 4, resolution, resolution), [resolution]);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.5, roughness: 0.4, metalness: 0.35, side: THREE.DoubleSide }), [palette]);
-  const rand = useMemo(() => seededRandom(seed), [seed]);
   useEffect(() => () => geom.dispose(), [geom]);
   useEffect(() => () => mat.dispose(), [mat]);
 
@@ -1240,7 +1239,7 @@ function SceneSpirograph({ palette, seed }: { palette: Palette; seed: number }) 
 // ---------------------------------------------------------------------------
 // Variant: Phyllotaxis Fibonacci Sphere (sunflower seed pattern)
 // ---------------------------------------------------------------------------
-function PhyllotaxisSphere({ palette, seed, count = 800 }: { palette: Palette; seed: number; count?: number }) {
+function PhyllotaxisSphere({ palette, seed: _seed, count = 800 }: { palette: Palette; seed: number; count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
   const { quality } = useQuality();
@@ -1303,7 +1302,7 @@ function ScenePhyllotaxis({ palette, seed }: { palette: Palette; seed: number })
 // ---------------------------------------------------------------------------
 // Variant: Aizawa Attractor (beautiful strange attractor)
 // ---------------------------------------------------------------------------
-function AizawaAttractor({ palette, seed }: { palette: Palette; seed: number }) {
+function AizawaAttractor({ palette, seed: _seed }: { palette: Palette; seed: number }) {
   const groupRef = useRef<THREE.Group>(null);
 
   const geometry = useMemo(() => {
@@ -1525,16 +1524,12 @@ export default function ThreeScene() {
   const palette = palettes[plan.palette % palettes.length];
 
   // Dynamic DPR state for performance scaling
-  // Use a ref to track quality.maxDpr and only update if it actually changed
-  const maxDprRef = useRef(quality.maxDpr);
   const [currentDpr, setCurrentDpr] = useState<number>(quality.maxDpr);
 
-  // Sync currentDpr with quality changes (only when maxDpr actually changes)
-  if (maxDprRef.current !== quality.maxDpr) {
-    maxDprRef.current = quality.maxDpr;
-    // This is safe because it only runs when the prop actually changes
+  // Sync currentDpr with quality changes
+  useEffect(() => {
     setCurrentDpr(quality.maxDpr);
-  }
+  }, [quality.maxDpr]);
 
   // Performance regression handler - lower DPR when FPS drops
   const handleDecline = useCallback(() => {

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { navItems, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";

@@ -41,14 +41,21 @@ const useHour = () => {
     const now = new Date();
     const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
 
+    // Track the interval ID so we can clean it up
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
     // Initial timeout to sync to hour boundary, then hourly interval
-    const timeout = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       update();
-      const id = setInterval(update, 60 * 60 * 1000); // Check every hour
-      return () => clearInterval(id);
+      intervalId = setInterval(update, 60 * 60 * 1000); // Check every hour
     }, msUntilNextHour);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeoutId);
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+      }
+    };
   }, []);
   return hour;
 };

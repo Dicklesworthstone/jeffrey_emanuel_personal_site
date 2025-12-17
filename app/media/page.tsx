@@ -2,23 +2,18 @@
 
 import SectionShell from "@/components/section-shell";
 import { MediaItem, mediaItems } from "@/lib/content";
-import { Newspaper, Podcast, PenLine, User } from "lucide-react";
+import { Newspaper, Podcast, PenLine, User, type LucideIcon } from "lucide-react";
 
-function getIcon(kind: MediaItem["kind"]) {
-  switch (kind) {
-    case "Podcast":
-      return Podcast;
-    case "Blog":
-      return PenLine;
-    case "Profile":
-      return User;
-    default:
-      return Newspaper;
-  }
-}
+// Icon lookup object defined at module level to avoid creating components during render
+const mediaIconMap: Record<MediaItem["kind"], LucideIcon> = {
+  Podcast: Podcast,
+  Blog: PenLine,
+  Profile: User,
+  Article: Newspaper,
+};
 
 function MediaRow({ item }: { item: MediaItem }) {
-  const Icon = getIcon(item.kind);
+  const Icon = mediaIconMap[item.kind] ?? Newspaper;
   return (
     <a
       href={item.href}
