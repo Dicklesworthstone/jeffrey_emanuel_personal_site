@@ -3,7 +3,7 @@ import Link from "next/link";
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
-import AnimatedGrid from "@/components/animated-grid";
+import AnimatedGrid, { LazySection } from "@/components/animated-grid";
 import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -288,7 +288,9 @@ export default async function HomePage() {
         title="From hedge funds to agents and chains"
         kicker="A condensed view of the path that got me here."
       >
-        <Timeline items={careerTimeline} />
+        <LazySection minHeight="800px" skeletonCards={4}>
+          <Timeline items={careerTimeline} />
+        </LazySection>
       </SectionShell>
 
       {featuredThreads.length > 0 && (
@@ -299,34 +301,36 @@ export default async function HomePage() {
           title="Selected X posts"
           kicker="I write a lot more informally on X. Here are a few good entry points."
         >
-          <AnimatedGrid
-            className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
-            staggerDelay={0.1}
-          >
-            {featuredThreads.map((thread) => (
-              <HapticExternalLink
-                key={thread.href}
-                href={thread.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
-              >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                  Thread on X
-                </p>
-                <h3 className="mt-4 text-lg font-bold leading-snug text-slate-50 transition-colors group-hover:text-sky-200">
-                  {thread.title}
-                </h3>
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
-                  {thread.blurb}
-                </p>
-                <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
-                  Open thread
-                  <span className="text-lg leading-none">→</span>
-                </div>
-              </HapticExternalLink>
-            ))}
-          </AnimatedGrid>
+          <LazySection minHeight="400px" skeletonCards={3}>
+            <AnimatedGrid
+              className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+              staggerDelay={0.1}
+            >
+              {featuredThreads.map((thread) => (
+                <HapticExternalLink
+                  key={thread.href}
+                  href={thread.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    Thread on X
+                  </p>
+                  <h3 className="mt-4 text-lg font-bold leading-snug text-slate-50 transition-colors group-hover:text-sky-200">
+                    {thread.title}
+                  </h3>
+                  <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
+                    {thread.blurb}
+                  </p>
+                  <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
+                    Open thread
+                    <span className="text-lg leading-none">→</span>
+                  </div>
+                </HapticExternalLink>
+              ))}
+            </AnimatedGrid>
+          </LazySection>
         </SectionShell>
       )}
     </>

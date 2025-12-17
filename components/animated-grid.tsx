@@ -137,6 +137,40 @@ function LazySectionSkeleton({
   );
 }
 
+/**
+ * Skeleton placeholder for timeline sections.
+ */
+export function TimelineSkeleton({ itemCount = 4 }: { itemCount?: number }) {
+  return (
+    <div className="relative" aria-hidden="true">
+      <div className="absolute left-6 top-4 bottom-4 hidden w-px bg-gradient-to-b from-slate-800/50 via-slate-800/20 to-transparent md:block" />
+      <div className="space-y-8 pl-2 md:space-y-12 md:pl-0">
+        {Array.from({ length: itemCount }).map((_, i) => (
+          <div key={i} className="relative md:pl-20 animate-pulse">
+            <div className="hidden md:flex absolute left-[8.5px] top-1 h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-950/50">
+              <div className="h-2 w-2 rounded-full bg-slate-800" />
+            </div>
+            <div className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-6 md:p-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-2">
+                  <div className="h-5 w-48 rounded bg-slate-800/60" />
+                  <div className="h-4 w-32 rounded bg-slate-800/50" />
+                </div>
+                <div className="h-6 w-24 rounded-full bg-slate-800/40" />
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="h-4 w-full rounded bg-slate-800/40" />
+                <div className="h-4 w-4/5 rounded bg-slate-800/40" />
+              </div>
+              <div className="mt-6 h-3 w-20 rounded bg-slate-800/30" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 interface LazySectionProps {
   children: ReactNode;
   /** Minimum height to reserve for the section before loading */
