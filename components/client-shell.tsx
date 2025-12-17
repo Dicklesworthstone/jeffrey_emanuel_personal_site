@@ -9,6 +9,7 @@ import SiteFooter from "@/components/site-footer";
 import ErrorBoundary from "@/components/error-boundary";
 import ScrollToTop from "@/components/scroll-to-top";
 import EasterEggs from "@/components/easter-eggs";
+import ServiceWorkerRegistration from "@/components/service-worker-registration";
 import { useMobileOptimizations } from "@/hooks/use-mobile-optimizations";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
@@ -89,6 +90,9 @@ export default function ClientShell({ children }: { children: React.ReactNode })
           isOpen={isShortcutsModalOpen}
           onClose={closeShortcutsModal}
         />
+
+        {/* PWA Service Worker Registration */}
+        <ServiceWorkerRegistration />
       </div>
     </ErrorBoundary>
   );
