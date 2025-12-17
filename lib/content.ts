@@ -59,8 +59,45 @@ export const heroStats: Stat[] = [
 export const heroContent = {
   eyebrow: "Founder • Engineer • Former Hedge Fund Analyst",
   title: "Building the tools that sit between markets and frontier AI.",
+  intro:
+    "Beginning in October of 2025, I began developing what I call my \"Agentic Coding Flywheel\": a collection of 7 interconnected tools.",
+  tools: [
+    {
+      name: "MCP Agent Mail",
+      tagline: '"Gmail for Agents"',
+      highlight: "1K+ stars",
+    },
+    {
+      name: "BV",
+      tagline: "Beads Viewer",
+      description:
+        "Use advanced graph theory to optimize the order of task execution by agents",
+    },
+    {
+      name: "Cass",
+      tagline: "Coding Agent Session Search",
+      description: "Search all your past coding agent chats instantly",
+    },
+    {
+      name: "Cass Memory",
+      description:
+        "Use Cass as the basis of a powerful continual learning and memory system",
+    },
+    {
+      name: "UBS",
+      tagline: "Ultimate Bug Scanner",
+      description:
+        "A polyglot static analysis tool designed specifically for use by agents",
+    },
+  ],
+  highlight: {
+    metric: "20,000+",
+    label: "lines of sophisticated Go code",
+    context: "BV was conceived, designed, and shipped in a single day",
+    subtext: "Loved by thousands of users with 500+ GitHub stars in under a month",
+  },
   body: [
-    "Beginning in October of 2025, I began developing what I call my \"Agentic Coding Flywheel\": a collection of 7 interconnected tools that include MCP Agent Mail (\"Gmail for Agents\" with 1K+ stars), BV (\"Beads Viewer\"; Use advanced graph theory to optimize the order of task execution by agents), Cass (Coding Agent Session Search; search all your past coding agent chats instantly), Cass Memory (Use Cass as the basis of a powerful continual learning and memory system), UBS (Ultimate Bug Scanner, a polyglot static analysis tool designed specifically for use by agents), and several others. Using these tools, I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines (for example, the BV tool was created entirely in one day, and is over 20k lines of sophisticated golang code; more importantly it is loved by thousands of users with over 500 GitHub stars in under a month).",
+    "Using these tools, I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
     "My 30+ open-source projects span agent infrastructure, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
     "I also founded Lumera Network (formerly Pastel), a Cosmos L1 for storage and AI verification. I consult to PE and hedge funds on AI automation after a decade as a long/short equity analyst.",
   ],

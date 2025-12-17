@@ -126,7 +126,33 @@ export default function ProjectsPage() {
         </nav>
       </LayoutGroup>
 
-      {/* Tag Filters */}
+      {/* Flywheel Visualization - only shown for "all" or "flywheel" filters */}
+      <AnimatePresence mode="wait">
+        {showFlywheel && (
+          <motion.div
+            key="flywheel"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeInOut" }}
+            className="mb-12 sm:mb-16 overflow-hidden"
+          >
+            <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-violet-950/20 via-black/40 to-black/20 p-4 sm:p-6 md:p-8 lg:p-12 backdrop-blur-sm">
+              <ErrorBoundary
+                fallback={
+                  <div className="flex min-h-[300px] items-center justify-center text-slate-400">
+                    <p className="text-sm">Unable to load flywheel visualization</p>
+                  </div>
+                }
+              >
+                <FlywheelVisualization />
+              </ErrorBoundary>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Tag Filters - positioned below flywheel */}
       <div className="mb-8 sm:mb-12">
         <div className="flex items-center justify-center gap-2 mb-3">
           <Tag className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
@@ -185,32 +211,6 @@ export default function ProjectsPage() {
           </p>
         </div>
       )}
-
-      {/* Flywheel Visualization - only shown for "all" or "flywheel" filters */}
-      <AnimatePresence mode="wait">
-        {showFlywheel && (
-          <motion.div
-            key="flywheel"
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeInOut" }}
-            className="mb-12 sm:mb-16 overflow-hidden"
-          >
-            <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-violet-950/20 via-black/40 to-black/20 p-4 sm:p-6 md:p-8 lg:p-12 backdrop-blur-sm">
-              <ErrorBoundary
-                fallback={
-                  <div className="flex min-h-[300px] items-center justify-center text-slate-400">
-                    <p className="text-sm">Unable to load flywheel visualization</p>
-                  </div>
-                }
-              >
-                <FlywheelVisualization />
-              </ErrorBoundary>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* The Grid - moves up immediately when flywheel is hidden */}
       <motion.div

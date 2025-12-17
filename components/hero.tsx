@@ -112,14 +112,91 @@ export default function Hero({ stats = heroStats }: HeroProps) {
             </motion.h1>
 
             <motion.div
-              className="max-w-2xl space-y-4 text-lg font-medium leading-relaxed text-slate-400/90 md:text-xl md:leading-loose"
+              className="max-w-2xl space-y-6"
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={prefersReducedMotion ? { duration: 0 } : { duration: 1, delay: 0.4 }}
             >
-              {heroContent.body.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+              {/* Lead intro */}
+              <p className="text-lg font-medium leading-relaxed text-slate-300 md:text-xl md:leading-relaxed">
+                {heroContent.intro}
+              </p>
+
+              {/* Tools grid */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {heroContent.tools.map((tool) => (
+                  <div
+                    key={tool.name}
+                    className="group relative overflow-hidden rounded-xl border border-slate-700/40 bg-slate-800/40 p-3 backdrop-blur-sm transition-all hover:border-slate-600/60 hover:bg-slate-800/60"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-200">
+                            {tool.name}
+                          </span>
+                          {"highlight" in tool && tool.highlight && (
+                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                              {tool.highlight}
+                            </span>
+                          )}
+                        </div>
+                        {"tagline" in tool && tool.tagline && (
+                          <p className="mt-0.5 text-xs font-medium text-sky-400/80">
+                            {tool.tagline}
+                          </p>
+                        )}
+                        {"description" in tool && tool.description && (
+                          <p className="mt-1 text-xs leading-relaxed text-slate-400/80">
+                            {tool.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {/* "And more" card */}
+                <div className="flex items-center justify-center rounded-xl border border-dashed border-slate-700/40 bg-slate-800/20 p-3 text-sm font-medium text-slate-500">
+                  + several others
+                </div>
+              </div>
+
+              {/* Achievement highlight callout */}
+              <div className="relative overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 via-slate-800/60 to-slate-900/80 p-5 backdrop-blur-sm">
+                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-500/10 blur-2xl" />
+                <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
+                      {heroContent.highlight.metric}
+                    </span>
+                    <span className="text-sm font-medium text-slate-400 sm:text-base">
+                      {heroContent.highlight.label}
+                    </span>
+                  </div>
+                  <div className="h-px w-full bg-gradient-to-r from-slate-700 via-slate-600 to-transparent sm:h-12 sm:w-px sm:bg-gradient-to-b" />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-medium text-slate-300 sm:text-base">
+                      {heroContent.highlight.context}
+                    </span>
+                    <span className="text-xs font-medium text-emerald-400/80 sm:text-sm">
+                      {heroContent.highlight.subtext}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body paragraphs */}
+              <div className="space-y-4">
+                {heroContent.body.map((p, i) => (
+                  <p
+                    key={i}
+                    className="text-base font-medium leading-relaxed text-slate-400/90 md:text-lg md:leading-loose"
+                  >
+                    {p}
+                  </p>
+                ))}
+              </div>
             </motion.div>
           </div>
 
