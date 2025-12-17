@@ -3,7 +3,7 @@ import Link from "next/link";
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
-import AnimatedGrid, { LazySection } from "@/components/animated-grid";
+import AnimatedGrid, { LazySection, TimelineSkeleton } from "@/components/animated-grid";
 import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -229,16 +229,18 @@ export default async function HomePage() {
         title="Products and open source"
         kicker="A comprehensive collection of the tools, protocols, and experiments I'm building."
       >
-        <AnimatedGrid
-          className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 lg:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
-          staggerDelay={0.08}
-        >
-          {featuredProjects.map((project) => (
-             <div key={project.name} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
-                <ProjectCard project={project} />
-             </div>
-          ))}
-        </AnimatedGrid>
+        <LazySection minHeight="500px" skeletonCards={6}>
+          <AnimatedGrid
+            className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 lg:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+            staggerDelay={0.08}
+          >
+            {featuredProjects.map((project) => (
+               <div key={project.name} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
+                  <ProjectCard project={project} />
+               </div>
+            ))}
+          </AnimatedGrid>
+        </LazySection>
       </SectionShell>
 
       <SectionShell
@@ -288,7 +290,7 @@ export default async function HomePage() {
         title="From hedge funds to agents and chains"
         kicker="A condensed view of the path that got me here."
       >
-        <LazySection minHeight="800px" skeletonCards={4}>
+        <LazySection minHeight="800px" skeleton={<TimelineSkeleton itemCount={careerTimeline.length} />}>
           <Timeline items={careerTimeline} />
         </LazySection>
       </SectionShell>
