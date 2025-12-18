@@ -4,7 +4,7 @@ import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
 import AnimatedGrid, { LazySection, TimelineSkeleton } from "@/components/animated-grid";
-import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play } from "lucide-react";
+import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
@@ -13,6 +13,7 @@ import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/content";
 import EndorsementShowcase from "@/components/endorsement-showcase";
 import DemoShowcase from "@/components/demo-showcase";
+import NewsletterSignup from "@/components/newsletter-signup";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
@@ -380,6 +381,22 @@ export default async function HomePage() {
           </LazySection>
         </SectionShell>
       )}
+
+      {/* Newsletter Signup */}
+      <SectionShell
+        id="newsletter"
+        iconNode={<Mail className="h-5 w-5" />}
+        eyebrow="Newsletter"
+        title="Stay updated"
+        kicker="New essays, tools, and insights delivered to your inbox."
+      >
+        <div className="mx-auto max-w-2xl">
+          <NewsletterSignup
+            heading="Join the mailing list"
+            description="Get notified when I publish new essays, release tools, or share research. No spam—just signal. Unsubscribe anytime."
+          />
+        </div>
+      </SectionShell>
     </>
   );
 }
