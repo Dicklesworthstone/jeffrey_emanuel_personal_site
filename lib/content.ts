@@ -10,6 +10,10 @@ export const siteConfig = {
     github: "https://github.com/Dicklesworthstone",
     linkedin: "https://www.linkedin.com/in/jeffreyemanuel",
   },
+  features: {
+    /** Enable newsletter signup section on homepage. Set to true once Buttondown is configured. */
+    newsletter: false,
+  },
 } satisfies {
   name: string;
   title: string;
@@ -17,6 +21,7 @@ export const siteConfig = {
   email: string;
   location: string;
   social: { x: string; github: string; linkedin: string };
+  features: { newsletter: boolean };
 };
 
 export type NavItem = { href: string; label: string };

@@ -382,21 +382,23 @@ export default async function HomePage() {
         </SectionShell>
       )}
 
-      {/* Newsletter Signup */}
-      <SectionShell
-        id="newsletter"
-        iconNode={<Mail className="h-5 w-5" />}
-        eyebrow="Newsletter"
-        title="Stay updated"
-        kicker="New essays, tools, and insights delivered to your inbox."
-      >
-        <div className="mx-auto max-w-2xl">
-          <NewsletterSignup
-            heading="Join the mailing list"
-            description="Get notified when I publish new essays, release tools, or share research. No spam—just signal. Unsubscribe anytime."
-          />
-        </div>
-      </SectionShell>
+      {/* Newsletter Signup - hidden until siteConfig.features.newsletter is true */}
+      {siteConfig.features.newsletter && (
+        <SectionShell
+          id="newsletter"
+          iconNode={<Mail className="h-5 w-5" />}
+          eyebrow="Newsletter"
+          title="Stay updated"
+          kicker="New essays, tools, and insights delivered to your inbox."
+        >
+          <div className="mx-auto max-w-2xl">
+            <NewsletterSignup
+              heading="Join the mailing list"
+              description="Get notified when I publish new essays, release tools, or share research. No spam—just signal. Unsubscribe anytime."
+            />
+          </div>
+        </SectionShell>
+      )}
     </>
   );
 }
