@@ -34,8 +34,9 @@ const RATE_LIMIT_DELAY = 15000; // 15 seconds
 const CACHE_FILE = ".stargazer-cache.json";
 const OUTPUT_FILE = "lib/data/stargazer-intelligence.json";
 
-// Flywheel repos to analyze (actual repo names from GitHub)
+// Repos to analyze - flywheel tools + other popular projects
 const REPOS_TO_ANALYZE = [
+  // Flywheel tools (agentic coding)
   "mcp_agent_mail",
   "beads_viewer",
   "cass_memory_system",
@@ -43,6 +44,20 @@ const REPOS_TO_ANALYZE = [
   "ntm",
   "simultaneous_launch_button",
   "coding_agent_session_search",
+  // Other major projects (high star count)
+  "claude_code_agent_farm",
+  "llm_aided_ocr",
+  "swiss_army_llama",
+  "your-source-to-prompt.html",
+  "bulk_transcribe_youtube_videos_from_playlist",
+  "sqlalchemy_data_model_visualizer",
+  "visual_astar_python",
+  "mindmap-generator",
+  "ultimate_mcp_client",
+  "ultimate_mcp_server",
+  "fast_vector_similarity",
+  "automatic_log_collector_and_analyzer",
+  "model_guided_research",
 ];
 
 // Cache structure

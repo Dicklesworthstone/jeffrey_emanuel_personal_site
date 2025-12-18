@@ -1,6 +1,6 @@
 {
-  "totalUniqueStargazers": 1530,
-  "combinedReach": 37507,
+  "totalUniqueStargazers": 6393,
+  "combinedReach": 37378,
   "topStargazers": [
     {
       "login": "mrexodia",
@@ -13,7 +13,8 @@
       "reposStarred": [
         "mcp_agent_mail",
         "beads_viewer",
-        "ultimate_bug_scanner"
+        "ultimate_bug_scanner",
+        "swiss_army_llama"
       ]
     },
     {
@@ -80,7 +81,8 @@
       "followers": 1424,
       "totalStars": 6135,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "ultimate_mcp_client"
       ]
     },
     {
@@ -180,7 +182,8 @@
       "followers": 124,
       "totalStars": 3602,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "your-source-to-prompt.html"
       ]
     },
     {
@@ -218,7 +221,8 @@
       "followers": 378,
       "totalStars": 2865,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "llm_aided_ocr"
       ]
     },
     {
@@ -351,19 +355,6 @@
       ]
     },
     {
-      "login": "PABannier",
-      "name": "Pierre-Antoine Bannier",
-      "avatarUrl": "https://avatars.githubusercontent.com/u/12958149?v=4",
-      "company": "Owkin",
-      "bio": "Data Scientist @ Owkin | Computer Vision | Scientific Computing | OSS",
-      "score": 3422.5,
-      "followers": 129,
-      "totalStars": 1261,
-      "reposStarred": [
-        "mcp_agent_mail"
-      ]
-    },
-    {
       "login": "deepfates",
       "name": "deepfates",
       "avatarUrl": "https://avatars.githubusercontent.com/u/58602708?v=4",
@@ -437,7 +428,9 @@
       "totalStars": 220,
       "reposStarred": [
         "mcp_agent_mail",
-        "beads_viewer"
+        "beads_viewer",
+        "claude_code_agent_farm",
+        "automatic_log_collector_and_analyzer"
       ]
     },
     {
@@ -507,7 +500,14 @@
         "cass_memory_system",
         "ntm",
         "simultaneous_launch_button",
-        "coding_agent_session_search"
+        "coding_agent_session_search",
+        "claude_code_agent_farm",
+        "llm_aided_ocr",
+        "swiss_army_llama",
+        "your-source-to-prompt.html",
+        "ultimate_mcp_client",
+        "ultimate_mcp_server",
+        "fast_vector_similarity"
       ]
     },
     {
@@ -531,7 +531,8 @@
       "followers": 201,
       "totalStars": 464,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "claude_code_agent_farm"
       ]
     },
     {
@@ -593,7 +594,8 @@
       "followers": 122,
       "totalStars": 497,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "fast_vector_similarity"
       ]
     },
     {
@@ -605,7 +607,8 @@
       "followers": 278,
       "totalStars": 101,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "automatic_log_collector_and_analyzer"
       ]
     },
     {
@@ -643,7 +646,8 @@
       "followers": 96,
       "totalStars": 458,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "model_guided_research"
       ]
     },
     {
@@ -743,7 +747,8 @@
       "totalStars": 379,
       "reposStarred": [
         "mcp_agent_mail",
-        "beads_viewer"
+        "beads_viewer",
+        "claude_code_agent_farm"
       ]
     },
     {
@@ -780,7 +785,8 @@
       "followers": 593,
       "totalStars": 0,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "automatic_log_collector_and_analyzer"
       ]
     },
     {
@@ -982,7 +988,8 @@
       "followers": 157,
       "totalStars": 210,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "your-source-to-prompt.html"
       ]
     },
     {
@@ -1028,7 +1035,8 @@
       "followers": 68,
       "totalStars": 266,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "llm_aided_ocr"
       ]
     },
     {
@@ -1078,7 +1086,8 @@
       "followers": 120,
       "totalStars": 212,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "model_guided_research"
       ]
     },
     {
@@ -1149,7 +1158,8 @@
       "reposStarred": [
         "mcp_agent_mail",
         "beads_viewer",
-        "cass_memory_system"
+        "cass_memory_system",
+        "model_guided_research"
       ]
     },
     {
@@ -1187,7 +1197,10 @@
       "followers": 274,
       "totalStars": 42,
       "reposStarred": [
-        "mcp_agent_mail"
+        "mcp_agent_mail",
+        "swiss_army_llama",
+        "sqlalchemy_data_model_visualizer",
+        "automatic_log_collector_and_analyzer"
       ]
     },
     {
@@ -1264,6 +1277,20 @@
       "followers": 225,
       "totalStars": 29,
       "reposStarred": [
+        "mcp_agent_mail",
+        "claude_code_agent_farm",
+        "your-source-to-prompt.html",
+        "visual_astar_python"
+      ]
+    },
+    {
+      "login": "hxrts",
+      "name": "Sam Hart",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/1831962?v=4",
+      "score": 551.4,
+      "followers": 178,
+      "totalStars": 74,
+      "reposStarred": [
         "mcp_agent_mail"
       ]
     }
@@ -1334,10 +1361,6 @@
       "count": 1
     },
     {
-      "name": "Owkin",
-      "count": 1
-    },
-    {
       "name": "Upward Spiral Research",
       "count": 1
     },
@@ -1348,12 +1371,16 @@
     {
       "name": "Akamai",
       "count": 1
+    },
+    {
+      "name": "cdcgov",
+      "count": 1
     }
   ],
   "byRepo": {
     "mcp_agent_mail": {
       "totalCount": 1000,
-      "notableCount": 109,
+      "notableCount": 108,
       "topStargazers": [
         {
           "login": "mrexodia",
@@ -1366,7 +1393,8 @@
           "reposStarred": [
             "mcp_agent_mail",
             "beads_viewer",
-            "ultimate_bug_scanner"
+            "ultimate_bug_scanner",
+            "swiss_army_llama"
           ]
         },
         {
@@ -1433,7 +1461,8 @@
           "followers": 1424,
           "totalStars": 6135,
           "reposStarred": [
-            "mcp_agent_mail"
+            "mcp_agent_mail",
+            "ultimate_mcp_client"
           ]
         },
         {
@@ -1509,7 +1538,8 @@
           "reposStarred": [
             "mcp_agent_mail",
             "beads_viewer",
-            "ultimate_bug_scanner"
+            "ultimate_bug_scanner",
+            "swiss_army_llama"
           ]
         },
         {
@@ -1594,7 +1624,9 @@
           "totalStars": 220,
           "reposStarred": [
             "mcp_agent_mail",
-            "beads_viewer"
+            "beads_viewer",
+            "claude_code_agent_farm",
+            "automatic_log_collector_and_analyzer"
           ]
         },
         {
@@ -1612,7 +1644,14 @@
             "cass_memory_system",
             "ntm",
             "simultaneous_launch_button",
-            "coding_agent_session_search"
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
           ]
         },
         {
@@ -1624,7 +1663,8 @@
           "totalStars": 379,
           "reposStarred": [
             "mcp_agent_mail",
-            "beads_viewer"
+            "beads_viewer",
+            "claude_code_agent_farm"
           ]
         },
         {
@@ -1725,7 +1765,14 @@
             "cass_memory_system",
             "ntm",
             "simultaneous_launch_button",
-            "coding_agent_session_search"
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
           ]
         },
         {
@@ -1739,7 +1786,8 @@
           "reposStarred": [
             "mcp_agent_mail",
             "beads_viewer",
-            "cass_memory_system"
+            "cass_memory_system",
+            "model_guided_research"
           ]
         },
         {
@@ -1779,7 +1827,8 @@
           "reposStarred": [
             "mcp_agent_mail",
             "beads_viewer",
-            "ultimate_bug_scanner"
+            "ultimate_bug_scanner",
+            "swiss_army_llama"
           ]
         },
         {
@@ -1846,7 +1895,14 @@
             "cass_memory_system",
             "ntm",
             "simultaneous_launch_button",
-            "coding_agent_session_search"
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
           ]
         }
       ],
@@ -1874,7 +1930,14 @@
             "cass_memory_system",
             "ntm",
             "simultaneous_launch_button",
-            "coding_agent_session_search"
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
           ]
         }
       ],
@@ -1901,7 +1964,14 @@
             "cass_memory_system",
             "ntm",
             "simultaneous_launch_button",
-            "coding_agent_session_search"
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
           ]
         },
         {
@@ -1960,7 +2030,630 @@
       "topCompanies": [
         "thisisartium"
       ]
+    },
+    "claude_code_agent_farm": {
+      "totalCount": 599,
+      "notableCount": 6,
+      "topStargazers": [
+        {
+          "login": "shunkakinoki",
+          "name": "Shun Kakinoki",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/39187513?v=4",
+          "company": "0xSequence",
+          "bio": "OBLITERATE THE GALAXY",
+          "score": 2255.5,
+          "followers": 831,
+          "totalStars": 220,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "claude_code_agent_farm",
+            "automatic_log_collector_and_analyzer"
+          ]
+        },
+        {
+          "login": "tkersey",
+          "name": "Tim Kersey",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/217?v=4",
+          "company": "thisisartium",
+          "bio": "If you'd have asked me when I was 3 what I wanted to be when I grew up I would have said a bologna sandwich \r\n",
+          "score": 1655,
+          "followers": 630,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "ntm",
+            "simultaneous_launch_button",
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
+          ]
+        },
+        {
+          "login": "sjelfull",
+          "name": "Fred Carlsen",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/10508?v=4",
+          "company": "sanity-io",
+          "score": 1593.8,
+          "followers": 201,
+          "totalStars": 464,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "claude_code_agent_farm"
+          ]
+        },
+        {
+          "login": "phil65",
+          "name": "Philipp Temminghoff",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/110931?v=4",
+          "score": 1234.6,
+          "followers": 135,
+          "totalStars": 379,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "claude_code_agent_farm"
+          ]
+        },
+        {
+          "login": "dai",
+          "name": "dai",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/12391?v=4",
+          "company": "Gijutsu-Hyoron Co.,Ltd.",
+          "bio": "🧰 Works at gihyo.jp 🎯 Focus on ebooks 📘 Repos are private 📘\r\n\r\n技術系出版社でEBookを作ってます  リポは完全に個人用です",
+          "score": 560.5,
+          "followers": 225,
+          "totalStars": 29,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "claude_code_agent_farm",
+            "your-source-to-prompt.html",
+            "visual_astar_python"
+          ]
+        },
+        {
+          "login": "Crunchyman-ralph",
+          "name": "Ralph Khreish",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/35776126?v=4",
+          "bio": "I eat code for breakfast",
+          "score": 529.4,
+          "followers": 167,
+          "totalStars": 75,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "claude_code_agent_farm"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "0xSequence",
+        "thisisartium",
+        "sanity-io",
+        "Gijutsu-Hyoron Co.,Ltd."
+      ]
+    },
+    "llm_aided_ocr": {
+      "totalCount": 1000,
+      "notableCount": 3,
+      "topStargazers": [
+        {
+          "login": "sammcj",
+          "name": "Sam",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/862951?v=4",
+          "company": "DigIO",
+          "bio": "AI Engineer, Platform Engineer, Music Geek || @s_mcleod@aus.social || 📝 Words are my own or somebody else's 🖖",
+          "score": 7959.8,
+          "followers": 378,
+          "totalStars": 2865,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "llm_aided_ocr"
+          ]
+        },
+        {
+          "login": "tkersey",
+          "name": "Tim Kersey",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/217?v=4",
+          "company": "thisisartium",
+          "bio": "If you'd have asked me when I was 3 what I wanted to be when I grew up I would have said a bologna sandwich \r\n",
+          "score": 1655,
+          "followers": 630,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "ntm",
+            "simultaneous_launch_button",
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
+          ]
+        },
+        {
+          "login": "rdhyee",
+          "name": "Raymond Yee",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/153266?v=4",
+          "score": 857.5,
+          "followers": 68,
+          "totalStars": 266,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "llm_aided_ocr"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "DigIO",
+        "thisisartium"
+      ]
+    },
+    "swiss_army_llama": {
+      "totalCount": 1000,
+      "notableCount": 3,
+      "topStargazers": [
+        {
+          "login": "mrexodia",
+          "name": "Duncan Ogilvie",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/2458265?v=4",
+          "bio": "Reverse engineer, creator of @x64dbg and 100+ other projects. Love binary analysis and Windows internals. Dreaming about doing open source full time...",
+          "score": 33269.8,
+          "followers": 3308,
+          "totalStars": 10634,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "ultimate_bug_scanner",
+            "swiss_army_llama"
+          ]
+        },
+        {
+          "login": "tkersey",
+          "name": "Tim Kersey",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/217?v=4",
+          "company": "thisisartium",
+          "bio": "If you'd have asked me when I was 3 what I wanted to be when I grew up I would have said a bologna sandwich \r\n",
+          "score": 1655,
+          "followers": 630,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "ntm",
+            "simultaneous_launch_button",
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
+          ]
+        },
+        {
+          "login": "nschlemm",
+          "name": "Nikolaus Schlemm",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/948118?v=4",
+          "company": "coder nostra GmbH",
+          "score": 666.6,
+          "followers": 274,
+          "totalStars": 42,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "swiss_army_llama",
+            "sqlalchemy_data_model_visualizer",
+            "automatic_log_collector_and_analyzer"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "thisisartium",
+        "coder nostra GmbH"
+      ]
+    },
+    "your-source-to-prompt.html": {
+      "totalCount": 694,
+      "notableCount": 4,
+      "topStargazers": [
+        {
+          "login": "mukulpatnaik",
+          "name": "mukul",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/36257370?v=4",
+          "company": "portalcorp",
+          "score": 9260.2,
+          "followers": 124,
+          "totalStars": 3602,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "your-source-to-prompt.html"
+          ]
+        },
+        {
+          "login": "tkersey",
+          "name": "Tim Kersey",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/217?v=4",
+          "company": "thisisartium",
+          "bio": "If you'd have asked me when I was 3 what I wanted to be when I grew up I would have said a bologna sandwich \r\n",
+          "score": 1655,
+          "followers": 630,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "ntm",
+            "simultaneous_launch_button",
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
+          ]
+        },
+        {
+          "login": "chgeuer",
+          "name": "Dr. Christian Geuer-Pollmann",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/795162?v=4",
+          "company": "microsoft",
+          "bio": "Principal Software Development Engineer @microsoft ",
+          "score": 885.7,
+          "followers": 157,
+          "totalStars": 210,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "your-source-to-prompt.html"
+          ]
+        },
+        {
+          "login": "dai",
+          "name": "dai",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/12391?v=4",
+          "company": "Gijutsu-Hyoron Co.,Ltd.",
+          "bio": "🧰 Works at gihyo.jp 🎯 Focus on ebooks 📘 Repos are private 📘\r\n\r\n技術系出版社でEBookを作ってます  リポは完全に個人用です",
+          "score": 560.5,
+          "followers": 225,
+          "totalStars": 29,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "claude_code_agent_farm",
+            "your-source-to-prompt.html",
+            "visual_astar_python"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "portalcorp",
+        "thisisartium",
+        "microsoft",
+        "Gijutsu-Hyoron Co.,Ltd."
+      ]
+    },
+    "bulk_transcribe_youtube_videos_from_playlist": {
+      "totalCount": 618,
+      "notableCount": 0,
+      "topStargazers": [],
+      "topCompanies": []
+    },
+    "sqlalchemy_data_model_visualizer": {
+      "totalCount": 282,
+      "notableCount": 1,
+      "topStargazers": [
+        {
+          "login": "nschlemm",
+          "name": "Nikolaus Schlemm",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/948118?v=4",
+          "company": "coder nostra GmbH",
+          "score": 666.6,
+          "followers": 274,
+          "totalStars": 42,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "swiss_army_llama",
+            "sqlalchemy_data_model_visualizer",
+            "automatic_log_collector_and_analyzer"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "coder nostra GmbH"
+      ]
+    },
+    "visual_astar_python": {
+      "totalCount": 175,
+      "notableCount": 1,
+      "topStargazers": [
+        {
+          "login": "dai",
+          "name": "dai",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/12391?v=4",
+          "company": "Gijutsu-Hyoron Co.,Ltd.",
+          "bio": "🧰 Works at gihyo.jp 🎯 Focus on ebooks 📘 Repos are private 📘\r\n\r\n技術系出版社でEBookを作ってます  リポは完全に個人用です",
+          "score": 560.5,
+          "followers": 225,
+          "totalStars": 29,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "claude_code_agent_farm",
+            "your-source-to-prompt.html",
+            "visual_astar_python"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "Gijutsu-Hyoron Co.,Ltd."
+      ]
+    },
+    "mindmap-generator": {
+      "totalCount": 173,
+      "notableCount": 0,
+      "topStargazers": [],
+      "topCompanies": []
+    },
+    "ultimate_mcp_client": {
+      "totalCount": 140,
+      "notableCount": 2,
+      "topStargazers": [
+        {
+          "login": "thomasdavis",
+          "name": "Thomas Davis",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/416209?v=4",
+          "company": "Free",
+          "bio": "Co-Founder of cdnjs.com\r\nCo-Founder of jsonresume.org",
+          "score": 18216.5,
+          "followers": 1424,
+          "totalStars": 6135,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "ultimate_mcp_client"
+          ]
+        },
+        {
+          "login": "tkersey",
+          "name": "Tim Kersey",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/217?v=4",
+          "company": "thisisartium",
+          "bio": "If you'd have asked me when I was 3 what I wanted to be when I grew up I would have said a bologna sandwich \r\n",
+          "score": 1655,
+          "followers": 630,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "ntm",
+            "simultaneous_launch_button",
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "Free",
+        "thisisartium"
+      ]
+    },
+    "ultimate_mcp_server": {
+      "totalCount": 129,
+      "notableCount": 1,
+      "topStargazers": [
+        {
+          "login": "tkersey",
+          "name": "Tim Kersey",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/217?v=4",
+          "company": "thisisartium",
+          "bio": "If you'd have asked me when I was 3 what I wanted to be when I grew up I would have said a bologna sandwich \r\n",
+          "score": 1655,
+          "followers": 630,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "ntm",
+            "simultaneous_launch_button",
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "thisisartium"
+      ]
+    },
+    "fast_vector_similarity": {
+      "totalCount": 413,
+      "notableCount": 2,
+      "topStargazers": [
+        {
+          "login": "tkersey",
+          "name": "Tim Kersey",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/217?v=4",
+          "company": "thisisartium",
+          "bio": "If you'd have asked me when I was 3 what I wanted to be when I grew up I would have said a bologna sandwich \r\n",
+          "score": 1655,
+          "followers": 630,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "ntm",
+            "simultaneous_launch_button",
+            "coding_agent_session_search",
+            "claude_code_agent_farm",
+            "llm_aided_ocr",
+            "swiss_army_llama",
+            "your-source-to-prompt.html",
+            "ultimate_mcp_client",
+            "ultimate_mcp_server",
+            "fast_vector_similarity"
+          ]
+        },
+        {
+          "login": "darvid",
+          "name": "David Gidwani",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/569269?v=4",
+          "company": "atomweight",
+          "bio": "Python 🐍, DevOps 🏗️, DevEx ⚡",
+          "score": 1498.7,
+          "followers": 122,
+          "totalStars": 497,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "fast_vector_similarity"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "thisisartium",
+        "atomweight"
+      ]
+    },
+    "automatic_log_collector_and_analyzer": {
+      "totalCount": 411,
+      "notableCount": 4,
+      "topStargazers": [
+        {
+          "login": "shunkakinoki",
+          "name": "Shun Kakinoki",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/39187513?v=4",
+          "company": "0xSequence",
+          "bio": "OBLITERATE THE GALAXY",
+          "score": 2255.5,
+          "followers": 831,
+          "totalStars": 220,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "claude_code_agent_farm",
+            "automatic_log_collector_and_analyzer"
+          ]
+        },
+        {
+          "login": "dorucioclea",
+          "name": "Cioclea Doru Octavian",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/39082034?v=4",
+          "bio": "Tech enthusiast ",
+          "score": 1465.3000000000002,
+          "followers": 278,
+          "totalStars": 101,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "automatic_log_collector_and_analyzer"
+          ]
+        },
+        {
+          "login": "floer32",
+          "name": "Michael Floering",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/2420688?v=4",
+          "score": 1195.6,
+          "followers": 593,
+          "totalStars": 0,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "automatic_log_collector_and_analyzer"
+          ]
+        },
+        {
+          "login": "nschlemm",
+          "name": "Nikolaus Schlemm",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/948118?v=4",
+          "company": "coder nostra GmbH",
+          "score": 666.6,
+          "followers": 274,
+          "totalStars": 42,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "swiss_army_llama",
+            "sqlalchemy_data_model_visualizer",
+            "automatic_log_collector_and_analyzer"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "0xSequence",
+        "coder nostra GmbH"
+      ]
+    },
+    "model_guided_research": {
+      "totalCount": 80,
+      "notableCount": 3,
+      "topStargazers": [
+        {
+          "login": "timf34",
+          "name": "timf34",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/66926418?v=4",
+          "bio": "Co-Founder at Field of Vision | Hack Ireland | Patch",
+          "score": 1354.9,
+          "followers": 96,
+          "totalStars": 458,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "model_guided_research"
+          ]
+        },
+        {
+          "login": "gastonmorixe",
+          "name": "Gaston Morixe",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/637225?v=4",
+          "bio": "Product Engineer",
+          "score": 781.6,
+          "followers": 120,
+          "totalStars": 212,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "model_guided_research"
+          ]
+        },
+        {
+          "login": "sunny-g",
+          "name": "Sunny Gonnabathula",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/2055636?v=4",
+          "company": "federato",
+          "score": 696.5,
+          "followers": 144,
+          "totalStars": 151,
+          "reposStarred": [
+            "mcp_agent_mail",
+            "beads_viewer",
+            "cass_memory_system",
+            "model_guided_research"
+          ]
+        }
+      ],
+      "topCompanies": [
+        "federato"
+      ]
     }
   },
-  "lastUpdated": "2025-12-18T05:46:27.834Z"
+  "lastUpdated": "2025-12-18T05:57:44.487Z"
 }
