@@ -216,82 +216,22 @@ export const endorsements: Endorsement[] = [
     context: "Analysis of the Nvidia short thesis",
   },
   {
-    id: "agent-tools-feedback",
-    quote: "The MCP Agent Mail system has fundamentally changed how I think about multi-agent coordination. It's elegant and practical.",
+    id: "naval-ravikant",
+    quote: "Come for the trade, stay for the dazzling 60-minute education on the state of AI.",
     author: {
-      name: "AI Developer",
-      title: "Senior Engineer",
+      name: "Naval Ravikant",
+      title: "Founder",
+      company: "AngelList",
     },
     source: {
       type: "twitter",
+      url: "https://x.com/naval/status/1883751264082969057",
       platform: "X/Twitter",
     },
     date: "2025",
-    tags: ["agent-mail", "tools", "technical"],
+    tags: ["nvidia", "ai", "finance"],
     featured: true,
-    context: "Feedback on Agent Mail system",
-  },
-  {
-    id: "linkedin-rec-1",
-    quote: "Jeffrey has a rare combination of deep technical expertise and the ability to communicate complex ideas clearly. His work on AI infrastructure is consistently ahead of the curve.",
-    author: {
-      name: "Former Colleague",
-      title: "VP of Engineering",
-      company: "Tech Company",
-    },
-    source: {
-      type: "linkedin",
-      platform: "LinkedIn",
-    },
-    date: "2024",
-    tags: ["technical", "leadership"],
-    featured: false,
-    context: "LinkedIn recommendation",
-  },
-  {
-    id: "flywheel-praise",
-    quote: "The Flywheel concept is brilliant - each tool genuinely makes the others more powerful. This is how developer tools should be built.",
-    author: {
-      name: "Open Source Contributor",
-    },
-    source: {
-      type: "twitter",
-      platform: "X/Twitter",
-    },
-    date: "2025",
-    tags: ["flywheel", "tools", "oss"],
-    featured: false,
-    context: "Comment on Flywheel ecosystem",
-  },
-  {
-    id: "ubs-feedback",
-    quote: "UBS caught three bugs in our production code that our CI pipeline missed. It's now part of our standard workflow.",
-    author: {
-      name: "DevOps Engineer",
-      company: "Startup",
-    },
-    source: {
-      type: "email",
-    },
-    date: "2025",
-    tags: ["ubs", "tools", "technical"],
-    featured: true,
-    context: "Email feedback on Ultimate Bug Scanner",
-  },
-  {
-    id: "consulting-client",
-    quote: "Jeffrey's due diligence work saved us from a significant investment mistake. His analysis was thorough and actionable.",
-    author: {
-      name: "Managing Partner",
-      company: "PE Firm",
-    },
-    source: {
-      type: "email",
-    },
-    date: "2024",
-    tags: ["consulting", "finance", "due-diligence"],
-    featured: false,
-    context: "Consulting engagement feedback",
+    context: "Sharing Jeffrey's Nvidia short thesis",
   },
 ];
 
