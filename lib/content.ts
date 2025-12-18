@@ -1615,3 +1615,143 @@ export const writingHighlights: WritingItem[] = [
     date: "2024-03-30",
   },
 ];
+
+// =============================================================================
+// NVIDIA STORY PAGE DATA
+// =============================================================================
+
+export type NvidiaStoryTimelineEvent = {
+  id: string;
+  date: string;
+  displayDate: string;
+  title: string;
+  description: string;
+  icon: string; // Lucide icon name
+  featured?: boolean;
+  sourceUrl?: string;
+};
+
+export const nvidiaStoryData = {
+  // Hero section stats
+  stats: {
+    marketCapDrop: 600_000_000_000, // $600B
+    marketCapDropDisplay: "$600B",
+    essayWordCount: 12000,
+    publishDate: "2025-01-25",
+    dropDate: "2025-01-27",
+  },
+
+  // Hero content
+  hero: {
+    headline: "The $600B Drop",
+    subheadline:
+      "How a 12,000-word blog post from a Brooklyn apartment contributed to the largest single-day market cap drop in stock market history.",
+    essayUrl: "/writing/the_short_case_for_nvda",
+  },
+
+  // Timeline events (chronological)
+  timeline: [
+    {
+      id: "deepseek-r1",
+      date: "2025-01-20",
+      displayDate: "January 20, 2025",
+      title: "DeepSeek R1 Released",
+      description:
+        "Chinese AI startup releases breakthrough reasoning model at a fraction of typical training costs. Market reaction: none.",
+      icon: "Cpu",
+      featured: false,
+    },
+    {
+      id: "essay-published",
+      date: "2025-01-25",
+      displayDate: "January 25, 2025",
+      title: "Essay Published",
+      description:
+        '"The Short Case for Nvidia Stock" goes live on Your Token Online, connecting the dots on what DeepSeek meant for Nvidia\'s moat.',
+      icon: "FileText",
+      featured: true,
+    },
+    {
+      id: "chamath-shares",
+      date: "2025-01-26",
+      displayDate: "January 26, 2025",
+      title: "Chamath Shares",
+      description: "Chamath Palihapitiya shares the essay to his millions of followers.",
+      icon: "Share2",
+      sourceUrl: "https://x.com/chamath/status/1883579259769462819",
+    },
+    {
+      id: "naval-amplifies",
+      date: "2025-01-26",
+      displayDate: "January 26, 2025",
+      title: "Naval Amplifies",
+      description: 'Naval Ravikant shares the essay, calling it "required reading."',
+      icon: "TrendingUp",
+      sourceUrl: "https://x.com/naval/status/1883751264082969057",
+    },
+    {
+      id: "the-drop",
+      date: "2025-01-27",
+      displayDate: "January 27, 2025",
+      title: "The Drop",
+      description:
+        "$600B single-day market cap decline. The largest in stock market history.",
+      icon: "TrendingDown",
+      featured: true,
+    },
+    {
+      id: "matt-levine",
+      date: "2025-01-28",
+      displayDate: "January 28, 2025",
+      title: "Matt Levine Weighs In",
+      description:
+        'Bloomberg columnist calls it "a candidate for the most impactful short research report ever."',
+      icon: "Quote",
+      featured: true,
+    },
+    {
+      id: "media-coverage",
+      date: "2025-01-28",
+      displayDate: "January 28-30, 2025",
+      title: "Media Coverage",
+      description:
+        "Slashdot, TechRadar, Diginomica, Techmeme, and others cover the story.",
+      icon: "Newspaper",
+    },
+  ] as NvidiaStoryTimelineEvent[],
+
+  // Key narrative point
+  narrativeInsight:
+    "DeepSeek V3 was released in late December 2024, and R1 on January 20. The market had NO reaction to either release. It took the essay—explaining what these efficiency breakthroughs meant for Nvidia's moat—to catalyze the selloff a full week later. This proves the essay was the proximate cause, not the DeepSeek releases themselves.",
+
+  // Podcast appearances
+  podcasts: [
+    {
+      id: "bankless",
+      title: "DeepSeek R1 & The Short Case For Nvidia Stock",
+      outlet: "Bankless Podcast",
+      date: "2025-01-28",
+      duration: "~90 min",
+      description: "In-depth discussion aired the day after the $600B drop.",
+      spotifyUrl:
+        "https://www.bankless.com/podcast/deepseek-r1-the-short-case-for-nvidia-stock-jeffrey-emanuel",
+    },
+    {
+      id: "delphi",
+      title: "Viral Author of The Short Case for Nvidia Stock",
+      outlet: "Delphi Digital",
+      description:
+        "AI infrastructure disruption, open-source innovation, AGI implications.",
+      spotifyUrl:
+        "https://members.delphidigital.io/media/jeffrey-emanuel-viral-author-of-the-short-case-for-nvidia-stock-cohosted-by-pondering-durian",
+    },
+    {
+      id: "farzad",
+      title: "Viral NVIDIA Short on Record Breaking $600B Loss",
+      outlet: "Farzad Podcast",
+      duration: "2+ hours",
+      description: "Deep dive on Nvidia, XAI, Tesla FSD, and humanoid robots.",
+      spotifyUrl: "https://open.spotify.com/episode/59UKRipYaHjsrQjEXHFR5z",
+    },
+  ],
+};
