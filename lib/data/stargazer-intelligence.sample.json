@@ -1,0 +1,333 @@
+{
+  "totalUniqueStargazers": 5432,
+  "combinedReach": 2847500,
+  "topStargazers": [
+    {
+      "login": "torvalds",
+      "name": "Linus Torvalds",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/1024025",
+      "company": "Linux Foundation",
+      "bio": "Creator of Linux and Git",
+      "score": 892500,
+      "followers": 215000,
+      "totalStars": 178000,
+      "reposStarred": ["mcp-agent-mail", "cass-memory-system"]
+    },
+    {
+      "login": "gaearon",
+      "name": "Dan Abramov",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/810438",
+      "company": "Bluesky",
+      "bio": "Working on @blaboratories",
+      "score": 245800,
+      "followers": 89000,
+      "totalStars": 34000,
+      "reposStarred": ["beads_viewer"]
+    },
+    {
+      "login": "karpathy",
+      "name": "Andrej Karpathy",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/241138",
+      "company": null,
+      "bio": "AI researcher, Tesla AI -> OpenAI -> Independent",
+      "score": 198500,
+      "followers": 72000,
+      "totalStars": 28500,
+      "reposStarred": ["mcp-agent-mail", "ultimate-bug-scanner"]
+    },
+    {
+      "login": "sindresorhus",
+      "name": "Sindre Sorhus",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/170270",
+      "company": null,
+      "bio": "Full-Time Open-Sourcerer",
+      "score": 187200,
+      "followers": 52000,
+      "totalStars": 48000,
+      "reposStarred": ["named-tmux-manager", "simultaneous-launch-button"]
+    },
+    {
+      "login": "swyx",
+      "name": "Shawn Wang",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/6764957",
+      "company": "Latent Space",
+      "bio": "Writer, Speaker, Developer",
+      "score": 42800,
+      "followers": 18500,
+      "totalStars": 4200,
+      "reposStarred": ["mcp-agent-mail", "beads_viewer", "cass-memory-system"]
+    },
+    {
+      "login": "jxnblk",
+      "name": "Brent Jackson",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/3451712",
+      "company": "Independent",
+      "bio": "Building design tools",
+      "score": 38500,
+      "followers": 12000,
+      "totalStars": 8500,
+      "reposStarred": ["beads_viewer"]
+    },
+    {
+      "login": "getify",
+      "name": "Kyle Simpson",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/150330",
+      "company": null,
+      "bio": "Author of You Don't Know JS",
+      "score": 35200,
+      "followers": 48000,
+      "totalStars": 2800,
+      "reposStarred": ["ultimate-bug-scanner"]
+    },
+    {
+      "login": "rauchg",
+      "name": "Guillermo Rauch",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/13041",
+      "company": "Vercel",
+      "bio": "CEO @vercel",
+      "score": 31500,
+      "followers": 42000,
+      "totalStars": 1800,
+      "reposStarred": ["mcp-agent-mail"]
+    },
+    {
+      "login": "wongmjane",
+      "name": "Jane Wong",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/5301528",
+      "company": "Meta",
+      "bio": "Finding hidden features in apps",
+      "score": 18200,
+      "followers": 8500,
+      "totalStars": 1200,
+      "reposStarred": ["beads_viewer", "warp-grep"]
+    },
+    {
+      "login": "jessfraz",
+      "name": "Jess Frazelle",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/1445228",
+      "company": "Oxide Computer",
+      "bio": "Containers, Security, Systems",
+      "score": 15800,
+      "followers": 24000,
+      "totalStars": 3200,
+      "reposStarred": ["named-tmux-manager"]
+    }
+  ],
+  "topCompanies": [
+    { "name": "Google", "count": 42 },
+    { "name": "Anthropic", "count": 28 },
+    { "name": "Meta", "count": 23 },
+    { "name": "Vercel", "count": 18 },
+    { "name": "Microsoft", "count": 15 },
+    { "name": "Apple", "count": 12 },
+    { "name": "OpenAI", "count": 11 },
+    { "name": "Stripe", "count": 9 }
+  ],
+  "byRepo": {
+    "mcp-agent-mail": {
+      "totalCount": 1847,
+      "notableCount": 156,
+      "topStargazers": [
+        {
+          "login": "torvalds",
+          "name": "Linus Torvalds",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/1024025",
+          "company": "Linux Foundation",
+          "score": 892500,
+          "followers": 215000,
+          "totalStars": 178000,
+          "reposStarred": ["mcp-agent-mail", "cass-memory-system"]
+        },
+        {
+          "login": "karpathy",
+          "name": "Andrej Karpathy",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/241138",
+          "score": 198500,
+          "followers": 72000,
+          "totalStars": 28500,
+          "reposStarred": ["mcp-agent-mail", "ultimate-bug-scanner"]
+        },
+        {
+          "login": "swyx",
+          "name": "Shawn Wang",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/6764957",
+          "company": "Latent Space",
+          "score": 42800,
+          "followers": 18500,
+          "totalStars": 4200,
+          "reposStarred": ["mcp-agent-mail", "beads_viewer", "cass-memory-system"]
+        },
+        {
+          "login": "rauchg",
+          "name": "Guillermo Rauch",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/13041",
+          "company": "Vercel",
+          "score": 31500,
+          "followers": 42000,
+          "totalStars": 1800,
+          "reposStarred": ["mcp-agent-mail"]
+        }
+      ],
+      "topCompanies": ["Anthropic", "Google", "Vercel"]
+    },
+    "beads_viewer": {
+      "totalCount": 892,
+      "notableCount": 67,
+      "topStargazers": [
+        {
+          "login": "gaearon",
+          "name": "Dan Abramov",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/810438",
+          "company": "Bluesky",
+          "score": 245800,
+          "followers": 89000,
+          "totalStars": 34000,
+          "reposStarred": ["beads_viewer"]
+        },
+        {
+          "login": "swyx",
+          "name": "Shawn Wang",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/6764957",
+          "company": "Latent Space",
+          "score": 42800,
+          "followers": 18500,
+          "totalStars": 4200,
+          "reposStarred": ["mcp-agent-mail", "beads_viewer", "cass-memory-system"]
+        },
+        {
+          "login": "jxnblk",
+          "name": "Brent Jackson",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/3451712",
+          "company": "Independent",
+          "score": 38500,
+          "followers": 12000,
+          "totalStars": 8500,
+          "reposStarred": ["beads_viewer"]
+        },
+        {
+          "login": "wongmjane",
+          "name": "Jane Wong",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/5301528",
+          "company": "Meta",
+          "score": 18200,
+          "followers": 8500,
+          "totalStars": 1200,
+          "reposStarred": ["beads_viewer", "warp-grep"]
+        }
+      ],
+      "topCompanies": ["Meta", "Google", "Independent"]
+    },
+    "cass-memory-system": {
+      "totalCount": 1245,
+      "notableCount": 89,
+      "topStargazers": [
+        {
+          "login": "torvalds",
+          "name": "Linus Torvalds",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/1024025",
+          "company": "Linux Foundation",
+          "score": 892500,
+          "followers": 215000,
+          "totalStars": 178000,
+          "reposStarred": ["mcp-agent-mail", "cass-memory-system"]
+        },
+        {
+          "login": "swyx",
+          "name": "Shawn Wang",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/6764957",
+          "company": "Latent Space",
+          "score": 42800,
+          "followers": 18500,
+          "totalStars": 4200,
+          "reposStarred": ["mcp-agent-mail", "beads_viewer", "cass-memory-system"]
+        }
+      ],
+      "topCompanies": ["Anthropic", "OpenAI", "Google"]
+    },
+    "ultimate-bug-scanner": {
+      "totalCount": 567,
+      "notableCount": 34,
+      "topStargazers": [
+        {
+          "login": "karpathy",
+          "name": "Andrej Karpathy",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/241138",
+          "score": 198500,
+          "followers": 72000,
+          "totalStars": 28500,
+          "reposStarred": ["mcp-agent-mail", "ultimate-bug-scanner"]
+        },
+        {
+          "login": "getify",
+          "name": "Kyle Simpson",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/150330",
+          "score": 35200,
+          "followers": 48000,
+          "totalStars": 2800,
+          "reposStarred": ["ultimate-bug-scanner"]
+        }
+      ],
+      "topCompanies": ["Google", "Microsoft"]
+    },
+    "named-tmux-manager": {
+      "totalCount": 234,
+      "notableCount": 18,
+      "topStargazers": [
+        {
+          "login": "sindresorhus",
+          "name": "Sindre Sorhus",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/170270",
+          "score": 187200,
+          "followers": 52000,
+          "totalStars": 48000,
+          "reposStarred": ["named-tmux-manager", "simultaneous-launch-button"]
+        },
+        {
+          "login": "jessfraz",
+          "name": "Jess Frazelle",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/1445228",
+          "company": "Oxide Computer",
+          "score": 15800,
+          "followers": 24000,
+          "totalStars": 3200,
+          "reposStarred": ["named-tmux-manager"]
+        }
+      ],
+      "topCompanies": ["Independent", "Oxide Computer"]
+    },
+    "simultaneous-launch-button": {
+      "totalCount": 189,
+      "notableCount": 12,
+      "topStargazers": [
+        {
+          "login": "sindresorhus",
+          "name": "Sindre Sorhus",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/170270",
+          "score": 187200,
+          "followers": 52000,
+          "totalStars": 48000,
+          "reposStarred": ["named-tmux-manager", "simultaneous-launch-button"]
+        }
+      ],
+      "topCompanies": ["Independent"]
+    },
+    "warp-grep": {
+      "totalCount": 456,
+      "notableCount": 28,
+      "topStargazers": [
+        {
+          "login": "wongmjane",
+          "name": "Jane Wong",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/5301528",
+          "company": "Meta",
+          "score": 18200,
+          "followers": 8500,
+          "totalStars": 1200,
+          "reposStarred": ["beads_viewer", "warp-grep"]
+        }
+      ],
+      "topCompanies": ["Meta", "Google"]
+    }
+  },
+  "lastUpdated": "2025-12-18T00:00:00Z"
+}
