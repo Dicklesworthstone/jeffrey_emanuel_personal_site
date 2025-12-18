@@ -20,6 +20,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "clsx": "^2.1.1",

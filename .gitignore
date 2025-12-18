@@ -48,3 +48,4 @@ next-env.d.ts
 
 # duplicate/backup directories
 jeffreyemanuel-site/
+.stargazer-cache.json
