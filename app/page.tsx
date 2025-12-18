@@ -260,6 +260,16 @@ export default async function HomePage() {
           heading=""
           className="mt-2"
         />
+        {/* Subtle link to Nvidia story - understated but findable */}
+        <div className="mt-8 text-center">
+          <HapticLink
+            href="/nvidia-story"
+            className="inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-300"
+          >
+            <span>See the story behind the $600B drop</span>
+            <ArrowRight className="h-3 w-3" />
+          </HapticLink>
+        </div>
       </SectionShell>
 
       <SectionShell
