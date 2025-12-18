@@ -1008,7 +1008,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Agents communicate via mail threads",
       cass: "Session history indexed for search",
     },
-    stars: 15,
+    stars: 16,
     projectSlug: "named-tmux-manager",
     features: [
       "Spawn named agent panes with type classification",
@@ -1029,7 +1029,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Notifications sent to reviewer inboxes",
       ubs: "Pre-flight scans before execution",
     },
-    stars: 20,
+    stars: 23,
     projectSlug: "simultaneous-launch-button",
     features: [
       "Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION)",
@@ -1051,7 +1051,7 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Shared context across agent sessions",
       slb: "Approval requests delivered to inboxes",
     },
-    stars: 1001,
+    stars: 1015,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "mcp-agent-mail",
     features: [
@@ -1074,7 +1074,7 @@ export const flywheelTools: FlywheelTool[] = [
       ubs: "Bug scanner results create blocking issues",
       cass: "Search prior sessions for task context",
     },
-    stars: 490,
+    stars: 546,
     demoUrl: "https://dicklesworthstone.github.io/beads_viewer-pages/",
     projectSlug: "beads-viewer",
     features: [
@@ -1096,7 +1096,7 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Creates issues for discovered bugs",
       slb: "Validates code before risky commits",
     },
-    stars: 89,
+    stars: 91,
     projectSlug: "ultimate-bug-scanner",
     features: [
       "Wraps best-in-class analyzers: ESLint, Ruff, Clippy",
@@ -1118,7 +1118,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Semantic search over stored memories",
       bv: "Remembers task patterns and solutions",
     },
-    stars: 60,
+    stars: 71,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "cass-memory-system",
     features: [
@@ -1141,7 +1141,7 @@ export const flywheelTools: FlywheelTool[] = [
       ntm: "Searches all managed agent histories",
       bv: "Links search results to related tasks",
     },
-    stars: 138,
+    stars: 145,
     projectSlug: "cass",
     features: [
       "Unified search across Claude Code, Codex, Cursor, Gemini",
