@@ -169,14 +169,8 @@ export default async function HomePage() {
                     each tool amplifies the others.
                   </p>
 
-                  {/* Notable Stargazers - social proof */}
-                  <div className="mt-6 flex flex-col gap-2">
-                    <p className="text-sm text-slate-500">
-                      Used by developers from{" "}
-                      <span className="text-violet-400">zendesk</span>,{" "}
-                      <span className="text-violet-400">grab</span>,{" "}
-                      <span className="text-violet-400">google-labs-code</span>
-                    </p>
+                  {/* Notable Stargazers - avatar strip showing influential developers */}
+                  <div className="mt-6">
                     <NotableStargazers variant="compact" maxItems={6} />
                   </div>
                 </div>
