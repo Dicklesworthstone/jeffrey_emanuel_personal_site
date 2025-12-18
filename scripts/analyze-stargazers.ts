@@ -24,7 +24,10 @@ import type {
   RepoStargazerStats,
   CompanyCount,
 } from "../lib/stargazer-types";
-import { NOTABLE_SCORE_THRESHOLD } from "../lib/stargazer-types";
+import {
+  LEGEND_FOLLOWERS_THRESHOLD,
+  LEGEND_STARS_THRESHOLD,
+} from "../lib/stargazer-types";
 
 // Configuration
 const GITHUB_USERNAME = "Dicklesworthstone";
@@ -276,18 +279,24 @@ function processUser(
   reposStarred: string[]
 ): NotableStargazer | null {
   const totalStars = userData.totalStars || 0;
+  const followers = userData.followers || 0;
   const contributions = userData.public_repos + userData.public_gists;
   const recentActivity = 50; // Placeholder - would need events API for real value
 
   const score = calculateScore(
     totalStars,
-    userData.followers,
+    followers,
     contributions,
     recentActivity
   );
 
-  // Skip users below threshold
-  if (score < NOTABLE_SCORE_THRESHOLD) {
+  // Only include "legends" - truly notable developers
+  // Must have 5K+ followers OR 30K+ total stars
+  const isLegend =
+    followers >= LEGEND_FOLLOWERS_THRESHOLD ||
+    totalStars >= LEGEND_STARS_THRESHOLD;
+
+  if (!isLegend) {
     return null;
   }
 
@@ -334,7 +343,7 @@ async function analyzeStargazers(): Promise<void> {
 
   console.log(`\nAnalyzing stargazers for ${REPOS_TO_ANALYZE.length} repos...`);
   console.log(`Max users to process: ${MAX_USERS_TO_PROCESS}`);
-  console.log(`Notable score threshold: ${NOTABLE_SCORE_THRESHOLD}\n`);
+  console.log(`Legend thresholds: ${LEGEND_FOLLOWERS_THRESHOLD}+ followers OR ${LEGEND_STARS_THRESHOLD}+ total stars\n`);
 
   // Collect all stargazers by repo
   const stargazersByRepo: Record<string, string[]> = {};

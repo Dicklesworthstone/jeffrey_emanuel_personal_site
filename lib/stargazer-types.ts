@@ -165,15 +165,21 @@ export const DISPLAY_DEFAULTS: Record<NotableStargazersDisplayConfig['variant'],
 };
 
 /**
- * Score threshold for considering a stargazer "notable".
- * Users below this score are excluded from the notable lists.
+ * Thresholds for considering a stargazer a "legend" worth highlighting.
+ * We only show truly notable developers - not just active GitHub users.
  *
- * Based on formula: score = totalStars * 2.5 + followers * 2.0 + contributions * 0.1 + recentActivity * 0.1
+ * A stargazer qualifies if they meet EITHER threshold:
+ * - 5,000+ followers (significant personal brand/recognition)
+ * - 30,000+ total stars across repos (created something massive)
  *
- * A score of 500 roughly corresponds to:
- * - 200 total stars + 0 followers, OR
- * - 0 stars + 250 followers, OR
- * - 100 stars + 100 followers
+ * This is intentionally strict - better to show nobody than to show
+ * random people as if they're famous.
+ */
+export const LEGEND_FOLLOWERS_THRESHOLD = 5000;
+export const LEGEND_STARS_THRESHOLD = 30000;
+
+/**
+ * @deprecated Use LEGEND_FOLLOWERS_THRESHOLD and LEGEND_STARS_THRESHOLD instead
  */
 export const NOTABLE_SCORE_THRESHOLD = 500;
 
