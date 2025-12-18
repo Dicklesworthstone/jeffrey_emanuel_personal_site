@@ -84,10 +84,15 @@ essayUrl: "/writing/the_short_case_for_nvda"
 
 **Timeline Events** (chronological):
 
+> **KEY NARRATIVE POINT**: DeepSeek V3 was released in late December 2024, and R1 on January 20.
+> The market did NOT react to either release. It took the essay—explaining what these efficiency
+> breakthroughs meant for Nvidia's moat—to catalyze the selloff a full week later. This proves
+> the essay was the proximate cause, not the DeepSeek releases themselves.
+
 ```
 1. January 20, 2025 - DeepSeek R1 Released
    Chinese AI startup releases breakthrough reasoning model at a fraction of typical training costs
-   (This provided key evidence for the essay's thesis about efficiency breakthroughs)
+   Market reaction: None. NVDA stock unchanged for the next 5 days.
 
 2. January 25, 2025 - Essay Published
    "The Short Case for Nvidia Stock" goes live on Your Token Online
