@@ -144,6 +144,24 @@ export interface Endorsement {
 
 export const endorsements: Endorsement[] = [
   {
+    id: "naval-ravikant",
+    quote: "Come for the trade, stay for the dazzling 60-minute education on the state of AI.",
+    author: {
+      name: "Naval Ravikant",
+      title: "Founder",
+      company: "AngelList",
+    },
+    source: {
+      type: "twitter",
+      url: "https://x.com/naval/status/1883751264082969057",
+      platform: "X/Twitter",
+    },
+    date: "2025",
+    tags: ["nvidia", "ai", "finance"],
+    featured: true,
+    context: "Sharing Jeffrey's Nvidia short thesis",
+  },
+  {
     id: "levine-nvidia",
     quote: "A candidate for the most impactful short research report ever written.",
     author: {
@@ -214,24 +232,6 @@ export const endorsements: Endorsement[] = [
     tags: ["nvidia", "tech", "ai"],
     featured: false,
     context: "Analysis of the Nvidia short thesis",
-  },
-  {
-    id: "naval-ravikant",
-    quote: "Come for the trade, stay for the dazzling 60-minute education on the state of AI.",
-    author: {
-      name: "Naval Ravikant",
-      title: "Founder",
-      company: "AngelList",
-    },
-    source: {
-      type: "twitter",
-      url: "https://x.com/naval/status/1883751264082969057",
-      platform: "X/Twitter",
-    },
-    date: "2025",
-    tags: ["nvidia", "ai", "finance"],
-    featured: true,
-    context: "Sharing Jeffrey's Nvidia short thesis",
   },
 ];
 

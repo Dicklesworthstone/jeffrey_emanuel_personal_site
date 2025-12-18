@@ -168,16 +168,16 @@ export default function XStatsCard() {
                   2025 Highlights
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {engagementStats.map((stat, index) => {
                   const Icon = stat.icon;
                   return (
                     <div
                       key={stat.label}
-                      className="flex flex-col items-center rounded-lg bg-slate-800/50 px-2 py-2"
+                      className="flex flex-col items-center rounded-lg bg-slate-800/50 px-1.5 py-1.5"
                     >
-                      <Icon className="mb-1 h-3 w-3 text-slate-400" />
-                      <span className="text-sm font-bold text-slate-200">
+                      <Icon className="mb-0.5 h-2.5 w-2.5 text-slate-400" />
+                      <span className="text-xs font-bold text-slate-200">
                         <AnimatedNumber
                           end={stat.numericValue}
                           suffix={stat.value.includes("M") ? "M" : "K"}
@@ -186,7 +186,7 @@ export default function XStatsCard() {
                           decimals={stat.value.includes(".") ? 1 : 0}
                         />
                       </span>
-                      <span className="text-[8px] font-medium uppercase tracking-wider text-slate-500">
+                      <span className="text-[7px] font-medium uppercase tracking-wider text-slate-500">
                         {stat.label}
                       </span>
                     </div>

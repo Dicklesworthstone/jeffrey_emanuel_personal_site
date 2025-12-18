@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence, LayoutGroup, useReducedMotion } from "framer-motion";
 import SectionShell from "@/components/section-shell";
 import BentoGrid from "@/components/bento-grid";
@@ -35,7 +35,15 @@ const popularTags = Object.entries(tagCounts)
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState<typeof filters[number]["id"]>("all");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [mountKey, setMountKey] = useState(0);
   const prefersReducedMotion = useReducedMotion();
+
+  // Force re-animation on client-side navigation by incrementing key on mount
+  // This is intentional to re-trigger AnimatePresence animations on navigation
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional one-time trigger on navigation
+    setMountKey((k) => k + 1);
+  }, []);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {
@@ -130,7 +138,7 @@ export default function ProjectsPage() {
       <AnimatePresence mode="wait">
         {showFlywheel && (
           <motion.div
-            key="flywheel"
+            key={`flywheel-${mountKey}`}
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
