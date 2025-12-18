@@ -14,6 +14,10 @@ import {
   X,
   ExternalLink,
   Zap,
+  Star,
+  Play,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -389,6 +393,155 @@ const CenterHub = React.memo(function CenterHub({ reducedMotion }: { reducedMoti
   );
 });
 
+// Rich tooltip for flywheel nodes - appears on hover with delay
+const RichTooltip = React.memo(function RichTooltip({
+  tool,
+  position,
+  containerSize,
+  reducedMotion,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  tool: FlywheelTool;
+  position: { x: number; y: number };
+  containerSize: number;
+  reducedMotion: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}) {
+  const Icon = iconMap[tool.icon] || Zap;
+
+  // Determine tooltip placement based on node position
+  // If node is on right half, tooltip goes left; if on left half, tooltip goes right
+  const isRightHalf = position.x > containerSize / 2;
+  const tooltipWidth = 280;
+  const gap = 16;
+
+  // Calculate tooltip position
+  const tooltipStyle: React.CSSProperties = {
+    position: "absolute",
+    width: tooltipWidth,
+    ...(isRightHalf
+      ? { right: containerSize - position.x + NODE_SIZE / 2 + gap }
+      : { left: position.x + NODE_SIZE / 2 + gap }),
+    top: Math.max(20, Math.min(position.y - 100, containerSize - 280)),
+  };
+
+  // Format star count
+  const formatStars = (count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+    }
+    return count.toString();
+  };
+
+  return (
+    <motion.div
+      initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: isRightHalf ? 10 : -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: isRightHalf ? 10 : -10 }}
+      transition={{ duration: reducedMotion ? 0.1 : 0.2 }}
+      style={tooltipStyle}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className="z-50 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 shadow-2xl shadow-black/50 backdrop-blur-xl"
+      role="tooltip"
+    >
+      {/* Background gradient */}
+      <div className={cn("absolute inset-0 opacity-10 bg-gradient-to-br", tool.color)} />
+
+      <div className="relative p-4">
+        {/* Header with icon, name, and stars */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br shadow-lg",
+                tool.color
+              )}
+            >
+              <Icon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-bold text-white">{tool.name}</h4>
+              <p className="text-xs text-slate-400">{tool.tagline}</p>
+            </div>
+          </div>
+
+          {/* Star badge */}
+          {tool.stars && (
+            <div className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-400">
+              <Star className="h-3 w-3 fill-current" />
+              <span>{formatStars(tool.stars)}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Key features */}
+        <div className="mt-4 space-y-1.5">
+          {tool.features.map((feature, i) => (
+            <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
+              <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" />
+              <span>{feature}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Action buttons */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {/* GitHub button */}
+          <a
+            href={tool.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold",
+              "bg-white/10 text-white transition-colors hover:bg-white/20"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink className="h-3 w-3" />
+            GitHub
+          </a>
+
+          {/* Live Demo button (if available) */}
+          {tool.demoUrl && (
+            <a
+              href={tool.demoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold",
+                "bg-gradient-to-r text-white transition-opacity hover:opacity-90",
+                tool.color
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Play className="h-3 w-3 fill-current" />
+              Try Demo
+            </a>
+          )}
+
+          {/* Learn More button (if project has a detail page) */}
+          {tool.projectSlug && (
+            <Link
+              href={`/projects/${tool.projectSlug}`}
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold",
+                "bg-white/5 text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              Learn More
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
 // Tool detail panel
 const ToolDetailPanel = React.memo(function ToolDetailPanel({
   tool,
@@ -710,6 +863,8 @@ const EcosystemVitalityBadge = React.memo(function EcosystemVitalityBadge({
 export default function FlywheelVisualization() {
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
   const [hoveredToolId, setHoveredToolId] = useState<string | null>(null);
+  const [tooltipToolId, setTooltipToolId] = useState<string | null>(null);
+  const hoverTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
   const supportsMotionPath = useSupportsMotionPath();
@@ -719,6 +874,55 @@ export default function FlywheelVisualization() {
   const displayedTool = flywheelTools.find((t) => t.id === activeToolId) ?? null;
   // For mobile bottom sheet, only show on explicit click/selection
   const selectedTool = flywheelTools.find((t) => t.id === selectedToolId) ?? null;
+  // Tool for rich tooltip (shown with delay)
+  const tooltipTool = flywheelTools.find((t) => t.id === tooltipToolId) ?? null;
+
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle hover with delay for tooltip
+  const handleNodeHoverStart = useCallback((toolId: string) => {
+    setHoveredToolId(toolId);
+    // Clear any existing timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    // Set tooltip to show after 300ms delay
+    hoverTimeoutRef.current = setTimeout(() => {
+      setTooltipToolId(toolId);
+    }, 300);
+  }, []);
+
+  const handleNodeHoverEnd = useCallback(() => {
+    setHoveredToolId(null);
+    // Clear the show timeout if hover ends before tooltip shows
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    // Set a short delay before hiding tooltip to allow mouse to move to it
+    hoverTimeoutRef.current = setTimeout(() => {
+      setTooltipToolId(null);
+    }, 150);
+  }, []);
+
+  const handleTooltipEnter = useCallback(() => {
+    // Cancel the hide timeout when mouse enters tooltip
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handleTooltipLeave = useCallback(() => {
+    // Hide tooltip immediately when mouse leaves it
+    setTooltipToolId(null);
+  }, []);
 
   // Calculate node positions
   const positions = useMemo(() => {
@@ -890,10 +1094,29 @@ export default function FlywheelVisualization() {
                 isConnected={isToolConnected(tool.id)}
                 isDimmed={!!activeToolId && tool.id !== activeToolId && !isToolConnected(tool.id)}
                 onSelect={() => handleSelectTool(tool.id)}
-                onHover={(hovering) => setHoveredToolId(hovering ? tool.id : null)}
+                onHover={(hovering) =>
+                  hovering ? handleNodeHoverStart(tool.id) : handleNodeHoverEnd()
+                }
                 reducedMotion={reducedMotion}
               />
             ))}
+
+            {/* Rich tooltip (desktop only - hidden on mobile via lg:block) */}
+            <div className="hidden lg:block">
+              <AnimatePresence>
+                {tooltipTool && tooltipToolId && positions[tooltipToolId] && (
+                  <RichTooltip
+                    key={tooltipToolId}
+                    tool={tooltipTool}
+                    position={positions[tooltipToolId]}
+                    containerSize={CONTAINER_SIZE}
+                    reducedMotion={reducedMotion}
+                    onMouseEnter={handleTooltipEnter}
+                    onMouseLeave={handleTooltipLeave}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Ecosystem vitality badge */}

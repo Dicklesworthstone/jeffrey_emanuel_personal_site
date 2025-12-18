@@ -962,6 +962,11 @@ export type FlywheelTool = {
   tagline: string;
   connectsTo: string[]; // IDs of tools this one connects to
   connectionDescriptions: Record<string, string>; // ID -> description of connection
+  // Enhanced fields for rich tooltips
+  stars?: number; // GitHub star count
+  demoUrl?: string; // Live demo URL if available
+  projectSlug?: string; // Slug for "Learn More" link to /projects/[slug]
+  features: string[]; // 2-3 key features for tooltip
 };
 
 export const flywheelTools: FlywheelTool[] = [
@@ -979,6 +984,13 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Agents communicate via mail threads",
       cass: "Session history indexed for search",
     },
+    stars: 15,
+    projectSlug: "named-tmux-manager",
+    features: [
+      "Spawn named agent panes with type classification",
+      "Broadcast prompts to specific agent types",
+      "Real-time dashboard showing agent status",
+    ],
   },
   {
     id: "slb",
@@ -993,6 +1005,13 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Notifications sent to reviewer inboxes",
       ubs: "Pre-flight scans before execution",
     },
+    stars: 20,
+    projectSlug: "simultaneous-launch-button",
+    features: [
+      "Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION)",
+      "Cryptographic command binding with SHA256+HMAC",
+      "Dynamic quorum based on active agents",
+    ],
   },
   {
     id: "mail",
@@ -1008,6 +1027,14 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Shared context across agent sessions",
       slb: "Approval requests delivered to inboxes",
     },
+    stars: 1001,
+    demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
+    projectSlug: "mcp-agent-mail",
+    features: [
+      "GitHub-flavored Markdown messaging between agents",
+      "Advisory file reservations to prevent conflicts",
+      "Git-backed storage for complete audit trails",
+    ],
   },
   {
     id: "bv",
@@ -1023,6 +1050,14 @@ export const flywheelTools: FlywheelTool[] = [
       ubs: "Bug scanner results create blocking issues",
       cass: "Search prior sessions for task context",
     },
+    stars: 490,
+    demoUrl: "https://dicklesworthstone.github.io/beads_viewer-pages/",
+    projectSlug: "beads-viewer",
+    features: [
+      "9 graph metrics: PageRank, Betweenness, Critical Path",
+      "Robot protocol (--robot-*) for AI-ready JSON",
+      "60fps TUI rendering via Bubble Tea",
+    ],
   },
   {
     id: "ubs",
@@ -1037,6 +1072,13 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Creates issues for discovered bugs",
       slb: "Validates code before risky commits",
     },
+    stars: 89,
+    projectSlug: "ultimate-bug-scanner",
+    features: [
+      "Wraps best-in-class analyzers: ESLint, Ruff, Clippy",
+      "Consistent JSON output for all languages",
+      "Perfect for pre-commit hooks and CI/CD",
+    ],
   },
   {
     id: "cm",
@@ -1052,6 +1094,14 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Semantic search over stored memories",
       bv: "Remembers task patterns and solutions",
     },
+    stars: 60,
+    demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
+    projectSlug: "cass-memory-system",
+    features: [
+      "ACE framework: procedural, episodic, semantic memory",
+      "MCP tools for cross-session context persistence",
+      "Memory consolidation and summarization",
+    ],
   },
   {
     id: "cass",
@@ -1067,6 +1117,13 @@ export const flywheelTools: FlywheelTool[] = [
       ntm: "Searches all managed agent histories",
       bv: "Links search results to related tasks",
     },
+    stars: 138,
+    projectSlug: "cass",
+    features: [
+      "Unified search across Claude Code, Codex, Cursor, Gemini",
+      "Tantivy full-text search for instant results",
+      "Robot mode (--robot) for AI agent integration",
+    ],
   },
 ];
 
