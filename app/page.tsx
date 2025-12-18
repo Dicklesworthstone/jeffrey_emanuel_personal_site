@@ -14,6 +14,7 @@ import { siteConfig } from "@/lib/content";
 import EndorsementShowcase from "@/components/endorsement-showcase";
 import DemoShowcase from "@/components/demo-showcase";
 import NewsletterSignup from "@/components/newsletter-signup";
+import NotableStargazers from "@/components/notable-stargazers-wrapper";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
@@ -167,6 +168,17 @@ export default async function HomePage() {
                     10+ agents simultaneously. My GitHub squares get darker green each month because
                     each tool amplifies the others.
                   </p>
+
+                  {/* Notable Stargazers - social proof */}
+                  <div className="mt-6 flex flex-col gap-2">
+                    <p className="text-sm text-slate-500">
+                      Used by developers from{" "}
+                      <span className="text-violet-400">zendesk</span>,{" "}
+                      <span className="text-violet-400">grab</span>,{" "}
+                      <span className="text-violet-400">google-labs-code</span>
+                    </p>
+                    <NotableStargazers variant="compact" maxItems={6} />
+                  </div>
                 </div>
 
                 {/* Mini flywheel preview */}
