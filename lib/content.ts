@@ -192,6 +192,25 @@ export const endorsements: Endorsement[] = [
     context: "Slashdot feature coverage",
   },
   {
+    id: "willison-nvidia",
+    quote:
+      "Long, excellent...capturing the current state of the AI/LLM industry. Jeffrey has a rare combination of experience in both computer science and investment analysis.",
+    author: {
+      name: "Simon Willison",
+      title: "Creator",
+      company: "Datasette",
+    },
+    source: {
+      type: "other",
+      url: "https://simonwillison.net/2025/Jan/27/deepseek-nvidia/",
+      platform: "Personal Blog",
+    },
+    date: "2025",
+    tags: ["nvidia", "tech", "ai"],
+    featured: false,
+    context: "Analysis of the Nvidia short thesis",
+  },
+  {
     id: "agent-tools-feedback",
     quote: "The MCP Agent Mail system has fundamentally changed how I think about multi-agent coordination. It's elegant and practical.",
     author: {
