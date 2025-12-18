@@ -2,6 +2,7 @@
 
 import SectionShell from "@/components/section-shell";
 import Timeline from "@/components/timeline";
+import TwoWorlds from "@/components/two-worlds";
 import Link from "next/link";
 import { careerTimeline } from "@/lib/content";
 import { User, ArrowRight } from "lucide-react";
@@ -78,6 +79,9 @@ export default function AboutPage() {
           </Link>
         </div>
       </SectionShell>
+
+      {/* Two Worlds Section - Visually striking transition narrative */}
+      <TwoWorlds />
 
       <SectionShell
         id="career"

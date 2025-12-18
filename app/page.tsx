@@ -4,7 +4,7 @@ import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
 import AnimatedGrid, { LazySection, TimelineSkeleton } from "@/components/animated-grid";
-import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail } from "lucide-react";
+import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail, Activity } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
@@ -15,6 +15,7 @@ import EndorsementShowcase from "@/components/endorsement-showcase";
 import DemoShowcase from "@/components/demo-showcase";
 import NewsletterSignup from "@/components/newsletter-signup";
 import NotableStargazers from "@/components/notable-stargazers-wrapper";
+import GitHubHeartbeat from "@/components/github-heartbeat-wrapper";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
@@ -345,6 +346,19 @@ export default async function HomePage() {
           heading=""
           className="mt-2"
         />
+      </SectionShell>
+
+      {/* GitHub Heartbeat - Live Activity */}
+      <SectionShell
+        id="activity"
+        iconNode={<Activity className="h-5 w-5" />}
+        eyebrow="Live Activity"
+        title="GitHub Heartbeat"
+        kicker="Real-time pulse of my open-source work. The flywheel spins faster every week."
+      >
+        <div className="mx-auto max-w-2xl">
+          <GitHubHeartbeat />
+        </div>
       </SectionShell>
 
       {featuredThreads.length > 0 && (

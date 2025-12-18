@@ -1,7 +1,8 @@
 "use client";
 
 import SectionShell from "@/components/section-shell";
-import { Cpu, LineChart, Users } from "lucide-react";
+import ConsultingIntakeForm from "@/components/consulting-intake-form";
+import { Cpu, LineChart, Users, MessageSquare } from "lucide-react";
 
 export default function ConsultingPage() {
   return (
@@ -144,10 +145,33 @@ export default function ConsultingPage() {
           </li>
         </ol>
         <p className="mt-4 text-sm text-slate-400">
-          If you want to explore working together, send a short note with some
+          If you want to explore working together, fill out the form below or send a short note with some
           context about your fund, your current AI exposure, and where you feel
           most uncertain.
         </p>
+      </SectionShell>
+
+      {/* Intake Form */}
+      <SectionShell
+        id="consulting-inquiry"
+        icon={MessageSquare}
+        eyebrow="Get in Touch"
+        title="Start a conversation"
+        kicker="Tell me about your fund and what you're trying to accomplish. I'll get back to you within a few days."
+      >
+        <div className="mx-auto max-w-3xl">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 p-6 backdrop-blur-xl sm:p-8">
+            {/* Background effects */}
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-violet-500/[0.05] blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-fuchsia-500/[0.05] blur-3xl" />
+            </div>
+
+            <div className="relative">
+              <ConsultingIntakeForm />
+            </div>
+          </div>
+        </div>
       </SectionShell>
     </>
   );
