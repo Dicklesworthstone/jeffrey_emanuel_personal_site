@@ -12,11 +12,24 @@ import {
   Terminal,
   BookOpen,
   Link as LinkIcon,
+  Users,
 } from "lucide-react";
 import { getProjectBySlug, getProjectSlugs, type Project } from "@/lib/content";
 import { JsonLd } from "@/components/json-ld";
 import SectionShell from "@/components/section-shell";
 import { cn } from "@/lib/utils";
+import NotableStargazersWrapper from "@/components/notable-stargazers-wrapper";
+
+// Map project slugs to GitHub repo names used in stargazer-intelligence.json
+const SLUG_TO_REPO: Record<string, string> = {
+  "mcp-agent-mail": "mcp_agent_mail",
+  "beads-viewer": "beads_viewer",
+  "named-tmux-manager": "ntm",
+  "simultaneous-launch-button": "simultaneous_launch_button",
+  "cass-memory-system": "cass_memory_system",
+  "cass": "coding_agent_session_search",
+  "ultimate-bug-scanner": "ultimate_bug_scanner",
+};
 
 type Params = Promise<{ slug: string }>;
 
@@ -171,6 +184,22 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
         <div className="mb-12 rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
           <p className="text-lg leading-relaxed text-slate-300">{project.description}</p>
         </div>
+
+        {/* Notable Stargazers - only show for projects with stargazer data */}
+        {slug && SLUG_TO_REPO[slug] && (
+          <div className="mb-12">
+            <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-white">
+              <Users className={cn("h-5 w-5", accentColor)} />
+              Notable Developers Using This
+            </h2>
+            <NotableStargazersWrapper
+              variant="project"
+              repoSlug={SLUG_TO_REPO[slug]}
+              maxItems={5}
+              showStats={false}
+            />
+          </div>
+        )}
 
         {/* Features */}
         {details?.features && details.features.length > 0 && (
