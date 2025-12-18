@@ -796,7 +796,7 @@ export default function FlywheelVisualization() {
       <div className="grid gap-8 lg:grid-cols-[1fr,340px] xl:grid-cols-[1fr,380px]">
         {/* Flywheel visualization */}
         <div
-          className="relative flex items-center justify-center"
+          className="relative flex flex-col items-center justify-center"
           role="img"
           aria-label="Interactive flywheel showing tool connections"
         >
