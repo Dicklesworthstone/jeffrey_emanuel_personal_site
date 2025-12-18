@@ -84,19 +84,19 @@ essayUrl: "/writing/the_short_case_for_nvda"
 
 **Timeline Events** (chronological):
 
-> **NOTE FOR IMPLEMENTERS**: Dates for events #2-4 need verification from primary sources.
-> The essay publish date and market drop date are confirmed. Chamath/Naval share dates
-> and DeepSeek R1 release timing should be verified before implementation.
+> **NOTE FOR IMPLEMENTERS**: DeepSeek R1 release timing should be verified before implementation.
 
 ```
-1. January 25, 2025 - Essay Published [CONFIRMED]
+1. January 25, 2025 - Essay Published
    "The Short Case for Nvidia Stock" goes live on Your Token Online
 
-2. January 26, 2025 - Chamath Shares [VERIFY DATE]
+2. January 26, 2025 - Chamath Shares
    Chamath Palihapitiya shares essay to his millions of followers
+   Source: https://x.com/chamath/status/1883579259769462819
 
-3. January 26, 2025 - Naval Amplifies [VERIFY DATE]
+3. January 26, 2025 - Naval Amplifies
    Naval Ravikant shares the essay, calling it "required reading"
+   Source: https://x.com/naval/status/1883751264082969057
 
 4. January 27, 2025 - DeepSeek R1 Released [VERIFY DATE]
    Chinese AI startup releases breakthrough model at 1/45th the training cost
