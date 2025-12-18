@@ -57,7 +57,7 @@ published: "January 25, 2025"
 wordCount: "12,000 words"
 category: "Markets & AI"
 excerpt: "A deep dive into how AI economics, models like DeepSeek, and GPU supply can collide with valuation narratives. Explores the potential reflexivity of the AI capex cycle."
-essayUrl: "/writing/the-short-case-for-nvda"
+essayUrl: "/writing/the_short_case_for_nvda"
 ```
 
 **Key Metrics to Display**:
@@ -83,17 +83,22 @@ essayUrl: "/writing/the-short-case-for-nvda"
 - Stock price mini-chart embedded at market drop event
 
 **Timeline Events** (chronological):
+
+> **NOTE FOR IMPLEMENTERS**: Dates for events #2-4 need verification from primary sources.
+> The essay publish date and market drop date are confirmed. Chamath/Naval share dates
+> and DeepSeek R1 release timing should be verified before implementation.
+
 ```
-1. January 25, 2025 - Essay Published
+1. January 25, 2025 - Essay Published [CONFIRMED]
    "The Short Case for Nvidia Stock" goes live on Your Token Online
 
-2. January 26, 2025 - Chamath Shares
+2. January 26, 2025 - Chamath Shares [VERIFY DATE]
    Chamath Palihapitiya shares essay to his millions of followers
 
-3. January 26, 2025 - Naval Amplifies
+3. January 26, 2025 - Naval Amplifies [VERIFY DATE]
    Naval Ravikant shares the essay, calling it "required reading"
 
-4. January 27, 2025 - DeepSeek R1 Released
+4. January 27, 2025 - DeepSeek R1 Released [VERIFY DATE]
    Chinese AI startup releases breakthrough model at 1/45th the training cost
 
 5. January 27, 2025 - Markets Open
@@ -285,29 +290,56 @@ export const nvidiaStoryStats = {
 
 ---
 
+## Accessibility Requirements
+
+1. **Reduced Motion**: All animations must respect `prefers-reduced-motion`
+   - Counter animation should display final value immediately
+   - Timeline scroll animations become instant transitions
+   - Hover effects remain but without motion
+
+2. **Keyboard Navigation**:
+   - Timeline events should be focusable and navigable with Tab
+   - Media cards should have clear focus states
+   - Skip links to main sections
+
+3. **Screen Readers**:
+   - Counter should have aria-label announcing the full amount
+   - Timeline should use semantic list markup or appropriate ARIA roles
+   - Quote attributions properly associated with quotes
+
+4. **Visual Accessibility**:
+   - Sufficient color contrast for all text (WCAG AA minimum)
+   - Focus indicators visible on all interactive elements
+   - Text remains readable without CSS
+
+---
+
 ## Technical Notes
 
 1. **Animation Library**: Use Framer Motion for scroll-triggered animations
 2. **Reduced Motion**: All animations must respect `prefers-reduced-motion`
 3. **Image Optimization**: Use Next.js Image component for all media
 4. **Embedded Players**: Lazy load podcast embeds for performance
+   - Consider privacy: add consent wrapper or lazy-load only on interaction
+   - Provide fallback links when embeds fail to load
 5. **SEO**: Strong meta tags with OG image featuring the $600B stat
 
 ---
 
 ## Files to Create/Modify
 
-1. `app/nvidia-story/page.tsx` - Main page component
-2. `app/nvidia-story/layout.tsx` - Page-specific metadata
-3. `components/nvidia-story/` directory:
-   - `hero-section.tsx`
-   - `essay-preview.tsx`
-   - `timeline.tsx`
-   - `quote-wall.tsx`
-   - `media-mosaic.tsx`
-   - `podcast-section.tsx`
-   - `aftermath-section.tsx`
-4. `lib/content.ts` - Add timeline data and story stats
+> **NOTE**: Per project guidelines, the bar for new files is high. Implementers should
+> consider consolidating sections into fewer files where logical. The structure below
+> is a suggested organization - adapt as appropriate.
+
+**Required**:
+1. `app/nvidia-story/page.tsx` - Main page component (could contain all sections)
+2. `lib/content.ts` - Add timeline data and story stats
+
+**Optional Component Split** (if sections are complex enough to warrant separation):
+- `components/nvidia-story/timeline.tsx` - Timeline has complex scroll animation logic
+- `components/nvidia-story/quote-wall.tsx` - Reuses endorsement patterns
+- Other sections may fit well inline in page.tsx
 
 ---
 
