@@ -1,5 +1,5 @@
 {
-  "totalUniqueStargazers": 6735,
+  "totalUniqueStargazers": 6842,
   "combinedReach": 0,
   "topStargazers": [],
   "topCompanies": [],
@@ -11,43 +11,43 @@
       "topCompanies": []
     },
     "beads_viewer": {
-      "totalCount": 776,
+      "totalCount": 861,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "cass_memory_system": {
-      "totalCount": 131,
+      "totalCount": 151,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ultimate_bug_scanner": {
-      "totalCount": 124,
+      "totalCount": 132,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ntm": {
-      "totalCount": 57,
+      "totalCount": 69,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "simultaneous_launch_button": {
-      "totalCount": 44,
+      "totalCount": 49,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "coding_agent_session_search": {
-      "totalCount": 271,
+      "totalCount": 296,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "claude_code_agent_farm": {
-      "totalCount": 613,
+      "totalCount": 619,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -65,19 +65,19 @@
       "topCompanies": []
     },
     "your-source-to-prompt.html": {
-      "totalCount": 712,
+      "totalCount": 715,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "bulk_transcribe_youtube_videos_from_playlist": {
-      "totalCount": 638,
+      "totalCount": 639,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "sqlalchemy_data_model_visualizer": {
-      "totalCount": 282,
+      "totalCount": 283,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -89,13 +89,13 @@
       "topCompanies": []
     },
     "mindmap-generator": {
-      "totalCount": 183,
+      "totalCount": 186,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ultimate_mcp_client": {
-      "totalCount": 141,
+      "totalCount": 142,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -107,7 +107,7 @@
       "topCompanies": []
     },
     "fast_vector_similarity": {
-      "totalCount": 415,
+      "totalCount": 418,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -125,5 +125,5 @@
       "topCompanies": []
     }
   },
-  "lastUpdated": "2026-01-04T03:41:21.314Z"
+  "lastUpdated": "2026-01-11T03:41:04.051Z"
 }
