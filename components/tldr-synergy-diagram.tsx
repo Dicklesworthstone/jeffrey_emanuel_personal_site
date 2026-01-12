@@ -104,7 +104,7 @@ export function TldrSynergyDiagram({
           className="h-auto w-full"
           aria-label="Flywheel tool synergy diagram showing connections between core tools"
         >
-          {/* Background glow */}
+          {/* All gradient definitions */}
           <defs>
             <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="rgb(139, 92, 246)" stopOpacity="0.2" />
@@ -115,6 +115,26 @@ export function TldrSynergyDiagram({
               <stop offset="50%" stopColor="rgb(139, 92, 246)" stopOpacity="0.8" />
               <stop offset="100%" stopColor="rgb(139, 92, 246)" stopOpacity="0.5" />
             </linearGradient>
+            {/* Tool-specific gradients */}
+            {coreTools.map((tool) => (
+              <linearGradient
+                key={`gradient-${tool.id}`}
+                id={`gradient-${tool.id}`}
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop
+                  offset="0%"
+                  stopColor={getGradientColor(tool.color, "from")}
+                />
+                <stop
+                  offset="100%"
+                  stopColor={getGradientColor(tool.color, "to")}
+                />
+              </linearGradient>
+            ))}
           </defs>
 
           {/* Center glow */}
@@ -132,10 +152,8 @@ export function TldrSynergyDiagram({
                 stroke="url(#lineGradient)"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                initial={reducedMotion ? {} : { pathLength: 0, opacity: 0 }}
-                animate={
-                  isInView ? { pathLength: 1, opacity: 1 } : {}
-                }
+                initial={reducedMotion ? {} : { opacity: 0 }}
+                animate={isInView ? { opacity: 1 } : {}}
                 transition={{
                   duration: reducedMotion ? 0 : 0.8,
                   delay: reducedMotion ? 0 : 0.3 + index * 0.05,
@@ -214,26 +232,6 @@ export function TldrSynergyDiagram({
                   strokeWidth="2"
                   opacity="0.6"
                 />
-
-                {/* Define gradient for each tool */}
-                <defs>
-                  <linearGradient
-                    id={`gradient-${tool.id}`}
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor={getGradientColor(tool.color, "from")}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={getGradientColor(tool.color, "to")}
-                    />
-                  </linearGradient>
-                </defs>
 
                 {/* Tool label */}
                 <text

@@ -23,16 +23,18 @@ function AnimatedStat({
   value,
   index,
   reducedMotion,
+  isInView,
 }: {
   label: string;
   value: string;
   index: number;
   reducedMotion: boolean;
+  isInView: boolean;
 }) {
   return (
     <motion.div
       initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{
         duration: reducedMotion ? 0 : 0.5,
         delay: reducedMotion ? 0 : 0.3 + index * 0.1,
@@ -175,6 +177,7 @@ export function TldrHero({ className }: TldrHeroProps) {
                 value={stat.value}
                 index={i}
                 reducedMotion={reducedMotion}
+                isInView={isInView}
               />
             ))}
           </motion.div>

@@ -61,6 +61,7 @@ function SectionHeader({
         </div>
         <button
           onClick={onToggleAll}
+          aria-label={isExpanded ? "Collapse all tools" : "Expand all tools"}
           className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
         >
           {isExpanded ? (
