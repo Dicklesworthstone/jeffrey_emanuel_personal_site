@@ -109,9 +109,12 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
   });
 
   test("should display tool stars count", async ({ page }) => {
-    // Check that star badges are visible
-    const starBadges = page.locator('text=/\\d+,?\\d* stars?|★/');
-    await expect(starBadges.first()).toBeVisible();
+    // Check that star badges are visible (number with star icon in amber badge)
+    // The star badge shows a number like "1,400" next to an SVG star icon
+    const starBadge = page.locator('.bg-amber-500\\/10').first();
+    await expect(starBadge).toBeVisible();
+    // Verify it contains a number
+    await expect(starBadge).toHaveText(/\d+/);
   });
 
   test("should work on mobile viewport", async ({ page }) => {
