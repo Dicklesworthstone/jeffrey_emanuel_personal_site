@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Jeffrey Emanuel",
   title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
   description:
-    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 7 interconnected tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 30+ open-source projects with 10K+ GitHub stars.",
+    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 7 interconnected tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 70+ open-source projects with 10K+ GitHub stars.",
   email: "jeffreyemanuel@gmail.com",
   location: "",
   social: {
@@ -31,6 +31,7 @@ export const navItems: NavItem[] = [
   { href: "/about", label: "About" },
   { href: "/consulting", label: "Consulting" },
   { href: "/projects", label: "Projects" },
+  { href: "/tldr", label: "Flywheel" },
   { href: "/writing", label: "Writing" },
   { href: "/media", label: "Media" },
   { href: "/contact", label: "Contact" },
@@ -42,7 +43,7 @@ export const heroStats: Stat[] = [
   {
     label: "GitHub Stars",
     value: "10K+",
-    helper: "Across 30+ open-source agent tools and infrastructure.",
+    helper: "Across 70+ open-source agent tools and infrastructure.",
   },
   {
     label: "Flywheel Tools",
@@ -473,7 +474,7 @@ export const projects: Project[] = [
   {
     name: "Coding Agent Session Search",
     kind: "oss",
-    badge: "138 stars",
+    badge: "307 stars",
     href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
     short: "Unified TUI for searching local history across Claude Code, Codex, Cursor, Gemini, and more.",
     description:
@@ -500,7 +501,7 @@ export const projects: Project[] = [
   {
     name: "Claude Code Agent Farm",
     kind: "oss",
-    badge: "596 stars",
+    badge: "621 stars",
     href: "https://github.com/Dicklesworthstone/claude_code_agent_farm",
     short: "Orchestrate an army of Claude Code agents to autonomously improve codebases.",
     description:
@@ -510,9 +511,21 @@ export const projects: Project[] = [
     gradient: "from-purple-600/20 via-fuchsia-500/20 to-pink-500/20",
   },
   {
+    name: "Agentic Flywheel Setup",
+    kind: "oss",
+    badge: "672 stars",
+    href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
+    short: "One-command setup for a fully-armed agentic coding environment.",
+    description:
+      "From zero to fully-configured agentic coding VPS in 30 minutes. A single curl command installs 30+ tools, configures zsh with powerlevel10k, sets up language runtimes (bun, Python, Rust, Go), and deploys three AI coding agents (Claude Code, Codex CLI, Gemini CLI) with the complete Dicklesworthstone coordination stack.",
+    tags: ["DevOps", "Setup", "Agents", "Automation", "Bash", "Flywheel"],
+    size: "wide",
+    gradient: "from-lime-500/20 via-emerald-500/20 to-teal-500/20",
+  },
+  {
     name: "Ultimate MCP Client",
     kind: "oss",
-    badge: "141 stars",
+    badge: "142 stars",
     href: "https://github.com/Dicklesworthstone/ultimate_mcp_client",
     short: "Universal bridge for AI models to interact with the real world via MCP.",
     description:
@@ -521,9 +534,19 @@ export const projects: Project[] = [
     size: "wide",
   },
   {
+    name: "Ultimate MCP Server",
+    kind: "oss",
+    badge: "128 stars",
+    href: "https://github.com/Dicklesworthstone/ultimate_mcp_server",
+    short: "Unified MCP server exposing dozens of powerful tools to AI models.",
+    description:
+      "The server counterpart to Ultimate MCP Client. Provides a comprehensive Model Context Protocol implementation that exposes a wide variety of tools—from file operations to web scraping to database access—through a unified interface. Designed for extensibility and seamless integration with Claude, GPT, and other frontier models.",
+    tags: ["MCP", "AI Tools", "Server", "Python", "Interoperability"],
+  },
+  {
     name: "MCP Agent Mail",
     kind: "oss",
-    badge: "1,001 stars",
+    badge: "1.4K stars",
     href: "https://github.com/Dicklesworthstone/mcp_agent_mail",
     short: "Gmail for your coding agents. A coordination layer with messaging, file leases, and audit trails.",
     description:
@@ -551,7 +574,7 @@ export const projects: Project[] = [
   {
     name: "Beads Viewer",
     kind: "oss",
-    badge: "490 stars",
+    badge: "891 stars",
     href: "https://github.com/Dicklesworthstone/beads_viewer",
     short: "Terminal UI for Steve Yegge's Beads system with graph analytics for agent task management.",
     description:
@@ -579,7 +602,7 @@ export const projects: Project[] = [
   {
     name: "Named Tmux Manager",
     kind: "oss",
-    badge: "15 stars",
+    badge: "69 stars",
     href: "https://github.com/Dicklesworthstone/ntm",
     short: "Multi-agent tmux orchestration. Spawn and coordinate Claude Code, Codex, and Gemini agents.",
     description:
@@ -606,7 +629,7 @@ export const projects: Project[] = [
   {
     name: "Simultaneous Launch Button",
     kind: "oss",
-    badge: "20 stars",
+    badge: "49 stars",
     href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
     short: "Two-person rule for AI agents: peer review before dangerous commands execute.",
     description:
@@ -632,7 +655,7 @@ export const projects: Project[] = [
   {
     name: "CASS Memory System",
     kind: "oss",
-    badge: "60 stars",
+    badge: "152 stars",
     href: "https://github.com/Dicklesworthstone/cass_memory_system",
     short: "ACE-framework persistent memory for coding agents. Stores procedural, episodic, and semantic knowledge.",
     description:
@@ -658,7 +681,7 @@ export const projects: Project[] = [
   {
     name: "Mindmap Generator",
     kind: "oss",
-    badge: "172 stars",
+    badge: "187 stars",
     href: "https://github.com/Dicklesworthstone/mindmap-generator",
     short: "Intelligently distills documents into hierarchical, context-aware mindmaps.",
     description:
@@ -833,7 +856,7 @@ export const projects: Project[] = [
   {
     name: "Ultimate Bug Scanner",
     kind: "oss",
-    badge: "89 stars",
+    badge: "132 stars",
     href: "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
     short: "Meta-runner for language-specific bug scanners, tuned for AI coding agents.",
     description:
@@ -901,12 +924,132 @@ export const projects: Project[] = [
   {
     name: "Chat to File",
     kind: "oss",
-    badge: "14 stars",
+    badge: "19 stars",
     href: "https://github.com/Dicklesworthstone/chat_shared_conversation_to_file",
     short: "Convert ChatGPT, Gemini, and Grok share links to Markdown and HTML.",
     description:
       "CLI tool that extracts AI conversations from share links and saves them as clean, archivable Markdown and static HTML. Preserves fenced code blocks with syntax highlighting, creates deterministic filenames, and supports one-command GitHub Pages deployment. Uses Playwright for reliable extraction.",
     tags: ["Bun", "TypeScript", "CLI", "ChatGPT", "Gemini", "Playwright"],
+  },
+  {
+    name: "Coding Agent Tips & Scripts",
+    kind: "oss",
+    badge: "146 stars",
+    href: "https://github.com/Dicklesworthstone/misc_coding_agent_tips_and_scripts",
+    short: "Battle-tested solutions for AI coding agents, terminal setup, and dev workflows.",
+    description:
+      "Practical guides documenting real problems and their solutions. Covers destructive command protection for AI agents, host-aware terminal themes, persistent SSH sessions, macOS NFS auto-mount, budget 10GbE networking, Claude Code hook safety guards, and more. Copy-paste configurations for immediate use.",
+    tags: ["Agents", "Tips", "DevTools", "Workflow", "Safety"],
+  },
+  {
+    name: "Brenner Bot",
+    kind: "research",
+    badge: "37 stars",
+    href: "https://github.com/Dicklesworthstone/brenner_bot",
+    short: "Multi-agent research system embodying Sydney Brenner's scientific methodology.",
+    description:
+      "A research 'seed crystal' combining curated Sydney Brenner transcripts with multi-model AI syntheses. Coordinates Claude (Opus 4.5), GPT-5, and Gemini agents via Agent Mail to conduct collaborative scientific research conversations following the Brenner approach. Includes Next.js web app at brennerbot.org and terminal-first Bun CLI.",
+    tags: ["AI Research", "Science", "Agents", "Methodology", "Multi-Agent"],
+  },
+  {
+    name: "Repo Updater",
+    kind: "oss",
+    badge: "28 stars",
+    href: "https://github.com/Dicklesworthstone/repo_updater",
+    short: "Keep dozens of GitHub repos in sync with a single command.",
+    description:
+      "A beautiful, automation-friendly CLI for synchronizing GitHub repositories. Clone missing repos, pull updates, detect conflicts, and get actionable resolution commands. Pure Bash with git plumbing for reliable status detection, JSON output for scripting, and meaningful exit codes for CI.",
+    tags: ["CLI", "GitHub", "DevTools", "Automation", "Bash"],
+  },
+  {
+    name: "Clawdbot Skills",
+    kind: "oss",
+    badge: "22 stars",
+    href: "https://github.com/Dicklesworthstone/agent_flywheel_clawdbot_skills_and_integrations",
+    short: "Modular skills teaching Clawdbot to use the Flywheel toolkit.",
+    description:
+      "A curated collection of Clawdbot skills for professional agentic coding workflows. Includes skills for NTM, Agent Mail, Beads Viewer, CASS, and more, plus cloud CLIs and workflow methodologies. Enables Claude-powered assistants across WhatsApp, Telegram, and web interfaces to orchestrate multi-agent development.",
+    tags: ["Agents", "Claude", "Skills", "DevTools", "Flywheel"],
+  },
+  {
+    name: "Destructive Command Guard",
+    kind: "oss",
+    badge: "13 stars",
+    href: "https://github.com/Dicklesworthstone/destructive_command_guard",
+    short: "Hook for Claude Code and Gemini CLI that blocks destructive commands.",
+    description:
+      "High-performance safety hook that intercepts catastrophic commands before they execute. Protects against git reset --hard, rm -rf, DROP TABLE, and other irreversible operations that AI agents occasionally attempt. Works on Linux, macOS, and WSL with clear explanations and safer alternatives.",
+    tags: ["Safety", "Claude", "Hooks", "Git", "DevTools", "Flywheel"],
+  },
+  {
+    name: "JeffreysPrompts.com",
+    kind: "oss",
+    badge: "19 stars",
+    href: "https://github.com/Dicklesworthstone/jeffreysprompts.com",
+    short: "Curated prompt library for agentic coding workflows.",
+    description:
+      "A Next.js platform for discovering, copying, and installing battle-tested prompts that supercharge AI coding agents. Browse categorized prompts, one-click copy, or install directly as Claude Code skills. Built with Next.js 16, React 19, and TypeScript.",
+    tags: ["Prompts", "Next.js", "Claude", "DevTools", "Web"],
+  },
+  {
+    name: "GIIL",
+    kind: "oss",
+    badge: "19 stars",
+    href: "https://github.com/Dicklesworthstone/giil",
+    short: "Git-backed interactive issue list with dependency tracking.",
+    description:
+      "A lightweight issue tracker that stores everything in git. Features dependency relationships between issues, markdown descriptions, and seamless integration with standard git workflows. Perfect for solo developers or small teams who want issue tracking without external services.",
+    tags: ["Git", "Issues", "CLI", "DevTools", "Productivity"],
+  },
+  {
+    name: "Coding Agent Account Manager",
+    kind: "oss",
+    badge: "19 stars",
+    href: "https://github.com/Dicklesworthstone/coding_agent_account_manager",
+    short: "Manage multiple AI coding agent subscriptions and accounts.",
+    description:
+      "Streamlines the management of multiple AI coding agent accounts (Claude, Codex, Gemini). Track subscription status, API keys, usage limits, and billing across providers. Essential for power users running multiple agent sessions.",
+    tags: ["Agents", "DevTools", "Management", "Subscriptions"],
+  },
+  {
+    name: "Flywheel Gateway",
+    kind: "oss",
+    badge: "4 stars",
+    href: "https://github.com/Dicklesworthstone/flywheel_gateway",
+    short: "Central API gateway for the Agentic Coding Flywheel ecosystem.",
+    description:
+      "Unified entry point for Flywheel tools, providing authentication, rate limiting, and routing across the ecosystem. Enables seamless integration between NTM, Agent Mail, Beads, and other Flywheel components.",
+    tags: ["Gateway", "API", "DevOps", "Flywheel"],
+  },
+  {
+    name: "Flywheel Connectors",
+    kind: "oss",
+    badge: "5 stars",
+    href: "https://github.com/Dicklesworthstone/flywheel_connectors",
+    short: "Integration adapters for external services in the Flywheel ecosystem.",
+    description:
+      "Pre-built connectors for integrating external services with the Agentic Coding Flywheel. Includes adapters for cloud providers, CI/CD systems, and third-party APIs to extend Flywheel workflows.",
+    tags: ["Integrations", "Connectors", "DevOps", "Flywheel"],
+  },
+  {
+    name: "XF",
+    kind: "oss",
+    badge: "9 stars",
+    href: "https://github.com/Dicklesworthstone/xf",
+    short: "Fast cross-file search and replace tool for codebases.",
+    description:
+      "A high-performance CLI for searching and replacing text across large codebases. Supports regex patterns, preview modes, and bulk operations with git-aware filtering. Optimized for use in agentic workflows.",
+    tags: ["CLI", "Search", "DevTools", "Refactoring"],
+  },
+  {
+    name: "Suno2CD",
+    kind: "oss",
+    badge: "11 stars",
+    href: "https://github.com/Dicklesworthstone/suno2cd",
+    short: "Export Suno AI music to CD-quality audio formats.",
+    description:
+      "Tool for downloading and converting Suno AI-generated music to high-quality audio formats suitable for CD burning or archival. Preserves metadata and supports batch processing.",
+    tags: ["Music", "Audio", "CLI", "AI"],
   },
 ];
 
@@ -948,7 +1091,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Agents communicate via mail threads",
       cass: "Session history indexed for search",
     },
-    stars: 16,
+    stars: 69,
     projectSlug: "named-tmux-manager",
     features: [
       "Spawn named agent panes with type classification",
@@ -969,7 +1112,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Notifications sent to reviewer inboxes",
       ubs: "Pre-flight scans before execution",
     },
-    stars: 23,
+    stars: 49,
     projectSlug: "simultaneous-launch-button",
     features: [
       "Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION)",
@@ -991,7 +1134,7 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Shared context across agent sessions",
       slb: "Approval requests delivered to inboxes",
     },
-    stars: 1015,
+    stars: 1400,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "mcp-agent-mail",
     features: [
@@ -1014,7 +1157,7 @@ export const flywheelTools: FlywheelTool[] = [
       ubs: "Bug scanner results create blocking issues",
       cass: "Search prior sessions for task context",
     },
-    stars: 546,
+    stars: 891,
     demoUrl: "https://dicklesworthstone.github.io/beads_viewer-pages/",
     projectSlug: "beads-viewer",
     features: [
@@ -1036,7 +1179,7 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Creates issues for discovered bugs",
       slb: "Validates code before risky commits",
     },
-    stars: 91,
+    stars: 132,
     projectSlug: "ultimate-bug-scanner",
     features: [
       "Wraps best-in-class analyzers: ESLint, Ruff, Clippy",
@@ -1058,7 +1201,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Semantic search over stored memories",
       bv: "Remembers task patterns and solutions",
     },
-    stars: 71,
+    stars: 152,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "cass-memory-system",
     features: [
@@ -1081,7 +1224,7 @@ export const flywheelTools: FlywheelTool[] = [
       ntm: "Searches all managed agent histories",
       bv: "Links search results to related tasks",
     },
-    stars: 145,
+    stars: 307,
     projectSlug: "cass",
     features: [
       "Unified search across Claude Code, Codex, Cursor, Gemini",
@@ -1718,4 +1861,647 @@ export const nvidiaStoryData = {
       spotifyUrl: "https://open.spotify.com/episode/59UKRipYaHjsrQjEXHFR5z",
     },
   ],
+};
+
+// =============================================================================
+// TLDR PAGE - FLYWHEEL ECOSYSTEM DETAILED DATA
+// =============================================================================
+// Extended data for the /tldr page showcasing all flywheel tools with
+// comprehensive descriptions, implementation highlights, and synergies.
+
+export type TldrToolCategory = "core" | "supporting";
+
+export type TldrFlywheelTool = {
+  id: string;
+  name: string;
+  shortName: string;
+  href: string;
+  icon: string;
+  color: string;
+  category: TldrToolCategory;
+  stars?: number;
+  // TLDR sections
+  whatItDoes: string;
+  whyItsUseful: string;
+  implementationHighlights: string[];
+  synergies: Array<{
+    toolId: string;
+    description: string;
+  }>;
+  techStack: string[];
+  keyFeatures: string[];
+  useCases: string[];
+};
+
+export const tldrFlywheelTools: TldrFlywheelTool[] = [
+  // ===========================================================================
+  // CORE FLYWHEEL TOOLS
+  // ===========================================================================
+  {
+    id: "ntm",
+    name: "Named Tmux Manager",
+    shortName: "NTM",
+    href: "https://github.com/Dicklesworthstone/ntm",
+    icon: "LayoutGrid",
+    color: "from-sky-500 to-blue-600",
+    category: "core",
+    stars: 69,
+    whatItDoes:
+      "Manages named tmux sessions with project-specific persistence. Creates organized workspaces for multi-agent development with typed panes.",
+    whyItsUseful:
+      "When running multiple AI coding agents simultaneously, keeping track of which agent is working on what becomes impossible without organization. NTM solves this by providing persistent, named sessions that survive reboots.",
+    implementationHighlights: [
+      "Pure Bash implementation with no dependencies beyond tmux",
+      "Project-aware persistence using XDG conventions",
+      "Support for agent type classification (claude, codex, cursor, etc.)",
+      "Real-time dashboard showing all active agent panes",
+    ],
+    synergies: [
+      {
+        toolId: "slb",
+        description:
+          "SLB launches agents into NTM-managed panes, routing dangerous commands through safety checks",
+      },
+      {
+        toolId: "mail",
+        description:
+          "Agents in different NTM panes communicate via Agent Mail threads",
+      },
+      {
+        toolId: "cass",
+        description: "Session history from all NTM panes is indexed for search",
+      },
+    ],
+    techStack: ["Bash 4.0+", "tmux 3.0+", "POSIX shell"],
+    keyFeatures: [
+      "Spawn named agent panes with type classification",
+      "Broadcast prompts to specific agent types",
+      "Session persistence across reboots",
+      "Dashboard view of all active agents",
+    ],
+    useCases: [
+      "Running 5+ Claude Code agents on different features simultaneously",
+      "Organizing development environments by project",
+      "Managing long-running agent sessions for complex refactors",
+    ],
+  },
+  {
+    id: "slb",
+    name: "Simultaneous Launch Button",
+    shortName: "SLB",
+    href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
+    icon: "Rocket",
+    color: "from-amber-500 to-orange-600",
+    category: "core",
+    stars: 49,
+    whatItDoes:
+      "Launches multiple Claude Code agents simultaneously in parallel tmux panes. Designed for when you want to throw compute at a problem by having many agents work in parallel.",
+    whyItsUseful:
+      "Starting 10 Claude Code instances manually is tedious. SLB does it in one command, with proper session naming and pane organization via NTM integration.",
+    implementationHighlights: [
+      "Single-command parallel agent spawning",
+      "Automatic tmux session and pane creation",
+      "Integration with NTM for session management",
+      "Configurable agent count and initial prompts",
+    ],
+    synergies: [
+      {
+        toolId: "ntm",
+        description: "Uses NTM for session organization and persistence",
+      },
+      {
+        toolId: "mail",
+        description:
+          "Agents coordinate their work via Agent Mail to avoid conflicts",
+      },
+      {
+        toolId: "dcg",
+        description: "DCG protects against agents running dangerous commands",
+      },
+    ],
+    techStack: ["Bash", "tmux"],
+    keyFeatures: [
+      "One-command multi-agent launch",
+      "Parallel tmux pane creation",
+      "NTM session integration",
+      "Customizable agent count",
+    ],
+    useCases: [
+      "Parallelizing a large refactor across multiple files",
+      "Testing different implementation approaches simultaneously",
+      "Code review with multiple agents checking different aspects",
+    ],
+  },
+  {
+    id: "mail",
+    name: "MCP Agent Mail",
+    shortName: "Mail",
+    href: "https://github.com/Dicklesworthstone/mcp_agent_mail",
+    icon: "Mail",
+    color: "from-violet-500 to-purple-600",
+    category: "core",
+    stars: 1400,
+    whatItDoes:
+      "Provides an inter-agent email system using the Model Context Protocol (MCP). Agents can send messages, read threads, and coordinate work without stepping on each other.",
+    whyItsUseful:
+      "When multiple agents work on the same codebase, they need to communicate. Agent Mail provides persistent, threaded messaging with file reservation support to prevent merge conflicts.",
+    implementationHighlights: [
+      "MCP server implementation for universal agent compatibility",
+      "Git-backed storage for complete audit trails",
+      "Advisory file locking to prevent edit conflicts",
+      "GitHub-flavored Markdown support in messages",
+    ],
+    synergies: [
+      {
+        toolId: "bv",
+        description: "Task IDs in mail threads link to Beads issues",
+      },
+      {
+        toolId: "cm",
+        description: "Shared context persists across agent sessions via CM",
+      },
+      {
+        toolId: "slb",
+        description: "Launched agents coordinate via mail threads",
+      },
+    ],
+    techStack: ["TypeScript", "MCP Protocol", "Git", "Node.js"],
+    keyFeatures: [
+      "Threaded messaging between AI agents",
+      "Advisory file reservations",
+      "Git-backed persistent storage",
+      "MCP integration for any compatible agent",
+    ],
+    useCases: [
+      "Coordinating file ownership across parallel agents",
+      "Passing context between session restarts",
+      "Building audit trails of agent decisions",
+    ],
+  },
+  {
+    id: "bv",
+    name: "Beads Viewer",
+    shortName: "BV",
+    href: "https://github.com/Dicklesworthstone/beads_viewer",
+    icon: "GitBranch",
+    color: "from-emerald-500 to-teal-600",
+    category: "core",
+    stars: 891,
+    whatItDoes:
+      "A fast terminal UI for viewing and analyzing Beads issues. Provides graph analytics including PageRank, critical path analysis, and cycle detection.",
+    whyItsUseful:
+      "Issue tracking isn't just a list—it's a dependency graph. BV surfaces which tasks are blocking others, identifies the critical path to completion, and helps prioritize work intelligently.",
+    implementationHighlights: [
+      "20,000+ lines of Go with Bubble Tea TUI framework",
+      "9 graph metrics: PageRank, Betweenness, Closeness, etc.",
+      "Robot protocol (--robot-*) for AI-ready JSON output",
+      "60fps rendering even with large issue graphs",
+    ],
+    synergies: [
+      {
+        toolId: "mail",
+        description: "Task updates trigger notifications via Agent Mail",
+      },
+      {
+        toolId: "ubs",
+        description: "Bug scanner findings become blocking issues",
+      },
+      {
+        toolId: "cass",
+        description: "Search prior sessions for task context",
+      },
+    ],
+    techStack: ["Go", "Bubble Tea", "Lip Gloss", "Graph algorithms"],
+    keyFeatures: [
+      "PageRank-based issue prioritization",
+      "Critical path analysis",
+      "Robot mode for AI agent integration",
+      "Interactive TUI with vim keybindings",
+    ],
+    useCases: [
+      "Identifying which task unblocks the most other work",
+      "Visualizing complex dependency graphs",
+      "Generating execution plans for AI agents",
+    ],
+  },
+  {
+    id: "ubs",
+    name: "Ultimate Bug Scanner",
+    shortName: "UBS",
+    href: "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
+    icon: "Bug",
+    color: "from-rose-500 to-red-600",
+    category: "core",
+    stars: 132,
+    whatItDoes:
+      "Wraps best-in-class static analyzers (ESLint, Ruff, Clippy, etc.) with a unified interface. Catches bugs before they become problems.",
+    whyItsUseful:
+      "Each language has its own lint tools with different output formats. UBS normalizes everything to consistent JSON, making it easy to integrate into any workflow or CI pipeline.",
+    implementationHighlights: [
+      "Language auto-detection based on file extensions",
+      "Wraps ESLint (TS/JS), Ruff (Python), Clippy (Rust), etc.",
+      "Consistent JSON output across all languages",
+      "Exit codes designed for CI/CD integration",
+    ],
+    synergies: [
+      {
+        toolId: "bv",
+        description: "Bug findings become blocking issues in Beads",
+      },
+      {
+        toolId: "slb",
+        description: "Pre-flight scans before risky operations",
+      },
+    ],
+    techStack: ["Bash", "ESLint", "Ruff", "Clippy", "Various linters"],
+    keyFeatures: [
+      "Unified interface for all static analyzers",
+      "Consistent JSON output format",
+      "Auto-detects languages",
+      "Perfect for pre-commit hooks",
+    ],
+    useCases: [
+      "Pre-commit validation across polyglot repos",
+      "CI/CD pipeline integration",
+      "Catching AI-generated code errors",
+    ],
+  },
+  {
+    id: "cm",
+    name: "CASS Memory System",
+    shortName: "CM",
+    href: "https://github.com/Dicklesworthstone/cass_memory_system",
+    icon: "Brain",
+    color: "from-pink-500 to-fuchsia-600",
+    category: "core",
+    stars: 152,
+    whatItDoes:
+      "Implements the ACE (Action, Context, Effect) framework for persistent agent memory. Agents can store, retrieve, and reason over past experiences.",
+    whyItsUseful:
+      "Without persistent memory, every agent session starts from scratch. CM gives agents long-term memory across sessions—remembering what worked, what failed, and why.",
+    implementationHighlights: [
+      "ACE framework: procedural, episodic, and semantic memory types",
+      "MCP tools for cross-session context persistence",
+      "Memory consolidation and summarization",
+      "Hierarchical memory organization",
+    ],
+    synergies: [
+      {
+        toolId: "mail",
+        description:
+          "Conversation summaries from mail threads stored as memories",
+      },
+      {
+        toolId: "cass",
+        description: "Semantic search over stored memories",
+      },
+      {
+        toolId: "bv",
+        description: "Task patterns and solutions remembered",
+      },
+    ],
+    techStack: ["TypeScript", "MCP Protocol", "SQLite", "Node.js"],
+    keyFeatures: [
+      "Three memory types: procedural, episodic, semantic",
+      "MCP integration for any compatible agent",
+      "Automatic memory consolidation",
+      "Cross-session context persistence",
+    ],
+    useCases: [
+      "Remembering project conventions across sessions",
+      "Learning from past debugging sessions",
+      "Building institutional knowledge over time",
+    ],
+  },
+  {
+    id: "cass",
+    name: "Coding Agent Session Search",
+    shortName: "CASS",
+    href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
+    icon: "Search",
+    color: "from-cyan-500 to-sky-600",
+    category: "core",
+    stars: 307,
+    whatItDoes:
+      "Full-text search across all AI coding agent sessions. Indexes conversations from Claude Code, Codex, Cursor, Gemini, and more.",
+    whyItsUseful:
+      "You've solved a similar problem before—but which session was it? CASS indexes everything so you can search 'how did I fix that React hydration error' and find the exact conversation.",
+    implementationHighlights: [
+      "Rust implementation with Tantivy full-text search",
+      "Multi-provider support (Claude, Codex, Cursor, Gemini)",
+      "Robot mode (--robot) for AI agent integration",
+      "Interactive TUI for human exploration",
+    ],
+    synergies: [
+      {
+        toolId: "cm",
+        description: "Indexes memories stored by CM for retrieval",
+      },
+      {
+        toolId: "ntm",
+        description: "Searches all managed agent session histories",
+      },
+      {
+        toolId: "bv",
+        description: "Links search results to related Beads tasks",
+      },
+    ],
+    techStack: ["Rust", "Tantivy", "Ratatui", "JSONL parsing"],
+    keyFeatures: [
+      "Unified search across all agent types",
+      "Sub-second search over millions of messages",
+      "Robot mode for AI agent integration",
+      "TUI for interactive exploration",
+    ],
+    useCases: [
+      "Finding how a similar bug was fixed before",
+      "Retrieving context from past project work",
+      "Building on previous agent conversations",
+    ],
+  },
+  // ===========================================================================
+  // SUPPORTING FLYWHEEL TOOLS
+  // ===========================================================================
+  {
+    id: "dcg",
+    name: "Destructive Command Guard",
+    shortName: "DCG",
+    href: "https://github.com/Dicklesworthstone/destructive_command_guard",
+    icon: "ShieldAlert",
+    color: "from-red-500 to-rose-600",
+    category: "supporting",
+    stars: 89,
+    whatItDoes:
+      "Intercepts dangerous shell commands (rm -rf, git reset --hard, etc.) before execution. Requires confirmation for destructive operations.",
+    whyItsUseful:
+      "AI agents can and will run 'rm -rf /' if they think it solves your problem. DCG is the safety net that catches catastrophic commands before they execute.",
+    implementationHighlights: [
+      "Shell integration via function wrappers",
+      "Pattern matching for known dangerous commands",
+      "Configurable risk levels and bypass rules",
+      "Logging of all intercepted commands",
+    ],
+    synergies: [
+      {
+        toolId: "slb",
+        description: "Protection layer for parallel agent operations",
+      },
+      {
+        toolId: "ntm",
+        description: "Guards all commands in NTM-managed sessions",
+      },
+    ],
+    techStack: ["Bash", "Shell integration", "Regex patterns"],
+    keyFeatures: [
+      "Intercepts rm -rf, git reset --hard, etc.",
+      "Confirmation prompts for risky commands",
+      "Configurable allowlists",
+      "Command audit logging",
+    ],
+    useCases: [
+      "Protecting against accidental data loss",
+      "Auditing dangerous commands from agents",
+      "Training wheels for new AI agent setups",
+    ],
+  },
+  {
+    id: "giil",
+    name: "Git Issue Import/Link",
+    shortName: "GIIL",
+    href: "https://github.com/Dicklesworthstone/giil",
+    icon: "GitPullRequest",
+    color: "from-slate-500 to-gray-600",
+    category: "supporting",
+    stars: 24,
+    whatItDoes:
+      "Imports GitHub issues into Beads and maintains bidirectional links. Keeps local issue tracking in sync with remote.",
+    whyItsUseful:
+      "You want the speed of local Beads tracking but still need GitHub Issues for external collaboration. GIIL bridges both worlds.",
+    implementationHighlights: [
+      "GitHub API integration for issue sync",
+      "Bidirectional linking (Beads ↔ GitHub)",
+      "Automatic status sync on updates",
+      "Bulk import capabilities",
+    ],
+    synergies: [
+      {
+        toolId: "bv",
+        description: "Imported issues appear in Beads Viewer",
+      },
+      {
+        toolId: "ru",
+        description: "Repo Updater syncs issues across all repos",
+      },
+    ],
+    techStack: ["TypeScript", "GitHub API", "Beads format"],
+    keyFeatures: [
+      "Import GitHub Issues to Beads",
+      "Bidirectional sync",
+      "Bulk operations",
+      "Status mapping",
+    ],
+    useCases: [
+      "Migrating from GitHub Issues to Beads",
+      "Keeping external stakeholders updated",
+      "Hybrid tracking workflows",
+    ],
+  },
+  {
+    id: "xf",
+    name: "X Archive Search",
+    shortName: "XF",
+    href: "https://github.com/Dicklesworthstone/xf",
+    icon: "Archive",
+    color: "from-blue-500 to-indigo-600",
+    category: "supporting",
+    stars: 156,
+    whatItDoes:
+      "Ultra-fast search over X/Twitter data archives. Uses hybrid BM25 + semantic search with Reciprocal Rank Fusion.",
+    whyItsUseful:
+      "Your X archive is a goldmine of bookmarks, threads, and ideas—but Twitter's search is terrible. XF makes your archive instantly searchable with both keyword and semantic matching.",
+    implementationHighlights: [
+      "Rust implementation for maximum performance",
+      "Hybrid BM25 + semantic search with RRF fusion",
+      "Zero-dependency hash embedder (no Python/API calls)",
+      "Privacy-first, fully local processing",
+    ],
+    synergies: [
+      {
+        toolId: "cass",
+        description: "Similar search architecture and patterns",
+      },
+      {
+        toolId: "cm",
+        description: "Found tweets can become memories",
+      },
+    ],
+    techStack: ["Rust", "Tantivy", "Hash embeddings", "RRF"],
+    keyFeatures: [
+      "Sub-second search over large archives",
+      "Semantic + keyword hybrid search",
+      "No external API dependencies",
+      "Privacy-preserving local processing",
+    ],
+    useCases: [
+      "Finding that thread you bookmarked months ago",
+      "Researching past discussions on a topic",
+      "Building on ideas from your tweet history",
+    ],
+  },
+  {
+    id: "s2p",
+    name: "Source to Prompt TUI",
+    shortName: "s2p",
+    href: "https://github.com/Dicklesworthstone/source_to_prompt_tui",
+    icon: "FileCode",
+    color: "from-green-500 to-emerald-600",
+    category: "supporting",
+    stars: 78,
+    whatItDoes:
+      "Terminal UI for combining source code files into LLM-ready prompts. Select files, preview output, copy to clipboard with token counting.",
+    whyItsUseful:
+      "Crafting prompts with code context is tedious. s2p lets you interactively select files, see the combined output, and track token count—all in a beautiful TUI.",
+    implementationHighlights: [
+      "Bun single-binary distribution",
+      "React/Ink terminal UI framework",
+      "tiktoken-accurate token counting",
+      "Gitignore-aware file filtering",
+    ],
+    synergies: [
+      {
+        toolId: "cass",
+        description: "Generated prompts can be searched later",
+      },
+      {
+        toolId: "cm",
+        description: "Effective prompts stored as memories",
+      },
+    ],
+    techStack: ["TypeScript", "Bun", "React", "Ink", "tiktoken"],
+    keyFeatures: [
+      "Interactive file selection",
+      "Real-time token counting",
+      "Clipboard integration",
+      "Gitignore-aware filtering",
+    ],
+    useCases: [
+      "Preparing code context for Claude/GPT",
+      "Creating reproducible prompt templates",
+      "Managing context window budget",
+    ],
+  },
+  {
+    id: "ru",
+    name: "Repo Updater",
+    shortName: "ru",
+    href: "https://github.com/Dicklesworthstone/repo_updater",
+    icon: "RefreshCw",
+    color: "from-orange-500 to-amber-600",
+    category: "supporting",
+    stars: 67,
+    whatItDoes:
+      "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
+    whyItsUseful:
+      "Managing many repos across machines is painful. 'ru sync' handles everything—cloning what's missing, pulling what's stale, and reporting conflicts with resolution commands.",
+    implementationHighlights: [
+      "Pure Bash with git plumbing (no string parsing)",
+      "Parallel sync with configurable worker count",
+      "AI-assisted code review integration",
+      "Meaningful exit codes for CI/CD",
+    ],
+    synergies: [
+      {
+        toolId: "giil",
+        description: "Syncs issues across all managed repos",
+      },
+      {
+        toolId: "ntm",
+        description: "NTM integration for agent-driven sweeps",
+      },
+    ],
+    techStack: ["Bash 4.0+", "Git plumbing", "GitHub CLI"],
+    keyFeatures: [
+      "One-command multi-repo sync",
+      "Parallel operations",
+      "Conflict detection with resolution hints",
+      "AI code review integration",
+    ],
+    useCases: [
+      "Keeping development machines in sync",
+      "CI/CD repo management",
+      "Automated codebase maintenance",
+    ],
+  },
+  {
+    id: "acfs",
+    name: "Flywheel Setup",
+    shortName: "ACFS",
+    href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
+    icon: "Cog",
+    color: "from-purple-500 to-violet-600",
+    category: "supporting",
+    stars: 234,
+    whatItDoes:
+      "One-command bootstrap that transforms a fresh Ubuntu VPS into a fully-configured agentic coding environment with all flywheel tools installed.",
+    whyItsUseful:
+      "Setting up a new development environment takes hours. ACFS does it in 30 minutes—installing 30+ tools, three AI agents, and all the flywheel tooling automatically.",
+    implementationHighlights: [
+      "Single curl | bash installation",
+      "Idempotent (safe to re-run)",
+      "Manifest-driven architecture",
+      "SHA256 checksum verification for security",
+    ],
+    synergies: [
+      {
+        toolId: "ntm",
+        description: "Installs and configures NTM",
+      },
+      {
+        toolId: "mail",
+        description: "Sets up Agent Mail MCP server",
+      },
+      {
+        toolId: "dcg",
+        description: "Installs DCG safety hooks",
+      },
+    ],
+    techStack: ["Bash", "YAML manifest", "Next.js wizard"],
+    keyFeatures: [
+      "30-minute zero-to-hero setup",
+      "Installs Claude Code, Codex, Gemini CLI",
+      "All flywheel tools pre-configured",
+      "Step-by-step wizard for beginners",
+    ],
+    useCases: [
+      "Setting up new development VPS",
+      "Onboarding team members",
+      "Reproducible environment provisioning",
+    ],
+  },
+];
+
+export const tldrPageData = {
+  hero: {
+    title: "The Agentic Coding Flywheel",
+    subtitle: "TL;DR Edition",
+    description:
+      "13 open-source tools that work together to supercharge multi-agent AI coding workflows. Each tool reinforces the others, creating a self-improving system where the whole is greater than the sum of its parts.",
+    stats: [
+      { label: "Tools", value: "13" },
+      { label: "GitHub Stars", value: "3,600+" },
+      { label: "Languages", value: "5" },
+    ],
+  },
+  coreDescription:
+    "The core flywheel tools form the backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, and search.",
+  supportingDescription:
+    "Supporting tools extend the ecosystem with safety guards, cross-repo management, archive search, prompt crafting, and automated setup.",
+  flywheelExplanation: {
+    title: "Why a Flywheel?",
+    paragraphs: [
+      "A flywheel stores rotational energy—the more you spin it, the more energy it stores, making each subsequent push easier. These tools work the same way.",
+      "Every agent session generates searchable history (CASS). Every bug found creates trackable issues (BV). Every resolved issue becomes institutional memory (CM). The more you use the system, the more valuable it becomes.",
+      "This isn't a collection of tools—it's an integrated system where data flows between components, each making the others more powerful.",
+    ],
+  },
 };
