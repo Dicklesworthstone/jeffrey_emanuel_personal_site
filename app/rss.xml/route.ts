@@ -70,8 +70,8 @@ export async function GET() {
     const t1 = a.date.getTime();
     const t2 = b.date.getTime();
     // Handle invalid dates (treat as old)
-    const v1 = isNaN(t1) ? 0 : t1;
-    const v2 = isNaN(t2) ? 0 : t2;
+    const v1 = Number.isNaN(t1) ? 0 : t1;
+    const v2 = Number.isNaN(t2) ? 0 : t2;
     return v2 - v1;
   });
 
