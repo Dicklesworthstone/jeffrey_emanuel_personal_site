@@ -16,11 +16,13 @@ import {
   Brain,
   Search,
   ShieldAlert,
+  ShieldCheck,
   GitPullRequest,
   Archive,
   FileCode,
   RefreshCw,
   Cog,
+  Image,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatStarCount, formatStarCountFull } from "@/lib/format-stars";
@@ -49,11 +51,13 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Brain,
   Search,
   ShieldAlert,
+  ShieldCheck,
   GitPullRequest,
   Archive,
   FileCode,
   RefreshCw,
   Cog,
+  Image,
   Box,
 };
 
@@ -93,10 +97,10 @@ function SynergyPill({
         <DynamicIcon name={linkedTool.icon} className="h-2.5 w-2.5 text-white sm:h-3 sm:w-3" />
       </div>
       <div className="min-w-0 flex-1">
-        <span className="block text-[10px] font-semibold text-white sm:text-xs">
+        <span className="block text-xs font-semibold text-white sm:text-xs">
           {linkedTool.shortName}
         </span>
-        <span className="block truncate text-[10px] text-slate-400 group-hover/synergy:text-slate-300 sm:text-xs">
+        <span className="block truncate text-xs text-slate-400 group-hover/synergy:text-slate-300 sm:text-xs">
           {synergy.description}
         </span>
       </div>
@@ -121,6 +125,7 @@ export function TldrToolCard({
 
   // Detect touch device to disable spotlight effect (better mobile performance)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional one-time browser feature detection
     setIsTouchDevice(window.matchMedia("(hover: none)").matches);
   }, []);
 
@@ -184,6 +189,7 @@ export function TldrToolCard({
             "absolute inset-0 bg-gradient-to-br opacity-[0.05] transition-opacity duration-300 group-hover:opacity-[0.1]",
             tool.color
           )}
+          aria-hidden="true"
         />
 
         {/* Spotlight effect */}
@@ -193,6 +199,7 @@ export function TldrToolCard({
             opacity: spotlightOpacity,
             background: `radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(${spotlightRgb}, 0.15), transparent 40%)`,
           }}
+          aria-hidden="true"
         />
 
         {/* Content */}
@@ -216,7 +223,7 @@ export function TldrToolCard({
                       {tool.shortName}
                     </h3>
                     {tool.category === "core" && (
-                      <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-300 sm:text-xs">
+                      <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-violet-300 sm:text-xs">
                         Core
                       </span>
                     )}
@@ -229,12 +236,12 @@ export function TldrToolCard({
               <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 {tool.stars && (
                   <span
-                    className="relative inline-flex items-center gap-1 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-1 text-[10px] font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 hover:ring-amber-400/50 hover:shadow-amber-500/20 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
+                    className="relative inline-flex items-center gap-1 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-1 text-xs font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 hover:ring-amber-400/50 hover:shadow-amber-500/20 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
                     aria-label={`${formatStarCountFull(tool.stars)} GitHub stars`}
                     title={`${formatStarCountFull(tool.stars)} stars`}
                   >
-                    {/* Shimmer effect */}
-                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-out hover:translate-x-full" />
+                    {/* Shimmer effect - slower for smoother feel */}
+                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1500ms] ease-in-out motion-reduce:transition-none motion-safe:group-hover:translate-x-full" aria-hidden="true" />
                     <Star className="relative h-3 w-3 fill-amber-400 text-amber-400 drop-shadow-[0_0_3px_rgba(251,191,36,0.5)] sm:h-3.5 sm:w-3.5" aria-hidden="true" />
                     <span className="relative font-mono tracking-tight">{formatStarCount(tool.stars)}</span>
                   </span>
@@ -266,7 +273,7 @@ export function TldrToolCard({
             <div className="space-y-4 p-4 sm:space-y-5 sm:p-5">
               {/* Why it's useful */}
               <div>
-                <h4 className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Why It&apos;s Useful
                 </h4>
                 <p className="text-xs leading-relaxed text-slate-300 sm:text-sm">
@@ -276,16 +283,16 @@ export function TldrToolCard({
 
               {/* Key features */}
               <div>
-                <h4 className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Key Features
                 </h4>
                 <ul className="space-y-1 sm:space-y-1.5">
-                  {tool.keyFeatures.map((feature, i) => (
+                  {tool.keyFeatures.map((feature) => (
                     <li
-                      key={i}
+                      key={feature}
                       className="flex items-start gap-2 text-xs text-slate-300 sm:text-sm"
                     >
-                      <ArrowUpRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500 sm:h-4 sm:w-4" />
+                      <ArrowUpRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500 sm:h-4 sm:w-4" aria-hidden="true" />
                       {feature}
                     </li>
                   ))}
@@ -294,14 +301,14 @@ export function TldrToolCard({
 
               {/* Tech stack */}
               <div>
-                <h4 className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Tech Stack
                 </h4>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {tool.techStack.map((tech) => (
                     <span
                       key={tech}
-                      className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 sm:px-2 sm:py-1 sm:text-xs"
+                      className="rounded-md bg-white/5 px-1.5 py-0.5 text-xs font-medium text-slate-400 sm:px-2 sm:py-1 sm:text-xs"
                     >
                       {tech}
                     </span>
@@ -312,7 +319,7 @@ export function TldrToolCard({
               {/* Synergies */}
               {tool.synergies.length > 0 && (
                 <div>
-                  <h4 className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                  <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                     Synergies
                   </h4>
                   <div className="grid gap-1.5 sm:gap-2 sm:grid-cols-2">
