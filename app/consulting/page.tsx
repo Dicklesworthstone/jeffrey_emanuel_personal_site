@@ -12,7 +12,7 @@ export default function ConsultingPage() {
         icon={Cpu}
         eyebrow="Consulting"
         title="AI, workflows, and markets for people who live inside risk limits"
-        kicker="I work with hedge funds, multi‑manager platforms, PE firms, and large allocators who need to reason clearly about AI and compute."
+        kicker="I work with hedge funds, multi-manager platforms, PE firms, and large allocators who need to reason clearly about AI and compute."
         headingLevel={1}
       >
         <p>
@@ -41,13 +41,13 @@ export default function ConsultingPage() {
               Market & risk analysis
             </h3>
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
-              <li>Deep dives on AI‑sensitive names across the stack.</li>
+              <li>Deep dives on AI-sensitive names across the stack.</li>
               <li>
                 Scenario work around shifts like DeepSeek, cheaper inference,
                 and new architectures.
               </li>
               <li>
-                Identifying where Nvidia‑style over‑earning risk might show up
+                Identifying where Nvidia-style over-earning risk might show up
                 next.
               </li>
             </ul>
@@ -95,11 +95,11 @@ export default function ConsultingPage() {
             </h3>
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
               <li>
-                One‑off or recurring briefings on the state of AI and what
+                One-off or recurring briefings on the state of AI and what
                 matters for your universe.
               </li>
               <li>
-                Sector‑specific sessions for PMs or PE deal teams who need to
+                Sector-specific sessions for PMs or PE deal teams who need to
                 underwrite AI risk and opportunity.
               </li>
               <li>
@@ -134,13 +134,13 @@ export default function ConsultingPage() {
             <span className="font-semibold text-slate-100">
               3. Deep work phase.
             </span>{" "}
-            Mix of calls, async memos, and hands‑on buildout where appropriate.
+            Mix of calls, async memos, and hands-on buildout where appropriate.
           </li>
           <li>
             <span className="font-semibold text-slate-100">
-              4. Delivery & follow‑up.
+              4. Delivery & follow-up.
             </span>{" "}
-            Final deliverables plus optional quarterly check‑ins if the mandate
+            Final deliverables plus optional quarterly check-ins if the mandate
             benefits from ongoing updates.
           </li>
         </ol>
