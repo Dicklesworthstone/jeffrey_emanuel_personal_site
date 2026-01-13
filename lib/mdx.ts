@@ -9,7 +9,7 @@ import { cache } from "react";
 // location and cwd until we find content/writing to keep SSG stable.
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 
-function resolvePostsDirectory() {
+function resolvePostsDirectory(): string | null {
   const bases = [moduleDir, process.cwd()];
   for (const base of bases) {
     let cursor = base;
@@ -19,7 +19,7 @@ function resolvePostsDirectory() {
       cursor = path.resolve(cursor, "..");
     }
   }
-  throw new Error("Cannot locate content/writing directory");
+  return null;
 }
 
 const postsDirectory = resolvePostsDirectory();
@@ -41,13 +41,16 @@ export type Post = {
 };
 
 export function getPostSlugs() {
-  if (!fs.existsSync(postsDirectory)) {
+  if (!postsDirectory || !fs.existsSync(postsDirectory)) {
     return [];
   }
   return fs.readdirSync(postsDirectory).filter((file) => file.endsWith(".md"));
 }
 
 export const getPostBySlug = cache((slug: string) => {
+  if (!postsDirectory) {
+    throw new Error(`Post not found: ${slug} (Content directory missing)`);
+  }
   const realSlug = slug.replace(/\.md$/, "");
   const fullPath = path.join(postsDirectory, `${realSlug}.md`);
   
@@ -87,8 +90,8 @@ export function getAllPosts() {
   return posts.sort((post1, post2) => {
     const t1 = new Date(post1.date).getTime();
     const t2 = new Date(post2.date).getTime();
-    if (isNaN(t1)) return 1;
-    if (isNaN(t2)) return -1;
+    if (Number.isNaN(t1)) return 1;
+    if (Number.isNaN(t2)) return -1;
     return t2 - t1;
   });
 }
