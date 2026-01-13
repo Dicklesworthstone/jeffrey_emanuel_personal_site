@@ -30,6 +30,10 @@ export default class ErrorBoundary extends Component<
     console.error("Error boundary caught error:", error, errorInfo);
   }
 
+  reset = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -52,15 +56,23 @@ export default class ErrorBoundary extends Component<
             {this.state.error?.message ||
               "An unexpected error occurred while rendering this section."}
           </p>
-          <button
-            onClick={() => {
-              window.location.reload();
-            }}
-            className="mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-100 shadow-sm shadow-slate-900/70 hover:border-slate-500 hover:bg-slate-900"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Reload page
-          </button>
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={this.reset}
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try again
+            </button>
+            <button
+              onClick={() => {
+                window.location.reload();
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-100 shadow-sm shadow-slate-900/70 hover:border-slate-500 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+            >
+              Reload page
+            </button>
+          </div>
           {process.env.NODE_ENV === "development" && this.state.error && (
             <details className="mt-8 w-full rounded-lg border border-slate-800/80 bg-slate-950/80 p-4 text-left">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-slate-400">

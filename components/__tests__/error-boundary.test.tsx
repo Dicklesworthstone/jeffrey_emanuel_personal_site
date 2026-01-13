@@ -71,6 +71,37 @@ describe("ErrorBoundary", () => {
     expect(reloadMock).toHaveBeenCalled();
   });
 
+  it("try again button resets error state", () => {
+    // Use an object reference to control throw state externally
+    const state = { shouldThrow: true };
+    
+    const ThrowOnce = () => {
+      if (state.shouldThrow) {
+        throw new Error("Transient error");
+      }
+      return <div>Recovered content</div>;
+    };
+
+    render(
+      <ErrorBoundary>
+        <ThrowOnce />
+      </ErrorBoundary>
+    );
+
+    // Initial error state
+    expect(screen.getByText("Transient error")).toBeInTheDocument();
+    
+    // Fix the issue so next render succeeds
+    state.shouldThrow = false;
+
+    // Click try again
+    const tryAgainButton = screen.getByRole("button", { name: /try again/i });
+    fireEvent.click(tryAgainButton);
+
+    // Should now show content
+    expect(screen.getByText("Recovered content")).toBeInTheDocument();
+  });
+
   it("has proper accessibility attributes", () => {
     render(
       <ErrorBoundary>
