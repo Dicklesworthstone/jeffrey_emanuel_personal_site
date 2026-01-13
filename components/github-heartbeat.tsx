@@ -52,7 +52,8 @@ interface HeartbeatEvent {
 
 // Parse GitHub events into our display format
 function parseEvent(event: GitHubEvent): HeartbeatEvent {
-  const repoShort = event.repo.name.replace(`${GITHUB_USERNAME}/`, "");
+  const repoName = event.repo?.name || "unknown/repo";
+  const repoShort = repoName.replace(`${GITHUB_USERNAME}/`, "");
   const timestamp = new Date(event.created_at);
 
   switch (event.type) {
@@ -304,7 +305,7 @@ function EventCard({ event, index }: { event: HeartbeatEvent; index: number }) {
           <span className={cn("text-xs font-bold uppercase tracking-wider", colors.text)}>
             {event.repo}
           </span>
-          <span className="text-[10px] text-slate-500">
+          <span className="text-xs text-slate-500">
             {formatRelativeTime(event.timestamp)}
           </span>
         </div>
