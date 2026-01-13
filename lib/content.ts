@@ -280,6 +280,15 @@ export const featuredSites: FeaturedSite[] = [
     gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
     icon: "Workflow",
   },
+  {
+    id: "brennerbot",
+    title: "BrennerBot.org",
+    tagline: "Multi-agent research orchestration using Sydney Brenner's scientific methods. Harness Opus, GPT-5.2, and Gemini 3 as a collaborative research group.",
+    url: "https://brennerbot.org",
+    ogImage: "https://brennerbot.org/og-image.png",
+    gradient: "from-emerald-500 via-teal-500 to-cyan-500",
+    icon: "Microscope",
+  },
 ];
 
 // ============================================================================
@@ -1931,103 +1940,8 @@ export type TldrFlywheelTool = {
 
 export const tldrFlywheelTools: TldrFlywheelTool[] = [
   // ===========================================================================
-  // CORE FLYWHEEL TOOLS
+  // CORE FLYWHEEL TOOLS - Ordered by importance for workflow
   // ===========================================================================
-  {
-    id: "ntm",
-    name: "Named Tmux Manager",
-    shortName: "NTM",
-    href: "https://github.com/Dicklesworthstone/ntm",
-    icon: "LayoutGrid",
-    color: "from-sky-500 to-blue-600",
-    category: "core",
-    stars: 69,
-    whatItDoes:
-      "Manages named tmux sessions with project-specific persistence. Creates organized workspaces for multi-agent development with typed panes.",
-    whyItsUseful:
-      "When running multiple AI coding agents simultaneously, keeping track of which agent is working on what becomes impossible without organization. NTM solves this by providing persistent, named sessions that survive reboots.",
-    implementationHighlights: [
-      "Go implementation with Bubble Tea TUI framework",
-      "Project-aware persistence using XDG conventions",
-      "Support for agent type classification (claude, codex, cursor, etc.)",
-      "Real-time dashboard showing all active agent panes",
-    ],
-    synergies: [
-      {
-        toolId: "slb",
-        description:
-          "SLB provides two-person rule safety checks for dangerous commands in NTM sessions",
-      },
-      {
-        toolId: "mail",
-        description:
-          "Agents in different NTM panes communicate via Agent Mail threads",
-      },
-      {
-        toolId: "cass",
-        description: "Session history from all NTM panes is indexed for search",
-      },
-    ],
-    techStack: ["Go 1.25+", "Bubble Tea", "tmux 3.0+"],
-    keyFeatures: [
-      "Spawn named agent panes with type classification",
-      "Broadcast prompts to specific agent types",
-      "Session persistence across reboots",
-      "Dashboard view of all active agents",
-    ],
-    useCases: [
-      "Running 5+ Claude Code agents on different features simultaneously",
-      "Organizing development environments by project",
-      "Managing long-running agent sessions for complex refactors",
-    ],
-  },
-  {
-    id: "slb",
-    name: "Simultaneous Launch Button",
-    shortName: "SLB",
-    href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
-    icon: "ShieldCheck",
-    color: "from-amber-500 to-orange-600",
-    category: "core",
-    stars: 49,
-    whatItDoes:
-      "Two-person rule CLI for approving dangerous shell commands. Requires a second human or AI reviewer to approve risky operations before execution.",
-    whyItsUseful:
-      "AI agents can accidentally run destructive commands. SLB implements a 'two-person rule' where dangerous commands require explicit approval from another party before executing, preventing catastrophic mistakes.",
-    implementationHighlights: [
-      "Go implementation with Bubble Tea TUI",
-      "SQLite-backed persistent command queue",
-      "Configurable risk detection patterns",
-      "Real-time approval/rejection notifications",
-    ],
-    synergies: [
-      {
-        toolId: "ntm",
-        description: "Protects NTM-managed sessions from dangerous commands",
-      },
-      {
-        toolId: "dcg",
-        description:
-          "Works alongside DCG for layered command safety",
-      },
-      {
-        toolId: "mail",
-        description: "Approval requests can be sent via Agent Mail",
-      },
-    ],
-    techStack: ["Go", "Bubble Tea", "SQLite"],
-    keyFeatures: [
-      "Two-person rule enforcement",
-      "Command queue with approval workflow",
-      "Pattern-based risk detection",
-      "SQLite persistence",
-    ],
-    useCases: [
-      "Requiring approval for rm -rf and git reset operations",
-      "Adding safety gates to autonomous agent workflows",
-      "Audit trail of dangerous command approvals",
-    ],
-  },
   {
     id: "mail",
     name: "MCP Agent Mail",
@@ -2121,6 +2035,98 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     ],
   },
   {
+    id: "cass",
+    name: "Coding Agent Session Search",
+    shortName: "CASS",
+    href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
+    icon: "Search",
+    color: "from-cyan-500 to-sky-600",
+    category: "core",
+    stars: 307,
+    whatItDoes:
+      "Blazing-fast search across all your past AI coding agent sessions. Indexes conversations from Claude Code, Codex, Cursor, Gemini, ChatGPT and more with sub-millisecond query times.",
+    whyItsUseful:
+      "You've solved this problem before - but which session? CASS lets you search 'how did I fix that React hydration error' and instantly find the exact conversation. Also supports semantic search and multi-machine sync via SSH.",
+    implementationHighlights: [
+      "Rust + Tantivy for sub-millisecond full-text search",
+      "Hybrid semantic + keyword search with RRF fusion",
+      "Robot mode (--robot) for AI agent integration",
+      "Multi-machine sync via SSH",
+    ],
+    synergies: [
+      {
+        toolId: "cm",
+        description: "Indexes memories stored by CM for retrieval",
+      },
+      {
+        toolId: "ntm",
+        description: "Searches all managed agent session histories",
+      },
+      {
+        toolId: "bv",
+        description: "Links search results to related Beads tasks",
+      },
+    ],
+    techStack: ["Rust", "Tantivy", "Ratatui", "JSONL parsing"],
+    keyFeatures: [
+      "Unified search across all agent types",
+      "Sub-second search over millions of messages",
+      "Robot mode for AI agent integration",
+      "TUI for interactive exploration",
+    ],
+    useCases: [
+      "Finding how a similar bug was fixed before",
+      "Retrieving context from past project work",
+      "Building on previous agent conversations",
+    ],
+  },
+  {
+    id: "acfs",
+    name: "Flywheel Setup",
+    shortName: "ACFS",
+    href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
+    icon: "Cog",
+    color: "from-purple-500 to-violet-600",
+    category: "core",
+    stars: 234,
+    whatItDoes:
+      "One-command bootstrap that transforms a fresh Ubuntu VPS into a fully-configured agentic coding environment with all flywheel tools installed.",
+    whyItsUseful:
+      "Setting up a new development environment takes hours. ACFS does it in 30 minutes, installing 30+ tools, three AI agents, and all the flywheel tooling automatically.",
+    implementationHighlights: [
+      "Single curl | bash installation",
+      "Idempotent (safe to re-run)",
+      "Manifest-driven architecture",
+      "SHA256 checksum verification for security",
+    ],
+    synergies: [
+      {
+        toolId: "ntm",
+        description: "Installs and configures NTM",
+      },
+      {
+        toolId: "mail",
+        description: "Sets up Agent Mail MCP server",
+      },
+      {
+        toolId: "dcg",
+        description: "Installs DCG safety hooks",
+      },
+    ],
+    techStack: ["Bash", "YAML manifest", "Next.js wizard"],
+    keyFeatures: [
+      "30-minute zero-to-hero setup",
+      "Installs Claude Code, Codex, Gemini CLI",
+      "All flywheel tools pre-configured",
+      "Step-by-step wizard for beginners",
+    ],
+    useCases: [
+      "Setting up new development VPS",
+      "Onboarding team members",
+      "Reproducible environment provisioning",
+    ],
+  },
+  {
     id: "ubs",
     name: "Ultimate Bug Scanner",
     shortName: "UBS",
@@ -2160,6 +2166,90 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
       "Pre-commit validation across polyglot repos",
       "CI/CD pipeline integration",
       "Catching AI-generated code errors",
+    ],
+  },
+  {
+    id: "dcg",
+    name: "Destructive Command Guard",
+    shortName: "DCG",
+    href: "https://github.com/Dicklesworthstone/destructive_command_guard",
+    icon: "ShieldAlert",
+    color: "from-red-500 to-rose-600",
+    category: "core",
+    stars: 89,
+    whatItDoes:
+      "Intercepts dangerous shell commands (rm -rf, git reset --hard, etc.) before execution. Requires confirmation for destructive operations.",
+    whyItsUseful:
+      "AI agents can and will run 'rm -rf /' if they think it solves your problem. DCG is the safety net that catches catastrophic commands before they execute.",
+    implementationHighlights: [
+      "Rust implementation with SIMD-accelerated pattern matching",
+      "Sub-microsecond command analysis overhead",
+      "Configurable risk levels and bypass rules",
+      "Logging of all intercepted commands",
+    ],
+    synergies: [
+      {
+        toolId: "slb",
+        description: "Works alongside SLB for layered command safety",
+      },
+      {
+        toolId: "ntm",
+        description: "Guards all commands in NTM-managed sessions",
+      },
+    ],
+    techStack: ["Rust", "SIMD", "Shell integration"],
+    keyFeatures: [
+      "Intercepts rm -rf, git reset --hard, etc.",
+      "SIMD-accelerated pattern matching",
+      "Configurable allowlists",
+      "Command audit logging",
+    ],
+    useCases: [
+      "Protecting against accidental data loss",
+      "Auditing dangerous commands from agents",
+      "Training wheels for new AI agent setups",
+    ],
+  },
+  {
+    id: "ru",
+    name: "Repo Updater",
+    shortName: "RU",
+    href: "https://github.com/Dicklesworthstone/repo_updater",
+    icon: "RefreshCw",
+    color: "from-orange-500 to-amber-600",
+    category: "core",
+    stars: 67,
+    whatItDoes:
+      "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
+    whyItsUseful:
+      "Managing many repos across machines is painful. 'ru sync' handles everything: cloning what's missing, pulling what's stale, and reporting conflicts with resolution commands.",
+    implementationHighlights: [
+      "Pure Bash with git plumbing (no string parsing)",
+      "Parallel sync with configurable worker count",
+      "AI-assisted code review integration",
+      "Meaningful exit codes for CI/CD",
+    ],
+    synergies: [
+      {
+        toolId: "ubs",
+        description: "Run bug scans across all synced repos",
+      },
+      {
+        toolId: "ntm",
+        description: "NTM integration for agent-driven sweeps",
+      },
+    ],
+    techStack: ["Bash 4.0+", "Git plumbing", "GitHub CLI"],
+    keyFeatures: [
+      "One-command multi-repo sync",
+      "Parallel operations",
+      "Conflict detection with resolution hints",
+      "AI code review integration",
+    ],
+    useCases: [
+      "Keeping development machines in sync",
+      "CI/CD repo management",
+      "Automated codebase maintenance",
     ],
   },
   {
@@ -2210,94 +2300,97 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     ],
   },
   {
-    id: "cass",
-    name: "Coding Agent Session Search",
-    shortName: "CASS",
-    href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
-    icon: "Search",
-    color: "from-cyan-500 to-sky-600",
+    id: "ntm",
+    name: "Named Tmux Manager",
+    shortName: "NTM",
+    href: "https://github.com/Dicklesworthstone/ntm",
+    icon: "LayoutGrid",
+    color: "from-sky-500 to-blue-600",
     category: "core",
-    stars: 307,
+    stars: 69,
     whatItDoes:
-      "Blazing-fast search across all your past AI coding agent sessions. Indexes conversations from Claude Code, Codex, Cursor, Gemini, ChatGPT and more with sub-millisecond query times.",
+      "Manages named tmux sessions with project-specific persistence. Creates organized workspaces for multi-agent development with typed panes.",
     whyItsUseful:
-      "You've solved this problem before - but which session? CASS lets you search 'how did I fix that React hydration error' and instantly find the exact conversation. Also supports semantic search and multi-machine sync via SSH.",
+      "When running multiple AI coding agents simultaneously, keeping track of which agent is working on what becomes impossible without organization. NTM solves this by providing persistent, named sessions that survive reboots.",
     implementationHighlights: [
-      "Rust + Tantivy for sub-millisecond full-text search",
-      "Hybrid semantic + keyword search with RRF fusion",
-      "Robot mode (--robot) for AI agent integration",
-      "Multi-machine sync via SSH",
-    ],
-    synergies: [
-      {
-        toolId: "cm",
-        description: "Indexes memories stored by CM for retrieval",
-      },
-      {
-        toolId: "ntm",
-        description: "Searches all managed agent session histories",
-      },
-      {
-        toolId: "bv",
-        description: "Links search results to related Beads tasks",
-      },
-    ],
-    techStack: ["Rust", "Tantivy", "Ratatui", "JSONL parsing"],
-    keyFeatures: [
-      "Unified search across all agent types",
-      "Sub-second search over millions of messages",
-      "Robot mode for AI agent integration",
-      "TUI for interactive exploration",
-    ],
-    useCases: [
-      "Finding how a similar bug was fixed before",
-      "Retrieving context from past project work",
-      "Building on previous agent conversations",
-    ],
-  },
-  // ===========================================================================
-  // ADDITIONAL CORE FLYWHEEL TOOLS
-  // ===========================================================================
-  {
-    id: "dcg",
-    name: "Destructive Command Guard",
-    shortName: "DCG",
-    href: "https://github.com/Dicklesworthstone/destructive_command_guard",
-    icon: "ShieldAlert",
-    color: "from-red-500 to-rose-600",
-    category: "core",
-    stars: 89,
-    whatItDoes:
-      "Intercepts dangerous shell commands (rm -rf, git reset --hard, etc.) before execution. Requires confirmation for destructive operations.",
-    whyItsUseful:
-      "AI agents can and will run 'rm -rf /' if they think it solves your problem. DCG is the safety net that catches catastrophic commands before they execute.",
-    implementationHighlights: [
-      "Rust implementation with SIMD-accelerated pattern matching",
-      "Sub-microsecond command analysis overhead",
-      "Configurable risk levels and bypass rules",
-      "Logging of all intercepted commands",
+      "Go implementation with Bubble Tea TUI framework",
+      "Project-aware persistence using XDG conventions",
+      "Support for agent type classification (claude, codex, cursor, etc.)",
+      "Real-time dashboard showing all active agent panes",
     ],
     synergies: [
       {
         toolId: "slb",
-        description: "Works alongside SLB for layered command safety",
+        description:
+          "SLB provides two-person rule safety checks for dangerous commands in NTM sessions",
       },
       {
-        toolId: "ntm",
-        description: "Guards all commands in NTM-managed sessions",
+        toolId: "mail",
+        description:
+          "Agents in different NTM panes communicate via Agent Mail threads",
+      },
+      {
+        toolId: "cass",
+        description: "Session history from all NTM panes is indexed for search",
       },
     ],
-    techStack: ["Rust", "SIMD", "Shell integration"],
+    techStack: ["Go 1.25+", "Bubble Tea", "tmux 3.0+"],
     keyFeatures: [
-      "Intercepts rm -rf, git reset --hard, etc.",
-      "SIMD-accelerated pattern matching",
-      "Configurable allowlists",
-      "Command audit logging",
+      "Spawn named agent panes with type classification",
+      "Broadcast prompts to specific agent types",
+      "Session persistence across reboots",
+      "Dashboard view of all active agents",
     ],
     useCases: [
-      "Protecting against accidental data loss",
-      "Auditing dangerous commands from agents",
-      "Training wheels for new AI agent setups",
+      "Running 5+ Claude Code agents on different features simultaneously",
+      "Organizing development environments by project",
+      "Managing long-running agent sessions for complex refactors",
+    ],
+  },
+  {
+    id: "slb",
+    name: "Simultaneous Launch Button",
+    shortName: "SLB",
+    href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
+    icon: "ShieldCheck",
+    color: "from-amber-500 to-orange-600",
+    category: "core",
+    stars: 49,
+    whatItDoes:
+      "Two-person rule CLI for approving dangerous shell commands. Requires a second human or AI reviewer to approve risky operations before execution.",
+    whyItsUseful:
+      "AI agents can accidentally run destructive commands. SLB implements a 'two-person rule' where dangerous commands require explicit approval from another party before executing, preventing catastrophic mistakes.",
+    implementationHighlights: [
+      "Go implementation with Bubble Tea TUI",
+      "SQLite-backed persistent command queue",
+      "Configurable risk detection patterns",
+      "Real-time approval/rejection notifications",
+    ],
+    synergies: [
+      {
+        toolId: "ntm",
+        description: "Protects NTM-managed sessions from dangerous commands",
+      },
+      {
+        toolId: "dcg",
+        description: "Works alongside DCG for layered command safety",
+      },
+      {
+        toolId: "mail",
+        description: "Approval requests can be sent via Agent Mail",
+      },
+    ],
+    techStack: ["Go", "Bubble Tea", "SQLite"],
+    keyFeatures: [
+      "Two-person rule enforcement",
+      "Command queue with approval workflow",
+      "Pattern-based risk detection",
+      "SQLite persistence",
+    ],
+    useCases: [
+      "Requiring approval for rm -rf and git reset operations",
+      "Adding safety gates to autonomous agent workflows",
+      "Audit trail of dangerous command approvals",
     ],
   },
   // ===========================================================================
@@ -2427,94 +2520,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
       "Preparing code context for Claude/GPT",
       "Creating reproducible prompt templates",
       "Managing context window budget",
-    ],
-  },
-  {
-    id: "ru",
-    name: "Repo Updater",
-    shortName: "RU",
-    href: "https://github.com/Dicklesworthstone/repo_updater",
-    icon: "RefreshCw",
-    color: "from-orange-500 to-amber-600",
-    category: "core",
-    stars: 67,
-    whatItDoes:
-      "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
-    whyItsUseful:
-      "Managing many repos across machines is painful. 'ru sync' handles everything: cloning what's missing, pulling what's stale, and reporting conflicts with resolution commands.",
-    implementationHighlights: [
-      "Pure Bash with git plumbing (no string parsing)",
-      "Parallel sync with configurable worker count",
-      "AI-assisted code review integration",
-      "Meaningful exit codes for CI/CD",
-    ],
-    synergies: [
-      {
-        toolId: "ubs",
-        description: "Run bug scans across all synced repos",
-      },
-      {
-        toolId: "ntm",
-        description: "NTM integration for agent-driven sweeps",
-      },
-    ],
-    techStack: ["Bash 4.0+", "Git plumbing", "GitHub CLI"],
-    keyFeatures: [
-      "One-command multi-repo sync",
-      "Parallel operations",
-      "Conflict detection with resolution hints",
-      "AI code review integration",
-    ],
-    useCases: [
-      "Keeping development machines in sync",
-      "CI/CD repo management",
-      "Automated codebase maintenance",
-    ],
-  },
-  {
-    id: "acfs",
-    name: "Flywheel Setup",
-    shortName: "ACFS",
-    href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
-    icon: "Cog",
-    color: "from-purple-500 to-violet-600",
-    category: "core",
-    stars: 234,
-    whatItDoes:
-      "One-command bootstrap that transforms a fresh Ubuntu VPS into a fully-configured agentic coding environment with all flywheel tools installed.",
-    whyItsUseful:
-      "Setting up a new development environment takes hours. ACFS does it in 30 minutes, installing 30+ tools, three AI agents, and all the flywheel tooling automatically.",
-    implementationHighlights: [
-      "Single curl | bash installation",
-      "Idempotent (safe to re-run)",
-      "Manifest-driven architecture",
-      "SHA256 checksum verification for security",
-    ],
-    synergies: [
-      {
-        toolId: "ntm",
-        description: "Installs and configures NTM",
-      },
-      {
-        toolId: "mail",
-        description: "Sets up Agent Mail MCP server",
-      },
-      {
-        toolId: "dcg",
-        description: "Installs DCG safety hooks",
-      },
-    ],
-    techStack: ["Bash", "YAML manifest", "Next.js wizard"],
-    keyFeatures: [
-      "30-minute zero-to-hero setup",
-      "Installs Claude Code, Codex, Gemini CLI",
-      "All flywheel tools pre-configured",
-      "Step-by-step wizard for beginners",
-    ],
-    useCases: [
-      "Setting up new development VPS",
-      "Onboarding team members",
-      "Reproducible environment provisioning",
     ],
   },
 ];

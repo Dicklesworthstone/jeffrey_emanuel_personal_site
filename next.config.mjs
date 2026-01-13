@@ -35,6 +35,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "agent-flywheel.com",
       },
+      {
+        protocol: "https",
+        hostname: "brennerbot.org",
+      },
     ],
   },
   // Service worker headers for PWA

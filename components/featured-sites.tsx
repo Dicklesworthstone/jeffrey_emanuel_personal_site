@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { ExternalLink, Sparkles, Workflow, Link as LinkIcon } from "lucide-react";
+import { ExternalLink, Sparkles, Workflow, Microscope } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FeaturedSite } from "@/lib/content";
 
@@ -14,6 +13,7 @@ import type { FeaturedSite } from "@/lib/content";
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles,
   Workflow,
+  Microscope,
 };
 
 // =============================================================================
@@ -32,6 +32,11 @@ function OgLinkCard({ site, index, reducedMotion, isInView }: OgLinkCardProps) {
   const domain = new URL(site.url).hostname;
   const [imageError, setImageError] = useState(false);
 
+  // Use proxy for OG images to avoid CORS issues and enable caching
+  const proxiedImageUrl = site.ogImage
+    ? `/api/og-image?url=${encodeURIComponent(site.ogImage)}`
+    : null;
+
   return (
     <motion.a
       href={site.url}
@@ -48,15 +53,15 @@ function OgLinkCard({ site, index, reducedMotion, isInView }: OgLinkCardProps) {
     >
       {/* OG Image Area - Twitter/Discord style */}
       <div className="relative aspect-[1.91/1] w-full overflow-hidden bg-slate-950">
-        {site.ogImage && !imageError ? (
-          // Actual OG Image
-          <Image
-            src={site.ogImage}
+        {proxiedImageUrl && !imageError ? (
+          // Actual OG Image via proxy
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={proxiedImageUrl}
             alt={`${site.title} preview`}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={() => setImageError(true)}
-            sizes="(max-width: 640px) 100vw, 50vw"
+            loading="lazy"
           />
         ) : (
           // Fallback: Gradient with icon
@@ -126,9 +131,9 @@ function OgLinkCard({ site, index, reducedMotion, isInView }: OgLinkCardProps) {
       <div
         className={cn(
           "pointer-events-none absolute inset-0 rounded-xl opacity-0 ring-1 ring-inset transition-opacity duration-300 group-hover:opacity-100",
-          site.id === "jeffreysprompts"
-            ? "ring-amber-500/30"
-            : "ring-violet-500/30"
+          site.id === "jeffreysprompts" && "ring-amber-500/30",
+          site.id === "agent-flywheel" && "ring-violet-500/30",
+          site.id === "brennerbot" && "ring-teal-500/30"
         )}
       />
     </motion.a>
@@ -153,7 +158,7 @@ export default function FeaturedSites({ sites, className }: FeaturedSitesProps) 
   return (
     <div
       ref={containerRef}
-      className={cn("grid gap-6 sm:grid-cols-2", className)}
+      className={cn("grid gap-6 sm:grid-cols-2 lg:grid-cols-3", className)}
     >
       {sites.map((site, index) => (
         <OgLinkCard
