@@ -38,12 +38,13 @@ export function TldrSynergyDiagram({
     [tools]
   );
 
-  // Calculate node positions in a circle
+  // Calculate node positions in a circle - adjust radius based on tool count
   const nodePositions = useMemo(() => {
     const positions: Record<string, NodePosition> = {};
     const centerX = 200;
     const centerY = 200;
-    const radius = 140;
+    // Scale radius based on number of tools to prevent overlap
+    const radius = coreTools.length > 8 ? 155 : 140;
 
     coreTools.forEach((tool, index) => {
       // Start from top and go clockwise
@@ -194,10 +195,14 @@ export function TldrSynergyDiagram({
             </text>
           </motion.g>
 
-          {/* Tool nodes */}
+          {/* Tool nodes - smaller when more tools */}
           {coreTools.map((tool, index) => {
             const pos = nodePositions[tool.id];
             if (!pos) return null;
+            // Smaller nodes when we have more tools
+            const nodeRadius = coreTools.length > 8 ? 22 : 28;
+            const ringRadius = coreTools.length > 8 ? 20 : 26;
+            const fontSize = coreTools.length > 8 ? "9px" : "11px";
 
             return (
               <motion.g
@@ -206,7 +211,7 @@ export function TldrSynergyDiagram({
                 animate={isInView ? { opacity: 1, scale: 1 } : {}}
                 transition={{
                   duration: reducedMotion ? 0 : 0.4,
-                  delay: reducedMotion ? 0 : 0.4 + index * 0.08,
+                  delay: reducedMotion ? 0 : 0.4 + index * 0.05,
                   type: "spring",
                   stiffness: 200,
                 }}
@@ -215,7 +220,7 @@ export function TldrSynergyDiagram({
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r="28"
+                  r={nodeRadius}
                   fill="rgba(15, 23, 42, 0.95)"
                   stroke="rgba(255, 255, 255, 0.1)"
                   strokeWidth="1"
@@ -226,7 +231,7 @@ export function TldrSynergyDiagram({
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r="26"
+                  r={ringRadius}
                   fill="none"
                   stroke={`url(#gradient-${tool.id})`}
                   strokeWidth="2"
@@ -236,9 +241,10 @@ export function TldrSynergyDiagram({
                 {/* Tool label */}
                 <text
                   x={pos.x}
-                  y={pos.y + 4}
+                  y={pos.y + 3}
                   textAnchor="middle"
-                  className="fill-white text-[11px] font-bold"
+                  className="fill-white font-bold"
+                  style={{ fontSize }}
                 >
                   {tool.shortName}
                 </text>
@@ -273,6 +279,9 @@ function getGradientColor(colorClass: string, type: "from" | "to"): string {
     "from-rose-500 to-red-600": { from: "#f43f5e", to: "#dc2626" },
     "from-pink-500 to-fuchsia-600": { from: "#ec4899", to: "#c026d3" },
     "from-cyan-500 to-sky-600": { from: "#06b6d4", to: "#0284c7" },
+    "from-red-500 to-rose-600": { from: "#ef4444", to: "#e11d48" },
+    "from-orange-500 to-amber-600": { from: "#f97316", to: "#d97706" },
+    "from-purple-500 to-violet-600": { from: "#a855f7", to: "#7c3aed" },
   };
 
   const colors = colorMap[colorClass];

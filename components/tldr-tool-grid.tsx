@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { Layers, Wrench, ExpandIcon, ShrinkIcon, Search, X } from "lucide-react";
+import { Layers, Wrench, Search, X } from "lucide-react";
 import Fuse from "fuse.js";
 import { cn } from "@/lib/utils";
 import { TldrToolCard } from "./tldr-tool-card";
-import type { TldrFlywheelTool, TldrToolCategory } from "@/lib/content";
+import type { TldrFlywheelTool } from "@/lib/content";
 
 // =============================================================================
 // TYPES
@@ -41,14 +41,14 @@ function ToolSearchBar({
       initial={reducedMotion ? {} : { opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reducedMotion ? 0 : 0.3 }}
-      className="mb-10"
+      className="mb-8 sm:mb-10"
     >
       <div className="relative mx-auto max-w-2xl">
         {/* Glass morphism search container */}
-        <div className="relative rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm">
+        <div className="relative rounded-xl border border-white/10 bg-slate-900/50 backdrop-blur-sm sm:rounded-2xl">
           {/* Search icon */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-            <Search className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-4">
+            <Search className="h-4 w-4 text-slate-400 sm:h-5 sm:w-5" aria-hidden="true" />
           </div>
 
           {/* Input field */}
@@ -57,13 +57,13 @@ function ToolSearchBar({
             type="text"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Search tools by name, description, or tech stack..."
+            placeholder="Search tools..."
             aria-label="Search flywheel tools"
-            className="w-full rounded-2xl bg-transparent py-4 pl-12 pr-20 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+            className="w-full rounded-xl bg-transparent py-3 pl-10 pr-16 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 sm:rounded-2xl sm:py-4 sm:pl-12 sm:pr-20"
           />
 
           {/* Clear button and keyboard hint */}
-          <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-4">
+          <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 pr-3 sm:gap-2 sm:pr-4">
             {query && (
               <button
                 onClick={() => onQueryChange("")}
@@ -86,11 +86,11 @@ function ToolSearchBar({
               initial={reducedMotion ? {} : { opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={reducedMotion ? {} : { opacity: 0, y: -5 }}
-              className="mt-3 text-center"
+              className="mt-2 text-center sm:mt-3"
               role="status"
               aria-live="polite"
             >
-              <span className="text-sm text-slate-400">
+              <span className="text-xs text-slate-400 sm:text-sm">
                 {resultCount === 0 ? (
                   "No tools match your search"
                 ) : (
@@ -165,16 +165,12 @@ function SectionHeader({
   description,
   icon: Icon,
   count,
-  isExpanded,
-  onToggleAll,
   reducedMotion,
 }: {
   title: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   count: number;
-  isExpanded: boolean;
-  onToggleAll: () => void;
   reducedMotion: boolean;
 }) {
   return (
@@ -183,41 +179,22 @@ function SectionHeader({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: reducedMotion ? 0 : 0.5 }}
-      className="mb-8"
+      className="mb-6 sm:mb-8"
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/20 text-violet-400">
-            <Icon className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-white md:text-2xl">
-              {title}
-              <span className="ml-2 text-sm font-normal text-slate-500">
-                ({count})
-              </span>
-            </h2>
-          </div>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400 sm:h-10 sm:w-10 sm:rounded-xl">
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </div>
-        <button
-          onClick={onToggleAll}
-          aria-label={isExpanded ? "Collapse all tools" : "Expand all tools"}
-          className="flex min-h-[44px] items-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          {isExpanded ? (
-            <>
-              <ShrinkIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Collapse All</span>
-            </>
-          ) : (
-            <>
-              <ExpandIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Expand All</span>
-            </>
-          )}
-        </button>
+        <div>
+          <h2 className="text-lg font-bold text-white sm:text-xl md:text-2xl">
+            {title}
+            <span className="ml-1.5 text-xs font-normal text-slate-500 sm:ml-2 sm:text-sm">
+              ({count})
+            </span>
+          </h2>
+        </div>
       </div>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">
+      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:mt-3 sm:text-sm">
         {description}
       </p>
     </motion.div>
@@ -235,9 +212,6 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Track expanded state for each tool
-  const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
 
   // Initialize Fuse.js for fuzzy search
   const fuse = useMemo(
@@ -298,53 +272,6 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [searchQuery]);
 
-  // Check if all tools in a category are expanded
-  const allCoreExpanded = useMemo(
-    () => coreTools.every((t) => expandedTools.has(t.id)),
-    [coreTools, expandedTools]
-  );
-
-  const allSupportingExpanded = useMemo(
-    () => supportingTools.every((t) => expandedTools.has(t.id)),
-    [supportingTools, expandedTools]
-  );
-
-  // Toggle single tool
-  const toggleTool = useCallback((toolId: string) => {
-    setExpandedTools((prev) => {
-      const next = new Set(prev);
-      if (next.has(toolId)) {
-        next.delete(toolId);
-      } else {
-        next.add(toolId);
-      }
-      return next;
-    });
-  }, []);
-
-  // Toggle all tools in a category
-  const toggleAllCategory = useCallback(
-    (category: TldrToolCategory) => {
-      const categoryTools =
-        category === "core" ? coreTools : supportingTools;
-      const allExpanded =
-        category === "core" ? allCoreExpanded : allSupportingExpanded;
-
-      setExpandedTools((prev) => {
-        const next = new Set(prev);
-        if (allExpanded) {
-          // Collapse all
-          categoryTools.forEach((t) => next.delete(t.id));
-        } else {
-          // Expand all
-          categoryTools.forEach((t) => next.add(t.id));
-        }
-        return next;
-      });
-    },
-    [coreTools, supportingTools, allCoreExpanded, allSupportingExpanded]
-  );
-
   const hasResults = filteredTools.length > 0;
   const isSearching = searchQuery.trim().length > 0;
 
@@ -374,14 +301,12 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
         <section>
           <SectionHeader
             title="Core Flywheel Tools"
-            description="The backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, and search. These tools form a self-reinforcing loop where each makes the others more powerful."
+            description="The backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, search, safety guards, multi-repo sync, and automated setup. These tools form a self-reinforcing loop where each makes the others more powerful."
             icon={Layers}
             count={coreTools.length}
-            isExpanded={allCoreExpanded}
-            onToggleAll={() => toggleAllCategory("core")}
             reducedMotion={reducedMotion}
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {coreTools.map((tool, index) => (
                 <motion.div
@@ -394,12 +319,11 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                     duration: reducedMotion ? 0 : 0.3,
                     delay: reducedMotion ? 0 : index * 0.03,
                   }}
+                  className="h-full"
                 >
                   <TldrToolCard
                     tool={tool}
                     allTools={tools}
-                    isExpanded={expandedTools.has(tool.id)}
-                    onToggleExpand={() => toggleTool(tool.id)}
                   />
                 </motion.div>
               ))}
@@ -413,14 +337,12 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
         <section>
           <SectionHeader
             title="Supporting Tools"
-            description="Extend the ecosystem with safety guards, cross-repo management, archive search, prompt crafting, and automated setup. These tools enhance the core flywheel without being essential to it."
+            description="Extend the ecosystem with GitHub issue sync, archive search, and prompt crafting utilities. These tools enhance the core flywheel for specialized workflows."
             icon={Wrench}
             count={supportingTools.length}
-            isExpanded={allSupportingExpanded}
-            onToggleAll={() => toggleAllCategory("supporting")}
             reducedMotion={reducedMotion}
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {supportingTools.map((tool, index) => (
                 <motion.div
@@ -433,12 +355,11 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                     duration: reducedMotion ? 0 : 0.3,
                     delay: reducedMotion ? 0 : index * 0.03,
                   }}
+                  className="h-full"
                 >
                   <TldrToolCard
                     tool={tool}
                     allTools={tools}
-                    isExpanded={expandedTools.has(tool.id)}
-                    onToggleExpand={() => toggleTool(tool.id)}
                   />
                 </motion.div>
               ))}

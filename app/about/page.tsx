@@ -34,15 +34,16 @@ export default function AboutPage() {
         </p>
         <p>
           In late 2025, I started building what became the{" "}
-          <Link href="/projects" className="font-semibold text-violet-400 hover:text-violet-300 transition-colors">
+          <Link href="/tldr" className="font-semibold text-violet-400 hover:text-violet-300 transition-colors">
             Agentic Coding Tooling Flywheel
           </Link>
-          : seven interconnected tools that transform how AI coding agents collaborate.
+          : thirteen interconnected tools that transform how AI coding agents collaborate.
           MCP Agent Mail lets agents message each other. Beads Viewer acts as a compass
           directing them on what to work on next. CASS Memory provides persistent
           context across sessions. Named Tmux Manager orchestrates multiple agents
-          simultaneously. Simultaneous Launch Button, Ultimate Bug Scanner, and
-          Coding Agent Session Search complete the ecosystem. Each tool amplifies
+          simultaneously. The ecosystem includes both core tools like Simultaneous Launch Button,
+          Ultimate Bug Scanner, and Coding Agent Session Search, plus supporting tools
+          like Dangerous Commands Guard, Cross-Repo Finder, and more. Each tool amplifies
           the others.
         </p>
         <p>

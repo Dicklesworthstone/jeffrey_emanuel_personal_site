@@ -41,8 +41,8 @@ function AnimatedStat({
       }}
       className="text-center"
     >
-      <div className="text-3xl font-bold text-white md:text-4xl">{value}</div>
-      <div className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-400">
+      <div className="text-2xl font-bold text-white sm:text-3xl md:text-4xl">{value}</div>
+      <div className="mt-1 text-[10px] font-medium uppercase tracking-wider text-slate-400 sm:text-xs">
         {label}
       </div>
     </motion.div>
@@ -110,16 +110,16 @@ export function TldrHero({ className }: TldrHeroProps) {
   return (
     <section
       ref={containerRef}
-      className={cn("relative overflow-hidden py-20 md:py-32", className)}
+      className={cn("relative overflow-hidden py-16 md:py-32", className)}
     >
       {/* Background gradient */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-violet-950/20 via-transparent to-transparent" />
 
-      {/* Decorative grid */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+      {/* Decorative grid - hidden on mobile for cleaner look */}
+      <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] sm:block" />
 
-      {/* Floating icons - decorative */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      {/* Floating icons - hidden on mobile to prevent overflow */}
+      <div className="pointer-events-none absolute inset-0 hidden md:block" aria-hidden="true">
         <FloatingIcon
           icon={Cog}
           className="left-[10%] top-[20%] from-violet-500 to-purple-600"
@@ -158,7 +158,7 @@ export function TldrHero({ className }: TldrHeroProps) {
             initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.1 }}
-            className="mt-6 text-4xl font-bold tracking-tight text-white md:text-6xl"
+            className="mt-6 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-6xl"
           >
             {hero.title}
             <span className="block bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -171,7 +171,7 @@ export function TldrHero({ className }: TldrHeroProps) {
             initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.2 }}
-            className="mt-6 text-lg leading-relaxed text-slate-400 md:text-xl"
+            className="mt-4 text-base leading-relaxed text-slate-400 sm:mt-6 sm:text-lg md:text-xl"
           >
             {hero.description}
           </motion.p>
@@ -181,7 +181,7 @@ export function TldrHero({ className }: TldrHeroProps) {
             initial={reducedMotion ? {} : { opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
             transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.3 }}
-            className="mt-12 flex items-center justify-center gap-8 md:gap-16"
+            className="mt-8 flex items-center justify-center gap-6 sm:mt-12 sm:gap-8 md:gap-16"
           >
             {hero.stats.map((stat, i) => (
               <AnimatedStat

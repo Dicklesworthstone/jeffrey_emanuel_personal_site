@@ -92,28 +92,26 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
     console.log("[E2E] Supporting tools section test passed");
   });
 
-  test("should expand and collapse tool cards", async ({ page }) => {
-    console.log("[E2E] Testing expand/collapse functionality");
+  test("should display full tool card content by default", async ({ page }) => {
+    console.log("[E2E] Testing that all tool content is visible by default");
 
-    // Find the first "Show More" button
-    const showMoreButton = page.getByRole("button", { name: /show more/i }).first();
-    console.log("[E2E] Found Show More button, clicking");
-    await showMoreButton.click();
+    // All cards should show "Why It's Useful" section without needing to expand
+    console.log("[E2E] Checking for Why It's Useful sections");
+    const whyUsefulSections = page.getByText(/why it's useful/i);
+    const count = await whyUsefulSections.count();
+    console.log(`[E2E] Found ${count} 'Why It's Useful' sections`);
+    expect(count).toBeGreaterThan(1);
 
-    // After expanding, should show "Why It's Useful" section
-    console.log("[E2E] Waiting for expanded content");
-    await expect(page.getByText(/why it's useful/i).first()).toBeVisible();
-    console.log("[E2E] Expanded content visible");
+    // Key Features should also be visible
+    console.log("[E2E] Checking for Key Features sections");
+    await expect(page.getByText(/key features/i).first()).toBeVisible();
+    console.log("[E2E] Key Features visible");
 
-    // Click "Show Less" to collapse
-    const showLessButton = page.getByRole("button", { name: /show less/i }).first();
-    console.log("[E2E] Found Show Less button, clicking to collapse");
-    await showLessButton.click();
-
-    // The detailed section should be hidden
-    console.log("[E2E] Waiting for collapse");
-    await expect(page.getByText(/why it's useful/i).first()).not.toBeVisible();
-    console.log("[E2E] Expand/collapse test passed");
+    // Tech Stack should be visible
+    console.log("[E2E] Checking for Tech Stack sections");
+    await expect(page.getByText(/tech stack/i).first()).toBeVisible();
+    console.log("[E2E] Tech Stack visible");
+    console.log("[E2E] Full card content test passed");
   });
 
   test("should display synergy diagram", async ({ page }) => {
@@ -210,8 +208,9 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
 
     // Check that star badges are visible (number with star icon in amber badge)
     // The star badge shows a number like "1,400" or "1.4K" next to an SVG star icon
-    console.log("[E2E] Looking for star badge");
-    const starBadge = page.locator('.bg-amber-500\\/10').first();
+    // Star badges now use gradient background with amber colors
+    console.log("[E2E] Looking for star badge with amber styling");
+    const starBadge = page.locator('[class*="ring-amber-400"]').first();
     await expect(starBadge).toBeVisible();
     console.log("[E2E] Star badge visible");
 
@@ -246,28 +245,23 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
     console.log("[E2E] Mobile viewport test passed");
   });
 
-  test("should expand all tools in a section", async ({ page }) => {
-    console.log("[E2E] Testing Expand All functionality");
+  test("should display all tools with equal-height cards", async ({ page }) => {
+    console.log("[E2E] Testing equal-height card display");
 
-    // Find and click "Expand All" button in core section
-    const expandAllButton = page.getByRole("button", { name: /expand all/i }).first();
-    console.log("[E2E] Found Expand All button, clicking");
-    await expandAllButton.click();
-
-    // Wait for animation
-    console.log("[E2E] Waiting for expansion animation");
-    await page.waitForTimeout(500);
-
+    // All cards should display full content by default (no expand/collapse)
     // Check that multiple "Why It's Useful" sections are visible
     const whyUsefulSections = page.getByText(/why it's useful/i);
     const count = await whyUsefulSections.count();
-    console.log(`[E2E] Found ${count} expanded sections`);
+    console.log(`[E2E] Found ${count} fully visible tool sections`);
     expect(count).toBeGreaterThan(1);
 
-    // Button should now say "Collapse All"
-    console.log("[E2E] Checking for Collapse All button");
-    await expect(page.getByRole("button", { name: /collapse all/i }).first()).toBeVisible();
-    console.log("[E2E] Expand All functionality test passed");
+    // Check that synergies sections are visible (these were in expanded content)
+    console.log("[E2E] Checking for Synergies sections");
+    const synergiesSections = page.getByText(/synergies/i);
+    const synergiesCount = await synergiesSections.count();
+    console.log(`[E2E] Found ${synergiesCount} synergies sections`);
+    expect(synergiesCount).toBeGreaterThan(0);
+    console.log("[E2E] Equal-height cards test passed");
   });
 });
 
@@ -291,43 +285,39 @@ test.describe("TLDR Page - Navigation", () => {
     console.log("[E2E] Navigation test passed");
   });
 
-  test("should maintain scroll position on card expansion", async ({ page }) => {
-    console.log("[E2E] Testing scroll position preservation");
+  test("should have stable card layout without shifting", async ({ page }) => {
+    console.log("[E2E] Testing stable card layout");
     await page.goto("/tldr");
 
     // Wait for page to settle
     await page.waitForLoadState("networkidle");
 
-    // Scroll to a card and get its position
-    console.log("[E2E] Scrolling to first Show More button");
-    const showMoreButton = page.getByRole("button", { name: /show more/i }).first();
-    await showMoreButton.scrollIntoViewIfNeeded();
+    // Get the position of the first tool card
+    console.log("[E2E] Getting position of first tool card");
+    const firstCard = page.locator('[class*="rounded-2xl"][class*="border"]').first();
+    await firstCard.scrollIntoViewIfNeeded();
     await page.waitForTimeout(100); // Let scroll settle
 
-    const buttonBefore = await showMoreButton.boundingBox();
-    console.log(`[E2E] Button Y position before expansion: ${buttonBefore?.y}px`);
+    const cardBefore = await firstCard.boundingBox();
+    console.log(`[E2E] Card position: ${cardBefore?.y}px`);
 
-    // Expand the card
-    console.log("[E2E] Expanding a card");
-    await showMoreButton.click();
+    // Scroll down and back up
+    console.log("[E2E] Scrolling page to test layout stability");
+    await page.evaluate(() => window.scrollTo(0, 500));
+    await page.waitForTimeout(100);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(100);
 
-    // Wait for animation
-    await page.waitForTimeout(500);
+    const cardAfter = await firstCard.boundingBox();
+    console.log(`[E2E] Card position after scrolling: ${cardAfter?.y}px`);
 
-    // The button should now be "Show Less" - check it's still roughly in same position
-    const showLessButton = page.getByRole("button", { name: /show less/i }).first();
-    const buttonAfter = await showLessButton.boundingBox();
-    console.log(`[E2E] Button Y position after expansion: ${buttonAfter?.y}px`);
-
-    // The button's position might change slightly, but it should still be visible
-    // This is a soft check - mainly verifying the page doesn't jump wildly
-    if (buttonBefore && buttonAfter) {
-      const positionDelta = Math.abs(buttonAfter.y - buttonBefore.y);
-      console.log(`[E2E] Button position delta: ${positionDelta}px`);
-      // Allow up to 500px shift (expansion adds content below)
-      expect(positionDelta).toBeLessThan(500);
+    // Position should be stable
+    if (cardBefore && cardAfter) {
+      const positionDelta = Math.abs(cardAfter.y - cardBefore.y);
+      console.log(`[E2E] Position delta: ${positionDelta}px`);
+      expect(positionDelta).toBeLessThan(5); // Should be essentially the same
     }
-    console.log("[E2E] Scroll position preservation test passed");
+    console.log("[E2E] Stable layout test passed");
   });
 });
 
