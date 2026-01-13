@@ -1,8 +1,7 @@
 "use client";
 
-import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type GoogleAnalyticsProps = {
   gaId: string;
@@ -11,53 +10,54 @@ type GoogleAnalyticsProps = {
 export function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const initialized = useRef(false);
 
+  // Initialize GA on mount (avoids Script component minification bug)
   useEffect(() => {
-    // Only track in production
     if (process.env.NODE_ENV !== "production") return;
+    if (!gaId || gaId === "") return;
+    if (initialized.current) return;
 
-    if (pathname && window.gtag) {
-      window.gtag("config", gaId, {
-        page_path: pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""),
-      });
-    }
+    initialized.current = true;
+
+    // Initialize dataLayer and gtag function
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function gtag(...args: Parameters<typeof window.gtag>) {
+      window.dataLayer.push(args);
+    };
+    window.gtag("js", new Date().toISOString());
+    window.gtag("config", gaId, {
+      page_path: window.location.pathname,
+      anonymize_ip: true,
+    });
+
+    // Load the GA script
+    const script = document.createElement("script");
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+    script.async = true;
+    document.head.appendChild(script);
+  }, [gaId]);
+
+  // Track page views on route change
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
+    if (!pathname || !window.gtag) return;
+
+    window.gtag("config", gaId, {
+      page_path: pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""),
+    });
   }, [pathname, searchParams, gaId]);
 
-  if (!gaId || gaId === "" || process.env.NODE_ENV !== "production") {
-    return null;
-  }
-
-  return (
-    <>
-      <Script
-        strategy="afterInteractive"
-        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-      />
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${gaId}', {
-              page_path: window.location.pathname,
-              anonymize_ip: true,
-            });
-          `,
-        }}
-      />
-    </>
-  );
+  return null;
 }
 
-// Add type definition for window.gtag
+// Add type definitions for window.gtag and dataLayer
 declare global {
   interface Window {
+    dataLayer: unknown[];
     gtag: (
       command: "config" | "event" | "js",
-      targetId: string,
+      targetId: string | Date,
       config?: Record<string, unknown>
     ) => void;
   }
