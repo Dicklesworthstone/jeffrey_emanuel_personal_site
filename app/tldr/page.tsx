@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useCallback } from "react";
+import { Copy, Check } from "lucide-react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import ErrorBoundary from "@/components/error-boundary";
 import { TldrHero } from "@/components/tldr-hero";
@@ -73,6 +74,79 @@ function FlywheelExplanation() {
 }
 
 // =============================================================================
+// FOOTER CTA WITH COPY BUTTON
+// =============================================================================
+
+const INSTALL_COMMAND = `curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/agentic_coding_flywheel_setup/main/install.sh | bash -s -- --yes --mode vibe`;
+
+function FooterCTA() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(INSTALL_COMMAND);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  }, []);
+
+  return (
+    <section className="border-t border-white/5 py-12 md:py-16">
+      <div className="container mx-auto px-4 text-center">
+        <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
+          Get Started
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-sm text-slate-400 sm:text-base">
+          The fastest way to set up the entire flywheel ecosystem is with ACFS.
+          One command, 30 minutes, and you&apos;re ready to go.
+        </p>
+        <div className="mt-6 flex flex-col items-center gap-4 md:mt-8">
+          <div className="group relative w-full max-w-4xl">
+            <div className="overflow-x-auto rounded-xl bg-slate-900/80 ring-1 ring-slate-700/50 transition-all duration-200 hover:ring-violet-500/30">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-4">
+                <code className="flex-1 whitespace-nowrap font-mono text-xs text-violet-300 sm:text-sm md:text-base">
+                  {INSTALL_COMMAND}
+                </code>
+                <button
+                  onClick={handleCopy}
+                  className="flex-shrink-0 rounded-lg bg-slate-800 p-2 text-slate-400 transition-all duration-200 hover:bg-violet-600 hover:text-white active:scale-95 sm:p-2.5"
+                  aria-label={copied ? "Copied!" : "Copy to clipboard"}
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-emerald-400 sm:h-5 sm:w-5" />
+                  ) : (
+                    <Copy className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+            {copied && (
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white shadow-lg">
+                Copied!
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-slate-500">
+            Or visit{" "}
+            <a
+              href="https://agent-flywheel.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-violet-400 underline hover:text-violet-300"
+            >
+              agent-flywheel.com
+            </a>{" "}
+            for the step-by-step wizard.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// =============================================================================
 // MAIN PAGE COMPONENT
 // =============================================================================
 
@@ -98,36 +172,7 @@ export default function TldrPage() {
         </section>
 
         {/* Footer CTA */}
-        <section className="border-t border-white/5 py-12 md:py-16">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
-              Get Started
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-sm text-slate-400 sm:text-base">
-              The fastest way to set up the entire flywheel ecosystem is with ACFS.
-              One command, 30 minutes, and you&apos;re ready to go.
-            </p>
-            <div className="mt-6 flex flex-col items-center gap-4 md:mt-8">
-              <div className="w-full max-w-2xl overflow-x-auto rounded-lg bg-slate-800/50 ring-1 ring-slate-700/50">
-                <code className="block whitespace-nowrap px-4 py-3 font-mono text-xs text-violet-300 sm:text-sm">
-                  curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/agentic_coding_flywheel_setup/main/install.sh | bash -s -- --yes --mode vibe
-                </code>
-              </div>
-              <p className="text-xs text-slate-500">
-                Or visit{" "}
-                <a
-                  href="https://agent-flywheel.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-violet-400 underline hover:text-violet-300"
-                >
-                  agent-flywheel.com
-                </a>{" "}
-                for the step-by-step wizard.
-              </p>
-            </div>
-          </div>
-        </section>
+        <FooterCTA />
       </main>
     </ErrorBoundary>
   );

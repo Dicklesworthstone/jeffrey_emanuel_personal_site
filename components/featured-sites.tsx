@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ExternalLink, Sparkles, Workflow, Link as LinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ interface OgLinkCardProps {
 function OgLinkCard({ site, index, reducedMotion, isInView }: OgLinkCardProps) {
   const Icon = iconMap[site.icon] || Sparkles;
   const domain = new URL(site.url).hostname;
+  const [imageError, setImageError] = useState(false);
 
   return (
     <motion.a
@@ -42,55 +44,75 @@ function OgLinkCard({ site, index, reducedMotion, isInView }: OgLinkCardProps) {
         delay: reducedMotion ? 0 : 0.1 + index * 0.12,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/80 shadow-lg shadow-slate-950/50 backdrop-blur-sm transition-all duration-300 hover:border-slate-700/80 hover:shadow-xl hover:shadow-violet-500/5"
+      className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/90 shadow-lg shadow-slate-950/50 backdrop-blur-sm transition-all duration-300 hover:border-slate-600/80 hover:shadow-xl hover:shadow-violet-500/10"
     >
       {/* OG Image Area - Twitter/Discord style */}
-      <div className="relative aspect-[1.91/1] w-full overflow-hidden">
-        {/* Gradient background */}
-        <div
-          className={cn(
-            "absolute inset-0 bg-gradient-to-br opacity-30 transition-opacity duration-300 group-hover:opacity-40",
-            site.gradient
-          )}
-        />
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:2rem_2rem]" />
-        {/* Central icon with glow */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative">
-            {/* Glow effect */}
+      <div className="relative aspect-[1.91/1] w-full overflow-hidden bg-slate-950">
+        {site.ogImage && !imageError ? (
+          // Actual OG Image
+          <Image
+            src={site.ogImage}
+            alt={`${site.title} preview`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={() => setImageError(true)}
+            sizes="(max-width: 640px) 100vw, 50vw"
+          />
+        ) : (
+          // Fallback: Gradient with icon
+          <>
             <div
               className={cn(
-                "absolute -inset-4 rounded-full bg-gradient-to-br opacity-20 blur-2xl transition-opacity duration-300 group-hover:opacity-30",
+                "absolute inset-0 bg-gradient-to-br opacity-40 transition-opacity duration-300 group-hover:opacity-50",
                 site.gradient
               )}
             />
-            <div
-              className={cn(
-                "relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br shadow-2xl transition-transform duration-300 group-hover:scale-105",
-                site.gradient
-              )}
-            >
-              <Icon className="h-10 w-10 text-white drop-shadow-lg" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:2rem_2rem]" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative">
+                <div
+                  className={cn(
+                    "absolute -inset-6 rounded-full bg-gradient-to-br opacity-30 blur-3xl transition-opacity duration-300 group-hover:opacity-40",
+                    site.gradient
+                  )}
+                />
+                <div
+                  className={cn(
+                    "relative flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br shadow-2xl transition-transform duration-300 group-hover:scale-110",
+                    site.gradient
+                  )}
+                >
+                  <Icon className="h-12 w-12 text-white drop-shadow-lg" />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
+        {/* Overlay gradient for better text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
         {/* Decorative corner elements */}
-        <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/[0.02] blur-2xl" />
-        <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-white/[0.02] blur-2xl" />
+        <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/[0.02] blur-3xl" />
+        <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-white/[0.02] blur-3xl" />
       </div>
 
       {/* Content area - like OG link previews */}
-      <div className="flex flex-1 flex-col border-t border-slate-800/50 p-4">
+      <div className="flex flex-1 flex-col border-t border-slate-800/50 bg-slate-900/50 p-5">
         {/* Domain with favicon-style icon */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <LinkIcon className="h-3 w-3" />
-          <span>{domain}</span>
-          <ExternalLink className="ml-auto h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
+          <div
+            className={cn(
+              "flex h-4 w-4 items-center justify-center rounded bg-gradient-to-br",
+              site.gradient
+            )}
+          >
+            <Icon className="h-2.5 w-2.5 text-white" />
+          </div>
+          <span className="font-medium">{domain}</span>
+          <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5" />
         </div>
 
         {/* Title */}
-        <h3 className="mt-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-violet-200 sm:text-lg">
+        <h3 className="mt-3 text-lg font-bold leading-tight text-white transition-colors group-hover:text-violet-200 sm:text-xl">
           {site.title}
         </h3>
 
@@ -105,8 +127,8 @@ function OgLinkCard({ site, index, reducedMotion, isInView }: OgLinkCardProps) {
         className={cn(
           "pointer-events-none absolute inset-0 rounded-xl opacity-0 ring-1 ring-inset transition-opacity duration-300 group-hover:opacity-100",
           site.id === "jeffreysprompts"
-            ? "ring-amber-500/20"
-            : "ring-violet-500/20"
+            ? "ring-amber-500/30"
+            : "ring-violet-500/30"
         )}
       />
     </motion.a>

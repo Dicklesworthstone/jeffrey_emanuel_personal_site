@@ -27,6 +27,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.mql5.com",
       },
+      {
+        protocol: "https",
+        hostname: "jeffreysprompts.com",
+      },
+      {
+        protocol: "https",
+        hostname: "agent-flywheel.com",
+      },
     ],
   },
   // Service worker headers for PWA
