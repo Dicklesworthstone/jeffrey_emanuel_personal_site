@@ -38,13 +38,12 @@ export default function AboutPage() {
             Agentic Coding Tooling Flywheel
           </Link>
           : thirteen interconnected tools that transform how AI coding agents collaborate.
-          MCP Agent Mail lets agents message each other. Beads Viewer acts as a compass
-          directing them on what to work on next. CASS Memory provides persistent
-          context across sessions. Named Tmux Manager orchestrates multiple agents
-          simultaneously. The ecosystem includes both core tools like Simultaneous Launch Button,
-          Ultimate Bug Scanner, and Coding Agent Session Search, plus supporting tools
-          like Dangerous Commands Guard, Cross-Repo Finder, and more. Each tool amplifies
-          the others.
+          Agent Mail is critical to my workflow - it lets multiple Claude Code instances
+          coordinate without stepping on each other. Beads Viewer uses PageRank to surface
+          which tasks unblock the most other work. CASS provides sub-millisecond search
+          across all my past agent sessions. The ecosystem includes safety tools like
+          Destructive Command Guard and the two-person rule CLI, plus Repo Updater for
+          keeping everything in sync. Each tool amplifies the others.
         </p>
         <p>
           The cadence of my GitHub commits increases more and more each passing week because the flywheel keeps
@@ -55,8 +54,9 @@ export default function AboutPage() {
         </p>
         <p>
           I also founded Lumera Network (formerly Pastel Network), a Cosmos-based L1
-          for storage, AI verification, and cross-chain interoperability. And I
-          continue to consult for PE funds and hedge funds on AI automation strategy.
+          for storage and AI verification. These days I mostly focus on AI automation
+          consulting for PE funds and hedge funds, plus building my own hedge fund
+          research tool powered by agents.
         </p>
         <p>
           The through line is simple: take complicated systems, understand them

@@ -249,7 +249,7 @@ export default function ProjectsPage() {
           >
             GitHub profile
           </a>{" "}
-          for the full archive of 30+ repos.
+          for the full archive of 70+ repos.
         </p>
       </div>
     </SectionShell>
