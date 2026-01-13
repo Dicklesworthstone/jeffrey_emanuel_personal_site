@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Keyboard } from "lucide-react";
 import { keyboardShortcutsList } from "@/hooks/use-keyboard-shortcuts";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -40,16 +41,7 @@ export default function KeyboardShortcutsModal({
   }, [isOpen, onClose]);
 
   // Prevent body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   const navigationShortcuts = keyboardShortcutsList.filter(
     (s) => s.category === "navigation"
@@ -148,15 +140,15 @@ function ShortcutSection({
         {title}
       </h3>
       <div className="space-y-2">
-        {shortcuts.map((shortcut, index) => (
+        {shortcuts.map((shortcut) => (
           <div
-            key={index}
+            key={shortcut.description}
             className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
           >
             <span className="text-sm text-slate-300">{shortcut.description}</span>
             <div className="flex items-center gap-1">
-              {shortcut.keys.map((key, keyIndex) => (
-                <Kbd key={keyIndex}>{key}</Kbd>
+              {shortcut.keys.map((key) => (
+                <Kbd key={key}>{key}</Kbd>
               ))}
             </div>
           </div>
