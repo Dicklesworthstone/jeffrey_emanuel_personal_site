@@ -4,8 +4,9 @@ import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
 import AnimatedGrid, { LazySection, TimelineSkeleton } from "@/components/animated-grid";
-import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail, Activity } from "lucide-react";
-import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats } from "@/lib/content";
+import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail, Activity, Globe } from "lucide-react";
+import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats, featuredSites } from "@/lib/content";
+import FeaturedSites from "@/components/featured-sites";
 import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
 import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
@@ -74,10 +75,10 @@ export default async function HomePage() {
               The Flywheel
             </p>
             <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
-              7 Tools That Amplify Each Other
+              13 Tools That Amplify Each Other
             </h3>
             <p className="mt-4 text-base leading-relaxed text-slate-400">
-              MCP Agent Mail, Beads Viewer, CASS Memory, and 4 more tools that let
+              MCP Agent Mail, Beads Viewer, CASS Memory, and 10 more tools that let
               coding agents coordinate, remember, and work safely together. Each
               tool makes the others more powerful.
             </p>
@@ -140,7 +141,7 @@ export default async function HomePage() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <HapticLink
-            href="/projects"
+            href="/tldr"
             className="group block"
           >
             <div className="relative rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-black/40 to-black/20 p-8 sm:p-12 backdrop-blur-sm transition-all duration-300 hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10">
@@ -164,7 +165,7 @@ export default async function HomePage() {
                   </h2>
 
                   <p className="mt-4 text-base leading-relaxed text-slate-400 sm:text-lg">
-                    Seven interconnected tools that transform how AI coding agents work together.
+                    Thirteen interconnected tools that transform how AI coding agents work together.
                     Coordination, memory, task tracking, safety, and search. I use these to run
                     10+ agents simultaneously. My GitHub squares get darker green each month because
                     each tool amplifies the others.
@@ -222,7 +223,7 @@ export default async function HomePage() {
                   </div>
 
                   <div className="mt-6 flex items-center gap-2 text-sm font-bold text-violet-400 transition-colors group-hover:text-violet-300">
-                    Explore the interactive flywheel
+                    Explore the TLDR
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
                 </div>
@@ -231,6 +232,17 @@ export default async function HomePage() {
           </HapticLink>
         </div>
       </section>
+
+      {/* Featured Sites */}
+      <SectionShell
+        id="sites"
+        iconNode={<Globe className="h-5 w-5" />}
+        eyebrow="Explore"
+        title="More from the flywheel"
+        kicker="A prompt library and an interactive setup wizard for getting started fast."
+      >
+        <FeaturedSites sites={featuredSites} />
+      </SectionShell>
 
       <SectionShell
         id="projects"
@@ -414,7 +426,7 @@ export default async function HomePage() {
           <div className="mx-auto max-w-2xl">
             <NewsletterSignup
               heading="Join the mailing list"
-              description="Get notified when I publish new essays, release tools, or share research. No spam—just signal. Unsubscribe anytime."
+              description="Get notified when I publish new essays, release tools, or share research. No spam, just signal. Unsubscribe anytime."
             />
           </div>
         </SectionShell>

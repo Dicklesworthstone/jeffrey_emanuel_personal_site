@@ -247,6 +247,41 @@ export function getEndorsementsByTag(tag: string): Endorsement[] {
 }
 
 // ============================================================================
+// FEATURED SITES
+// ============================================================================
+
+export interface FeaturedSite {
+  id: string;
+  title: string;
+  tagline: string;
+  url: string;
+  ogImage: string;
+  gradient: string;
+  icon: string;
+}
+
+export const featuredSites: FeaturedSite[] = [
+  {
+    id: "jeffreysprompts",
+    title: "JeffreysPrompts.com",
+    tagline: "Battle-tested prompts for AI coding agents. Browse, copy, or install directly as Claude Code skills.",
+    url: "https://jeffreysprompts.com",
+    ogImage: "https://jeffreysprompts.com/og-image.png",
+    gradient: "from-amber-500 via-orange-500 to-red-500",
+    icon: "Sparkles",
+  },
+  {
+    id: "agent-flywheel",
+    title: "Agent-Flywheel.com",
+    tagline: "Interactive setup wizard for the complete flywheel ecosystem. One command, 30 minutes, fully configured.",
+    url: "https://agent-flywheel.com",
+    ogImage: "https://agent-flywheel.com/og-image.png",
+    gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
+    icon: "Workflow",
+  },
+];
+
+// ============================================================================
 // LIVE DEMOS
 // ============================================================================
 
@@ -540,7 +575,7 @@ export const projects: Project[] = [
     href: "https://github.com/Dicklesworthstone/ultimate_mcp_server",
     short: "Unified MCP server exposing dozens of powerful tools to AI models.",
     description:
-      "The server counterpart to Ultimate MCP Client. Provides a comprehensive Model Context Protocol implementation that exposes a wide variety of tools—from file operations to web scraping to database access—through a unified interface. Designed for extensibility and seamless integration with Claude, GPT, and other frontier models.",
+      "The server counterpart to Ultimate MCP Client. Provides a comprehensive Model Context Protocol implementation that exposes a wide variety of tools (file operations, web scraping, database access, and more) through a unified interface. Designed for extensibility and seamless integration with Claude, GPT, and other frontier models.",
     tags: ["MCP", "AI Tools", "Server", "Python", "Interoperability"],
   },
   {
@@ -2050,7 +2085,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whatItDoes:
       "A fast terminal UI for viewing and analyzing Beads issues. Provides graph analytics including PageRank, critical path analysis, and cycle detection.",
     whyItsUseful:
-      "Issue tracking isn't just a list—it's a dependency graph. BV surfaces which tasks are blocking others, identifies the critical path to completion, and helps prioritize work intelligently.",
+      "Issue tracking is really a dependency graph. BV surfaces which tasks are blocking others, identifies the critical path to completion, and helps prioritize work intelligently.",
     implementationHighlights: [
       "20,000+ lines of Go with Bubble Tea TUI framework",
       "9 graph metrics: PageRank, Betweenness, Closeness, etc.",
@@ -2138,7 +2173,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whatItDoes:
       "Implements the ACE (Action, Context, Effect) framework for persistent agent memory. Agents can store, retrieve, and reason over past experiences.",
     whyItsUseful:
-      "Without persistent memory, every agent session starts from scratch. CM gives agents long-term memory across sessions—remembering what worked, what failed, and why.",
+      "Without persistent memory, every agent session starts from scratch. CM gives agents long-term memory across sessions, remembering what worked, what failed, and why.",
     implementationHighlights: [
       "ACE framework: procedural, episodic, and semantic memory types",
       "MCP tools for cross-session context persistence",
@@ -2185,7 +2220,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whatItDoes:
       "Full-text search across all AI coding agent sessions. Indexes conversations from Claude Code, Codex, Cursor, Gemini, and more.",
     whyItsUseful:
-      "You've solved a similar problem before—but which session was it? CASS indexes everything so you can search 'how did I fix that React hydration error' and find the exact conversation.",
+      "You've solved a similar problem before, but which session was it? CASS indexes everything so you can search 'how did I fix that React hydration error' and find the exact conversation.",
     implementationHighlights: [
       "Rust implementation with Tantivy full-text search",
       "Multi-provider support (Claude, Codex, Cursor, Gemini)",
@@ -2220,7 +2255,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     ],
   },
   // ===========================================================================
-  // SUPPORTING FLYWHEEL TOOLS
+  // ADDITIONAL CORE FLYWHEEL TOOLS
   // ===========================================================================
   {
     id: "dcg",
@@ -2229,7 +2264,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     href: "https://github.com/Dicklesworthstone/destructive_command_guard",
     icon: "ShieldAlert",
     color: "from-red-500 to-rose-600",
-    category: "supporting",
+    category: "core",
     stars: 89,
     whatItDoes:
       "Intercepts dangerous shell commands (rm -rf, git reset --hard, etc.) before execution. Requires confirmation for destructive operations.",
@@ -2264,6 +2299,9 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
       "Training wheels for new AI agent setups",
     ],
   },
+  // ===========================================================================
+  // SUPPORTING FLYWHEEL TOOLS
+  // ===========================================================================
   {
     id: "giil",
     name: "Git Issue Import/Link",
@@ -2318,7 +2356,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whatItDoes:
       "Ultra-fast search over X/Twitter data archives. Uses hybrid BM25 + semantic search with Reciprocal Rank Fusion.",
     whyItsUseful:
-      "Your X archive is a goldmine of bookmarks, threads, and ideas—but Twitter's search is terrible. XF makes your archive instantly searchable with both keyword and semantic matching.",
+      "Your X archive is a goldmine of bookmarks, threads, and ideas, but Twitter's search is terrible. XF makes your archive instantly searchable with both keyword and semantic matching.",
     implementationHighlights: [
       "Rust implementation for maximum performance",
       "Hybrid BM25 + semantic search with RRF fusion",
@@ -2360,7 +2398,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whatItDoes:
       "Terminal UI for combining source code files into LLM-ready prompts. Select files, preview output, copy to clipboard with token counting.",
     whyItsUseful:
-      "Crafting prompts with code context is tedious. s2p lets you interactively select files, see the combined output, and track token count—all in a beautiful TUI.",
+      "Crafting prompts with code context is tedious. s2p lets you interactively select files, see the combined output, and track token count, all in a beautiful TUI.",
     implementationHighlights: [
       "Bun single-binary distribution",
       "React/Ink terminal UI framework",
@@ -2393,16 +2431,16 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
   {
     id: "ru",
     name: "Repo Updater",
-    shortName: "ru",
+    shortName: "RU",
     href: "https://github.com/Dicklesworthstone/repo_updater",
     icon: "RefreshCw",
     color: "from-orange-500 to-amber-600",
-    category: "supporting",
+    category: "core",
     stars: 67,
     whatItDoes:
       "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
     whyItsUseful:
-      "Managing many repos across machines is painful. 'ru sync' handles everything—cloning what's missing, pulling what's stale, and reporting conflicts with resolution commands.",
+      "Managing many repos across machines is painful. 'ru sync' handles everything: cloning what's missing, pulling what's stale, and reporting conflicts with resolution commands.",
     implementationHighlights: [
       "Pure Bash with git plumbing (no string parsing)",
       "Parallel sync with configurable worker count",
@@ -2439,12 +2477,12 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
     icon: "Cog",
     color: "from-purple-500 to-violet-600",
-    category: "supporting",
+    category: "core",
     stars: 234,
     whatItDoes:
       "One-command bootstrap that transforms a fresh Ubuntu VPS into a fully-configured agentic coding environment with all flywheel tools installed.",
     whyItsUseful:
-      "Setting up a new development environment takes hours. ACFS does it in 30 minutes—installing 30+ tools, three AI agents, and all the flywheel tooling automatically.",
+      "Setting up a new development environment takes hours. ACFS does it in 30 minutes, installing 30+ tools, three AI agents, and all the flywheel tooling automatically.",
     implementationHighlights: [
       "Single curl | bash installation",
       "Idempotent (safe to re-run)",
@@ -2485,23 +2523,23 @@ export const tldrPageData = {
     title: "The Agentic Coding Flywheel",
     subtitle: "TL;DR Edition",
     description:
-      "13 open-source tools that work together to supercharge multi-agent AI coding workflows. Each tool reinforces the others, creating a self-improving system where the whole is greater than the sum of its parts.",
+      "10 core tools and 3 supporting utilities that work together to supercharge multi-agent AI coding workflows. Each tool reinforces the others, creating a self-improving system where the whole is greater than the sum of its parts.",
     stats: [
-      { label: "Tools", value: "13" },
+      { label: "Core Tools", value: "10" },
       { label: "GitHub Stars", value: "3,600+" },
       { label: "Languages", value: "5" },
     ],
   },
   coreDescription:
-    "The core flywheel tools form the backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, and search.",
+    "The core flywheel tools form the backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, search, safety guards, multi-repo sync, and automated setup.",
   supportingDescription:
-    "Supporting tools extend the ecosystem with safety guards, cross-repo management, archive search, prompt crafting, and automated setup.",
+    "Supporting tools extend the ecosystem with GitHub issue sync, archive search, and prompt crafting utilities.",
   flywheelExplanation: {
     title: "Why a Flywheel?",
     paragraphs: [
-      "A flywheel stores rotational energy—the more you spin it, the more energy it stores, making each subsequent push easier. These tools work the same way.",
+      "A flywheel stores rotational energy; the more you spin it, the more energy it stores, making each subsequent push easier. These tools work the same way.",
       "Every agent session generates searchable history (CASS). Every bug found creates trackable issues (BV). Every resolved issue becomes institutional memory (CM). The more you use the system, the more valuable it becomes.",
-      "This isn't a collection of tools—it's an integrated system where data flows between components, each making the others more powerful.",
+      "These tools form an integrated system where data flows between components, each making the others more powerful.",
     ],
   },
 };
