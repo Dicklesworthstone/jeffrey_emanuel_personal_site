@@ -1176,7 +1176,7 @@ export const flywheelTools: FlywheelTool[] = [
     features: [
       "GitHub-flavored Markdown messaging between agents",
       "Advisory file reservations to prevent conflicts",
-      "Git-backed storage for complete audit trails",
+      "SQLite-backed storage for complete audit trails",
     ],
   },
   {
@@ -1209,7 +1209,7 @@ export const flywheelTools: FlywheelTool[] = [
     href: "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
     icon: "Bug",
     color: "from-rose-500 to-red-600",
-    tagline: "Multi-language static analysis",
+    tagline: "Pattern-based bug detection",
     connectsTo: ["bv", "slb"],
     connectionDescriptions: {
       bv: "Creates issues for discovered bugs",
@@ -1218,7 +1218,7 @@ export const flywheelTools: FlywheelTool[] = [
     stars: 132,
     projectSlug: "ultimate-bug-scanner",
     features: [
-      "Wraps best-in-class analyzers: ESLint, Ruff, Clippy",
+      "1,000+ custom detection patterns across languages",
       "Consistent JSON output for all languages",
       "Perfect for pre-commit hooks and CI/CD",
     ],
@@ -1241,9 +1241,9 @@ export const flywheelTools: FlywheelTool[] = [
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "cass-memory-system",
     features: [
-      "ACE framework: procedural, episodic, semantic memory",
+      "Three-layer cognitive: episodic, working, procedural memory",
       "MCP tools for cross-session context persistence",
-      "Memory consolidation and summarization",
+      "Built on top of CASS for semantic search",
     ],
   },
   {
