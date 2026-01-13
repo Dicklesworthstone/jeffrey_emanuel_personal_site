@@ -77,7 +77,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             </div>
             <div className="flex flex-col leading-none">
               {siteConfig.location && (
-                <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400 transition-colors group-hover:text-sky-400">
+                <span className="text-xs font-bold uppercase tracking-widest text-slate-400 transition-colors group-hover:text-sky-400">
                   {siteConfig.location.split(",")[0]}
                 </span>
               )}
@@ -140,7 +140,10 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
           {/* Mobile Menu Toggle & Search */}
           <div className="flex items-center gap-4 md:hidden">
             <button
-              onClick={onOpenCommandPalette}
+              onClick={() => {
+                setOpen(false);
+                onOpenCommandPalette?.();
+              }}
               className="text-slate-400 hover:text-white"
               aria-label="Search"
             >
@@ -150,31 +153,24 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               className="relative z-50 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-all active:scale-95"
               onClick={() => setOpen((v) => !v)}
               onTouchStart={lightTap}
-              aria-label="Toggle navigation"
+              aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={open}
             >
-               <AnimatePresence mode="wait" initial={false}>
-                {open ? (
-                  <motion.div
-                    key="close"
-                    initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, rotate: -90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, rotate: 90 }}
-                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
-                  >
-                    <X className="h-5 w-5" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, rotate: 90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, rotate: -90 }}
-                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
-                  >
-                    <Menu className="h-5 w-5" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+               {/* Simple crossfade to avoid animation glitches */}
+              <span className="relative h-5 w-5">
+                <X
+                  className={cn(
+                    "absolute inset-0 h-5 w-5 transition-opacity duration-200",
+                    open ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                <Menu
+                  className={cn(
+                    "absolute inset-0 h-5 w-5 transition-opacity duration-200",
+                    open ? "opacity-0" : "opacity-100"
+                  )}
+                />
+              </span>
           </button>
         </div>
         </div>
@@ -187,8 +183,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-            className="fixed inset-0 z-40 flex flex-col bg-slate-950/95 backdrop-blur-2xl md:hidden overflow-y-auto"
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
+            className="fixed inset-0 z-40 flex flex-col bg-slate-950/98 backdrop-blur-lg md:hidden overflow-y-auto will-change-[opacity]"
+            style={{ transform: "translateZ(0)" }}
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"
@@ -199,38 +196,32 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             />
             
             <nav className="relative flex flex-1 flex-col justify-center px-8">
-              <div className="flex flex-col gap-8">
-                {navItems.map((item, index) => {
+              <motion.div
+                className="flex flex-col gap-8"
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
+              >
+                {navItems.map((item) => {
                   const active = pathname === item.href;
                   return (
-                    <motion.div
+                    <Link
                       key={item.href}
-                      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.1 + index * 0.05, duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+                      href={item.href}
+                      className={cn(
+                        "text-4xl font-bold tracking-tight transition-colors",
+                        active ? "text-white" : "text-slate-500 active:text-slate-300"
+                      )}
+                      onClick={() => setOpen(false)}
+                      onTouchStart={lightTap}
                     >
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "text-4xl font-bold tracking-tight transition-colors",
-                          active ? "text-white" : "text-slate-500 active:text-slate-300"
-                        )}
-                        onClick={() => setOpen(false)}
-                        onTouchStart={lightTap}
-                      >
-                        {item.label}
-                      </Link>
-                    </motion.div>
+                      {item.label}
+                    </Link>
                   );
                 })}
-              </div>
+              </motion.div>
 
-              <motion.div
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.4, duration: 0.5 }}
-                className="mt-16"
-              >
+              <div className="mt-16">
                 <Link
                   href="/contact"
                   className="flex w-full items-center justify-center rounded-full bg-white py-4 text-lg font-bold text-slate-950 shadow-lg shadow-white/10 transition-transform active:scale-95"
@@ -238,19 +229,14 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 >
                   Get in touch
                 </Link>
-              </motion.div>
+              </div>
             </nav>
-            
+
             {/* Footer info in menu */}
             {siteConfig.location && (
-              <motion.div
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.6 }}
-                className="relative p-8 text-xs font-medium uppercase tracking-widest text-slate-500"
-              >
-                 {siteConfig.location}
-              </motion.div>
+              <div className="relative p-8 text-xs font-medium uppercase tracking-widest text-slate-500">
+                {siteConfig.location}
+              </div>
             )}
           </motion.div>
         )}
