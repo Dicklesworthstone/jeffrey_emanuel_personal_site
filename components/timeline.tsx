@@ -45,7 +45,7 @@ export default function Timeline({ items }: { items: TimelineItem[] }) {
                    </div>
                    
                    <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center rounded-full border border-white/5 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-colors group-hover:border-white/10 group-hover:text-slate-300">
+                      <span className="inline-flex items-center rounded-full border border-white/5 bg-white/5 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-slate-400 transition-colors group-hover:border-white/10 group-hover:text-slate-300">
                         {item.period}
                       </span>
                    </div>

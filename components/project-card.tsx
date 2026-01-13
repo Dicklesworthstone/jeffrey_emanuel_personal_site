@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Star, GitFork, Box, Beaker } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import type { Project } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
@@ -22,9 +22,15 @@ export default function ProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
   const divRef = useRef<HTMLDivElement>(null);
   const [opacity, setOpacity] = useState(0);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  // Detect touch device to disable spotlight effect (better mobile performance)
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia("(hover: none)").matches);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current) return;
+    if (!divRef.current || isTouchDevice) return;
     const div = divRef.current;
     const rect = div.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -37,7 +43,7 @@ export default function ProjectCard({ project }: { project: Project }) {
   };
 
   const handleMouseEnter = () => {
-    setOpacity(1);
+    if (!isTouchDevice) setOpacity(1);
   };
 
   const handleMouseLeave = () => {
@@ -91,9 +97,10 @@ export default function ProjectCard({ project }: { project: Project }) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/5 bg-black/20 p-6 md:p-8",
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-black/20 p-4 sm:p-6 md:p-8",
           "transition-all duration-300 ease-out",
           "hover:bg-black/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
+          "active:scale-[0.98] active:shadow-lg",
           "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
           "will-change-transform",
           hoverBorder
@@ -119,7 +126,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         <div className="relative z-10 flex flex-1 flex-col">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-widest">
+              <div className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest">
                 <span className={cn(
                   "flex h-5 w-5 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10",
                   accentColor
@@ -139,9 +146,11 @@ export default function ProjectCard({ project }: { project: Project }) {
             </div>
             <div className="flex flex-col items-end gap-2">
               {starCount && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-500/20 transition-colors group-hover:bg-amber-500/20">
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                  {starCount}
+                <span className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 group-hover:ring-amber-400/50 group-hover:shadow-amber-500/20">
+                  {/* Shimmer effect */}
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-out group-hover:translate-x-full" />
+                  <Star className="relative h-3.5 w-3.5 fill-amber-400 text-amber-400 drop-shadow-[0_0_3px_rgba(251,191,36,0.5)]" />
+                  <span className="relative font-mono tracking-tight">{starCount}</span>
                 </span>
               )}
               {displayBadge && (
@@ -169,7 +178,7 @@ export default function ProjectCard({ project }: { project: Project }) {
               {project.tags.slice(0, isLarge ? 5 : 3).map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded-md bg-white/5 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-slate-400 transition-colors group-hover:bg-white/10 group-hover:text-slate-300"
+                  className="inline-flex items-center rounded-md bg-white/5 px-2 py-1 text-xs font-medium uppercase tracking-wider text-slate-400 transition-colors group-hover:bg-white/10 group-hover:text-slate-300"
                 >
                   {tag}
                 </span>

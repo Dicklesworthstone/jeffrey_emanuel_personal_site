@@ -98,7 +98,8 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
           <div className="space-y-8">
             <motion.h1
-              className="text-balance-pro text-5xl font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl lg:text-[5.5rem] xl:text-[6rem]"
+              className="text-balance-pro font-bold leading-[0.9] tracking-[-0.04em] text-white"
+              style={{ fontSize: "clamp(2.5rem, 8vw, 6rem)" }}
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
@@ -136,7 +137,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                             {tool.name}
                           </span>
                           {"highlight" in tool && tool.highlight && (
-                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400">
                               {tool.highlight}
                             </span>
                           )}

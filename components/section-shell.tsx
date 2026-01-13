@@ -74,7 +74,7 @@ export default function SectionShell({
           {eyebrow && (
             <div className="mb-6 flex items-center gap-3">
               <div className="h-px w-6 bg-gradient-to-r from-sky-500/80 to-transparent" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-sky-400/90 shadow-sky-500/20 drop-shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-sky-400/90 shadow-sky-500/20 drop-shadow-sm">
                 {eyebrow}
               </p>
             </div>
@@ -89,7 +89,8 @@ export default function SectionShell({
               )}
               <HeadingTag
                 id={headingId}
-                className="text-balance-pro text-3xl font-bold tracking-tighter text-white sm:text-4xl md:text-5xl lg:text-6xl"
+                className="text-balance-pro font-bold tracking-tighter text-white"
+                style={{ fontSize: "clamp(1.875rem, 5vw, 3.75rem)" }}
               >
                 {title}
               </HeadingTag>

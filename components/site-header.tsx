@@ -77,7 +77,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             </div>
             <div className="flex flex-col leading-none">
               {siteConfig.location && (
-                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 transition-colors group-hover:text-sky-400">
+                <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400 transition-colors group-hover:text-sky-400">
                   {siteConfig.location.split(",")[0]}
                 </span>
               )}
@@ -123,7 +123,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             >
               <Search className="h-4 w-4" />
               <span className="hidden lg:inline">Search</span>
-              <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-slate-300 lg:inline-block">
+              <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-slate-300 lg:inline-block">
                 ⌘K
               </kbd>
             </button>
@@ -147,7 +147,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               <Search className="h-5 w-5" />
             </button>
             <button
-              className="relative z-50 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-colors"
+              className="relative z-50 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-all active:scale-95"
               onClick={() => setOpen((v) => !v)}
               onTouchStart={lightTap}
               aria-label="Toggle navigation"

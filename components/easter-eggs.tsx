@@ -19,32 +19,30 @@ export default function EasterEggs() {
   // Console message for developers
   useEffect(() => {
     if (hasLoggedRef.current) return;
+    if (typeof window === "undefined") return;
     hasLoggedRef.current = true;
 
-    // Use an array join to avoid template literal issues with special characters
-    const message = [
-      "",
-      "    +-------------------------------------------+",
-      "    |                                           |",
-      "    |   Hey, fellow developer!                  |",
-      "    |                                           |",
-      "    |   Thanks for inspecting the code.         |",
-      "    |   This site is built with:                |",
-      "    |                                           |",
-      "    |   - Next.js 16 + React 19                 |",
-      "    |   - Tailwind CSS v4                       |",
-      "    |   - Three.js for 3D visualizations        |",
-      "    |   - Framer Motion for animations          |",
-      "    |                                           |",
-      "    |   Try the Konami code!                    |",
-      "    |                                           |",
-      "    |   github.com/Dicklesworthstone            |",
-      "    |                                           |",
-      "    +-------------------------------------------+",
-      "",
-    ].join("\n");
-
-    console.log("%c" + message, "color: #38bdf8; font-family: monospace; font-size: 12px;");
+    // Defer the console message to avoid any hydration issues
+    requestAnimationFrame(() => {
+      try {
+        // Simple console.group approach avoids %c parsing issues
+        console.group("%cJeffrey Emanuel", "color: #38bdf8; font-weight: bold; font-size: 14px;");
+        console.log("%cHey, fellow developer!", "color: #38bdf8; font-size: 12px;");
+        console.log("%cThanks for inspecting the code.", "color: #94a3b8; font-size: 11px;");
+        console.log("");
+        console.log("%cThis site is built with:", "color: #e2e8f0; font-size: 11px;");
+        console.log("%c  - Next.js 16 + React 19", "color: #94a3b8; font-size: 11px;");
+        console.log("%c  - Tailwind CSS v4", "color: #94a3b8; font-size: 11px;");
+        console.log("%c  - Three.js for 3D visualizations", "color: #94a3b8; font-size: 11px;");
+        console.log("%c  - Framer Motion for animations", "color: #94a3b8; font-size: 11px;");
+        console.log("");
+        console.log("%cTry the Konami code!", "color: #fbbf24; font-weight: bold; font-size: 12px;");
+        console.log("%cgithub.com/Dicklesworthstone", "color: #60a5fa; font-size: 11px;");
+        console.groupEnd();
+      } catch {
+        // Silently ignore any console errors
+      }
+    });
   }, []);
 
   // Cleanup timeout on unmount
