@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeAll, afterAll, beforeEach, vi, expect } from "vitest";
+import { tldrMatchers, testLog, resetMockIdCounter } from "@/tests/utils/tldr-test-helpers";
 
 // Cleanup after each test
 afterEach(() => {
@@ -64,3 +65,42 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+
+// =============================================================================
+// TLDR TEST UTILITIES
+// =============================================================================
+
+// Extend Vitest with custom matchers
+expect.extend(tldrMatchers);
+
+// Test suite lifecycle logging
+beforeAll(() => {
+  testLog.section("Starting Test Suite");
+});
+
+afterAll(() => {
+  testLog.section("Test Suite Complete");
+});
+
+// Reset mock factories before each test
+beforeEach(() => {
+  resetMockIdCounter();
+});
+
+// =============================================================================
+// CUSTOM MATCHER TYPE DECLARATIONS
+// =============================================================================
+
+declare module "vitest" {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  interface Assertion<T = any> {
+    toBeAccessible(): T;
+    toMeetTouchTargetSize(minSize?: number): T;
+    toHaveValidSynergies(allTools: import("@/lib/content").TldrFlywheelTool[]): T;
+  }
+  interface AsymmetricMatchersContaining {
+    toBeAccessible(): unknown;
+    toMeetTouchTargetSize(minSize?: number): unknown;
+    toHaveValidSynergies(allTools: import("@/lib/content").TldrFlywheelTool[]): unknown;
+  }
+}
