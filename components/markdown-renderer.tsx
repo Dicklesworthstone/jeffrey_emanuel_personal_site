@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import ErrorBoundary from "@/components/error-boundary";
+import CopyButton from "@/components/copy-button";
 
 // Dynamically import syntax highlighter to reduce initial bundle size (~600KB)
 const SyntaxHighlighter = dynamic(
@@ -43,21 +44,31 @@ function CodeBlock({ language, children }: { language: string; children: string 
   // Show simple code block while loading
   if (!isLoaded || !style) {
     return (
-      <pre className="overflow-x-auto rounded-lg bg-slate-900/80 p-4 text-sm">
-        <code className="font-mono text-slate-300">{children}</code>
-      </pre>
+      <div className="group relative rounded-lg bg-slate-900/80">
+        <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <CopyButton text={children} />
+        </div>
+        <pre className="overflow-x-auto p-4 text-sm">
+          <code className="font-mono text-slate-300">{children}</code>
+        </pre>
+      </div>
     );
   }
 
   return (
-    <SyntaxHighlighter
-      style={style}
-      language={language}
-      PreTag="div"
-      customStyle={{ margin: 0, padding: 0, background: 'transparent' }}
-    >
-      {children}
-    </SyntaxHighlighter>
+    <div className="group relative rounded-lg bg-[#282c34]">
+      <div className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+        <CopyButton text={children} />
+      </div>
+      <SyntaxHighlighter
+        style={style}
+        language={language}
+        PreTag="div"
+        customStyle={{ margin: 0, padding: '1rem', background: 'transparent' }}
+      >
+        {children}
+      </SyntaxHighlighter>
+    </div>
   );
 }
 

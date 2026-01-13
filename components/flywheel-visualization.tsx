@@ -23,6 +23,7 @@ import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/con
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
+import BottomSheet from "@/components/bottom-sheet";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutGrid,
@@ -77,6 +78,26 @@ function useSupportsMotionPath() {
     }
   }, []);
   return supported;
+}
+
+// Helper to extract hex color from Tailwind classes
+const connectionColorMap: Record<string, string> = {
+  "from-sky-500 to-blue-600": "#0ea5e9",
+  "from-amber-500 to-orange-600": "#f59e0b",
+  "from-violet-500 to-purple-600": "#8b5cf6",
+  "from-emerald-500 to-teal-600": "#10b981",
+  "from-rose-500 to-red-600": "#f43f5e",
+  "from-pink-500 to-fuchsia-600": "#ec4899",
+  "from-cyan-500 to-sky-600": "#06b6d4",
+};
+
+function getConnectionColor(colorClass: string) {
+  for (const [key, value] of Object.entries(connectionColorMap)) {
+    if (colorClass.includes(key.split(" ")[0].replace("from-", ""))) {
+      return value;
+    }
+  }
+  return "#8b5cf6";
 }
 
 // Animated particle that flows along a connection
@@ -144,27 +165,8 @@ const ConnectionLine = React.memo(function ConnectionLine({
   const gradientId = `gradient-${connectionId}`;
   const flowGradientId = `flow-gradient-${connectionId}`;
 
-  // Extract color values for gradient
-  const getGradientColor = (colorClass: string) => {
-    const colorMap: Record<string, string> = {
-      "from-sky-500 to-blue-600": "#0ea5e9",
-      "from-amber-500 to-orange-600": "#f59e0b",
-      "from-violet-500 to-purple-600": "#8b5cf6",
-      "from-emerald-500 to-teal-600": "#10b981",
-      "from-rose-500 to-red-600": "#f43f5e",
-      "from-pink-500 to-fuchsia-600": "#ec4899",
-      "from-cyan-500 to-sky-600": "#06b6d4",
-    };
-    for (const [key, value] of Object.entries(colorMap)) {
-      if (colorClass.includes(key.split(" ")[0].replace("from-", ""))) {
-        return value;
-      }
-    }
-    return "#8b5cf6";
-  };
-
-  const color1 = getGradientColor(fromColor);
-  const color2 = getGradientColor(toColor);
+  const color1 = getConnectionColor(fromColor);
+  const color2 = getConnectionColor(toColor);
 
   // Calculate path length for dash animation (approximate)
   const dx = toPos.x - fromPos.x;
@@ -672,135 +674,6 @@ function PlaceholderPanel() {
   );
 }
 
-// Mobile bottom sheet
-const MobileBottomSheet = React.memo(function MobileBottomSheet({
-  tool,
-  onClose,
-  reducedMotion,
-}: {
-  tool: FlywheelTool | null;
-  onClose: () => void;
-  reducedMotion: boolean;
-}) {
-  useBodyScrollLock(!!tool);
-
-  // Get icon for the tool (or fallback)
-  const Icon = tool ? (iconMap[tool.icon] || Zap) : Zap;
-
-  return (
-    <AnimatePresence>
-      {tool && (
-        <>
-          <motion.div
-            key="mobile-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reducedMotion ? 0.1 : 0.2 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden"
-            onClick={onClose}
-            aria-hidden="true"
-          />
-          <motion.div
-            key="mobile-sheet"
-            initial={reducedMotion ? { opacity: 0 } : { y: "100%" }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={reducedMotion ? { opacity: 0 } : { y: "100%" }}
-            transition={
-              reducedMotion
-                ? { duration: 0.15 }
-                : { type: "spring", damping: 30, stiffness: 300 }
-            }
-            className="fixed inset-x-0 bottom-0 z-50 lg:hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="mobile-sheet-title"
-          >
-            <div className="rounded-t-3xl border-t border-white/10 bg-slate-950/95 backdrop-blur-xl">
-              <div className="flex justify-center pt-3 pb-2">
-                <div className="h-1 w-10 rounded-full bg-white/20" />
-              </div>
-              <div className="max-h-[70vh] overflow-y-auto px-5 pb-8">
-                <div className="flex items-center gap-4 py-4">
-                  <div
-                    className={cn(
-                      "flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg",
-                      tool.color
-                    )}
-                  >
-                    <Icon className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 id="mobile-sheet-title" className="text-xl font-bold text-white">
-                      {tool.name}
-                    </h3>
-                    <p className="text-sm text-slate-400">{tool.tagline}</p>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white"
-                    aria-label="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-                <Link
-                  href={tool.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "flex items-center justify-center gap-2 rounded-xl py-3.5 px-4",
-                    "text-base font-semibold text-white bg-gradient-to-r shadow-lg",
-                    tool.color
-                  )}
-                >
-                  View on GitHub
-                  <ExternalLink className="h-5 w-5" />
-                </Link>
-                <div className="mt-6">
-                  <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Integrates With
-                  </h4>
-                  <div className="space-y-2">
-                    {tool.connectsTo.map((targetId) => {
-                      const targetTool = flywheelTools.find((t) => t.id === targetId);
-                      if (!targetTool) return null;
-                      const TargetIcon = iconMap[targetTool.icon] || Zap;
-                      return (
-                        <div
-                          key={targetId}
-                          className="flex items-center gap-3 rounded-xl bg-white/5 p-3 border border-white/5"
-                        >
-                          <div
-                            className={cn(
-                              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br",
-                              targetTool.color
-                            )}
-                          >
-                            <TargetIcon className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-white">
-                              {targetTool.shortName}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              {tool.connectionDescriptions[targetId] || "Integration"}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-});
-
 // Ecosystem vitality badge component
 const EcosystemVitalityBadge = React.memo(function EcosystemVitalityBadge({
   toolCount,
@@ -1137,11 +1010,80 @@ export default function FlywheelVisualization() {
       </div>
 
       {/* Mobile bottom sheet - only shows on explicit click */}
-      <MobileBottomSheet
-        tool={selectedTool}
+      <BottomSheet
+        isOpen={!!selectedTool}
         onClose={handleCloseDetail}
-        reducedMotion={reducedMotion}
-      />
+        title={selectedTool?.name}
+      >
+        {selectedTool && (() => {
+          const ToolIcon = iconMap[selectedTool.icon] || Zap;
+          return (
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div
+                  className={cn(
+                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg",
+                    selectedTool.color
+                  )}
+                >
+                  <ToolIcon className="h-6 w-6 text-white" />
+                </div>
+                <p className="text-sm text-slate-400 pt-1">{selectedTool.tagline}</p>
+              </div>
+
+              <Link
+                href={selectedTool.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "flex items-center justify-center gap-2 rounded-xl py-3.5 px-4",
+                  "text-base font-semibold text-white bg-gradient-to-r shadow-lg",
+                  selectedTool.color
+                )}
+              >
+                View on GitHub
+                <ExternalLink className="h-5 w-5" />
+              </Link>
+
+              <div>
+                <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Integrates With
+                </h4>
+                <div className="space-y-2">
+                  {selectedTool.connectsTo.map((targetId) => {
+                    const targetTool = flywheelTools.find((t) => t.id === targetId);
+                    if (!targetTool) return null;
+                    const TargetIcon = iconMap[targetTool.icon] || Zap;
+                    return (
+                      <div
+                        key={targetId}
+                        className="flex items-center gap-3 rounded-xl bg-white/5 p-3 border border-white/5"
+                      >
+                        <div
+                          className={cn(
+                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br",
+                            targetTool.color
+                          )}
+                        >
+                          <TargetIcon className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-white">
+                            {targetTool.shortName}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {selectedTool.connectionDescriptions[targetId] || "Integration"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </BottomSheet>
     </div>
   );
 }

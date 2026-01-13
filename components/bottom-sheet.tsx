@@ -4,6 +4,7 @@ import { useEffect, useId } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -27,16 +28,7 @@ export default function BottomSheet({
   const prefersReducedMotion = useReducedMotion();
 
   // Lock body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   // Close on escape key
   useEffect(() => {
