@@ -416,7 +416,7 @@ export const projects: Project[] = [
     href: "https://github.com/Dicklesworthstone/smartedgar",
     short: "Modern SEC ingestion and research stack with an MCP server at its core.",
     description:
-      "SmartEdgar pulls, normalizes, and slices SEC filings into agent‑ready formats. It exposes a clean MCP API so analysts and AI tools can ask structured questions about filings instead of fighting PDFs.",
+      "SmartEdgar pulls, normalizes, and slices SEC filings into agent-ready formats. It exposes a clean MCP API so analysts and AI tools can ask structured questions about filings instead of fighting PDFs.",
     tags: ["EDGAR", "MCP", "Agents", "Finance"],
     size: "large",
     gradient: "from-emerald-500/20 via-teal-500/20 to-cyan-500/20",
@@ -424,9 +424,9 @@ export const projects: Project[] = [
   {
     name: "Lumera Network",
     kind: "product",
-    badge: "Layer‑1 protocol",
+    badge: "Layer-1 protocol",
     href: "https://pastel.network",
-    short: "Cosmos-based L1 for decentralized storage, AI inference, and cross‑chain interoperability.",
+    short: "Cosmos-based L1 for decentralized storage, AI inference, and cross-chain interoperability.",
     description:
       "Originally launched as Pastel Network, Lumera is a sovereign Cosmos chain designed for long-lived storage of digital assets, on-chain AI authenticity, and agentic access to data and compute across ecosystems.",
     tags: ["L1", "Cosmos", "Storage", "AI", "Interoperability"],
@@ -895,7 +895,7 @@ export const projects: Project[] = [
     href: "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
     short: "Meta-runner for language-specific bug scanners, tuned for AI coding agents.",
     description:
-      "Wraps best‑in‑class static analyzers (ESLint, Ruff, Clippy, golangci-lint, and more) with a consistent JSON interface. Perfect as a pre-commit hook or post-processing step for autonomous agents to catch bugs before they ship.",
+      "Wraps best-in-class static analyzers (ESLint, Ruff, Clippy, golangci-lint, and more) with a consistent JSON interface. Perfect as a pre-commit hook or post-processing step for autonomous agents to catch bugs before they ship.",
     tags: ["Static Analysis", "Agents", "Code Quality", "CI/CD", "Multi-Language", "Flywheel"],
     size: "wide",
     slug: "ultimate-bug-scanner",
@@ -920,9 +920,9 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "45 stars",
     href: "https://github.com/Dicklesworthstone/kissinger_undergraduate_thesis",
-    short: "A vibe‑coded reader for Henry Kissinger's 400‑page undergraduate thesis.",
+    short: "A vibe-coded reader for Henry Kissinger's 400-page undergraduate thesis.",
     description:
-      "Takes a painful scanned PDF and turns it into a clean, phone‑friendly reading experience, with structure that plays nicely with modern models and human readers.",
+      "Takes a painful scanned PDF and turns it into a clean, phone-friendly reading experience, with structure that plays nicely with modern models and human readers.",
     tags: ["History", "PDF", "Reading", "Education", "OCR"],
   },
   {
