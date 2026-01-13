@@ -22,6 +22,7 @@ import {
 import Fuse from "fuse.js";
 import { navItems, projects, writingHighlights, siteConfig } from "@/lib/content";
 import { cn } from "@/lib/utils";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -330,16 +331,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   }, [selectedIndex]);
 
   // Prevent body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   let globalIndex = 0;
   const activeId = filteredCommands[selectedIndex]?.id;

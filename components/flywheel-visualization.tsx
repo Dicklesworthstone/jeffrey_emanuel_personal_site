@@ -22,6 +22,7 @@ import {
 import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutGrid,
@@ -353,7 +354,7 @@ const ToolNode = React.memo(function ToolNode({
         </div>
 
         {/* Label */}
-        <span className="relative z-10 text-[10px] font-bold uppercase tracking-wider text-white">
+        <span className="relative z-10 text-xs font-bold uppercase tracking-wider text-white">
           {tool.shortName}
         </span>
       </motion.button>
@@ -479,9 +480,9 @@ const RichTooltip = React.memo(function RichTooltip({
 
         {/* Key features */}
         <div className="mt-4 space-y-1.5">
-          {tool.features.map((feature, i) => (
-            <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
-              <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" />
+          {tool.features.map((feature) => (
+            <div key={feature} className="flex items-start gap-2 text-xs text-slate-300">
+              <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
               <span>{feature}</span>
             </div>
           ))}
@@ -681,15 +682,7 @@ const MobileBottomSheet = React.memo(function MobileBottomSheet({
   onClose: () => void;
   reducedMotion: boolean;
 }) {
-  useEffect(() => {
-    if (tool) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "";
-      };
-    }
-    return;
-  }, [tool]);
+  useBodyScrollLock(!!tool);
 
   // Get icon for the tool (or fallback)
   const Icon = tool ? (iconMap[tool.icon] || Zap) : Zap;
@@ -984,7 +977,7 @@ export default function FlywheelVisualization() {
       <div className="mb-8 md:mb-12 text-center">
         <div className="mb-4 flex items-center justify-center gap-3">
           <div className="h-px w-8 bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-violet-400">
+          <span className="text-xs font-bold uppercase tracking-widest text-violet-400">
             Ecosystem
           </span>
           <div className="h-px w-8 bg-gradient-to-l from-transparent via-violet-500/50 to-transparent" />

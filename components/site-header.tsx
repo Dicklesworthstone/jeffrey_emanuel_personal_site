@@ -8,6 +8,7 @@ import { Menu, X, Sparkles, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { navItems, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 
@@ -44,16 +45,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   }, []);
 
   // Lock body scroll when menu is open
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+  useBodyScrollLock(open);
 
   return (
     <>
