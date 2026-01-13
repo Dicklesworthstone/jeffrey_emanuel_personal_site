@@ -5,7 +5,7 @@
  * Run with verbose: bun test tests/unit/format-stars.test.ts --verbose
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import {
   formatStarCount,
   formatStarCountFull,
