@@ -25,6 +25,7 @@ import {
   Cog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatStarCount, formatStarCountFull } from "@/lib/format-stars";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import type { TldrFlywheelTool } from "@/lib/content";
 
@@ -232,9 +233,13 @@ export function TldrToolCard({
               {/* Stars and link */}
               <div className="flex items-center gap-2">
                 {tool.stars && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-500/20">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                    {tool.stars.toLocaleString()}
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-500/20"
+                    aria-label={`${formatStarCountFull(tool.stars)} GitHub stars`}
+                    title={`${formatStarCountFull(tool.stars)} stars`}
+                  >
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" aria-hidden="true" />
+                    {formatStarCount(tool.stars)}
                   </span>
                 )}
                 <Link
@@ -245,7 +250,7 @@ export function TldrToolCard({
                     e.stopPropagation();
                     lightTap();
                   }}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
                   aria-label={`View ${tool.name} on GitHub`}
                 >
                   <ExternalLink className="h-4 w-4" />
@@ -258,10 +263,10 @@ export function TldrToolCard({
               {tool.whatItDoes}
             </p>
 
-            {/* Expand button */}
+            {/* Expand button - minimum 44px height for touch targets */}
             <button
               onClick={handleToggle}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 py-2 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="mt-4 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-white/5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
               aria-expanded={isExpanded}
               aria-controls={`tool-details-${tool.id}`}
             >

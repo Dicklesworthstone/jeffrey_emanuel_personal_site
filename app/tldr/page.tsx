@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
+import ErrorBoundary from "@/components/error-boundary";
 import { TldrHero } from "@/components/tldr-hero";
 import { TldrToolGrid } from "@/components/tldr-tool-grid";
 import { TldrSynergyDiagram } from "@/components/tldr-synergy-diagram";
@@ -76,49 +77,55 @@ function FlywheelExplanation() {
 
 export default function TldrPage() {
   return (
-    <main className="min-h-screen">
-      {/* Hero Section */}
-      <TldrHero />
+    <ErrorBoundary>
+      <main className="min-h-screen">
+        {/* Hero Section */}
+        <TldrHero />
 
-      {/* Flywheel Explanation with Diagram */}
-      <FlywheelExplanation />
+        {/* Flywheel Explanation with Diagram */}
+        <ErrorBoundary>
+          <FlywheelExplanation />
+        </ErrorBoundary>
 
-      {/* Tools Grid */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <TldrToolGrid tools={tldrFlywheelTools} />
-        </div>
-      </section>
-
-      {/* Footer CTA */}
-      <section className="border-t border-white/5 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white md:text-3xl">
-            Get Started
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-slate-400">
-            The fastest way to set up the entire flywheel ecosystem is with ACFS.
-            One command, 30 minutes, and you&apos;re ready to go.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-4">
-            <code className="rounded-lg bg-slate-800/50 px-4 py-3 font-mono text-sm text-violet-300 ring-1 ring-slate-700/50">
-              curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/agentic_coding_flywheel_setup/main/install.sh | bash -s -- --yes --mode vibe
-            </code>
-            <p className="text-xs text-slate-500">
-              Or visit{" "}
-              <a
-                href="https://agent-flywheel.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-violet-400 underline hover:text-violet-300"
-              >
-                agent-flywheel.com
-              </a>{" "}
-              for the step-by-step wizard.
-            </p>
+        {/* Tools Grid */}
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <ErrorBoundary>
+              <TldrToolGrid tools={tldrFlywheelTools} />
+            </ErrorBoundary>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+
+        {/* Footer CTA */}
+        <section className="border-t border-white/5 py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-2xl font-bold text-white md:text-3xl">
+              Get Started
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-slate-400">
+              The fastest way to set up the entire flywheel ecosystem is with ACFS.
+              One command, 30 minutes, and you&apos;re ready to go.
+            </p>
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <code className="rounded-lg bg-slate-800/50 px-4 py-3 font-mono text-sm text-violet-300 ring-1 ring-slate-700/50">
+                curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/agentic_coding_flywheel_setup/main/install.sh | bash -s -- --yes --mode vibe
+              </code>
+              <p className="text-xs text-slate-500">
+                Or visit{" "}
+                <a
+                  href="https://agent-flywheel.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-violet-400 underline hover:text-violet-300"
+                >
+                  agent-flywheel.com
+                </a>{" "}
+                for the step-by-step wizard.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </ErrorBoundary>
   );
 }

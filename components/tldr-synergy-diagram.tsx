@@ -190,7 +190,7 @@ export function TldrSynergyDiagram({
               textAnchor="middle"
               className="fill-slate-500 text-[8px]"
             >
-              7 Core Tools
+              {coreTools.length} Core Tools
             </text>
           </motion.g>
 

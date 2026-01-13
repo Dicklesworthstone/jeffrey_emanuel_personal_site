@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useReducedMotion, useInView } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import { motion, useReducedMotion, useInView, AnimatePresence } from "framer-motion";
 import { Cog, Zap, GitBranch, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tldrPageData } from "@/lib/content";
@@ -91,6 +91,19 @@ export function TldrHero({ className }: TldrHeroProps) {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  // Hide scroll indicator after user scrolls
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setHasScrolled(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { hero } = tldrPageData;
 
@@ -182,28 +195,33 @@ export function TldrHero({ className }: TldrHeroProps) {
             ))}
           </motion.div>
 
-          {/* Scroll indicator */}
-          <motion.div
-            initial={reducedMotion ? {} : { opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.6 }}
-            className="mt-16 flex justify-center"
-          >
-            <motion.div
-              animate={reducedMotion ? {} : { y: [0, 8, 0] }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="flex flex-col items-center gap-2 text-slate-500"
-            >
-              <span className="text-xs font-medium uppercase tracking-wider">
-                Scroll to explore
-              </span>
-              <ArrowDown className="h-5 w-5" />
-            </motion.div>
-          </motion.div>
+          {/* Scroll indicator - hides after user scrolls */}
+          <AnimatePresence>
+            {!hasScrolled && (
+              <motion.div
+                initial={reducedMotion ? {} : { opacity: 0 }}
+                animate={isInView ? { opacity: 1 } : {}}
+                exit={reducedMotion ? {} : { opacity: 0, y: 20 }}
+                transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.6 }}
+                className="mt-16 flex justify-center"
+              >
+                <motion.div
+                  animate={reducedMotion ? {} : { y: [0, 8, 0] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="flex flex-col items-center gap-2 text-slate-500"
+                >
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    Scroll to explore
+                  </span>
+                  <ArrowDown className="h-5 w-5" />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>
