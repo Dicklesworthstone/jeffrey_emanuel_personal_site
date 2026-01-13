@@ -6,9 +6,10 @@ import type { Stat } from "@/lib/content";
 import XStatsCard from "@/components/x-stats-card";
 
 /**
- * Parse a stat value string like "10K+" into animated components
+ * Parse a stat value string like "10K+" into animated components.
+ * Exported for testing.
  */
-function parseStatValue(value: string): {
+export function parseStatValue(value: string): {
   number: number;
   suffix: string;
   isAnimatable: boolean;
