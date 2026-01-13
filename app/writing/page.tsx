@@ -49,8 +49,8 @@ export default function WritingPage() {
       // Handle potential invalid dates gracefully
       const t1 = new Date(a.date).getTime();
       const t2 = new Date(b.date).getTime();
-      if (isNaN(t1)) return 1;
-      if (isNaN(t2)) return -1;
+      if (Number.isNaN(t1)) return 1;
+      if (Number.isNaN(t2)) return -1;
       return t2 - t1;
     });
 
