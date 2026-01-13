@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Jeffrey Emanuel",
   title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
   description:
-    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 7 interconnected tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 70+ open-source projects with 10K+ GitHub stars.",
+    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 10 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 70+ open-source projects with 10K+ GitHub stars.",
   email: "jeffreyemanuel@gmail.com",
   location: "",
   social: {
@@ -47,8 +47,8 @@ export const heroStats: Stat[] = [
   },
   {
     label: "Flywheel Tools",
-    value: "7",
-    helper: "Interconnected tools that amplify multi-agent workflows.",
+    value: "10",
+    helper: "Core tools that amplify multi-agent workflows.",
   },
   {
     label: "Years Building AI",
@@ -66,7 +66,7 @@ export const heroContent = {
   eyebrow: "Founder • Engineer • Former Hedge Fund Analyst",
   title: "Building the tools that sit between markets and frontier AI.",
   intro:
-    "Beginning in October of 2025, I began developing what I call my \"Agentic Coding Flywheel\": a collection of 7 interconnected tools.",
+    "Beginning in October of 2025, I began developing what I call my \"Agentic Coding Flywheel\": a collection of 10 core tools.",
   tools: [
     {
       name: "MCP Agent Mail",
@@ -104,7 +104,7 @@ export const heroContent = {
   },
   body: [
     "Using these tools, I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
-    "My 30+ open-source projects span agent infrastructure, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
+    "My 70+ open-source projects span agent infrastructure, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
     "I also founded Lumera Network (formerly Pastel), a Cosmos L1 for storage and AI verification. I consult to PE and hedge funds on AI automation after a decade as a long/short equity analyst.",
   ],
   primaryCta: {
@@ -1946,7 +1946,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whyItsUseful:
       "When running multiple AI coding agents simultaneously, keeping track of which agent is working on what becomes impossible without organization. NTM solves this by providing persistent, named sessions that survive reboots.",
     implementationHighlights: [
-      "Pure Bash implementation with no dependencies beyond tmux",
+      "Go implementation with Bubble Tea TUI framework",
       "Project-aware persistence using XDG conventions",
       "Support for agent type classification (claude, codex, cursor, etc.)",
       "Real-time dashboard showing all active agent panes",
@@ -1955,7 +1955,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
       {
         toolId: "slb",
         description:
-          "SLB launches agents into NTM-managed panes, routing dangerous commands through safety checks",
+          "SLB provides two-person rule safety checks for dangerous commands in NTM sessions",
       },
       {
         toolId: "mail",
@@ -1967,7 +1967,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
         description: "Session history from all NTM panes is indexed for search",
       },
     ],
-    techStack: ["Bash 4.0+", "tmux 3.0+", "POSIX shell"],
+    techStack: ["Go 1.25+", "Bubble Tea", "tmux 3.0+"],
     keyFeatures: [
       "Spawn named agent panes with type classification",
       "Broadcast prompts to specific agent types",
@@ -1985,46 +1985,46 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     name: "Simultaneous Launch Button",
     shortName: "SLB",
     href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
-    icon: "Rocket",
+    icon: "ShieldCheck",
     color: "from-amber-500 to-orange-600",
     category: "core",
     stars: 49,
     whatItDoes:
-      "Launches multiple Claude Code agents simultaneously in parallel tmux panes. Designed for when you want to throw compute at a problem by having many agents work in parallel.",
+      "Two-person rule CLI for approving dangerous shell commands. Requires a second human or AI reviewer to approve risky operations before execution.",
     whyItsUseful:
-      "Starting 10 Claude Code instances manually is tedious. SLB does it in one command, with proper session naming and pane organization via NTM integration.",
+      "AI agents can accidentally run destructive commands. SLB implements a 'two-person rule' where dangerous commands require explicit approval from another party before executing, preventing catastrophic mistakes.",
     implementationHighlights: [
-      "Single-command parallel agent spawning",
-      "Automatic tmux session and pane creation",
-      "Integration with NTM for session management",
-      "Configurable agent count and initial prompts",
+      "Go implementation with Bubble Tea TUI",
+      "SQLite-backed persistent command queue",
+      "Configurable risk detection patterns",
+      "Real-time approval/rejection notifications",
     ],
     synergies: [
       {
         toolId: "ntm",
-        description: "Uses NTM for session organization and persistence",
-      },
-      {
-        toolId: "mail",
-        description:
-          "Agents coordinate their work via Agent Mail to avoid conflicts",
+        description: "Protects NTM-managed sessions from dangerous commands",
       },
       {
         toolId: "dcg",
-        description: "DCG protects against agents running dangerous commands",
+        description:
+          "Works alongside DCG for layered command safety",
+      },
+      {
+        toolId: "mail",
+        description: "Approval requests can be sent via Agent Mail",
       },
     ],
-    techStack: ["Bash", "tmux"],
+    techStack: ["Go", "Bubble Tea", "SQLite"],
     keyFeatures: [
-      "One-command multi-agent launch",
-      "Parallel tmux pane creation",
-      "NTM session integration",
-      "Customizable agent count",
+      "Two-person rule enforcement",
+      "Command queue with approval workflow",
+      "Pattern-based risk detection",
+      "SQLite persistence",
     ],
     useCases: [
-      "Parallelizing a large refactor across multiple files",
-      "Testing different implementation approaches simultaneously",
-      "Code review with multiple agents checking different aspects",
+      "Requiring approval for rm -rf and git reset operations",
+      "Adding safety gates to autonomous agent workflows",
+      "Audit trail of dangerous command approvals",
     ],
   },
   {
@@ -2041,8 +2041,8 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whyItsUseful:
       "When multiple agents work on the same codebase, they need to communicate. Agent Mail provides persistent, threaded messaging with file reservation support to prevent merge conflicts.",
     implementationHighlights: [
-      "MCP server implementation for universal agent compatibility",
-      "Git-backed storage for complete audit trails",
+      "FastMCP server implementation for universal agent compatibility",
+      "SQLite-backed storage for complete audit trails",
       "Advisory file locking to prevent edit conflicts",
       "GitHub-flavored Markdown support in messages",
     ],
@@ -2060,11 +2060,11 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
         description: "Launched agents coordinate via mail threads",
       },
     ],
-    techStack: ["TypeScript", "MCP Protocol", "Git", "Node.js"],
+    techStack: ["Python 3.14+", "FastMCP", "FastAPI", "SQLite"],
     keyFeatures: [
       "Threaded messaging between AI agents",
       "Advisory file reservations",
-      "Git-backed persistent storage",
+      "SQLite-backed persistent storage",
       "MCP integration for any compatible agent",
     ],
     useCases: [
@@ -2129,12 +2129,12 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     category: "core",
     stars: 132,
     whatItDoes:
-      "Wraps best-in-class static analyzers (ESLint, Ruff, Clippy, etc.) with a unified interface. Catches bugs before they become problems.",
+      "Custom pattern-based bug scanner with 1,000+ detection rules across multiple languages. Catches common bugs, security issues, and code smells before they become problems.",
     whyItsUseful:
-      "Each language has its own lint tools with different output formats. UBS normalizes everything to consistent JSON, making it easy to integrate into any workflow or CI pipeline.",
+      "Instead of managing dozens of separate linters, UBS provides comprehensive bug detection in a single tool. Its pattern-based approach catches issues that traditional static analyzers miss.",
     implementationHighlights: [
-      "Language auto-detection based on file extensions",
-      "Wraps ESLint (TS/JS), Ruff (Python), Clippy (Rust), etc.",
+      "1,000+ custom detection patterns across languages",
+      "Pattern-based scanning with extensible rule definitions",
       "Consistent JSON output across all languages",
       "Exit codes designed for CI/CD integration",
     ],
@@ -2148,11 +2148,11 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
         description: "Pre-flight scans before risky operations",
       },
     ],
-    techStack: ["Bash", "ESLint", "Ruff", "Clippy", "Various linters"],
+    techStack: ["Bash", "Pattern matching", "JSON output"],
     keyFeatures: [
-      "Unified interface for all static analyzers",
+      "1,000+ built-in detection patterns",
       "Consistent JSON output format",
-      "Auto-detects languages",
+      "Multi-language support",
       "Perfect for pre-commit hooks",
     ],
     useCases: [
@@ -2171,11 +2171,11 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     category: "core",
     stars: 152,
     whatItDoes:
-      "Implements the ACE (Action, Context, Effect) framework for persistent agent memory. Agents can store, retrieve, and reason over past experiences.",
+      "Implements a three-layer cognitive architecture for persistent agent memory: Episodic (experiences), Working (active context), and Procedural (skills/patterns).",
     whyItsUseful:
       "Without persistent memory, every agent session starts from scratch. CM gives agents long-term memory across sessions, remembering what worked, what failed, and why.",
     implementationHighlights: [
-      "ACE framework: procedural, episodic, and semantic memory types",
+      "Three-layer cognitive architecture (Episodic, Working, Procedural)",
       "MCP tools for cross-session context persistence",
       "Memory consolidation and summarization",
       "Hierarchical memory organization",
@@ -2195,9 +2195,9 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
         description: "Task patterns and solutions remembered",
       },
     ],
-    techStack: ["TypeScript", "MCP Protocol", "SQLite", "Node.js"],
+    techStack: ["TypeScript", "Bun", "MCP Protocol", "SQLite"],
     keyFeatures: [
-      "Three memory types: procedural, episodic, semantic",
+      "Three memory layers: episodic, working, procedural",
       "MCP integration for any compatible agent",
       "Automatic memory consolidation",
       "Cross-session context persistence",
@@ -2271,25 +2271,25 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whyItsUseful:
       "AI agents can and will run 'rm -rf /' if they think it solves your problem. DCG is the safety net that catches catastrophic commands before they execute.",
     implementationHighlights: [
-      "Shell integration via function wrappers",
-      "Pattern matching for known dangerous commands",
+      "Rust implementation with SIMD-accelerated pattern matching",
+      "Sub-microsecond command analysis overhead",
       "Configurable risk levels and bypass rules",
       "Logging of all intercepted commands",
     ],
     synergies: [
       {
         toolId: "slb",
-        description: "Protection layer for parallel agent operations",
+        description: "Works alongside SLB for layered command safety",
       },
       {
         toolId: "ntm",
         description: "Guards all commands in NTM-managed sessions",
       },
     ],
-    techStack: ["Bash", "Shell integration", "Regex patterns"],
+    techStack: ["Rust", "SIMD", "Shell integration"],
     keyFeatures: [
       "Intercepts rm -rf, git reset --hard, etc.",
-      "Confirmation prompts for risky commands",
+      "SIMD-accelerated pattern matching",
       "Configurable allowlists",
       "Command audit logging",
     ],
@@ -2304,44 +2304,44 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
   // ===========================================================================
   {
     id: "giil",
-    name: "Git Issue Import/Link",
+    name: "Get Image from Internet Link",
     shortName: "GIIL",
     href: "https://github.com/Dicklesworthstone/giil",
-    icon: "GitPullRequest",
+    icon: "Image",
     color: "from-slate-500 to-gray-600",
     category: "supporting",
     stars: 24,
     whatItDoes:
-      "Imports GitHub issues into Beads and maintains bidirectional links. Keeps local issue tracking in sync with remote.",
+      "Downloads images from iCloud public share links for use in remote debugging sessions. Converts iCloud URLs to direct image downloads.",
     whyItsUseful:
-      "You want the speed of local Beads tracking but still need GitHub Issues for external collaboration. GIIL bridges both worlds.",
+      "When debugging remotely via SSH, you can't easily share screenshots. GIIL lets you upload to iCloud, share the link, and the remote machine downloads the image directly for AI agents to analyze.",
     implementationHighlights: [
-      "GitHub API integration for issue sync",
-      "Bidirectional linking (Beads ↔ GitHub)",
-      "Automatic status sync on updates",
-      "Bulk import capabilities",
+      "iCloud public share URL parsing",
+      "Direct image download without browser",
+      "Automatic file naming from URL metadata",
+      "Works over SSH without GUI",
     ],
     synergies: [
       {
-        toolId: "bv",
-        description: "Imported issues appear in Beads Viewer",
+        toolId: "mail",
+        description: "Downloaded images can be referenced in Agent Mail",
       },
       {
-        toolId: "ru",
-        description: "Repo Updater syncs issues across all repos",
+        toolId: "cass",
+        description: "Image analysis sessions are searchable",
       },
     ],
-    techStack: ["TypeScript", "GitHub API", "Beads format"],
+    techStack: ["Bash", "curl", "iCloud API"],
     keyFeatures: [
-      "Import GitHub Issues to Beads",
-      "Bidirectional sync",
-      "Bulk operations",
-      "Status mapping",
+      "iCloud share link support",
+      "CLI-based image download",
+      "No browser required",
+      "Works over SSH",
     ],
     useCases: [
-      "Migrating from GitHub Issues to Beads",
-      "Keeping external stakeholders updated",
-      "Hybrid tracking workflows",
+      "Sharing screenshots for remote debugging",
+      "Getting images to headless servers",
+      "AI agent image analysis workflows",
     ],
   },
   {
@@ -2449,8 +2449,8 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     ],
     synergies: [
       {
-        toolId: "giil",
-        description: "Syncs issues across all managed repos",
+        toolId: "ubs",
+        description: "Run bug scans across all synced repos",
       },
       {
         toolId: "ntm",
