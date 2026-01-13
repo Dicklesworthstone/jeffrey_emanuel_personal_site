@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, memo } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { Layers, Wrench, Search, X } from "lucide-react";
 import Fuse from "fuse.js";
@@ -21,7 +21,7 @@ interface TldrToolGridProps {
 // SEARCH BAR COMPONENT
 // =============================================================================
 
-function ToolSearchBar({
+const ToolSearchBar = memo(function ToolSearchBar({
   query,
   onQueryChange,
   resultCount,
@@ -113,13 +113,13 @@ function ToolSearchBar({
       </div>
     </motion.div>
   );
-}
+});
 
 // =============================================================================
 // EMPTY STATE COMPONENT
 // =============================================================================
 
-function EmptySearchState({
+const EmptySearchState = memo(function EmptySearchState({
   query,
   onClear,
   reducedMotion,
@@ -154,13 +154,13 @@ function EmptySearchState({
       </button>
     </motion.div>
   );
-}
+});
 
 // =============================================================================
 // SECTION HEADER COMPONENT
 // =============================================================================
 
-function SectionHeader({
+const SectionHeader = memo(function SectionHeader({
   title,
   description,
   icon: Icon,
@@ -199,7 +199,7 @@ function SectionHeader({
       </p>
     </motion.div>
   );
-}
+});
 
 // =============================================================================
 // MAIN COMPONENT

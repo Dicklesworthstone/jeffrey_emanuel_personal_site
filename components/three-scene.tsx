@@ -82,10 +82,12 @@ function StarField({ density = 420, color = "#38bdf8" }: { density?: number; col
     // Scale density based on quality settings
     const numPoints = scaleCount(density, quality);
     const pts = new Float32Array(numPoints * 3);
+    // Use seeded random for deterministic, pure positioning
+    const rand = seededRandom(42);
     for (let i = 0; i < numPoints; i++) {
-      const r = 5 + Math.random() * 4;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 5 + rand() * 4;
+      const theta = rand() * Math.PI * 2;
+      const phi = Math.acos(2 * rand() - 1);
       const x = r * Math.sin(phi) * Math.cos(theta);
       const y = r * Math.sin(phi) * Math.sin(theta);
       const z = r * Math.cos(phi);

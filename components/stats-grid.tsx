@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useReducedMotion } from "framer-motion";
 import type { Stat } from "@/lib/content";
 import XStatsCard from "@/components/x-stats-card";
@@ -115,6 +115,12 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
   const containerRef = useRef<HTMLDListElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Memoize parsed stat values to avoid re-parsing on each render
+  const parsedStats = useMemo(
+    () => stats.map((stat) => ({ stat, parsed: parseStatValue(stat.value) })),
+    [stats]
+  );
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -140,13 +146,11 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
       ref={containerRef}
       className="grid gap-px overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-800/60 text-sm text-slate-200 shadow-xl shadow-slate-950/20 sm:grid-cols-2 lg:grid-cols-4"
     >
-      {stats.map((stat, index) => {
+      {parsedStats.map(({ stat, parsed }, index) => {
         // Use special X stats card for the Twitter/X stat
         if (stat.label === "Audience on X") {
           return <XStatsCard key={stat.label} />;
         }
-
-        const parsed = parseStatValue(stat.value);
 
         return (
           <div
@@ -160,7 +164,7 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
             {/* Subtle inner glow on hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-            <dt className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 transition-colors group-hover:text-sky-400/70">
+            <dt className="text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors group-hover:text-sky-400/70">
               {stat.label}
             </dt>
             <dd className="mt-3 text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
