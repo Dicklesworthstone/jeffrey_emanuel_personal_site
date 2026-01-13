@@ -77,23 +77,24 @@ export const heroContent = {
       name: "BV",
       tagline: "Beads Viewer",
       description:
-        "Use advanced graph theory to optimize the order of task execution by agents",
+        "Apply PageRank and graph theory to prioritize which tasks unblock the most work",
     },
     {
       name: "Cass",
       tagline: "Coding Agent Session Search",
-      description: "Search all your past coding agent chats instantly",
+      description: "Sub-millisecond search across all your past agent sessions",
     },
     {
-      name: "Cass Memory",
+      name: "CM",
+      tagline: "CASS Memory System",
       description:
-        "Use Cass as the basis of a powerful continual learning and memory system",
+        "Persistent memory built on CASS - agents learn and remember across sessions",
     },
     {
       name: "UBS",
       tagline: "Ultimate Bug Scanner",
       description:
-        "A polyglot static analysis tool designed specifically for use by agents",
+        "1,000+ pattern-based detection rules for catching bugs before they ship",
     },
   ],
   highlight: {
@@ -2037,9 +2038,9 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     category: "core",
     stars: 1400,
     whatItDoes:
-      "Provides an inter-agent email system using the Model Context Protocol (MCP). Agents can send messages, read threads, and coordinate work without stepping on each other.",
+      "A mail-like coordination layer for multi-agent workflows. Agents send messages, read threads, and reserve files asynchronously via MCP tools - like Gmail for AI coding agents.",
     whyItsUseful:
-      "When multiple agents work on the same codebase, they need to communicate. Agent Mail provides persistent, threaded messaging with file reservation support to prevent merge conflicts.",
+      "Critical for multi-agent setups. When 5+ Claude Code instances work the same codebase, they need to coordinate who's editing what. Agent Mail prevents merge conflicts and builds an audit trail of all agent decisions.",
     implementationHighlights: [
       "FastMCP server implementation for universal agent compatibility",
       "SQLite-backed storage for complete audit trails",
@@ -2083,14 +2084,14 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     category: "core",
     stars: 891,
     whatItDoes:
-      "A fast terminal UI for viewing and analyzing Beads issues. Provides graph analytics including PageRank, critical path analysis, and cycle detection.",
+      "A fast terminal UI for viewing and analyzing Beads issues. Applies graph theory (PageRank, betweenness centrality, critical path) to identify which tasks unblock the most other work.",
     whyItsUseful:
-      "Issue tracking is really a dependency graph. BV surfaces which tasks are blocking others, identifies the critical path to completion, and helps prioritize work intelligently.",
+      "Issue tracking is really a dependency graph. BV lets Claude prioritize beads intelligently by computing actual bottlenecks. The --robot-insights flag gives PageRank rankings for what to tackle first.",
     implementationHighlights: [
-      "20,000+ lines of Go with Bubble Tea TUI framework",
-      "9 graph metrics: PageRank, Betweenness, Closeness, etc.",
+      "20,000+ lines of Go shipped in a single day",
+      "Graph theory inspired by Frank Harary ('Mr. Graph Theory')",
       "Robot protocol (--robot-*) for AI-ready JSON output",
-      "60fps rendering even with large issue graphs",
+      "60fps TUI rendering with vim keybindings",
     ],
     synergies: [
       {
@@ -2171,9 +2172,9 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     category: "core",
     stars: 152,
     whatItDoes:
-      "Implements a three-layer cognitive architecture for persistent agent memory: Episodic (experiences), Working (active context), and Procedural (skills/patterns).",
+      "A memory system built on top of CASS. Implements three-layer cognitive architecture: Episodic (experiences), Working (active context), and Procedural (skills and lessons learned).",
     whyItsUseful:
-      "Without persistent memory, every agent session starts from scratch. CM gives agents long-term memory across sessions, remembering what worked, what failed, and why.",
+      "Without persistent memory, every agent session starts from scratch. CM lets agents learn from past sessions - remembering what worked, what failed, and extracting reusable playbook rules for future work.",
     implementationHighlights: [
       "Three-layer cognitive architecture (Episodic, Working, Procedural)",
       "MCP tools for cross-session context persistence",
@@ -2218,14 +2219,14 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     category: "core",
     stars: 307,
     whatItDoes:
-      "Full-text search across all AI coding agent sessions. Indexes conversations from Claude Code, Codex, Cursor, Gemini, and more.",
+      "Blazing-fast search across all your past AI coding agent sessions. Indexes conversations from Claude Code, Codex, Cursor, Gemini, ChatGPT and more with sub-millisecond query times.",
     whyItsUseful:
-      "You've solved a similar problem before, but which session was it? CASS indexes everything so you can search 'how did I fix that React hydration error' and find the exact conversation.",
+      "You've solved this problem before - but which session? CASS lets you search 'how did I fix that React hydration error' and instantly find the exact conversation. Also supports semantic search and multi-machine sync via SSH.",
     implementationHighlights: [
-      "Rust implementation with Tantivy full-text search",
-      "Multi-provider support (Claude, Codex, Cursor, Gemini)",
+      "Rust + Tantivy for sub-millisecond full-text search",
+      "Hybrid semantic + keyword search with RRF fusion",
       "Robot mode (--robot) for AI agent integration",
-      "Interactive TUI for human exploration",
+      "Multi-machine sync via SSH",
     ],
     synergies: [
       {
@@ -2523,7 +2524,7 @@ export const tldrPageData = {
     title: "The Agentic Coding Flywheel",
     subtitle: "TL;DR Edition",
     description:
-      "10 core tools and 3 supporting utilities that work together to supercharge multi-agent AI coding workflows. Each tool reinforces the others, creating a self-improving system where the whole is greater than the sum of its parts.",
+      "10 core tools and 3 supporting utilities that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
     stats: [
       { label: "Core Tools", value: "10" },
       { label: "GitHub Stars", value: "3,600+" },
@@ -2531,15 +2532,15 @@ export const tldrPageData = {
     ],
   },
   coreDescription:
-    "The core flywheel tools form the backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, search, safety guards, multi-repo sync, and automated setup.",
+    "The core flywheel tools form the backbone: Agent Mail for coordination, BV for graph-based prioritization, CASS for instant session search, CM for persistent memory, UBS for bug detection, plus session management, safety guards, and automated setup.",
   supportingDescription:
-    "Supporting tools extend the ecosystem with GitHub issue sync, archive search, and prompt crafting utilities.",
+    "Supporting tools extend the ecosystem: GIIL for remote image debugging, XF for searching your X archive, and S2P for crafting prompts from source code.",
   flywheelExplanation: {
     title: "Why a Flywheel?",
     paragraphs: [
-      "A flywheel stores rotational energy; the more you spin it, the more energy it stores, making each subsequent push easier. These tools work the same way.",
-      "Every agent session generates searchable history (CASS). Every bug found creates trackable issues (BV). Every resolved issue becomes institutional memory (CM). The more you use the system, the more valuable it becomes.",
-      "These tools form an integrated system where data flows between components, each making the others more powerful.",
+      "A flywheel stores rotational energy - the more you spin it, the easier each push becomes. These tools work the same way. The more you use them, the more valuable the system becomes.",
+      "Every agent session generates searchable history (CASS). Past solutions become retrievable memory (CM). Dependencies surface bottlenecks (BV). Agents coordinate without conflicts (Mail). Each piece feeds the others.",
+      "The result: I shipped 20,000+ lines of production Go code in a single day with BV. The flywheel keeps spinning faster - my GitHub commits accelerate each week because each tool amplifies the others.",
     ],
   },
 };
