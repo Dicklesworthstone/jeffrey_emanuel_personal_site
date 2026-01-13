@@ -78,7 +78,7 @@ function StarField({ density = 420, color = "#38bdf8" }: { density?: number; col
   const ref = useRef<THREE.Points>(null);
   const { quality } = useQuality();
 
-  const [positions] = useState(() => {
+  const positions = useMemo(() => {
     // Scale density based on quality settings
     const numPoints = scaleCount(density, quality);
     const pts = new Float32Array(numPoints * 3);
@@ -95,7 +95,7 @@ function StarField({ density = 420, color = "#38bdf8" }: { density?: number; col
       pts[idx + 2] = z;
     }
     return pts;
-  });
+  }, [density, quality]);
 
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
