@@ -21,6 +21,7 @@ export default function KeyboardShortcutsModal({
 }: KeyboardShortcutsModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const lastActiveElement = useRef<HTMLElement | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Focus management
@@ -46,6 +47,39 @@ export default function KeyboardShortcutsModal({
 
   // Prevent body scroll when open
   useBodyScrollLock(isOpen);
+
+  // Trap focus inside the modal while open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const container = modalRef.current;
+      if (!container) return;
+
+      const focusable = container.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      if (e.shiftKey) {
+        if (active === first || !container.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleTab);
+    return () => window.removeEventListener("keydown", handleTab);
+  }, [isOpen]);
 
   const navigationShortcuts = keyboardShortcutsList.filter(
     (s) => s.category === "navigation"
@@ -83,7 +117,10 @@ export default function KeyboardShortcutsModal({
             aria-modal="true"
             aria-labelledby="shortcuts-title"
           >
-            <div className="rounded-2xl border border-white/10 bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl">
+            <div
+              ref={modalRef}
+              className="rounded-2xl border border-white/10 bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl"
+            >
               {/* Header */}
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">

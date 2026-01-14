@@ -1,4 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+
+let lockCount = 0;
+let originalStyle: { overflow: string; paddingRight: string } | null = null;
 
 /**
  * Hook to lock body scroll when a component is mounted or active.
@@ -6,20 +9,19 @@ import { useEffect, useRef } from "react";
  * Also compensates for scrollbar width to prevent layout shift.
  */
 export function useBodyScrollLock(isLocked: boolean) {
-  const originalStyle = useRef<{ overflow: string; paddingRight: string } | null>(null);
-
   useEffect(() => {
-    if (isLocked) {
+    if (!isLocked) return undefined;
+    if (typeof window === "undefined") return undefined;
+
+    if (lockCount === 0) {
       // Measure scrollbar width
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 
-      // Store original styles only if we haven't already (to handle rapid toggles safely)
-      if (!originalStyle.current) {
-        originalStyle.current = {
-          overflow: document.body.style.overflow,
-          paddingRight: document.body.style.paddingRight,
-        };
-      }
+      // Store original styles
+      originalStyle = {
+        overflow: document.body.style.overflow,
+        paddingRight: document.body.style.paddingRight,
+      };
 
       // Apply styles
       document.body.style.overflow = "hidden";
@@ -27,20 +29,22 @@ export function useBodyScrollLock(isLocked: boolean) {
       if (scrollbarWidth > 0) {
         document.body.style.paddingRight = `${scrollbarWidth}px`;
       }
-      
+
       // Set global CSS variable for other fixed elements (like header) to use
       document.documentElement.style.setProperty("--scrollbar-width", `${scrollbarWidth}px`);
-
-      return () => {
-        // Restore styles
-        if (originalStyle.current) {
-          document.body.style.overflow = originalStyle.current.overflow;
-          document.body.style.paddingRight = originalStyle.current.paddingRight;
-          originalStyle.current = null;
-        }
-        document.documentElement.style.removeProperty("--scrollbar-width");
-      };
     }
-    return undefined;
+
+    lockCount += 1;
+
+    return () => {
+      lockCount = Math.max(0, lockCount - 1);
+      if (lockCount === 0 && originalStyle) {
+        // Restore styles
+        document.body.style.overflow = originalStyle.overflow;
+        document.body.style.paddingRight = originalStyle.paddingRight;
+        originalStyle = null;
+        document.documentElement.style.removeProperty("--scrollbar-width");
+      }
+    };
   }, [isLocked]);
 }
