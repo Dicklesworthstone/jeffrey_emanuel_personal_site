@@ -14,35 +14,45 @@ const PAGES_TO_CHECK = [
   { path: "/contact", name: "Contact" },
 ];
 
+// Patterns to ignore in error checking (expected in headless/CI environments)
+const IGNORED_ERROR_PATTERNS = [
+  "Failed to load resource", // Network errors from external resources
+  "net::ERR_", // Network errors
+  "favicon.ico", // Missing favicon variants
+  "THREE.WebGLRenderer", // WebGL not available in CI
+  "WebGL", // WebGL context errors in headless browsers
+  "WEBGL", // WebGL context errors (case variation)
+  "webgl", // WebGL context errors (lowercase)
+  "GPU", // GPU-related errors in headless mode
+];
+
 test.describe("Production Health Check", () => {
   test("production site has zero console errors", async ({ page }) => {
     const errors: { page: string; error: string }[] = [];
 
+    // Helper to check if error should be ignored
+    const shouldIgnoreError = (text: string): boolean => {
+      return IGNORED_ERROR_PATTERNS.some((pattern) =>
+        text.toLowerCase().includes(pattern.toLowerCase())
+      );
+    };
+
     // Capture page errors (unhandled exceptions)
     page.on("pageerror", (error) => {
-      errors.push({
-        page: page.url(),
-        error: `PageError: ${error.message}`,
-      });
+      if (!shouldIgnoreError(error.message)) {
+        errors.push({
+          page: page.url(),
+          error: `PageError: ${error.message}`,
+        });
+      }
     });
 
     // Capture console errors
     page.on("console", (msg) => {
       if (msg.type() === "error") {
         const text = msg.text();
-        // Ignore known third-party errors that we can't control
-        const ignoredPatterns = [
-          "Failed to load resource", // Network errors from external resources
-          "net::ERR_", // Network errors
-          "favicon.ico", // Missing favicon variants
-          "THREE.WebGLRenderer", // WebGL not available in CI
-        ];
 
-        const shouldIgnore = ignoredPatterns.some((pattern) =>
-          text.includes(pattern)
-        );
-
-        if (!shouldIgnore) {
+        if (!shouldIgnoreError(text)) {
           errors.push({
             page: page.url(),
             error: `ConsoleError: ${text}`,

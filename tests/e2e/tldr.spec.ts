@@ -38,8 +38,11 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
     console.log("[E2E] Tools count (13) visible");
 
     // Stars count - check that the stats section has numeric values
-    // Use a more specific selector for the hero stats container
-    const statsContainer = page.locator(".text-3xl, .text-4xl");
+    // Stats use responsive font sizes: text-2xl sm:text-3xl md:text-4xl
+    // Use a more robust selector that works across all viewport sizes
+    const statsContainer = page.locator(".text-2xl, .text-3xl, .text-4xl").filter({
+      hasText: /^\d/  // Starts with a digit (stat values like "13", "3,600+", "5")
+    });
     const statsCount = await statsContainer.count();
     console.log(`[E2E] Found ${statsCount} stat elements`);
     expect(statsCount).toBeGreaterThanOrEqual(2); // At least tools and stars
@@ -266,17 +269,28 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
 });
 
 test.describe("TLDR Page - Navigation", () => {
-  test("should be accessible from main navigation", async ({ page }) => {
+  test("should be accessible from main navigation", async ({ page, isMobile }) => {
     console.log("[E2E] Testing navigation to /tldr from homepage");
 
     // Go to homepage
     console.log("[E2E] Navigating to homepage");
     await page.goto("/");
 
+    // On mobile, we need to open the hamburger menu first
+    if (isMobile) {
+      console.log("[E2E] Mobile viewport - opening hamburger menu");
+      const menuButton = page.getByRole("button", { name: /menu|navigation/i });
+      if (await menuButton.isVisible()) {
+        await menuButton.click();
+        // Wait for menu animation
+        await page.waitForTimeout(300);
+      }
+    }
+
     // Click on Flywheel link in navigation header (use exact match for header nav)
     console.log("[E2E] Looking for Flywheel link in navigation");
-    const navHeader = page.locator("header");
-    await navHeader.getByRole("link", { name: "Flywheel", exact: true }).click();
+    const flywheelLink = page.getByRole("link", { name: "Flywheel", exact: true });
+    await flywheelLink.click();
     console.log("[E2E] Clicked Flywheel link");
 
     // Should navigate to /tldr
