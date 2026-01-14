@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { useReducedMotion } from "framer-motion";
 import type { Stat } from "@/lib/content";
-import XStatsCard from "@/components/x-stats-card";
+import { XStatsCard } from "@/components/x-stats-card";
+import { AnimatedNumber } from "@/components/animated-number";
 
 /**
  * Parse a stat value string like "10K+" into animated components.
@@ -26,105 +26,6 @@ export function parseStatValue(value: string): {
   const suffix = `${magnitude || ""}${plus || ""}`;
 
   return { number: num, suffix, isAnimatable: true };
-}
-
-/**
- * Animated stat number component
- */
-function AnimatedNumber({
-  end,
-  suffix,
-  duration = 2000,
-  isVisible,
-}: {
-  end: number;
-  suffix: string;
-  duration?: number;
-  isVisible: boolean;
-}) {
-  // Check for reduced motion preference (SSR-safe via Framer Motion)
-  const prefersReducedMotion = useReducedMotion();
-
-  // Initialize with SSR-safe values (always 0/false) to avoid hydration mismatch
-  // prefersReducedMotion may differ between server and client
-  const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const frameRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-
-  // Handle reduced motion preference after hydration
-  useEffect(() => {
-    if (prefersReducedMotion && !hasAnimated) {
-      const hydrationId = setTimeout(() => {
-        setCount(end);
-        setHasAnimated(true);
-      }, 0);
-      return () => clearTimeout(hydrationId);
-    }
-    return undefined;
-  }, [prefersReducedMotion, end, hasAnimated]);
-
-  // Easing function - smooth deceleration
-  const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
-
-  useEffect(() => {
-    // Skip animation if reduced motion is preferred, already animated, or not visible
-    if (prefersReducedMotion || !isVisible || hasAnimated) return;
-
-    // Animation function defined inside effect to avoid stale closures
-    const animate = (timestamp: number) => {
-      if (startTimeRef.current === null) {
-        startTimeRef.current = timestamp;
-      }
-
-      const elapsed = timestamp - (startTimeRef.current ?? timestamp);
-      const progress = Math.min(elapsed / duration, 1);
-      const easedProgress = easeOutExpo(progress);
-      const currentCount = easedProgress * end;
-
-      setCount(currentCount);
-
-      if (progress < 1) {
-        frameRef.current = requestAnimationFrame(animate);
-      } else {
-        setCount(end);
-        setHasAnimated(true);
-      }
-    };
-
-    // Start animation
-    startTimeRef.current = null;
-    frameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, [isVisible, hasAnimated, end, duration, prefersReducedMotion]);
-
-  // Use count directly - reduced motion users will have count set to end via useEffect
-  // This avoids hydration mismatch since prefersReducedMotion may differ server vs client
-  const currentCount = count;
-
-  // Format number - show integer for whole numbers, one decimal otherwise
-  const displayNumber =
-    end % 1 === 0 ? Math.round(currentCount).toString() : currentCount.toFixed(1);
-
-  // Final value for screen readers (immediate, no animation)
-  const finalValue = end % 1 === 0 ? end.toString() : end.toFixed(1);
-
-  return (
-    <>
-      {/* Screen reader sees final value immediately */}
-      <span className="sr-only">{finalValue}{suffix}</span>
-      {/* Visual animated number */}
-      <span className="tabular-nums" aria-hidden="true">
-        {displayNumber}
-        {suffix}
-      </span>
-    </>
-  );
 }
 
 export default function StatsGrid({ stats }: { stats: Stat[] }) {
@@ -191,7 +92,7 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
             <dd className="mt-3 text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
               {parsed.isAnimatable ? (
                 <AnimatedNumber
-                  end={parsed.number}
+                  value={parsed.number}
                   suffix={parsed.suffix}
                   duration={1800 + index * 200} // Slightly different duration for each
                   isVisible={isVisible}

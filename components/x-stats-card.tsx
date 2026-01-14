@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Eye, Heart, Bookmark, TrendingUp } from "lucide-react";
+import { AnimatedNumber } from "@/components/animated-number";
 
 interface XEngagementStat {
   icon: typeof Eye;
@@ -17,85 +18,7 @@ const engagementStats: XEngagementStat[] = [
   { icon: Bookmark, label: "Bookmarks", value: "62.8K", numericValue: 62.8 },
 ];
 
-function AnimatedNumber({
-  end,
-  suffix,
-  duration = 1500,
-  isVisible,
-  decimals = 1,
-}: {
-  end: number;
-  suffix: string;
-  duration?: number;
-  isVisible: boolean;
-  decimals?: number;
-}) {
-  const prefersReducedMotion = useReducedMotion();
-  // Initialize with 0/false to avoid hydration mismatch (prefersReducedMotion differs server vs client)
-  const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const frameRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-
-  const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
-
-  // Handle reduced motion preference after hydration
-  useEffect(() => {
-    if (prefersReducedMotion && !hasAnimated) {
-      const hydrationId = setTimeout(() => {
-        setCount(end);
-        setHasAnimated(true);
-      }, 0);
-      return () => clearTimeout(hydrationId);
-    }
-    return undefined;
-  }, [prefersReducedMotion, end, hasAnimated]);
-
-  useEffect(() => {
-    if (prefersReducedMotion || !isVisible || hasAnimated) return;
-
-    const animate = (timestamp: number) => {
-      if (startTimeRef.current === null) {
-        startTimeRef.current = timestamp;
-      }
-
-      const elapsed = timestamp - (startTimeRef.current ?? timestamp);
-      const progress = Math.min(elapsed / duration, 1);
-      const easedProgress = easeOutExpo(progress);
-      const currentCount = easedProgress * end;
-
-      setCount(currentCount);
-
-      if (progress < 1) {
-        frameRef.current = requestAnimationFrame(animate);
-      } else {
-        setCount(end);
-        setHasAnimated(true);
-      }
-    };
-
-    startTimeRef.current = null;
-    frameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, [isVisible, hasAnimated, end, duration, prefersReducedMotion]);
-
-  const currentCount = prefersReducedMotion ? end : count;
-  const displayNumber = currentCount.toFixed(decimals);
-
-  return (
-    <span className="tabular-nums">
-      {displayNumber}
-      {suffix}
-    </span>
-  );
-}
-
-export default function XStatsCard() {
+export function XStatsCard() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -148,7 +71,7 @@ export default function XStatsCard() {
   // Track if we've ever expanded (for animation purposes)
   useEffect(() => {
     if (isExpanded && !hasExpandedOnce) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time animation trigger based on user interaction
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time flag, not a sync loop
       setHasExpandedOnce(true);
     }
   }, [isExpanded, hasExpandedOnce]);
@@ -205,7 +128,7 @@ export default function XStatsCard() {
       </dt>
       <dd className="mt-3 text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
         <AnimatedNumber
-          end={29}
+          value={29}
           suffix="K+"
           duration={1800}
           isVisible={isVisible}
@@ -245,7 +168,7 @@ export default function XStatsCard() {
                       <Icon className="mb-0.5 h-2.5 w-2.5 text-slate-400" />
                       <span className="text-xs font-bold text-slate-200">
                         <AnimatedNumber
-                          end={stat.numericValue}
+                          value={stat.numericValue}
                           suffix={stat.value.includes("M") ? "M" : "K"}
                           duration={1200 + index * 150}
                           isVisible={hasExpandedOnce}

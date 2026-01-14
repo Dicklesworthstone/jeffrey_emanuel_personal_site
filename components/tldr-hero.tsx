@@ -96,9 +96,16 @@ export function TldrHero({ className, id }: TldrHeroProps) {
 
   // Hide scroll indicator after user scrolls
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setHasScrolled(true);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (window.scrollY > 50) {
+            setHasScrolled(true);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 

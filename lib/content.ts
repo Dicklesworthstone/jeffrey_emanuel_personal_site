@@ -42,12 +42,12 @@ export type Stat = { label: string; value: string; helper?: string };
 export const heroStats: Stat[] = [
   {
     label: "GitHub Stars",
-    value: "12K+",
+    value: "16K+",
     helper: "Across 70+ open-source agent tools and infrastructure.",
   },
   {
     label: "Flywheel Tools",
-    value: "10",
+    value: "13",
     helper: "Core tools that amplify multi-agent workflows.",
   },
   {
