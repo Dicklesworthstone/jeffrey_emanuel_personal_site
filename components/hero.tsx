@@ -14,6 +14,7 @@ import ThreeSceneFallback from "@/components/three-scene-fallback";
 import { heroContent, heroStats, siteConfig, type Stat } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useClickParticles } from "@/hooks/use-click-particles";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import headshot from "@/assets/jeff_emanuel_headshot.webp";
 
@@ -38,6 +39,12 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   const [shouldRenderScene, setShouldRenderScene] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const idleHandleRef = useRef<{ id: number; type: "idle" | "timeout" } | null>(null);
+  const { ref: sceneRef, isIntersecting: isSceneVisible } =
+    useIntersectionObserver<HTMLDivElement>({
+    threshold: 0.15,
+    rootMargin: "200px",
+    triggerOnce: false,
+  });
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(min-width: 1024px)");
@@ -105,6 +112,8 @@ export default function Hero({ stats = heroStats }: HeroProps) {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isSceneActive = shouldRenderScene && isSceneVisible;
 
   return (
     <section
@@ -306,7 +315,10 @@ export default function Hero({ stats = heroStats }: HeroProps) {
         </div>
 
         {/* 3D Scene - Full Three.js on desktop, lightweight fallback on mobile */}
-        <div className="relative mt-12 h-[400px] w-full lg:absolute lg:-right-[10%] lg:top-1/2 lg:mt-0 lg:h-[900px] lg:w-[1000px] lg:-translate-y-1/2 lg:opacity-100 pointer-events-none">
+        <div
+          ref={sceneRef}
+          className="relative mt-12 h-[400px] w-full lg:absolute lg:-right-[10%] lg:top-1/2 lg:mt-0 lg:h-[900px] lg:w-[1000px] lg:-translate-y-1/2 lg:opacity-100 pointer-events-none"
+        >
            <div className="absolute inset-0 z-10 bg-gradient-to-l from-transparent via-[#020617]/20 to-[#020617] lg:via-[#020617]/60" />
            <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#020617] to-transparent lg:hidden" />
 
@@ -320,7 +332,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
              <ErrorBoundary fallback={<ThreeSceneFallback />}>
                 {shouldRenderScene ? (
                   <Suspense fallback={<ThreeSceneLoading />}>
-                    <ThreeScene />
+                    <ThreeScene isActive={isSceneActive} />
                   </Suspense>
                 ) : (
                   <ThreeSceneFallback />

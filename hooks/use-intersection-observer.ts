@@ -15,12 +15,12 @@ interface UseIntersectionObserverOptions {
  * Note: Starts with isIntersecting=true to prevent flash of invisible content
  * during SSR/hydration. The observer will correct this if element is not visible.
  */
-export function useIntersectionObserver({
+export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
   threshold = 0.1,
   rootMargin = "0px",
   triggerOnce = true,
 }: UseIntersectionObserverOptions = {}) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<T | null>(null);
   // Start true to prevent flash of invisible content during hydration
   const [isIntersecting, setIsIntersecting] = useState(true);
   const hasTriggeredRef = useRef(false);

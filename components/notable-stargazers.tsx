@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Star, Users, ExternalLink } from "lucide-react";
@@ -24,6 +24,52 @@ try {
   stargazerData = require("@/lib/data/stargazer-intelligence.sample.json");
 }
 
+type ResolvedStargazerData = {
+  stargazers: NotableStargazer[];
+  totalCount: number;
+  companies: { name: string; count: number }[];
+  combinedReach: number;
+};
+
+const EMPTY_RESOLVED: ResolvedStargazerData = {
+  stargazers: [],
+  totalCount: 0,
+  companies: [],
+  combinedReach: 0,
+};
+
+const HOMEPAGE_RESOLVED: ResolvedStargazerData = {
+  stargazers: stargazerData.topStargazers ?? [],
+  totalCount: stargazerData.totalUniqueStargazers ?? 0,
+  companies: stargazerData.topCompanies ?? [],
+  combinedReach: stargazerData.combinedReach ?? 0,
+};
+
+const repoCache = new Map<string, ResolvedStargazerData>();
+
+function resolveRepoData(repoSlug: string): ResolvedStargazerData {
+  const cached = repoCache.get(repoSlug);
+  if (cached) return cached;
+
+  const repoData = stargazerData.byRepo?.[repoSlug];
+  if (!repoData) {
+    repoCache.set(repoSlug, EMPTY_RESOLVED);
+    return EMPTY_RESOLVED;
+  }
+
+  const resolved: ResolvedStargazerData = {
+    stargazers: repoData.topStargazers,
+    totalCount: repoData.notableCount,
+    companies: repoData.topCompanies?.map((name) => ({ name, count: 0 })) ?? [],
+    combinedReach: repoData.topStargazers.reduce((sum, s) => sum + s.followers, 0),
+  };
+
+  repoCache.set(repoSlug, resolved);
+  return resolved;
+}
+
+const isStargazerDataStale = isDataStale(stargazerData.lastUpdated);
+
 interface NotableStargazersProps {
   /** Display mode */
   variant?: "homepage" | "project" | "compact";
@@ -44,10 +90,16 @@ interface NotableStargazersProps {
   className?: string;
 }
 
+const AVATAR_SIZE_CONFIG = {
+  sm: { className: "h-8 w-8", pixels: 32, ring: "ring-2" },
+  md: { className: "h-10 w-10", pixels: 40, ring: "ring-2" },
+  lg: { className: "h-12 w-12", pixels: 48, ring: "ring-[3px]" },
+};
+
 /**
  * Avatar component for a single stargazer with tooltip
  */
-function StargazerAvatar({
+const StargazerAvatar = memo(function StargazerAvatar({
   stargazer,
   size = "md",
   index = 0,
@@ -58,13 +110,7 @@ function StargazerAvatar({
   index?: number;
   prefersReducedMotion: boolean | null;
 }) {
-  const sizeConfig = {
-    sm: { className: "h-8 w-8", pixels: 32, ring: "ring-2" },
-    md: { className: "h-10 w-10", pixels: 40, ring: "ring-2" },
-    lg: { className: "h-12 w-12", pixels: 48, ring: "ring-[3px]" },
-  };
-
-  const config = sizeConfig[size];
+  const config = AVATAR_SIZE_CONFIG[size];
 
   return (
     <motion.a
@@ -124,12 +170,12 @@ function StargazerAvatar({
       </div>
     </motion.a>
   );
-}
+});
 
 /**
  * Avatar strip showing multiple stargazers
  */
-function AvatarStrip({
+const AvatarStrip = memo(function AvatarStrip({
   stargazers,
   maxItems,
   size = "md",
@@ -142,7 +188,10 @@ function AvatarStrip({
   totalCount: number;
   prefersReducedMotion: boolean | null;
 }) {
-  const displayStargazers = stargazers.slice(0, maxItems);
+  const displayStargazers = useMemo(
+    () => stargazers.slice(0, maxItems),
+    [stargazers, maxItems],
+  );
   const remainingCount = totalCount - displayStargazers.length;
 
   const overlapClasses = {
@@ -176,12 +225,12 @@ function AvatarStrip({
       )}
     </div>
   );
-}
+});
 
 /**
  * Stats line showing reach and counts
  */
-function StatsLine({
+const StatsLine = memo(function StatsLine({
   totalCount,
   combinedReach,
   prefersReducedMotion,
@@ -204,12 +253,12 @@ function StatsLine({
       combined reach
     </motion.div>
   );
-}
+});
 
 /**
  * Company mentions line
  */
-function CompanyMentions({
+const CompanyMentions = memo(function CompanyMentions({
   companies,
   maxCompanies,
   prefersReducedMotion,
@@ -239,7 +288,7 @@ function CompanyMentions({
       ))}
     </motion.div>
   );
-}
+});
 
 /**
  * Notable Stargazers display component.
@@ -275,40 +324,11 @@ export function NotableStargazers({
   const finalShowStats = showStats ?? defaults.showStats;
   const finalShowCompanies = showCompanies ?? defaults.showCompanies;
 
-  // Get stargazers based on variant
-  const { stargazers, totalCount, companies, combinedReach } = useMemo(() => {
-    if (variant === "project" && repoSlug) {
-      const repoData = stargazerData.byRepo[repoSlug];
-      if (!repoData) {
-        return {
-          stargazers: [],
-          totalCount: 0,
-          companies: [],
-          combinedReach: 0,
-        };
-      }
-      return {
-        stargazers: repoData.topStargazers,
-        totalCount: repoData.notableCount,
-        companies: repoData.topCompanies?.map((name) => ({ name, count: 0 })) || [],
-        combinedReach: repoData.topStargazers.reduce((sum, s) => sum + s.followers, 0),
-      };
-    }
-
-    // Homepage or compact - use aggregate data
-    return {
-      stargazers: stargazerData.topStargazers,
-      totalCount: stargazerData.totalUniqueStargazers,
-      companies: stargazerData.topCompanies,
-      combinedReach: stargazerData.combinedReach,
-    };
-  }, [variant, repoSlug]);
-
-  // Check for stale data
-  const isStale = useMemo(
-    () => isDataStale(stargazerData.lastUpdated),
-    []
-  );
+  // Resolve stargazer data without re-computing on every render
+  const resolvedData =
+    variant === "project" && repoSlug ? resolveRepoData(repoSlug) : HOMEPAGE_RESOLVED;
+  const { stargazers, totalCount, companies, combinedReach } = resolvedData;
+  const isStale = isStargazerDataStale;
 
   // Don't render if no data
   if (stargazers.length === 0) {
