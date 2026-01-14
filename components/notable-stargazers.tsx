@@ -57,11 +57,12 @@ function resolveRepoData(repoSlug: string): ResolvedStargazerData {
     return EMPTY_RESOLVED;
   }
 
+  const topStargazers = repoData.topStargazers ?? [];
   const resolved: ResolvedStargazerData = {
-    stargazers: repoData.topStargazers,
+    stargazers: topStargazers,
     totalCount: repoData.notableCount,
     companies: repoData.topCompanies?.map((name) => ({ name, count: 0 })) ?? [],
-    combinedReach: repoData.topStargazers.reduce((sum, s) => sum + s.followers, 0),
+    combinedReach: topStargazers.reduce((sum, s) => sum + s.followers, 0),
   };
 
   repoCache.set(repoSlug, resolved);

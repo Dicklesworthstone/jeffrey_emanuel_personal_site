@@ -34,6 +34,10 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
       return;
     }
 
+    if (typeof IntersectionObserver === "undefined") {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         const isNowIntersecting = entry.isIntersecting;
