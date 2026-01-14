@@ -22,7 +22,6 @@ import {
 import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
-import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 import BottomSheet from "@/components/bottom-sheet";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
