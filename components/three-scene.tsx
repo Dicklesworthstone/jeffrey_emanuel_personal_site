@@ -55,16 +55,13 @@ const palettes: Palette[] = [
 ];
 
 const useHour = () => {
-  // Initialize with 12 (noon) to avoid hydration mismatch, update after mount
-  const [hour, setHour] = useState(12);
+  // Initialize with current hour since this is a client-side only component (ssr: false)
+  const [hour, setHour] = useState(() => new Date().getHours());
   useEffect(() => {
     const update = () => setHour(new Date().getHours());
-    const hydrationId = setTimeout(update, 0);
+    // Update every minute
     const id = setInterval(update, 60_000);
-    return () => {
-      clearTimeout(hydrationId);
-      clearInterval(id);
-    };
+    return () => clearInterval(id);
   }, []);
   return hour;
 };

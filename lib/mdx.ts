@@ -10,6 +10,10 @@ import { cache } from "react";
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 
 function resolvePostsDirectory(): string | null {
+  // 1. Try process.cwd() joined with content/writing (Standard Next.js)
+  const cwdPath = path.join(process.cwd(), "content/writing");
+  if (fs.existsSync(cwdPath)) return cwdPath;
+
   const bases = [moduleDir, process.cwd()];
   for (const base of bases) {
     let cursor = base;
