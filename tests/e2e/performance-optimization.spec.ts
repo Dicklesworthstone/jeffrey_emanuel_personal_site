@@ -161,6 +161,11 @@ test.describe("Performance Optimization - 3D Scene", () => {
       "GPU",
       "gpu",
       "context",
+      "THREE",
+      "renderer",
+      "canvas",
+      "Failed to load resource",
+      "net::ERR_",
     ];
 
     // Listen for console errors
