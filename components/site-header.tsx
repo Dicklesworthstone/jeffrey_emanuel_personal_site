@@ -31,6 +31,13 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Detect OS for meta key using lazy initializer
+  const [metaKey] = useState(() => {
+    if (typeof navigator !== "undefined" && !/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
+      return "Ctrl+";
+    }
+    return "⌘";
+  });
   const { lightTap, mediumTap } = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
   const resolvedPath = pathname ?? "";
@@ -141,7 +148,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               <Search className="h-4 w-4" />
               <span className="hidden lg:inline">Search</span>
               <kbd className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-slate-300 lg:inline-block">
-                ⌘K
+                {metaKey}K
               </kbd>
             </button>
 

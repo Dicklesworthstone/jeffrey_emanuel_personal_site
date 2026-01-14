@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Keyboard } from "lucide-react";
 import { keyboardShortcutsList } from "@/hooks/use-keyboard-shortcuts";
@@ -23,6 +23,14 @@ export default function KeyboardShortcutsModal({
   const lastActiveElement = useRef<HTMLElement | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  // Detect OS for modifier key using lazy initializer
+  const [modifier] = useState(() => {
+    if (typeof navigator !== "undefined" && !/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
+      return "Ctrl";
+    }
+    return "⌘";
+  });
 
   // Focus management
   useEffect(() => {
@@ -147,13 +155,13 @@ export default function KeyboardShortcutsModal({
               {/* Shortcuts List */}
               <div className="space-y-6">
                 {/* Navigation */}
-                <ShortcutSection title="Navigation" shortcuts={navigationShortcuts} />
+                <ShortcutSection title="Navigation" shortcuts={navigationShortcuts} modifier={modifier} />
 
                 {/* Actions */}
-                <ShortcutSection title="Actions" shortcuts={actionShortcuts} />
+                <ShortcutSection title="Actions" shortcuts={actionShortcuts} modifier={modifier} />
 
                 {/* General */}
-                <ShortcutSection title="General" shortcuts={generalShortcuts} />
+                <ShortcutSection title="General" shortcuts={generalShortcuts} modifier={modifier} />
               </div>
 
               {/* Footer hint */}
@@ -171,9 +179,11 @@ export default function KeyboardShortcutsModal({
 function ShortcutSection({
   title,
   shortcuts,
+  modifier,
 }: {
   title: string;
   shortcuts: typeof keyboardShortcutsList;
+  modifier: string;
 }) {
   return (
     <div>
@@ -189,7 +199,7 @@ function ShortcutSection({
             <span className="text-sm text-slate-300">{shortcut.description}</span>
             <div className="flex items-center gap-1">
               {shortcut.keys.map((key) => (
-                <Kbd key={key}>{key}</Kbd>
+                <Kbd key={key}>{key === "⌘" ? modifier : key}</Kbd>
               ))}
             </div>
           </div>
