@@ -8,7 +8,6 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import ErrorBoundary from "@/components/error-boundary";
 import CopyButton from "@/components/copy-button";
 
@@ -30,9 +29,12 @@ interface MarkdownRendererProps {
 }
 
 // Lazy-loaded code block with syntax highlighting
-function CodeBlock({ language, children }: { language: string; children: string }) {
+function CodeBlock({ language, children }: { language: string; children: React.ReactNode }) {
   const [style, setStyle] = useState<Record<string, React.CSSProperties> | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Ensure content is a string
+  const content = String(children || "").replace(/\n$/, "");
 
   useEffect(() => {
     oneDarkPromise.then((theme) => {
@@ -46,10 +48,10 @@ function CodeBlock({ language, children }: { language: string; children: string 
     return (
       <div className="group relative rounded-lg bg-slate-900/80">
         <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
-          <CopyButton text={children} />
+          <CopyButton text={content} />
         </div>
         <pre className="overflow-x-auto p-4 text-sm">
-          <code className="font-mono text-slate-300">{children}</code>
+          <code className="font-mono text-slate-300">{content}</code>
         </pre>
       </div>
     );
@@ -58,7 +60,7 @@ function CodeBlock({ language, children }: { language: string; children: string 
   return (
     <div className="group relative rounded-lg bg-[#282c34]">
       <div className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
-        <CopyButton text={children} />
+        <CopyButton text={content} />
       </div>
       <SyntaxHighlighter
         style={style}
@@ -66,7 +68,7 @@ function CodeBlock({ language, children }: { language: string; children: string 
         PreTag="div"
         customStyle={{ margin: 0, padding: '1rem', background: 'transparent' }}
       >
-        {children}
+        {content}
       </SyntaxHighlighter>
     </div>
   );
@@ -100,7 +102,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             const match = /language-(\w+)/.exec(className || "");
             return !inline && match ? (
               <CodeBlock language={match[1]}>
-                {String(children).replace(/\n$/, "")}
+                {children}
               </CodeBlock>
             ) : (
               <code {...props} className={cn("bg-slate-800/50 rounded px-1.5 py-0.5 text-sm font-mono text-sky-200", className)}>
@@ -121,23 +123,23 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             return <td className="px-6 py-4 border-b border-slate-800/50 text-slate-400 whitespace-nowrap">{children}</td>;
           },
           img({ src, alt }) {
-             // For external images where we can't control the size, use fill or width/height 0
-             // We need to handle relative URLs (local images) vs absolute URLs
+             const safeSrc = (src as string) || "";
              return (
                  <figure className="block my-8 relative">
-                    <div className="relative w-full h-auto">
-                      <Image 
-                        src={(src as string) || ""} 
-                        alt={alt || ""}
-                        width={0}
-                        height={0}
-                        sizes="100vw"
-                        className="rounded-xl border border-slate-800 shadow-2xl mx-auto w-full h-auto"
-                        style={{ width: '100%', height: 'auto' }}
-                        loading="lazy"
-                      />
-                    </div>
-                    {alt && <figcaption className="block text-center text-sm text-slate-500 mt-2 italic">{alt}</figcaption>}
+                    {/* Use a standard img tag to avoid unknown-dimension Next/Image errors */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={safeSrc}
+                      alt={alt || ""}
+                      loading="lazy"
+                      decoding="async"
+                      className="rounded-xl border border-slate-800 shadow-2xl mx-auto w-full h-auto"
+                    />
+                    {alt && (
+                      <figcaption className="block text-center text-sm text-slate-500 mt-2 italic">
+                        {alt}
+                      </figcaption>
+                    )}
                  </figure>
              )
           }
