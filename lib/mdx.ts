@@ -61,10 +61,16 @@ export const getPostBySlug = cache((slug: string) => {
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
 
+  const parsedDate = data.date ? new Date(data.date) : null;
+  const safeDate =
+    parsedDate && !Number.isNaN(parsedDate.getTime())
+      ? parsedDate.toISOString()
+      : new Date().toISOString();
+
   const items: Post = {
     slug: realSlug,
     title: data.title || realSlug.replace(/-/g, " "),
-    date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+    date: safeDate,
     excerpt: data.excerpt || "",
     content: content,
     ...data,

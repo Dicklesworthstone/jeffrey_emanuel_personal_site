@@ -21,12 +21,12 @@ export async function GET() {
       .slice(0, 5000); // Cap at 5000 chars per post to prevent massive payloads
 
     return {
-      title: post.title,
+      title: post.title || "",
       slug: post.slug,
-      excerpt: post.excerpt,
-      category: post.category,
+      excerpt: post.excerpt || "",
+      category: post.category || "Essay",
       tags: post.tags || [],
-      content: plainText,
+      content: plainText || "",
     };
   });
 
