@@ -201,13 +201,19 @@ describe("seededRandom", () => {
 
       // Generate 1000 more and check none match the first value exactly
       const firstValue = firstValues[0];
+      let cycleFoundAt = -1;
       for (let i = 0; i < 1000; i++) {
         const value = rand();
         // Allow for floating point comparison
         if (Math.abs(value - firstValue) < 1e-15) {
-          console.log(`[TEST] Warning: Found repeat of first value at iteration ${i + 10}`);
+          cycleFoundAt = i + 10;
+          console.log(`[TEST] ERROR: Found repeat of first value at iteration ${cycleFoundAt}`);
+          break;
         }
       }
+
+      // This should fail if a cycle was detected
+      expect(cycleFoundAt).toBe(-1);
       console.log("[TEST] ✓ No quick cycle detected in first 1010 values");
     });
   });
