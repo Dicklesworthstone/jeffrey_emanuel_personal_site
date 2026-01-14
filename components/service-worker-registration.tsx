@@ -14,8 +14,6 @@ export default function ServiceWorkerRegistration() {
         navigator.serviceWorker
           .register("/sw.js", { scope: "/" })
           .then((registration) => {
-            console.log("SW registered:", registration.scope);
-
             // Check for updates
             registration.addEventListener("updatefound", () => {
               const newWorker = registration.installing;
@@ -25,8 +23,7 @@ export default function ServiceWorkerRegistration() {
                     newWorker.state === "installed" &&
                     navigator.serviceWorker.controller
                   ) {
-                    // New content available, show refresh prompt if desired
-                    console.log("New content available, refresh to update");
+                    // New content available
                   }
                 });
               }
@@ -39,7 +36,7 @@ export default function ServiceWorkerRegistration() {
 
       // Handle controller change (when a new SW takes over)
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        console.log("New service worker activated");
+        // New service worker activated
       });
     }
     return;
