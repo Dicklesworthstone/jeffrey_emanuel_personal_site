@@ -33,15 +33,39 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const { lightTap, mediumTap } = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
+  const resolvedPath = pathname ?? "";
+
+  const isActive = (href: string) => {
+    if (href === "/") return resolvedPath === "/";
+    return resolvedPath.startsWith(href);
+  };
 
   // Shrink header on scroll (mobile only)
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+    let ticking = false;
+    let lastScrolled = false;
+
+    const update = () => {
+      const next = window.scrollY > 20;
+      if (next !== lastScrolled) {
+        lastScrolled = next;
+        setScrolled(next);
+      }
+      ticking = false;
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    };
+
+    // Set initial state in case page loads mid-scroll
+    update();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   // Lock body scroll when menu is open
@@ -86,7 +110,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             aria-label="Main navigation"
           >
             {navItems.map((item) => {
-              const active = pathname === item.href;
+              const active = isActive(item.href);
               return (
                 <Link
                   key={item.href}
@@ -196,7 +220,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
               >
                 {navItems.map((item) => {
-                  const active = pathname === item.href;
+                  const active = isActive(item.href);
                   return (
                     <Link
                       key={item.href}

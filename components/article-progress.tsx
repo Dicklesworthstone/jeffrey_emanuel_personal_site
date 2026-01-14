@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useSpring, useReducedMotion, useMotionValue } from "framer-motion";
 
 /**
@@ -12,32 +12,34 @@ export default function ArticleProgress() {
   // Use spring for smooth animation derived from the motion value
   const scaleX = useSpring(progress, { stiffness: 100, damping: 30 });
   const prefersReducedMotion = useReducedMotion();
+  const metricsRef = useRef({ start: 0, end: 0 });
 
   useEffect(() => {
     let ticking = false;
 
-    const calculateProgress = () => {
+    const measure = () => {
       const article = document.querySelector("article");
-      if (!article) return;
+      if (!article) return null;
 
-      const articleTop = article.offsetTop;
-      const articleHeight = article.offsetHeight;
-      const windowHeight = window.innerHeight;
-      const scrollY = window.scrollY;
+      const rect = article.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const end = top + rect.height - window.innerHeight;
+      metricsRef.current = { start: top, end };
+      return article;
+    };
 
-      // Calculate how far through the article we've scrolled
-      const start = articleTop;
-      const end = articleTop + articleHeight - windowHeight;
+    const calculateProgress = () => {
+      const { start, end } = metricsRef.current;
       const scrollRange = end - start;
 
-      if (scrollRange <= 0) {
+      if (!Number.isFinite(scrollRange) || scrollRange <= 0) {
         progress.set(1);
         return;
       }
 
       const currentProgress = Math.min(
         1,
-        Math.max(0, (scrollY - start) / scrollRange)
+        Math.max(0, (window.scrollY - start) / scrollRange)
       );
 
       progress.set(currentProgress);
@@ -52,18 +54,23 @@ export default function ArticleProgress() {
         ticking = true;
       }
     };
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
 
-    // Calculate on mount and scroll
+    // Measure and calculate on mount
+    const article = measure();
     calculateProgress();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
 
     // Use ResizeObserver to detect layout changes (e.g. images loading)
-    const article = document.querySelector("article");
     let resizeObserver: ResizeObserver | null = null;
     
     if (article) {
       resizeObserver = new ResizeObserver(() => {
+        measure();
         onScroll();
       });
       resizeObserver.observe(article);
@@ -71,7 +78,7 @@ export default function ArticleProgress() {
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }

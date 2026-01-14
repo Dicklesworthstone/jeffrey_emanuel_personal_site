@@ -714,6 +714,7 @@ export default function FlywheelVisualization() {
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
   const supportsMotionPath = useSupportsMotionPath();
+  const toolById = useMemo(() => new Map(flywheelTools.map((tool) => [tool.id, tool])), []);
 
   const activeToolId = selectedToolId || hoveredToolId;
   // Show detail panel for hovered tool (desktop) or selected tool (mobile/click)
@@ -794,26 +795,32 @@ export default function FlywheelVisualization() {
     return lines;
   }, []);
 
+  const hasConnection = useCallback(
+    (from: string, to: string) => {
+      const fromTool = toolById.get(from);
+      const toTool = toolById.get(to);
+      return Boolean(
+        fromTool?.connectsTo.includes(to) || toTool?.connectsTo.includes(from)
+      );
+    },
+    [toolById]
+  );
+
   const isConnectionHighlighted = useCallback(
     (from: string, to: string) => {
       if (!activeToolId) return false;
-      const activeTool = flywheelTools.find((t) => t.id === activeToolId);
-      if (!activeTool) return false;
-      return (
-        (from === activeToolId && activeTool.connectsTo.includes(to)) ||
-        (to === activeToolId && activeTool.connectsTo.includes(from))
-      );
+      if (activeToolId !== from && activeToolId !== to) return false;
+      return hasConnection(from, to);
     },
-    [activeToolId]
+    [activeToolId, hasConnection]
   );
 
   const isToolConnected = useCallback(
     (toolId: string) => {
       if (!activeToolId || toolId === activeToolId) return false;
-      const activeTool = flywheelTools.find((t) => t.id === activeToolId);
-      return activeTool?.connectsTo.includes(toolId) ?? false;
+      return hasConnection(activeToolId, toolId);
     },
-    [activeToolId]
+    [activeToolId, hasConnection]
   );
 
   const handleSelectTool = useCallback((toolId: string) => {

@@ -9,8 +9,7 @@ export default function ServiceWorkerRegistration() {
       "serviceWorker" in navigator &&
       process.env.NODE_ENV === "production"
     ) {
-      // Register service worker after page load
-      window.addEventListener("load", () => {
+      const registerServiceWorker = () => {
         navigator.serviceWorker
           .register("/sw.js", { scope: "/" })
           .then((registration) => {
@@ -32,12 +31,26 @@ export default function ServiceWorkerRegistration() {
           .catch(() => {
             // Silently fail if SW registration fails (e.g. Firefox private mode)
           });
-      });
+      };
+
+      // Register immediately if the page already loaded
+      if (document.readyState === "complete") {
+        registerServiceWorker();
+      } else {
+        // Register service worker after page load
+        window.addEventListener("load", registerServiceWorker);
+      }
 
       // Handle controller change (when a new SW takes over)
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
+      const handleControllerChange = () => {
         // New service worker activated
-      });
+      };
+      navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+
+      return () => {
+        window.removeEventListener("load", registerServiceWorker);
+        navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+      };
     }
     return;
   }, []);
