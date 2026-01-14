@@ -55,8 +55,11 @@ const palettes: Palette[] = [
 ];
 
 const useHour = () => {
-  const [hour, setHour] = useState(() => new Date().getHours());
+  // Initialize with 12 (noon) to avoid hydration mismatch, update after mount
+  const [hour, setHour] = useState(12);
   useEffect(() => {
+    // Set actual hour after hydration
+    setHour(new Date().getHours());
     const update = () => setHour(new Date().getHours());
     const id = setInterval(update, 60_000);
     return () => clearInterval(id);
@@ -1518,7 +1521,7 @@ const hourlyPlan: { variant: VariantKey; palette: number; seed: number; backgrou
 // ---------------------------------------------------------------------------
 // Main exported component
 // ---------------------------------------------------------------------------
-export default function ThreeScene() {
+export default function ThreeScene({ isActive = true }: { isActive?: boolean }) {
   const { capabilities, quality } = useDeviceCapabilities();
   const { isMobile, tier } = capabilities;
   const prefersReducedMotion = capabilities.prefersReducedMotion;
@@ -1546,7 +1549,7 @@ export default function ThreeScene() {
   }, [quality.maxDpr]);
 
   const autoRotateSpeed = tier === "low" ? 0.08 : tier === "medium" ? 0.18 : 0.28;
-  const allowAnimation = !prefersReducedMotion && tier !== "low";
+  const allowAnimation = isActive && !prefersReducedMotion && tier !== "low";
 
   // Context value
   const contextValue: QualityContextValue = useMemo(() => ({

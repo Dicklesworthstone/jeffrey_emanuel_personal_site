@@ -383,8 +383,14 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef(false);
-  const [now, setNow] = useState(() => new Date());
+  // Initialize with null to avoid hydration mismatch, set after mount
+  const [now, setNow] = useState<Date | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  // Set initial time after hydration to avoid mismatch
+  useEffect(() => {
+    setNow(new Date());
+  }, []);
 
   // Fetch events
   useEffect(() => {
@@ -435,6 +441,9 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
 
   // Calculate stats
   const stats = useMemo(() => {
+    // Return defaults if now is not yet set (during SSR/hydration)
+    if (!now) return { eventsToday: 0, streak: 0 };
+
     const todayKey = getLocalDayKey(now);
     const eventsToday = events.filter((e) => getLocalDayKey(e.timestamp) === todayKey).length;
 
@@ -523,13 +532,13 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
               <Clock className="h-8 w-8 text-slate-600" />
               <p className="text-sm text-slate-500">No recent activity</p>
             </div>
-          ) : (
+          ) : now ? (
             <AnimatePresence mode="popLayout">
               {events.slice(0, 5).map((event, index) => (
                 <EventCard key={event.id} event={event} index={index} now={now} />
               ))}
             </AnimatePresence>
-          )}
+          ) : null}
         </div>
 
         {/* Footer link */}
