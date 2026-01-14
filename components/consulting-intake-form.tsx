@@ -118,21 +118,23 @@ function FormField({
   required,
   error,
   children,
+  id,
 }: {
   label: string;
   required?: boolean;
   error?: string;
   children: React.ReactNode;
+  id?: string;
 }) {
   return (
     <div className="space-y-2">
-      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-300">
+      <label htmlFor={id} className="flex items-center gap-1.5 text-sm font-medium text-slate-300">
         {label}
         {required && <span className="text-rose-400">*</span>}
       </label>
       {children}
       {error && (
-        <p className="flex items-center gap-1.5 text-xs text-rose-400">
+        <p id={`${id}-error`} className="flex items-center gap-1.5 text-xs text-rose-400" role="alert">
           <AlertCircle className="h-3 w-3" />
           {error}
         </p>
@@ -159,6 +161,7 @@ function Input({
       )}
       <input
         {...props}
+        aria-invalid={error}
         className={cn(
           "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-all duration-200",
           "focus:border-violet-500/50 focus:outline-none focus:ring-2 focus:ring-violet-500/20",
@@ -180,6 +183,7 @@ function Textarea({
   return (
     <textarea
       {...props}
+      aria-invalid={error}
       className={cn(
         "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-all duration-200 resize-none",
         "focus:border-violet-500/50 focus:outline-none focus:ring-2 focus:ring-violet-500/20",
@@ -472,41 +476,48 @@ ${formData.message}`
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Name" required error={errors.name}>
+          <FormField label="Name" required error={errors.name} id="name">
             <Input
+              id="name"
               type="text"
               icon={User}
               placeholder="Your name"
               value={formData.name}
               onChange={(e) => updateField("name", e.target.value)}
               error={!!errors.name}
+              aria-describedby={errors.name ? "name-error" : undefined}
             />
           </FormField>
 
-          <FormField label="Email" required error={errors.email}>
+          <FormField label="Email" required error={errors.email} id="email">
             <Input
+              id="email"
               type="email"
               icon={Mail}
               placeholder="you@company.com"
               value={formData.email}
               onChange={(e) => updateField("email", e.target.value)}
               error={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
             />
           </FormField>
 
-          <FormField label="Company" required error={errors.company}>
+          <FormField label="Company" required error={errors.company} id="company">
             <Input
+              id="company"
               type="text"
               icon={Building2}
               placeholder="Fund or firm name"
               value={formData.company}
               onChange={(e) => updateField("company", e.target.value)}
               error={!!errors.company}
+              aria-describedby={errors.company ? "company-error" : undefined}
             />
           </FormField>
 
-          <FormField label="Role">
+          <FormField label="Role" id="role">
             <Input
+              id="role"
               type="text"
               placeholder="Your title"
               value={formData.role}
@@ -607,13 +618,16 @@ ${formData.message}`
           label="What are you looking to accomplish?"
           required
           error={errors.message}
+          id="message"
         >
           <Textarea
+            id="message"
             rows={5}
             placeholder="Describe your fund's current AI exposure, where you feel most uncertain, and what success would look like..."
             value={formData.message}
             onChange={(e) => updateField("message", e.target.value)}
             error={!!errors.message}
+            aria-describedby={errors.message ? "message-error" : undefined}
           />
         </FormField>
       </div>

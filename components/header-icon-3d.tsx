@@ -34,11 +34,11 @@ class ThreeErrorBoundary extends Component<{ children: ReactNode; fallback: Reac
 // Hour-based animation selector (24 different micro-animations)
 // ---------------------------------------------------------------------------
 const useHour = () => {
-  // Initialize with 12 (noon) to avoid hydration mismatch, update after mount
-  const [hour, setHour] = useState(12);
+  // Initialize with current hour since this is client-side only
+  const [hour, setHour] = useState(() => new Date().getHours());
   useEffect(() => {
     const update = () => setHour(new Date().getHours());
-    const hydrationId = setTimeout(update, 0);
+    
     // Calculate ms until next hour to sync properly
     const now = new Date();
     const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
@@ -53,7 +53,6 @@ const useHour = () => {
     }, msUntilNextHour);
 
     return () => {
-      clearTimeout(hydrationId);
       clearTimeout(timeoutId);
       if (intervalId !== null) {
         clearInterval(intervalId);

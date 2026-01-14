@@ -12,7 +12,6 @@ export default function NotFound() {
         eyebrow="404 Error"
         kicker="The page you are looking for doesn't exist. It might have been moved, deleted, or never existed in the first place."
         icon={Search}
-        className="py-0 flex flex-col justify-center" // Override padding to center it better
       >
         <div className="flex flex-col gap-4 sm:flex-row pt-8">
           <Link

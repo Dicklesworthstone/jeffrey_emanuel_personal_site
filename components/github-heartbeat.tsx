@@ -14,7 +14,9 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GITHUB_USERNAME } from "@/lib/constants";
+import { siteConfig } from "@/lib/content";
+
+export const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop() || "Dicklesworthstone";
 
 // Event types we care about
 type GitHubEventType =
@@ -403,7 +405,12 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
           throw new Error(`GitHub API error: ${response.status}`);
         }
 
-        const data: GitHubEvent[] = await response.json();
+        const data = await response.json();
+        
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid response format");
+        }
+
         const parsed = data
           .filter((e) =>
             ["PushEvent", "PullRequestEvent", "CreateEvent", "WatchEvent", "ForkEvent"].includes(

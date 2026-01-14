@@ -1,22 +1,22 @@
 import { NvidiaStory } from "@/components/nvidia-story";
 import { JsonLd } from "@/components/json-ld";
+import { siteConfig, nvidiaStoryData } from "@/lib/content";
 
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
   headline: "The $600B Drop: How a Blog Post Moved Markets",
-  datePublished: "2025-01-27",
+  datePublished: nvidiaStoryData.stats.publishDate,
   dateModified: "2025-01-27",
-  description:
-    "How a 12,000-word blog post from a Brooklyn apartment contributed to the largest single-day market cap drop in stock market history.",
+  description: nvidiaStoryData.hero.subheadline,
   author: {
     "@type": "Person",
-    name: "Jeffrey Emanuel",
+    name: siteConfig.name,
     url: "https://jeffreyemanuel.com",
   },
   publisher: {
     "@type": "Organization",
-    name: "Jeffrey Emanuel",
+    name: siteConfig.name,
     logo: {
       "@type": "ImageObject",
       url: "https://jeffreyemanuel.com/icon-192.png",

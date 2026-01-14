@@ -53,7 +53,7 @@ export default function ScrollToTop() {
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
           onClick={scrollToTop}
           onTouchStart={mediumTap}
-          className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 shadow-lg shadow-sky-500/20 backdrop-blur-xl transition-all active:scale-95 hover:border-sky-500/60 hover:bg-sky-500/20 md:hidden"
+          className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 shadow-lg shadow-sky-500/20 backdrop-blur-xl transition-all active:scale-95 hover:border-sky-500/60 hover:bg-sky-500/20"
           aria-label="Scroll to top"
         >
           <ArrowUp className="h-5 w-5" />

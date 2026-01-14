@@ -31,6 +31,16 @@ const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop(
 export async function fetchGitHubStats(): Promise<GitHubStats> {
   const now = Date.now();
 
+  if (!process.env.GITHUB_TOKEN) {
+    console.warn("GITHUB_TOKEN not found. Using fallback GitHub stats.");
+    return {
+      totalStars: 12000, // Updated fallback
+      repoCount: 70,
+      followers: 500,
+      fetchedAt: now,
+    };
+  }
+
   try {
     // Fetch user data for follower count and repo count
     const userResponse = await fetch(

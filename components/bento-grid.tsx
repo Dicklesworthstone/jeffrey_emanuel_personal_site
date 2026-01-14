@@ -73,7 +73,7 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
       <AnimatePresence mode="popLayout">
         {projects.map((project) => (
           <motion.div
-            layout
+            layout={!prefersReducedMotion}
             key={project.name}
             variants={variants}
             className={cn(

@@ -543,8 +543,9 @@ function Clifford({ palette, seed, count = 42000 }: { palette: Palette; seed: nu
     }
     geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geom.computeBoundingSphere();
-    return () => geom.dispose();
   }, [geom, seed, count]);
+
+  useEffect(() => () => geom.dispose(), [geom]);
 
   useFrame(({ clock }) => {
     if (!group.current) return;

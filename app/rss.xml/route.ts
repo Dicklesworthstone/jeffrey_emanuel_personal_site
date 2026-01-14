@@ -69,7 +69,7 @@ export async function GET() {
   const allItems = [...mdxItems, ...externalItems].sort((a, b) => {
     const t1 = a.date.getTime();
     const t2 = b.date.getTime();
-    // Handle invalid dates (treat as old)
+    // Handle invalid dates (treat as old, epoch 0)
     const v1 = Number.isNaN(t1) ? 0 : t1;
     const v2 = Number.isNaN(t2) ? 0 : t2;
     return v2 - v1;

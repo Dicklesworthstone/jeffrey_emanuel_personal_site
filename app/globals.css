@@ -178,6 +178,11 @@ body {
   line-height: 1.6;
 }
 
+main {
+  position: relative;
+  z-index: 1;
+}
+
 /* 
   ========================================
   SOPHISTICATED BACKGROUND SYSTEM
