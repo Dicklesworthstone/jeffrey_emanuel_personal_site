@@ -19,6 +19,7 @@ interface GitHubUser {
 
 interface GitHubRepo {
   stargazers_count: number;
+  fork?: boolean;
 }
 
 const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop() || "Dicklesworthstone";
@@ -84,6 +85,7 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
 
     for (const repos of results) {
       for (const repo of repos) {
+        if (repo.fork) continue;
         totalStars += repo.stargazers_count || 0;
         repoCount++;
       }

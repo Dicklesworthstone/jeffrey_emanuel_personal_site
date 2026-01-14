@@ -25,7 +25,7 @@ export function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
     window.gtag = function gtag(...args: Parameters<typeof window.gtag>) {
       window.dataLayer.push(args);
     };
-    window.gtag("js", new Date().toISOString());
+    window.gtag("js", new Date());
     window.gtag("config", gaId, {
       page_path: window.location.pathname,
       anonymize_ip: true,
