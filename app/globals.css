@@ -122,6 +122,28 @@
      TOUCH TARGET MINIMUM
      ======================================== */
   --touch-target-min: 44px;
+
+  /* ========================================
+     Z-INDEX SCALE (Layering System)
+     ======================================== */
+  --z-base: 0;
+  --z-above: 10;
+  --z-dropdown: 20;
+  --z-sticky: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-tooltip: 70;
+  --z-toast: 80;
+  --z-max: 9999;
+
+  /* ========================================
+     BACKDROP BLUR SCALE
+     ======================================== */
+  --blur-sm: 8px;
+  --blur-md: 12px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
 }
 
 ::selection {
@@ -151,6 +173,7 @@ body {
   background-color: #020617;
   color: #e2e8f0;
   position: relative;
+  isolation: isolate;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -469,11 +492,40 @@ body::after {
 
 /* Button press feedback */
 button {
-  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  transition: transform 0.15s ease-out, box-shadow 0.2s ease-out;
 }
 
 button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+/* Primary button glow effect */
+.btn-glow-primary {
+  box-shadow: 0 0 20px -5px rgba(139, 92, 246, 0.4);
+}
+
+.btn-glow-primary:hover {
+  box-shadow:
+    0 0 30px -5px rgba(139, 92, 246, 0.5),
+    0 0 60px -10px rgba(217, 70, 239, 0.3);
+}
+
+/* Secondary button subtle glow */
+.btn-glow-secondary:hover {
+  box-shadow: 0 0 20px -8px rgba(56, 189, 248, 0.3);
+}
+
+/* Disable glow animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn-glow-primary,
+  .btn-glow-secondary {
+    box-shadow: none;
+  }
+
+  .btn-glow-primary:hover,
+  .btn-glow-secondary:hover {
+    box-shadow: none;
+  }
 }
 
 /* Link hover underline animation */
