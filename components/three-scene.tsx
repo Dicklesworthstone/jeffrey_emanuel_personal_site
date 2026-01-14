@@ -58,11 +58,13 @@ const useHour = () => {
   // Initialize with 12 (noon) to avoid hydration mismatch, update after mount
   const [hour, setHour] = useState(12);
   useEffect(() => {
-    // Set actual hour after hydration
-    setHour(new Date().getHours());
     const update = () => setHour(new Date().getHours());
+    const hydrationId = setTimeout(update, 0);
     const id = setInterval(update, 60_000);
-    return () => clearInterval(id);
+    return () => {
+      clearTimeout(hydrationId);
+      clearInterval(id);
+    };
   }, []);
   return hour;
 };

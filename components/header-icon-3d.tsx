@@ -37,11 +37,8 @@ const useHour = () => {
   // Initialize with 12 (noon) to avoid hydration mismatch, update after mount
   const [hour, setHour] = useState(12);
   useEffect(() => {
-    // Set actual hour immediately after hydration
-    const currentHour = new Date().getHours();
-    setHour(currentHour);
-
     const update = () => setHour(new Date().getHours());
+    const hydrationId = setTimeout(update, 0);
     // Calculate ms until next hour to sync properly
     const now = new Date();
     const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
@@ -56,6 +53,7 @@ const useHour = () => {
     }, msUntilNextHour);
 
     return () => {
+      clearTimeout(hydrationId);
       clearTimeout(timeoutId);
       if (intervalId !== null) {
         clearInterval(intervalId);
