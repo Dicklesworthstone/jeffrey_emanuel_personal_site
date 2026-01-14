@@ -1,0 +1,48 @@
+name: Production Health Check
+
+on:
+  # Run after Vercel deployment succeeds
+  deployment_status:
+  # Daily check at 6 AM UTC
+  schedule:
+    - cron: '0 6 * * *'
+  # Manual trigger
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    # Only run on successful deployments to production, or scheduled/manual runs
+    # Note: Vercel uses "Production" (capitalized) for the environment name
+    if: |
+      (github.event_name == 'deployment_status' &&
+       github.event.deployment_status.state == 'success' &&
+       contains(fromJSON('["Production", "production"]'), github.event.deployment.environment)) ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright browsers
+        run: bunx playwright install chromium --with-deps
+
+      - name: Run production health checks
+        run: bunx playwright test --config=playwright.production.config.ts
+        env:
+          PRODUCTION_URL: https://jeffreyemanuel.com
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
