@@ -217,9 +217,25 @@ export function LazySection({
     const element = ref.current;
     if (!element) return;
 
+    const parseRootMargin = (margin: string) => {
+      const value = margin.trim().split(/\s+/)[0] ?? "0px";
+      if (value.endsWith("px")) {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      if (value.endsWith("%")) {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? (parsed / 100) * window.innerHeight : 0;
+      }
+      const parsed = parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
     // Check if element is already in viewport on mount
     const rect = element.getBoundingClientRect();
-    const isInViewport = rect.top < window.innerHeight + 200;
+    const marginPx = parseRootMargin(rootMargin);
+    const isInViewport =
+      rect.top < window.innerHeight + marginPx && rect.bottom > -marginPx;
 
     if (isInViewport) {
       hasTriggeredRef.current = true;
