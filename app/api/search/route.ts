@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAllPosts } from "@/lib/mdx";
 
+export const dynamic = "force-static";
+
 export async function GET() {
   const posts = getAllPosts();
   

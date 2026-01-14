@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import {
   GitCommit,
@@ -426,28 +426,33 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     return () => window.clearInterval(id);
   }, []);
 
+  const getLocalDayKey = useCallback((date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }, []);
+
   // Calculate stats
   const stats = useMemo(() => {
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const eventsToday = events.filter((e) => e.timestamp >= todayStart).length;
+    const todayKey = getLocalDayKey(now);
+    const eventsToday = events.filter((e) => getLocalDayKey(e.timestamp) === todayKey).length;
 
     // Simple streak calculation (consecutive days with activity)
-    const uniqueDays = new Set(
-      events.map((e) => e.timestamp.toISOString().split("T")[0])
-    );
+    const uniqueDays = new Set(events.map((e) => getLocalDayKey(e.timestamp)));
     let streak = 0;
-    const today = now.toISOString().split("T")[0];
-    let checkDate = today;
+    let checkDate = todayKey;
 
     while (uniqueDays.has(checkDate)) {
       streak++;
-      const d = new Date(checkDate);
+      const [year, month, day] = checkDate.split("-").map(Number);
+      const d = new Date(year, month - 1, day);
       d.setDate(d.getDate() - 1);
-      checkDate = d.toISOString().split("T")[0];
+      checkDate = getLocalDayKey(d);
     }
 
     return { eventsToday, streak };
-  }, [events, now]);
+  }, [events, now, getLocalDayKey]);
 
   const isLive = !loading && !error && events.length > 0;
 

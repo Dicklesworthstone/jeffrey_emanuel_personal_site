@@ -126,8 +126,9 @@ function StarField({ density = 420, color = "#38bdf8" }: { density?: number; col
 // Variant: Orbital polyhedron (original)
 // ---------------------------------------------------------------------------
 function FloatingPolyhedron({ palette }: { palette: Palette }) {
-  const ref = useRef<THREE.Mesh>(null!);
+  const ref = useRef<THREE.Mesh>(null);
   useFrame((state) => {
+    if (!ref.current) return;
     const t = state.clock.getElapsedTime();
     ref.current.rotation.x = t * 0.25;
     ref.current.rotation.y = t * 0.35;
@@ -148,8 +149,9 @@ function FloatingPolyhedron({ palette }: { palette: Palette }) {
 }
 
 function OrbitalRing(props: { radius: number; tilt: number; color: string }) {
-  const ref = useRef<THREE.Mesh>(null!);
+  const ref = useRef<THREE.Mesh>(null);
   useFrame((state) => {
+    if (!ref.current) return;
     const t = state.clock.getElapsedTime();
     ref.current.rotation.z = props.tilt;
     ref.current.rotation.y = t * 0.15;
