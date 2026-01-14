@@ -3,6 +3,7 @@
 import { useRef, useMemo } from "react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { getColorDefinition } from "@/lib/colors";
 import type { TldrFlywheelTool } from "@/lib/content";
 
 // =============================================================================
@@ -128,11 +129,11 @@ export function TldrSynergyDiagram({
               >
                 <stop
                   offset="0%"
-                  stopColor={getGradientColor(tool.color, "from")}
+                  stopColor={getColorDefinition(tool.color).from}
                 />
                 <stop
                   offset="100%"
-                  stopColor={getGradientColor(tool.color, "to")}
+                  stopColor={getColorDefinition(tool.color).to}
                 />
               </linearGradient>
             ))}
@@ -267,28 +268,6 @@ export function TldrSynergyDiagram({
       </motion.div>
     </div>
   );
-}
-
-// Helper to extract colors from Tailwind gradient classes
-function getGradientColor(colorClass: string, type: "from" | "to"): string {
-  const colorMap: Record<string, { from: string; to: string }> = {
-    "from-sky-500 to-blue-600": { from: "#0ea5e9", to: "#2563eb" },
-    "from-amber-500 to-orange-600": { from: "#f59e0b", to: "#ea580c" },
-    "from-violet-500 to-purple-600": { from: "#8b5cf6", to: "#9333ea" },
-    "from-emerald-500 to-teal-600": { from: "#10b981", to: "#0d9488" },
-    "from-rose-500 to-red-600": { from: "#f43f5e", to: "#dc2626" },
-    "from-pink-500 to-fuchsia-600": { from: "#ec4899", to: "#c026d3" },
-    "from-cyan-500 to-sky-600": { from: "#06b6d4", to: "#0284c7" },
-    "from-red-500 to-rose-600": { from: "#ef4444", to: "#e11d48" },
-    "from-orange-500 to-amber-600": { from: "#f97316", to: "#d97706" },
-    "from-purple-500 to-violet-600": { from: "#a855f7", to: "#7c3aed" },
-  };
-
-  const colors = colorMap[colorClass];
-  if (colors) {
-    return colors[type];
-  }
-  return type === "from" ? "#8b5cf6" : "#9333ea";
 }
 
 export default TldrSynergyDiagram;

@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatStarCount, formatStarCountFull } from "@/lib/format-stars";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { getColorDefinition } from "@/lib/colors";
 import type { TldrFlywheelTool } from "@/lib/content";
 
 // =============================================================================
@@ -144,24 +145,7 @@ export function TldrToolCard({
     [reducedMotion, isTouchDevice]
   );
 
-  // Extract RGB values from gradient for spotlight
-  const gradientToRgb: Record<string, string> = {
-    "from-sky-500 to-blue-600": "56, 189, 248",
-    "from-amber-500 to-orange-600": "251, 191, 36",
-    "from-violet-500 to-purple-600": "139, 92, 246",
-    "from-emerald-500 to-teal-600": "52, 211, 153",
-    "from-rose-500 to-red-600": "244, 63, 94",
-    "from-pink-500 to-fuchsia-600": "236, 72, 153",
-    "from-cyan-500 to-sky-600": "34, 211, 238",
-    "from-red-500 to-rose-600": "239, 68, 68",
-    "from-slate-500 to-gray-600": "100, 116, 139",
-    "from-blue-500 to-indigo-600": "59, 130, 246",
-    "from-green-500 to-emerald-600": "34, 197, 94",
-    "from-orange-500 to-amber-600": "249, 115, 22",
-    "from-purple-500 to-violet-600": "168, 85, 247",
-  };
-
-  const spotlightRgb = gradientToRgb[tool.color] || "255, 255, 255";
+  const spotlightRgb = getColorDefinition(tool.color).rgb;
 
   return (
     <motion.div

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/content";
 import { cn } from "@/lib/utils";
+import { getColorDefinition } from "@/lib/colors";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import BottomSheet from "@/components/bottom-sheet";
 
@@ -77,26 +78,6 @@ function useSupportsMotionPath() {
     }
   }, []);
   return supported;
-}
-
-// Helper to extract hex color from Tailwind classes
-const connectionColorMap: Record<string, string> = {
-  "from-sky-500 to-blue-600": "#0ea5e9",
-  "from-amber-500 to-orange-600": "#f59e0b",
-  "from-violet-500 to-purple-600": "#8b5cf6",
-  "from-emerald-500 to-teal-600": "#10b981",
-  "from-rose-500 to-red-600": "#f43f5e",
-  "from-pink-500 to-fuchsia-600": "#ec4899",
-  "from-cyan-500 to-sky-600": "#06b6d4",
-};
-
-function getConnectionColor(colorClass: string) {
-  for (const [key, value] of Object.entries(connectionColorMap)) {
-    if (colorClass.includes(key.split(" ")[0].replace("from-", ""))) {
-      return value;
-    }
-  }
-  return "#8b5cf6";
 }
 
 // Animated particle that flows along a connection
@@ -164,8 +145,8 @@ const ConnectionLine = React.memo(function ConnectionLine({
   const gradientId = `gradient-${connectionId}`;
   const flowGradientId = `flow-gradient-${connectionId}`;
 
-  const color1 = getConnectionColor(fromColor);
-  const color2 = getConnectionColor(toColor);
+  const color1 = getColorDefinition(fromColor).primary;
+  const color2 = getColorDefinition(toColor).primary;
 
   // Calculate path length for dash animation (approximate)
   const dx = toPos.x - fromPos.x;
