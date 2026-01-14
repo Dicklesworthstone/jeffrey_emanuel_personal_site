@@ -54,3 +54,6 @@ test-results/
 # bv (beads viewer) local config and caches
 .bv/
 .env*.local
+
+# Playwright test artifacts
+playwright-report/
