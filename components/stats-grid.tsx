@@ -126,6 +126,11 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
     const container = containerRef.current;
     if (!container) return;
 
+    if (typeof IntersectionObserver === "undefined") {
+      const hydrationId = setTimeout(() => setIsVisible(true), 0);
+      return () => clearTimeout(hydrationId);
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

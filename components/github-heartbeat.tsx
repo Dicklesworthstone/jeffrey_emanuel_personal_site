@@ -75,7 +75,7 @@ function parseEvent(event: GitHubEvent): HeartbeatEvent {
         id: event.id,
         type: event.type,
         repo: repoShort,
-        message: `PR ${event.payload.action}`,
+        message: event.payload.action ? `PR ${event.payload.action}` : "PR activity",
         timestamp,
         icon: <GitPullRequest className="h-3.5 w-3.5" />,
         color: "violet",
