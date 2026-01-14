@@ -24,13 +24,8 @@ export default function KeyboardShortcutsModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Detect OS for modifier key using lazy initializer
-  const [modifier] = useState(() => {
-    if (typeof navigator !== "undefined" && !/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
-      return "Ctrl";
-    }
-    return "⌘";
-  });
+  // Initialize with Mac default to match SSR, update after hydration
+  const [modifier, setModifier] = useState("⌘");
 
   // Focus management
   useEffect(() => {
@@ -41,6 +36,14 @@ export default function KeyboardShortcutsModal({
       lastActiveElement.current?.focus();
     }
   }, [isOpen]);
+
+  // Detect OS for modifier key - must run after hydration to avoid mismatch
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && !/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for SSR hydration safety
+      setModifier("Ctrl");
+    }
+  }, []);
 
   // Close on Escape
   useEffect(() => {

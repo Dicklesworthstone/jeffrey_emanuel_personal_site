@@ -31,16 +31,19 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // Detect OS for meta key using lazy initializer
-  const [metaKey] = useState(() => {
-    if (typeof navigator !== "undefined" && !/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
-      return "Ctrl+";
-    }
-    return "⌘";
-  });
+  // Initialize with Mac default to match SSR, update after hydration
+  const [metaKey, setMetaKey] = useState("⌘");
   const { lightTap, mediumTap } = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
   const resolvedPath = pathname ?? "";
+
+  // Detect OS for meta key - must run after hydration to avoid mismatch
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && !/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for SSR hydration safety
+      setMetaKey("Ctrl+");
+    }
+  }, []);
 
   const isActive = (href: string) => {
     if (href === "/") return resolvedPath === "/";
