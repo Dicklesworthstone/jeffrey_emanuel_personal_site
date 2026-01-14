@@ -21,8 +21,6 @@ import {
   writingHighlights,
   tldrFlywheelTools,
   siteConfig,
-  type Project,
-  type TldrFlywheelTool,
 } from "@/lib/content";
 import { testLog } from "@/tests/utils/tldr-test-helpers";
 

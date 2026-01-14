@@ -178,7 +178,8 @@ test.describe("Projects Page - Category Filtering", () => {
     console.log("[E2E] Testing flywheel visibility on filter");
 
     // Initially flywheel should be visible (on All Work)
-    const flywheelContainer = page.locator(
+    // Note: flywheelContainer locator defined for potential future use
+    const _flywheelContainer = page.locator(
       ".mb-12.sm\\:mb-16, .mb-12.overflow-hidden"
     );
 

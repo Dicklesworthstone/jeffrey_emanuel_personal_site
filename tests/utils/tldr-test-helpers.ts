@@ -14,7 +14,7 @@
 import { render, type RenderOptions, type RenderResult } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { vi } from "vitest";
-import type { TldrFlywheelTool, TldrToolCategory } from "@/lib/content";
+import type { TldrFlywheelTool } from "@/lib/content";
 
 // =============================================================================
 // LOGGING UTILITIES
