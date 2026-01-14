@@ -178,10 +178,12 @@ export function useClickParticles({
       const y = event.clientY;
       const lifespan = duration / 1000;
 
+      const palette = colors.length > 0 ? colors : defaultColors;
+
       for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
         const speed = 3 + Math.random() * 4;
-        const color = colors[Math.floor(Math.random() * colors.length)];
+        const color = palette[Math.floor(Math.random() * palette.length)] ?? defaultColors[0];
 
         // Convert hex to RGB for alpha support
         const rgbColor = hexToRgb(color);

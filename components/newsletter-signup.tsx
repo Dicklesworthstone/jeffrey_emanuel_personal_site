@@ -152,7 +152,13 @@ export function NewsletterSignup({
                 ref={inputRef}
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (status === "error") {
+                    setStatus("idle");
+                    setErrorMessage("");
+                  }
+                }}
                 placeholder="your@email.com"
                 disabled={status === "submitting"}
                 className={cn(

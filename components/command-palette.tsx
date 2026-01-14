@@ -50,6 +50,14 @@ interface SearchIndexItem {
   content: string;
 }
 
+const toCommandId = (prefix: string, value: string) => {
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `${prefix}-${slug || "item"}`;
+};
+
 const pageIcons: Record<string, React.ReactNode> = {
   "/": <Home className="h-4 w-4" />,
   "/about": <User className="h-4 w-4" />,
@@ -106,6 +114,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       })
       .then((data) => {
         setSearchIndex(data);
+        setHasError(false);
         const fuseInstance = new Fuse<SearchIndexItem>(data, {
           keys: [
             { name: "title", weight: 0.7 },
@@ -160,7 +169,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     // Navigation pages
     navItems.forEach((item) => {
       cmds.push({
-        id: `page-${item.href}`,
+        id: toCommandId("page", item.href),
         title: item.label,
         subtitle: `Go to ${item.label}`,
         icon: pageIcons[item.href] || <ArrowRight className="h-4 w-4" />,
@@ -176,7 +185,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     // Projects (top 15)
     projects.slice(0, 15).forEach((project) => {
       cmds.push({
-        id: `project-${project.name}`,
+        id: toCommandId("project", project.name),
         title: project.name,
         subtitle: project.short,
         icon: <FolderGit2 className="h-4 w-4" />,
@@ -199,7 +208,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     // Featured Writing (Keep these as they are high priority)
     writingHighlights.forEach((item) => {
       cmds.push({
-        id: `writing-${item.title}`,
+        id: toCommandId("writing", item.title),
         title: item.title,
         subtitle: item.category,
         icon: <PenSquare className="h-4 w-4" />,
