@@ -77,6 +77,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const paletteRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const prefersReducedMotion = useReducedMotion();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -84,6 +85,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [fuse, setFuse] = useState<Fuse<SearchIndexItem> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  const openExternal = useCallback((url: string) => {
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (newWindow) {
+      newWindow.opener = null;
+    }
+  }, []);
 
   // Fetch search index on load (or on first open)
   useEffect(() => {
@@ -149,7 +157,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         category: "projects",
         action: () => {
           if (project.href.startsWith("http")) {
-            window.open(project.href, "_blank");
+            openExternal(project.href);
           } else {
             router.push(project.href);
           }
@@ -172,7 +180,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         category: "writing",
         action: () => {
           if (item.href.startsWith("http")) {
-            window.open(item.href, "_blank");
+            openExternal(item.href);
           } else {
             router.push(item.href);
           }
@@ -190,7 +198,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       icon: <Github className="h-4 w-4" />,
       category: "social",
       action: () => {
-        window.open(siteConfig.social.github, "_blank");
+        openExternal(siteConfig.social.github);
         onClose();
       },
       keywords: ["github", "code", "repos"],
@@ -202,7 +210,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       icon: <Twitter className="h-4 w-4" />,
       category: "social",
       action: () => {
-        window.open(siteConfig.social.x, "_blank");
+        openExternal(siteConfig.social.x);
         onClose();
       },
       keywords: ["twitter", "x", "social"],
@@ -214,14 +222,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       icon: <Linkedin className="h-4 w-4" />,
       category: "social",
       action: () => {
-        window.open(siteConfig.social.linkedin, "_blank");
+        openExternal(siteConfig.social.linkedin);
         onClose();
       },
       keywords: ["linkedin", "professional", "connect"],
     });
 
     return cmds;
-  }, [router, onClose]);
+  }, [router, onClose, openExternal]);
 
   // Combined results (Static + Fuse)
   const filteredCommands = useMemo(() => {
@@ -301,6 +309,39 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     return undefined;
   }, [isOpen]);
 
+  // Trap focus inside the palette while open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const container = paletteRef.current;
+      if (!container) return;
+
+      const focusable = container.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+
+      if (e.shiftKey) {
+        if (active === first || !container.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleTab);
+    return () => window.removeEventListener("keydown", handleTab);
+  }, [isOpen]);
+
   // Handle keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -372,7 +413,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             aria-modal="true"
             aria-label="Command palette"
           >
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/95 shadow-2xl backdrop-blur-xl">
+            <div
+              ref={paletteRef}
+              className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/95 shadow-2xl backdrop-blur-xl"
+            >
               {/* Search Input */}
               <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
                 <Search className="h-5 w-5 text-slate-400" />

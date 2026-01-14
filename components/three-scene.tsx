@@ -1521,6 +1521,7 @@ const hourlyPlan: { variant: VariantKey; palette: number; seed: number; backgrou
 export default function ThreeScene() {
   const { capabilities, quality } = useDeviceCapabilities();
   const { isMobile, tier } = capabilities;
+  const prefersReducedMotion = capabilities.prefersReducedMotion;
   const hour = useHour();
   const plan = hourlyPlan[hour % 24];
   const palette = palettes[plan.palette % palettes.length];
@@ -1545,6 +1546,7 @@ export default function ThreeScene() {
   }, [quality.maxDpr]);
 
   const autoRotateSpeed = tier === "low" ? 0.08 : tier === "medium" ? 0.18 : 0.28;
+  const allowAnimation = !prefersReducedMotion && tier !== "low";
 
   // Context value
   const contextValue: QualityContextValue = useMemo(() => ({
@@ -1559,24 +1561,26 @@ export default function ThreeScene() {
       dpr={currentDpr}
       performance={{ min: 0.3 }}
       style={{ touchAction: "none" }}
-      frameloop={tier === "low" ? "demand" : "always"}
+      frameloop={allowAnimation ? "always" : "demand"}
     >
       {/* Performance monitoring - automatically scales DPR based on FPS */}
-      <PerformanceMonitor
-        onDecline={handleDecline}
-        onIncline={handleIncline}
-        flipflops={3}
-        bounds={() => (tier === "high" ? [50, 60] : [25, 35])}
-      />
+      {allowAnimation && (
+        <PerformanceMonitor
+          onDecline={handleDecline}
+          onIncline={handleIncline}
+          flipflops={3}
+          bounds={() => (tier === "high" ? [50, 60] : [25, 35])}
+        />
+      )}
       <QualityContext.Provider value={contextValue}>
         <color attach="background" args={[plan.background ?? "#020617"]} />
         {scenes[plan.variant]({ palette, seed: plan.seed })}
         <OrbitControls
           enableZoom={false}
-          autoRotate={tier !== "low"}
+          autoRotate={allowAnimation}
           autoRotateSpeed={autoRotateSpeed}
           enablePan={false}
-          enableRotate={!isMobile}
+          enableRotate={!isMobile && !prefersReducedMotion}
           enableDamping={tier === "high"}
           makeDefault
         />
