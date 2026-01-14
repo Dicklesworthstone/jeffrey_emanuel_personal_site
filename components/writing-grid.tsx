@@ -63,7 +63,7 @@ export default function WritingGrid({ featured, archive }: WritingGridProps) {
 
           <div className="grid gap-6 md:grid-cols-2">
             {featured.map((post) => (
-              <motion.div key={post.title} variants={item} className={post.featured ? "md:col-span-2" : ""}>
+              <motion.div key={post.href} variants={item} className={post.featured ? "md:col-span-2" : ""}>
                 <WritingCard item={post} />
               </motion.div>
             ))}
@@ -85,7 +85,7 @@ export default function WritingGrid({ featured, archive }: WritingGridProps) {
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {archive.map((post) => (
-            <motion.div key={post.title} variants={item} className="h-full">
+            <motion.div key={post.href} variants={item} className="h-full">
               <WritingCard item={post} />
             </motion.div>
           ))}

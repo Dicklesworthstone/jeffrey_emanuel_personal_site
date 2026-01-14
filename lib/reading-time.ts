@@ -29,9 +29,10 @@ export function calculateReadingTime(content: string): ReadingTimeResult {
     // Remove HTML tags
     .replace(/<[^>]*>/g, "")
     // Remove markdown images BEFORE links (images are ![alt](url), links are [text](url))
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "")
+    // Handle one level of nested parentheses in URL: ( ... ( ... ) ... )
+    .replace(/!\[([^\]]*)\]\((?:[^)(]+|\([^)(]*\))*\)/g, "")
     // Remove markdown links (keep link text)
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]*)\]\((?:[^)(]+|\([^)(]*\))*\)/g, "$1")
     // Remove markdown formatting
     .replace(/[*_~#]/g, "")
     // Remove extra whitespace
