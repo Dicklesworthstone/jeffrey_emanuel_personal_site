@@ -406,8 +406,9 @@ Message:
 ${formData.message}`
     );
 
-    // Open mailto link
-    window.location.href = `mailto:jeffreyemanuel@gmail.com?subject=${subject}&body=${body}`;
+    // Open mailto link in a new way that's less likely to block the UI
+    // Using window.open with _self target is often safer than location.href for mailto
+    window.open(`mailto:jeffreyemanuel@gmail.com?subject=${subject}&body=${body}`, "_self");
 
     // Show success state after a brief delay
     setTimeout(() => {
