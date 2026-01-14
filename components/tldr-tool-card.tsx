@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, type CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowUpRight,
@@ -88,7 +88,7 @@ function SynergyPill({
   if (!linkedTool) return null;
 
   return (
-    <div className="group/synergy relative flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1.5 transition-colors hover:bg-white/10 sm:px-3 sm:py-2">
+    <div className="group/synergy relative flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1.5 ring-1 ring-inset ring-white/5 transition-all hover:bg-white/10 hover:ring-white/15 sm:px-3 sm:py-2">
       <div
         className={cn(
           "flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-gradient-to-br sm:h-6 sm:w-6",
@@ -101,7 +101,7 @@ function SynergyPill({
         <span className="block text-xs font-semibold text-white sm:text-xs">
           {linkedTool.shortName}
         </span>
-        <span className="block truncate text-xs text-slate-400 group-hover/synergy:text-slate-300 sm:text-xs">
+        <span className="block truncate text-xs text-slate-400 transition-colors group-hover/synergy:text-slate-300 sm:text-xs">
           {synergy.description}
         </span>
       </div>
@@ -165,8 +165,10 @@ export function TldrToolCard({
           "relative h-full flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm",
           "transition-all duration-300",
           "hover:border-white/20 hover:bg-slate-900/70",
+          "motion-safe:hover:scale-[1.01] motion-safe:hover:shadow-[0_0_40px_-14px_rgba(var(--accent-rgb),0.35)]",
           "active:scale-[0.98] active:border-white/25"
         )}
+        style={{ "--accent-rgb": spotlightRgb } as CSSProperties}
       >
         {/* Gradient background */}
         <div
@@ -220,16 +222,19 @@ export function TldrToolCard({
               {/* Stars and link */}
               <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 {tool.stars && (
-                  <span
+                  <motion.span
                     className="relative inline-flex items-center gap-1 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-1 text-xs font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 hover:ring-amber-400/50 hover:shadow-amber-500/20 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
                     aria-label={`${formatStarCountFull(tool.stars)} GitHub stars`}
                     title={`${formatStarCountFull(tool.stars)} stars`}
+                    initial={reducedMotion ? {} : { scale: 1, opacity: 0 }}
+                    animate={reducedMotion ? {} : { scale: [1, 1.08, 1], opacity: 1 }}
+                    transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
                   >
                     {/* Shimmer effect - slower for smoother feel */}
                     <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1500ms] ease-in-out motion-reduce:transition-none motion-safe:group-hover:translate-x-full" aria-hidden="true" />
                     <Star className="relative h-3 w-3 fill-amber-400 text-amber-400 drop-shadow-[0_0_3px_rgba(251,191,36,0.5)] sm:h-3.5 sm:w-3.5" aria-hidden="true" />
                     <span className="relative font-mono tracking-tight">{formatStarCount(tool.stars)}</span>
-                  </span>
+                  </motion.span>
                 )}
                 <Link
                   href={tool.href}
@@ -239,10 +244,10 @@ export function TldrToolCard({
                     e.stopPropagation();
                     lightTap();
                   }}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white sm:h-11 sm:w-11"
+                  className="group/github flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all hover:bg-white/10 hover:text-white sm:h-11 sm:w-11"
                   aria-label={`View ${tool.name} on GitHub`}
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4 transition-transform group-hover/github:translate-x-0.5" />
                 </Link>
               </div>
             </div>
