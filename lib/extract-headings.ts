@@ -2,6 +2,8 @@
  * Extract headings from markdown content for table of contents.
  */
 
+import GithubSlugger from "github-slugger";
+
 export interface TocHeading {
   id: string;
   text: string;
@@ -9,16 +11,24 @@ export interface TocHeading {
 }
 
 /**
- * Generate a slug from heading text.
- * Matches how most markdown processors generate IDs.
+ * Normalize heading text to match markdown rendering output.
+ * Strips inline markdown and HTML so slugging matches rehype-slug.
  */
-function slugify(text: string): string {
+function normalizeHeadingText(text: string): string {
   return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/--+/g, "-") // Replace multiple hyphens with single
-    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+    // Remove HTML tags
+    .replace(/<[^>]*>/g, "")
+    // Remove markdown images but keep alt text
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    // Replace markdown links with link text
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    // Replace inline code with its content
+    .replace(/`([^`]+)`/g, "$1")
+    // Strip emphasis/strikethrough markers
+    .replace(/[*_~]/g, "")
+    // Collapse whitespace
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**
@@ -27,39 +37,37 @@ function slugify(text: string): string {
  */
 export function extractHeadings(content: string): TocHeading[] {
   const headings: TocHeading[] = [];
-  const slugCounts = new Map<string, number>();
+  const slugger = new GithubSlugger();
 
   // Match markdown headings (## and ###)
   // Avoid matching headings inside code blocks
   const lines = content.split("\n");
-  let inCodeBlock = false;
+  let activeFence: "```" | "~~~" | null = null;
 
   for (const line of lines) {
     // Track code blocks
-    if (line.trim().startsWith("```")) {
-      inCodeBlock = !inCodeBlock;
+    const fenceMatch = line.trim().match(/^(```|~~~)/);
+    if (fenceMatch) {
+      const fence = fenceMatch[1] as "```" | "~~~";
+      if (!activeFence) {
+        activeFence = fence;
+      } else if (activeFence === fence) {
+        activeFence = null;
+      }
       continue;
     }
 
-    if (inCodeBlock) continue;
+    if (activeFence) continue;
 
     // Match h2 (##) and h3 (###) headings, allowing for optional trailing hashes
     const h2Match = line.match(/^##\s+(.*?)(?:\s+#+)?$/);
     const h3Match = line.match(/^###\s+(.*?)(?:\s+#+)?$/);
 
     if (h2Match) {
-      const text = h2Match[1].trim();
-      const baseSlug = slugify(text);
-      let slug = baseSlug;
-      
-      // Handle duplicates
-      if (slugCounts.has(baseSlug)) {
-        const count = slugCounts.get(baseSlug)! + 1;
-        slugCounts.set(baseSlug, count);
-        slug = `${baseSlug}-${count - 1}`;
-      } else {
-        slugCounts.set(baseSlug, 1);
-      }
+      const rawText = h2Match[1].trim();
+      const text = normalizeHeadingText(rawText);
+      if (!text) continue;
+      const slug = slugger.slug(text);
 
       headings.push({
         id: slug,
@@ -67,18 +75,10 @@ export function extractHeadings(content: string): TocHeading[] {
         level: 2,
       });
     } else if (h3Match) {
-      const text = h3Match[1].trim();
-      const baseSlug = slugify(text);
-      let slug = baseSlug;
-      
-      // Handle duplicates
-      if (slugCounts.has(baseSlug)) {
-        const count = slugCounts.get(baseSlug)! + 1;
-        slugCounts.set(baseSlug, count);
-        slug = `${baseSlug}-${count - 1}`;
-      } else {
-        slugCounts.set(baseSlug, 1);
-      }
+      const rawText = h3Match[1].trim();
+      const text = normalizeHeadingText(rawText);
+      if (!text) continue;
+      const slug = slugger.slug(text);
 
       headings.push({
         id: slug,
