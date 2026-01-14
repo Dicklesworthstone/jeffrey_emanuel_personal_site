@@ -12,7 +12,7 @@ export const siteConfig = {
   },
   features: {
     /** Enable newsletter signup section on homepage. Set to true once Buttondown is configured. */
-    newsletter: false,
+    newsletter: true,
   },
 } satisfies {
   name: string;
@@ -1109,6 +1109,16 @@ export const projects: Project[] = [
     description:
       "A high-performance CLI for searching and replacing text across large codebases. Supports regex patterns, preview modes, and bulk operations with git-aware filtering. Optimized for use in agentic workflows.",
     tags: ["CLI", "Search", "DevTools", "Refactoring"],
+  },
+  {
+    name: "Chat to File",
+    kind: "oss",
+    badge: "20 stars",
+    href: "https://github.com/Dicklesworthstone/chat_shared_conversation_to_file",
+    short: "Convert ChatGPT, Gemini, and Grok share links to Markdown and HTML.",
+    description:
+      "A CLI tool that takes share links from ChatGPT, Gemini, and Grok conversations and converts them into clean Markdown or HTML files. Perfect for archiving AI conversations, creating documentation, or feeding conversations into other tools.",
+    tags: ["CLI", "Agents", "Markdown", "Conversion", "DevTools"],
   },
   {
     name: "Suno2CD",

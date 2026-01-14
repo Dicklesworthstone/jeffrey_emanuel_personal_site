@@ -61,9 +61,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@doodlestein",
+    creator: "@doodlestein",
     title: siteConfig.title,
     description: siteConfig.description,
-    creator: "@doodlestein",
   },
 };
 
