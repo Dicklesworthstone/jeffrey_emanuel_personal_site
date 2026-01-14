@@ -42,17 +42,29 @@ export function extractHeadings(content: string): TocHeading[] {
   // Match markdown headings (## and ###)
   // Avoid matching headings inside code blocks
   const lines = content.split("\n");
-  let activeFence: "```" | "~~~" | null = null;
+  let activeFence: string | null = null;
 
   for (const line of lines) {
     // Track code blocks
-    const fenceMatch = line.trim().match(/^(```|~~~)/);
+    // Matches at least 3 backticks or tildes, capturing the fence sequence
+    const fenceMatch = line.trim().match(/^(`{3,}|~{3,})/);
     if (fenceMatch) {
-      const fence = fenceMatch[1] as "```" | "~~~";
+      const fence = fenceMatch[1];
       if (!activeFence) {
+        // Start of code block
         activeFence = fence;
-      } else if (activeFence === fence) {
-        activeFence = null;
+      } else if (activeFence && fence.startsWith(activeFence)) {
+        // End of code block - standard markdown allows closing fence to be longer than opening
+        // but it must be the same character sequence
+        // We check if the closing fence starts with the opening fence string
+        // (e.g. opening "```", closing "````" is valid)
+        // However, standard markdown requires closing fence to be at least as long as opening.
+        // Let's stick to a simpler check: if we are in a fence, and we see a fence of same char
+        // that is at least as long, we close it.
+        // But to keep it simple and robust for this use case:
+        if (fence[0] === activeFence[0] && fence.length >= activeFence.length) {
+             activeFence = null;
+        }
       }
       continue;
     }
