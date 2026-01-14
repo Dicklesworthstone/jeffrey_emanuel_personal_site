@@ -3,9 +3,9 @@ import Link from "next/link";
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
-import AnimatedGrid, { LazySection } from "@/components/animated-grid";
+import AnimatedGrid from "@/components/animated-grid";
 import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail, Activity, Globe } from "lucide-react";
-import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats, featuredSites } from "@/lib/content";
+import { careerTimeline, projects, threads, writingHighlights, tldrFlywheelTools, heroStats, featuredSites } from "@/lib/content";
 import FeaturedSites from "@/components/featured-sites";
 import { cn } from "@/lib/utils";
 import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
@@ -194,8 +194,8 @@ export default async function HomePage() {
                       />
                     </svg>
                     {/* Tool dots - positioned using percentages for responsive scaling */}
-                    {flywheelTools.map((tool, i) => {
-                      const angle = ((i / flywheelTools.length) * 2 * Math.PI) - (Math.PI / 2);
+                    {tldrFlywheelTools.map((tool, i) => {
+                      const angle = ((i / tldrFlywheelTools.length) * 2 * Math.PI) - (Math.PI / 2);
                       // Use 38% of container size as radius (leaves room for dot size)
                       const radiusPercent = 38;
                       const xPercent = Math.cos(angle) * radiusPercent;
@@ -251,18 +251,16 @@ export default async function HomePage() {
         title="Products and open source"
         kicker="A comprehensive collection of the tools, protocols, and experiments I'm building."
       >
-        <LazySection minHeight="500px" skeletonCards={6}>
-          <AnimatedGrid
-            className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 lg:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
-            staggerDelay={0.08}
-          >
-            {featuredProjects.map((project) => (
-               <div key={project.name} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
-                  <ProjectCard project={project} />
-               </div>
-            ))}
-          </AnimatedGrid>
-        </LazySection>
+        <AnimatedGrid
+          className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 lg:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+          staggerDelay={0.08}
+        >
+          {featuredProjects.map((project) => (
+              <div key={project.name} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
+                <ProjectCard project={project} />
+              </div>
+          ))}
+        </AnimatedGrid>
       </SectionShell>
 
       {/* Endorsements - Social proof after projects */}
@@ -299,39 +297,37 @@ export default async function HomePage() {
         title="Essays, memos, and research notes"
         kicker="A mix of public writing and GitHub-native research artifacts."
       >
-        <LazySection minHeight="400px" skeletonCards={6}>
-          <AnimatedGrid
-            className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
-            staggerDelay={0.1}
-          >
-            {featuredWriting.map((item) => (
-              <HapticLink
-                key={item.title}
-                href={item.href}
-                className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
-              >
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-                  <span>{item.source}</span>
-                  <span className="h-0.5 w-0.5 rounded-full bg-slate-500" />
-                  <span>{item.category}</span>
-                </div>
+        <AnimatedGrid
+          className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+          staggerDelay={0.1}
+        >
+          {featuredWriting.map((item) => (
+            <HapticLink
+              key={item.title}
+              href={item.href}
+              className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+                <span>{item.source}</span>
+                <span className="h-0.5 w-0.5 rounded-full bg-slate-500" />
+                <span>{item.category}</span>
+              </div>
 
-                <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 transition-colors group-hover:text-sky-200">
-                  {item.title}
-                </h3>
+              <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 transition-colors group-hover:text-sky-200">
+                {item.title}
+              </h3>
 
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
-                  {item.blurb}
-                </p>
+              <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
+                {item.blurb}
+              </p>
 
-                <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
-                  Read the essay
-                  <span className="text-lg leading-none">→</span>
-                </div>
-              </HapticLink>
-            ))}
-          </AnimatedGrid>
-        </LazySection>
+              <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
+                Read the essay
+                <span className="text-lg leading-none">→</span>
+              </div>
+            </HapticLink>
+          ))}
+        </AnimatedGrid>
       </SectionShell>
 
       <SectionShell
@@ -379,36 +375,34 @@ export default async function HomePage() {
           title="Selected X posts"
           kicker="I write a lot more informally on X. Here are a few good entry points."
         >
-          <LazySection minHeight="400px" skeletonCards={3}>
-            <AnimatedGrid
-              className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
-              staggerDelay={0.1}
-            >
-              {featuredThreads.map((thread) => (
-                <HapticExternalLink
-                  key={thread.href}
-                  href={thread.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
-                >
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                    Thread on X
-                  </p>
-                  <h3 className="mt-4 text-lg font-bold leading-snug text-slate-50 transition-colors group-hover:text-sky-200">
-                    {thread.title}
-                  </h3>
-                  <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
-                    {thread.blurb}
-                  </p>
-                  <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
-                    Open thread
-                    <span className="text-lg leading-none">→</span>
-                  </div>
-                </HapticExternalLink>
-              ))}
-            </AnimatedGrid>
-          </LazySection>
+          <AnimatedGrid
+            className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
+            staggerDelay={0.1}
+          >
+            {featuredThreads.map((thread) => (
+              <HapticExternalLink
+                key={thread.href}
+                href={thread.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
+              >
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                  Thread on X
+                </p>
+                <h3 className="mt-4 text-lg font-bold leading-snug text-slate-50 transition-colors group-hover:text-sky-200">
+                  {thread.title}
+                </h3>
+                <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
+                  {thread.blurb}
+                </p>
+                <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
+                  Open thread
+                  <span className="text-lg leading-none">→</span>
+                </div>
+              </HapticExternalLink>
+            ))}
+          </AnimatedGrid>
         </SectionShell>
       )}
 

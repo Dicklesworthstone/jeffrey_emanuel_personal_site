@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getAllPosts } from '@/lib/mdx';
-import { navItems } from '@/lib/content';
+import { navItems, getProjectSlugs } from '@/lib/content';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffreyemanuel.com';
@@ -23,5 +23,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6, // Blog posts are good but main pages are structural
   }));
 
-  return [...staticPages, ...postPages];
+  // Project detail pages
+  const projectPages = getProjectSlugs().map((slug) => ({
+    url: `${baseUrl}/projects/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...projectPages, ...postPages];
 }
