@@ -1017,6 +1017,30 @@ export const projects: Project[] = [
     tags: ["Agents", "Claude", "Skills", "DevTools", "Flywheel"],
   },
   {
+    name: "Meta Skill",
+    kind: "oss",
+    badge: "10 stars",
+    href: "https://github.com/Dicklesworthstone/meta_skill",
+    short: "Rust CLI for managing Claude Code skills: indexing, building, bundling, and sharing.",
+    description:
+      "A comprehensive toolkit for Claude Code skill management. Index skills from local directories or GitHub, build and bundle them for distribution, and mine your CASS coding session history to extract reusable patterns as shareable skills. The meta-tool for creating and organizing the skills that make agents smarter.",
+    tags: ["Rust", "Claude", "Skills", "CLI", "DevTools", "Flywheel"],
+    slug: "meta-skill",
+    details: {
+      features: [
+        "Index skills from local directories and GitHub repos",
+        "Build and bundle skills for distribution",
+        "Mine CASS session history for skill extraction",
+        "Skill dependency resolution and management",
+        "Searchable skill registry with metadata",
+        "Integration with Claude Code skill system",
+      ],
+      installation: "```bash\\n# Install via Cargo\\ncargo install meta_skill\\n\\n# Or download pre-built binary from releases\\n```",
+      usage: "```bash\\n# Index skills from a directory\\nmeta_skill index ~/.claude/skills\\n\\n# Search for skills\\nmeta_skill search 'git workflow'\\n\\n# Build a skill bundle\\nmeta_skill build my-skill --output bundle.tar.gz\\n\\n# Mine CASS for skill patterns\\nmeta_skill mine --from-cass\\n```",
+      relatedProjects: ["cass", "clawdbot-skills"],
+    },
+  },
+  {
     name: "Destructive Command Guard",
     kind: "oss",
     badge: "13 stars",
@@ -2531,6 +2555,48 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
       "Managing context window budget",
     ],
   },
+  {
+    id: "ms",
+    name: "Meta Skill",
+    shortName: "MS",
+    href: "https://github.com/Dicklesworthstone/meta_skill",
+    icon: "Layers",
+    color: "from-indigo-500 to-violet-600",
+    category: "supporting",
+    stars: 10,
+    whatItDoes:
+      "Rust CLI for managing Claude Code skills: indexing, building, bundling, and sharing. Integrates with CASS for mining coding session history into reusable skills.",
+    whyItsUseful:
+      "Skills are reusable prompt fragments that make Claude Code smarter. Meta Skill helps you discover, organize, and create them - including mining your own session history to extract patterns that work.",
+    implementationHighlights: [
+      "Rust implementation for high performance",
+      "CASS integration for skill mining",
+      "GitHub registry support for sharing",
+      "Dependency resolution for skill bundles",
+    ],
+    synergies: [
+      {
+        toolId: "cass",
+        description: "Mines session history for skill patterns",
+      },
+      {
+        toolId: "cm",
+        description: "Discovered skills become procedural memories",
+      },
+    ],
+    techStack: ["Rust", "Tantivy", "Git", "TOML"],
+    keyFeatures: [
+      "Index skills from directories and GitHub",
+      "Build and bundle skills for distribution",
+      "Mine CASS for skill extraction",
+      "Searchable skill registry",
+    ],
+    useCases: [
+      "Creating reusable Claude Code skills",
+      "Sharing skills with team members",
+      "Extracting patterns from session history",
+    ],
+  },
 ];
 
 export const tldrPageData = {
@@ -2538,9 +2604,9 @@ export const tldrPageData = {
     title: "The Agentic Coding Flywheel",
     subtitle: "TL;DR Edition",
     description:
-      "10 core tools and 3 supporting utilities that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
+      "10 core tools and 4 supporting utilities that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
     stats: [
-      { label: "Ecosystem Tools", value: "13" },
+      { label: "Ecosystem Tools", value: "14" },
       { label: "GitHub Stars", value: "3,600+" },
       { label: "Languages", value: "5" },
     ],
@@ -2548,7 +2614,7 @@ export const tldrPageData = {
   coreDescription:
     "The core flywheel tools form the backbone: Agent Mail for coordination, BV for graph-based prioritization, CASS for instant session search, CM for persistent memory, UBS for bug detection, plus session management, safety guards, and automated setup.",
   supportingDescription:
-    "Supporting tools extend the ecosystem: GIIL for remote image debugging, XF for searching your X archive, and S2P for crafting prompts from source code.",
+    "Supporting tools extend the ecosystem: ICI for remote image debugging, XF for searching your X archive, S2P for crafting prompts from source code, and Meta Skill for managing and mining Claude Code skills.",
   flywheelExplanation: {
     title: "Why a Flywheel?",
     paragraphs: [
