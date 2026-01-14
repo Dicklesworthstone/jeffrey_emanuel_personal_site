@@ -54,11 +54,7 @@ function CodeBlock({ language, children }: { language: string; children: React.R
   const content = String(children || "").replace(/\n$/, "");
 
   useEffect(() => {
-    if (cachedTheme) {
-      setStyle(cachedTheme);
-      setIsLoaded(true);
-      return;
-    }
+    if (cachedTheme) return;
     let cancelled = false;
     loadTheme()
       .then((theme) => {
