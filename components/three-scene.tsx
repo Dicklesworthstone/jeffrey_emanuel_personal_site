@@ -65,11 +65,14 @@ const useHour = () => {
 };
 
 // Simple deterministic pseudo-random generator for repeatable layouts
-const seededRandom = (seed: number) => {
-  let x = Math.sin(seed) * 10000;
+// Uses Mulberry32 for better statistical properties than sine-based PRNGs
+export const seededRandom = (seed: number) => {
+  let state = seed | 0;
   return () => {
-    x = Math.sin(x) * 10000;
-    return x - Math.floor(x);
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 };
 

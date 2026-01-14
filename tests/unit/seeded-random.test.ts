@@ -10,19 +10,7 @@
  */
 
 import { describe, test, expect } from "vitest";
-
-/**
- * Deterministic pseudo-random number generator.
- * Uses sine function to create repeatable sequences.
- * Copied from components/three-scene.tsx for testing.
- */
-const seededRandom = (seed: number) => {
-  let x = Math.sin(seed) * 10000;
-  return () => {
-    x = Math.sin(x) * 10000;
-    return x - Math.floor(x);
-  };
-};
+import { seededRandom } from "@/components/three-scene";
 
 describe("seededRandom", () => {
   describe("determinism", () => {
@@ -81,9 +69,9 @@ describe("seededRandom", () => {
 
       // These values should be consistent across all test runs
       // Capturing actual values from the algorithm
-      expect(first).toBeCloseTo(0.6063913235120708, 10);
-      expect(typeof second).toBe("number");
-      expect(typeof third).toBe("number");
+      expect(first).toBeCloseTo(0.6011037519201636, 10);
+      expect(second).toBeCloseTo(0.44829055899754167, 10);
+      expect(third).toBeCloseTo(0.8524657934904099, 10);
       console.log("[TEST] ✓ Known values verified");
     });
   });
