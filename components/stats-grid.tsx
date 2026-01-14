@@ -55,9 +55,13 @@ function AnimatedNumber({
   // Handle reduced motion preference after hydration
   useEffect(() => {
     if (prefersReducedMotion && !hasAnimated) {
-      setCount(end);
-      setHasAnimated(true);
+      const hydrationId = setTimeout(() => {
+        setCount(end);
+        setHasAnimated(true);
+      }, 0);
+      return () => clearTimeout(hydrationId);
     }
+    return undefined;
   }, [prefersReducedMotion, end, hasAnimated]);
 
   // Easing function - smooth deceleration

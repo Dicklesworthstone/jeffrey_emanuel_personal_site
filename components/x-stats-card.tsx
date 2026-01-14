@@ -31,14 +31,21 @@ function AnimatedNumber({
   decimals?: number;
 }) {
   const prefersReducedMotion = useReducedMotion();
-  const [count, setCount] = useState(() => (prefersReducedMotion ? end : 0));
-  const [hasAnimated, setHasAnimated] = useState(() =>
-    Boolean(prefersReducedMotion)
-  );
+  // Initialize with 0/false to avoid hydration mismatch (prefersReducedMotion differs server vs client)
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const frameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
   const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+  // Handle reduced motion preference after hydration
+  useEffect(() => {
+    if (prefersReducedMotion && !hasAnimated) {
+      setCount(end);
+      setHasAnimated(true);
+    }
+  }, [prefersReducedMotion, end, hasAnimated]);
 
   useEffect(() => {
     if (prefersReducedMotion || !isVisible || hasAnimated) return;

@@ -202,8 +202,11 @@ export function useDeviceCapabilities() {
 
   // Detect actual capabilities after hydration
   useEffect(() => {
-    setCapabilities(detectCapabilities());
-    setIsHydrated(true);
+    const hydrationId = setTimeout(() => {
+      setCapabilities(detectCapabilities());
+      setIsHydrated(true);
+    }, 0);
+    return () => clearTimeout(hydrationId);
   }, []);
 
   useEffect(() => {

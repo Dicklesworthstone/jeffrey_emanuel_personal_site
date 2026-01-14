@@ -37,11 +37,23 @@ export function AnimatedCounter({
   startOnView = true,
 }: AnimatedCounterProps) {
   const prefersReducedMotion = useReducedMotion();
-  // Start with target value if reduced motion, otherwise 0
-  const [count, setCount] = useState(() => (prefersReducedMotion ? target : 0));
+  // Initialize with 0 to avoid hydration mismatch (prefersReducedMotion differs server vs client)
+  const [count, setCount] = useState(0);
   const hasStartedRef = useRef(false);
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  // Handle reduced motion preference after hydration
+  useEffect(() => {
+    if (prefersReducedMotion && !hasStartedRef.current) {
+      const hydrationId = setTimeout(() => {
+        setCount(target);
+        hasStartedRef.current = true;
+      }, 0);
+      return () => clearTimeout(hydrationId);
+    }
+    return undefined;
+  }, [prefersReducedMotion, target]);
 
   useEffect(() => {
     // Skip animation entirely if reduced motion preferred
