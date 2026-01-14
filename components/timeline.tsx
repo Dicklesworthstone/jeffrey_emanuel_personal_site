@@ -27,9 +27,10 @@ export default function Timeline({ items }: { items: TimelineItem[] }) {
                 )}
               </div>
 
-              {/* Content Card - Glass Effect */}
+              {/* Content Card - Glass Effect with featured styling for current role */}
               <div className={cn(
-                "glass-card rounded-3xl p-6 md:p-8 transition-transform duration-300 group-hover:-translate-y-1"
+                "glass-card rounded-3xl p-6 md:p-8 transition-transform duration-300 motion-reduce:transition-none motion-safe:group-hover:-translate-y-1",
+                isLatest && "border-sky-500/20 bg-gradient-to-br from-sky-950/30 to-slate-900/30 shadow-[0_0_30px_-10px_rgba(56,189,248,0.15)]"
               )}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                    <div className="space-y-1">
@@ -44,7 +45,13 @@ export default function Timeline({ items }: { items: TimelineItem[] }) {
                       </p>
                    </div>
                    
-                   <div className="flex items-center gap-3">
+                   <div className="flex items-center gap-2">
+                      {isLatest && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-sky-400 ring-1 ring-inset ring-sky-500/20">
+                          <span className="h-1.5 w-1.5 rounded-full bg-sky-400 motion-safe:animate-pulse" aria-hidden="true" />
+                          Current
+                        </span>
+                      )}
                       <span className="inline-flex items-center rounded-full border border-white/5 bg-white/5 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-slate-400 transition-colors group-hover:border-white/10 group-hover:text-slate-300">
                         {item.period}
                       </span>

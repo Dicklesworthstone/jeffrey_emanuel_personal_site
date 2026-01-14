@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Suspense, useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Briefcase, Workflow } from "lucide-react";
+import { ArrowRight, Briefcase, Workflow, ChevronDown } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
 import StatsGrid from "@/components/stats-grid";
 import ErrorBoundary from "@/components/error-boundary";
@@ -36,16 +36,30 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   const prefersReducedMotion = useReducedMotion();
 
   const [shouldRenderScene, setShouldRenderScene] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
     const checkDesktop = () => {
       // Match Tailwind 'lg' breakpoint (1024px)
       setShouldRenderScene(window.matchMedia("(min-width: 1024px)").matches);
     };
-    
+
     checkDesktop();
     window.addEventListener("resize", checkDesktop);
     return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
+
+  // Hide scroll indicator after user scrolls (also check initial position)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setHasScrolled(true);
+      }
+    };
+    // Check initial scroll position (e.g., page refresh while scrolled)
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -69,7 +83,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
             className="flex items-center gap-5"
           >
             <div className="group relative h-16 w-16 overflow-hidden rounded-full shadow-2xl sm:h-20 sm:w-20">
-              <div className="absolute inset-0 animate-pulse bg-sky-500/20 blur-md group-hover:bg-sky-400/30" />
+              <div className="absolute inset-0 motion-safe:animate-pulse bg-sky-500/20 blur-md group-hover:bg-sky-400/30" aria-hidden="true" />
               <Image
                 src={headshot}
                 alt={`Headshot photo of ${siteConfig.name}`}
@@ -85,8 +99,8 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                 {siteConfig.name}
               </span>
               <div className="flex items-center gap-2">
-                <span className="flex h-2 w-2">
-                  <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="flex h-2 w-2" aria-hidden="true">
+                  <span className="absolute inline-flex h-2 w-2 motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
                 </span>
                 <span className="text-xs font-bold uppercase tracking-widest text-sky-400/90">
@@ -138,7 +152,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                           </span>
                           {"highlight" in tool && tool.highlight && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-400/30">
-                              <svg className="h-3 w-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                              <svg className="h-3 w-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
                               {tool.highlight}
@@ -159,10 +173,14 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                     </div>
                   </div>
                 ))}
-                {/* "And more" card */}
-                <div className="flex items-center justify-center rounded-xl border border-dashed border-slate-700/40 bg-slate-800/20 p-3 text-sm font-medium text-slate-500">
-                  + several others
-                </div>
+                {/* Explore ecosystem link */}
+                <Link
+                  href="/tldr"
+                  className="group flex items-center justify-center gap-2 rounded-xl border border-slate-700/40 bg-gradient-to-br from-slate-800/40 to-slate-900/40 p-3 text-sm font-medium text-slate-400 transition-colors hover:border-violet-500/30 hover:bg-slate-800/60 hover:text-violet-300"
+                >
+                  <span>Explore all tools</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5" aria-hidden="true" />
+                </Link>
               </div>
 
               {/* Achievement highlight callout */}
@@ -192,12 +210,12 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
               {/* Body paragraphs */}
               <div className="space-y-4">
-                {heroContent.body.map((p, i) => (
+                {heroContent.body.map((paragraph) => (
                   <p
-                    key={i}
+                    key={paragraph.slice(0, 50)}
                     className="text-base font-medium leading-relaxed text-slate-400/90 md:text-lg md:leading-loose"
                   >
-                    {p}
+                    {paragraph}
                   </p>
                 ))}
               </div>
@@ -215,20 +233,20 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               onTouchStart={mediumTap}
               onClick={spawnParticles}
               className={cn(
-                "group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.5)] active:scale-95",
+                "btn-glow-primary group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white transition-all active:scale-95",
               )}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity group-hover:opacity-100" />
-              <Workflow className="relative z-10 h-4 w-4 transition-transform group-hover:rotate-12" />
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100" aria-hidden="true" />
+              <Workflow className="relative z-10 h-4 w-4 transition-transform motion-reduce:transition-none group-hover:rotate-12" aria-hidden="true" />
               <span className="relative z-10">{heroContent.primaryCta.label}</span>
-              <ArrowRight className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="relative z-10 h-4 w-4 transition-transform motion-reduce:transition-none group-hover:translate-x-1" aria-hidden="true" />
             </Link>
 
             <Link
               href={heroContent.secondaryCta.href}
-              className="group inline-flex h-14 items-center gap-2.5 rounded-full border border-slate-700/50 bg-slate-900/40 px-8 text-sm font-bold tracking-wide text-white backdrop-blur-md transition-all hover:border-slate-600 hover:bg-slate-800/60 active:scale-95"
+              className="btn-glow-secondary group inline-flex h-14 items-center gap-2.5 rounded-full border border-slate-700/50 bg-slate-900/40 px-8 text-sm font-bold tracking-wide text-white backdrop-blur-md transition-colors hover:border-slate-600 hover:bg-slate-800/60 active:scale-95"
             >
-              <Briefcase className="h-4 w-4 text-slate-400 transition-colors group-hover:text-sky-300" />
+              <Briefcase className="h-4 w-4 text-slate-400 transition-colors motion-reduce:transition-none group-hover:text-sky-300" aria-hidden="true" />
               <span>{heroContent.secondaryCta.label}</span>
             </Link>
           </motion.div>
@@ -267,6 +285,26 @@ export default function Hero({ stats = heroStats }: HeroProps) {
            </div>
         </div>
       </div>
+
+      {/* Scroll indicator - fades out after scrolling */}
+      <motion.div
+        className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
+        initial={{ opacity: hasScrolled ? 0 : 1 }}
+        animate={{ opacity: hasScrolled ? 0 : 1 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
+        aria-hidden="true"
+      >
+        <motion.div
+          className="flex flex-col items-center gap-2"
+          animate={prefersReducedMotion ? {} : { y: [0, 6, 0] }}
+          transition={prefersReducedMotion ? {} : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <span className="text-xs font-medium uppercase tracking-widest text-slate-500">
+            Scroll
+          </span>
+          <ChevronDown className="h-5 w-5 text-slate-500" />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

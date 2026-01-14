@@ -179,7 +179,7 @@ export default function TwoWorlds() {
             className="mb-6 flex items-center justify-center gap-3"
           >
             <div className="h-px w-8 bg-gradient-to-r from-transparent to-amber-500/60" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-400/80">
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-400/80">
               Two Worlds, One Vision
             </p>
             <div className="h-px w-8 bg-gradient-to-l from-transparent to-violet-500/60" />
@@ -244,16 +244,16 @@ export default function TwoWorlds() {
                   { icon: <Target className="h-4 w-4" />, text: "Principal investor at multi-strat fund" },
                   { icon: <LineChart className="h-4 w-4" />, text: "Cross-sector fundamental analysis" },
                   { icon: <Scale className="h-4 w-4" />, text: "Risk-adjusted position sizing" },
-                ].map((item, i) => (
+                ].map((item, index) => (
                   <motion.li
-                    key={i}
+                    key={item.text}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.3 + i * 0.1 }}
+                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.3 + index * 0.1 }}
                     className="flex items-center gap-3"
                   >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/10 bg-amber-500/5 text-amber-400">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/10 bg-amber-500/5 text-amber-400" aria-hidden="true">
                       {item.icon}
                     </span>
                     <span className="text-sm font-medium text-slate-300">{item.text}</span>
@@ -298,16 +298,16 @@ export default function TwoWorlds() {
                   { icon: <GitBranch className="h-4 w-4" />, text: "6K+ GitHub stars across tools" },
                   { icon: <Brain className="h-4 w-4" />, text: "Context management & memory" },
                   { icon: <Zap className="h-4 w-4" />, text: "Flywheel effect in AI tooling" },
-                ].map((item, i) => (
+                ].map((item, index) => (
                   <motion.li
-                    key={i}
+                    key={item.text}
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.3 + i * 0.1 }}
+                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.3 + index * 0.1 }}
                     className="flex items-center gap-3"
                   >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-500/10 bg-violet-500/5 text-violet-400">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-500/10 bg-violet-500/5 text-violet-400" aria-hidden="true">
                       {item.icon}
                     </span>
                     <span className="text-sm font-medium text-slate-300">{item.text}</span>

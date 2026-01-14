@@ -56,7 +56,7 @@ export default function WritingCard({ item }: { item: WritingItem }) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 md:p-8",
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border p-6 md:p-8",
           "transition-all duration-300 ease-out",
           "hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
           "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
@@ -67,7 +67,7 @@ export default function WritingCard({ item }: { item: WritingItem }) {
       >
         {/* Featured Gradient Background */}
         {isFeatured && item.gradient && (
-          <div className={cn("absolute inset-0 opacity-[0.15] transition-opacity duration-500 group-hover:opacity-[0.25]", gradientClass)} />
+          <div className={cn("absolute inset-0 opacity-[0.12] transition-opacity duration-500 group-hover:opacity-[0.20]", gradientClass)} aria-hidden="true" />
         )}
 
         {/* Dynamic Spotlight Effect */}
@@ -77,13 +77,14 @@ export default function WritingCard({ item }: { item: WritingItem }) {
             opacity,
             background: `radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(255, 255, 255, 0.06), transparent 40%)`,
           }}
+          aria-hidden="true"
         />
-        
+
         {/* Subtle gradient stroke on top border */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" aria-hidden="true" />
 
         <div className="relative z-10 flex flex-1 flex-col">
-          <div className="mb-4 flex items-center gap-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+          <div className="mb-4 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-slate-500">
             <span className={cn(
               "inline-block px-2 py-0.5 rounded-full bg-white/5",
               isFeatured ? "text-white ring-1 ring-white/10" : "text-slate-400"

@@ -298,7 +298,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
 
       {/* Core Tools Section */}
       {coreTools.length > 0 && (
-        <section>
+        <section id="core-tools">
           <SectionHeader
             title="Core Flywheel Tools"
             description="The backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, search, safety guards, multi-repo sync, and automated setup. These tools form a self-reinforcing loop where each makes the others more powerful."
@@ -334,7 +334,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
 
       {/* Supporting Tools Section */}
       {supportingTools.length > 0 && (
-        <section>
+        <section id="supporting-tools">
           <SectionHeader
             title="Supporting Tools"
             description="Extend the ecosystem with GitHub issue sync, archive search, and prompt crafting utilities. These tools enhance the core flywheel for specialized workflows."

@@ -9,7 +9,7 @@ vi.mock("framer-motion", async () => {
     ...actual,
     AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     motion: {
-      div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+      div: ({ children, ...props }: { children?: React.ReactNode } & Record<string, unknown>) => <div {...props}>{children}</div>,
     },
     useReducedMotion: () => false,
   };

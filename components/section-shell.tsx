@@ -74,7 +74,7 @@ export default function SectionShell({
           {eyebrow && (
             <div className="mb-6 flex items-center gap-3">
               <div className="h-px w-6 bg-gradient-to-r from-sky-500/80 to-transparent" />
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-sky-400/90 shadow-sky-500/20 drop-shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-widest text-sky-400/90 shadow-sky-500/20 drop-shadow-sm">
                 {eyebrow}
               </p>
             </div>
@@ -83,9 +83,19 @@ export default function SectionShell({
           <div className="flex flex-col gap-6">
             <div className="flex items-start gap-5 md:items-center">
               {(Icon || iconNode) && (
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/50 text-sky-400 shadow-lg shadow-sky-900/10 backdrop-blur-sm">
+                <motion.div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-800/50 text-sky-400 shadow-lg shadow-sky-900/10 backdrop-blur-sm"
+                  initial={false}
+                  animate={animateIn ? {
+                    boxShadow: "0 0 20px -5px rgba(56, 189, 248, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+                  } : {
+                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+                  }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: 0.2 }}
+                  aria-hidden="true"
+                >
                   {iconNode || (Icon && <Icon className="h-5 w-5" />)}
-                </div>
+                </motion.div>
               )}
               <HeadingTag
                 id={headingId}

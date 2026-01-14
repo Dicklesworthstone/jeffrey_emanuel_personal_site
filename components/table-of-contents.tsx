@@ -214,7 +214,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
         {/* Current section indicator */}
         {activeHeading && (
           <div className="mt-4 rounded-xl border border-violet-500/20 bg-violet-500/10 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400">
+            <p className="text-xs font-bold uppercase tracking-widest text-violet-400">
               Reading
             </p>
             <p className="mt-1 text-sm font-medium text-slate-300 line-clamp-2">

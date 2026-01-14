@@ -88,7 +88,7 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/5 bg-black/20",
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-black/20",
           "transition-all duration-300 ease-out",
           "hover:bg-black/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
           "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
@@ -100,9 +100,10 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
         {/* Background gradient */}
         <div
           className={cn(
-            "absolute inset-0 opacity-[0.06] transition-opacity duration-500 bg-gradient-to-br group-hover:opacity-[0.12]",
+            "absolute inset-0 opacity-[0.08] transition-opacity duration-500 bg-gradient-to-br group-hover:opacity-[0.15]",
             config.bgGradient
           )}
+          aria-hidden="true"
         />
 
         {/* Dynamic spotlight effect */}
@@ -112,10 +113,11 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
             opacity: spotlightOpacity,
             background: `radial-gradient(500px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(${config.spotlightColor}, 0.12), transparent 40%)`,
           }}
+          aria-hidden="true"
         />
 
         {/* Subtle top border gradient */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" aria-hidden="true" />
 
         <div className="relative z-10 flex flex-1 flex-col">
           {/* Preview image placeholder - can be added later */}
@@ -131,7 +133,7 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
           )}
 
           {/* Category badge */}
-          <div className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-widest">
+          <div className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest">
             <span
               className={cn(
                 "flex h-5 w-5 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10",
@@ -180,7 +182,7 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
               {demo.technologies.slice(0, featured ? 4 : 3).map((tech) => (
                 <span
                   key={tech}
-                  className="inline-flex items-center rounded-md bg-white/5 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-slate-400 transition-colors group-hover:bg-white/10 group-hover:text-slate-300"
+                  className="inline-flex items-center rounded-md bg-white/5 px-2 py-1 text-xs font-medium uppercase tracking-wider text-slate-400 transition-colors group-hover:bg-white/10 group-hover:text-slate-300"
                 >
                   {tech}
                 </span>

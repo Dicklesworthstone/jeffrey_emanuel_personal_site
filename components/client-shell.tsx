@@ -55,7 +55,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     // Instant scroll on navigation
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, [pathname]);
 
   return (

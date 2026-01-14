@@ -181,7 +181,7 @@ export function TldrSynergyDiagram({
               x="200"
               y="196"
               textAnchor="middle"
-              className="fill-violet-400 text-[10px] font-bold uppercase tracking-wider"
+              className="fill-violet-400 text-xs font-bold uppercase tracking-wider"
             >
               Flywheel
             </text>
@@ -189,7 +189,7 @@ export function TldrSynergyDiagram({
               x="200"
               y="210"
               textAnchor="middle"
-              className="fill-slate-500 text-[8px]"
+              className="fill-slate-500 text-[9px]"
             >
               {coreTools.length} Core Tools
             </text>

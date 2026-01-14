@@ -12,6 +12,7 @@ import { tldrPageData } from "@/lib/content";
 
 interface TldrHeroProps {
   className?: string;
+  id?: string;
 }
 
 // =============================================================================
@@ -42,7 +43,7 @@ function AnimatedStat({
       className="text-center"
     >
       <div className="text-2xl font-bold text-white sm:text-3xl md:text-4xl">{value}</div>
-      <div className="mt-1 text-[10px] font-medium uppercase tracking-wider text-slate-400 sm:text-xs">
+      <div className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-400">
         {label}
       </div>
     </motion.div>
@@ -86,7 +87,7 @@ function FloatingIcon({
 // MAIN COMPONENT
 // =============================================================================
 
-export function TldrHero({ className }: TldrHeroProps) {
+export function TldrHero({ className, id }: TldrHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
   const prefersReducedMotion = useReducedMotion();
@@ -109,6 +110,7 @@ export function TldrHero({ className }: TldrHeroProps) {
 
   return (
     <section
+      id={id}
       ref={containerRef}
       className={cn("relative overflow-hidden py-16 md:py-32", className)}
     >

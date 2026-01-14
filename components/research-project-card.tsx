@@ -62,11 +62,11 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
                 <Icon className="h-5 w-5 text-purple-400" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
+                <span className="text-xs font-bold uppercase tracking-widest text-purple-400">
                   Frontier Research
                 </span>
                 {project.badge && (
-                  <span className="text-[10px] font-medium text-slate-500">
+                  <span className="text-xs font-medium text-slate-500">
                     {project.badge}
                   </span>
                 )}
@@ -91,7 +91,7 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
               {project.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-white/5 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-400 transition-colors group-hover:border-white/10 group-hover:text-slate-300"
+                  className="rounded-full border border-white/5 bg-white/5 px-3 py-1 text-xs font-medium text-slate-400 transition-colors group-hover:border-white/10 group-hover:text-slate-300"
                 >
                   {tag}
                 </span>

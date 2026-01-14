@@ -26,6 +26,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 
   // Detect touch device to disable spotlight effect (better mobile performance)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional one-time browser feature detection
     setIsTouchDevice(window.matchMedia("(hover: none)").matches);
   }, []);
 
@@ -108,7 +109,7 @@ export default function ProjectCard({ project }: { project: Project }) {
       >
         {/* Custom Gradient Background */}
         {project.gradient && (
-           <div className={cn("absolute inset-0 opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15] bg-gradient-to-br", project.gradient)} />
+           <div className={cn("absolute inset-0 opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15] bg-gradient-to-br", project.gradient)} aria-hidden="true" />
         )}
 
         {/* Dynamic Spotlight Effect */}
@@ -118,10 +119,11 @@ export default function ProjectCard({ project }: { project: Project }) {
             opacity,
             background: `radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(${spotlightColor}, 0.12), transparent 40%)`,
           }}
+          aria-hidden="true"
         />
-        
+
         {/* Subtle gradient stroke on top border */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" aria-hidden="true" />
 
         <div className="relative z-10 flex flex-1 flex-col">
           <div className="flex items-start justify-between gap-4">
@@ -147,8 +149,8 @@ export default function ProjectCard({ project }: { project: Project }) {
             <div className="flex flex-col items-end gap-2">
               {starCount && (
                 <span className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 group-hover:ring-amber-400/50 group-hover:shadow-amber-500/20">
-                  {/* Shimmer effect */}
-                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-out group-hover:translate-x-full" />
+                  {/* Shimmer effect - slower for smoother feel */}
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1500ms] ease-in-out motion-reduce:transition-none motion-safe:group-hover:translate-x-full" aria-hidden="true" />
                   <Star className="relative h-3.5 w-3.5 fill-amber-400 text-amber-400 drop-shadow-[0_0_3px_rgba(251,191,36,0.5)]" />
                   <span className="relative font-mono tracking-tight">{starCount}</span>
                 </span>

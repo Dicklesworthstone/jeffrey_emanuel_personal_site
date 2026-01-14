@@ -139,7 +139,7 @@ export function EndorsementCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-black/20",
+        "group relative flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-black/20",
         "transition-all duration-300 ease-out",
         "hover:bg-black/40 hover:scale-[1.01] hover:shadow-xl hover:shadow-black/40",
         "focus-within:scale-[1.01] focus-within:shadow-xl focus-within:shadow-black/40",
@@ -156,9 +156,10 @@ export function EndorsementCard({
       {/* Background gradient */}
       <div
         className={cn(
-          "absolute inset-0 opacity-[0.06] transition-opacity duration-500 bg-gradient-to-br group-hover:opacity-[0.12]",
+          "absolute inset-0 opacity-[0.08] transition-opacity duration-500 bg-gradient-to-br group-hover:opacity-[0.15]",
           config.bgGradient
         )}
+        aria-hidden="true"
       />
 
       {/* Dynamic spotlight effect */}
@@ -168,10 +169,11 @@ export function EndorsementCard({
           opacity: spotlightOpacity,
           background: `radial-gradient(400px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(${config.spotlightColor}, 0.1), transparent 40%)`,
         }}
+        aria-hidden="true"
       />
 
       {/* Subtle top border gradient */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" aria-hidden="true" />
 
       <div className="relative z-10 flex flex-1 flex-col">
         {/* Source badge and date */}
@@ -185,12 +187,12 @@ export function EndorsementCard({
             >
               <SourceIcon className="h-2.5 w-2.5" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
               {config.label}
             </span>
           </div>
           {date && !isCompact && (
-            <span className="text-[10px] text-slate-600">{date}</span>
+            <span className="text-xs text-slate-600">{date}</span>
           )}
         </div>
 
@@ -284,7 +286,7 @@ export function EndorsementCard({
         href={sourceUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-2xl"
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-2xl sm:rounded-3xl"
         aria-label={`View ${author}'s endorsement on ${config.label}`}
       >
         {cardContent}

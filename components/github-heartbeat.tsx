@@ -124,8 +124,7 @@ function parseEvent(event: GitHubEvent): HeartbeatEvent {
 }
 
 // Relative time formatter
-function formatRelativeTime(date: Date): string {
-  const now = new Date();
+function formatRelativeTime(date: Date, now: Date): string {
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -269,7 +268,15 @@ function HeartbeatLine() {
 }
 
 // Single event card
-function EventCard({ event, index }: { event: HeartbeatEvent; index: number }) {
+function EventCard({
+  event,
+  index,
+  now,
+}: {
+  event: HeartbeatEvent;
+  index: number;
+  now: Date;
+}) {
   const prefersReducedMotion = useReducedMotion();
   const colors = colorMap[event.color] || colorMap.slate;
 
@@ -306,7 +313,7 @@ function EventCard({ event, index }: { event: HeartbeatEvent; index: number }) {
             {event.repo}
           </span>
           <span className="text-xs text-slate-500">
-            {formatRelativeTime(event.timestamp)}
+            {formatRelativeTime(event.timestamp, now)}
           </span>
         </div>
         <p className="mt-0.5 truncate text-sm font-medium text-slate-300">
@@ -376,6 +383,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef(false);
+  const [now, setNow] = useState(() => new Date());
   const prefersReducedMotion = useReducedMotion();
 
   // Fetch events
@@ -385,14 +393,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
 
     async function fetchEvents() {
       try {
-        const response = await fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=30`,
-          {
-            headers: {
-              Accept: "application/vnd.github.v3+json",
-            },
-          }
-        );
+        const response = await fetch("/api/github-heartbeat");
 
         if (!response.ok) {
           throw new Error(`GitHub API error: ${response.status}`);
@@ -419,9 +420,14 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     fetchEvents();
   }, []);
 
+  // Update relative time labels once per minute
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
   // Calculate stats
   const stats = useMemo(() => {
-    const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const eventsToday = events.filter((e) => e.timestamp >= todayStart).length;
 
@@ -441,7 +447,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     }
 
     return { eventsToday, streak };
-  }, [events]);
+  }, [events, now]);
 
   const isLive = !loading && !error && events.length > 0;
 
@@ -515,7 +521,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
           ) : (
             <AnimatePresence mode="popLayout">
               {events.slice(0, 5).map((event, index) => (
-                <EventCard key={event.id} event={event} index={index} />
+                <EventCard key={event.id} event={event} index={index} now={now} />
               ))}
             </AnimatePresence>
           )}
