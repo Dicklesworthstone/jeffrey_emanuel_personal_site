@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
   }
 
-  // Validate the URL domain
+  // Validate the URL domain and protocol
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
@@ -26,8 +26,51 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 
+  if (!["https:", "http:"].includes(parsedUrl.protocol)) {
+    return NextResponse.json({ error: "Invalid URL protocol" }, { status: 400 });
+  }
+
   if (!ALLOWED_DOMAINS.includes(parsedUrl.hostname)) {
     return NextResponse.json({ error: "Domain not allowed" }, { status: 403 });
+  }
+
+  const headers: HeadersInit = {
+    "User-Agent": "Mozilla/5.0 (compatible; JeffreySiteBot/1.0)",
+    "Accept": "image/*",
+  };
+
+  async function fetchAllowedImage(initialUrl: string) {
+    let currentUrl = initialUrl;
+    const maxRedirects = 3;
+
+    for (let i = 0; i <= maxRedirects; i += 1) {
+      const response = await fetch(currentUrl, {
+        headers,
+        redirect: "manual",
+      });
+
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get("location");
+        if (!location) {
+          throw new Error("Redirect without location");
+        }
+
+        const nextUrl = new URL(location, currentUrl);
+        if (!["https:", "http:"].includes(nextUrl.protocol)) {
+          throw new Error("Redirect protocol not allowed");
+        }
+        if (!ALLOWED_DOMAINS.includes(nextUrl.hostname)) {
+          throw new Error("Redirect domain not allowed");
+        }
+
+        currentUrl = nextUrl.toString();
+        continue;
+      }
+
+      return response;
+    }
+
+    throw new Error("Too many redirects");
   }
 
   // Check cache
@@ -44,12 +87,7 @@ export async function GET(request: NextRequest) {
 
   // Fetch the image
   try {
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; JeffreySiteBot/1.0)",
-        "Accept": "image/*",
-      },
-    });
+    const response = await fetchAllowedImage(url);
 
     if (!response.ok) {
       return NextResponse.json(
