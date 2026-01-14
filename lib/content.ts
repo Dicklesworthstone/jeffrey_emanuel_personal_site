@@ -42,7 +42,7 @@ export type Stat = { label: string; value: string; helper?: string };
 export const heroStats: Stat[] = [
   {
     label: "GitHub Stars",
-    value: "10K+",
+    value: "12K+",
     helper: "Across 70+ open-source agent tools and infrastructure.",
   },
   {

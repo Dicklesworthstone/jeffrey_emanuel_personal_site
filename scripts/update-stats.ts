@@ -83,7 +83,7 @@ function updateContentFile(stats: { githubStars?: string; twitterFollowers?: str
   let updated = false;
 
   if (stats.githubStars) {
-    const githubRegex = /(label:\s*"GitHub Stars",\s*\n\s*value:\s*)"[^"]+"/;
+    const githubRegex = /(label:\s*"GitHub Stars",\s*value:\s*)"[^"]+"/;
     if (githubRegex.test(content)) {
       content = content.replace(githubRegex, `$1"${stats.githubStars}"`);
       console.log(`Updated GitHub Stars to: ${stats.githubStars}`);
@@ -92,7 +92,7 @@ function updateContentFile(stats: { githubStars?: string; twitterFollowers?: str
   }
 
   if (stats.twitterFollowers) {
-    const twitterRegex = /(label:\s*"Audience on X",\s*\n\s*value:\s*)"[^"]+"/;
+    const twitterRegex = /(label:\s*"Audience on X",\s*value:\s*)"[^"]+"/;
     if (twitterRegex.test(content)) {
       content = content.replace(twitterRegex, `$1"${stats.twitterFollowers}"`);
       console.log(`Updated Twitter followers to: ${stats.twitterFollowers}`);
