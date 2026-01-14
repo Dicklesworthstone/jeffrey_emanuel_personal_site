@@ -3,7 +3,7 @@ import Link from "next/link";
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
-import AnimatedGrid, { LazySection, TimelineSkeleton } from "@/components/animated-grid";
+import AnimatedGrid, { LazySection } from "@/components/animated-grid";
 import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail, Activity, Globe } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, flywheelTools, heroStats, featuredSites } from "@/lib/content";
 import FeaturedSites from "@/components/featured-sites";
@@ -341,9 +341,7 @@ export default async function HomePage() {
         title="From hedge funds to agents and chains"
         kicker="A condensed view of the path that got me here."
       >
-        <LazySection minHeight="800px" skeleton={<TimelineSkeleton itemCount={careerTimeline.length} />}>
-          <Timeline items={careerTimeline} />
-        </LazySection>
+        <Timeline items={careerTimeline} />
       </SectionShell>
 
       {/* Try It - Live Demos */}

@@ -1,8 +1,13 @@
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
 import type { TimelineItem } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export default function Timeline({ items }: { items: TimelineItem[] }) {
   const latestIndex = items.findIndex((item) => item.period.includes("Present"));
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div className="relative">
       {/* Vertical track - Optimized for depth */}
@@ -13,7 +18,14 @@ export default function Timeline({ items }: { items: TimelineItem[] }) {
           const isLatest = latestIndex === -1 ? index === 0 : index === latestIndex;
           
           return (
-            <li key={`${item.org}-${item.period}`} className="group relative md:pl-20">
+            <motion.li
+              key={`${item.org}-${item.period}`}
+              className="group relative md:pl-20"
+              initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
+              whileInView={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
               
               {/* Desktop Node Indicator */}
               <div className={cn(
@@ -67,7 +79,7 @@ export default function Timeline({ items }: { items: TimelineItem[] }) {
                    <span className="uppercase tracking-wider">{item.location}</span>
                 </div>
               </div>
-            </li>
+            </motion.li>
           );
         })}
       </ol>

@@ -1129,19 +1129,20 @@ export const flywheelTools: FlywheelTool[] = [
     href: "https://github.com/Dicklesworthstone/ntm",
     icon: "LayoutGrid",
     color: "from-sky-500 to-blue-600",
-    tagline: "Spawn & orchestrate multiple agents",
-    connectsTo: ["slb", "mail", "cass"],
+    tagline: "Multi-agent tmux orchestration",
+    connectsTo: ["slb", "mail", "cass", "bv"],
     connectionDescriptions: {
       slb: "Routes dangerous commands through safety checks",
-      mail: "Agents communicate via mail threads",
-      cass: "Session history indexed for search",
+      mail: "Human Overseer messaging and file reservations",
+      cass: "Duplicate detection and session history search",
+      bv: "Dashboard shows beads status; --robot-triage for dispatch",
     },
     stars: 69,
     projectSlug: "named-tmux-manager",
     features: [
-      "Spawn named agent panes with type classification",
-      "Broadcast prompts to specific agent types",
-      "Real-time dashboard showing agent status",
+      "Spawn 10+ Claude/Codex/Gemini agents in parallel",
+      "Smart broadcast with type/variant/tag filtering",
+      "60fps animated dashboard with health monitoring",
     ],
   },
   {
@@ -2309,42 +2310,46 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     category: "core",
     stars: 69,
     whatItDoes:
-      "Manages named tmux sessions with project-specific persistence. Creates organized workspaces for multi-agent development with typed panes.",
+      "A tmux session orchestration platform that transforms tmux into a multi-agent command center. Spawn, broadcast to, and coordinate Claude/Codex/Gemini agents across tiled panes with smart routing and real-time monitoring.",
     whyItsUseful:
-      "When running multiple AI coding agents simultaneously, keeping track of which agent is working on what becomes impossible without organization. NTM solves this by providing persistent, named sessions that survive reboots.",
+      "Enables true multi-agent development at scale. Spawn 10+ AI agents in parallel, broadcast prompts by type/variant/tag, monitor progress via animated dashboard, and coordinate work through integrated Agent Mail and CASS. Sessions survive SSH disconnects.",
     implementationHighlights: [
-      "Go implementation with Bubble Tea TUI framework",
-      "Project-aware persistence using XDG conventions",
-      "Support for agent type classification (claude, codex, cursor, etc.)",
-      "Real-time dashboard showing all active agent panes",
+      "38,000+ lines of Go with 50+ internal packages",
+      "Bubble Tea TUI with 60fps animated dashboard",
+      "Smart routing: least-loaded, round-robin, affinity strategies",
+      "CASS integration for duplicate detection before broadcasting",
+      "Checkpoint system for automatic session snapshots",
     ],
     synergies: [
       {
-        toolId: "slb",
-        description:
-          "SLB provides two-person rule safety checks for dangerous commands in NTM sessions",
-      },
-      {
         toolId: "mail",
         description:
-          "Agents in different NTM panes communicate via Agent Mail threads",
+          "Human Overseer messaging, file reservations, and audit trail logging integrated directly into NTM",
       },
       {
         toolId: "cass",
-        description: "Session history from all NTM panes is indexed for search",
+        description:
+          "Duplicate detection before sending, context retrieval from 7+ days of session history",
+      },
+      {
+        toolId: "bv",
+        description:
+          "Dashboard shows ready/blocked beads alongside agent status; --robot-triage for smart dispatch",
       },
     ],
-    techStack: ["Go 1.25+", "Bubble Tea", "tmux 3.0+"],
+    techStack: ["Go 1.25+", "Bubble Tea", "Cobra", "tmux 3.0+", "TOML/YAML config"],
     keyFeatures: [
-      "Spawn named agent panes with type classification",
-      "Broadcast prompts to specific agent types",
-      "Session persistence across reboots",
-      "Dashboard view of all active agents",
+      "Multi-agent spawn: ntm spawn project --cc=3 --cod=2 --gmi=1",
+      "Smart broadcast: filter by type, variant (opus/sonnet), or custom tags",
+      "Robot mode API: --robot-status, --robot-send, --robot-snapshot for automation",
+      "Animated dashboard with token velocity, health checks, and alert panels",
+      "Checkpoint/restore for session state management",
     ],
     useCases: [
-      "Running 5+ Claude Code agents on different features simultaneously",
-      "Organizing development environments by project",
-      "Managing long-running agent sessions for complex refactors",
+      "Running 10+ AI agents in parallel on different features",
+      "Broadcasting same prompt to Claude AND Codex simultaneously",
+      "Auto-routing work to least-loaded agent with CASS dedup",
+      "Persistent sessions for multi-day refactoring projects",
     ],
   },
   {
