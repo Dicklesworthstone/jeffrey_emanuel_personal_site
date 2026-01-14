@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-const GITHUB_USERNAME = "Dicklesworthstone";
+import { GITHUB_USERNAME } from "@/lib/constants";
 
 // Cache for 5 minutes
 export const revalidate = 300;

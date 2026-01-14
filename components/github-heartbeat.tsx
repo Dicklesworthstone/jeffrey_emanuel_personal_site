@@ -14,9 +14,7 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// GitHub username
-const GITHUB_USERNAME = "Dicklesworthstone";
+import { GITHUB_USERNAME } from "@/lib/constants";
 
 // Event types we care about
 type GitHubEventType =
@@ -198,7 +196,7 @@ function HeartbeatLine() {
   }
 
   return (
-    <div className="relative h-12 w-full overflow-hidden">
+    <div className="relative h-12 w-full overflow-hidden" aria-hidden="true">
       {/* Static line background */}
       <svg viewBox="0 0 400 48" className="h-full w-full" preserveAspectRatio="none">
         <path
