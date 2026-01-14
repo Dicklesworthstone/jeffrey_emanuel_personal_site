@@ -14,6 +14,23 @@ import { cn } from "@/lib/utils";
 import ErrorBoundary from "@/components/error-boundary";
 import CopyButton from "@/components/copy-button";
 
+let cachedTheme: Record<string, React.CSSProperties> | null = null;
+let themePromise: Promise<Record<string, React.CSSProperties>> | null = null;
+
+function loadTheme() {
+  if (cachedTheme) {
+    return Promise.resolve(cachedTheme);
+  }
+  if (!themePromise) {
+    themePromise = import("react-syntax-highlighter/dist/esm/styles/prism/one-dark")
+      .then((mod) => {
+        cachedTheme = mod.default;
+        return cachedTheme;
+      });
+  }
+  return themePromise;
+}
+
 // Dynamically import syntax highlighter to reduce initial bundle size (~600KB)
 const SyntaxHighlighter = dynamic(
   () => import("react-syntax-highlighter/dist/esm/prism-light").then(mod => mod.default),
@@ -30,22 +47,32 @@ interface MarkdownRendererProps {
 
 // Lazy-loaded code block with syntax highlighting
 function CodeBlock({ language, children }: { language: string; children: React.ReactNode }) {
-  const [style, setStyle] = useState<Record<string, React.CSSProperties> | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [style, setStyle] = useState<Record<string, React.CSSProperties> | null>(() => cachedTheme);
+  const [isLoaded, setIsLoaded] = useState(() => Boolean(cachedTheme));
   
   // Ensure content is a string
   const content = String(children || "").replace(/\n$/, "");
 
   useEffect(() => {
-    import("react-syntax-highlighter/dist/esm/styles/prism/one-dark")
-      .then((mod) => {
-        setStyle(mod.default);
+    if (cachedTheme) {
+      setStyle(cachedTheme);
+      setIsLoaded(true);
+      return;
+    }
+    let cancelled = false;
+    loadTheme()
+      .then((theme) => {
+        if (cancelled) return;
+        setStyle(theme);
         setIsLoaded(true);
       })
       .catch(() => {
-        // Fallback or silent fail if style fails to load
-        setIsLoaded(false); 
+        if (cancelled) return;
+        setIsLoaded(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Show simple code block while loading
