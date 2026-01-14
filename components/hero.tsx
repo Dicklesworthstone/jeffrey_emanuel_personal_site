@@ -3,7 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Briefcase, Workflow, ChevronDown } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
@@ -37,17 +37,61 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
   const [shouldRenderScene, setShouldRenderScene] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const idleHandleRef = useRef<{ id: number; type: "idle" | "timeout" } | null>(null);
 
   useEffect(() => {
-    const checkDesktop = () => {
-      // Match Tailwind 'lg' breakpoint (1024px)
-      setShouldRenderScene(window.matchMedia("(min-width: 1024px)").matches);
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+
+    const cancelPending = () => {
+      if (!idleHandleRef.current) return;
+      if (idleHandleRef.current.type === "idle" && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback?.(idleHandleRef.current.id);
+      } else {
+        clearTimeout(idleHandleRef.current.id);
+      }
+      idleHandleRef.current = null;
     };
 
-    checkDesktop();
-    window.addEventListener("resize", checkDesktop);
-    return () => window.removeEventListener("resize", checkDesktop);
-  }, []);
+    const scheduleEnable = () => {
+      if (!mediaQuery.matches) {
+        cancelPending();
+        setShouldRenderScene(false);
+        return;
+      }
+      if (shouldRenderScene) return;
+
+      const enable = () => {
+        setShouldRenderScene(true);
+        idleHandleRef.current = null;
+      };
+
+      if ("requestIdleCallback" in window) {
+        const id = window.requestIdleCallback(enable, { timeout: 300 });
+        idleHandleRef.current = { id, type: "idle" };
+      } else {
+        const id = setTimeout(enable, 200) as unknown as number;
+        idleHandleRef.current = { id, type: "timeout" };
+      }
+    };
+
+    scheduleEnable();
+
+    const handleChange = () => scheduleEnable();
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      cancelPending();
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, [shouldRenderScene]);
 
   // Hide scroll indicator after user scrolls (also check initial position)
   useEffect(() => {

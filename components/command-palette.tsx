@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, useDeferredValue } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
@@ -79,12 +79,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const listRef = useRef<HTMLDivElement>(null);
   const paletteRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const prefersReducedMotion = useReducedMotion();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchIndex, setSearchIndex] = useState<SearchIndexItem[]>([]);
   const [fuse, setFuse] = useState<Fuse<SearchIndexItem> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const hasPrefetchedRef = useRef(false);
 
   const openExternal = useCallback((url: string) => {
     const newWindow = window.open(url, "_blank", "noopener,noreferrer");
@@ -93,39 +95,63 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     }
   }, []);
 
-  // Fetch search index on load (or on first open)
-  useEffect(() => {
-    if (isOpen && searchIndex.length === 0 && !isLoading && !hasError) {
-      setIsLoading(true);
-      fetch("/api/search")
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch search index");
-          return res.json();
-        })
-        .then((data) => {
-          setSearchIndex(data);
-          const fuseInstance = new Fuse<SearchIndexItem>(data, {
-            keys: [
-              { name: "title", weight: 0.7 },
-              { name: "tags", weight: 0.5 },
-              { name: "category", weight: 0.4 },
-              { name: "excerpt", weight: 0.3 },
-              { name: "content", weight: 0.1 },
-            ],
-            threshold: 0.4,
-            includeScore: true,
-          });
-          setFuse(fuseInstance);
-        })
-        .catch((err) => {
-          console.error("Failed to load search index", err);
-          setHasError(true);
-        })
-        .finally(() => {
-          setIsLoading(false);
+  const loadSearchIndex = useCallback((options?: { force?: boolean }) => {
+    if (searchIndex.length > 0 || isLoading) return;
+    if (hasError && !options?.force) return;
+    setIsLoading(true);
+    fetch("/api/search")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch search index");
+        return res.json();
+      })
+      .then((data) => {
+        setSearchIndex(data);
+        const fuseInstance = new Fuse<SearchIndexItem>(data, {
+          keys: [
+            { name: "title", weight: 0.7 },
+            { name: "tags", weight: 0.5 },
+            { name: "category", weight: 0.4 },
+            { name: "excerpt", weight: 0.3 },
+            { name: "content", weight: 0.1 },
+          ],
+          threshold: 0.4,
+          includeScore: true,
         });
+        setFuse(fuseInstance);
+      })
+      .catch((err) => {
+        console.error("Failed to load search index", err);
+        setHasError(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [searchIndex.length, isLoading, hasError]);
+
+  // Fetch search index on first open
+  useEffect(() => {
+    if (isOpen) {
+      loadSearchIndex({ force: true });
     }
-  }, [isOpen, searchIndex.length, isLoading, hasError]);
+  }, [isOpen, loadSearchIndex]);
+
+  // Prefetch search index when the browser is idle
+  useEffect(() => {
+    if (hasPrefetchedRef.current) return;
+    if (searchIndex.length > 0 || isLoading || hasError) return;
+    if (typeof window === "undefined") return;
+
+    hasPrefetchedRef.current = true;
+
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(() => loadSearchIndex(), { timeout: 1500 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+
+    // Fallback for browsers without requestIdleCallback
+    const timeoutId = setTimeout(() => loadSearchIndex(), 1500);
+    return () => clearTimeout(timeoutId);
+  }, [searchIndex.length, isLoading, hasError, loadSearchIndex]);
 
   // Build static commands list
   const staticCommands = useMemo<Command[]>(() => {
@@ -233,9 +259,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
   // Combined results (Static + Fuse)
   const filteredCommands = useMemo(() => {
-    if (!query.trim()) return staticCommands;
+    if (!deferredQuery.trim()) return staticCommands;
 
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = deferredQuery.toLowerCase();
     
     // 1. Filter static commands
     const staticMatches = staticCommands.filter((cmd) => {
@@ -248,7 +274,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     // 2. Search dynamic index with Fuse
     const fuseMatches: Command[] = [];
     if (fuse) {
-      const results = fuse.search(query, { limit: 5 });
+      const results = fuse.search(deferredQuery, { limit: 5 });
       results.forEach((result) => {
         // Avoid duplicates if they are already in static list (by title)
         const isDuplicate = staticMatches.some(c => c.title === result.item.title);
@@ -269,7 +295,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     }
 
     return [...staticMatches, ...fuseMatches];
-  }, [staticCommands, query, fuse, router, onClose]);
+  }, [staticCommands, deferredQuery, fuse, router, onClose]);
 
   // Group by category
   const groupedCommands = useMemo(() => {
@@ -450,9 +476,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               >
                 {isLoading
                   ? "Loading search index..."
-                  : query.trim()
+                  : deferredQuery.trim()
                   ? filteredCommands.length === 0
-                    ? `No results found for "${query}"`
+                    ? `No results found for "${deferredQuery}"`
                     : `${filteredCommands.length} results found`
                   : ""}
               </div>
@@ -466,7 +492,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               >
                 {filteredCommands.length === 0 ? (
                   <div className="px-4 py-8 text-center text-sm text-slate-500" aria-hidden="true">
-                    No results found for &quot;{query}&quot;
+                    No results found for &quot;{deferredQuery}&quot;
                   </div>
                 ) : (
                   Object.entries(groupedCommands).map(([category, cmds]) => (
