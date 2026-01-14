@@ -1,5 +1,8 @@
 "use client";
 
+// KaTeX CSS - only loaded when this component is used (blog posts only)
+import "katex/dist/katex.min.css";
+
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -20,9 +23,6 @@ const SyntaxHighlighter = dynamic(
   }
 );
 
-// Dynamically import the theme
-const oneDarkPromise = import("react-syntax-highlighter/dist/esm/styles/prism/one-dark").then(mod => mod.default);
-
 interface MarkdownRendererProps {
   content: string;
   className?: string;
@@ -37,10 +37,15 @@ function CodeBlock({ language, children }: { language: string; children: React.R
   const content = String(children || "").replace(/\n$/, "");
 
   useEffect(() => {
-    oneDarkPromise.then((theme) => {
-      setStyle(theme);
-      setIsLoaded(true);
-    });
+    import("react-syntax-highlighter/dist/esm/styles/prism/one-dark")
+      .then((mod) => {
+        setStyle(mod.default);
+        setIsLoaded(true);
+      })
+      .catch(() => {
+        // Fallback or silent fail if style fails to load
+        setIsLoaded(false); 
+      });
   }, []);
 
   // Show simple code block while loading

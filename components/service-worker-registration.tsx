@@ -29,8 +29,8 @@ export default function ServiceWorkerRegistration() {
               }
             });
           })
-          .catch((error) => {
-            console.error("SW registration failed:", error);
+          .catch(() => {
+            // Silently fail if SW registration fails (e.g. Firefox private mode)
           });
       });
 
