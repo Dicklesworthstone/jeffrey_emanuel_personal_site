@@ -34,20 +34,19 @@ export default function TypingAnimation({
   showCursor = true,
   loop = true,
 }: TypingAnimationProps) {
-  if (words.length === 0) {
-    return null;
-  }
-
+  // Hooks must be called unconditionally before any early returns
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
-  const currentWord = words[currentWordIndex];
+  // Handle empty words array after hooks are called
+  const hasWords = words.length > 0;
+  const currentWord = hasWords ? words[currentWordIndex] : "";
 
   useEffect(() => {
-    // If reduced motion, we don't need to run the animation logic at all
-    if (prefersReducedMotion) return;
+    // If reduced motion or no words, we don't need to run the animation logic
+    if (prefersReducedMotion || !hasWords) return;
 
     let timeout: NodeJS.Timeout;
 
@@ -96,7 +95,13 @@ export default function TypingAnimation({
     deletingSpeed,
     pauseAfterTyping,
     prefersReducedMotion,
+    hasWords,
   ]);
+
+  // Handle empty words array - return null after hooks have been called
+  if (!hasWords) {
+    return null;
+  }
 
   // For reduced motion, just show the first word (or current word if logic allows)
   if (prefersReducedMotion) {
