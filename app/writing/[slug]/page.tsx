@@ -109,7 +109,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             </Link>
 
             <header className="mb-12 border-b border-slate-800/60 pb-10">
-              <div className="flex flex-wrap items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 mb-4">
+              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
                 {post.category && <span className="text-sky-300">{post.category}</span>}
                 {post.date && (
                   <div className="flex items-center gap-2">

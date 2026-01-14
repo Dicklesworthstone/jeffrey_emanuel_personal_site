@@ -26,7 +26,7 @@ function MediaRow({ item }: { item: MediaItem }) {
           <Icon className="h-4 w-4" />
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
             {item.outlet} • {item.kind}
           </p>
           <h3 className="mt-1 text-sm font-semibold text-slate-50 group-hover:text-sky-100">

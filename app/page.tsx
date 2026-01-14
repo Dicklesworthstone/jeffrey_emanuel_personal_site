@@ -71,7 +71,7 @@ export default async function HomePage() {
           staggerDelay={0.12}
         >
           <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 border border-violet-500/20 bg-gradient-to-br from-violet-950/20 to-transparent">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400 shadow-violet-500/20 drop-shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-widest text-violet-400 shadow-violet-500/20 drop-shadow-sm">
               The Flywheel
             </p>
             <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
@@ -91,7 +91,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-fuchsia-400 shadow-fuchsia-500/20 drop-shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-widest text-fuchsia-400 shadow-fuchsia-500/20 drop-shadow-sm">
               Markets & research
             </p>
             <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
@@ -110,7 +110,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400 shadow-sky-500/20 drop-shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-widest text-sky-400 shadow-sky-500/20 drop-shadow-sm">
               Infrastructure
             </p>
             <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
@@ -155,7 +155,7 @@ export default async function HomePage() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/30">
                       <Workflow className="h-5 w-5 text-white" />
                     </div>
-                    <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-violet-400">
+                    <span className="text-xs font-bold uppercase tracking-widest text-violet-400">
                       Featured Ecosystem
                     </span>
                   </div>
@@ -310,7 +310,7 @@ export default async function HomePage() {
                 href={item.href}
                 className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
               >
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
                   <span>{item.source}</span>
                   <span className="h-0.5 w-0.5 rounded-full bg-slate-500" />
                   <span>{item.category}</span>
@@ -394,7 +394,7 @@ export default async function HomePage() {
                   rel="noreferrer noopener"
                   className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
                     Thread on X
                   </p>
                   <h3 className="mt-4 text-lg font-bold leading-snug text-slate-50 transition-colors group-hover:text-sky-200">

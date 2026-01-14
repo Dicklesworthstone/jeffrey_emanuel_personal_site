@@ -41,14 +41,14 @@ function FlywheelExplanation() {
               {flywheelExplanation.title}
             </h2>
             <div className="mt-4 space-y-3 sm:mt-6 sm:space-y-4">
-              {flywheelExplanation.paragraphs.map((paragraph, i) => (
+              {flywheelExplanation.paragraphs.map((paragraph, index) => (
                 <motion.p
-                  key={i}
+                  key={paragraph.slice(0, 50)}
                   initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{
                     duration: reducedMotion ? 0 : 0.4,
-                    delay: reducedMotion ? 0 : 0.1 + i * 0.1,
+                    delay: reducedMotion ? 0 : 0.1 + index * 0.1,
                   }}
                   className="text-sm leading-relaxed text-slate-400 sm:text-base"
                 >
@@ -79,7 +79,7 @@ function FlywheelExplanation() {
 
 const INSTALL_COMMAND = `curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/agentic_coding_flywheel_setup/main/install.sh | bash -s -- --yes --mode vibe`;
 
-function FooterCTA() {
+function FooterCTA({ id }: { id?: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -87,13 +87,13 @@ function FooterCTA() {
       await navigator.clipboard.writeText(INSTALL_COMMAND);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+    } catch {
+      // Silently fail - clipboard API may not be available
     }
   }, []);
 
   return (
-    <section className="border-t border-white/5 py-12 md:py-16">
+    <section id={id} className="border-t border-white/5 py-12 md:py-16">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
           Get Started
@@ -155,7 +155,7 @@ export default function TldrPage() {
     <ErrorBoundary>
       <main className="min-h-screen overflow-x-hidden">
         {/* Hero Section */}
-        <TldrHero />
+        <TldrHero id="tldr-hero" />
 
         {/* Flywheel Explanation with Diagram */}
         <ErrorBoundary>
@@ -172,7 +172,7 @@ export default function TldrPage() {
         </section>
 
         {/* Footer CTA */}
-        <FooterCTA />
+        <FooterCTA id="get-started" />
       </main>
     </ErrorBoundary>
   );

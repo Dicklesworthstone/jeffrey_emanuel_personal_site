@@ -209,12 +209,12 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
               Features
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
-              {details.features.map((feature, index) => (
+              {details.features.map((feature) => (
                 <li
-                  key={index}
+                  key={feature}
                   className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-4"
                 >
-                  <Check className={cn("mt-0.5 h-4 w-4 flex-shrink-0", accentColor)} />
+                  <Check className={cn("mt-0.5 h-4 w-4 flex-shrink-0", accentColor)} aria-hidden="true" />
                   <span className="text-sm text-slate-300">{feature}</span>
                 </li>
               ))}

@@ -28,7 +28,7 @@ export default function ContactPage() {
               productive.
             </p>
             <div className="mt-4 rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 text-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                 Primary contact
               </p>
               <a
@@ -47,7 +47,7 @@ export default function ContactPage() {
 
           <div className="space-y-4 text-sm text-slate-300">
             <div className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                 Social
               </p>
               <ul className="mt-3 space-y-2 text-sm">

@@ -200,7 +200,7 @@ export default function ProjectsPage() {
                 )}
               >
                 {tag}
-                <span className="ml-1 text-[10px] opacity-60">({count})</span>
+                <span className="ml-1 text-xs opacity-60">({count})</span>
               </button>
             );
           })}
