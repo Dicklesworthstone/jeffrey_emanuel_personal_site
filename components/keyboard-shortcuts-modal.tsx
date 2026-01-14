@@ -20,12 +20,16 @@ export default function KeyboardShortcutsModal({
   onClose,
 }: KeyboardShortcutsModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lastActiveElement = useRef<HTMLElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Focus close button when modal opens
+  // Focus management
   useEffect(() => {
     if (isOpen) {
+      lastActiveElement.current = document.activeElement as HTMLElement;
       closeButtonRef.current?.focus();
+    } else {
+      lastActiveElement.current?.focus();
     }
   }, [isOpen]);
 

@@ -280,15 +280,25 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     setSelectedIndex(0);
   }, [query]);
 
-  // Focus input when opened
+  const lastActiveElement = useRef<HTMLElement | null>(null);
+
+  // Focus management
   useEffect(() => {
     if (isOpen) {
+      // Save currently focused element
+      lastActiveElement.current = document.activeElement as HTMLElement;
+
       setQuery("");
       setSelectedIndex(0);
       const timeoutId = setTimeout(() => inputRef.current?.focus(), 50);
       return () => clearTimeout(timeoutId);
+    } 
+    
+    // Restore focus when closed
+    if (lastActiveElement.current) {
+      lastActiveElement.current.focus();
     }
-    return;
+    return undefined;
   }, [isOpen]);
 
   // Handle keyboard navigation

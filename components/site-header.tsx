@@ -56,6 +56,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             ? "border-slate-950/50 bg-slate-950/80 backdrop-blur-xl py-3"
             : "border-transparent bg-transparent py-5"
         )}
+        style={{ paddingRight: "var(--scrollbar-width, 0px)" }}
         role="banner"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
