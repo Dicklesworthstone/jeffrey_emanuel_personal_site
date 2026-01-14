@@ -675,7 +675,7 @@ export const projects: Project[] = [
     name: "Simultaneous Launch Button",
     kind: "oss",
     badge: "49 stars",
-    href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
+    href: "https://github.com/Dicklesworthstone/slb",
     short: "Two-person rule for AI agents: peer review before dangerous commands execute.",
     description:
       "Adds safety friction for autonomous agents. Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION), cryptographic command binding with SHA256+HMAC, dynamic quorum based on active agents, and complete audit trails. Integrates with Claude Code hooks and MCP Agent Mail for notifications.",
@@ -692,7 +692,7 @@ export const projects: Project[] = [
         "Configurable timeout and approval thresholds",
         "Command replay protection",
       ],
-      installation: "```bash\n# Install via Go\ngo install github.com/Dicklesworthstone/simultaneous_launch_button@latest\n```",
+      installation: "```bash\n# Install via Go\ngo install github.com/Dicklesworthstone/slb@latest\n```",
       usage: "```bash\n# Request approval for a dangerous command\nslb request --command \"rm -rf /tmp/build\" --risk DANGEROUS\n\n# Approve a pending request (from another agent)\nslb approve <request-id>\n\n# List pending requests\nslb list\n```",
       relatedProjects: ["mcp-agent-mail", "named-tmux-manager", "ultimate-bug-scanner"],
     },
@@ -1137,7 +1137,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Duplicate detection and session history search",
       bv: "Dashboard shows beads status; --robot-triage for dispatch",
     },
-    stars: 69,
+    stars: 71,
     projectSlug: "named-tmux-manager",
     features: [
       "Spawn 10+ Claude/Codex/Gemini agents in parallel",
@@ -1149,7 +1149,7 @@ export const flywheelTools: FlywheelTool[] = [
     id: "slb",
     name: "Simultaneous Launch Button",
     shortName: "SLB",
-    href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
+    href: "https://github.com/Dicklesworthstone/slb",
     icon: "ShieldCheck",
     color: "from-amber-500 to-orange-600",
     tagline: "Peer review for dangerous commands",
@@ -1180,7 +1180,7 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Shared context across agent sessions",
       slb: "Approval requests delivered to inboxes",
     },
-    stars: 1400,
+    stars: 1433,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "mcp-agent-mail",
     features: [
@@ -1203,7 +1203,7 @@ export const flywheelTools: FlywheelTool[] = [
       ubs: "Bug scanner results create blocking issues",
       cass: "Search prior sessions for task context",
     },
-    stars: 891,
+    stars: 927,
     demoUrl: "https://dicklesworthstone.github.io/beads_viewer-pages/",
     projectSlug: "beads-viewer",
     features: [
@@ -1271,7 +1271,7 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Links search results to related tasks",
       mail: "Agents query history before asking colleagues",
     },
-    stars: 307,
+    stars: 312,
     projectSlug: "cass",
     features: [
       "11 formats: Claude Code, Codex, Cursor, Gemini, ChatGPT, Aider, etc.",
@@ -1952,7 +1952,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Mail",
     color: "from-violet-500 to-purple-600",
     category: "core",
-    stars: 1400,
+    stars: 1433,
     whatItDoes:
       "A mail-like coordination layer for multi-agent workflows. Agents send messages, read threads, and reserve files asynchronously via MCP tools - like Gmail for AI coding agents.",
     whyItsUseful:
@@ -1998,7 +1998,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "GitBranch",
     color: "from-emerald-500 to-teal-600",
     category: "core",
-    stars: 891,
+    stars: 927,
     whatItDoes:
       "A fast terminal UI for viewing and analyzing Beads issues. Applies graph theory (PageRank, betweenness centrality, critical path) to identify which tasks unblock the most other work.",
     whyItsUseful:
@@ -2044,7 +2044,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Search",
     color: "from-cyan-500 to-sky-600",
     category: "core",
-    stars: 307,
+    stars: 312,
     whatItDoes:
       "A unified TUI/CLI search engine that indexes 11+ coding agent formats (Claude Code, Codex, Cursor, Gemini, ChatGPT, Aider, Cline, and more) into a single searchable timeline. Supports BM25 keyword search, ML-powered semantic search, and hybrid RRF fusion.",
     whyItsUseful:
@@ -2093,7 +2093,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Cog",
     color: "from-purple-500 to-violet-600",
     category: "core",
-    stars: 234,
+    stars: 692,
     whatItDoes:
       "One-command bootstrap that transforms a fresh Ubuntu VPS into a fully-configured agentic coding environment with all flywheel tools installed.",
     whyItsUseful:
@@ -2181,7 +2181,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "ShieldAlert",
     color: "from-red-500 to-rose-600",
     category: "core",
-    stars: 89,
+    stars: 22,
     whatItDoes:
       "Intercepts dangerous shell commands (rm -rf, git reset --hard, etc.) before execution. Requires confirmation for destructive operations.",
     whyItsUseful:
@@ -2223,7 +2223,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "RefreshCw",
     color: "from-orange-500 to-amber-600",
     category: "core",
-    stars: 67,
+    stars: 29,
     whatItDoes:
       "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
     whyItsUseful:
@@ -2312,7 +2312,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "LayoutGrid",
     color: "from-sky-500 to-blue-600",
     category: "core",
-    stars: 69,
+    stars: 71,
     whatItDoes:
       "A tmux session orchestration platform that transforms tmux into a multi-agent command center. Spawn, broadcast to, and coordinate Claude/Codex/Gemini agents across tiled panes with smart routing and real-time monitoring.",
     whyItsUseful:
@@ -2360,7 +2360,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     id: "slb",
     name: "Simultaneous Launch Button",
     shortName: "SLB",
-    href: "https://github.com/Dicklesworthstone/simultaneous_launch_button",
+    href: "https://github.com/Dicklesworthstone/slb",
     icon: "ShieldCheck",
     color: "from-amber-500 to-orange-600",
     category: "core",
@@ -2455,7 +2455,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Archive",
     color: "from-blue-500 to-indigo-600",
     category: "supporting",
-    stars: 156,
+    stars: 25,
     whatItDoes:
       "Ultra-fast search over X/Twitter data archives. Uses hybrid BM25 + semantic search with Reciprocal Rank Fusion.",
     whyItsUseful:
@@ -2497,7 +2497,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "FileCode",
     color: "from-green-500 to-emerald-600",
     category: "supporting",
-    stars: 78,
+    stars: 8,
     whatItDoes:
       "Terminal UI for combining source code files into LLM-ready prompts. Select files, preview output, copy to clipboard with token counting.",
     whyItsUseful:
