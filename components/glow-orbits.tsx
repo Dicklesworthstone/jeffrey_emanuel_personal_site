@@ -62,11 +62,19 @@ export default function GlowOrbits() {
       }
     };
 
-    mediaQuery.addEventListener("change", handleMotionPreferenceChange);
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleMotionPreferenceChange);
+    } else {
+      mediaQuery.addListener(handleMotionPreferenceChange);
+    }
 
     return () => {
       ctx.revert();
-      mediaQuery.removeEventListener("change", handleMotionPreferenceChange);
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleMotionPreferenceChange);
+      } else {
+        mediaQuery.removeListener(handleMotionPreferenceChange);
+      }
     };
   }, []);
 

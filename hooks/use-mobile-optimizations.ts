@@ -177,14 +177,34 @@ function getQualitySettings(caps: DeviceCapabilities): QualitySettings {
   }
 }
 
+// Default SSR-safe capabilities (used for initial render to avoid hydration mismatch)
+const defaultCapabilities: DeviceCapabilities = {
+  tier: "medium",
+  isMobile: false,
+  isSlowConnection: false,
+  hardwareConcurrency: 4,
+  devicePixelRatio: 1,
+  prefersReducedMotion: false,
+  hasLowMemory: false,
+  isLowPowerMode: false,
+  maxTextureSize: 4096,
+  supportsWebGL2: true,
+};
+
 /**
  * Hook to get device capabilities and quality settings for Three.js rendering.
  * Re-evaluates on visibility change and orientation change.
  */
 export function useDeviceCapabilities() {
-  const [capabilities, setCapabilities] = useState<DeviceCapabilities>(() =>
-    detectCapabilities()
-  );
+  // Initialize with SSR-safe defaults to avoid hydration mismatch
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities>(defaultCapabilities);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Detect actual capabilities after hydration
+  useEffect(() => {
+    setCapabilities(detectCapabilities());
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     // Re-detect on visibility change (user might have changed power settings)
@@ -194,9 +214,12 @@ export function useDeviceCapabilities() {
       }
     };
 
+    let orientationTimeout: ReturnType<typeof setTimeout> | null = null;
+
     // Re-detect on orientation change
     const handleOrientationChange = () => {
-      setTimeout(() => setCapabilities(detectCapabilities()), 100);
+      if (orientationTimeout) clearTimeout(orientationTimeout);
+      orientationTimeout = setTimeout(() => setCapabilities(detectCapabilities()), 100);
     };
 
     // Listen for reduced motion preference changes
@@ -207,12 +230,24 @@ export function useDeviceCapabilities() {
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("orientationchange", handleOrientationChange);
-    motionQuery.addEventListener("change", handleMotionChange);
+    if (motionQuery.addEventListener) {
+      motionQuery.addEventListener("change", handleMotionChange);
+    } else {
+      motionQuery.addListener(handleMotionChange);
+    }
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("orientationchange", handleOrientationChange);
-      motionQuery.removeEventListener("change", handleMotionChange);
+      if (orientationTimeout) {
+        clearTimeout(orientationTimeout);
+        orientationTimeout = null;
+      }
+      if (motionQuery.removeEventListener) {
+        motionQuery.removeEventListener("change", handleMotionChange);
+      } else {
+        motionQuery.removeListener(handleMotionChange);
+      }
     };
   }, []);
 
@@ -221,7 +256,7 @@ export function useDeviceCapabilities() {
     [capabilities]
   );
 
-  return { capabilities, quality };
+  return { capabilities, quality, isHydrated };
 }
 
 /**
@@ -240,10 +275,12 @@ export function useMobileOptimizations() {
     // CSS overscroll-behavior-y: none on body already handles iOS bounce
 
     // Add orientation change listener for better UX
+    let orientationTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleOrientationChange = () => {
       // Trigger resize to recalculate viewport and fix any layout issues
       // Small delay to ensure orientation change is complete
-      setTimeout(() => {
+      if (orientationTimeout) clearTimeout(orientationTimeout);
+      orientationTimeout = setTimeout(() => {
         window.dispatchEvent(new Event("resize"));
       }, 100);
     };
@@ -253,6 +290,10 @@ export function useMobileOptimizations() {
     // Cleanup
     return () => {
       window.removeEventListener("orientationchange", handleOrientationChange);
+      if (orientationTimeout) {
+        clearTimeout(orientationTimeout);
+        orientationTimeout = null;
+      }
     };
   }, []);
 }

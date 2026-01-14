@@ -45,11 +45,20 @@ function AnimatedNumber({
   // Check for reduced motion preference (SSR-safe via Framer Motion)
   const prefersReducedMotion = useReducedMotion();
 
-  // Initialize state based on reduced motion preference
-  const [count, setCount] = useState(() => prefersReducedMotion ? end : 0);
-  const [hasAnimated, setHasAnimated] = useState(() => Boolean(prefersReducedMotion));
+  // Initialize with SSR-safe values (always 0/false) to avoid hydration mismatch
+  // prefersReducedMotion may differ between server and client
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const frameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+
+  // Handle reduced motion preference after hydration
+  useEffect(() => {
+    if (prefersReducedMotion && !hasAnimated) {
+      setCount(end);
+      setHasAnimated(true);
+    }
+  }, [prefersReducedMotion, end, hasAnimated]);
 
   // Easing function - smooth deceleration
   const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
@@ -90,7 +99,9 @@ function AnimatedNumber({
     };
   }, [isVisible, hasAnimated, end, duration, prefersReducedMotion]);
 
-  const currentCount = prefersReducedMotion ? end : count;
+  // Use count directly - reduced motion users will have count set to end via useEffect
+  // This avoids hydration mismatch since prefersReducedMotion may differ server vs client
+  const currentCount = count;
 
   // Format number - show integer for whole numbers, one decimal otherwise
   const displayNumber =
