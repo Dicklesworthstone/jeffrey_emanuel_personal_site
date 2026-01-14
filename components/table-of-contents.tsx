@@ -15,7 +15,8 @@ interface TableOfContentsProps {
  * Shows current section and provides quick navigation.
  */
 export default function TableOfContents({ headings }: TableOfContentsProps) {
-  const [activeId, setActiveId] = useState<string>("");
+  const defaultHeadingId = headings[0]?.id ?? "";
+  const [activeId, setActiveId] = useState<string>(defaultHeadingId);
   const [isOpen, setIsOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
@@ -24,6 +25,9 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
 
   useEffect(() => {
     if (headings.length === 0) return;
+    if (typeof IntersectionObserver === "undefined") return;
+
+    visibleIds.current.clear();
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -89,7 +93,10 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
   // Don't render if no headings
   if (headings.length === 0) return null;
 
-  const activeHeading = headings.find((h) => h.id === activeId);
+  const resolvedActiveId = headings.some((h) => h.id === activeId)
+    ? activeId
+    : defaultHeadingId;
+  const activeHeading = headings.find((h) => h.id === resolvedActiveId);
 
   return (
     <>
@@ -158,7 +165,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                         className={cn(
                           "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
                           heading.level === 3 && "pl-6",
-                          activeId === heading.id
+                          resolvedActiveId === heading.id
                             ? "bg-violet-500/20 text-violet-300"
                             : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
                         )}
@@ -190,7 +197,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                     className={cn(
                       "group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-all",
                       heading.level === 3 && "pl-5",
-                      activeId === heading.id
+                      resolvedActiveId === heading.id
                         ? "bg-violet-500/20 text-violet-300"
                         : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
                     )}
@@ -198,7 +205,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                     <ChevronRight
                       className={cn(
                         "h-3 w-3 transition-transform",
-                        activeId === heading.id
+                        resolvedActiveId === heading.id
                           ? "text-violet-400"
                           : "text-slate-500 group-hover:text-slate-400"
                       )}

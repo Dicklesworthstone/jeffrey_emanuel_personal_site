@@ -60,7 +60,7 @@ function resolveRepoData(repoSlug: string): ResolvedStargazerData {
   const topStargazers = repoData.topStargazers ?? [];
   const resolved: ResolvedStargazerData = {
     stargazers: topStargazers,
-    totalCount: repoData.notableCount,
+    totalCount: repoData.totalCount ?? repoData.notableCount ?? 0,
     companies: repoData.topCompanies?.map((name) => ({ name, count: 0 })) ?? [],
     combinedReach: topStargazers.reduce((sum, s) => sum + s.followers, 0),
   };

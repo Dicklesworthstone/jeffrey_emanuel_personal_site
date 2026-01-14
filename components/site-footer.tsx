@@ -13,7 +13,7 @@ export default function SiteFooter() {
           <p className="text-lg font-bold tracking-tight text-slate-100">
             {siteConfig.name}
           </p>
-          <p className="text-sm leading-relaxed text-slate-500">
+          <p className="text-sm leading-relaxed text-slate-500" suppressHydrationWarning>
             Building durable infrastructure for the agentic future.
             <br />
             &copy; {new Date().getFullYear()} Jeffrey Emanuel. All rights reserved.

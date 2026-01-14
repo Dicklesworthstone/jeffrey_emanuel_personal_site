@@ -34,6 +34,10 @@ export default function TypingAnimation({
   showCursor = true,
   loop = true,
 }: TypingAnimationProps) {
+  if (words.length === 0) {
+    return null;
+  }
+
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -69,6 +73,10 @@ export default function TypingAnimation({
           setCurrentText(currentWord.slice(0, currentText.length + 1));
         }, typingSpeed);
       } else {
+        // If we're at the last word and not looping, stop here.
+        if (!loop && currentWordIndex === words.length - 1) {
+          return;
+        }
         // Finished typing, pause then start deleting
         timeout = setTimeout(() => {
           setIsDeleting(true);

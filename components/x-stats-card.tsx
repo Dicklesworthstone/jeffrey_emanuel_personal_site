@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Eye, Heart, Bookmark, TrendingUp } from "lucide-react";
 
@@ -100,11 +100,17 @@ export default function XStatsCard() {
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasExpandedOnce, setHasExpandedOnce] = useState(false);
+  const [supportsHover, setSupportsHover] = useState(true);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      const hydrationId = setTimeout(() => setIsVisible(true), 0);
+      return () => clearTimeout(hydrationId);
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -120,6 +126,25 @@ export default function XStatsCard() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(hover: hover)");
+
+    const updateHoverSupport = () => {
+      setSupportsHover(mediaQuery.matches);
+    };
+
+    updateHoverSupport();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", updateHoverSupport);
+      return () => mediaQuery.removeEventListener("change", updateHoverSupport);
+    }
+
+    mediaQuery.addListener(updateHoverSupport);
+    return () => mediaQuery.removeListener(updateHoverSupport);
+  }, []);
+
   // Track if we've ever expanded (for animation purposes)
   useEffect(() => {
     if (isExpanded && !hasExpandedOnce) {
@@ -128,14 +153,44 @@ export default function XStatsCard() {
     }
   }, [isExpanded, hasExpandedOnce]);
 
+  const handleClick = useCallback(() => {
+    if (supportsHover) return;
+    setIsExpanded((prev) => !prev);
+  }, [supportsHover]);
+
+  const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setIsExpanded((prev) => !prev);
+    }
+  }, []);
+
   return (
     <div
       ref={containerRef}
       className="group relative bg-slate-950/40 px-6 py-6 backdrop-blur transition-colors hover:bg-slate-950/20"
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
-      onFocus={() => setIsExpanded(true)}
-      onBlur={() => setIsExpanded(false)}
+      onMouseEnter={() => {
+        if (supportsHover) {
+          setIsExpanded(true);
+        }
+      }}
+      onMouseLeave={() => {
+        if (supportsHover) {
+          setIsExpanded(false);
+        }
+      }}
+      onFocus={() => {
+        if (supportsHover) {
+          setIsExpanded(true);
+        }
+      }}
+      onBlur={() => {
+        if (supportsHover) {
+          setIsExpanded(false);
+        }
+      }}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
       aria-expanded={isExpanded}
