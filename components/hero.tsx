@@ -47,8 +47,6 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   });
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
-
     const cancelPending = () => {
       if (!idleHandleRef.current) return;
       if (idleHandleRef.current.type === "idle" && "cancelIdleCallback" in window) {
@@ -60,11 +58,6 @@ export default function Hero({ stats = heroStats }: HeroProps) {
     };
 
     const scheduleEnable = () => {
-      if (!mediaQuery.matches) {
-        cancelPending();
-        setShouldRenderScene(false);
-        return;
-      }
       if (shouldRenderScene) return;
 
       const enable = () => {
@@ -83,20 +76,8 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
     scheduleEnable();
 
-    const handleChange = () => scheduleEnable();
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener("change", handleChange);
-    } else {
-      mediaQuery.addListener(handleChange);
-    }
-
     return () => {
       cancelPending();
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener("change", handleChange);
-      } else {
-        mediaQuery.removeListener(handleChange);
-      }
     };
   }, [shouldRenderScene]);
 
@@ -314,7 +295,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
           </motion.div>
         </div>
 
-        {/* 3D Scene - Full Three.js on desktop, lightweight fallback on mobile */}
+        {/* 3D Scene - Full Three.js on all devices (adaptive quality + gradients for legibility) */}
         <div
           ref={sceneRef}
           className="relative mt-12 h-[400px] w-full lg:absolute lg:-right-[10%] lg:top-1/2 lg:mt-0 lg:h-[900px] lg:w-[1000px] lg:-translate-y-1/2 lg:opacity-100 pointer-events-none"
@@ -322,21 +303,15 @@ export default function Hero({ stats = heroStats }: HeroProps) {
            <div className="absolute inset-0 z-10 bg-gradient-to-l from-transparent via-[#020617]/20 to-[#020617] lg:via-[#020617]/60" />
            <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#020617] to-transparent lg:hidden" />
 
-           {/* Mobile: Lightweight CSS/SVG animation fallback */}
-           <div className="h-full w-full lg:hidden">
-             <ThreeSceneFallback />
-           </div>
-
-           {/* Desktop: Full Three.js WebGL scene - Only rendered if screen is large enough */}
-           <div className="pointer-events-auto hidden h-full w-full lg:block">
+           <div className="h-full w-full pointer-events-none lg:pointer-events-auto">
              <ErrorBoundary fallback={<ThreeSceneFallback className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]" />}>
-                {shouldRenderScene ? (
-                  <Suspense fallback={<ThreeSceneLoading />}>
-                    <ThreeScene isActive={isSceneActive} />
-                  </Suspense>
-                ) : (
-                  <ThreeSceneFallback className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]" />
-                )}
+               {shouldRenderScene ? (
+                 <Suspense fallback={<ThreeSceneLoading />}>
+                   <ThreeScene isActive={isSceneActive} />
+                 </Suspense>
+               ) : (
+                 <ThreeSceneFallback className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]" />
+               )}
              </ErrorBoundary>
            </div>
         </div>
