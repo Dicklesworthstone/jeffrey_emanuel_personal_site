@@ -47,7 +47,7 @@ export const heroStats: Stat[] = [
   },
   {
     label: "Flywheel Tools",
-    value: "13",
+    value: "14",
     helper: "Core tools that amplify multi-agent workflows.",
   },
   {
@@ -2607,7 +2607,7 @@ export const tldrPageData = {
     description:
       "13 interconnected tools that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
     stats: [
-      { label: "Ecosystem Tools", value: "13" },
+      { label: "Ecosystem Tools", value: "14" },
       { label: "GitHub Stars", value: "16K+" },
       { label: "Languages", value: "5" },
     ],
