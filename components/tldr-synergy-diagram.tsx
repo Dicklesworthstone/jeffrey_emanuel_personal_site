@@ -179,7 +179,7 @@ export function TldrSynergyDiagram({
                   duration: 2.5,
                   repeat: Infinity,
                   ease: "linear",
-                  delay: Math.random() * 2, // Random start times for organic feel
+                  delay: (index * 0.2) % 2, // Deterministic stagger
                   repeatDelay: 0.5
                 }}
                 className="pointer-events-none"
