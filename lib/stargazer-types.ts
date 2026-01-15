@@ -212,7 +212,12 @@ export function isValidStargazerIntelligence(data: unknown): data is StargazerIn
   // Validate at least first element of arrays (if non-empty)
   if (d.topStargazers.length > 0) {
     const first = d.topStargazers[0] as Record<string, unknown>;
-    if (!first || typeof first.login !== 'string' || typeof first.score !== 'number') {
+    if (
+      !first ||
+      typeof first.login !== 'string' ||
+      typeof first.score !== 'number' ||
+      Number.isNaN(first.score)
+    ) {
       return false;
     }
   }
@@ -243,6 +248,10 @@ export function isDataStale(lastUpdated: string, maxAgeDays: number = 7): boolea
  * Re-exported from github-stats for convenience.
  */
 export function formatReach(num: number): string {
+  // Guard against NaN/invalid input
+  if (!Number.isFinite(num) || num < 0) {
+    return "0";
+  }
   if (num >= 1_000_000) {
     return `${(num / 1_000_000).toFixed(1)}M`;
   }

@@ -44,6 +44,7 @@ export function useClickParticles({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const isUnmountedRef = useRef(false);
 
   const resizeHandlerRef = useRef<(() => void) | null>(null);
 
@@ -96,6 +97,9 @@ export function useClickParticles({
     if (!ctx) return;
 
     const loop = () => {
+      // Check if component has unmounted to prevent stale RAF callbacks
+      if (isUnmountedRef.current) return;
+
       const currentCanvas = canvasRef.current;
       if (!currentCanvas) return;
       const currentCtx = currentCanvas.getContext("2d");
@@ -145,16 +149,24 @@ export function useClickParticles({
 
   // Cleanup on unmount
   useEffect(() => {
+    isUnmountedRef.current = false;
     return () => {
+      // Set flag first to prevent any queued RAF callbacks from executing
+      isUnmountedRef.current = true;
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
       }
       if (resizeHandlerRef.current) {
         window.removeEventListener("resize", resizeHandlerRef.current);
+        resizeHandlerRef.current = null;
       }
       if (canvasRef.current && canvasRef.current.parentNode) {
         canvasRef.current.parentNode.removeChild(canvasRef.current);
+        canvasRef.current = null;
       }
+      // Clear particles array
+      particlesRef.current = [];
     };
   }, []);
 

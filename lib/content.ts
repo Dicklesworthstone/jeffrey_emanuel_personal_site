@@ -1110,16 +1110,7 @@ export const projects: Project[] = [
       "A high-performance CLI for searching and replacing text across large codebases. Supports regex patterns, preview modes, and bulk operations with git-aware filtering. Optimized for use in agentic workflows.",
     tags: ["CLI", "Search", "DevTools", "Refactoring"],
   },
-  {
-    name: "Chat to File",
-    kind: "oss",
-    badge: "20 stars",
-    href: "https://github.com/Dicklesworthstone/chat_shared_conversation_to_file",
-    short: "Convert ChatGPT, Gemini, and Grok share links to Markdown and HTML.",
-    description:
-      "A CLI tool that takes share links from ChatGPT, Gemini, and Grok conversations and converts them into clean Markdown or HTML files. Perfect for archiving AI conversations, creating documentation, or feeding conversations into other tools.",
-    tags: ["CLI", "Agents", "Markdown", "Conversion", "DevTools"],
-  },
+
   {
     name: "Suno2CD",
     kind: "oss",
@@ -2614,10 +2605,10 @@ export const tldrPageData = {
     title: "The Agentic Coding Flywheel",
     subtitle: "TL;DR Edition",
     description:
-      "10 core tools and 4 supporting utilities that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
+      "13 interconnected tools that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
     stats: [
-      { label: "Ecosystem Tools", value: "14" },
-      { label: "GitHub Stars", value: "3,600+" },
+      { label: "Ecosystem Tools", value: "13" },
+      { label: "GitHub Stars", value: "16K+" },
       { label: "Languages", value: "5" },
     ],
   },

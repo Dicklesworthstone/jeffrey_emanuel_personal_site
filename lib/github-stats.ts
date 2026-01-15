@@ -123,6 +123,10 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
  * Format number with K/M suffix for display.
  */
 export function formatNumber(num: number): string {
+  // Guard against NaN/invalid input
+  if (!Number.isFinite(num) || num < 0) {
+    return "0";
+  }
   if (num >= 1000000) {
     return `${(num / 1000000).toFixed(1)}M`;
   }

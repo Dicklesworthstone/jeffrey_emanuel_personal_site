@@ -42,13 +42,17 @@ export function useKonamiCode(callback: () => void): void {
       inputRef.current.length === KONAMI_CODE.length &&
       inputRef.current.every((key, index) => key === KONAMI_CODE[index])
     ) {
-      callbackRef.current();
+      // Invoke callback with null safety check
+      callbackRef.current?.();
       // Reset the input
       inputRef.current = [];
     }
   }, []);
 
   useEffect(() => {
+    // SSR safety check
+    if (typeof window === "undefined") return;
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);

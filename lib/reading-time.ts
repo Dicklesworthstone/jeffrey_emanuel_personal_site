@@ -25,14 +25,14 @@ interface ReadingTimeResult {
  */
 export function calculateReadingTime(content: string): ReadingTimeResult {
   // Strip markdown/HTML tags
+  // Note: Using simple regexes without nested quantifiers to avoid ReDoS
   const plainText = content
     // Remove HTML tags
     .replace(/<[^>]*>/g, "")
-    // Remove markdown images BEFORE links (images are ![alt](url), links are [text](url))
-    // Handle one level of nested parentheses in URL: ( ... ( ... ) ... )
-    .replace(/!\[([^\]]*)\]\((?:[^)(]+|\([^)(]*\))*\)/g, "")
-    // Remove markdown links (keep link text)
-    .replace(/\[([^\]]*)\]\((?:[^)(]+|\([^)(]*\))*\)/g, "$1")
+    // Remove markdown images: ![alt](url) - use simple non-greedy match
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    // Remove markdown links (keep link text): [text](url)
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
     // Remove markdown formatting
     .replace(/[*_~#]/g, "")
     // Remove extra whitespace
