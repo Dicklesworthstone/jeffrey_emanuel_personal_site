@@ -17,10 +17,14 @@ function resolvePostsDirectory(): string | null {
   const bases = [moduleDir, process.cwd()];
   for (const base of bases) {
     let cursor = base;
-    for (let i = 0; i < 6; i++) {
+    // Safety break: 10 levels or until root
+    for (let i = 0; i < 10; i++) {
       const candidate = path.resolve(cursor, "content/writing");
       if (fs.existsSync(candidate)) return candidate;
-      cursor = path.resolve(cursor, "..");
+      
+      const parent = path.resolve(cursor, "..");
+      if (parent === cursor) break; // Hit root
+      cursor = parent;
     }
   }
   return null;
@@ -80,10 +84,11 @@ export const getPostBySlug = cache((slug: string) => {
   const { data, content } = matter(fileContents);
 
   const parsedDate = data.date ? new Date(data.date) : null;
+  // Use a fixed fallback date for deterministic builds/rendering if date is invalid
   const safeDate =
     parsedDate && !Number.isNaN(parsedDate.getTime())
       ? parsedDate.toISOString()
-      : new Date().toISOString();
+      : "1970-01-01T00:00:00.000Z";
 
   const items: Post = {
     slug: realSlug,

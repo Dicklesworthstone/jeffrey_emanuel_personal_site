@@ -18,7 +18,7 @@ import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import headshot from "@/assets/jeff_emanuel_headshot.webp";
 
-// Only load Three.js on larger screens to save mobile bandwidth/battery
+// Lazy-load Three.js to keep initial load lightweight across devices
 const ThreeScene = dynamic(() => import("@/components/three-scene"), {
   ssr: false,
   loading: () => <ThreeSceneLoading />,

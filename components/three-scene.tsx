@@ -613,9 +613,6 @@ function SceneFlock({ palette, seed }: { palette: Palette; seed: number }) {
 }
 
 // ---------------------------------------------------------------------------
-// Rotation schedule (20-minute slices)
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
 // Variant: Clifford attractor ribbons
 // ---------------------------------------------------------------------------
 function Clifford({ palette, seed, count = 42000 }: { palette: Palette; seed: number; count?: number }) {
@@ -1552,10 +1549,12 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
     }));
   }, [actualCount, rand]);
 
-  // Simple 3D noise function
+  // Simple 3D noise function (phase-shifted to add curl-like variation)
   const noise3D = (x: number, y: number, z: number, t: number) => {
-    return Math.sin(x * 1.5 + t) * Math.cos(y * 1.3 + t * 0.7) * Math.sin(z * 1.1 + t * 0.5) +
-           Math.sin(x * 0.7 - t * 0.5) * Math.cos(z * 0.9 + t * 0.3);
+    const n1 = Math.sin(x * 1.5 + t) * Math.cos(y * 1.3 + t * 0.7) * Math.sin(z * 1.1 + t * 0.5);
+    const n2 = Math.sin(x * 0.7 - t * 0.5) * Math.cos(z * 0.9 + t * 0.3);
+    const n3 = Math.cos(y * 0.8 + z * 0.6 - t * 0.4) * Math.sin(x * 0.6 + t * 0.2);
+    return n1 + n2 + 0.6 * n3;
   };
 
   useEffect(() => () => geom.dispose(), [geom]);
@@ -1567,12 +1566,21 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
     const dummy = dummyRef.current;
 
     particles.forEach((p, i) => {
-      // Calculate flow field direction using noise
+      // Calculate flow field direction using noise + swirl (Hodge-like curl bias)
       const nx = noise3D(p.pos.x * 0.3, p.pos.y * 0.3, p.pos.z * 0.3, t);
       const ny = noise3D(p.pos.y * 0.3, p.pos.z * 0.3, p.pos.x * 0.3, t + 100);
       const nz = noise3D(p.pos.z * 0.3, p.pos.x * 0.3, p.pos.y * 0.3, t + 200);
+      const swirlX = -p.pos.y * 0.6 + Math.sin(p.pos.y * 0.6 + t * 0.7) * 0.4;
+      const swirlY = p.pos.x * 0.6 + Math.cos(p.pos.x * 0.6 - t * 0.6) * 0.4;
+      const swirlZ = Math.sin((p.pos.x + p.pos.y) * 0.35 + t * 0.5) * 0.5;
 
-      p.vel.set(nx, ny, nz).multiplyScalar(0.015);
+      const flowX = nx + swirlX;
+      const flowY = ny + swirlY;
+      const flowZ = nz + swirlZ;
+
+      p.vel.x = p.vel.x * 0.65 + flowX * 0.02;
+      p.vel.y = p.vel.y * 0.65 + flowY * 0.02;
+      p.vel.z = p.vel.z * 0.65 + flowZ * 0.02;
       p.pos.add(p.vel);
 
       // Wrap around bounds
@@ -1583,7 +1591,7 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
 
       dummy.position.copy(p.pos);
       const speed = p.vel.length();
-      dummy.scale.setScalar(0.8 + speed * 20);
+      dummy.scale.setScalar(0.75 + speed * 16);
       dummy.updateMatrix();
       meshRef.current!.setMatrixAt(i, dummy.matrix);
     });
@@ -1814,7 +1822,7 @@ function PhaseShearField({ palette, seed, grid = 26 }: { palette: Palette; seed:
   const size = Math.max(16, Math.floor(grid * Math.sqrt(quality.particleMultiplier)));
   const count = Math.min(size * size, quality.maxParticles);
   const points = useMemo(() => {
-    const coords: Array<{ x: number; y: number; phase: number; spin: number }> = [];
+    const coords: Array<{ x: number; y: number; phase: number; spin: number; bias: number }> = [];
     const rand = seededRandom(seed);
     const half = (size - 1) / 2;
     for (let i = 0; i < size; i++) {
@@ -1827,6 +1835,7 @@ function PhaseShearField({ palette, seed, grid = 26 }: { palette: Palette; seed:
           y,
           phase: rand() * Math.PI * 2,
           spin: (rand() - 0.5) * 1.4,
+          bias: rand() * 2.0 - 1.0,
         });
       }
     }
@@ -1850,13 +1859,20 @@ function PhaseShearField({ palette, seed, grid = 26 }: { palette: Palette; seed:
 
     for (let i = 0; i < points.length; i++) {
       const p = points[i];
-      const phase = p.phase + t * 0.8 + p.spin * 0.4;
-      const wave = Math.sin((p.x + p.y) * 3.2 + phase) * 0.45;
-      const x = p.x + shear * p.y;
-      const y = p.y + Math.cos(t * 0.25 + p.spin) * 0.08;
-      const z = wave + Math.sin(phase + p.x * 2.0) * 0.15;
+      const phi1 = (p.x * 2.8 + p.y * 1.9) * 1.1 + t * 0.6 + p.phase;
+      const phi2 = (p.x * -2.1 + p.y * 2.6) * 1.2 - t * 0.5 + p.spin;
+      const phi3 = (p.x * 1.5 - p.y * 3.1) * 1.0 + t * 0.8 + p.phase * 0.5;
+      const sx = Math.cos(phi1) + Math.cos(phi2) + Math.cos(phi3);
+      const sy = Math.sin(phi1) + Math.sin(phi2) + Math.sin(phi3);
+      const coherence = Math.min(1, Math.sqrt(sx * sx + sy * sy) / 3);
+      const phase = Math.atan2(sy, sx);
+
+      const drift = Math.sin(t * 0.3 + p.bias) * 0.08;
+      const x = p.x + shear * p.y + drift;
+      const y = p.y + Math.cos(t * 0.25 + p.spin) * 0.08 + Math.sin(t * 0.2 + p.phase) * 0.05;
+      const z = Math.sin(phase + t * 0.6) * 0.25 + (coherence - 0.5) * 0.6;
       dummy.position.set(x * 1.6, y * 1.6, z);
-      dummy.scale.setScalar(0.7 + 0.25 * Math.sin(phase));
+      dummy.scale.setScalar(0.55 + coherence * 0.6 + 0.15 * Math.sin(phase + t));
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
@@ -1872,6 +1888,335 @@ function ScenePhaseShear({ palette, seed }: { palette: Palette; seed: number }) 
       <ambientLight intensity={0.5} />
       <pointLight position={[0, 2, 3]} intensity={1.2} color={palette[2]} />
       <PhaseShearField palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Orbital Möbius field (orbital sampler + Möbius drift)
+// ---------------------------------------------------------------------------
+function MobiusOrbitField({ palette, seed, count = 520 }: { palette: Palette; seed: number; count?: number }) {
+  const { quality } = useQuality();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const actualCount = Math.min(scaleCount(count, quality), quality.maxParticles);
+  const segments = scaleSegments(6, quality);
+
+  const seeds = useMemo(() => {
+    const rand = seededRandom(seed);
+    const golden = Math.PI * (3 - Math.sqrt(5));
+    const ringCount = Math.max(4, Math.floor(6 * quality.geometryDetail));
+    return Array.from({ length: actualCount }).map((_, i) => {
+      const ring = Math.floor((i / actualCount) * ringCount);
+      return {
+        radius: 0.28 + ring * 0.18 + rand() * 0.06,
+        angle: i * golden + rand() * 0.4,
+        phase: rand() * Math.PI * 2,
+        speed: 0.15 + rand() * 0.5,
+        lift: 0.12 + rand() * 0.35,
+        scale: 0.5 + rand() * 0.7,
+      };
+    });
+  }, [actualCount, seed, quality.geometryDetail]);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.03, segments, segments), [segments]);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[0], emissiveIntensity: 1.0, roughness: 0.35 }),
+    [palette],
+  );
+
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const aMag = 0.18 + 0.08 * Math.sin(t * 0.4);
+    const aAng = t * 0.2;
+    const ax = aMag * Math.cos(aAng);
+    const ay = aMag * Math.sin(aAng);
+    const dummy = dummyRef.current;
+
+    for (let i = 0; i < seeds.length; i++) {
+      const s = seeds[i];
+      const theta = s.angle + t * s.speed;
+      const r = s.radius * (0.85 + 0.2 * Math.sin(t * 0.7 + s.phase));
+      const x = r * Math.cos(theta);
+      const y = r * Math.sin(theta);
+
+      // Möbius transform on the unit disk: (z + a) / (1 + conj(a) z)
+      const u = 1 + ax * x + ay * y;
+      const v = ax * y - ay * x;
+      const denom = u * u + v * v;
+      const rx = ((x + ax) * u + (y + ay) * v) / denom;
+      const ry = ((y + ay) * u - (x + ax) * v) / denom;
+      const z = Math.sin(theta * 2 + t + s.phase) * s.lift;
+
+      dummy.position.set(rx * 2.2, ry * 2.2, z);
+      dummy.scale.setScalar(s.scale * (0.75 + 0.25 * Math.sin(theta + s.phase)));
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, actualCount]} />;
+}
+
+function SceneMobiusOrbit({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <pointLight position={[2, 2, 3]} intensity={1.1} color={palette[0]} />
+      <MobiusOrbitField palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Tensor morph lattice (structure-tensor inspired)
+// ---------------------------------------------------------------------------
+function TensorMorphLattice({ palette, seed, grid = 20 }: { palette: Palette; seed: number; grid?: number }) {
+  const { quality } = useQuality();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const size = Math.max(12, Math.floor(grid * Math.sqrt(quality.particleMultiplier)));
+  const count = Math.min(size * size, quality.maxParticles);
+  const radialSegments = Math.max(4, Math.floor(6 * quality.geometryDetail));
+
+  const points = useMemo(() => {
+    const coords: Array<{ x: number; y: number; phase: number; bias: number }> = [];
+    const rand = seededRandom(seed);
+    const half = (size - 1) / 2;
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (coords.length >= count) break;
+        const x = (i - half) / half;
+        const y = (j - half) / half;
+        coords.push({
+          x,
+          y,
+          phase: rand() * Math.PI * 2,
+          bias: rand() * 2.0 - 1.0,
+        });
+      }
+    }
+    return coords;
+  }, [size, count, seed]);
+
+  const geom = useMemo(
+    () => new THREE.CylinderGeometry(0.018, 0.018, 0.6, radialSegments, 1, true),
+    [radialSegments],
+  );
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[2], emissive: palette[1], emissiveIntensity: 0.85, roughness: 0.35 }),
+    [palette],
+  );
+
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const shear = Math.sin(t * 0.25) * 0.22;
+    const dummy = dummyRef.current;
+
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i];
+      const s1 = Math.sin(p.x * 2.6 + t * 0.35 + p.phase) + Math.cos(p.y * 2.2 - t * 0.3 + p.bias);
+      const s2 = Math.cos(p.x * 1.8 - t * 0.4 + p.bias) - Math.sin(p.y * 2.7 + t * 0.25 + p.phase);
+      const theta = Math.atan2(s2, s1);
+      const coherence = Math.min(1, Math.hypot(s1, s2) * 0.35 + 0.15);
+
+      const x = p.x + shear * p.y;
+      const y = p.y + Math.sin(t * 0.3 + p.phase) * 0.08;
+      const z = (coherence - 0.5) * 0.8 + Math.sin(theta + t * 0.4) * 0.15;
+      const length = 0.35 + coherence * 0.7;
+
+      dummy.position.set(x * 1.6, y * 1.6, z);
+      dummy.scale.set(1, length, 1);
+      dummy.rotation.set(Math.sin(p.bias + t * 0.2) * 0.25, 0, theta);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, points.length]} />;
+}
+
+function SceneTensorMorph({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <pointLight position={[0, 2, 3]} intensity={1.1} color={palette[0]} />
+      <TensorMorphLattice palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Hodge flow streamlines (curl + divergence-free hints)
+// ---------------------------------------------------------------------------
+function HodgeFlowStreamlines({ palette, seed, lines = 14, steps = 120 }: { palette: Palette; seed: number; lines?: number; steps?: number }) {
+  const { quality } = useQuality();
+  const groupRef = useRef<THREE.Group>(null);
+
+  const geometry = useMemo(() => {
+    const rand = seededRandom(seed);
+    const lineCount = Math.max(8, Math.floor(lines * quality.geometryDetail));
+    const positions: number[] = [];
+    const bound = 2.6;
+    for (let l = 0; l < lineCount; l++) {
+      let x = (rand() - 0.5) * bound * 2;
+      let y = (rand() - 0.5) * bound * 2;
+      let px = x;
+      let py = y;
+      let pz = 0;
+      for (let s = 0; s < steps; s++) {
+        const vx = -y + 0.6 * Math.sin(y * 1.3 + seed * 0.01 + l);
+        const vy = x + 0.6 * Math.cos(x * 1.1 - seed * 0.02 - l);
+        const speed = Math.sqrt(vx * vx + vy * vy) + 0.001;
+        x += (vx / speed) * 0.08;
+        y += (vy / speed) * 0.08;
+        const z = Math.sin((x * x + y * y) * 0.8 + l) * 0.25;
+        positions.push(px, py, pz, x, y, z);
+        px = x;
+        py = y;
+        pz = z;
+        if (x * x + y * y > bound * bound) {
+          x *= 0.4;
+          y *= 0.4;
+          px = x;
+          py = y;
+          pz = z;
+        }
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, [lines, steps, seed, quality.geometryDetail]);
+
+  const material = useMemo(
+    () => new THREE.LineBasicMaterial({ color: palette[3], transparent: true, opacity: 0.55 }),
+    [palette],
+  );
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => material.dispose(), [material]);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    if (groupRef.current) {
+      groupRef.current.rotation.y = t * 0.1;
+      groupRef.current.rotation.x = Math.sin(t * 0.25) * 0.12;
+      groupRef.current.rotation.z = Math.cos(t * 0.2) * 0.08;
+    }
+    material.opacity = 0.45 + Math.sin(t * 0.6) * 0.2;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <lineSegments geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function SceneHodgeFlow({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.35} />
+      <pointLight position={[2, 2, 3]} intensity={1.1} color={palette[1]} />
+      <HodgeFlowStreamlines palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Transport bridge (entropic transport / bridge dynamics)
+// ---------------------------------------------------------------------------
+function TransportBridge({ palette, seed, count = 320 }: { palette: Palette; seed: number; count?: number }) {
+  const { quality } = useQuality();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const actualCount = Math.min(scaleCount(count, quality), quality.maxParticles);
+  const segments = scaleSegments(6, quality);
+
+  const seeds = useMemo(() => {
+    const rand = seededRandom(seed);
+    return Array.from({ length: actualCount }).map(() => ({
+      u: rand(),
+      speed: 0.25 + rand() * 0.6,
+      phase: rand() * Math.PI * 2,
+      radius: 0.06 + rand() * 0.16,
+      scale: 0.5 + rand() * 0.6,
+    }));
+  }, [actualCount, seed]);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.035, segments, segments), [segments]);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[2], emissiveIntensity: 0.9, roughness: 0.4 }),
+    [palette],
+  );
+
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const ax = -1.6;
+    const ay = 0.0;
+    const az = 0.2;
+    const bx = 1.6;
+    const by = 0.0;
+    const bz = -0.2;
+    const c1x = -0.6;
+    const c1y = 0.9 * Math.sin(t * 0.4);
+    const c1z = 0.6 * Math.cos(t * 0.3);
+    const c2x = 0.6;
+    const c2y = -0.9 * Math.sin(t * 0.42);
+    const c2z = -0.6 * Math.cos(t * 0.28);
+
+    const dummy = dummyRef.current;
+    for (let i = 0; i < seeds.length; i++) {
+      const s = seeds[i];
+      const u = (s.u + t * 0.08 * s.speed) % 1;
+      const inv = 1 - u;
+      const b0 = inv * inv * inv;
+      const b1 = 3 * inv * inv * u;
+      const b2 = 3 * inv * u * u;
+      const b3 = u * u * u;
+      const px = b0 * ax + b1 * c1x + b2 * c2x + b3 * bx;
+      const py = b0 * ay + b1 * c1y + b2 * c2y + b3 * by;
+      const pz = b0 * az + b1 * c1z + b2 * c2z + b3 * bz;
+
+      const wobble = Math.sin(u * Math.PI * 2 + s.phase + t) * s.radius;
+      const nx = Math.cos(s.phase + t * 0.3);
+      const ny = Math.sin(s.phase + t * 0.3);
+      const x = px + nx * wobble;
+      const y = py + ny * wobble;
+      const z = pz + Math.cos(u * Math.PI * 2 + s.phase) * s.radius * 0.6;
+
+      dummy.position.set(x, y, z);
+      dummy.scale.setScalar(s.scale * (0.7 + 0.3 * Math.sin(u * Math.PI * 2 + t)));
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, actualCount]} />;
+}
+
+function SceneTransportBridge({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <pointLight position={[0, 2, 3]} intensity={1.0} color={palette[1]} />
+      <TransportBridge palette={palette} seed={seed} />
     </>
   );
 }
@@ -2222,10 +2567,10 @@ function ReactionDiffusionImpostor({ palette, seed, size = 34 }: { palette: Pale
   const grid = Math.max(24, Math.floor(size * quality.geometryDetail));
   const total = grid * grid;
 
-  const uRef = useRef<Float32Array>();
-  const vRef = useRef<Float32Array>();
-  const uNextRef = useRef<Float32Array>();
-  const vNextRef = useRef<Float32Array>();
+  const uRef = useRef<Float32Array | null>(null);
+  const vRef = useRef<Float32Array | null>(null);
+  const uNextRef = useRef<Float32Array | null>(null);
+  const vNextRef = useRef<Float32Array | null>(null);
 
   if (!uRef.current || uRef.current.length !== total) {
     const rand = seededRandom(seed);
@@ -2351,9 +2696,9 @@ function FibrationLattice({ palette, seed, loops = 16, segments = 80 }: { palett
   const groupRef = useRef<THREE.Group>(null);
   const beadsRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
-  const rand = useMemo(() => seededRandom(seed), [seed]);
 
   const loopPoints = useMemo(() => {
+    const rand = seededRandom(seed);
     const rings: THREE.Vector3[][] = [];
     for (let i = 0; i < loops; i++) {
       const radius = 1.1 + rand() * 0.6;
@@ -2370,7 +2715,7 @@ function FibrationLattice({ palette, seed, loops = 16, segments = 80 }: { palett
       rings.push(pts);
     }
     return rings;
-  }, [loops, segments, rand]);
+  }, [loops, segments, seed]);
 
   const lineGeometry = useMemo(() => {
     const positions: number[] = [];
@@ -2392,6 +2737,7 @@ function FibrationLattice({ palette, seed, loops = 16, segments = 80 }: { palett
   );
 
   const arcGeometry = useMemo(() => {
+    const rand = seededRandom(seed + 37);
     const positions: number[] = [];
     const arcCount = Math.max(8, Math.floor(12 * quality.geometryDetail));
     for (let i = 0; i < arcCount; i++) {
@@ -2414,7 +2760,7 @@ function FibrationLattice({ palette, seed, loops = 16, segments = 80 }: { palett
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
     return g;
-  }, [rand, quality.geometryDetail]);
+  }, [seed, quality.geometryDetail]);
 
   const arcMaterial = useMemo(
     () => new THREE.LineBasicMaterial({ color: palette[3], transparent: true, opacity: 0.35 }),
@@ -2560,6 +2906,642 @@ function SceneFiligree({ palette, seed }: { palette: Palette; seed: number }) {
 }
 
 // ---------------------------------------------------------------------------
+// Variant: Lemniscate weave (figure-eight orbitals)
+// ---------------------------------------------------------------------------
+function LemniscateWeave({ palette, seed, count = 180 }: { palette: Palette; seed: number; count?: number }) {
+  const { quality } = useQuality();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const actualCount = Math.max(24, Math.floor(count * quality.particleMultiplier));
+
+  const seeds = useMemo(() => {
+    const rand = seededRandom(seed);
+    return Array.from({ length: actualCount }).map(() => ({
+      phase: rand() * Math.PI * 2,
+      speed: 0.25 + rand() * 0.7,
+      scale: 0.5 + rand() * 0.7,
+      a: 0.9 + rand() * 0.8,
+      lift: 0.15 + rand() * 0.35,
+    }));
+  }, [actualCount, seed]);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 1.0, roughness: 0.35 }),
+    [palette],
+  );
+
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const dummy = dummyRef.current;
+    for (let i = 0; i < seeds.length; i++) {
+      const s = seeds[i];
+      const tt = t * s.speed + s.phase;
+      const denom = 1 + Math.sin(tt) * Math.sin(tt);
+      const x = (s.a * Math.cos(tt)) / denom;
+      const y = (s.a * Math.sin(tt) * Math.cos(tt)) / denom;
+      const z = Math.sin(tt * 2) * s.lift;
+      dummy.position.set(x * 1.6, y * 1.6, z);
+      dummy.scale.setScalar(s.scale * (0.8 + 0.2 * Math.sin(tt)));
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, actualCount]} />;
+}
+
+function SceneLemniscate({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <pointLight position={[2, 2, 3]} intensity={1.1} color={palette[2]} />
+      <LemniscateWeave palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Logarithmic spiral field
+// ---------------------------------------------------------------------------
+function LogSpiralField({ palette, seed, spirals = 5 }: { palette: Palette; seed: number; spirals?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  const geometry = useMemo(() => {
+    const positions: number[] = [];
+    const steps = 200;
+    for (let s = 0; s < spirals; s++) {
+      const a = 0.12 + rand() * 0.18;
+      const b = 0.18 + rand() * 0.12;
+      const phase = rand() * Math.PI * 2;
+      const tilt = (rand() - 0.5) * 0.6;
+      for (let i = 0; i < steps; i++) {
+        const t0 = (i / steps) * Math.PI * 4;
+        const t1 = ((i + 1) / steps) * Math.PI * 4;
+        const r0 = a * Math.exp(b * t0);
+        const r1 = a * Math.exp(b * t1);
+        const x0 = Math.cos(t0 + phase) * r0;
+        const y0 = Math.sin(t0 + phase) * r0;
+        const x1 = Math.cos(t1 + phase) * r1;
+        const y1 = Math.sin(t1 + phase) * r1;
+        const z0 = Math.sin(t0 * 0.5 + phase) * tilt;
+        const z1 = Math.sin(t1 * 0.5 + phase) * tilt;
+        positions.push(x0, y0, z0, x1, y1, z1);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, [rand, spirals]);
+
+  const material = useMemo(
+    () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.7 }),
+    [palette],
+  );
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => material.dispose(), [material]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.z = t * 0.08;
+    groupRef.current.rotation.y = Math.sin(t * 0.3) * 0.2;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <lineSegments geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function SceneLogSpiral({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+      <pointLight position={[2, 2, 3]} intensity={1.1} color={palette[0]} />
+      <LogSpiralField palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Epicycle rosettes
+// ---------------------------------------------------------------------------
+function EpicycleRosettes({ palette, seed, curves = 4 }: { palette: Palette; seed: number; curves?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  const geometry = useMemo(() => {
+    const positions: number[] = [];
+    const steps = 240;
+    for (let c = 0; c < curves; c++) {
+      const R = 1.2 + rand() * 0.6;
+      const r = 0.3 + rand() * 0.5;
+      const d = 0.4 + rand() * 0.6;
+      const phase = rand() * Math.PI * 2;
+      for (let i = 0; i < steps; i++) {
+        const t0 = (i / steps) * Math.PI * 2 * 3;
+        const t1 = ((i + 1) / steps) * Math.PI * 2 * 3;
+        const x0 = (R + r) * Math.cos(t0 + phase) - d * Math.cos(((R + r) / r) * t0 + phase);
+        const y0 = (R + r) * Math.sin(t0 + phase) - d * Math.sin(((R + r) / r) * t0 + phase);
+        const x1 = (R + r) * Math.cos(t1 + phase) - d * Math.cos(((R + r) / r) * t1 + phase);
+        const y1 = (R + r) * Math.sin(t1 + phase) - d * Math.sin(((R + r) / r) * t1 + phase);
+        const z0 = Math.sin(t0 * 0.3 + phase) * 0.3;
+        const z1 = Math.sin(t1 * 0.3 + phase) * 0.3;
+        positions.push(x0, y0, z0, x1, y1, z1);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, [curves, rand]);
+
+  const material = useMemo(
+    () => new THREE.LineBasicMaterial({ color: palette[2], transparent: true, opacity: 0.65 }),
+    [palette],
+  );
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => material.dispose(), [material]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.1;
+    groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.15;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <lineSegments geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function SceneEpicycle({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <directionalLight position={[3, 4, 3]} intensity={1.1} color={palette[1]} />
+      <EpicycleRosettes palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Vortex grid (sheared wave lattice)
+// ---------------------------------------------------------------------------
+function VortexGrid({ palette, seed, size = 24 }: { palette: Palette; seed: number; size?: number }) {
+  const { quality } = useQuality();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const grid = Math.max(16, Math.floor(size * Math.sqrt(quality.particleMultiplier)));
+
+  const points = useMemo(() => {
+    const coords: Array<{ x: number; y: number; phase: number }> = [];
+    const rand = seededRandom(seed);
+    const half = (grid - 1) / 2;
+    for (let i = 0; i < grid; i++) {
+      for (let j = 0; j < grid; j++) {
+        coords.push({
+          x: (i - half) / half,
+          y: (j - half) / half,
+          phase: rand() * Math.PI * 2,
+        });
+      }
+    }
+    return coords;
+  }, [grid, seed]);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.03, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.8, roughness: 0.35 }),
+    [palette],
+  );
+
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const dummy = dummyRef.current;
+    const shear = Math.sin(t * 0.4) * 0.25;
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i];
+      const wave = Math.sin((p.x + p.y) * 3.0 + t + p.phase) + Math.cos((p.x - p.y) * 2.6 - t);
+      const x = p.x + shear * p.y;
+      const y = p.y + Math.cos(t * 0.3 + p.phase) * 0.06;
+      const z = wave * 0.12;
+      dummy.position.set(x * 1.6, y * 1.6, z);
+      dummy.scale.setScalar(0.7 + 0.2 * Math.sin(t + p.phase));
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, points.length]} />;
+}
+
+function SceneVortexGrid({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[0, 2, 3]} intensity={1.1} color={palette[2]} />
+      <VortexGrid palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Orbital swarm (elliptical mechanics)
+// ---------------------------------------------------------------------------
+function OrbitalSwarm({ palette, seed, count = 140 }: { palette: Palette; seed: number; count?: number }) {
+  const { quality } = useQuality();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const actualCount = Math.max(20, Math.floor(count * quality.particleMultiplier));
+
+  const seeds = useMemo(() => {
+    const rand = seededRandom(seed);
+    return Array.from({ length: actualCount }).map(() => ({
+      a: 1.2 + rand() * 1.2,
+      e: rand() * 0.35,
+      inc: rand() * Math.PI * 0.6,
+      node: rand() * Math.PI * 2,
+      phase: rand() * Math.PI * 2,
+      speed: 0.25 + rand() * 0.6,
+      scale: 0.5 + rand() * 0.6,
+    }));
+  }, [actualCount, seed]);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.9, roughness: 0.35 }),
+    [palette],
+  );
+
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const dummy = dummyRef.current;
+    for (let i = 0; i < seeds.length; i++) {
+      const s = seeds[i];
+      const theta = t * s.speed + s.phase;
+      const r = (s.a * (1 - s.e * s.e)) / (1 + s.e * Math.cos(theta));
+      const xOrb = r * Math.cos(theta);
+      const yOrb = r * Math.sin(theta);
+
+      const cosNode = Math.cos(s.node);
+      const sinNode = Math.sin(s.node);
+      const cosInc = Math.cos(s.inc);
+      const sinInc = Math.sin(s.inc);
+      const x = xOrb * cosNode - yOrb * sinNode * cosInc;
+      const y = xOrb * sinNode + yOrb * cosNode * cosInc;
+      const z = yOrb * sinInc;
+
+      dummy.position.set(x, y, z);
+      dummy.scale.setScalar(s.scale * (0.85 + 0.15 * Math.sin(theta + s.phase)));
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, actualCount]} />;
+}
+
+function SceneOrbitals({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <pointLight position={[2, 2, 3]} intensity={1.1} color={palette[2]} />
+      <OrbitalSwarm palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Torus phyllotaxis
+// ---------------------------------------------------------------------------
+function TorusPhyllotaxis({ palette, seed, count = 700 }: { palette: Palette; seed: number; count?: number }) {
+  const { quality } = useQuality();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummyRef = useRef(new THREE.Object3D());
+  const actualCount = Math.min(scaleCount(count, quality), quality.maxParticles);
+  const golden = Math.PI * (3 - Math.sqrt(5));
+
+  const points = useMemo(() => {
+    const rand = seededRandom(seed);
+    const R = 1.4 + rand() * 0.2;
+    const r = 0.35 + rand() * 0.15;
+    return { R, r };
+  }, [seed]);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.03, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const mat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[2], emissiveIntensity: 0.9, roughness: 0.35 }),
+    [palette],
+  );
+
+  useEffect(() => () => geom.dispose(), [geom]);
+  useEffect(() => () => mat.dispose(), [mat]);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const dummy = dummyRef.current;
+    for (let i = 0; i < actualCount; i++) {
+      const u = i * golden + t * 0.12;
+      const v = (i / actualCount) * Math.PI * 2 + t * 0.05;
+      const x = (points.R + points.r * Math.cos(v)) * Math.cos(u);
+      const y = (points.R + points.r * Math.cos(v)) * Math.sin(u);
+      const z = points.r * Math.sin(v);
+      dummy.position.set(x, y, z);
+      dummy.scale.setScalar(0.6 + 0.3 * Math.sin(u + v));
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return <instancedMesh ref={meshRef} args={[geom, mat, actualCount]} />;
+}
+
+function SceneTorusPhyllo({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.45} />
+      <pointLight position={[0, 2, 3]} intensity={1.1} color={palette[0]} />
+      <TorusPhyllotaxis palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Sine weave ribbons
+// ---------------------------------------------------------------------------
+function SineWeave({ palette, seed, bands = 6 }: { palette: Palette; seed: number; bands?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  const geometry = useMemo(() => {
+    const positions: number[] = [];
+    const steps = 120;
+    for (let b = 0; b < bands; b++) {
+      const offset = (b - (bands - 1) / 2) * 0.35;
+      const phase = rand() * Math.PI * 2;
+      for (let i = 0; i < steps; i++) {
+        const t0 = (i / steps) * 3.2 - 1.6;
+        const t1 = ((i + 1) / steps) * 3.2 - 1.6;
+        const y0 = Math.sin(t0 * 2 + phase + offset) * 0.4 + offset;
+        const y1 = Math.sin(t1 * 2 + phase + offset) * 0.4 + offset;
+        const z0 = Math.cos(t0 * 1.4 + phase) * 0.25;
+        const z1 = Math.cos(t1 * 1.4 + phase) * 0.25;
+        positions.push(t0 * 1.2, y0, z0, t1 * 1.2, y1, z1);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, [bands, rand]);
+
+  const material = useMemo(
+    () => new THREE.LineBasicMaterial({ color: palette[2], transparent: true, opacity: 0.6 }),
+    [palette],
+  );
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => material.dispose(), [material]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.12;
+    groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.12;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <lineSegments geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function SceneSineWeave({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+      <pointLight position={[2, 2, 3]} intensity={1.0} color={palette[1]} />
+      <SineWeave palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Harmonic ribbons (latitude waves)
+// ---------------------------------------------------------------------------
+function HarmonicRibbons({ palette, seed, rings = 7 }: { palette: Palette; seed: number; rings?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  const geometry = useMemo(() => {
+    const positions: number[] = [];
+    const steps = 160;
+    const ringCount = Math.max(2, rings);
+    for (let r = 0; r < ringCount; r++) {
+      const lat = (r / (ringCount - 1) - 0.5) * Math.PI * 0.8;
+      const phase = rand() * Math.PI * 2;
+      const amp = 0.15 + rand() * 0.2;
+      for (let i = 0; i < steps; i++) {
+        const t0 = (i / steps) * Math.PI * 2;
+        const t1 = ((i + 1) / steps) * Math.PI * 2;
+        const radius0 = 1.6 + amp * Math.sin(t0 * 3 + phase);
+        const radius1 = 1.6 + amp * Math.sin(t1 * 3 + phase);
+        const x0 = Math.cos(t0) * radius0;
+        const y0 = Math.sin(lat) * 1.2;
+        const z0 = Math.sin(t0) * radius0;
+        const x1 = Math.cos(t1) * radius1;
+        const y1 = Math.sin(lat) * 1.2;
+        const z1 = Math.sin(t1) * radius1;
+        positions.push(x0, y0, z0, x1, y1, z1);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, [rings, rand]);
+
+  const material = useMemo(
+    () => new THREE.LineBasicMaterial({ color: palette[3], transparent: true, opacity: 0.6 }),
+    [palette],
+  );
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => material.dispose(), [material]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.1;
+    groupRef.current.rotation.x = Math.sin(t * 0.25) * 0.1;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <lineSegments geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function SceneHarmonicRibbons({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+      <pointLight position={[2, 2, 3]} intensity={1.0} color={palette[0]} />
+      <HarmonicRibbons palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: De Jong point cloud
+// ---------------------------------------------------------------------------
+function DeJongCloud({ palette, seed, count = 18000 }: { palette: Palette; seed: number; count?: number }) {
+  const { tier } = useQuality();
+  const groupRef = useRef<THREE.Group>(null);
+  const actualCount = useMemo(() => {
+    if (tier === "high") return count;
+    if (tier === "medium") return Math.max(12000, Math.floor(count * 0.7));
+    return Math.max(8000, Math.floor(count * 0.45));
+  }, [count, tier]);
+
+  const geometry = useMemo(() => {
+    const rand = seededRandom(seed);
+    const a = -2 + rand() * 4;
+    const b = -2 + rand() * 4;
+    const c = -2 + rand() * 4;
+    const d = -2 + rand() * 4;
+    let x = 0.1, y = 0.1;
+    const positions = new Float32Array(actualCount * 3);
+    for (let i = 0; i < actualCount; i++) {
+      const nx = Math.sin(a * y) - Math.cos(b * x);
+      const ny = Math.sin(c * x) - Math.cos(d * y);
+      x = nx;
+      y = ny;
+      const idx = i * 3;
+      positions[idx] = x * 0.7;
+      positions[idx + 1] = y * 0.7;
+      positions[idx + 2] = Math.sin(x * y) * 0.4;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    return g;
+  }, [actualCount, seed]);
+
+  const material = useMemo(
+    () => new THREE.PointsMaterial({ color: palette[1], size: 0.03, sizeAttenuation: true, transparent: true, opacity: 0.7 }),
+    [palette],
+  );
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => material.dispose(), [material]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.y = t * 0.12;
+    groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.2;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <points geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function SceneDeJong({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+      <pointLight position={[0, 2, 3]} intensity={1.0} color={palette[0]} />
+      <DeJongCloud palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Polygon bloom
+// ---------------------------------------------------------------------------
+function PolygonBloom({ palette, seed, petals = 12 }: { palette: Palette; seed: number; petals?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+
+  const geometry = useMemo(() => {
+    const positions: number[] = [];
+    const radius = 1.8;
+    for (let i = 0; i < petals; i++) {
+      const angle = (i / petals) * Math.PI * 2;
+      const inner = 0.4 + rand() * 0.2;
+      const outer = radius + rand() * 0.4;
+      const x0 = Math.cos(angle) * inner;
+      const y0 = Math.sin(angle) * inner;
+      const x1 = Math.cos(angle) * outer;
+      const y1 = Math.sin(angle) * outer;
+      const z = Math.sin(angle * 3 + rand() * Math.PI) * 0.25;
+      positions.push(x0, y0, 0, x1, y1, z);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, [petals, rand]);
+
+  const material = useMemo(
+    () => new THREE.LineBasicMaterial({ color: palette[2], transparent: true, opacity: 0.7 }),
+    [palette],
+  );
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useEffect(() => () => material.dispose(), [material]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.rotation.z = t * 0.2;
+    groupRef.current.rotation.x = Math.sin(t * 0.2) * 0.1;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <lineSegments geometry={geometry} material={material} />
+    </group>
+  );
+}
+
+function ScenePolygonBloom({ palette, seed }: { palette: Palette; seed: number }) {
+  return (
+    <>
+      <ambientLight intensity={0.35} />
+      <pointLight position={[2, 2, 3]} intensity={1.0} color={palette[1]} />
+      <PolygonBloom palette={palette} seed={seed} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Variant: Reaction-Diffusion Waves on a Torus
 // ---------------------------------------------------------------------------
 function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number }) {
@@ -2656,9 +3638,23 @@ type VariantKey =
   | "aizawa"
   | "rossler"
   | "torusknot"
+  | "mobiusorbit"
+  | "tensormorph"
+  | "hodgeflow"
+  | "transportbridge"
   | "reactionimpostor"
   | "fibration"
   | "filigree"
+  | "lemniscate"
+  | "logspiral"
+  | "epicycle"
+  | "vortexgrid"
+  | "orbitals"
+  | "torusphyllo"
+  | "sineweave"
+  | "harmonicribbons"
+  | "dejong"
+  | "polygonbloom"
   | "reactiondiffusion";
 
 const scenes: Record<VariantKey, (opts: { palette: Palette; seed: number }) => JSX.Element> = {
@@ -2687,9 +3683,23 @@ const scenes: Record<VariantKey, (opts: { palette: Palette; seed: number }) => J
   aizawa: ({ palette, seed }) => <SceneAizawa palette={palette} seed={seed} />,
   rossler: ({ palette, seed }) => <SceneRossler palette={palette} seed={seed} />,
   torusknot: ({ palette, seed }) => <SceneTorusKnot palette={palette} seed={seed} />,
+  mobiusorbit: ({ palette, seed }) => <SceneMobiusOrbit palette={palette} seed={seed} />,
+  tensormorph: ({ palette, seed }) => <SceneTensorMorph palette={palette} seed={seed} />,
+  hodgeflow: ({ palette, seed }) => <SceneHodgeFlow palette={palette} seed={seed} />,
+  transportbridge: ({ palette, seed }) => <SceneTransportBridge palette={palette} seed={seed} />,
   reactionimpostor: ({ palette, seed }) => <SceneReactionImpostor palette={palette} seed={seed} />,
   fibration: ({ palette, seed }) => <SceneFibration palette={palette} seed={seed} />,
   filigree: ({ palette, seed }) => <SceneFiligree palette={palette} seed={seed} />,
+  lemniscate: ({ palette, seed }) => <SceneLemniscate palette={palette} seed={seed} />,
+  logspiral: ({ palette, seed }) => <SceneLogSpiral palette={palette} seed={seed} />,
+  epicycle: ({ palette, seed }) => <SceneEpicycle palette={palette} seed={seed} />,
+  vortexgrid: ({ palette, seed }) => <SceneVortexGrid palette={palette} seed={seed} />,
+  orbitals: ({ palette, seed }) => <SceneOrbitals palette={palette} seed={seed} />,
+  torusphyllo: ({ palette, seed }) => <SceneTorusPhyllo palette={palette} seed={seed} />,
+  sineweave: ({ palette, seed }) => <SceneSineWeave palette={palette} seed={seed} />,
+  harmonicribbons: ({ palette, seed }) => <SceneHarmonicRibbons palette={palette} seed={seed} />,
+  dejong: ({ palette, seed }) => <SceneDeJong palette={palette} seed={seed} />,
+  polygonbloom: ({ palette, seed }) => <ScenePolygonBloom palette={palette} seed={seed} />,
   reactiondiffusion: ({ palette, seed }) => <SceneReactionDiffusion palette={palette} seed={seed} />,
 };
 
@@ -2704,6 +3714,14 @@ const lightVariants: VariantKey[] = [
   "mobius",
   "quasicrystal",
   "phaseshear",
+  "logspiral",
+  "epicycle",
+  "sineweave",
+  "polygonbloom",
+  "torusphyllo",
+  "hodgeflow",
+  "tensormorph",
+  "transportbridge",
 ];
 
 const mediumVariants: VariantKey[] = [
@@ -2725,6 +3743,20 @@ const mediumVariants: VariantKey[] = [
   "clifford",
   "rossler",
   "torusknot",
+  "mobiusorbit",
+  "tensormorph",
+  "hodgeflow",
+  "transportbridge",
+  "lemniscate",
+  "logspiral",
+  "epicycle",
+  "vortexgrid",
+  "orbitals",
+  "torusphyllo",
+  "sineweave",
+  "harmonicribbons",
+  "dejong",
+  "polygonbloom",
 ];
 
 const rotationPlan: { variant: VariantKey; palette: number; seed: number; background?: string }[] = [
@@ -2759,6 +3791,17 @@ const rotationPlan: { variant: VariantKey; palette: number; seed: number; backgr
   { variant: "flowfield", palette: 2, seed: 209 },       // 9pm - Night flow field
   { variant: "trefoil", palette: 1, seed: 210 },         // 10pm - Glowing knot
   { variant: "rossler", palette: 4, seed: 211 },         // 11pm - Rossler attractor
+  // Bonus rotation - additional mathematical variants
+  { variant: "lemniscate", palette: 0, seed: 300 },      // Lemniscate weave
+  { variant: "logspiral", palette: 1, seed: 301 },       // Logarithmic spirals
+  { variant: "epicycle", palette: 2, seed: 302 },        // Epicycle rosettes
+  { variant: "vortexgrid", palette: 3, seed: 303 },      // Vortex grid
+  { variant: "orbitals", palette: 4, seed: 304 },        // Orbital swarm
+  { variant: "torusphyllo", palette: 5, seed: 305 },     // Torus phyllotaxis
+  { variant: "sineweave", palette: 0, seed: 306 },       // Sine weave
+  { variant: "harmonicribbons", palette: 2, seed: 307 }, // Harmonic ribbons
+  { variant: "dejong", palette: 4, seed: 308 },          // De Jong cloud
+  { variant: "polygonbloom", palette: 3, seed: 309 },    // Polygon bloom
 ];
 
 // ---------------------------------------------------------------------------
