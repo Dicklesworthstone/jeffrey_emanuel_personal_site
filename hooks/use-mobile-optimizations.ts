@@ -145,23 +145,23 @@ function getQualitySettings(caps: DeviceCapabilities): QualitySettings {
   switch (caps.tier) {
     case "low":
       return {
-        particleMultiplier: 0.25,
+        particleMultiplier: 0.2,
         geometryDetail: 0.5,
         maxDpr: 1,
         enableShadows: false,
         enablePostProcessing: false,
-        maxParticles: 200,
-        targetFps: 30,
+        maxParticles: 180,
+        targetFps: 60,
       };
     case "medium":
       return {
-        particleMultiplier: 0.5,
-        geometryDetail: 0.75,
+        particleMultiplier: 0.45,
+        geometryDetail: 0.7,
         maxDpr: 1.5,
         enableShadows: false,
         enablePostProcessing: false,
         maxParticles: 500,
-        targetFps: 30,
+        targetFps: 60,
       };
     case "high":
     default:
