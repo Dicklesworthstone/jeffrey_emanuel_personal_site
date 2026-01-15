@@ -288,10 +288,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         // Avoid duplicates if they are already in static list (by title)
         const isDuplicate = staticMatches.some(c => c.title === result.item.title);
         if (!isDuplicate) {
+          const excerpt = result.item.excerpt || "";
+          const truncatedExcerpt = excerpt.length > 60
+            ? excerpt.slice(0, 60) + "..."
+            : excerpt;
           fuseMatches.push({
             id: `search-result-${result.item.slug}`,
             title: result.item.title,
-            subtitle: result.item.excerpt.slice(0, 60) + "...",
+            subtitle: truncatedExcerpt || "Read more...",
             icon: <FileText className="h-4 w-4" />,
             category: "search_results",
             action: () => {

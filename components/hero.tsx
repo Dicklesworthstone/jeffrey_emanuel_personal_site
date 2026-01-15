@@ -329,13 +329,13 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
            {/* Desktop: Full Three.js WebGL scene - Only rendered if screen is large enough */}
            <div className="pointer-events-auto hidden h-full w-full lg:block">
-             <ErrorBoundary fallback={<ThreeSceneFallback />}>
+             <ErrorBoundary fallback={<ThreeSceneFallback className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]" />}>
                 {shouldRenderScene ? (
                   <Suspense fallback={<ThreeSceneLoading />}>
                     <ThreeScene isActive={isSceneActive} />
                   </Suspense>
                 ) : (
-                  <ThreeSceneFallback />
+                  <ThreeSceneFallback className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]" />
                 )}
              </ErrorBoundary>
            </div>

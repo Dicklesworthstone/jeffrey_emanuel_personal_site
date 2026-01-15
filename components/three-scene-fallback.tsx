@@ -1,19 +1,20 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 /**
  * Lightweight fallback for the Three.js scene on mobile devices.
  * Uses CSS animations and SVG instead of WebGL for better performance.
  * Respects prefers-reduced-motion for accessibility.
  */
-export default function ThreeSceneFallback() {
+export default function ThreeSceneFallback({ className }: { className?: string }) {
   const prefersReducedMotion = useReducedMotion();
 
   // Static version for reduced motion - no animations
   if (prefersReducedMotion) {
     return (
-      <div className="relative h-full w-full overflow-hidden">
+      <div className={cn("relative h-full w-full overflow-hidden", className)}>
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-violet-950/30 to-slate-900" />
         <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-gradient-to-br from-violet-500/20 to-transparent blur-3xl opacity-40" />
         <div className="absolute -bottom-10 -right-10 h-60 w-60 rounded-full bg-gradient-to-tl from-sky-500/20 to-transparent blur-3xl opacity-30" />
@@ -48,7 +49,7 @@ export default function ThreeSceneFallback() {
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className={cn("relative h-full w-full overflow-hidden", className)}>
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-violet-950/30 to-slate-900" />
 

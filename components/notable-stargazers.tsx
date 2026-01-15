@@ -193,7 +193,8 @@ const AvatarStrip = memo(function AvatarStrip({
     () => stargazers.slice(0, maxItems),
     [stargazers, maxItems],
   );
-  const remainingCount = totalCount - displayStargazers.length;
+  // Ensure remainingCount doesn't go negative (defensive against bad data)
+  const remainingCount = Math.max(0, totalCount - displayStargazers.length);
 
   const overlapClasses = {
     sm: "-space-x-2",
