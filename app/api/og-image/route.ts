@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 // Simple in-memory cache for OG images
 const imageCache = new Map<string, { data: ArrayBuffer; contentType: string; timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_CACHE_SIZE = 50; // Maximum number of cached images
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB max per image
 
 // Allowed domains for security
 const ALLOWED_DOMAINS = [
@@ -90,9 +92,10 @@ export async function GET(request: NextRequest) {
     const response = await fetchAllowedImage(url);
 
     if (!response.ok) {
+      // Don't leak upstream status codes - return generic error
       return NextResponse.json(
-        { error: `Failed to fetch image: ${response.status}` },
-        { status: response.status }
+        { error: "Failed to fetch image" },
+        { status: 502 }
       );
     }
 
@@ -105,6 +108,14 @@ export async function GET(request: NextRequest) {
 
     const data = await response.arrayBuffer();
 
+    // Reject oversized images to prevent memory exhaustion
+    if (data.byteLength > MAX_IMAGE_SIZE) {
+      return NextResponse.json(
+        { error: "Image too large" },
+        { status: 413 }
+      );
+    }
+
     // Cache the result
     imageCache.set(url, {
       data,
@@ -112,10 +123,15 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now(),
     });
 
-    // Clean up old cache entries (simple LRU-ish cleanup)
-    if (imageCache.size > 50) {
-      const oldestKey = imageCache.keys().next().value;
-      if (oldestKey) imageCache.delete(oldestKey);
+    // Clean up old cache entries to prevent unbounded growth
+    if (imageCache.size > MAX_CACHE_SIZE) {
+      // Remove oldest entries until under limit
+      const entries = Array.from(imageCache.entries())
+        .sort((a, b) => a[1].timestamp - b[1].timestamp);
+      const toRemove = entries.slice(0, imageCache.size - MAX_CACHE_SIZE + 1);
+      for (const [key] of toRemove) {
+        imageCache.delete(key);
+      }
     }
 
     return new NextResponse(data, {

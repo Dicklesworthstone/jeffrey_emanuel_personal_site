@@ -63,23 +63,27 @@ export function formatStarCountFull(count: number): string {
  * Useful for sorting or calculations.
  *
  * @param formatted - Formatted string like "1.4K" or "2.3M"
- * @returns The numeric value
+ * @returns The numeric value, or 0 if parsing fails
  *
  * @example
  * parseStarCount("1.4K") // 1400
  * parseStarCount("2.3M") // 2300000
+ * parseStarCount("invalid") // 0
  */
 export function parseStarCount(formatted: string): number {
   const trimmed = formatted.trim();
 
+  let result: number;
+
   if (trimmed.endsWith("M")) {
-    return parseFloat(trimmed.slice(0, -1)) * 1_000_000;
+    result = parseFloat(trimmed.slice(0, -1)) * 1_000_000;
+  } else if (trimmed.endsWith("K")) {
+    result = parseFloat(trimmed.slice(0, -1)) * 1_000;
+  } else {
+    // Remove commas and parse
+    result = parseFloat(trimmed.replace(/,/g, ""));
   }
 
-  if (trimmed.endsWith("K")) {
-    return parseFloat(trimmed.slice(0, -1)) * 1_000;
-  }
-
-  // Remove commas and parse
-  return parseFloat(trimmed.replace(/,/g, ""));
+  // Return 0 for NaN/invalid values (safe default for star counts)
+  return Number.isNaN(result) ? 0 : result;
 }

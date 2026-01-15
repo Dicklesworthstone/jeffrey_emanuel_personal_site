@@ -21,10 +21,12 @@ export async function GET() {
     );
 
     if (!response.ok) {
-      // If rate limited or error, try to return valid error
+      // Don't leak upstream status codes - return generic error
+      // 429 is rate limiting, which is common and can be handled differently
+      const status = response.status === 429 ? 429 : 502;
       return NextResponse.json(
-        { error: `GitHub API error: ${response.status}` },
-        { status: response.status }
+        { error: status === 429 ? "Rate limited" : "GitHub API unavailable" },
+        { status }
       );
     }
 

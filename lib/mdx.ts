@@ -55,9 +55,23 @@ export const getPostBySlug = cache((slug: string) => {
   if (!postsDirectory) {
     throw new Error(`Post not found: ${slug} (Content directory missing)`);
   }
+
+  // Sanitize slug to prevent path traversal attacks
+  // Only allow alphanumeric, hyphens, and underscores
   const realSlug = slug.replace(/\.md$/, "");
+  if (!/^[\w-]+$/.test(realSlug)) {
+    throw new Error(`Invalid slug format: ${slug}`);
+  }
+
   const fullPath = path.join(postsDirectory, `${realSlug}.md`);
-  
+
+  // Verify the resolved path is within the posts directory (defense in depth)
+  const resolvedPath = path.resolve(fullPath);
+  const resolvedPostsDir = path.resolve(postsDirectory);
+  if (!resolvedPath.startsWith(resolvedPostsDir + path.sep)) {
+    throw new Error(`Invalid slug: ${slug}`);
+  }
+
   if (!fs.existsSync(fullPath)) {
     throw new Error(`Post not found: ${slug}`);
   }

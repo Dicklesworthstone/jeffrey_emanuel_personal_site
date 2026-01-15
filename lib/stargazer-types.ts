@@ -185,18 +185,39 @@ export const NOTABLE_SCORE_THRESHOLD = 500;
 
 /**
  * Type guard to check if data is valid StargazerIntelligence.
+ * Validates structure and basic sanity of nested arrays.
  */
 export function isValidStargazerIntelligence(data: unknown): data is StargazerIntelligence {
   if (!data || typeof data !== 'object') return false;
   const d = data as Record<string, unknown>;
-  return (
-    typeof d.totalUniqueStargazers === 'number' &&
-    typeof d.combinedReach === 'number' &&
-    Array.isArray(d.topStargazers) &&
-    Array.isArray(d.topCompanies) &&
-    typeof d.byRepo === 'object' &&
-    typeof d.lastUpdated === 'string'
-  );
+
+  // Validate top-level types
+  if (
+    typeof d.totalUniqueStargazers !== 'number' ||
+    typeof d.combinedReach !== 'number' ||
+    !Array.isArray(d.topStargazers) ||
+    !Array.isArray(d.topCompanies) ||
+    typeof d.byRepo !== 'object' ||
+    d.byRepo === null ||
+    typeof d.lastUpdated !== 'string'
+  ) {
+    return false;
+  }
+
+  // Validate numeric values are not NaN
+  if (Number.isNaN(d.totalUniqueStargazers) || Number.isNaN(d.combinedReach)) {
+    return false;
+  }
+
+  // Validate at least first element of arrays (if non-empty)
+  if (d.topStargazers.length > 0) {
+    const first = d.topStargazers[0] as Record<string, unknown>;
+    if (!first || typeof first.login !== 'string' || typeof first.score !== 'number') {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -206,6 +227,12 @@ export function isValidStargazerIntelligence(data: unknown): data is StargazerIn
 export function isDataStale(lastUpdated: string, maxAgeDays: number = 7): boolean {
   const updateDate = new Date(lastUpdated);
   const now = new Date();
+
+  // If date is invalid, treat as stale (safest assumption)
+  if (Number.isNaN(updateDate.getTime())) {
+    return true;
+  }
+
   const diffMs = now.getTime() - updateDate.getTime();
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
   return diffDays > maxAgeDays;
