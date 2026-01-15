@@ -2562,8 +2562,8 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     name: "Meta Skill",
     shortName: "MS",
     href: "https://github.com/Dicklesworthstone/meta_skill",
-    icon: "Layers",
-    color: "from-indigo-500 to-violet-600",
+    icon: "Sparkles",
+    color: "from-teal-500 to-emerald-600",
     category: "core",
     stars: 10,
     whatItDoes:
@@ -2606,7 +2606,7 @@ export const tldrPageData = {
     title: "The Agentic Coding Flywheel",
     subtitle: "TL;DR Edition",
     description:
-      "13 interconnected tools that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
+      "14 interconnected tools that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
     stats: [
       { label: "Ecosystem Tools", value: "14" },
       { label: "GitHub Stars", value: "16K+" },
@@ -2614,9 +2614,9 @@ export const tldrPageData = {
     ],
   },
   coreDescription:
-    "The core flywheel tools form the backbone: Agent Mail for coordination, BV for graph-based prioritization, CASS for instant session search, CM for persistent memory, UBS for bug detection, plus session management, safety guards, and automated setup.",
+    "The core flywheel tools form the backbone: Agent Mail for coordination, BV for graph-based prioritization, CASS for instant session search, CM for persistent memory, UBS for bug detection, MS for skill management with MCP integration, plus session management, safety guards, and automated setup.",
   supportingDescription:
-    "Supporting tools extend the ecosystem: ICI for remote image debugging, XF for searching your X archive, S2P for crafting prompts from source code, and Meta Skill for managing and mining Claude Code skills.",
+    "Supporting tools extend the ecosystem: ICI for remote image debugging, XF for searching your X archive, and S2P for crafting prompts from source code.",
   flywheelExplanation: {
     title: "Why a Flywheel?",
     paragraphs: [
