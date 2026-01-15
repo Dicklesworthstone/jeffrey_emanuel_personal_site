@@ -106,19 +106,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Not an image" }, { status: 400 });
     }
 
-    const data = await response.arrayBuffer();
+    const reader = response.body?.getReader();
+    if (!reader) {
+      return NextResponse.json({ error: "Failed to read response body" }, { status: 502 });
+    }
 
-    // Reject oversized images to prevent memory exhaustion
-    if (data.byteLength > MAX_IMAGE_SIZE) {
-      return NextResponse.json(
-        { error: "Image too large" },
-        { status: 413 }
-      );
+    const chunks: Uint8Array[] = [];
+    let receivedLength = 0;
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        if (value) {
+          receivedLength += value.length;
+          if (receivedLength > MAX_IMAGE_SIZE) {
+            reader.cancel();
+            return NextResponse.json({ error: "Image too large" }, { status: 413 });
+          }
+          chunks.push(value);
+        }
+      }
+    } catch (error) {
+      console.error("Stream read error:", error);
+      return NextResponse.json({ error: "Stream read failed" }, { status: 500 });
+    }
+
+    // Combine chunks
+    const data = new Uint8Array(receivedLength);
+    let offset = 0;
+    for (const chunk of chunks) {
+      data.set(chunk, offset);
+      offset += chunk.length;
     }
 
     // Cache the result
     imageCache.set(url, {
-      data,
+      data: data.buffer as ArrayBuffer,
       contentType,
       timestamp: Date.now(),
     });
