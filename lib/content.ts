@@ -2571,8 +2571,9 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     whyItsUseful:
       "AI agents need reusable context to be effective. MS doesn't just store skills—it learns which ones work. Thompson sampling optimizes suggestions over time, security systems (ACIP, DCG) keep content safe, and the MCP server makes skills native to any AI agent.",
     implementationHighlights: [
-      "MCP server exposes 6 native tools for AI agent integration",
+      "Dual persistence: SQLite for queries + Git for audit trails",
       "Thompson sampling bandit learns from usage to optimize suggestions",
+      "MCP server exposes 6 native tools for AI agent integration",
       "ACIP prompt-injection detection with quarantine system",
       "DCG command safety tiers (Safe/Caution/Danger/Critical)",
     ],
@@ -2585,6 +2586,10 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
         toolId: "cm",
         description: "Skills and CM memories are complementary knowledge layers",
       },
+      {
+        toolId: "bv",
+        description: "Graph analysis via bv for skill dependency insights",
+      },
     ],
     techStack: ["Rust", "SQLite", "Tantivy", "Git", "MCP"],
     keyFeatures: [
@@ -2592,6 +2597,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
       "Thompson sampling optimizes suggestions over time",
       "Multi-layer security (ACIP, DCG, path policy, secrets)",
       "Hybrid search: BM25 + hash embeddings with RRF",
+      "Token packing for context budget optimization",
     ],
     useCases: [
       "AI agents querying skills via MCP during sessions",
