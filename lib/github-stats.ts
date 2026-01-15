@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/content";
+import { formatStarCount } from "@/lib/format-stars";
 
 /**
  * Fetch GitHub statistics for a user.
@@ -123,24 +124,14 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
  * Format number with K/M suffix for display.
  */
 export function formatNumber(num: number): string {
-  // Guard against NaN/invalid input
-  if (!Number.isFinite(num) || num < 0) {
-    return "0";
-  }
-  if (num >= 1000000) {
-    return `${(num / 1000000).toFixed(1)}M`;
-  }
-  if (num >= 1000) {
-    return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1)}K`;
-  }
-  return num.toString();
+  return formatStarCount(num);
 }
 
 /**
  * Get formatted stats string like "10.2K+ stars"
  */
 export function formatStarsDisplay(totalStars: number): string {
-  return `${formatNumber(totalStars)}+`;
+  return `${formatStarCount(totalStars)}+`;
 }
 
 export default fetchGitHubStats;
