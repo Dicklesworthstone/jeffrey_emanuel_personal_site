@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import TldrToolGrid from "@/components/tldr-tool-grid";
 import { TldrFlywheelTool } from "@/lib/content";
@@ -35,8 +35,8 @@ const mockTools: TldrFlywheelTool[] = [
     icon: "Box",
     color: "cyan",
     href: "#",
-    tagline: "Tagline 1",
-    implementationHighlights: []
+    implementationHighlights: [],
+    useCases: []
   },
   {
     id: "tool-2",
@@ -51,8 +51,8 @@ const mockTools: TldrFlywheelTool[] = [
     icon: "Rocket",
     color: "violet",
     href: "#",
-    tagline: "Tagline 2",
-    implementationHighlights: []
+    implementationHighlights: [],
+    useCases: []
   },
   {
     id: "tool-3",
@@ -67,8 +67,8 @@ const mockTools: TldrFlywheelTool[] = [
     icon: "Wrench",
     color: "amber",
     href: "#",
-    tagline: "Tagline 3",
-    implementationHighlights: []
+    implementationHighlights: [],
+    useCases: []
   },
 ];
 

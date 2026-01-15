@@ -70,7 +70,7 @@ describe("TldrHero", () => {
     // Testing specific class application is useful.
     
     it("has hidden class on floating icons container for mobile", () => {
-        const { container } = render(<TldrHero />);
+        render(<TldrHero />);
         // The floating icons container has "hidden md:block"
         // We can look for the container that contains the floating icons.
         // It's the div with absolute inset-0 hidden md:block

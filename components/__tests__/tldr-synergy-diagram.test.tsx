@@ -33,8 +33,8 @@ const mockTools: TldrFlywheelTool[] = [
     icon: "Box",
     color: "cyan",
     href: "#",
-    tagline: "",
-    implementationHighlights: []
+    implementationHighlights: [],
+    useCases: []
   },
   {
     id: "tool-b",
@@ -49,8 +49,8 @@ const mockTools: TldrFlywheelTool[] = [
     icon: "Rocket",
     color: "violet",
     href: "#",
-    tagline: "",
-    implementationHighlights: []
+    implementationHighlights: [],
+    useCases: []
   },
   {
     id: "tool-c",
@@ -65,8 +65,8 @@ const mockTools: TldrFlywheelTool[] = [
     icon: "Wrench",
     color: "amber",
     href: "#",
-    tagline: "",
-    implementationHighlights: []
+    implementationHighlights: [],
+    useCases: []
   },
 ];
 
@@ -77,7 +77,7 @@ describe("TldrSynergyDiagram", () => {
 
   describe("rendering", () => {
     it("renders core tool nodes only", () => {
-      const { container } = render(<TldrSynergyDiagram tools={mockTools} />);
+      render(<TldrSynergyDiagram tools={mockTools} />);
       
       // Should find Alpha and Beta text
       expect(screen.getByText("Alpha")).toBeInTheDocument();
