@@ -162,6 +162,29 @@ export function TldrSynergyDiagram({
                 }}
               />
             ))}
+            
+            {/* Animated particles */}
+            {!reducedMotion && isInView && connections.map((conn, index) => (
+              <motion.circle
+                key={`particle-${conn.from}-${conn.to}`}
+                r="2"
+                fill="white"
+                initial={{ cx: conn.fromPos.x, cy: conn.fromPos.y, opacity: 0 }}
+                animate={{ 
+                  cx: [conn.fromPos.x, conn.toPos.x],
+                  cy: [conn.fromPos.y, conn.toPos.y],
+                  opacity: [0, 1, 1, 0]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: Math.random() * 2, // Random start times for organic feel
+                  repeatDelay: 0.5
+                }}
+                className="pointer-events-none"
+              />
+            ))}
           </g>
 
           {/* Center "Flywheel" label */}
@@ -208,6 +231,7 @@ export function TldrSynergyDiagram({
             return (
               <motion.g
                 key={tool.id}
+                whileHover={reducedMotion ? {} : { scale: 1.1 }}
                 initial={reducedMotion ? {} : { opacity: 0, scale: 0 }}
                 animate={isInView ? { opacity: 1, scale: 1 } : {}}
                 transition={{
@@ -216,6 +240,7 @@ export function TldrSynergyDiagram({
                   type: "spring",
                   stiffness: 200,
                 }}
+                className="cursor-pointer"
               >
                 {/* Node background */}
                 <circle

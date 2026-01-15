@@ -317,7 +317,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                   exit={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
                   transition={{
                     duration: reducedMotion ? 0 : 0.3,
-                    delay: reducedMotion ? 0 : index * 0.03,
+                    delay: reducedMotion ? 0 : index * 0.05,
                   }}
                   className="h-full"
                 >
@@ -353,7 +353,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                   exit={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
                   transition={{
                     duration: reducedMotion ? 0 : 0.3,
-                    delay: reducedMotion ? 0 : index * 0.03,
+                    delay: reducedMotion ? 0 : index * 0.05,
                   }}
                   className="h-full"
                 >
