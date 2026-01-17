@@ -1,16 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import TldrToolCard from "@/components/tldr-tool-card";
 import { TldrFlywheelTool } from "@/lib/content";
-
-// Mock dependencies
-vi.mock("@/hooks/use-haptic-feedback", () => ({
-  useHapticFeedback: () => ({ lightTap: vi.fn() }),
-}));
-
-vi.mock("@/lib/colors", () => ({
-  getColorDefinition: () => ({ rgb: "0, 255, 255" }),
-}));
 
 // Mock Data
 const mockTool: TldrFlywheelTool = {
@@ -44,10 +35,6 @@ const mockOtherTool: TldrFlywheelTool = {
 const allTools = [mockTool, mockOtherTool];
 
 describe("TldrToolCard", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   describe("rendering", () => {
     it("renders tool name and short name", () => {
       render(<TldrToolCard tool={mockTool} allTools={allTools} />);

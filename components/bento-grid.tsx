@@ -65,7 +65,7 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
       className={cn(
-        "grid grid-cols-1 gap-5 md:gap-6 lg:gap-8 md:grid-cols-3 auto-rows-[minmax(180px,auto)]",
+        "grid grid-cols-1 gap-5 md:gap-6 lg:gap-8 md:grid-cols-3 auto-rows-[minmax(180px,auto)] grid-flow-dense",
         className
       )}
       role="list"

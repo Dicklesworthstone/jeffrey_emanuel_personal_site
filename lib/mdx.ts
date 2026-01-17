@@ -14,19 +14,18 @@ function resolvePostsDirectory(): string | null {
   const cwdPath = path.join(process.cwd(), "content/writing");
   if (fs.existsSync(cwdPath)) return cwdPath;
 
-  const bases = [moduleDir, process.cwd()];
-  for (const base of bases) {
-    let cursor = base;
-    // Safety break: 10 levels or until root
-    for (let i = 0; i < 10; i++) {
-      const candidate = path.resolve(cursor, "content/writing");
-      if (fs.existsSync(candidate)) return candidate;
-      
-      const parent = path.resolve(cursor, "..");
-      if (parent === cursor) break; // Hit root
-      cursor = parent;
-    }
+  // 2. Fallback: Check relative to module location (useful for some monorepo/test setups)
+  // Walk up a few levels just in case
+  let cursor = moduleDir;
+  for (let i = 0; i < 5; i++) {
+    const candidate = path.resolve(cursor, "content/writing");
+    if (fs.existsSync(candidate)) return candidate;
+    
+    const parent = path.resolve(cursor, "..");
+    if (parent === cursor) break;
+    cursor = parent;
   }
+  
   return null;
 }
 
@@ -119,6 +118,35 @@ export function getAllPosts() {
   return posts.sort((post1, post2) => {
     const t1 = new Date(post1.date).getTime();
     const t2 = new Date(post2.date).getTime();
+    if (Number.isNaN(t1)) return 1;
+    if (Number.isNaN(t2)) return -1;
+    return t2 - t1;
+  });
+}
+
+/**
+ * Get all posts with metadata only (no content body).
+ * Optimized for listing pages to reduce memory usage and payload size.
+ */
+export function getAllPostsMeta() {
+  const slugs = getPostSlugs();
+  const posts: Omit<Post, "content">[] = [];
+
+  for (const slug of slugs) {
+    try {
+      // We still have to read the file, but we don't pass the heavy content string around
+      const post = getPostBySlug(slug);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { content, ...meta } = post;
+      posts.push(meta);
+    } catch (err) {
+      console.warn(`[content] Skipping ${slug}: ${(err as Error).message}`);
+    }
+  }
+
+  return posts.sort((post1, post2) => {
+    const t1 = new Date(post1.date as string).getTime();
+    const t2 = new Date(post2.date as string).getTime();
     if (Number.isNaN(t1)) return 1;
     if (Number.isNaN(t2)) return -1;
     return t2 - t1;

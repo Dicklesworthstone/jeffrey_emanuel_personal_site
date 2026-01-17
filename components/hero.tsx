@@ -298,10 +298,10 @@ export default function Hero({ stats = heroStats }: HeroProps) {
         {/* 3D Scene - Full Three.js on all devices (adaptive quality + gradients for legibility) */}
         <div
           ref={sceneRef}
-          className="relative mt-12 h-[400px] w-full lg:absolute lg:-right-[10%] lg:top-1/2 lg:mt-0 lg:h-[900px] lg:w-[1000px] lg:-translate-y-1/2 lg:opacity-100 pointer-events-none"
+          className="relative mt-12 h-[400px] w-full pointer-events-none lg:absolute lg:-right-[10%] lg:top-1/2 lg:mt-0 lg:h-[900px] lg:w-[1000px] lg:-translate-y-1/2 lg:opacity-100 lg:pointer-events-auto"
         >
-           <div className="absolute inset-0 z-10 bg-gradient-to-l from-transparent via-[#020617]/20 to-[#020617] lg:via-[#020617]/60" />
-           <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#020617] to-transparent lg:hidden" />
+           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-l from-transparent via-[#020617]/20 to-[#020617] lg:via-[#020617]/60" />
+           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[#020617] to-transparent lg:hidden" />
 
            <div className="h-full w-full pointer-events-none lg:pointer-events-auto">
              <ErrorBoundary fallback={<ThreeSceneFallback className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]" />}>

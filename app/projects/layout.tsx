@@ -52,11 +52,15 @@ function getProgrammingLanguage(tags: string[]): string | undefined {
 // Extract star count from badge if present
 function extractStarCount(badge?: string): number | undefined {
   if (!badge) return undefined;
-  const match = badge.match(/(\d+(?:,\d+)?)\s*stars?/i);
-  if (match) {
-    return parseInt(match[1].replace(",", ""), 10);
-  }
-  return undefined;
+  const match = badge.match(/([\d,.]+)\s*([KkMm])?\+?\s*stars?/i);
+  if (!match) return undefined;
+
+  const base = parseFloat(match[1].replace(/,/g, ""));
+  if (!Number.isFinite(base)) return undefined;
+
+  const unit = match[2]?.toLowerCase();
+  const multiplier = unit === "k" ? 1_000 : unit === "m" ? 1_000_000 : 1;
+  return Math.round(base * multiplier);
 }
 
 // Generate SoftwareApplication schema for a project

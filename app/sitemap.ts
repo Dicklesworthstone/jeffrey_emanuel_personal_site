@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getAllPosts } from '@/lib/mdx';
+import { getAllPostsMeta } from '@/lib/mdx';
 import { navItems, getProjectSlugs } from '@/lib/content';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -15,10 +15,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Blog posts
-  const posts = getAllPosts();
+  const posts = getAllPostsMeta();
   const postPages = posts.map((post) => ({
     url: `${baseUrl}/writing/${post.slug}`,
-    lastModified: new Date(post.date),
+    lastModified: new Date(post.date as string),
     changeFrequency: 'weekly' as const,
     priority: 0.6, // Blog posts are good but main pages are structural
   }));

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import TldrToolGrid from "@/components/tldr-tool-grid";
 import { TldrFlywheelTool } from "@/lib/content";
@@ -9,16 +9,6 @@ vi.mock("@/components/tldr-tool-card", () => ({
     <div data-testid="tool-card">{tool.name}</div>
   ),
 }));
-
-// Mock framer-motion
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual("framer-motion");
-  return {
-    ...actual,
-    useReducedMotion: () => true,
-    AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  };
-});
 
 // Mock Data
 const mockTools: TldrFlywheelTool[] = [
@@ -101,8 +91,11 @@ describe("TldrToolGrid", () => {
       
       // Should show only Alpha
       expect(screen.getByText("Alpha Tool")).toBeInTheDocument();
-      expect(screen.queryByText("Beta Tool")).not.toBeInTheDocument();
-      expect(screen.queryByText("Gamma Tool")).not.toBeInTheDocument();
+      
+      await waitFor(() => {
+        expect(screen.queryByText("Beta Tool")).not.toBeInTheDocument();
+        expect(screen.queryByText("Gamma Tool")).not.toBeInTheDocument();
+      });
       
       // Count update
       const status = screen.getByRole("status");
@@ -116,7 +109,9 @@ describe("TldrToolGrid", () => {
         fireEvent.change(searchInput, { target: { value: "Rust" } });
         
         expect(screen.getByText("Beta Tool")).toBeInTheDocument();
-        expect(screen.queryByText("Alpha Tool")).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.queryByText("Alpha Tool")).not.toBeInTheDocument();
+        });
     });
 
     it("shows empty state when no matches found", async () => {

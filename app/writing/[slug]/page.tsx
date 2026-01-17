@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug } from "@/lib/mdx";
+import { getAllPostsMeta, getPostBySlug } from "@/lib/mdx";
 import MarkdownRenderer from "@/components/markdown-renderer";
 import ArticleProgress from "@/components/article-progress";
 import TableOfContents from "@/components/table-of-contents";
@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 
 export async function generateStaticParams() {
-  const posts = getAllPosts();
+  const posts = getAllPostsMeta();
   return posts.map((post) => ({
     slug: post.slug,
   }));

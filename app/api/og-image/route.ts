@@ -3,14 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 // Simple in-memory cache for OG images
 const imageCache = new Map<string, { data: ArrayBuffer; contentType: string; timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-const MAX_CACHE_SIZE = 50; // Maximum number of cached images
+const MAX_CACHE_SIZE = 20; // Reduced to 20 to prevent memory pressure in lambda
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB max per image
 
-// Allowed domains for security
+// Allowed domains for security (including www subdomains)
 const ALLOWED_DOMAINS = [
   "jeffreysprompts.com",
+  "www.jeffreysprompts.com",
   "agent-flywheel.com",
+  "www.agent-flywheel.com",
   "brennerbot.org",
+  "www.brennerbot.org",
 ];
 
 export async function GET(request: NextRequest) {
@@ -150,12 +153,10 @@ export async function GET(request: NextRequest) {
 
     // Clean up old cache entries to prevent unbounded growth
     if (imageCache.size > MAX_CACHE_SIZE) {
-      // Remove oldest entries until under limit
-      const entries = Array.from(imageCache.entries())
-        .sort((a, b) => a[1].timestamp - b[1].timestamp);
-      const toRemove = entries.slice(0, imageCache.size - MAX_CACHE_SIZE + 1);
-      for (const [key] of toRemove) {
-        imageCache.delete(key);
+      // Remove oldest entry (Map preserves insertion order)
+      const firstKey = imageCache.keys().next().value;
+      if (firstKey) {
+        imageCache.delete(firstKey);
       }
     }
 

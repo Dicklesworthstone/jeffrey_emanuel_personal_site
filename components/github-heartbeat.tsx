@@ -417,7 +417,6 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
               e.type
             )
           )
-          .slice(0, 10)
           .map(parseEvent);
 
         setEvents(parsed);

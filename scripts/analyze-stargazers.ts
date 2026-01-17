@@ -29,8 +29,19 @@ import {
   LEGEND_STARS_THRESHOLD,
 } from "../lib/stargazer-types";
 
+// Helper to get username from content.ts without importing (avoiding build/module issues)
+function getGitHubUsername(): string {
+  try {
+    const content = fs.readFileSync(path.join(process.cwd(), "lib/content.ts"), "utf-8");
+    const match = content.match(/github:\s*["']https:\/\/github\.com\/([^"']+)["']/);
+    return match ? match[1] : "Dicklesworthstone";
+  } catch {
+    return "Dicklesworthstone";
+  }
+}
+
 // Configuration
-const GITHUB_USERNAME = "Dicklesworthstone";
+const GITHUB_USERNAME = getGitHubUsername();
 const MAX_USERS_TO_PROCESS = 1000;
 const CONCURRENCY_LIMIT = 20;
 const RATE_LIMIT_DELAY = 15000; // 15 seconds

@@ -29,17 +29,12 @@ const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop(
  * Fetch total star count and other stats from GitHub API.
  * Uses caching to avoid rate limits.
  */
-export async function fetchGitHubStats(): Promise<GitHubStats> {
+export async function fetchGitHubStats(): Promise<GitHubStats | null> {
   const now = Date.now();
 
   if (!process.env.GITHUB_TOKEN) {
-    console.warn("GITHUB_TOKEN not found. Using fallback GitHub stats.");
-    return {
-      totalStars: 12000, // Updated fallback
-      repoCount: 70,
-      followers: 500,
-      fetchedAt: now,
-    };
+    console.warn("GITHUB_TOKEN not found. Skipping live GitHub stats fetch.");
+    return null;
   }
 
   try {
@@ -110,13 +105,7 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
     };
   } catch (error) {
     console.error("Failed to fetch GitHub stats:", error);
-
-    return {
-      totalStars: 10000, // Fallback from static content
-      repoCount: 30,
-      followers: 500,
-      fetchedAt: now,
-    };
+    return null;
   }
 }
 

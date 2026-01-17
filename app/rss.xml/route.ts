@@ -1,6 +1,6 @@
 import { Feed } from "feed";
 import { writingHighlights, siteConfig } from "@/lib/content";
-import { getAllPosts } from "@/lib/mdx";
+import { getAllPostsMeta } from "@/lib/mdx";
 
 export async function GET() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jeffreyemanuel.com";
@@ -24,13 +24,13 @@ export async function GET() {
   // Helper to normalize date
   const getDate = (d: string | Date) => new Date(d);
 
-  // 1. Get all dynamic MDX posts
-  const mdxItems = getAllPosts().map((post) => ({
-    title: post.title,
+  // 1. Get all dynamic MDX posts (metadata only)
+  const mdxItems = getAllPostsMeta().map((post) => ({
+    title: post.title as string,
     id: `${siteUrl}/writing/${post.slug}`,
     link: `${siteUrl}/writing/${post.slug}`,
-    description: post.excerpt,
-    content: post.excerpt,
+    description: post.excerpt as string,
+    content: post.excerpt as string,
     author: [
       {
         name: siteConfig.name,
@@ -38,9 +38,9 @@ export async function GET() {
         link: siteUrl,
       },
     ],
-    date: getDate(post.date),
+    date: getDate(post.date as string),
     category: [
-      { name: post.category || "Essay" },
+      { name: (post.category as string) || "Essay" },
       { name: (post.source as string) || "Blog" },
     ],
   }));

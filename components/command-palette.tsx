@@ -357,8 +357,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       const container = paletteRef.current;
       if (!container) return;
 
+      // Only select focusable elements that are NOT tabindex="-1"
+      // This ensures we skip the list items which are managed via aria-activedescendant
       const focusable = container.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button:not([tabindex="-1"]), [href]:not([tabindex="-1"]), input:not([tabindex="-1"]), select:not([tabindex="-1"]), textarea:not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])'
       );
       if (focusable.length === 0) return;
 
@@ -525,6 +527,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                           <button
                             key={cmd.id}
                             id={cmd.id}
+                            tabIndex={-1}
                             data-index={index}
                             onClick={cmd.action}
                             onMouseEnter={() => setSelectedIndex(index)}

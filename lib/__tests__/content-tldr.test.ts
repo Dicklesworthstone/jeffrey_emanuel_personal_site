@@ -40,14 +40,14 @@ describe("TLDR Data Integrity", () => {
       });
     });
 
-    it("has 10 core tools", () => {
+    it("has 11 core tools", () => {
       const core = tldrFlywheelTools.filter((t) => t.category === "core");
-      expect(core.length).toBe(10);
+      expect(core.length).toBe(11);
     });
 
-    it("has 4 supporting tools", () => {
+    it("has 3 supporting tools", () => {
       const supporting = tldrFlywheelTools.filter((t) => t.category === "supporting");
-      expect(supporting.length).toBe(4);
+      expect(supporting.length).toBe(3);
     });
   });
 

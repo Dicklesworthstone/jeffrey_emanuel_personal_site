@@ -36,6 +36,38 @@ export interface QualitySettings {
   targetFps: number;               // 30 or 60
 }
 
+// Cache WebGL capabilities to avoid expensive context creation
+let cachedWebGLCaps: { maxTextureSize: number; supportsWebGL2: boolean } | null = null;
+
+function getWebGLCapabilities() {
+  if (cachedWebGLCaps) return cachedWebGLCaps;
+
+  let maxTextureSize = 4096;
+  let supportsWebGL2 = false;
+
+  try {
+    const canvas = document.createElement("canvas");
+    const gl2 = canvas.getContext("webgl2");
+    if (gl2) {
+      supportsWebGL2 = true;
+      maxTextureSize = gl2.getParameter(gl2.MAX_TEXTURE_SIZE);
+    } else {
+      const gl1 = canvas.getContext("webgl");
+      if (gl1) {
+        maxTextureSize = gl1.getParameter(gl1.MAX_TEXTURE_SIZE);
+      }
+    }
+    // Context loss to free resources
+    const ext = (gl2 || canvas.getContext("webgl"))?.getExtension('WEBGL_lose_context');
+    if (ext) ext.loseContext();
+  } catch {
+    // WebGL not available
+  }
+
+  cachedWebGLCaps = { maxTextureSize, supportsWebGL2 };
+  return cachedWebGLCaps;
+}
+
 /**
  * Detect device capabilities for adaptive rendering
  */
@@ -87,24 +119,8 @@ function detectCapabilities(): DeviceCapabilities {
   // Low power mode detection (heuristic: iOS low power mode reduces CPU frequency)
   const isLowPowerMode = isSlowConnection || hasLowMemory;
 
-  // WebGL capabilities
-  let maxTextureSize = 4096;
-  let supportsWebGL2 = false;
-  try {
-    const canvas = document.createElement("canvas");
-    const gl2 = canvas.getContext("webgl2");
-    if (gl2) {
-      supportsWebGL2 = true;
-      maxTextureSize = gl2.getParameter(gl2.MAX_TEXTURE_SIZE);
-    } else {
-      const gl1 = canvas.getContext("webgl");
-      if (gl1) {
-        maxTextureSize = gl1.getParameter(gl1.MAX_TEXTURE_SIZE);
-      }
-    }
-  } catch {
-    // WebGL not available
-  }
+  // WebGL capabilities (cached)
+  const { maxTextureSize, supportsWebGL2 } = getWebGLCapabilities();
 
   // Determine tier based on capabilities
   let tier: DeviceTier = "high";

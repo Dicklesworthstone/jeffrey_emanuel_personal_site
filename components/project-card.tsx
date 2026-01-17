@@ -21,6 +21,7 @@ const KindIcon = ({ kind }: { kind: Project["kind"] }) => {
 export default function ProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
   const divRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   const [opacity, setOpacity] = useState(0);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
@@ -31,20 +32,23 @@ export default function ProjectCard({ project }: { project: Project }) {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current || isTouchDevice) return;
-    const div = divRef.current;
-    const rect = div.getBoundingClientRect();
+    if (!divRef.current || isTouchDevice || !rectRef.current) return;
+    
+    // Use cached rect to avoid layout thrashing
+    const rect = rectRef.current;
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    requestAnimationFrame(() => {
-      div.style.setProperty("--mouse-x", `${x}px`);
-      div.style.setProperty("--mouse-y", `${y}px`);
-    });
+    divRef.current.style.setProperty("--mouse-x", `${x}px`);
+    divRef.current.style.setProperty("--mouse-y", `${y}px`);
   };
 
   const handleMouseEnter = () => {
-    if (!isTouchDevice) setOpacity(1);
+    if (!isTouchDevice && divRef.current) {
+      setOpacity(1);
+      // Cache rect on enter to avoid recalculation during move
+      rectRef.current = divRef.current.getBoundingClientRect();
+    }
   };
 
   const handleMouseLeave = () => {

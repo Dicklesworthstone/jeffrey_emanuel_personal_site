@@ -160,6 +160,9 @@ describe("parseStarCount", () => {
 
     console.log("[TEST] parseStarCount('10K') should return 10000");
     expect(parseStarCount("10K")).toBe(10000);
+
+    console.log("[TEST] parseStarCount('1.4k') should return 1400");
+    expect(parseStarCount("1.4k")).toBe(1400);
   });
 
   test("parses M suffix", () => {
@@ -168,6 +171,9 @@ describe("parseStarCount", () => {
 
     console.log("[TEST] parseStarCount('1M') should return 1000000");
     expect(parseStarCount("1M")).toBe(1000000);
+
+    console.log("[TEST] parseStarCount('2.3m') should return 2300000");
+    expect(parseStarCount("2.3m")).toBe(2300000);
   });
 
   test("parses plain numbers", () => {
@@ -183,6 +189,11 @@ describe("parseStarCount", () => {
   test("handles whitespace", () => {
     console.log("[TEST] parseStarCount(' 1.4K ') should return 1400");
     expect(parseStarCount(" 1.4K ")).toBe(1400);
+  });
+
+  test("handles trailing text and plus signs", () => {
+    console.log("[TEST] parseStarCount('1.2k+ stars') should return 1200");
+    expect(parseStarCount("1.2k+ stars")).toBe(1200);
   });
 });
 

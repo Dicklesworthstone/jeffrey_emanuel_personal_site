@@ -1,7 +1,7 @@
 import SectionShell from "@/components/section-shell";
 import WritingGrid from "@/components/writing-grid";
 import { writingHighlights, type WritingItem } from "@/lib/content";
-import { getAllPosts } from "@/lib/mdx";
+import { getAllPostsMeta } from "@/lib/mdx";
 import { PenSquare } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -19,16 +19,16 @@ export const metadata: Metadata = {
 };
 
 export default function WritingPage() {
-  const allPosts = getAllPosts();
+  const allPosts = getAllPostsMeta();
 
   // Convert MDX posts to WritingItem format
   const mdxItems: WritingItem[] = allPosts.map((post) => ({
-    title: post.title,
+    title: post.title as string,
     href: `/writing/${post.slug}`,
     source: (post.source as "YTO" | "FMD" | "GitHub") || "Blog",
-    category: post.category || "Essay",
-    blurb: post.excerpt,
-    date: post.date,
+    category: (post.category as string) || "Essay",
+    blurb: post.excerpt as string,
+    date: post.date as string,
     featured: post.featured as boolean | undefined,
     gradient: post.gradient as string | undefined,
   }));

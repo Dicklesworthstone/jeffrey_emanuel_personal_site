@@ -17,16 +17,6 @@ vi.mock("@/lib/content", () => ({
   },
 }));
 
-// Mock framer-motion
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual("framer-motion");
-  return {
-    ...actual,
-    useReducedMotion: () => true, // Force reduced motion for simpler testing
-    useInView: () => true, // Force in view to trigger animations
-  };
-});
-
 describe("TldrHero", () => {
   beforeEach(() => {
     vi.clearAllMocks();

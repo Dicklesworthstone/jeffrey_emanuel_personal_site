@@ -8,16 +8,6 @@ vi.mock("@/lib/colors", () => ({
   getColorDefinition: () => ({ from: "red", to: "blue", rgb: "255,0,0" }),
 }));
 
-// Mock framer-motion
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual("framer-motion");
-  return {
-    ...actual,
-    useReducedMotion: () => true,
-    useInView: () => true,
-  };
-});
-
 // Mock Data
 const mockTools: TldrFlywheelTool[] = [
   {

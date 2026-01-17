@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useId } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -130,6 +130,7 @@ const ConnectionLine = React.memo(function ConnectionLine({
   reducedMotion,
   connectionId,
   supportsMotionPath,
+  scopeId,
 }: {
   fromPos: { x: number; y: number };
   toPos: { x: number; y: number };
@@ -140,10 +141,11 @@ const ConnectionLine = React.memo(function ConnectionLine({
   reducedMotion: boolean;
   connectionId: string;
   supportsMotionPath: boolean;
+  scopeId: string;
 }) {
   const path = getCurvedPath(fromPos, toPos);
-  const gradientId = `gradient-${connectionId}`;
-  const flowGradientId = `flow-gradient-${connectionId}`;
+  const gradientId = `${scopeId}-gradient-${connectionId}`;
+  const flowGradientId = `${scopeId}-flow-gradient-${connectionId}`;
 
   const color1 = getColorDefinition(fromColor).primary;
   const color2 = getColorDefinition(toColor).primary;
@@ -715,6 +717,7 @@ export default function FlywheelVisualization() {
   const reducedMotion = prefersReducedMotion ?? false;
   const supportsMotionPath = useSupportsMotionPath();
   const toolById = useMemo(() => new Map(flywheelTools.map((tool) => [tool.id, tool])), []);
+  const scopeId = useId();
 
   const activeToolId = selectedToolId || hoveredToolId;
   // Show detail panel for hovered tool (desktop) or selected tool (mobile/click)
@@ -928,6 +931,7 @@ export default function FlywheelVisualization() {
                     reducedMotion={reducedMotion}
                     connectionId={`${from}-${to}`}
                     supportsMotionPath={supportsMotionPath}
+                    scopeId={scopeId}
                   />
                 );
               })}

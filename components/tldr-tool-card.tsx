@@ -119,6 +119,7 @@ export function TldrToolCard({
 }: TldrToolCardProps) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
   const [spotlightOpacity, setSpotlightOpacity] = useState(0);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -128,18 +129,31 @@ export function TldrToolCard({
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional one-time browser feature detection
     setIsTouchDevice(window.matchMedia("(hover: none)").matches);
+    
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!cardRef.current || reducedMotion || isTouchDevice) return;
+      
+      // Debounce with rAF to prevent layout thrashing
+      if (rafRef.current) return;
+
       const rect = cardRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      requestAnimationFrame(() => {
-        cardRef.current?.style.setProperty("--mouse-x", `${x}px`);
-        cardRef.current?.style.setProperty("--mouse-y", `${y}px`);
+      rafRef.current = requestAnimationFrame(() => {
+        if (cardRef.current) {
+          cardRef.current.style.setProperty("--mouse-x", `${x}px`);
+          cardRef.current.style.setProperty("--mouse-y", `${y}px`);
+        }
+        rafRef.current = null;
       });
     },
     [reducedMotion, isTouchDevice]

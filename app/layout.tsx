@@ -76,7 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Preconnect to external domains for faster resource loading */}
         {/* Google Analytics - preconnect with crossorigin for faster script loading */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         {/* Google Analytics additional domain for data collection */}
         <link rel="preconnect" href="https://www.google-analytics.com" />

@@ -6,23 +6,21 @@ interface UseIntersectionObserverOptions {
   threshold?: number;
   rootMargin?: string;
   triggerOnce?: boolean;
+  initialIsIntersecting?: boolean;
 }
 
 /**
  * Hook to detect when an element enters the viewport
  * More performant than Framer Motion's whileInView for many elements
- *
- * Note: Starts with isIntersecting=true to prevent flash of invisible content
- * during SSR/hydration. The observer will correct this if element is not visible.
  */
 export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
   threshold = 0.1,
   rootMargin = "0px",
   triggerOnce = true,
+  initialIsIntersecting = false,
 }: UseIntersectionObserverOptions = {}) {
   const ref = useRef<T | null>(null);
-  // Start true to prevent flash of invisible content during hydration
-  const [isIntersecting, setIsIntersecting] = useState(true);
+  const [isIntersecting, setIsIntersecting] = useState(initialIsIntersecting);
   const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
@@ -35,7 +33,12 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
     }
 
     if (typeof IntersectionObserver === "undefined") {
-      return;
+      // Fallback for older browsers: assume visible to avoid hiding content
+      const timeoutId = setTimeout(() => {
+        setIsIntersecting(true);
+        hasTriggeredRef.current = true;
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
 
     const observer = new IntersectionObserver(

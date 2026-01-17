@@ -29,8 +29,8 @@ export function calculateReadingTime(content: string): ReadingTimeResult {
   const plainText = content
     // Remove HTML tags
     .replace(/<[^>]*>/g, "")
-    // Remove markdown images: ![alt](url) - use simple non-greedy match
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    // Remove markdown images: ![alt](url) - handles one level of nested parens
+    .replace(/!\[[^\]]*\]\((?:[^)(]+|\([^)(]*\))*\)/g, "")
     // Remove markdown links (keep link text): [text](url)
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
     // Remove markdown formatting

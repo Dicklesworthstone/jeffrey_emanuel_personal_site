@@ -40,6 +40,16 @@ function scaleSegments(baseSegments: number, q: QualitySettings): number {
   return Math.max(8, Math.floor(baseSegments * q.geometryDetail));
 }
 
+function makeLineMaterial(color: string, opacity = 0.6) {
+  return new THREE.LineBasicMaterial({
+    color,
+    transparent: true,
+    opacity,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Shared primitives
 // ---------------------------------------------------------------------------
@@ -88,13 +98,18 @@ function MathematicalHalo({ palette }: { palette: Palette }) {
 
   const baseGeom = useMemo(() => new THREE.IcosahedronGeometry(2.2, 1), []);
   const wireGeom = useMemo(() => new THREE.WireframeGeometry(baseGeom), [baseGeom]);
-  const wireMat = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[3], transparent: true, opacity: 0.25 }),
-    [palette],
-  );
+  const wireMat = useMemo(() => makeLineMaterial(palette[3], 0.32), [palette]);
   const pointGeom = useMemo(() => new THREE.SphereGeometry(0.035, segments, segments), [segments]);
   const pointMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[0], emissiveIntensity: 0.7, roughness: 0.4 }),
+    () => new THREE.MeshStandardMaterial({
+      color: palette[1],
+      emissive: palette[0],
+      emissiveIntensity: 0.9,
+      roughness: 0.3,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.95,
+    }),
     [palette],
   );
 
@@ -208,7 +223,15 @@ function StarField({ density = 420, color = "#38bdf8" }: { density?: number; col
 
   return (
     <points ref={ref} geometry={geometry}>
-      <pointsMaterial size={0.045} sizeAttenuation color={color} transparent opacity={0.7} />
+      <pointsMaterial
+        size={0.05}
+        sizeAttenuation
+        color={color}
+        transparent
+        opacity={0.8}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
     </points>
   );
 }
@@ -333,14 +356,12 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
 
   // gsap pulsing emissive
   useEffect(() => {
-    if (!ref.current) return;
-    const m = ref.current.material as THREE.MeshStandardMaterial;
     const tl = gsap.timeline({ repeat: -1, yoyo: true });
-    tl.to(m, { emissiveIntensity: 1.6, duration: 2.8, ease: "sine.inOut" });
+    tl.to(mat, { emissiveIntensity: 1.6, duration: 2.8, ease: "sine.inOut" });
     return () => {
       tl.kill();
     };
-  }, []);
+  }, [mat]);
 
   return (
     <group ref={groupRef}>
@@ -440,7 +461,14 @@ function LorenzRibbons({ palette }: { palette: Palette }) {
 
   return (
     <lineSegments ref={lineRef} geometry={geometry}>
-      <lineBasicMaterial color={palette[1]} transparent opacity={0.7} linewidth={1.5} />
+      <lineBasicMaterial
+        color={palette[1]}
+        transparent
+        opacity={0.78}
+        linewidth={1.5}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
     </lineSegments>
   );
 }
@@ -656,10 +684,7 @@ function Clifford({ palette, seed, count = 42000 }: { palette: Palette; seed: nu
     return g;
   }, [positions]);
 
-  const mat = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.7 }),
-    [palette],
-  );
+  const mat = useMemo(() => makeLineMaterial(palette[1], 0.78), [palette]);
 
   const emberCount = Math.max(16, Math.floor(140 * quality.particleMultiplier));
   const emberSegments = scaleSegments(6, quality);
@@ -1105,12 +1130,7 @@ function MobiusLoom({ palette, seed, bands = 3, points = 420 }: { palette: Palet
   }, [bandDefs]);
 
   const lineMats = useMemo(
-    () =>
-      bandDefs.map((_, i) => new THREE.LineBasicMaterial({
-        color: palette[i % palette.length],
-        transparent: true,
-        opacity: 0.55,
-      })),
+    () => bandDefs.map((_, i) => makeLineMaterial(palette[i % palette.length], 0.62)),
     [bandDefs, palette],
   );
 
@@ -1264,10 +1284,7 @@ function HyperbolicWeave({ palette, seed, arcCount = 18, segments = 64 }: { pale
     return g;
   }, [arcs, segments]);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.75 }),
-    [palette],
-  );
+  const material = useMemo(() => makeLineMaterial(palette[1], 0.72), [palette]);
 
   const nodeCount = Math.max(16, Math.floor(90 * quality.particleMultiplier));
   const nodeGeom = useMemo(() => new THREE.SphereGeometry(0.045, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
@@ -1530,8 +1547,16 @@ function PerlinFlowField({ palette, seed, count = 2000 }: { palette: Palette; se
   const sphereSegments = scaleSegments(6, quality);
   const geom = useMemo(() => new THREE.SphereGeometry(0.025, sphereSegments, sphereSegments), [sphereSegments]);
   const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 1.0, roughness: 0.4 }),
-    [palette]
+    () => new THREE.MeshStandardMaterial({
+      color: palette[0],
+      emissive: palette[1],
+      emissiveIntensity: 1.1,
+      roughness: 0.3,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.95,
+    }),
+    [palette],
   );
 
   const rand = useMemo(() => seededRandom(seed), [seed]);
@@ -1844,7 +1869,15 @@ function PhaseShearField({ palette, seed, grid = 26 }: { palette: Palette; seed:
 
   const geom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
   const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.9, roughness: 0.35 }),
+    () => new THREE.MeshStandardMaterial({
+      color: palette[0],
+      emissive: palette[1],
+      emissiveIntensity: 1.0,
+      roughness: 0.3,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.95,
+    }),
     [palette],
   );
 
@@ -1909,7 +1942,7 @@ function MobiusOrbitField({ palette, seed, count = 520 }: { palette: Palette; se
     return Array.from({ length: actualCount }).map((_, i) => {
       const ring = Math.floor((i / actualCount) * ringCount);
       return {
-        radius: 0.28 + ring * 0.18 + rand() * 0.06,
+        radius: 0.22 + ring * 0.12 + rand() * 0.06,
         angle: i * golden + rand() * 0.4,
         phase: rand() * Math.PI * 2,
         speed: 0.15 + rand() * 0.5,
@@ -1921,7 +1954,15 @@ function MobiusOrbitField({ palette, seed, count = 520 }: { palette: Palette; se
 
   const geom = useMemo(() => new THREE.SphereGeometry(0.03, segments, segments), [segments]);
   const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[0], emissiveIntensity: 1.0, roughness: 0.35 }),
+    () => new THREE.MeshStandardMaterial({
+      color: palette[1],
+      emissive: palette[0],
+      emissiveIntensity: 1.2,
+      roughness: 0.28,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.95,
+    }),
     [palette],
   );
 
@@ -1947,7 +1988,7 @@ function MobiusOrbitField({ palette, seed, count = 520 }: { palette: Palette; se
       // Möbius transform on the unit disk: (z + a) / (1 + conj(a) z)
       const u = 1 + ax * x + ay * y;
       const v = ax * y - ay * x;
-      const denom = u * u + v * v;
+      const denom = u * u + v * v + 1e-6;
       const rx = ((x + ax) * u + (y + ay) * v) / denom;
       const ry = ((y + ay) * u - (x + ax) * v) / denom;
       const z = Math.sin(theta * 2 + t + s.phase) * s.lift;
@@ -2009,7 +2050,15 @@ function TensorMorphLattice({ palette, seed, grid = 20 }: { palette: Palette; se
     [radialSegments],
   );
   const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: palette[2], emissive: palette[1], emissiveIntensity: 0.85, roughness: 0.35 }),
+    () => new THREE.MeshStandardMaterial({
+      color: palette[2],
+      emissive: palette[1],
+      emissiveIntensity: 1.0,
+      roughness: 0.3,
+      metalness: 0.15,
+      transparent: true,
+      opacity: 0.95,
+    }),
     [palette],
   );
 
@@ -2062,6 +2111,7 @@ function SceneTensorMorph({ palette, seed }: { palette: Palette; seed: number })
 function HodgeFlowStreamlines({ palette, seed, lines = 14, steps = 120 }: { palette: Palette; seed: number; lines?: number; steps?: number }) {
   const { quality } = useQuality();
   const groupRef = useRef<THREE.Group>(null);
+  const materialRef = useRef<THREE.LineBasicMaterial>(null);
 
   const geometry = useMemo(() => {
     const rand = seededRandom(seed);
@@ -2099,13 +2149,7 @@ function HodgeFlowStreamlines({ palette, seed, lines = 14, steps = 120 }: { pale
     return g;
   }, [lines, steps, seed, quality.geometryDetail]);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[3], transparent: true, opacity: 0.55 }),
-    [palette],
-  );
-
   useEffect(() => () => geometry.dispose(), [geometry]);
-  useEffect(() => () => material.dispose(), [material]);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
@@ -2114,12 +2158,23 @@ function HodgeFlowStreamlines({ palette, seed, lines = 14, steps = 120 }: { pale
       groupRef.current.rotation.x = Math.sin(t * 0.25) * 0.12;
       groupRef.current.rotation.z = Math.cos(t * 0.2) * 0.08;
     }
-    material.opacity = 0.45 + Math.sin(t * 0.6) * 0.2;
+    if (materialRef.current) {
+      materialRef.current.opacity = 0.45 + Math.sin(t * 0.6) * 0.2;
+    }
   });
 
   return (
     <group ref={groupRef}>
-      <lineSegments geometry={geometry} material={material} />
+      <lineSegments geometry={geometry}>
+        <lineBasicMaterial
+          ref={materialRef}
+          color={palette[3]}
+          transparent
+          opacity={0.55}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </lineSegments>
     </group>
   );
 }
@@ -2157,7 +2212,15 @@ function TransportBridge({ palette, seed, count = 320 }: { palette: Palette; see
 
   const geom = useMemo(() => new THREE.SphereGeometry(0.035, segments, segments), [segments]);
   const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[2], emissiveIntensity: 0.9, roughness: 0.4 }),
+    () => new THREE.MeshStandardMaterial({
+      color: palette[0],
+      emissive: palette[2],
+      emissiveIntensity: 1.0,
+      roughness: 0.32,
+      metalness: 0.12,
+      transparent: true,
+      opacity: 0.95,
+    }),
     [palette],
   );
 
@@ -2413,10 +2476,7 @@ function AizawaAttractor({ palette, seed: _ }: { palette: Palette; seed: number 
     return geom;
   }, []);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.85 }),
-    [palette]
-  );
+  const material = useMemo(() => makeLineMaterial(palette[1], 0.85), [palette]);
 
   useEffect(() => () => { geometry.dispose(); material.dispose(); }, [geometry, material]);
 
@@ -2540,7 +2600,14 @@ function RosslerAttractor({ palette, seed, count = 18000 }: { palette: Palette; 
   return (
     <group ref={groupRef}>
       <lineSegments geometry={geometry}>
-        <lineBasicMaterial ref={materialRef} color={palette[1]} transparent opacity={0.75} />
+        <lineBasicMaterial
+          ref={materialRef}
+          color={palette[1]}
+          transparent
+          opacity={0.75}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </lineSegments>
       <instancedMesh ref={emberRef} args={[emberGeom, emberMat, emberCount]} />
     </group>
@@ -2731,10 +2798,7 @@ function FibrationLattice({ palette, seed, loops = 16, segments = 80 }: { palett
     return g;
   }, [loopPoints]);
 
-  const lineMaterial = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.6 }),
-    [palette],
-  );
+  const lineMaterial = useMemo(() => makeLineMaterial(palette[1], 0.68), [palette]);
 
   const arcGeometry = useMemo(() => {
     const rand = seededRandom(seed + 37);
@@ -2762,10 +2826,7 @@ function FibrationLattice({ palette, seed, loops = 16, segments = 80 }: { palett
     return g;
   }, [seed, quality.geometryDetail]);
 
-  const arcMaterial = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[3], transparent: true, opacity: 0.35 }),
-    [palette],
-  );
+  const arcMaterial = useMemo(() => makeLineMaterial(palette[3], 0.42), [palette]);
 
   const beadCount = Math.max(16, Math.floor(90 * quality.particleMultiplier));
   const beadGeom = useMemo(() => new THREE.SphereGeometry(0.045, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
@@ -3000,10 +3061,7 @@ function LogSpiralField({ palette, seed, spirals = 5 }: { palette: Palette; seed
     return g;
   }, [rand, spirals]);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[1], transparent: true, opacity: 0.7 }),
-    [palette],
-  );
+  const material = useMemo(() => makeLineMaterial(palette[1], 0.72), [palette]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
@@ -3064,10 +3122,7 @@ function EpicycleRosettes({ palette, seed, curves = 4 }: { palette: Palette; see
     return g;
   }, [curves, rand]);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[2], transparent: true, opacity: 0.65 }),
-    [palette],
-  );
+  const material = useMemo(() => makeLineMaterial(palette[2], 0.7), [palette]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
@@ -3318,10 +3373,7 @@ function SineWeave({ palette, seed, bands = 6 }: { palette: Palette; seed: numbe
     return g;
   }, [bands, rand]);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[2], transparent: true, opacity: 0.6 }),
-    [palette],
-  );
+  const material = useMemo(() => makeLineMaterial(palette[2], 0.62), [palette]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
@@ -3384,10 +3436,7 @@ function HarmonicRibbons({ palette, seed, rings = 7 }: { palette: Palette; seed:
     return g;
   }, [rings, rand]);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[3], transparent: true, opacity: 0.6 }),
-    [palette],
-  );
+  const material = useMemo(() => makeLineMaterial(palette[3], 0.62), [palette]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
@@ -3452,7 +3501,15 @@ function DeJongCloud({ palette, seed, count = 18000 }: { palette: Palette; seed:
   }, [actualCount, seed]);
 
   const material = useMemo(
-    () => new THREE.PointsMaterial({ color: palette[1], size: 0.03, sizeAttenuation: true, transparent: true, opacity: 0.7 }),
+    () => new THREE.PointsMaterial({
+      color: palette[1],
+      size: 0.032,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.8,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    }),
     [palette],
   );
 
@@ -3509,10 +3566,7 @@ function PolygonBloom({ palette, seed, petals = 12 }: { palette: Palette; seed: 
     return g;
   }, [petals, rand]);
 
-  const material = useMemo(
-    () => new THREE.LineBasicMaterial({ color: palette[2], transparent: true, opacity: 0.7 }),
-    [palette],
-  );
+  const material = useMemo(() => makeLineMaterial(palette[2], 0.72), [palette]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
@@ -3760,37 +3814,37 @@ const mediumVariants: VariantKey[] = [
 ];
 
 const rotationPlan: { variant: VariantKey; palette: number; seed: number; background?: string }[] = [
-  // Midnight - 5am: Mysterious & ethereal
-  { variant: "aizawa", palette: 4, seed: 200 },           // 12am - Strange attractor
-  { variant: "hyperbolic", palette: 5, seed: 201 },      // 1am - Hyperbolic weave
-  { variant: "filigree", palette: 4, seed: 5 },          // 2am - Filigree orbitals
-  { variant: "ikeda", palette: 3, seed: 133 },           // 3am - Ikeda map cloud
-  { variant: "clifford", palette: 2, seed: 33 },         // 4am - Clifford ribbons
-  { variant: "harmonics", palette: 1, seed: 202 },       // 5am - Spherical harmonics dawn
+  // Phase 1: Mysterious & ethereal
+  { variant: "aizawa", palette: 4, seed: 200 },           // Strange attractor
+  { variant: "hyperbolic", palette: 5, seed: 201 },      // Hyperbolic weave
+  { variant: "filigree", palette: 4, seed: 5 },          // Filigree orbitals
+  { variant: "ikeda", palette: 3, seed: 133 },           // Ikeda map cloud
+  { variant: "clifford", palette: 2, seed: 33 },         // Clifford ribbons
+  { variant: "harmonics", palette: 1, seed: 202 },       // Spherical harmonics
 
-  // 6am - 11am: Morning energy & geometry
-  { variant: "phyllotaxis", palette: 0, seed: 203 },     // 6am - Fibonacci sunrise
-  { variant: "trefoil", palette: 5, seed: 204 },         // 7am - Knot energy
-  { variant: "torusknot", palette: 2, seed: 205 },       // 8am - Torus knot lattice
-  { variant: "mobiusloom", palette: 1, seed: 206 },      // 9am - Möbius loom
-  { variant: "fibration", palette: 3, seed: 101 },       // 10am - Fibration lattice
-  { variant: "helix", palette: 0, seed: 6 },             // 11am - DNA ribbons
+  // Phase 2: Geometry & structure
+  { variant: "phyllotaxis", palette: 0, seed: 203 },     // Fibonacci phyllotaxis
+  { variant: "trefoil", palette: 5, seed: 204 },         // Knot energy
+  { variant: "torusknot", palette: 2, seed: 205 },       // Torus knot lattice
+  { variant: "mobiusloom", palette: 1, seed: 206 },      // Möbius loom
+  { variant: "fibration", palette: 3, seed: 101 },       // Fibration lattice
+  { variant: "helix", palette: 0, seed: 6 },             // DNA ribbons
 
-  // Noon - 5pm: Peak activity & vibrant
-  { variant: "torus", palette: 3, seed: 4 },             // 12pm - Torus garden
-  { variant: "wave", palette: 2, seed: 3 },              // 1pm - Interference patterns
-  { variant: "lissajous", palette: 1, seed: 2 },         // 2pm - Lissajous swarm
-  { variant: "reactionimpostor", palette: 0, seed: 207 }, // 3pm - RD impostor
-  { variant: "hopf", palette: 5, seed: 55 },             // 4pm - Hopf fibration
-  { variant: "orbits", palette: 0, seed: 1 },            // 5pm - Classic orbital
+  // Phase 3: Peak activity & vibrant
+  { variant: "torus", palette: 3, seed: 4 },             // Torus garden
+  { variant: "wave", palette: 2, seed: 3 },              // Interference patterns
+  { variant: "lissajous", palette: 1, seed: 2 },         // Lissajous swarm
+  { variant: "reactionimpostor", palette: 0, seed: 207 }, // RD impostor
+  { variant: "hopf", palette: 5, seed: 55 },             // Hopf fibration
+  { variant: "orbits", palette: 0, seed: 1 },            // Classic orbital
 
-  // 6pm - 11pm: Evening elegance
-  { variant: "gyroid", palette: 5, seed: 41 },           // 6pm - Minimal surface
-  { variant: "phaseshear", palette: 4, seed: 7 },        // 7pm - Phase-shear lattice
-  { variant: "quasicrystal", palette: 3, seed: 208 },    // 8pm - Quasicrystal lattice
-  { variant: "flowfield", palette: 2, seed: 209 },       // 9pm - Night flow field
-  { variant: "trefoil", palette: 1, seed: 210 },         // 10pm - Glowing knot
-  { variant: "rossler", palette: 4, seed: 211 },         // 11pm - Rossler attractor
+  // Phase 4: Evening elegance
+  { variant: "gyroid", palette: 5, seed: 41 },           // Minimal surface
+  { variant: "phaseshear", palette: 4, seed: 7 },        // Phase-shear lattice
+  { variant: "quasicrystal", palette: 3, seed: 208 },    // Quasicrystal lattice
+  { variant: "flowfield", palette: 2, seed: 209 },       // Flow field
+  { variant: "trefoil", palette: 1, seed: 210 },         // Glowing knot
+  { variant: "rossler", palette: 4, seed: 211 },         // Rossler attractor
   // Bonus rotation - additional mathematical variants
   { variant: "lemniscate", palette: 0, seed: 300 },      // Lemniscate weave
   { variant: "logspiral", palette: 1, seed: 301 },       // Logarithmic spirals
@@ -3802,6 +3856,10 @@ const rotationPlan: { variant: VariantKey; palette: number; seed: number; backgr
   { variant: "harmonicribbons", palette: 2, seed: 307 }, // Harmonic ribbons
   { variant: "dejong", palette: 4, seed: 308 },          // De Jong cloud
   { variant: "polygonbloom", palette: 3, seed: 309 },    // Polygon bloom
+  { variant: "mobiusorbit", palette: 1, seed: 310 },     // Orbital Möbius field
+  { variant: "tensormorph", palette: 5, seed: 311 },     // Tensor morph lattice
+  { variant: "hodgeflow", palette: 2, seed: 312 },       // Hodge flow streamlines
+  { variant: "transportbridge", palette: 0, seed: 313 }, // Transport bridge
 ];
 
 // ---------------------------------------------------------------------------
@@ -3869,6 +3927,10 @@ export default function ThreeScene({ isActive = true }: { isActive?: boolean }) 
     tier
   }), [quality, tier]);
 
+  // Render the variant as a component to ensure hooks are isolated and
+  // properly reset when the variant changes (via the key prop).
+  const SceneComponent = scenes[variant];
+
   return (
     <Canvas
       camera={{ position: [0, 0, 6], fov: 40 }}
@@ -3893,8 +3955,10 @@ export default function ThreeScene({ isActive = true }: { isActive?: boolean }) 
       )}
       <QualityContext.Provider value={contextValue}>
         <color attach="background" args={[plan.background ?? "#020617"]} />
+        <ambientLight intensity={0.18} />
+        <hemisphereLight intensity={0.2} color="#dbeafe" groundColor="#0b1120" />
         <MathematicalHalo palette={palette} />
-        {scenes[variant]({ palette, seed: plan.seed })}
+        <SceneComponent key={variant} palette={palette} seed={plan.seed} />
         <OrbitControls
           enableZoom={false}
           autoRotate={allowAnimation}

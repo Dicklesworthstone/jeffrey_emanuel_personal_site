@@ -2,27 +2,6 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SiteHeader from "../site-header";
 
-// Mock framer-motion to avoid animation issues in tests
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
-  return {
-    ...actual,
-    AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    motion: {
-      div: ({ children, ...props }: { children?: React.ReactNode } & Record<string, unknown>) => <div {...props}>{children}</div>,
-    },
-    useReducedMotion: () => false,
-  };
-});
-
-// Mock hooks
-vi.mock("@/hooks/use-haptic-feedback", () => ({
-  useHapticFeedback: () => ({
-    lightTap: vi.fn(),
-    mediumTap: vi.fn(),
-  }),
-}));
-
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",

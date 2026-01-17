@@ -72,16 +72,21 @@ export function formatStarCountFull(count: number): string {
  */
 export function parseStarCount(formatted: string): number {
   const trimmed = formatted.trim();
+  const normalized = trimmed
+    .toLowerCase()
+    .replace(/\bstars?\b/i, "")
+    .replace(/\+/g, "")
+    .trim();
 
   let result: number;
 
-  if (trimmed.endsWith("M")) {
-    result = parseFloat(trimmed.slice(0, -1)) * 1_000_000;
-  } else if (trimmed.endsWith("K")) {
-    result = parseFloat(trimmed.slice(0, -1)) * 1_000;
+  if (normalized.endsWith("m")) {
+    result = parseFloat(normalized.slice(0, -1)) * 1_000_000;
+  } else if (normalized.endsWith("k")) {
+    result = parseFloat(normalized.slice(0, -1)) * 1_000;
   } else {
     // Remove commas and parse
-    result = parseFloat(trimmed.replace(/,/g, ""));
+    result = parseFloat(normalized.replace(/,/g, ""));
   }
 
   // Return 0 for NaN/invalid values (safe default for star counts)

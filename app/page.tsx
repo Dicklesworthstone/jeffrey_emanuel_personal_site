@@ -25,12 +25,12 @@ export default async function HomePage() {
   
   // Fetch live stats
   const githubStats = await fetchGitHubStats();
-  const liveStats = heroStats.map((stat) => {
+  const liveStats = githubStats ? heroStats.map((stat) => {
     if (stat.label === "GitHub Stars") {
       return { ...stat, value: formatStarsDisplay(githubStats.totalStars) };
     }
     return stat;
-  });
+  }) : heroStats;
 
   const personSchema = {
     "@context": "https://schema.org",

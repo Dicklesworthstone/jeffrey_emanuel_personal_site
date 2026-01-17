@@ -1,4 +1,7 @@
-import { useEffect } from "react";
+import { useLayoutEffect, useEffect } from "react";
+
+// Use useLayoutEffect in browser to prevent flicker, useEffect on server to avoid warnings
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 let lockCount = 0;
 let originalStyle: { overflow: string; paddingRight: string } | null = null;
@@ -9,7 +12,7 @@ let originalStyle: { overflow: string; paddingRight: string } | null = null;
  * Also compensates for scrollbar width to prevent layout shift.
  */
 export function useBodyScrollLock(isLocked: boolean) {
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!isLocked) return undefined;
     if (typeof window === "undefined") return undefined;
 

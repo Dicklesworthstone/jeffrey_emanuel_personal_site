@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useId } from "react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import { Mail, Check, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -46,6 +46,7 @@ export function NewsletterSignup({
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-50px" });
   const { lightTap, mediumTap } = useHapticFeedback();
+  const inputId = useId();
 
   // Reset to idle after showing success for a while
   useEffect(() => {
@@ -64,7 +65,7 @@ export function NewsletterSignup({
       e.preventDefault();
 
       // Basic validation
-      if (!email || !email.includes("@")) {
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         setStatus("error");
         setErrorMessage("Please enter a valid email address");
         lightTap();
@@ -75,48 +76,27 @@ export function NewsletterSignup({
       mediumTap();
 
       try {
-        // Submit to Buttondown's API
+        // Submit to Buttondown's embed endpoint (public, no API key needed)
+        // We use FormData to mimic a form submission
+        const formData = new FormData();
+        formData.append("email", email);
+
         const response = await fetch(
-          `https://api.buttondown.email/v1/subscribers`,
+          `https://buttondown.email/api/emails/embed-subscribe/${buttondownId}`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email,
-              referrer_url: window.location.href,
-            }),
+            body: formData,
           }
         );
 
-        // Buttondown returns 201 for new subscribers, 200 for existing
-        if (response.ok || response.status === 201) {
+        if (response.ok) {
           setStatus("success");
           mediumTap();
         } else {
-          // Try the embed form approach as fallback
-          const formData = new FormData();
-          formData.append("email", email);
-
-          const embedResponse = await fetch(
-            `https://buttondown.email/api/emails/embed-subscribe/${buttondownId}`,
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
-
-          if (embedResponse.ok) {
-            setStatus("success");
-            mediumTap();
-          } else {
-            throw new Error("Subscription failed");
-          }
+          throw new Error("Subscription failed");
         }
       } catch {
-        // If fetch fails, fall back to form action approach
-        // This is a graceful degradation - the form will submit traditionally
+        // If fetch fails, show error state
         setStatus("error");
         setErrorMessage("Something went wrong. Please try again.");
         lightTap();
@@ -148,7 +128,11 @@ export function NewsletterSignup({
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex gap-2">
+              <label htmlFor={inputId} className="sr-only">
+                Email address
+              </label>
               <input
+                id={inputId}
                 ref={inputRef}
                 type="email"
                 value={email}
@@ -172,6 +156,7 @@ export function NewsletterSignup({
               <button
                 type="submit"
                 disabled={status === "submitting"}
+                aria-label="Subscribe"
                 className={cn(
                   "rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white transition-all",
                   "hover:bg-violet-400 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -254,7 +239,11 @@ export function NewsletterSignup({
               className="flex w-full max-w-md flex-col gap-3 sm:flex-row"
             >
               <div className="relative flex-1">
+                <label htmlFor={inputId} className="sr-only">
+                  Email address
+                </label>
                 <input
+                  id={inputId}
                   ref={inputRef}
                   type="email"
                   value={email}

@@ -2622,7 +2622,7 @@ export const tldrPageData = {
   coreDescription:
     "The core flywheel tools form the backbone: Agent Mail for coordination, BV for graph-based prioritization, CASS for instant session search, CM for persistent memory, UBS for bug detection, MS for skill management with MCP integration, plus session management, safety guards, and automated setup.",
   supportingDescription:
-    "Supporting tools extend the ecosystem: ICI for remote image debugging, XF for searching your X archive, and S2P for crafting prompts from source code.",
+    "Supporting tools extend the ecosystem: GIIL for remote image debugging, XF for searching your X archive, and S2P for crafting prompts from source code.",
   flywheelExplanation: {
     title: "Why a Flywheel?",
     paragraphs: [

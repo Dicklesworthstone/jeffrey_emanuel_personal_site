@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { GITHUB_USERNAME } from "@/lib/constants";
+import { siteConfig } from "@/lib/content";
+
+const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop() || "Dicklesworthstone";
 
 // Cache for 5 minutes
 export const revalidate = 300;

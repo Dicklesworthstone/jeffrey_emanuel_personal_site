@@ -17,8 +17,26 @@
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const GITHUB_USERNAME = "Dicklesworthstone";
 const CONTENT_FILE = join(process.cwd(), "lib/content.ts");
+
+function getGitHubUsername(): string {
+  try {
+    const content = readFileSync(CONTENT_FILE, "utf-8");
+    // Match github: "https://github.com/Username"
+    // Handles single/double quotes and whitespace
+    const match = content.match(/github:\s*["']https:\/\/github\.com\/([^"']+)["']/);
+    if (match && match[1]) {
+      console.log(`Detected GitHub username: ${match[1]}`);
+      return match[1];
+    }
+  } catch (e) {
+    console.warn("Could not read content file to extract username:", e);
+  }
+  console.warn("Could not extract GitHub username from content.ts, using fallback.");
+  return "Dicklesworthstone";
+}
+
+const GITHUB_USERNAME = getGitHubUsername();
 
 interface RepoData {
   stargazers_count: number;
@@ -68,8 +86,8 @@ async function fetchGitHubStars(): Promise<string | null> {
 
     // Format the number
     if (totalStars >= 1000) {
-      const k = Math.floor(totalStars / 1000);
-      return `${k}K+`;
+      const formatted = (totalStars / 1000).toFixed(1).replace(/\.0$/, "");
+      return `${formatted}K+`;
     }
     return `${totalStars}+`;
   } catch (error) {
@@ -83,18 +101,20 @@ function updateContentFile(stats: { githubStars?: string; twitterFollowers?: str
   let updated = false;
 
   if (stats.githubStars) {
-    const githubRegex = /(label:\s*"GitHub Stars",[\s\S]*?value:\s*)"[^"]+"/;
+    // Match label: "GitHub Stars" ... value: "16K+" (robust to quotes)
+    const githubRegex = /(label:\s*["']GitHub Stars["'],[\s\S]*?value:\s*)(["'])[^"']+\2/;
     if (githubRegex.test(content)) {
-      content = content.replace(githubRegex, `$1"${stats.githubStars}"`);
+      content = content.replace(githubRegex, `$1$2${stats.githubStars}$2`);
       console.log(`Updated GitHub Stars to: ${stats.githubStars}`);
       updated = true;
     }
   }
 
   if (stats.twitterFollowers) {
-    const twitterRegex = /(label:\s*"Audience on X",[\s\S]*?value:\s*)"[^"]+"/;
+    // Match label: "Audience on X" ... value: "29K+" (robust to quotes)
+    const twitterRegex = /(label:\s*["']Audience on X["'],[\s\S]*?value:\s*)(["'])[^"']+\2/;
     if (twitterRegex.test(content)) {
-      content = content.replace(twitterRegex, `$1"${stats.twitterFollowers}"`);
+      content = content.replace(twitterRegex, `$1$2${stats.twitterFollowers}$2`);
       console.log(`Updated Twitter followers to: ${stats.twitterFollowers}`);
       updated = true;
     }

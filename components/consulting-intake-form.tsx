@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState, forwardRef, type ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Send,
   CheckCircle2,
@@ -16,43 +16,35 @@ import {
   Sparkles,
   AlertCircle,
 } from "lucide-react";
+import { Controller, useForm, useWatch, type DefaultValues } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 
-// Form field types
-type EngagementType =
-  | "market-analysis"
-  | "workflow-design"
-  | "staff-enablement"
-  | "ic-briefing"
-  | "custom";
+const engagementValues = [
+  "market-analysis",
+  "workflow-design",
+  "staff-enablement",
+  "ic-briefing",
+  "custom",
+] as const;
 
-type Timeline = "asap" | "1-month" | "3-months" | "6-months" | "flexible";
+type EngagementType = (typeof engagementValues)[number];
 
-type BudgetRange = "under-10k" | "10k-25k" | "25k-50k" | "50k-100k" | "100k-plus" | "flexible";
+const timelineValues = ["asap", "1-month", "3-months", "6-months", "flexible"] as const;
 
-interface FormData {
-  name: string;
-  email: string;
-  company: string;
-  role: string;
-  engagementType: EngagementType | "";
-  timeline: Timeline | "";
-  budget: BudgetRange | "";
-  interests: string[];
-  message: string;
-}
+type Timeline = (typeof timelineValues)[number];
 
-const initialFormData: FormData = {
-  name: "",
-  email: "",
-  company: "",
-  role: "",
-  engagementType: "",
-  timeline: "",
-  budget: "",
-  interests: [],
-  message: "",
-};
+const budgetValues = [
+  "under-10k",
+  "10k-25k",
+  "25k-50k",
+  "50k-100k",
+  "100k-plus",
+  "flexible",
+] as const;
+
+type BudgetRange = (typeof budgetValues)[number];
 
 // Interest areas
 const interestOptions = [
@@ -112,6 +104,65 @@ const budgetOptions: { value: BudgetRange; label: string }[] = [
   { value: "flexible", label: "Flexible" },
 ];
 
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email"),
+  company: z.string().min(1, "Company is required"),
+  role: z.string().optional(),
+  engagementType: z.enum(engagementValues, {
+    message: "Select an engagement type",
+  }),
+  timeline: z.enum(timelineValues).optional(),
+  budget: z.enum(budgetValues).optional(),
+  interests: z.array(z.string()),
+  message: z
+    .string()
+    .min(1, "Please tell me about your needs")
+    .max(1500, "Message is too long for mailto link (max 1500 chars)"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const defaultValues: DefaultValues<FormValues> = {
+  name: "",
+  email: "",
+  company: "",
+  role: "",
+  message: "",
+  interests: [],
+};
+
+type StepConfig = {
+  id: string;
+  title: string;
+  description: string;
+  fields: (keyof FormValues)[];
+};
+
+const steps: StepConfig[] = [
+  {
+    id: "contact",
+    title: "Contact",
+    description: "Tell me who you are",
+    fields: ["name", "email", "company", "role"],
+  },
+  {
+    id: "engagement",
+    title: "Engagement",
+    description: "Scope, timing, and budget",
+    fields: ["engagementType", "timeline", "budget"],
+  },
+  {
+    id: "focus",
+    title: "Focus",
+    description: "Interests and context",
+    fields: ["interests", "message"],
+  },
+];
+
 // Input wrapper component
 function FormField({
   label,
@@ -123,7 +174,7 @@ function FormField({
   label: string;
   required?: boolean;
   error?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   id?: string;
 }) {
   return (
@@ -144,14 +195,13 @@ function FormField({
 }
 
 // Styled input component
-function Input({
-  icon: Icon,
-  error,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-  icon?: React.ComponentType<{ className?: string }>;
-  error?: boolean;
-}) {
+const Input = forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement> & {
+    icon?: React.ComponentType<{ className?: string }>;
+    error?: boolean;
+  }
+>(function InputComponent({ icon: Icon, error, ...props }, ref) {
   return (
     <div className="relative">
       {Icon && (
@@ -161,6 +211,7 @@ function Input({
       )}
       <input
         {...props}
+        ref={ref}
         aria-invalid={error}
         className={cn(
           "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-all duration-200",
@@ -173,16 +224,17 @@ function Input({
       />
     </div>
   );
-}
+});
 
 // Styled textarea component
-function Textarea({
-  error,
-  ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: boolean }) {
+const Textarea = forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: boolean }
+>(function TextareaComponent({ error, ...props }, ref) {
   return (
     <textarea
       {...props}
+      ref={ref}
       aria-invalid={error}
       className={cn(
         "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-all duration-200 resize-none",
@@ -193,7 +245,7 @@ function Textarea({
       )}
     />
   );
-}
+});
 
 // Radio card component
 function RadioCard({
@@ -288,12 +340,18 @@ function Select({
   options,
   placeholder,
   icon: Icon,
+  id,
+  name,
+  "aria-describedby": ariaDescribedBy,
 }: {
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   placeholder: string;
   icon?: React.ComponentType<{ className?: string }>;
+  id?: string;
+  name?: string;
+  "aria-describedby"?: string;
 }) {
   return (
     <div className="relative">
@@ -303,8 +361,11 @@ function Select({
         </div>
       )}
       <select
+        id={id}
+        name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        aria-describedby={ariaDescribedBy}
         className={cn(
           "w-full appearance-none rounded-xl border border-slate-700/50 bg-slate-900/60 px-4 py-3 text-sm text-white backdrop-blur-sm transition-all duration-200",
           "focus:border-violet-500/50 focus:outline-none focus:ring-2 focus:ring-violet-500/20",
@@ -331,94 +392,161 @@ function Select({
   );
 }
 
+function StepIndicator({ steps, currentStep }: { steps: StepConfig[]; currentStep: number }) {
+  const prefersReducedMotion = useReducedMotion();
+  const progress = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between text-xs text-slate-500">
+        <span>
+          Step {currentStep + 1} of {steps.length}
+        </span>
+        <span className="text-slate-400">{steps[currentStep].title}</span>
+      </div>
+      <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-800/80">
+        <motion.div
+          initial={prefersReducedMotion ? false : { width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" }}
+          className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500"
+        />
+      </div>
+      <ol className="grid gap-2 text-xs text-slate-500 sm:grid-cols-3">
+        {steps.map((step, index) => {
+          const isComplete = index < currentStep;
+          const isActive = index === currentStep;
+          return (
+            <li key={step.id} className="flex items-center gap-2" aria-current={isActive ? "step" : undefined}>
+              <span
+                className={cn(
+                  "flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold",
+                  isComplete
+                    ? "bg-violet-500 text-white"
+                    : isActive
+                      ? "bg-violet-500/20 text-violet-200"
+                      : "bg-slate-800/80 text-slate-500"
+                )}
+              >
+                {isComplete ? <CheckCircle2 className="h-3.5 w-3.5" /> : index + 1}
+              </span>
+              <span className={cn("font-medium", isActive ? "text-slate-100" : "text-slate-500")}>
+                {step.title}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 // Main form component
 export default function ConsultingIntakeForm() {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const prefersReducedMotion = useReducedMotion();
 
-  const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+  const {
+    control,
+    register,
+    handleSubmit,
+    trigger,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+    mode: "onTouched",
+  });
+
+  const selectedEngagement = useWatch({ control, name: "engagementType" });
+  const selectedTimeline = useWatch({ control, name: "timeline" });
+  const selectedBudget = useWatch({ control, name: "budget" });
+  const selectedInterests = useWatch({ control, name: "interests" }) ?? [];
+
+  useEffect(() => {
+    const node = stepRefs.current[stepIndex];
+    if (!node) return;
+    const focusable = node.querySelector<HTMLElement>(
+      "input, select, textarea, button"
+    );
+    if (focusable) {
+      focusable.focus();
     }
+  }, [stepIndex]);
+
+  const scrollToFormTop = () => {
+    if (!formRef.current) return;
+    formRef.current.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
   };
 
-  const toggleInterest = (interest: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter((i) => i !== interest)
-        : [...prev.interests, interest],
-    }));
+  const handleNext = async () => {
+    const stepFields = steps[stepIndex]?.fields ?? [];
+    const isValid = await trigger(stepFields, { shouldFocus: true });
+    if (!isValid) return;
+    setDirection(1);
+    setStepIndex((prev) => Math.min(prev + 1, steps.length - 1));
+    scrollToFormTop();
   };
 
-  const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof FormData, string>> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-
-    if (!formData.company.trim()) {
-      newErrors.company = "Company is required";
-    }
-
-    if (!formData.message.trim()) {
-      newErrors.message = "Please tell me about your needs";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleBack = () => {
+    setDirection(-1);
+    setStepIndex((prev) => Math.max(prev - 1, 0));
+    scrollToFormTop();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormValues) => {
+    const engagementLabel = engagementOptions.find((opt) => opt.value === data.engagementType)?.label;
+    const timelineLabel = data.timeline
+      ? timelineOptions.find((opt) => opt.value === data.timeline)?.label
+      : undefined;
+    const budgetLabel = data.budget
+      ? budgetOptions.find((opt) => opt.value === data.budget)?.label
+      : undefined;
 
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-
-    // Create mailto link with form data
     const subject = encodeURIComponent(
-      `Consulting Inquiry from ${formData.name} at ${formData.company}`
+      `Consulting Inquiry from ${data.name} at ${data.company}`
     );
 
     const body = encodeURIComponent(
-      `Name: ${formData.name}
-Email: ${formData.email}
-Company: ${formData.company}
-Role: ${formData.role || "Not specified"}
+      `Name: ${data.name}
+Email: ${data.email}
+Company: ${data.company}
+Role: ${data.role || "Not specified"}
 
-Engagement Type: ${formData.engagementType ? engagementOptions.find((e) => e.value === formData.engagementType)?.label : "Not specified"}
-Timeline: ${formData.timeline ? timelineOptions.find((t) => t.value === formData.timeline)?.label : "Not specified"}
-Budget Range: ${formData.budget ? budgetOptions.find((b) => b.value === formData.budget)?.label : "Not specified"}
+Engagement Type: ${engagementLabel || "Not specified"}
+Timeline: ${timelineLabel || "Not specified"}
+Budget Range: ${budgetLabel || "Not specified"}
 
 Areas of Interest:
-${formData.interests.length > 0 ? formData.interests.map((i) => `- ${interestOptions.find((opt) => opt.id === i)?.label}`).join("\n") : "None specified"}
+${
+        data.interests.length > 0
+          ? data.interests
+              .map((interest) => interestOptions.find((opt) => opt.id === interest)?.label)
+              .filter(Boolean)
+              .map((label) => `- ${label}`)
+              .join("\n")
+          : "None specified"
+      }
 
 Message:
-${formData.message}`
+${data.message}`
     );
 
-    // Open mailto link in a new way that's less likely to block the UI
-    // Using window.open with _self target is often safer than location.href for mailto
-    window.open(`mailto:jeffreyemanuel@gmail.com?subject=${subject}&body=${body}`, "_self");
+    window.location.assign(
+      `mailto:jeffreyemanuel@gmail.com?subject=${subject}&body=${body}`
+    );
 
-    // Show success state after a brief delay
     setTimeout(() => {
-      setIsSubmitting(false);
       setIsSubmitted(true);
-    }, 1000);
+    }, 800);
   };
 
   if (isSubmitted) {
@@ -441,8 +569,8 @@ ${formData.message}`
 
         <h3 className="text-xl font-bold text-white">Message Ready</h3>
         <p className="mt-2 text-sm text-slate-400">
-          Your email client should have opened with the inquiry details.
-          If it did not open, you can email me directly at{" "}
+          Your email client should have opened with the inquiry details. If it
+          did not open, you can email me directly at{" "}
           <a
             href="mailto:jeffreyemanuel@gmail.com"
             className="font-medium text-emerald-400 hover:text-emerald-300"
@@ -454,7 +582,8 @@ ${formData.message}`
         <button
           onClick={() => {
             setIsSubmitted(false);
-            setFormData(initialFormData);
+            setStepIndex(0);
+            reset(defaultValues);
           }}
           className="mt-6 text-sm font-medium text-slate-500 transition-colors hover:text-slate-300"
         >
@@ -464,208 +593,363 @@ ${formData.message}`
     );
   }
 
+  const isLastStep = stepIndex === steps.length - 1;
+  const currentStep = steps[stepIndex];
+
+  const summaryInterests = selectedInterests
+    .map((interest) => interestOptions.find((opt) => opt.id === interest)?.label)
+    .filter(Boolean);
+
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
-      {/* Contact Information */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
-            <User className="h-4 w-4" />
-          </div>
-          <h3 className="text-lg font-semibold text-white">Contact Information</h3>
-        </div>
+    <form
+      ref={formRef}
+      onSubmit={
+        isLastStep
+          ? handleSubmit(onSubmit)
+          : (event) => {
+              event.preventDefault();
+              handleNext();
+            }
+      }
+      className="space-y-8"
+    >
+      <StepIndicator steps={steps} currentStep={stepIndex} />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Name" required error={errors.name} id="name">
-            <Input
-              id="name"
-              type="text"
-              icon={User}
-              placeholder="Your name"
-              value={formData.name}
-              onChange={(e) => updateField("name", e.target.value)}
-              error={!!errors.name}
-              aria-describedby={errors.name ? "name-error" : undefined}
-            />
-          </FormField>
-
-          <FormField label="Email" required error={errors.email} id="email">
-            <Input
-              id="email"
-              type="email"
-              icon={Mail}
-              placeholder="you@company.com"
-              value={formData.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              error={!!errors.email}
-              aria-describedby={errors.email ? "email-error" : undefined}
-            />
-          </FormField>
-
-          <FormField label="Company" required error={errors.company} id="company">
-            <Input
-              id="company"
-              type="text"
-              icon={Building2}
-              placeholder="Fund or firm name"
-              value={formData.company}
-              onChange={(e) => updateField("company", e.target.value)}
-              error={!!errors.company}
-              aria-describedby={errors.company ? "company-error" : undefined}
-            />
-          </FormField>
-
-          <FormField label="Role" id="role">
-            <Input
-              id="role"
-              type="text"
-              placeholder="Your title"
-              value={formData.role}
-              onChange={(e) => updateField("role", e.target.value)}
-            />
-          </FormField>
-        </div>
-      </div>
-
-      {/* Engagement Type */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
-            <Target className="h-4 w-4" />
-          </div>
-          <h3 className="text-lg font-semibold text-white">Type of Engagement</h3>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {engagementOptions.map((opt) => (
-            <RadioCard
-              key={opt.value}
-              selected={formData.engagementType === opt.value}
-              onClick={() => updateField("engagementType", opt.value)}
-              label={opt.label}
-              description={opt.description}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Timeline & Budget */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
-              <Calendar className="h-4 w-4" />
-            </div>
-            <h3 className="text-lg font-semibold text-white">Timeline</h3>
-          </div>
-          <Select
-            value={formData.timeline}
-            onChange={(v) => updateField("timeline", v as Timeline)}
-            options={timelineOptions}
-            placeholder="When do you need this?"
-            icon={Calendar}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
-              <DollarSign className="h-4 w-4" />
-            </div>
-            <h3 className="text-lg font-semibold text-white">Budget Range</h3>
-          </div>
-          <Select
-            value={formData.budget}
-            onChange={(v) => updateField("budget", v as BudgetRange)}
-            options={budgetOptions}
-            placeholder="Approximate budget"
-            icon={DollarSign}
-          />
-        </div>
-      </div>
-
-      {/* Areas of Interest */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <h3 className="text-lg font-semibold text-white">Areas of Interest</h3>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {interestOptions.map((opt) => (
-            <ChipToggle
-              key={opt.id}
-              selected={formData.interests.includes(opt.id)}
-              onClick={() => toggleInterest(opt.id)}
-              label={opt.label}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Message */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
-            <MessageSquare className="h-4 w-4" />
-          </div>
-          <h3 className="text-lg font-semibold text-white">Tell me more</h3>
-        </div>
-
-        <FormField
-          label="What are you looking to accomplish?"
-          required
-          error={errors.message}
-          id="message"
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={currentStep.id}
+          ref={(node) => {
+            stepRefs.current[stepIndex] = node;
+          }}
+          initial={
+            prefersReducedMotion
+              ? { opacity: 1 }
+              : { opacity: 0, x: direction >= 0 ? 40 : -40 }
+          }
+          animate={{ opacity: 1, x: 0 }}
+          exit={
+            prefersReducedMotion
+              ? { opacity: 0 }
+              : { opacity: 0, x: direction >= 0 ? -40 : 40 }
+          }
+          transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: "easeOut" }}
+          className="space-y-8"
         >
-          <Textarea
-            id="message"
-            rows={5}
-            placeholder="Describe your fund's current AI exposure, where you feel most uncertain, and what success would look like..."
-            value={formData.message}
-            onChange={(e) => updateField("message", e.target.value)}
-            error={!!errors.message}
-            aria-describedby={errors.message ? "message-error" : undefined}
-          />
-        </FormField>
-      </div>
+          {stepIndex === 0 && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3" aria-live="polite">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
+                  <User className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Contact Information</h3>
+                  <p className="text-xs text-slate-500">{currentStep.description}</p>
+                </div>
+              </div>
 
-      {/* Submit Button */}
-      <div className="pt-4">
-        <motion.button
-          type="submit"
-          disabled={isSubmitting}
-          whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-          whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField label="Name" required error={errors.name?.message} id="name">
+                  <Input
+                    id="name"
+                    type="text"
+                    icon={User}
+                    placeholder="Your name"
+                    error={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
+                    {...register("name")}
+                  />
+                </FormField>
+
+                <FormField label="Email" required error={errors.email?.message} id="email">
+                  <Input
+                    id="email"
+                    type="email"
+                    icon={Mail}
+                    placeholder="you@company.com"
+                    error={!!errors.email}
+                    aria-describedby={errors.email ? "email-error" : undefined}
+                    {...register("email")}
+                  />
+                </FormField>
+
+                <FormField label="Company" required error={errors.company?.message} id="company">
+                  <Input
+                    id="company"
+                    type="text"
+                    icon={Building2}
+                    placeholder="Fund or firm name"
+                    error={!!errors.company}
+                    aria-describedby={errors.company ? "company-error" : undefined}
+                    {...register("company")}
+                  />
+                </FormField>
+
+                <FormField label="Role" id="role">
+                  <Input
+                    id="role"
+                    type="text"
+                    placeholder="Your title"
+                    {...register("role")}
+                  />
+                </FormField>
+              </div>
+            </div>
+          )}
+
+          {stepIndex === 1 && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3" aria-live="polite">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
+                  <Target className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Type of Engagement</h3>
+                  <p className="text-xs text-slate-500">{currentStep.description}</p>
+                </div>
+              </div>
+
+              <Controller
+                name="engagementType"
+                control={control}
+                render={({ field }) => (
+                  <div className="space-y-3">
+                    <div
+                      role="radiogroup"
+                      aria-describedby={errors.engagementType ? "engagementType-error" : undefined}
+                      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                    >
+                      {engagementOptions.map((opt) => (
+                        <RadioCard
+                          key={opt.value}
+                          selected={field.value === opt.value}
+                          onClick={() => field.onChange(opt.value)}
+                          label={opt.label}
+                          description={opt.description}
+                        />
+                      ))}
+                    </div>
+                    {errors.engagementType?.message && (
+                      <p
+                        id="engagementType-error"
+                        className="flex items-center gap-1.5 text-xs text-rose-400"
+                        role="alert"
+                      >
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.engagementType.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Timeline</h3>
+                  </div>
+                  <Controller
+                    name="timeline"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        id="timeline"
+                        name={field.name}
+                        value={field.value ?? ""}
+                        onChange={(value) => field.onChange(value || undefined)}
+                        options={timelineOptions}
+                        placeholder="When do you need this?"
+                        icon={Calendar}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
+                      <DollarSign className="h-4 w-4" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Budget Range</h3>
+                  </div>
+                  <Controller
+                    name="budget"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        id="budget"
+                        name={field.name}
+                        value={field.value ?? ""}
+                        onChange={(value) => field.onChange(value || undefined)}
+                        options={budgetOptions}
+                        placeholder="Approximate budget"
+                        icon={DollarSign}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {stepIndex === 2 && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3" aria-live="polite">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Areas of Interest</h3>
+                  <p className="text-xs text-slate-500">{currentStep.description}</p>
+                </div>
+              </div>
+
+              <Controller
+                name="interests"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-2">
+                    {interestOptions.map((opt) => (
+                      <ChipToggle
+                        key={opt.id}
+                        selected={field.value?.includes(opt.id)}
+                        onClick={() => {
+                          const next = field.value?.includes(opt.id)
+                            ? field.value.filter((item) => item !== opt.id)
+                            : [...(field.value ?? []), opt.id];
+                          field.onChange(next);
+                        }}
+                        label={opt.label}
+                      />
+                    ))}
+                  </div>
+                )}
+              />
+
+              <FormField
+                label="What are you looking to accomplish?"
+                required
+                error={errors.message?.message}
+                id="message"
+              >
+                <Textarea
+                  id="message"
+                  rows={5}
+                  placeholder="Describe your fund's current AI exposure, where you feel most uncertain, and what success would look like..."
+                  error={!!errors.message}
+                  aria-describedby={errors.message ? "message-error" : undefined}
+                  {...register("message")}
+                />
+              </FormField>
+
+              <div className="rounded-xl border border-slate-800/70 bg-slate-950/60 p-4 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-slate-300">
+                  <MessageSquare className="h-4 w-4 text-violet-300" />
+                  <span className="font-semibold">Quick summary</span>
+                </div>
+                <div className="mt-3 grid gap-2">
+                  <div>
+                    <span className="text-slate-500">Engagement:</span>{" "}
+                    <span className="text-slate-200">
+                      {selectedEngagement
+                        ? engagementOptions.find((opt) => opt.value === selectedEngagement)?.label
+                        : "Not specified"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Timeline:</span>{" "}
+                    <span className="text-slate-200">
+                      {selectedTimeline
+                        ? timelineOptions.find((opt) => opt.value === selectedTimeline)?.label
+                        : "Not specified"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Budget:</span>{" "}
+                    <span className="text-slate-200">
+                      {selectedBudget
+                        ? budgetOptions.find((opt) => opt.value === selectedBudget)?.label
+                        : "Not specified"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Interests:</span>{" "}
+                    <span className="text-slate-200">
+                      {summaryInterests.length > 0 ? summaryInterests.join(", ") : "None specified"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="flex flex-col gap-4 border-t border-slate-800/70 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <button
+          type="button"
+          onClick={handleBack}
+          disabled={stepIndex === 0}
           className={cn(
-            "group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-violet-500/25 transition-all",
-            "hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.5)]",
-            "disabled:cursor-not-allowed disabled:opacity-60"
+            "rounded-xl border border-slate-700/60 px-4 py-2 text-sm font-semibold text-slate-300 transition-colors",
+            stepIndex === 0
+              ? "cursor-not-allowed opacity-40"
+              : "hover:border-slate-600/80 hover:text-white"
           )}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity group-hover:opacity-100" />
+          Back
+        </button>
 
-          <span className="relative flex items-center justify-center gap-2">
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Preparing...
-              </>
-            ) : (
-              <>
-                <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-                Send Inquiry
-              </>
-            )}
-          </span>
-        </motion.button>
+        <div className="flex flex-1 items-center justify-end gap-3">
+          {!isLastStep && (
+            <motion.button
+              type="button"
+              onClick={handleNext}
+              whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+              className="relative overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all"
+            >
+              Continue
+            </motion.button>
+          )}
 
-        <p className="mt-4 text-center text-xs text-slate-500">
-          This will open your email client with the inquiry details pre-filled.
-        </p>
+          {isLastStep && (
+            <motion.button
+              type="submit"
+              disabled={isSubmitting}
+              whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+              className={cn(
+                "group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-violet-500/25 transition-all sm:w-auto",
+                "hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.5)]",
+                "disabled:cursor-not-allowed disabled:opacity-60"
+              )}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity group-hover:opacity-100" />
+
+              <span className="relative flex items-center justify-center gap-2">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Preparing...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+                    Send Inquiry
+                  </>
+                )}
+              </span>
+            </motion.button>
+          )}
+        </div>
       </div>
+
+      <p className="text-center text-xs text-slate-500">
+        This will open your email client with the inquiry details pre-filled.
+      </p>
     </form>
   );
 }
