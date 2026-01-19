@@ -214,7 +214,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             animate={{ opacity: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 z-40 flex flex-col bg-slate-950/98 backdrop-blur-lg md:hidden overflow-y-auto will-change-[opacity]"
+            className="fixed inset-0 z-40 flex flex-col bg-slate-950/98 backdrop-blur-lg md:hidden overflow-y-auto will-change-[opacity] pt-24"
             style={{ transform: "translateZ(0)" }}
             role="dialog"
             aria-modal="true"
@@ -227,7 +227,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             
             <nav className="relative flex flex-1 flex-col justify-center px-8">
               <motion.div
-                className="flex flex-col gap-8"
+                className="flex flex-col gap-6"
                 initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
@@ -251,7 +251,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 })}
               </motion.div>
 
-              <div className="mt-16">
+              <div className="mt-10">
                 <Link
                   href="/contact"
                   className="flex w-full items-center justify-center rounded-full bg-white py-4 text-lg font-bold text-slate-950 shadow-lg shadow-white/10 transition-transform active:scale-95"
