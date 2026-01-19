@@ -132,7 +132,7 @@ We do **not** care about backwards compatibility — we want the cleanest possib
 ├── public/               # Static assets
 │   └── images/           # Images, favicons
 ├── hooks/                # Custom React hooks
-└── .beads/               # Issue tracking (bd)
+└── .beads/               # Issue tracking (br)
 ```
 
 ---
@@ -250,18 +250,20 @@ The site deploys automatically to Vercel on push to `main`.
 
 ---
 
-## Issue Tracking with bd (beads)
+## Issue Tracking with br (beads_rust)
 
-**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+**IMPORTANT**: This project uses **br (beads_rust)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+
+**Note:** `br` is non-invasive and never executes git commands. After syncing, you must manually commit the `.beads/` directory.
 
 **CRITICAL GIT RULE**: The `.beads/` directory contains issue tracking state and **MUST ALWAYS BE COMMITTED** with code changes. When committing code changes, you MUST also commit the corresponding `.beads/` files in the same commit to keep issue state synchronized with code state.
 
-**NEVER FORGET THIS**: The ONLY allowed way to interact with beads is via the `bd` command. DO NOT TRY TO DIRECTLY READ, CREATE, OR MODIFY BEADS BY MODIFYING JSON OR JSONL FILES. ONLY VIA `bd`!
+**NEVER FORGET THIS**: The ONLY allowed way to interact with beads is via the `br` command. DO NOT TRY TO DIRECTLY READ, CREATE, OR MODIFY BEADS BY MODIFYING JSON OR JSONL FILES. ONLY VIA `br`!
 
-### Why bd?
+### Why br?
 
 * Dependency-aware: Track blockers and relationships between issues.
-* Git-friendly: Auto-syncs to JSONL for version control.
+* Git-friendly: Exports to JSONL for version control.
 * Agent-optimized: JSON output, ready work detection, discovered-from links.
 * Prevents duplicate tracking systems and confusion.
 
@@ -269,21 +271,21 @@ The site deploys automatically to Vercel on push to `main`.
 
 ```bash
 # Check for ready work
-bd ready --json
+br ready --json
 
 # Create new issues
-bd create "Issue title" -t bug|feature|task -p 0-4 --json
-bd create "Issue title" -p 1 --deps discovered-from:bd-123 --json
+br create "Issue title" -t bug|feature|task -p 0-4 --json
+br create "Issue title" -p 1 --deps discovered-from:br-123 --json
 
 # Claim and update
-bd update bd-42 --status in_progress --json
-bd update bd-42 --priority 1 --json
+br update br-42 --status in_progress --json
+br update br-42 --priority 1 --json
 
 # Complete work
-bd close bd-42 --reason "Completed" --json
+br close br-42 --reason "Completed" --json
 
 # View statistics
-bd stats
+br stats
 ```
 
 ### Issue Types
@@ -304,20 +306,20 @@ bd stats
 
 ### Workflow for AI Agents
 
-1. **Check ready work**: `bd ready` shows unblocked issues.
-2. **Claim your task**: `bd update <id> --status in_progress`.
+1. **Check ready work**: `br ready` shows unblocked issues.
+2. **Claim your task**: `br update <id> --status in_progress`.
 3. **Work on it**: Implement, test, document.
 4. **Discover new work?** Create linked issue:
-   * `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`.
-5. **Complete**: `bd close <id> --reason "Done"`.
-6. **Sync**: `bd sync` at end of session to push changes.
+   * `br create "Found bug" -p 1 --deps discovered-from:<parent-id>`.
+5. **Complete**: `br close <id> --reason "Done"`.
+6. **Sync**: `br sync --flush-only` then manually `git add .beads/ && git commit`.
 
 ### Important Rules
 
-* Use bd for ALL task tracking
+* Use br for ALL task tracking
 * Always use `--json` flag for programmatic use
 * Link discovered work with `discovered-from` dependencies
-* Check `bd ready` before asking "what should I work on?"
+* Check `br ready` before asking "what should I work on?"
 * Do NOT create markdown TODO lists
 * Do NOT use external issue trackers
 * Do NOT duplicate tracking systems
@@ -488,9 +490,9 @@ The flywheel tools are defined in `lib/content.ts` under `flywheelTools`. Edit t
 1. Make changes
 2. Run `bun tsc --noEmit` and `bun lint`
 3. Run `ubs` on changed files
-4. Update beads: `bd close <id>` for completed work
-5. Commit code AND `.beads/` changes together
-6. Run `bd sync` to sync beads with remote
+4. Update beads: `br close <id>` for completed work
+5. Run `br sync --flush-only` to export beads to JSONL
+6. Commit code AND `.beads/` changes together: `git add . && git commit`
 7. Push to trigger Vercel deployment
 
 ---
