@@ -1,3 +1,5 @@
+import tldrToolStarsData from "./data/tldr-tool-stars.json";
+
 export const siteConfig = {
   name: "Jeffrey Emanuel",
   title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
@@ -2606,6 +2608,14 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     ],
   },
 ];
+
+// Merge build-time star counts (overrides hardcoded fallbacks)
+const _starsMap = tldrToolStarsData as Record<string, number>;
+for (const tool of tldrFlywheelTools) {
+  if (_starsMap[tool.id] !== undefined) {
+    tool.stars = _starsMap[tool.id];
+  }
+}
 
 export const tldrPageData = {
   hero: {

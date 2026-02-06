@@ -13,6 +13,7 @@
     "build": "rm -rf .next && next build",
     "build:with-stats": "bun run update-stats && rm -rf .next && next build",
     "update-stats": "bun run scripts/update-stats.ts",
+    "fetch-tldr-stars": "bun run scripts/fetch-tldr-stars.ts",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
