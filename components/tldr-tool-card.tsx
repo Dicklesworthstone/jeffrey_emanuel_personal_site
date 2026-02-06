@@ -157,6 +157,11 @@ export function TldrToolCard({
         if (cardRef.current) {
           cardRef.current.style.setProperty("--mouse-x", `${x}px`);
           cardRef.current.style.setProperty("--mouse-y", `${y}px`);
+          // 3D tilt: rotate toward cursor (max ±4 degrees)
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          cardRef.current.style.setProperty("--tilt-y", `${((x - centerX) / centerX) * 4}deg`);
+          cardRef.current.style.setProperty("--tilt-x", `${-((y - centerY) / centerY) * 4}deg`);
         }
         rafRef.current = null;
       });
@@ -179,7 +184,13 @@ export function TldrToolCard({
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setSpotlightOpacity(1)}
-        onMouseLeave={() => setSpotlightOpacity(0)}
+        onMouseLeave={() => {
+          setSpotlightOpacity(0);
+          if (cardRef.current) {
+            cardRef.current.style.setProperty("--tilt-x", "0deg");
+            cardRef.current.style.setProperty("--tilt-y", "0deg");
+          }
+        }}
         className={cn(
           "relative h-full flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm",
           "transition-all duration-300",
@@ -187,7 +198,11 @@ export function TldrToolCard({
           "motion-safe:hover:scale-[1.01] motion-safe:hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4),0_0_40px_-14px_rgba(var(--accent-rgb),0.35)]",
           "active:scale-[0.98] active:border-white/25"
         )}
-        style={{ "--accent-rgb": spotlightRgb } as CSSProperties}
+        style={{
+          "--accent-rgb": spotlightRgb,
+          transform: "perspective(800px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))",
+          transition: "transform 0.15s ease-out, border-color 0.3s, background-color 0.3s, box-shadow 0.3s",
+        } as CSSProperties}
       >
         {/* Gradient background */}
         <div
