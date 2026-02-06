@@ -2,12 +2,12 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { Layers, Wrench, Search, X, ArrowUpRight, Star } from "lucide-react";
+import { Layers, Wrench, Search, X, ArrowUpRight, Star, GitCompare } from "lucide-react";
 import Fuse from "fuse.js";
 import { cn } from "@/lib/utils";
 import { formatStarCount, formatStarCountFull } from "@/lib/format-stars";
 import BottomSheet from "@/components/bottom-sheet";
-import { TldrToolCard } from "./tldr-tool-card";
+import { TldrToolCard, DynamicIcon } from "./tldr-tool-card";
 import type { TldrFlywheelTool } from "@/lib/content";
 
 // =============================================================================
@@ -215,6 +215,9 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Keyboard navigation state
+  const [focusedToolId, setFocusedToolId] = useState<string | null>(null);
+
   // Mobile bottom sheet state
   const [selectedTool, setSelectedTool] = useState<TldrFlywheelTool | null>(null);
   const handleMobileTap = useCallback((tool: TldrFlywheelTool) => {
@@ -222,6 +225,34 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
   }, []);
   const handleCloseSheet = useCallback(() => {
     setSelectedTool(null);
+  }, []);
+
+  // Compare mode state
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
+  const [showComparison, setShowComparison] = useState(false);
+
+  const toggleCompareSelection = useCallback((tool: TldrFlywheelTool) => {
+    setCompareIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(tool.id)) {
+        next.delete(tool.id);
+      } else if (next.size < 3) {
+        next.add(tool.id);
+      }
+      return next;
+    });
+  }, []);
+
+  const compareTools = useMemo(
+    () => tools.filter((t) => compareIds.has(t.id)),
+    [tools, compareIds]
+  );
+
+  const exitCompareMode = useCallback(() => {
+    setCompareMode(false);
+    setCompareIds(new Set());
+    setShowComparison(false);
   }, []);
 
   // Initialize Fuse.js for fuzzy search
@@ -259,29 +290,108 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
     };
   }, [filteredTools]);
 
-  // Keyboard shortcut: "/" to focus search
+  // Keyboard shortcuts: "/" to focus search, j/k vim navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const inInput = ["INPUT", "TEXTAREA"].includes(
+        (e.target as HTMLElement)?.tagName ?? ""
+      );
+
       // Focus search on "/" key (when not in an input)
-      if (
-        e.key === "/" &&
-        !["INPUT", "TEXTAREA"].includes(
-          (e.target as HTMLElement)?.tagName ?? ""
-        )
-      ) {
+      if (e.key === "/" && !inInput) {
         e.preventDefault();
         searchInputRef.current?.focus();
+        return;
       }
       // Clear search on Escape
-      if (e.key === "Escape" && searchQuery) {
-        setSearchQuery("");
-        searchInputRef.current?.blur();
+      if (e.key === "Escape") {
+        if (searchQuery) {
+          setSearchQuery("");
+          searchInputRef.current?.blur();
+        }
+        setFocusedToolId(null);
+        return;
+      }
+
+      // Vim navigation (only when not in an input)
+      if (inInput) return;
+
+      if (e.key === "j" || e.key === "ArrowDown") {
+        e.preventDefault();
+        setFocusedToolId((prev) => {
+          const idx = prev ? filteredTools.findIndex((t) => t.id === prev) : -1;
+          const next = Math.min(idx + 1, filteredTools.length - 1);
+          const tool = filteredTools[next];
+          if (tool) {
+            document.getElementById(`tool-card-${tool.id}`)?.scrollIntoView({
+              behavior: reducedMotion ? "instant" : "smooth",
+              block: "center",
+            });
+          }
+          return tool?.id ?? prev;
+        });
+        return;
+      }
+
+      if (e.key === "k" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setFocusedToolId((prev) => {
+          const idx = prev ? filteredTools.findIndex((t) => t.id === prev) : filteredTools.length;
+          const next = Math.max(idx - 1, 0);
+          const tool = filteredTools[next];
+          if (tool) {
+            document.getElementById(`tool-card-${tool.id}`)?.scrollIntoView({
+              behavior: reducedMotion ? "instant" : "smooth",
+              block: "center",
+            });
+          }
+          return tool?.id ?? prev;
+        });
+        return;
+      }
+
+      // Enter: open details for focused tool
+      if (e.key === "Enter" && focusedToolId) {
+        const tool = filteredTools.find((t) => t.id === focusedToolId);
+        if (tool) setSelectedTool(tool);
+        return;
+      }
+
+      // g: open GitHub link for focused tool
+      if (e.key === "g" && focusedToolId) {
+        const tool = filteredTools.find((t) => t.id === focusedToolId);
+        if (tool) window.open(tool.href, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      // c: toggle compare mode
+      if (e.key === "c") {
+        setCompareMode((prev) => {
+          if (prev) {
+            setCompareIds(new Set());
+            setShowComparison(false);
+          }
+          return !prev;
+        });
+        return;
+      }
+
+      // G: jump to last tool
+      if (e.key === "G") {
+        const last = filteredTools[filteredTools.length - 1];
+        if (last) {
+          setFocusedToolId(last.id);
+          document.getElementById(`tool-card-${last.id}`)?.scrollIntoView({
+            behavior: reducedMotion ? "instant" : "smooth",
+            block: "center",
+          });
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [searchQuery]);
+  }, [searchQuery, filteredTools, focusedToolId, reducedMotion]);
 
   const hasResults = filteredTools.length > 0;
   const isSearching = searchQuery.trim().length > 0;
@@ -306,6 +416,59 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
         inputRef={searchInputRef}
         reducedMotion={reducedMotion}
       />
+
+      {/* Compare Mode Controls */}
+      <div className="flex items-center justify-end gap-3 -mt-4 sm:-mt-6">
+        <button
+          onClick={() => {
+            if (compareMode) {
+              exitCompareMode();
+            } else {
+              setCompareMode(true);
+            }
+          }}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all sm:text-sm",
+            compareMode
+              ? "bg-violet-500/20 text-violet-300 ring-1 ring-violet-500/40"
+              : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
+          )}
+        >
+          <GitCompare className="h-4 w-4" aria-hidden="true" />
+          {compareMode ? "Exit Compare" : "Compare"}
+        </button>
+      </div>
+
+      {/* Compare Mode Floating Pill */}
+      <AnimatePresence>
+        {compareMode && compareIds.size > 0 && (
+          <motion.div
+            initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reducedMotion ? {} : { opacity: 0, y: 20 }}
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 rounded-full border border-violet-500/30 bg-slate-900/95 px-5 py-3 shadow-2xl shadow-violet-500/10 backdrop-blur-lg"
+          >
+            <span className="text-sm font-medium text-white">
+              {compareIds.size} of 3 selected
+            </span>
+            {compareIds.size >= 2 && (
+              <button
+                onClick={() => setShowComparison(true)}
+                className="rounded-full bg-violet-500 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-violet-400"
+              >
+                Compare
+              </button>
+            )}
+            <button
+              onClick={exitCompareMode}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+              aria-label="Exit compare mode"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Empty State */}
       {isSearching && !hasResults && (
@@ -346,7 +509,11 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                   <TldrToolCard
                     tool={tool}
                     allTools={tools}
-                    onMobileTap={handleMobileTap}
+                    onMobileTap={compareMode ? undefined : handleMobileTap}
+                    isFocused={focusedToolId === tool.id}
+                    isCompareMode={compareMode}
+                    isSelectedForCompare={compareIds.has(tool.id)}
+                    onToggleCompare={toggleCompareSelection}
                   />
                 </motion.div>
               ))}
@@ -385,7 +552,11 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                   <TldrToolCard
                     tool={tool}
                     allTools={tools}
-                    onMobileTap={handleMobileTap}
+                    onMobileTap={compareMode ? undefined : handleMobileTap}
+                    isFocused={focusedToolId === tool.id}
+                    isCompareMode={compareMode}
+                    isSelectedForCompare={compareIds.has(tool.id)}
+                    onToggleCompare={toggleCompareSelection}
                   />
                 </motion.div>
               ))}
@@ -393,6 +564,100 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
           </div>
         </section>
       )}
+      {/* Comparison Bottom Sheet */}
+      <BottomSheet
+        isOpen={showComparison && compareTools.length >= 2}
+        onClose={() => setShowComparison(false)}
+        title={`Comparing ${compareTools.length} Tools`}
+        maxHeight={90}
+      >
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full min-w-[500px] text-left text-sm">
+            <thead>
+              <tr>
+                <th className="pb-3 pr-3 text-xs font-bold uppercase tracking-wider text-slate-500" />
+                {compareTools.map((tool) => (
+                  <th key={tool.id} className="pb-3 px-3 text-center">
+                    <div className={cn("mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br", tool.color)}>
+                      <DynamicIcon name={tool.icon} className="h-5 w-5 text-white" aria-hidden="true" />
+                    </div>
+                    <span className="text-sm font-bold text-white">{tool.shortName}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              <tr>
+                <td className="py-3 pr-3 text-xs font-bold uppercase tracking-wider text-slate-500">What It Does</td>
+                {compareTools.map((tool) => (
+                  <td key={tool.id} className="py-3 px-3 text-xs text-slate-300">{tool.whatItDoes}</td>
+                ))}
+              </tr>
+              <tr>
+                <td className="py-3 pr-3 text-xs font-bold uppercase tracking-wider text-slate-500">Stars</td>
+                {compareTools.map((tool) => (
+                  <td key={tool.id} className="py-3 px-3 text-center">
+                    {tool.stars ? (
+                      <span className="inline-flex items-center gap-1 text-amber-300">
+                        <Star className="h-3 w-3 fill-amber-400" aria-hidden="true" />
+                        {formatStarCount(tool.stars)}
+                      </span>
+                    ) : "—"}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="py-3 pr-3 text-xs font-bold uppercase tracking-wider text-slate-500">Tech Stack</td>
+                {compareTools.map((tool) => (
+                  <td key={tool.id} className="py-3 px-3">
+                    <div className="flex flex-wrap gap-1">
+                      {tool.techStack.map((tech) => (
+                        <span key={tech} className="rounded bg-white/5 px-1.5 py-0.5 text-xs text-slate-400">{tech}</span>
+                      ))}
+                    </div>
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="py-3 pr-3 text-xs font-bold uppercase tracking-wider text-slate-500">Key Features</td>
+                {compareTools.map((tool) => (
+                  <td key={tool.id} className="py-3 px-3">
+                    <ul className="space-y-1">
+                      {tool.keyFeatures.slice(0, 3).map((f) => (
+                        <li key={f} className="text-xs text-slate-300">• {f}</li>
+                      ))}
+                    </ul>
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="py-3 pr-3 text-xs font-bold uppercase tracking-wider text-slate-500">Synergies</td>
+                {compareTools.map((tool) => (
+                  <td key={tool.id} className="py-3 px-3">
+                    <div className="flex flex-wrap gap-1">
+                      {tool.synergies.map((s) => {
+                        const linked = tools.find((t) => t.id === s.toolId);
+                        if (!linked) return null;
+                        const isInCompare = compareIds.has(s.toolId);
+                        return (
+                          <span key={s.toolId} className={cn(
+                            "rounded-md px-1.5 py-0.5 text-xs font-medium",
+                            isInCompare ? "bg-violet-500/20 text-violet-300 ring-1 ring-violet-500/30" : "bg-white/5 text-slate-400"
+                          )}>
+                            {linked.shortName}{isInCompare ? " ✓" : ""}
+                          </span>
+                        );
+                      })}
+                      {tool.synergies.length === 0 && <span className="text-xs text-slate-500">—</span>}
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </BottomSheet>
+
       {/* Mobile Bottom Sheet for tool details */}
       <BottomSheet
         isOpen={!!selectedTool}

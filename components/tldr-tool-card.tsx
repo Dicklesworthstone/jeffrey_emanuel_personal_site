@@ -39,6 +39,14 @@ interface TldrToolCardProps {
   allTools: TldrFlywheelTool[];
   /** Called on mobile when user taps to see full details in a bottom sheet */
   onMobileTap?: (tool: TldrFlywheelTool) => void;
+  /** Whether this card is keyboard-focused via vim navigation */
+  isFocused?: boolean;
+  /** Whether compare mode is active */
+  isCompareMode?: boolean;
+  /** Whether this card is selected for comparison */
+  isSelectedForCompare?: boolean;
+  /** Toggle this card's compare selection */
+  onToggleCompare?: (tool: TldrFlywheelTool) => void;
 }
 
 // =============================================================================
@@ -68,7 +76,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 // HELPER COMPONENTS
 // =============================================================================
 
-function DynamicIcon({
+export function DynamicIcon({
   name,
   className,
   "aria-hidden": ariaHidden,
@@ -121,6 +129,10 @@ export function TldrToolCard({
   tool,
   allTools,
   onMobileTap,
+  isFocused,
+  isCompareMode,
+  isSelectedForCompare,
+  onToggleCompare,
 }: TldrToolCardProps) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -195,6 +207,8 @@ export function TldrToolCard({
           "relative h-full flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm",
           "transition-all duration-300",
           "hover:border-white/20 hover:bg-slate-900/70",
+          isFocused && "ring-2 ring-violet-500/60 border-violet-500/40",
+          isSelectedForCompare && "ring-2 ring-violet-400/70 border-violet-400/40",
           "motion-safe:hover:scale-[1.01] motion-safe:hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4),0_0_40px_-14px_rgba(var(--accent-rgb),0.35)]",
           "active:scale-[0.98] active:border-white/25"
         )}
@@ -222,6 +236,31 @@ export function TldrToolCard({
           }}
           aria-hidden="true"
         />
+
+        {/* Compare selection overlay */}
+        {isCompareMode && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleCompare?.(tool);
+            }}
+            className="absolute inset-0 z-20 cursor-pointer"
+            aria-label={isSelectedForCompare ? `Remove ${tool.shortName} from comparison` : `Add ${tool.shortName} to comparison`}
+          >
+            <div className={cn(
+              "absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all sm:right-4 sm:top-4",
+              isSelectedForCompare
+                ? "border-violet-400 bg-violet-500 text-white"
+                : "border-slate-500 bg-slate-900/80"
+            )}>
+              {isSelectedForCompare && (
+                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+          </button>
+        )}
 
         {/* Content */}
         <div className="relative z-10 flex flex-1 flex-col">
