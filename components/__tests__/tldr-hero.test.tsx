@@ -41,9 +41,10 @@ describe("TldrHero", () => {
 
     it("renders stats", () => {
       render(<TldrHero />);
-      expect(screen.getByText("100+")).toBeInTheDocument();
+      // Stat values may be split across elements (number in span + suffix as text)
+      expect(screen.getByText((_content, element) => element?.textContent === "100+")).toBeInTheDocument();
       expect(screen.getByText("Stat One")).toBeInTheDocument();
-      expect(screen.getByText("50%")).toBeInTheDocument();
+      expect(screen.getByText((_content, element) => element?.textContent === "50%")).toBeInTheDocument();
       expect(screen.getByText("Stat Two")).toBeInTheDocument();
     });
     

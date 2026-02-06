@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState, useCallback } from "react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getColorDefinition } from "@/lib/colors";
@@ -32,6 +32,9 @@ export function TldrSynergyDiagram({
   const isInView = useInView(containerRef, { once: true, margin: "-50px" });
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
+
+  // Interactive state
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
   // Filter to core tools only for the diagram
   const coreTools = useMemo(
@@ -66,6 +69,7 @@ export function TldrSynergyDiagram({
       to: string;
       fromPos: NodePosition;
       toPos: NodePosition;
+      sourceRgb: string;
     }> = [];
 
     coreTools.forEach((tool) => {
@@ -84,6 +88,7 @@ export function TldrSynergyDiagram({
               to: synergy.toolId,
               fromPos: nodePositions[tool.id],
               toPos: nodePositions[synergy.toolId],
+              sourceRgb: getColorDefinition(tool.color).rgb,
             });
           }
         }
@@ -92,6 +97,91 @@ export function TldrSynergyDiagram({
 
     return lines;
   }, [coreTools, nodePositions]);
+
+  // Compute connected nodes for hover highlighting
+  const connectedToHovered = useMemo(() => {
+    if (!hoveredNode) return new Set<string>();
+    const connected = new Set<string>();
+
+    // Direct synergies from hovered tool
+    const tool = coreTools.find((t) => t.id === hoveredNode);
+    if (tool) {
+      tool.synergies.forEach((s) => {
+        if (coreTools.some((t) => t.id === s.toolId)) {
+          connected.add(s.toolId);
+        }
+      });
+    }
+
+    // Reverse connections: other tools that list hoveredNode as a synergy
+    coreTools.forEach((t) => {
+      t.synergies.forEach((s) => {
+        if (s.toolId === hoveredNode) {
+          connected.add(t.id);
+        }
+      });
+    });
+
+    return connected;
+  }, [hoveredNode, coreTools]);
+
+  // Check if a connection is highlighted
+  const isConnectionHighlighted = useCallback(
+    (from: string, to: string) => {
+      if (!hoveredNode) return false;
+      return from === hoveredNode || to === hoveredNode;
+    },
+    [hoveredNode]
+  );
+
+  // Get node opacity based on hover state
+  const getNodeOpacity = useCallback(
+    (toolId: string) => {
+      if (!hoveredNode) return 1;
+      if (toolId === hoveredNode) return 1;
+      if (connectedToHovered.has(toolId)) return 1;
+      return 0.25;
+    },
+    [hoveredNode, connectedToHovered]
+  );
+
+  // Click handler: scroll to the tool card
+  const handleNodeClick = useCallback((toolId: string) => {
+    const element = document.getElementById(`tool-card-${toolId}`);
+    if (element) {
+      element.scrollIntoView({
+        behavior: prefersReducedMotion ? "instant" : "smooth",
+        block: "center",
+      });
+      // Brief highlight effect via a CSS class
+      element.classList.add("ring-2", "ring-violet-400/60", "rounded-2xl");
+      setTimeout(() => {
+        element.classList.remove("ring-2", "ring-violet-400/60", "rounded-2xl");
+      }, 1500);
+    }
+  }, [prefersReducedMotion]);
+
+  // Keyboard handler for nodes
+  const handleNodeKeyDown = useCallback(
+    (e: React.KeyboardEvent, toolId: string) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleNodeClick(toolId);
+      }
+    },
+    [handleNodeClick]
+  );
+
+  // Defensive: handle no core tools (guard placed after all hooks)
+  if (coreTools.length === 0) {
+    return (
+      <div ref={containerRef} className={cn("relative", className)}>
+        <div className="mx-auto flex h-48 max-w-md items-center justify-center rounded-2xl border border-slate-800/40 bg-slate-900/30">
+          <p className="text-sm text-slate-500">No tools to visualize</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -104,7 +194,8 @@ export function TldrSynergyDiagram({
         <svg
           viewBox="0 0 400 400"
           className="h-auto w-full"
-          aria-label="Flywheel tool synergy diagram showing connections between core tools"
+          aria-label="Flywheel tool synergy diagram showing connections between core tools. Click a tool to scroll to its details."
+          role="img"
         >
           {/* All gradient definitions */}
           <defs>
@@ -117,6 +208,19 @@ export function TldrSynergyDiagram({
               <stop offset="50%" stopColor="rgb(139, 92, 246)" stopOpacity="0.8" />
               <stop offset="100%" stopColor="rgb(139, 92, 246)" stopOpacity="0.5" />
             </linearGradient>
+            <linearGradient id="lineGradientHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgb(139, 92, 246)" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="rgb(167, 139, 250)" stopOpacity="1" />
+              <stop offset="100%" stopColor="rgb(139, 92, 246)" stopOpacity="0.8" />
+            </linearGradient>
+            {/* Particle glow filter */}
+            <filter id="particleGlow">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
             {/* Tool-specific gradients */}
             {coreTools.map((tool) => (
               <linearGradient
@@ -144,47 +248,53 @@ export function TldrSynergyDiagram({
 
           {/* Connection lines */}
           <g className="connections">
-            {connections.map((conn, index) => (
-              <motion.line
-                key={`${conn.from}-${conn.to}`}
-                x1={conn.fromPos.x}
-                y1={conn.fromPos.y}
-                x2={conn.toPos.x}
-                y2={conn.toPos.y}
-                stroke="url(#lineGradient)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                initial={reducedMotion ? {} : { opacity: 0 }}
-                animate={isInView ? { opacity: 1 } : {}}
-                transition={{
-                  duration: reducedMotion ? 0 : 0.8,
-                  delay: reducedMotion ? 0 : 0.3 + index * 0.05,
-                }}
-              />
-            ))}
-            
-            {/* Animated particles */}
-            {!reducedMotion && isInView && connections.map((conn, index) => (
-              <motion.circle
-                key={`particle-${conn.from}-${conn.to}`}
-                r="2"
-                fill="white"
-                initial={{ cx: conn.fromPos.x, cy: conn.fromPos.y, opacity: 0 }}
-                animate={{ 
-                  cx: [conn.fromPos.x, conn.toPos.x],
-                  cy: [conn.fromPos.y, conn.toPos.y],
-                  opacity: [0, 1, 1, 0]
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: (index * 0.2) % 2, // Deterministic stagger
-                  repeatDelay: 0.5
-                }}
-                className="pointer-events-none"
-              />
-            ))}
+            {connections.map((conn, index) => {
+              const highlighted = isConnectionHighlighted(conn.from, conn.to);
+              const dimmed = hoveredNode && !highlighted;
+
+              return (
+                <motion.line
+                  key={`${conn.from}-${conn.to}`}
+                  x1={conn.fromPos.x}
+                  y1={conn.fromPos.y}
+                  x2={conn.toPos.x}
+                  y2={conn.toPos.y}
+                  stroke={highlighted ? "url(#lineGradientHighlight)" : "url(#lineGradient)"}
+                  strokeWidth={highlighted ? 2.5 : 1.5}
+                  strokeLinecap="round"
+                  initial={reducedMotion ? {} : { opacity: 0 }}
+                  animate={isInView ? { opacity: dimmed ? 0.15 : 1 } : {}}
+                  transition={{
+                    duration: reducedMotion ? 0 : 0.8,
+                    delay: reducedMotion ? 0 : 0.3 + index * 0.05,
+                  }}
+                  style={{ transition: "stroke-width 200ms, opacity 200ms" }}
+                />
+              );
+            })}
+
+            {/* Animated flow particles (SMIL-based to avoid re-render restarts) */}
+            {!reducedMotion && isInView && connections.map((conn, index) => {
+              const delay1 = ((index * 0.7) % 3).toFixed(1);
+              const delay2 = (((index * 0.7) + 1.8) % 3.5).toFixed(1);
+
+              return (
+                <g key={`particles-${conn.from}-${conn.to}`} className="pointer-events-none">
+                  {/* Primary particle - source → target */}
+                  <circle r="3" fill={`rgb(${conn.sourceRgb})`} filter="url(#particleGlow)" opacity="0">
+                    <animate attributeName="cx" values={`${conn.fromPos.x};${conn.toPos.x}`} dur="3s" repeatCount="indefinite" begin={`${delay1}s`} />
+                    <animate attributeName="cy" values={`${conn.fromPos.y};${conn.toPos.y}`} dur="3s" repeatCount="indefinite" begin={`${delay1}s`} />
+                    <animate attributeName="opacity" values="0;0.8;0.8;0" dur="3s" repeatCount="indefinite" begin={`${delay1}s`} />
+                  </circle>
+                  {/* Secondary particle - target → source (smaller, offset) */}
+                  <circle r="2" fill={`rgb(${conn.sourceRgb})`} opacity="0">
+                    <animate attributeName="cx" values={`${conn.toPos.x};${conn.fromPos.x}`} dur="3.5s" repeatCount="indefinite" begin={`${delay2}s`} />
+                    <animate attributeName="cy" values={`${conn.toPos.y};${conn.fromPos.y}`} dur="3.5s" repeatCount="indefinite" begin={`${delay2}s`} />
+                    <animate attributeName="opacity" values="0;0.5;0.5;0" dur="3.5s" repeatCount="indefinite" begin={`${delay2}s`} />
+                  </circle>
+                </g>
+              );
+            })}
           </g>
 
           {/* Center "Flywheel" label */}
@@ -193,6 +303,20 @@ export function TldrSynergyDiagram({
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.2 }}
           >
+            {/* Subtle breathing glow behind center node */}
+            {!reducedMotion && isInView && (
+              <motion.circle
+                cx="200"
+                cy="200"
+                r="42"
+                fill="none"
+                stroke="rgba(139, 92, 246, 0.15)"
+                strokeWidth="1"
+                animate={{ r: [42, 48, 42], opacity: [0.3, 0.1, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none"
+              />
+            )}
             <circle
               cx="200"
               cy="200"
@@ -227,30 +351,54 @@ export function TldrSynergyDiagram({
             const nodeRadius = coreTools.length > 8 ? 22 : 28;
             const ringRadius = coreTools.length > 8 ? 20 : 26;
             const fontSize = coreTools.length > 8 ? "9px" : "11px";
+            const nodeOpacity = getNodeOpacity(tool.id);
+            const isHovered = hoveredNode === tool.id;
 
             return (
               <motion.g
                 key={tool.id}
-                whileHover={reducedMotion ? {} : { scale: 1.1 }}
+                role="button"
+                tabIndex={0}
+                aria-label={`${tool.shortName} - click to scroll to details`}
+                onMouseEnter={() => setHoveredNode(tool.id)}
+                onMouseLeave={() => setHoveredNode(null)}
+                onFocus={() => setHoveredNode(tool.id)}
+                onBlur={() => setHoveredNode(null)}
+                onClick={() => handleNodeClick(tool.id)}
+                onKeyDown={(e) => handleNodeKeyDown(e, tool.id)}
+                whileHover={reducedMotion ? {} : { scale: 1.15 }}
                 initial={reducedMotion ? {} : { opacity: 0, scale: 0 }}
-                animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                animate={isInView ? { opacity: nodeOpacity, scale: 1 } : {}}
                 transition={{
                   duration: reducedMotion ? 0 : 0.4,
                   delay: reducedMotion ? 0 : 0.4 + index * 0.05,
                   type: "spring",
                   stiffness: 200,
                 }}
-                className="cursor-pointer"
+                className="cursor-pointer outline-none"
+                style={{ transition: "opacity 200ms" }}
               >
+                {/* Focus ring (visible on keyboard focus) */}
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={nodeRadius + 4}
+                  fill="none"
+                  stroke="rgb(139, 92, 246)"
+                  strokeWidth="2"
+                  opacity={0}
+                  className="[g:focus-visible>&]:opacity-60"
+                />
+
                 {/* Node background */}
                 <circle
                   cx={pos.x}
                   cy={pos.y}
                   r={nodeRadius}
                   fill="rgba(15, 23, 42, 0.95)"
-                  stroke="rgba(255, 255, 255, 0.1)"
-                  strokeWidth="1"
-                  className="transition-all duration-300 hover:stroke-white/30"
+                  stroke={isHovered ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.1)"}
+                  strokeWidth={isHovered ? 1.5 : 1}
+                  style={{ transition: "stroke 200ms, stroke-width 200ms" }}
                 />
 
                 {/* Gradient ring */}
@@ -260,8 +408,9 @@ export function TldrSynergyDiagram({
                   r={ringRadius}
                   fill="none"
                   stroke={`url(#gradient-${tool.id})`}
-                  strokeWidth="2"
-                  opacity="0.6"
+                  strokeWidth={isHovered ? 3 : 2}
+                  opacity={isHovered ? 0.9 : 0.6}
+                  style={{ transition: "stroke-width 200ms, opacity 200ms" }}
                 />
 
                 {/* Tool label */}
@@ -269,7 +418,7 @@ export function TldrSynergyDiagram({
                   x={pos.x}
                   y={pos.y + 3}
                   textAnchor="middle"
-                  className="fill-white font-bold"
+                  className="fill-white font-bold pointer-events-none"
                   style={{ fontSize }}
                 >
                   {tool.shortName}
@@ -286,8 +435,10 @@ export function TldrSynergyDiagram({
           transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.8 }}
           className="mt-6 text-center"
         >
-          <p className="text-xs text-slate-500">
-            Lines represent data flow and integration between tools
+          <p className="text-xs text-slate-500" aria-live="polite" aria-atomic="true">
+            {hoveredNode
+              ? `Showing connections for ${coreTools.find((t) => t.id === hoveredNode)?.shortName ?? "tool"}`
+              : "Hover a tool to see connections \u00b7 Click to scroll to details"}
           </p>
         </motion.div>
       </motion.div>

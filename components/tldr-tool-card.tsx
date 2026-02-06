@@ -37,6 +37,8 @@ import type { TldrFlywheelTool } from "@/lib/content";
 interface TldrToolCardProps {
   tool: TldrFlywheelTool;
   allTools: TldrFlywheelTool[];
+  /** Called on mobile when user taps to see full details in a bottom sheet */
+  onMobileTap?: (tool: TldrFlywheelTool) => void;
 }
 
 // =============================================================================
@@ -69,12 +71,14 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 function DynamicIcon({
   name,
   className,
+  "aria-hidden": ariaHidden,
 }: {
   name: string;
   className?: string;
+  "aria-hidden"?: boolean | "true" | "false";
 }) {
   const IconComponent = iconMap[name] || Box;
-  return <IconComponent className={className} />;
+  return <IconComponent className={className} aria-hidden={ariaHidden} />;
 }
 
 function SynergyPill({
@@ -88,14 +92,14 @@ function SynergyPill({
   if (!linkedTool) return null;
 
   return (
-    <div className="group/synergy relative flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1.5 ring-1 ring-inset ring-white/5 transition-all hover:bg-white/10 hover:ring-white/15 sm:px-3 sm:py-2">
+    <div className="group/synergy relative flex min-h-[44px] items-center gap-2 rounded-lg bg-white/5 px-3 py-2.5 ring-1 ring-inset ring-white/5 transition-all hover:bg-white/10 hover:ring-white/15 sm:px-3 sm:py-2">
       <div
         className={cn(
           "flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-gradient-to-br sm:h-6 sm:w-6",
           linkedTool.color
         )}
       >
-        <DynamicIcon name={linkedTool.icon} className="h-2.5 w-2.5 text-white sm:h-3 sm:w-3" />
+        <DynamicIcon name={linkedTool.icon} className="h-2.5 w-2.5 text-white sm:h-3 sm:w-3" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <span className="block text-xs font-semibold text-white sm:text-xs">
@@ -116,6 +120,7 @@ function SynergyPill({
 export function TldrToolCard({
   tool,
   allTools,
+  onMobileTap,
 }: TldrToolCardProps) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -179,7 +184,7 @@ export function TldrToolCard({
           "relative h-full flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm",
           "transition-all duration-300",
           "hover:border-white/20 hover:bg-slate-900/70",
-          "motion-safe:hover:scale-[1.01] motion-safe:hover:shadow-[0_0_40px_-14px_rgba(var(--accent-rgb),0.35)]",
+          "motion-safe:hover:scale-[1.01] motion-safe:hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4),0_0_40px_-14px_rgba(var(--accent-rgb),0.35)]",
           "active:scale-[0.98] active:border-white/25"
         )}
         style={{ "--accent-rgb": spotlightRgb } as CSSProperties}
@@ -187,7 +192,7 @@ export function TldrToolCard({
         {/* Gradient background */}
         <div
           className={cn(
-            "absolute inset-0 bg-gradient-to-br opacity-[0.05] transition-opacity duration-300 group-hover:opacity-[0.1]",
+            "absolute inset-0 bg-gradient-to-br opacity-[0.05] transition-opacity duration-300 group-hover:opacity-[0.12] group-hover:delay-[30ms]",
             tool.color
           )}
           aria-hidden="true"
@@ -212,11 +217,20 @@ export function TldrToolCard({
               <div className="flex items-start gap-3 sm:gap-4">
                 <div
                   className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg sm:h-12 sm:w-12",
+                    "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg sm:h-12 sm:w-12",
+                    "motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:delay-[50ms]",
                     tool.color
                   )}
                 >
-                  <DynamicIcon name={tool.icon} className="h-5 w-5 text-white sm:h-6 sm:w-6" />
+                  {/* Hover glow behind icon */}
+                  <div
+                    className={cn(
+                      "pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-br opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-30 group-hover:delay-[80ms]",
+                      tool.color
+                    )}
+                    aria-hidden="true"
+                  />
+                  <DynamicIcon name={tool.icon} className="relative h-5 w-5 text-white sm:h-6 sm:w-6" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -258,7 +272,7 @@ export function TldrToolCard({
                     e.stopPropagation();
                     lightTap();
                   }}
-                  className="group/github flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all hover:bg-white/10 hover:text-white sm:h-11 sm:w-11"
+                  className="group/github flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 sm:h-11 sm:w-11"
                   aria-label={`View ${tool.name} on GitHub`}
                 >
                   <ExternalLink className="h-4 w-4 transition-transform group-hover/github:translate-x-0.5" />
@@ -272,14 +286,31 @@ export function TldrToolCard({
             </p>
           </div>
 
-          {/* Full content - always visible */}
-          <div className="flex-1 border-t border-white/10">
+          {/* Mobile: Show Details button (hidden on md+) */}
+          {onMobileTap && (
+            <div className="border-t border-white/10 p-4 md:hidden">
+              <button
+                onClick={() => {
+                  lightTap();
+                  onMobileTap(tool);
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 py-3 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white active:scale-[0.98]"
+                aria-label={`View details for ${tool.shortName}`}
+              >
+                Show Details
+                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          )}
+
+          {/* Full content - hidden on mobile when bottom sheet is available, always visible on md+ */}
+          <div className={cn("flex-1 border-t border-white/10", onMobileTap && "hidden md:block")}>
             <div className="space-y-4 p-4 sm:space-y-5 sm:p-5">
               {/* Why it's useful */}
               <div>
-                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Why It&apos;s Useful
-                </h4>
+                </h3>
                 <p className="text-xs leading-relaxed text-slate-300 sm:text-sm">
                   {tool.whyItsUseful}
                 </p>
@@ -287,9 +318,9 @@ export function TldrToolCard({
 
               {/* Key features */}
               <div>
-                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Key Features
-                </h4>
+                </h3>
                 <ul className="space-y-1 sm:space-y-1.5">
                   {tool.keyFeatures.map((feature) => (
                     <li
@@ -305,9 +336,9 @@ export function TldrToolCard({
 
               {/* Tech stack */}
               <div>
-                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Tech Stack
-                </h4>
+                </h3>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {tool.techStack.map((tech) => (
                     <span
@@ -323,9 +354,9 @@ export function TldrToolCard({
               {/* Synergies */}
               {tool.synergies.length > 0 && (
                 <div>
-                  <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                  <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                     Synergies
-                  </h4>
+                  </h3>
                   <div className="grid gap-1.5 sm:gap-2 sm:grid-cols-2">
                     {tool.synergies.map((synergy) => (
                       <SynergyPill

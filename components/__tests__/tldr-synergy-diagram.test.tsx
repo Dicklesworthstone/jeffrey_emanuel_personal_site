@@ -100,7 +100,7 @@ describe("TldrSynergyDiagram", () => {
     
     it("renders correct ARIA label", () => {
         render(<TldrSynergyDiagram tools={mockTools} />);
-        const svg = screen.getByLabelText("Flywheel tool synergy diagram showing connections between core tools");
+        const svg = screen.getByLabelText("Flywheel tool synergy diagram showing connections between core tools. Click a tool to scroll to its details.");
         expect(svg).toBeInTheDocument();
     });
   });
@@ -109,7 +109,7 @@ describe("TldrSynergyDiagram", () => {
      // Checking if the SVG has viewBox set for scaling
      it("has viewBox attribute for scaling", () => {
          render(<TldrSynergyDiagram tools={mockTools} />);
-         const svg = screen.getByLabelText("Flywheel tool synergy diagram showing connections between core tools");
+         const svg = screen.getByLabelText("Flywheel tool synergy diagram showing connections between core tools. Click a tool to scroll to its details.");
          expect(svg).toHaveAttribute("viewBox", "0 0 400 400");
      });
   });

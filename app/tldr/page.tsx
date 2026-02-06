@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 import { Copy, Check } from "lucide-react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import ErrorBoundary from "@/components/error-boundary";
 import { TldrHero } from "@/components/tldr-hero";
 import { TldrToolGrid } from "@/components/tldr-tool-grid";
 import { TldrSynergyDiagram } from "@/components/tldr-synergy-diagram";
+import { TldrSectionNav } from "@/components/tldr-section-nav";
 import { tldrFlywheelTools, tldrPageData } from "@/lib/content";
 
 // =============================================================================
@@ -26,8 +27,17 @@ function FlywheelExplanation() {
       ref={containerRef}
       className="relative overflow-hidden py-12 md:py-24"
     >
-      {/* Background gradient */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-violet-950/10 to-transparent" />
+      {/* Mesh gradient background */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: [
+            "radial-gradient(circle at 30% 40%, rgba(139, 92, 246, 0.12), transparent 50%)",
+            "radial-gradient(circle at 70% 60%, rgba(52, 211, 153, 0.08), transparent 50%)",
+            "radial-gradient(ellipse 100% 60% at 50% 50%, rgba(15, 23, 42, 0.4), transparent 70%)",
+          ].join(", "),
+        }}
+      />
 
       <div className="container relative mx-auto px-4 sm:px-6">
         <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
@@ -111,7 +121,7 @@ function FooterCTA({ id }: { id?: string }) {
                 </code>
                 <button
                   onClick={handleCopy}
-                  className="flex-shrink-0 rounded-lg bg-slate-800 p-2 text-slate-400 transition-all duration-200 hover:bg-violet-600 hover:text-white active:scale-95 sm:p-2.5"
+                  className="flex-shrink-0 flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg bg-slate-800 p-2.5 text-slate-400 transition-all duration-200 hover:bg-violet-600 hover:text-white active:scale-95 sm:p-2.5"
                   aria-label={copied ? "Copied!" : "Copy to clipboard"}
                 >
                   {copied ? (
@@ -122,11 +132,13 @@ function FooterCTA({ id }: { id?: string }) {
                 </button>
               </div>
             </div>
-            {copied && (
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white shadow-lg">
-                Copied!
-              </div>
-            )}
+            <div role="status" aria-live="polite" aria-atomic="true">
+              {copied && (
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white shadow-lg">
+                  Copied!
+                </div>
+              )}
+            </div>
           </div>
           <p className="text-xs text-slate-500">
             Or visit{" "}
@@ -151,6 +163,16 @@ function FooterCTA({ id }: { id?: string }) {
 // =============================================================================
 
 export default function TldrPage() {
+  const sectionNavItems = useMemo(() => {
+    const core = tldrFlywheelTools.filter((t) => t.category === "core");
+    const supporting = tldrFlywheelTools.filter((t) => t.category === "supporting");
+    return [
+      { id: "core-tools", label: "Core Tools", shortLabel: "Core", count: core.length },
+      { id: "supporting-tools", label: "Supporting Tools", shortLabel: "Support", count: supporting.length },
+      { id: "get-started", label: "Get Started", shortLabel: "Setup", count: 0 },
+    ].filter((s) => s.count > 0 || s.id === "get-started");
+  }, []);
+
   return (
     <ErrorBoundary>
       <main className="min-h-screen overflow-x-hidden">
@@ -158,14 +180,48 @@ export default function TldrPage() {
         <TldrHero id="tldr-hero" />
 
         {/* Flywheel Explanation with Diagram */}
-        <ErrorBoundary>
+        <ErrorBoundary
+          fallback={
+            <section className="py-12 md:py-24">
+              <div className="container mx-auto px-4 text-center">
+                <p className="text-sm text-slate-500">
+                  Unable to load the flywheel diagram. Please refresh the page.
+                </p>
+              </div>
+            </section>
+          }
+        >
           <FlywheelExplanation />
         </ErrorBoundary>
 
+        {/* Sticky Section Navigation */}
+        <TldrSectionNav
+          sections={sectionNavItems}
+          triggerElementId="tldr-hero"
+        />
+
         {/* Tools Grid */}
-        <section className="py-12 md:py-24">
+        <section className="relative py-12 md:py-24">
+          {/* Subtle mesh gradient behind tools */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: [
+                "radial-gradient(ellipse 70% 30% at 10% 20%, rgba(139, 92, 246, 0.06), transparent)",
+                "radial-gradient(ellipse 50% 40% at 90% 80%, rgba(236, 72, 153, 0.04), transparent)",
+              ].join(", "),
+            }}
+          />
           <div className="container mx-auto px-4 sm:px-6">
-            <ErrorBoundary>
+            <ErrorBoundary
+              fallback={
+                <div className="py-16 text-center">
+                  <p className="text-sm text-slate-500">
+                    Unable to load tools. Please refresh the page.
+                  </p>
+                </div>
+              }
+            >
               <TldrToolGrid tools={tldrFlywheelTools} />
             </ErrorBoundary>
           </div>

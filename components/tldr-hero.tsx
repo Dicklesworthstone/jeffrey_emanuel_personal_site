@@ -19,6 +19,16 @@ interface TldrHeroProps {
 // ANIMATED STAT COMPONENT
 // =============================================================================
 
+/** Parse a stat value like "14", "16K+", "5" into numeric + suffix parts */
+function parseStatValue(value: string): { numeric: number; suffix: string } {
+  const match = value.match(/^([\d,]+)(.*)/);
+  if (!match) return { numeric: 0, suffix: value };
+  return {
+    numeric: parseInt(match[1].replace(/,/g, ""), 10),
+    suffix: match[2], // e.g. "K+", "+", ""
+  };
+}
+
 function AnimatedStat({
   label,
   value,
@@ -32,6 +42,34 @@ function AnimatedStat({
   reducedMotion: boolean;
   isInView: boolean;
 }) {
+  const { numeric, suffix } = parseStatValue(value);
+  const [displayCount, setDisplayCount] = useState(numeric);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (!isInView || hasAnimated.current || reducedMotion) return;
+    hasAnimated.current = true;
+
+    const delay = index * 150;
+    const timer = setTimeout(() => {
+      setDisplayCount(0);
+      const duration = Math.min(1200 + numeric * 5, 2000);
+      let startTime: number;
+
+      const step = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setDisplayCount(Math.round(eased * numeric));
+        if (progress < 1) requestAnimationFrame(step);
+      };
+
+      requestAnimationFrame(step);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [isInView, numeric, index, reducedMotion]);
+
   return (
     <motion.div
       initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -42,7 +80,10 @@ function AnimatedStat({
       }}
       className="text-center"
     >
-      <div className="text-2xl font-bold text-white sm:text-3xl md:text-4xl">{value}</div>
+      <div className="text-2xl font-bold text-white sm:text-3xl md:text-4xl">
+        <span className="tabular-nums">{displayCount.toLocaleString()}</span>
+        {suffix}
+      </div>
       <div className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-400">
         {label}
       </div>
@@ -121,8 +162,17 @@ export function TldrHero({ className, id }: TldrHeroProps) {
       ref={containerRef}
       className={cn("relative overflow-hidden py-16 md:py-32", className)}
     >
-      {/* Background gradient */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-violet-950/20 via-transparent to-transparent" />
+      {/* Mesh gradient background */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: [
+            "radial-gradient(ellipse 80% 50% at 20% 40%, rgba(139, 92, 246, 0.15), transparent)",
+            "radial-gradient(ellipse 60% 40% at 80% 30%, rgba(236, 72, 153, 0.08), transparent)",
+            "radial-gradient(ellipse 50% 60% at 50% 80%, rgba(56, 189, 248, 0.06), transparent)",
+          ].join(", "),
+        }}
+      />
 
       {/* Decorative grid - hidden on mobile for cleaner look */}
       <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] sm:block" />
@@ -190,7 +240,7 @@ export function TldrHero({ className, id }: TldrHeroProps) {
             initial={reducedMotion ? {} : { opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
             transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.3 }}
-            className="mt-8 flex items-center justify-center gap-6 sm:mt-12 sm:gap-8 md:gap-16"
+            className="mt-8 flex items-center justify-center gap-4 sm:mt-12 sm:gap-6 md:gap-8 lg:gap-16"
           >
             {hero.stats.map((stat, i) => (
               <AnimatedStat

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, memo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { Layers, Wrench, Search, X } from "lucide-react";
+import { Layers, Wrench, Search, X, ArrowUpRight, Star } from "lucide-react";
 import Fuse from "fuse.js";
 import { cn } from "@/lib/utils";
+import { formatStarCount, formatStarCountFull } from "@/lib/format-stars";
+import BottomSheet from "@/components/bottom-sheet";
 import { TldrToolCard } from "./tldr-tool-card";
 import type { TldrFlywheelTool } from "@/lib/content";
 
@@ -67,7 +69,7 @@ const ToolSearchBar = memo(function ToolSearchBar({
             {query && (
               <button
                 onClick={() => onQueryChange("")}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50"
                 aria-label="Clear search"
               >
                 <X className="h-4 w-4" />
@@ -136,7 +138,7 @@ const EmptySearchState = memo(function EmptySearchState({
       className="py-16 text-center"
     >
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-500/10">
-        <Search className="h-8 w-8 text-violet-400" />
+        <Search className="h-8 w-8 text-violet-400" aria-hidden="true" />
       </div>
       <h3 className="mt-6 text-lg font-semibold text-white">
         No tools match &quot;{query}&quot;
@@ -147,7 +149,7 @@ const EmptySearchState = memo(function EmptySearchState({
       </p>
       <button
         onClick={onClear}
-        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20"
+        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50"
       >
         <X className="h-4 w-4" />
         Clear search
@@ -213,6 +215,15 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Mobile bottom sheet state
+  const [selectedTool, setSelectedTool] = useState<TldrFlywheelTool | null>(null);
+  const handleMobileTap = useCallback((tool: TldrFlywheelTool) => {
+    setSelectedTool(tool);
+  }, []);
+  const handleCloseSheet = useCallback(() => {
+    setSelectedTool(null);
+  }, []);
+
   // Initialize Fuse.js for fuzzy search
   const fuse = useMemo(
     () =>
@@ -275,6 +286,15 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
   const hasResults = filteredTools.length > 0;
   const isSearching = searchQuery.trim().length > 0;
 
+  // Defensive: handle empty tools array
+  if (tools.length === 0) {
+    return (
+      <div className={cn("py-16 text-center", className)}>
+        <p className="text-sm text-slate-500">No tools to display.</p>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("space-y-16", className)}>
       {/* Search Bar */}
@@ -306,24 +326,27 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
             count={coreTools.length}
             reducedMotion={reducedMotion}
           />
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:gap-6 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {coreTools.map((tool, index) => (
                 <motion.div
                   key={tool.id}
+                  id={`tool-card-${tool.id}`}
                   layout={!reducedMotion}
                   initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   exit={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+                  viewport={{ once: true, margin: "-40px" }}
                   transition={{
                     duration: reducedMotion ? 0 : 0.3,
                     delay: reducedMotion ? 0 : index * 0.05,
                   }}
-                  className="h-full"
+                  className="h-full scroll-mt-24"
                 >
                   <TldrToolCard
                     tool={tool}
                     allTools={tools}
+                    onMobileTap={handleMobileTap}
                   />
                 </motion.div>
               ))}
@@ -342,24 +365,27 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
             count={supportingTools.length}
             reducedMotion={reducedMotion}
           />
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:gap-6 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {supportingTools.map((tool, index) => (
                 <motion.div
                   key={tool.id}
+                  id={`tool-card-${tool.id}`}
                   layout={!reducedMotion}
                   initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   exit={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+                  viewport={{ once: true, margin: "-40px" }}
                   transition={{
                     duration: reducedMotion ? 0 : 0.3,
                     delay: reducedMotion ? 0 : index * 0.05,
                   }}
-                  className="h-full"
+                  className="h-full scroll-mt-24"
                 >
                   <TldrToolCard
                     tool={tool}
                     allTools={tools}
+                    onMobileTap={handleMobileTap}
                   />
                 </motion.div>
               ))}
@@ -367,6 +393,128 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
           </div>
         </section>
       )}
+      {/* Mobile Bottom Sheet for tool details */}
+      <BottomSheet
+        isOpen={!!selectedTool}
+        onClose={handleCloseSheet}
+        title={selectedTool?.shortName}
+        maxHeight={85}
+      >
+        {selectedTool && (
+          <div className="space-y-5">
+            {/* Stars + GitHub link */}
+            <div className="flex items-center gap-3">
+              {selectedTool.stars && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-100 ring-1 ring-inset ring-amber-400/30">
+                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  <span className="font-mono" title={formatStarCountFull(selectedTool.stars)}>
+                    {formatStarCount(selectedTool.stars)}
+                  </span>
+                </span>
+              )}
+              <a
+                href={selectedTool.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-sm font-medium text-violet-300 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                View on GitHub
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </div>
+
+            {/* What It Does */}
+            <div>
+              <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                What It Does
+              </h3>
+              <p className="text-sm leading-relaxed text-slate-300">
+                {selectedTool.whatItDoes}
+              </p>
+            </div>
+
+            {/* Why It's Useful */}
+            <div>
+              <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                Why It&apos;s Useful
+              </h3>
+              <p className="text-sm leading-relaxed text-slate-300">
+                {selectedTool.whyItsUseful}
+              </p>
+            </div>
+
+            {/* Key Features */}
+            <div>
+              <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                Key Features
+              </h3>
+              <ul className="space-y-1.5">
+                {selectedTool.keyFeatures.map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-start gap-2 text-sm text-slate-300"
+                  >
+                    <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Tech Stack */}
+            <div>
+              <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                Tech Stack
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {selectedTool.techStack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="rounded-md bg-white/5 px-2 py-1 text-xs font-medium text-slate-400"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Synergies */}
+            {selectedTool.synergies.length > 0 && (
+              <div>
+                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Synergies
+                </h3>
+                <div className="grid gap-2">
+                  {selectedTool.synergies.map((synergy) => {
+                    const linked = tools.find((t) => t.id === synergy.toolId);
+                    if (!linked) return null;
+                    return (
+                      <div
+                        key={synergy.toolId}
+                        className="flex items-center gap-3 rounded-xl bg-white/5 p-3 ring-1 ring-inset ring-white/5"
+                      >
+                        <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br", linked.color)}>
+                          <span className="text-xs font-bold text-white">
+                            {linked.shortName.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-white">
+                            {linked.shortName}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {synergy.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 }
