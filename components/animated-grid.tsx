@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { type ReactNode, Children, useState, useRef, useEffect } from "react";
+import { type ReactNode, Children, useState, useRef, useEffect, useCallback } from "react";
 
 interface AnimatedGridProps {
   children: ReactNode;
@@ -11,6 +11,8 @@ interface AnimatedGridProps {
   staggerDelay?: number;
   /** Initial delay before animations start */
   initialDelay?: number;
+  /** Show scroll progress dots on mobile for horizontal-scroll containers */
+  scrollIndicator?: boolean;
 }
 
 // Stagger container for scroll-triggered animations
@@ -56,25 +58,90 @@ export default function AnimatedGrid({
   className,
   staggerDelay = 0.1,
   initialDelay = 0.05,
+  scrollIndicator = false,
 }: AnimatedGridProps) {
   const prefersReducedMotion = useReducedMotion();
   const variants = prefersReducedMotion ? reducedMotionVariants : itemVariants;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [atEnd, setAtEnd] = useState(false);
+  const childCount = Children.count(children);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) {
+      setScrollProgress(0);
+      setAtEnd(true);
+      return;
+    }
+    const progress = el.scrollLeft / maxScroll;
+    setScrollProgress(progress);
+    setAtEnd(progress > 0.95);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!scrollIndicator || !el) return;
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Initial scroll position sync on mount
+    handleScroll();
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [scrollIndicator, handleScroll]);
+
+  // Calculate active dot index
+  const activeDot = Math.min(
+    Math.round(scrollProgress * (childCount - 1)),
+    childCount - 1
+  );
 
   return (
-    <motion.div
-      variants={containerVariants}
-      custom={{ staggerDelay, initialDelay }}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      className={cn(className)}
-    >
-      {Children.map(children, (child, index) => (
-        <motion.div key={index} variants={variants}>
-          {child}
-        </motion.div>
-      ))}
-    </motion.div>
+    <div className="relative">
+      <motion.div
+        ref={scrollRef}
+        variants={containerVariants}
+        custom={{ staggerDelay, initialDelay }}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        className={cn(className)}
+      >
+        {Children.map(children, (child, index) => (
+          <motion.div key={index} variants={variants}>
+            {child}
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Right-edge fade hint for mobile horizontal scroll */}
+      {scrollIndicator && (
+        <div
+          className={cn(
+            "pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#020617] to-transparent md:hidden transition-opacity duration-300",
+            atEnd ? "opacity-0" : "opacity-100"
+          )}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Scroll progress dots for mobile */}
+      {scrollIndicator && childCount > 1 && (
+        <div className="mt-4 flex justify-center gap-1.5 md:hidden" aria-hidden="true">
+          {Array.from({ length: childCount }).map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-200",
+                i === activeDot
+                  ? "w-4 bg-sky-400"
+                  : "w-1.5 bg-slate-700"
+              )}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -119,17 +186,17 @@ function LazySectionSkeleton({
       {Array.from({ length: cardCount }).map((_, i) => (
         <div
           key={i}
-          className="animate-pulse rounded-2xl border border-slate-800/80 bg-slate-950/80 p-6 shadow-lg"
+          className="skeleton-shimmer rounded-2xl border border-slate-800/80 bg-slate-950/80 p-6 shadow-lg"
         >
-          <div className="h-3 w-20 rounded bg-slate-800/80" />
-          <div className="mt-3 h-5 w-3/4 rounded bg-slate-800/60" />
+          <div className="h-3 w-20 rounded skeleton-shimmer-line" />
+          <div className="mt-3 h-5 w-3/4 rounded skeleton-shimmer-line" />
           <div className="mt-4 space-y-2">
-            <div className="h-4 w-full rounded bg-slate-800/40" />
-            <div className="h-4 w-5/6 rounded bg-slate-800/40" />
+            <div className="h-4 w-full rounded skeleton-shimmer-line" />
+            <div className="h-4 w-5/6 rounded skeleton-shimmer-line" />
           </div>
           <div className="mt-6 flex gap-2">
-            <div className="h-6 w-16 rounded-md bg-slate-800/50" />
-            <div className="h-6 w-20 rounded-md bg-slate-800/50" />
+            <div className="h-6 w-16 rounded-md skeleton-shimmer-line" />
+            <div className="h-6 w-20 rounded-md skeleton-shimmer-line" />
           </div>
         </div>
       ))}
@@ -146,23 +213,23 @@ export function TimelineSkeleton({ itemCount = 4 }: { itemCount?: number }) {
       <div className="absolute left-6 top-4 bottom-4 hidden w-px bg-gradient-to-b from-slate-800/50 via-slate-800/20 to-transparent md:block" />
       <div className="space-y-8 pl-2 md:space-y-12 md:pl-0">
         {Array.from({ length: itemCount }).map((_, i) => (
-          <div key={i} className="relative md:pl-20 animate-pulse">
+          <div key={i} className="relative md:pl-20 skeleton-shimmer">
             <div className="hidden md:flex absolute left-[8.5px] top-1 h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-950/50">
-              <div className="h-2 w-2 rounded-full bg-slate-800" />
+              <div className="h-2 w-2 rounded-full skeleton-shimmer-line" />
             </div>
             <div className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-6 md:p-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-2">
-                  <div className="h-5 w-48 rounded bg-slate-800/60" />
-                  <div className="h-4 w-32 rounded bg-slate-800/50" />
+                  <div className="h-5 w-48 rounded skeleton-shimmer-line" />
+                  <div className="h-4 w-32 rounded skeleton-shimmer-line" />
                 </div>
-                <div className="h-6 w-24 rounded-full bg-slate-800/40" />
+                <div className="h-6 w-24 rounded-full skeleton-shimmer-line" />
               </div>
               <div className="mt-4 space-y-2">
-                <div className="h-4 w-full rounded bg-slate-800/40" />
-                <div className="h-4 w-4/5 rounded bg-slate-800/40" />
+                <div className="h-4 w-full rounded skeleton-shimmer-line" />
+                <div className="h-4 w-4/5 rounded skeleton-shimmer-line" />
               </div>
-              <div className="mt-6 h-3 w-20 rounded bg-slate-800/30" />
+              <div className="mt-6 h-3 w-20 rounded skeleton-shimmer-line" />
             </div>
           </div>
         ))}

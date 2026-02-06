@@ -77,6 +77,15 @@
   --glow-lg: 0 0 30px -5px;
 
   /* ========================================
+     ELEVATION TOKENS (Physics-based depth)
+     Multi-layer shadows for realistic lift
+     ======================================== */
+  --elevation-0: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.2);
+  --elevation-1: 0 2px 8px -2px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  --elevation-2: 0 12px 32px -8px rgba(0,0,0,0.5), 0 4px 12px -4px rgba(56,189,248,0.08), 0 0 0 1px rgba(255,255,255,0.06);
+  --elevation-3: 0 24px 48px -12px rgba(0,0,0,0.6), 0 8px 24px -8px rgba(56,189,248,0.12), 0 0 0 1px rgba(255,255,255,0.08);
+
+  /* ========================================
      EASING FUNCTIONS (Stripe-level polish)
      ======================================== */
   --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
@@ -461,18 +470,20 @@ body::after {
   background: rgba(15, 23, 42, 0.3);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: var(--elevation-0);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glass-card:hover {
   background: rgba(15, 23, 42, 0.5);
   border-color: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 0 0 1px rgba(255,255,255,0.05),
-    0 12px 32px -8px rgba(0,0,0,0.4),
-    0 4px 12px -4px rgba(56, 189, 248, 0.1); /* Subtle color bleed */
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: var(--elevation-2);
+}
+
+.glass-card:active {
+  transform: translateY(0) scale(1);
+  box-shadow: var(--elevation-0);
 }
 
 .floating-chip {
@@ -726,6 +737,62 @@ select:focus-visible {
 
   /* Disable any motion variants in Framer Motion via CSS hint */
   /* (Framer Motion also checks this preference automatically) */
+}
+
+/*
+  ========================================
+  SHIMMER SKELETON LOADING
+  ========================================
+*/
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.03) 0%,
+    rgba(139, 92, 246, 0.08) 50%,
+    rgba(56, 189, 248, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.skeleton-shimmer-line {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.6) 0%,
+    rgba(51, 65, 85, 0.8) 50%,
+    rgba(30, 41, 59, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer,
+  .skeleton-shimmer-line {
+    animation: none;
+    background: rgba(30, 41, 59, 0.5);
+  }
+}
+
+/*
+  ========================================
+  MOBILE TOUCH FEEDBACK (hover: none)
+  ========================================
+*/
+
+@media (hover: none) {
+  .glass-card:active {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: var(--elevation-1);
+    filter: brightness(1.1);
+  }
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

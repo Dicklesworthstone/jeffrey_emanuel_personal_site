@@ -126,18 +126,18 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "text-sm font-medium transition-all hover:text-white whitespace-nowrap",
-                    active ? "text-white" : "text-slate-400"
+                    "relative rounded-full px-3 py-1.5 text-sm font-medium transition-all whitespace-nowrap",
+                    active ? "text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
                   )}
                 >
-                  {item.label}
                   {active && (
                     <motion.div
-                      layoutId={prefersReducedMotion ? undefined : "nav-dot"}
-                      className="mx-auto mt-1 h-1 w-1 rounded-full bg-sky-400"
+                      layoutId={prefersReducedMotion ? undefined : "nav-pill"}
+                      className="absolute inset-0 rounded-full bg-white/[0.07] ring-1 ring-white/10"
                       transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
+                  <span className="relative z-10">{item.label}</span>
                 </Link>
               );
             })}
@@ -228,30 +228,48 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             <nav className="relative flex flex-1 flex-col justify-center px-8">
               <motion.div
                 className="flex flex-col gap-8"
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
+                initial="hidden"
+                animate="visible"
+                variants={prefersReducedMotion ? undefined : {
+                  hidden: { opacity: 1 },
+                  visible: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.06, delayChildren: 0.1 },
+                  },
+                }}
               >
                 {navItems.map((item) => {
                   const active = isActive(item.href);
                   return (
-                    <Link
+                    <motion.div
                       key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "text-4xl font-bold tracking-tight transition-colors",
-                        active ? "text-white" : "text-slate-500 active:text-slate-300"
-                      )}
-                      onClick={() => setOpen(false)}
-                      onTouchStart={lightTap}
+                      variants={prefersReducedMotion ? undefined : {
+                        hidden: { opacity: 0, x: -20 },
+                        visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] } },
+                      }}
                     >
-                      {item.label}
-                    </Link>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "text-4xl font-bold tracking-tight transition-colors",
+                          active ? "text-white" : "text-slate-500 active:text-slate-300"
+                        )}
+                        onClick={() => setOpen(false)}
+                        onTouchStart={lightTap}
+                      >
+                        {item.label}
+                      </Link>
+                    </motion.div>
                   );
                 })}
               </motion.div>
 
-              <div className="mt-16">
+              <motion.div
+                className="mt-16"
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: [0.33, 1, 0.68, 1], delay: 0.1 + navItems.length * 0.06 }}
+              >
                 <Link
                   href="/contact"
                   className="flex w-full items-center justify-center rounded-full bg-white py-4 text-lg font-bold text-slate-950 shadow-lg shadow-white/10 transition-transform active:scale-95"
@@ -259,7 +277,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 >
                   Get in touch
                 </Link>
-              </div>
+              </motion.div>
             </nav>
 
             {/* Footer info in menu */}

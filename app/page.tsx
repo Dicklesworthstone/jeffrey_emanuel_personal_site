@@ -69,6 +69,7 @@ export default async function HomePage() {
         <AnimatedGrid
           className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
           staggerDelay={0.12}
+          scrollIndicator
         >
           <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 border border-violet-500/20 bg-gradient-to-br from-violet-950/20 to-transparent">
             <p className="text-xs font-bold uppercase tracking-widest text-violet-400 shadow-violet-500/20 drop-shadow-sm">
@@ -254,6 +255,7 @@ export default async function HomePage() {
         <AnimatedGrid
           className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 lg:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
           staggerDelay={0.08}
+          scrollIndicator
         >
           {featuredProjects.map((project) => (
               <div key={project.name} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
@@ -300,6 +302,7 @@ export default async function HomePage() {
         <AnimatedGrid
           className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
           staggerDelay={0.1}
+          scrollIndicator
         >
           {featuredWriting.map((item) => (
             <HapticLink
@@ -378,6 +381,7 @@ export default async function HomePage() {
           <AnimatedGrid
             className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
             staggerDelay={0.1}
+            scrollIndicator
           >
             {featuredThreads.map((thread) => (
               <HapticExternalLink

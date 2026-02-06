@@ -104,9 +104,10 @@ export default function ProjectCard({ project }: { project: Project }) {
         className={cn(
           "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-black/20 p-4 sm:p-6 md:p-8",
           "transition-all duration-300 ease-out",
-          "hover:bg-black/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
-          "active:scale-[0.98] active:shadow-lg",
-          "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
+          "[box-shadow:var(--elevation-0)]",
+          "hover:bg-black/40 hover:-translate-y-1 hover:scale-[1.015] hover:[box-shadow:var(--elevation-2)]",
+          "active:scale-[0.98] active:translate-y-0 active:[box-shadow:var(--elevation-0)] active:brightness-110 active:border-white/10",
+          "focus-within:-translate-y-1 focus-within:scale-[1.015] focus-within:[box-shadow:var(--elevation-2)]",
           "will-change-transform",
           hoverBorder
         )}

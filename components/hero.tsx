@@ -171,12 +171,12 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                 {heroContent.intro}
               </p>
 
-              {/* Tools grid */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Tools grid - horizontal scroll on mobile, grid on desktop */}
+              <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar sm:grid sm:grid-cols-2 lg:grid-cols-3">
                 {heroContent.tools.map((tool) => (
                   <div
                     key={tool.name}
-                    className="group relative overflow-hidden rounded-xl border border-slate-700/40 bg-slate-800/40 p-3 backdrop-blur-sm transition-all hover:border-slate-600/60 hover:bg-slate-800/60"
+                    className="snap-start shrink-0 w-[70vw] sm:w-auto group relative overflow-hidden rounded-xl border border-slate-700/40 bg-slate-800/40 p-3 backdrop-blur-sm transition-all hover:border-slate-600/60 hover:bg-slate-800/60"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
@@ -210,7 +210,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                 {/* Explore ecosystem link */}
                 <Link
                   href="/tldr"
-                  className="group flex items-center justify-center gap-2 rounded-xl border border-slate-700/40 bg-gradient-to-br from-slate-800/40 to-slate-900/40 p-3 text-sm font-medium text-slate-400 transition-colors hover:border-violet-500/30 hover:bg-slate-800/60 hover:text-violet-300"
+                  className="snap-start shrink-0 w-[70vw] sm:w-auto group flex items-center justify-center gap-2 rounded-xl border border-slate-700/40 bg-gradient-to-br from-slate-800/40 to-slate-900/40 p-3 text-sm font-medium text-slate-400 transition-colors hover:border-violet-500/30 hover:bg-slate-800/60 hover:text-violet-300"
                 >
                   <span>Explore all tools</span>
                   <ArrowRight className="h-3.5 w-3.5 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5" aria-hidden="true" />

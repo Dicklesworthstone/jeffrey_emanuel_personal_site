@@ -64,9 +64,9 @@ export default function SectionShell({
         initial={false}
         animate={{
           opacity: 1,
-          y: animateIn ? 0 : (hasMounted ? 10 : 0)
+          y: animateIn ? 0 : (hasMounted ? 20 : 0)
         }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10"
         style={{ opacity: 1 }}
       >
@@ -114,9 +114,18 @@ export default function SectionShell({
           </div>
         </div>
 
-        <div className="relative">
+        <motion.div
+          className="relative"
+          initial={false}
+          animate={{
+            opacity: 1,
+            y: animateIn ? 0 : (hasMounted ? 12 : 0)
+          }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+          style={{ opacity: 1 }}
+        >
           {children}
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   );

@@ -83,13 +83,16 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
               animationDelay: `${index * 100}ms`,
             }}
           >
+            {/* Animated top border that scales in on hover */}
+            <div className="absolute inset-x-0 top-0 h-px origin-center scale-x-0 bg-gradient-to-r from-sky-400 via-violet-400 to-sky-400 transition-transform duration-500 group-hover:scale-x-100" aria-hidden="true" />
+
             {/* Subtle inner glow on hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
             <dt className="text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors group-hover:text-sky-400/70">
               {stat.label}
             </dt>
-            <dd className="mt-3 text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
+            <dd className="mt-3 text-3xl font-bold tracking-tight text-slate-100 transition-[filter] duration-500 group-hover:drop-shadow-[0_0_8px_rgba(56,189,248,0.3)] sm:text-4xl">
               {parsed.isAnimatable ? (
                 <AnimatedNumber
                   value={parsed.number}

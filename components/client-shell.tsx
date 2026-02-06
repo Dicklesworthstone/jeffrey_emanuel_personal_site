@@ -94,16 +94,16 @@ export default function ClientShell({ children }: { children: React.ReactNode })
     <ErrorBoundary>
       <div className="flex min-h-screen flex-col">
         <SiteHeader onOpenCommandPalette={openCommandPalette} />
-        {isDev ? (
-          <Profiler id="route" onRender={handleProfiler}>
+        {(() => {
+          const pageTransition = (
             <AnimatePresence mode="wait">
               <motion.main
                 id="main-content"
                 key={pathname}
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }}
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -16, filter: "blur(4px)" }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.35, ease: [0.33, 1, 0.68, 1] }}
                 className="flex-1"
                 tabIndex={-1}
                 role="main"
@@ -111,24 +111,13 @@ export default function ClientShell({ children }: { children: React.ReactNode })
                 {children}
               </motion.main>
             </AnimatePresence>
-          </Profiler>
-        ) : (
-          <AnimatePresence mode="wait">
-            <motion.main
-              id="main-content"
-              key={pathname}
-              initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
-              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }}
-              className="flex-1"
-              tabIndex={-1}
-              role="main"
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
-        )}
+          );
+          return isDev ? (
+            <Profiler id="route" onRender={handleProfiler}>
+              {pageTransition}
+            </Profiler>
+          ) : pageTransition;
+        })()}
         <SiteFooter />
         <ScrollToTop />
         <EasterEggs />
