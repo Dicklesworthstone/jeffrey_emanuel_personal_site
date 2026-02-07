@@ -4,7 +4,7 @@ export const siteConfig = {
   name: "Jeffrey Emanuel",
   title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
   description:
-    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 10 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 70+ open-source projects with 10K+ GitHub stars.",
+    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 10 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 90+ open-source projects with 10K+ GitHub stars.",
   email: "jeffreyemanuel@gmail.com",
   location: "",
   social: {
@@ -45,7 +45,7 @@ export const heroStats: Stat[] = [
   {
     label: "GitHub Stars",
     value: "16K+",
-    helper: "Across 70+ open-source agent tools and infrastructure.",
+    helper: "Across 90+ open-source agent tools and infrastructure.",
   },
   {
     label: "Flywheel Tools",
@@ -107,7 +107,7 @@ export const heroContent = {
   },
   body: [
     "Using these tools, I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
-    "My 70+ open-source projects span agent infrastructure, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
+    "My 90+ open-source projects span agent infrastructure, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
     "I also founded Lumera Network (formerly Pastel), a Cosmos L1 for storage and AI verification. I consult to PE and hedge funds on AI automation after a decade as a long/short equity analyst.",
   ],
   primaryCta: {
@@ -521,7 +521,7 @@ export const projects: Project[] = [
   {
     name: "Coding Agent Session Search",
     kind: "oss",
-    badge: "307 stars",
+    badge: "446 stars",
     href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
     short: "Unified TUI for searching local history across Claude Code, Codex, Cursor, Gemini, and more.",
     description:
@@ -548,7 +548,7 @@ export const projects: Project[] = [
   {
     name: "Claude Code Agent Farm",
     kind: "oss",
-    badge: "621 stars",
+    badge: "640 stars",
     href: "https://github.com/Dicklesworthstone/claude_code_agent_farm",
     short: "Orchestrate an army of Claude Code agents to autonomously improve codebases.",
     description:
@@ -560,7 +560,7 @@ export const projects: Project[] = [
   {
     name: "Agentic Flywheel Setup",
     kind: "oss",
-    badge: "672 stars",
+    badge: "1,006 stars",
     href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
     short: "One-command setup for a fully-armed agentic coding environment.",
     description:
@@ -572,7 +572,7 @@ export const projects: Project[] = [
   {
     name: "Ultimate MCP Client",
     kind: "oss",
-    badge: "142 stars",
+    badge: "145 stars",
     href: "https://github.com/Dicklesworthstone/ultimate_mcp_client",
     short: "Universal bridge for AI models to interact with the real world via MCP.",
     description:
@@ -583,7 +583,7 @@ export const projects: Project[] = [
   {
     name: "Ultimate MCP Server",
     kind: "oss",
-    badge: "128 stars",
+    badge: "136 stars",
     href: "https://github.com/Dicklesworthstone/ultimate_mcp_server",
     short: "Unified MCP server exposing dozens of powerful tools to AI models.",
     description:
@@ -593,7 +593,7 @@ export const projects: Project[] = [
   {
     name: "MCP Agent Mail",
     kind: "oss",
-    badge: "1.4K stars",
+    badge: "1,654 stars",
     href: "https://github.com/Dicklesworthstone/mcp_agent_mail",
     short: "Gmail for your coding agents. A coordination layer with messaging, file leases, and audit trails.",
     description:
@@ -621,7 +621,7 @@ export const projects: Project[] = [
   {
     name: "Beads Viewer",
     kind: "oss",
-    badge: "891 stars",
+    badge: "1,211 stars",
     href: "https://github.com/Dicklesworthstone/beads_viewer",
     short: "Terminal UI for Steve Yegge's Beads system with graph analytics for agent task management.",
     description:
@@ -649,7 +649,7 @@ export const projects: Project[] = [
   {
     name: "Named Tmux Manager",
     kind: "oss",
-    badge: "69 stars",
+    badge: "133 stars",
     href: "https://github.com/Dicklesworthstone/ntm",
     short: "Multi-agent tmux orchestration. Spawn and coordinate Claude Code, Codex, and Gemini agents.",
     description:
@@ -676,7 +676,7 @@ export const projects: Project[] = [
   {
     name: "Simultaneous Launch Button",
     kind: "oss",
-    badge: "49 stars",
+    badge: "56 stars",
     href: "https://github.com/Dicklesworthstone/slb",
     short: "Two-person rule for AI agents: peer review before dangerous commands execute.",
     description:
@@ -702,7 +702,7 @@ export const projects: Project[] = [
   {
     name: "CASS Memory System",
     kind: "oss",
-    badge: "152 stars",
+    badge: "212 stars",
     href: "https://github.com/Dicklesworthstone/cass_memory_system",
     short: "ACE-framework persistent memory for coding agents. Stores procedural, episodic, and semantic knowledge.",
     description:
@@ -728,7 +728,7 @@ export const projects: Project[] = [
   {
     name: "Mindmap Generator",
     kind: "oss",
-    badge: "187 stars",
+    badge: "197 stars",
     href: "https://github.com/Dicklesworthstone/mindmap-generator",
     short: "Intelligently distills documents into hierarchical, context-aware mindmaps.",
     description:
@@ -739,7 +739,7 @@ export const projects: Project[] = [
   {
     name: "LLM-Aided OCR",
     kind: "oss",
-    badge: "2,790 stars",
+    badge: "2,855 stars",
     href: "https://github.com/Dicklesworthstone/llm_aided_ocr",
     short: "Tesseract + LLMs = Perfect PDFs. Corrects OCR errors with language models.",
     description:
@@ -751,7 +751,7 @@ export const projects: Project[] = [
   {
     name: "Swiss Army Llama",
     kind: "oss",
-    badge: "1,037 stars",
+    badge: "1,043 stars",
     href: "https://github.com/Dicklesworthstone/swiss_army_llama",
     short: "A high-performance 'Swiss Army Knife' FastAPI service for local LLMs.",
     description:
@@ -761,7 +761,7 @@ export const projects: Project[] = [
   {
     name: "Visual A* Pathfinding",
     kind: "oss",
-    badge: "175 stars",
+    badge: "176 stars",
     href: "https://github.com/Dicklesworthstone/visual_astar_python",
     short: "Captivating, cinematic visualizations of pathfinding algorithms in action.",
     description:
@@ -773,7 +773,7 @@ export const projects: Project[] = [
   {
     name: "Your Source to Prompt",
     kind: "oss",
-    badge: "693 stars",
+    badge: "733 stars",
     href: "https://github.com/Dicklesworthstone/your-source-to-prompt.html",
     short: "Secure, browser-based tool to turn codebases into optimized LLM prompts.",
     description:
@@ -783,7 +783,7 @@ export const projects: Project[] = [
   {
     name: "Bulk YouTube Transcriber",
     kind: "oss",
-    badge: "618 stars",
+    badge: "643 stars",
     href: "https://github.com/Dicklesworthstone/bulk_transcribe_youtube_videos_from_playlist",
     short: "Convert entire playlists into structured, searchable text with Whisper.",
     description:
@@ -793,7 +793,7 @@ export const projects: Project[] = [
   {
     name: "Automatic Log Collector",
     kind: "oss",
-    badge: "411 stars",
+    badge: "423 stars",
     href: "https://github.com/Dicklesworthstone/automatic_log_collector_and_analyzer",
     short: "Open-source Splunk alternative for efficient multi-server log analysis.",
     description:
@@ -803,7 +803,7 @@ export const projects: Project[] = [
   {
     name: "Fast Vector Similarity",
     kind: "oss",
-    badge: "413 stars",
+    badge: "425 stars",
     href: "https://github.com/Dicklesworthstone/fast_vector_similarity",
     short: "Lightning-fast Rust library for complex vector similarity metrics.",
     description:
@@ -813,7 +813,7 @@ export const projects: Project[] = [
   {
     name: "SQLAlchemy Visualizer",
     kind: "oss",
-    badge: "282 stars",
+    badge: "284 stars",
     href: "https://github.com/Dicklesworthstone/sqlalchemy_data_model_visualizer",
     short: "Instantly turns SQLAlchemy ORM models into interactive SVG diagrams.",
     description:
@@ -823,7 +823,7 @@ export const projects: Project[] = [
   {
     name: "Next.js GitHub Blog",
     kind: "oss",
-    badge: "81 stars",
+    badge: "89 stars",
     href: "https://github.com/Dicklesworthstone/nextjs-github-markdown-blog",
     short: "Seamless blogging platform using your GitHub repo as a CMS.",
     description:
@@ -833,7 +833,7 @@ export const projects: Project[] = [
   {
     name: "LLM Tournament",
     kind: "oss",
-    badge: "43 stars",
+    badge: "45 stars",
     href: "https://github.com/Dicklesworthstone/llm-tournament",
     short: "Arena for LLMs to compete and collaborate on coding challenges.",
     description:
@@ -863,7 +863,7 @@ export const projects: Project[] = [
   {
     name: "GitHub Repo Stars Analyzer",
     kind: "oss",
-    badge: "17 stars",
+    badge: "20 stars",
     href: "https://github.com/Dicklesworthstone/most-influential-github-repo-stars",
     short: "Discover who *really* matters among your stargazers.",
     description:
@@ -903,7 +903,7 @@ export const projects: Project[] = [
   {
     name: "Ultimate Bug Scanner",
     kind: "oss",
-    badge: "132 stars",
+    badge: "152 stars",
     href: "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
     short: "Meta-runner for language-specific bug scanners, tuned for AI coding agents.",
     description:
@@ -930,7 +930,7 @@ export const projects: Project[] = [
   {
     name: "Kissinger Thesis Reader",
     kind: "oss",
-    badge: "45 stars",
+    badge: "46 stars",
     href: "https://github.com/Dicklesworthstone/kissinger_undergraduate_thesis",
     short: "A vibe-coded reader for Henry Kissinger's 400-page undergraduate thesis.",
     description:
@@ -971,7 +971,7 @@ export const projects: Project[] = [
   {
     name: "Chat to File",
     kind: "oss",
-    badge: "19 stars",
+    badge: "21 stars",
     href: "https://github.com/Dicklesworthstone/chat_shared_conversation_to_file",
     short: "Convert ChatGPT, Gemini, and Grok share links to Markdown and HTML.",
     description:
@@ -981,7 +981,7 @@ export const projects: Project[] = [
   {
     name: "Coding Agent Tips & Scripts",
     kind: "oss",
-    badge: "146 stars",
+    badge: "191 stars",
     href: "https://github.com/Dicklesworthstone/misc_coding_agent_tips_and_scripts",
     short: "Battle-tested solutions for AI coding agents, terminal setup, and dev workflows.",
     description:
@@ -991,7 +991,7 @@ export const projects: Project[] = [
   {
     name: "Brenner Bot",
     kind: "research",
-    badge: "37 stars",
+    badge: "51 stars",
     href: "https://github.com/Dicklesworthstone/brenner_bot",
     short: "Multi-agent research system embodying Sydney Brenner's scientific methodology.",
     description:
@@ -1001,7 +1001,7 @@ export const projects: Project[] = [
   {
     name: "Repo Updater",
     kind: "oss",
-    badge: "28 stars",
+    badge: "49 stars",
     href: "https://github.com/Dicklesworthstone/repo_updater",
     short: "Keep dozens of GitHub repos in sync with a single command.",
     description:
@@ -1011,7 +1011,7 @@ export const projects: Project[] = [
   {
     name: "Clawdbot Skills",
     kind: "oss",
-    badge: "22 stars",
+    badge: "42 stars",
     href: "https://github.com/Dicklesworthstone/agent_flywheel_clawdbot_skills_and_integrations",
     short: "Modular skills teaching Clawdbot to use the Flywheel toolkit.",
     description:
@@ -1021,7 +1021,7 @@ export const projects: Project[] = [
   {
     name: "Meta Skill",
     kind: "oss",
-    badge: "10 stars",
+    badge: "108 stars",
     href: "https://github.com/Dicklesworthstone/meta_skill",
     short: "Complete skill management platform with MCP server for AI agent integration.",
     description:
@@ -1046,7 +1046,7 @@ export const projects: Project[] = [
   {
     name: "Destructive Command Guard",
     kind: "oss",
-    badge: "13 stars",
+    badge: "349 stars",
     href: "https://github.com/Dicklesworthstone/destructive_command_guard",
     short: "Hook for Claude Code and Gemini CLI that blocks destructive commands.",
     description:
@@ -1056,7 +1056,7 @@ export const projects: Project[] = [
   {
     name: "JeffreysPrompts.com",
     kind: "oss",
-    badge: "19 stars",
+    badge: "64 stars",
     href: "https://github.com/Dicklesworthstone/jeffreysprompts.com",
     short: "Curated prompt library for agentic coding workflows.",
     description:
@@ -1066,7 +1066,7 @@ export const projects: Project[] = [
   {
     name: "GIIL",
     kind: "oss",
-    badge: "19 stars",
+    badge: "27 stars",
     href: "https://github.com/Dicklesworthstone/giil",
     short: "Git-backed interactive issue list with dependency tracking.",
     description:
@@ -1076,7 +1076,7 @@ export const projects: Project[] = [
   {
     name: "Coding Agent Account Manager",
     kind: "oss",
-    badge: "19 stars",
+    badge: "46 stars",
     href: "https://github.com/Dicklesworthstone/coding_agent_account_manager",
     short: "Manage multiple AI coding agent subscriptions and accounts.",
     description:
@@ -1086,7 +1086,7 @@ export const projects: Project[] = [
   {
     name: "Flywheel Gateway",
     kind: "oss",
-    badge: "4 stars",
+    badge: "19 stars",
     href: "https://github.com/Dicklesworthstone/flywheel_gateway",
     short: "Central API gateway for the Agentic Coding Flywheel ecosystem.",
     description:
@@ -1096,7 +1096,7 @@ export const projects: Project[] = [
   {
     name: "Flywheel Connectors",
     kind: "oss",
-    badge: "5 stars",
+    badge: "27 stars",
     href: "https://github.com/Dicklesworthstone/flywheel_connectors",
     short: "Integration adapters for external services in the Flywheel ecosystem.",
     description:
@@ -1106,7 +1106,7 @@ export const projects: Project[] = [
   {
     name: "XF",
     kind: "oss",
-    badge: "9 stars",
+    badge: "67 stars",
     href: "https://github.com/Dicklesworthstone/xf",
     short: "Fast cross-file search and replace tool for codebases.",
     description:
@@ -1117,12 +1117,238 @@ export const projects: Project[] = [
   {
     name: "Suno2CD",
     kind: "oss",
-    badge: "11 stars",
+    badge: "12 stars",
     href: "https://github.com/Dicklesworthstone/suno2cd",
     short: "Export Suno AI music to CD-quality audio formats.",
     description:
       "Tool for downloading and converting Suno AI-generated music to high-quality audio formats suitable for CD burning or archival. Preserves metadata and supports batch processing.",
     tags: ["Music", "Audio", "CLI", "AI"],
+  },
+  {
+    name: "FrankenTUI",
+    kind: "oss",
+    badge: "94 stars",
+    href: "https://github.com/Dicklesworthstone/frankentui",
+    short: "Minimal, high-performance terminal UI kernel focused on correctness, determinism, and clean architecture.",
+    description:
+      "A kernel-level TUI foundation for Rust with a disciplined runtime, diff-based renderer, and inline-mode support that preserves scrollback while keeping UI chrome stable. Features a layered crate architecture (core → render → runtime → widgets), one-writer rule for serialized output, RAII cleanup even on panic, and snapshot/time-travel harness for deterministic testing. Designed as a foundation you build your own UI framework on top of.",
+    tags: ["Rust", "TUI", "Terminal", "Rendering", "Systems"],
+    size: "wide",
+    gradient: "from-orange-500/20 via-red-500/20 to-rose-500/20",
+    slug: "frankentui",
+    details: {
+      features: [
+        "Inline mode with scrollback preservation — stable UI chrome while logs scroll",
+        "Deterministic buffer diff rendering pipeline (Buffer → Diff → Presenter → ANSI)",
+        "One-writer rule enforcing serialized terminal output for correctness",
+        "RAII cleanup via TerminalSession — terminal state restored even on panic",
+        "11-crate layered workspace: core, render, style, text, layout, runtime, widgets, extras",
+        "Snapshot and time-travel harness for regression testing",
+        "Optional OpenTelemetry integration for runtime instrumentation",
+        "JSONL evidence logs for diff strategy and resize decisions",
+      ],
+      installation: "```bash\n# Clone and build\ngit clone https://github.com/Dicklesworthstone/frankentui.git\ncd frankentui\ncargo build --release\n\n# Run the demo showcase\ncargo run -p ftui-demo-showcase\n```",
+      usage: "```bash\n# Primary demo showcase\ncargo run -p ftui-demo-showcase\n\n# Pick a specific demo view\nFTUI_HARNESS_VIEW=dashboard cargo run -p ftui-demo-showcase\nFTUI_HARNESS_VIEW=visual_effects cargo run -p ftui-demo-showcase\n```",
+      relatedProjects: ["beads-rust", "beads-viewer", "named-tmux-manager"],
+    },
+  },
+  {
+    name: "Beads Rust",
+    kind: "oss",
+    badge: "489 stars",
+    href: "https://github.com/Dicklesworthstone/beads_rust",
+    short: "Fast Rust port of Steve Yegge's beads — a local-first, non-invasive issue tracker for git repos.",
+    description:
+      "A high-performance reimplementation of the beads issue tracker in Rust. Provides dependency-aware issue tracking that exports to JSONL for version control, with JSON output for AI agent integration. Features ready-work detection, discovered-from linking, and seamless git-friendly state management without ever running git commands itself.",
+    tags: ["Rust", "CLI", "Issue Tracking", "Git", "Agents", "Flywheel"],
+    size: "large",
+    gradient: "from-amber-500/20 via-orange-500/20 to-red-500/20",
+    slug: "beads-rust",
+    details: {
+      features: [
+        "Dependency-aware issue tracking with blocker/blocked-by relationships",
+        "JSONL export for git-friendly version control",
+        "Ready-work detection for unblocked issues",
+        "Discovered-from linking to trace how issues relate",
+        "JSON output mode for AI agent integration",
+        "SQLite-backed with sync to JSONL for durability",
+        "Non-invasive — never executes git commands",
+        "Compatible with bv (Beads Viewer) for graph analytics",
+      ],
+      installation: "```bash\n# Install via Cargo\ncargo install beads_rust\n\n# Or download pre-built binary from releases\n# https://github.com/Dicklesworthstone/beads_rust/releases\n```",
+      usage: "```bash\n# Check for ready work\nbr ready --json\n\n# Create an issue\nbr create \"Fix rendering bug\" -t bug -p 1 --json\n\n# Update status\nbr update br-42 --status in_progress\n\n# Close when done\nbr close br-42 --reason \"Fixed in commit abc123\"\n```",
+      relatedProjects: ["beads-viewer", "mcp-agent-mail", "cass"],
+    },
+  },
+  {
+    name: "WezTerm Automata",
+    kind: "oss",
+    badge: "22 stars",
+    href: "https://github.com/Dicklesworthstone/wezterm_automata",
+    short: "Terminal hypervisor for AI agent swarms with pattern detection and event-driven workflows.",
+    description:
+      "Coordinates fleets of AI coding agents across WezTerm panes. Features real-time pane output capture, pattern-matching state detection, event-driven workflows, FTS5 full-text search, and a policy engine for safe multi-agent control. Includes a Robot Mode JSON API for programmatic orchestration.",
+    tags: ["Rust", "Terminal", "Multi-Agent", "Automation", "Flywheel"],
+  },
+  {
+    name: "Pi Agent Rust",
+    kind: "oss",
+    badge: "26 stars",
+    href: "https://github.com/Dicklesworthstone/pi_agent_rust",
+    short: "High-performance AI coding agent CLI with sub-100ms startup and native SSE streaming.",
+    description:
+      "A lightweight AI coding agent written in Rust with instant startup, a ~15MB binary, and 7 built-in tools. Features session branching, structured concurrency via asupersync, and beautiful terminal output via rich_rust. Designed for speed-critical agentic workflows.",
+    tags: ["Rust", "CLI", "Agents", "AI", "Performance"],
+  },
+  {
+    name: "Remote Compilation Helper",
+    kind: "oss",
+    badge: "25 stars",
+    href: "https://github.com/Dicklesworthstone/remote_compilation_helper",
+    short: "Transparent compilation offloading for AI agents via Claude Code hooks.",
+    description:
+      "Intercepts cargo and gcc builds via Claude Code PreToolUse hooks and routes them to remote workers. Features sub-millisecond routing decisions, smart worker load-balancing, project affinity caching, multi-agent deduplication, and fail-open design for zero-disruption fallback.",
+    tags: ["Rust", "DevOps", "Build Tools", "Agents", "Performance", "Flywheel"],
+  },
+  {
+    name: "Automated Plan Reviser Pro",
+    kind: "oss",
+    badge: "41 stars",
+    href: "https://github.com/Dicklesworthstone/automated_plan_reviser_pro",
+    short: "Iterative specification refinement using GPT Pro Extended Reasoning.",
+    description:
+      "Multi-round AI review automation for architecture optimization. Bundles project documents, runs iterative GPT-powered review sessions with background processing, and tracks round history with git integration. Features session attach/detach and a beautiful gum-based TUI.",
+    tags: ["Bash", "AI", "Architecture", "Planning", "Automation"],
+  },
+  {
+    name: "Process Triage",
+    kind: "oss",
+    badge: "17 stars",
+    href: "https://github.com/Dicklesworthstone/process_triage",
+    short: "Bayesian zombie process detection and safe cleanup for dev environments.",
+    description:
+      "Uses a four-class Bayesian inference model to identify abandoned and zombie processes with conservative defaults. Features transparent decision evidence, staged SIGTERM→SIGKILL, protected process lists, and cross-platform support. Never auto-kills without explicit confirmation.",
+    tags: ["Rust", "Linux", "Systems", "DevOps", "Safety"],
+  },
+  {
+    name: "ASupersync",
+    kind: "oss",
+    badge: "17 stars",
+    href: "https://github.com/Dicklesworthstone/asupersync",
+    short: "Spec-first, cancel-correct, capability-secure async runtime for Rust.",
+    description:
+      "A structured concurrency runtime with regions, cancel-correct protocols with bounded cleanup, and capability-based context. Features two-phase effects, a deterministic lab runtime for testing, and guarantees no orphan tasks. Used as the async foundation for pi_agent_rust and fastmcp_rust.",
+    tags: ["Rust", "Async", "Concurrency", "Runtime", "Systems"],
+  },
+  {
+    name: "TOON Rust",
+    kind: "oss",
+    badge: "16 stars",
+    href: "https://github.com/Dicklesworthstone/toon_rust",
+    short: "Reference Rust implementation of TOON, a token-optimized serialization format for LLMs.",
+    description:
+      "Spec-first Rust port of Token-Optimized Object Notation. Features streaming decode, deterministic output, native binary with no Node.js dependency, and token-efficiency optimizations including key folding and delimiter support. 100% spec conformance.",
+    tags: ["Rust", "Serialization", "LLM", "Performance"],
+  },
+  {
+    name: "RANO",
+    kind: "oss",
+    badge: "16 stars",
+    href: "https://github.com/Dicklesworthstone/rano",
+    short: "Network observer for AI CLI processes with provider attribution and SQLite logging.",
+    description:
+      "Tracks outbound connections from Claude Code, Codex CLI, and Gemini CLI with automatic provider-aware tagging (Anthropic, OpenAI, Google). Features descendant process tracking, live terminal stats, SQLite durable logging, and flexible JSON output.",
+    tags: ["Rust", "Networking", "Monitoring", "Agents", "Flywheel"],
+  },
+  {
+    name: "FastMCP Rust",
+    kind: "oss",
+    badge: "9 stars",
+    href: "https://github.com/Dicklesworthstone/fastmcp_rust",
+    short: "High-performance MCP framework for Rust with attribute macros and cancel-correct async.",
+    description:
+      "A zero-boilerplate Model Context Protocol framework built on asupersync. Features attribute macros for tools and resources, automatic timeout budgets, structured concurrency, and a 4-valued Outcome type. No unsafe code.",
+    tags: ["Rust", "MCP", "Async", "AI Tools", "Flywheel"],
+  },
+  {
+    name: "Charmed Rust",
+    kind: "oss",
+    badge: "9 stars",
+    href: "https://github.com/Dicklesworthstone/charmed_rust",
+    short: "Port of Charm's Bubbletea, Lipgloss, and Bubbles TUI libraries to idiomatic Rust.",
+    description:
+      "Brings the Elm architecture (pure update/view), CSS-like styling, 16 pre-built components, spring animations, Markdown rendering, and SSH app framework to Rust. 100% type-safe with no unsafe code.",
+    tags: ["Rust", "TUI", "Terminal", "UI Components"],
+  },
+  {
+    name: "Rich Rust",
+    kind: "oss",
+    badge: "11 stars",
+    href: "https://github.com/Dicklesworthstone/rich_rust",
+    short: "Beautiful terminal output library for Rust inspired by Python's Rich.",
+    description:
+      "Markup syntax for styled text, auto-sizing tables, panels, progress bars, spinners, syntax highlighting for 100+ languages, Markdown rendering, and automatic color downgrade. Zero unsafe code.",
+    tags: ["Rust", "TUI", "Terminal", "Output"],
+  },
+  {
+    name: "OpenTUI Rust",
+    kind: "oss",
+    badge: "10 stars",
+    href: "https://github.com/Dicklesworthstone/opentui_rust",
+    short: "High-performance TUI rendering engine with RGBA alpha blending and scissor clipping.",
+    description:
+      "Cell-based buffers with real alpha blending, scissor clipping for nested viewports, double-buffered diff rendering, rope-based text editing with undo/redo. A zero-opinion rendering engine for building terminal UI frameworks.",
+    tags: ["Rust", "TUI", "Rendering", "Graphics"],
+  },
+  {
+    name: "Post Compact Reminder",
+    kind: "oss",
+    badge: "15 stars",
+    href: "https://github.com/Dicklesworthstone/post_compact_reminder",
+    short: "Claude Code hook that re-reads AGENTS.md after context compaction.",
+    description:
+      "A SessionStart hook for Claude Code that reminds the agent to re-read AGENTS.md after context compaction, preventing loss of project conventions during long coding sessions.",
+    tags: ["Claude Code", "Hooks", "DevTools", "Agents", "Flywheel"],
+  },
+  {
+    name: "Agent Settings Backup",
+    kind: "oss",
+    badge: "16 stars",
+    href: "https://github.com/Dicklesworthstone/agent_settings_backup_script",
+    short: "Backup and sync settings across AI coding agents.",
+    description:
+      "Backs up and synchronizes configuration for Claude Code, Cursor, Codex, and other AI coding agents. Preserves settings, MCP configurations, and customizations across machines and reinstalls.",
+    tags: ["Bash", "DevOps", "Agents", "Configuration", "Flywheel"],
+  },
+  {
+    name: "Vibe Cockpit",
+    kind: "oss",
+    badge: "9 stars",
+    href: "https://github.com/Dicklesworthstone/vibe_cockpit",
+    short: "Monitoring and observability dashboard for AI coding agent fleets.",
+    description:
+      "Comprehensive monitoring tool for AI coding agent fleets. Tracks agent health, resource usage, and work progress across multiple concurrent sessions.",
+    tags: ["Monitoring", "Agents", "Dashboard", "DevOps", "Flywheel"],
+  },
+  {
+    name: "Coding Agent Usage Tracker",
+    kind: "oss",
+    badge: "9 stars",
+    href: "https://github.com/Dicklesworthstone/coding_agent_usage_tracker",
+    short: "Cross-platform CLI for tracking LLM provider usage across Codex, Claude, and Gemini.",
+    description:
+      "Tracks API token consumption and costs across multiple LLM providers (Codex, Claude, Gemini). Provides usage reports, cost breakdowns, and trend analysis for managing AI coding budgets.",
+    tags: ["Rust", "CLI", "Analytics", "LLM", "Cost Management"],
+  },
+  {
+    name: "FrankenSQLite",
+    kind: "oss",
+    badge: "10 stars",
+    href: "https://github.com/Dicklesworthstone/frankensqlite",
+    short: "Clean-room Rust reimplementation of SQLite with MVCC page-level versioning.",
+    description:
+      "A from-scratch SQLite implementation in Rust featuring MVCC page-level versioning for concurrent read/write access. Designed as both a learning exercise and a foundation for specialized embedded database use cases.",
+    tags: ["Rust", "Database", "SQLite", "Systems"],
   },
 ];
 
@@ -1165,7 +1391,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Duplicate detection and session history search",
       bv: "Dashboard shows beads status; --robot-triage for dispatch",
     },
-    stars: 71,
+    stars: 133,
     projectSlug: "named-tmux-manager",
     features: [
       "Spawn 10+ Claude/Codex/Gemini agents in parallel",
@@ -1186,7 +1412,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Notifications sent to reviewer inboxes",
       ubs: "Pre-flight scans before execution",
     },
-    stars: 49,
+    stars: 56,
     projectSlug: "simultaneous-launch-button",
     features: [
       "Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION)",
@@ -1208,7 +1434,7 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Shared context across agent sessions",
       slb: "Approval requests delivered to inboxes",
     },
-    stars: 1433,
+    stars: 1654,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "mcp-agent-mail",
     features: [
@@ -1231,7 +1457,7 @@ export const flywheelTools: FlywheelTool[] = [
       ubs: "Bug scanner results create blocking issues",
       cass: "Search prior sessions for task context",
     },
-    stars: 927,
+    stars: 1211,
     demoUrl: "https://dicklesworthstone.github.io/beads_viewer-pages/",
     projectSlug: "beads-viewer",
     features: [
@@ -1253,7 +1479,7 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Creates issues for discovered bugs",
       slb: "Validates code before risky commits",
     },
-    stars: 132,
+    stars: 152,
     projectSlug: "ultimate-bug-scanner",
     features: [
       "1,000+ custom detection patterns across languages",
@@ -1275,7 +1501,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Semantic search over stored memories",
       bv: "Remembers task patterns and solutions",
     },
-    stars: 152,
+    stars: 212,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "cass-memory-system",
     features: [
@@ -1299,7 +1525,7 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Links search results to related tasks",
       mail: "Agents query history before asking colleagues",
     },
-    stars: 312,
+    stars: 446,
     projectSlug: "cass",
     features: [
       "11 formats: Claude Code, Codex, Cursor, Gemini, ChatGPT, Aider, etc.",
@@ -1980,7 +2206,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Mail",
     color: "from-violet-500 to-purple-600",
     category: "core",
-    stars: 1433,
+    stars: 1654,
     whatItDoes:
       "A mail-like coordination layer for multi-agent workflows. Agents send messages, read threads, and reserve files asynchronously via MCP tools - like Gmail for AI coding agents.",
     whyItsUseful:
@@ -2026,7 +2252,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "GitBranch",
     color: "from-emerald-500 to-teal-600",
     category: "core",
-    stars: 927,
+    stars: 1211,
     whatItDoes:
       "A fast terminal UI for viewing and analyzing Beads issues. Applies graph theory (PageRank, betweenness centrality, critical path) to identify which tasks unblock the most other work.",
     whyItsUseful:
@@ -2072,7 +2298,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Search",
     color: "from-cyan-500 to-sky-600",
     category: "core",
-    stars: 312,
+    stars: 446,
     whatItDoes:
       "A unified TUI/CLI search engine that indexes 11+ coding agent formats (Claude Code, Codex, Cursor, Gemini, ChatGPT, Aider, Cline, and more) into a single searchable timeline. Supports BM25 keyword search, ML-powered semantic search, and hybrid RRF fusion.",
     whyItsUseful:
@@ -2121,7 +2347,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Cog",
     color: "from-purple-500 to-violet-600",
     category: "core",
-    stars: 692,
+    stars: 1006,
     whatItDoes:
       "One-command bootstrap that transforms a fresh Ubuntu VPS into a fully-configured agentic coding environment with all flywheel tools installed.",
     whyItsUseful:
@@ -2167,7 +2393,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Bug",
     color: "from-rose-500 to-red-600",
     category: "core",
-    stars: 132,
+    stars: 152,
     whatItDoes:
       "Custom pattern-based bug scanner with 1,000+ detection rules across multiple languages. Catches common bugs, security issues, and code smells before they become problems.",
     whyItsUseful:
@@ -2209,7 +2435,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "ShieldAlert",
     color: "from-red-500 to-rose-600",
     category: "core",
-    stars: 22,
+    stars: 349,
     whatItDoes:
       "Intercepts dangerous shell commands (rm -rf, git reset --hard, etc.) before execution. Requires confirmation for destructive operations.",
     whyItsUseful:
@@ -2251,7 +2477,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "RefreshCw",
     color: "from-orange-500 to-amber-600",
     category: "core",
-    stars: 29,
+    stars: 49,
     whatItDoes:
       "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
     whyItsUseful:
@@ -2293,7 +2519,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Brain",
     color: "from-pink-500 to-fuchsia-600",
     category: "core",
-    stars: 152,
+    stars: 212,
     whatItDoes:
       "A memory system built on top of CASS. Implements three-layer cognitive architecture: Episodic (experiences), Working (active context), and Procedural (skills and lessons learned).",
     whyItsUseful:
@@ -2340,7 +2566,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "LayoutGrid",
     color: "from-sky-500 to-blue-600",
     category: "core",
-    stars: 71,
+    stars: 133,
     whatItDoes:
       "A tmux session orchestration platform that transforms tmux into a multi-agent command center. Spawn, broadcast to, and coordinate Claude/Codex/Gemini agents across tiled panes with smart routing and real-time monitoring.",
     whyItsUseful:
@@ -2392,7 +2618,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "ShieldCheck",
     color: "from-amber-500 to-orange-600",
     category: "core",
-    stars: 49,
+    stars: 56,
     whatItDoes:
       "Two-person rule CLI for approving dangerous shell commands. Requires a second human or AI reviewer to approve risky operations before execution.",
     whyItsUseful:
@@ -2441,7 +2667,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Image",
     color: "from-slate-500 to-gray-600",
     category: "supporting",
-    stars: 24,
+    stars: 27,
     whatItDoes:
       "Downloads images from iCloud public share links for use in remote debugging sessions. Converts iCloud URLs to direct image downloads.",
     whyItsUseful:
@@ -2483,7 +2709,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Archive",
     color: "from-blue-500 to-indigo-600",
     category: "supporting",
-    stars: 25,
+    stars: 67,
     whatItDoes:
       "Ultra-fast search over X/Twitter data archives. Uses hybrid BM25 + semantic search with Reciprocal Rank Fusion.",
     whyItsUseful:
@@ -2525,7 +2751,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "FileCode",
     color: "from-green-500 to-emerald-600",
     category: "supporting",
-    stars: 8,
+    stars: 13,
     whatItDoes:
       "Terminal UI for combining source code files into LLM-ready prompts. Select files, preview output, copy to clipboard with token counting.",
     whyItsUseful:
@@ -2567,7 +2793,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Sparkles",
     color: "from-teal-500 to-emerald-600",
     category: "core",
-    stars: 10,
+    stars: 108,
     whatItDoes:
       "Complete skill management platform: store, search, track effectiveness, package for sharing, and integrate with AI agents via MCP. Skills come from hand-written files, CASS mining, bundles, or guided workflows.",
     whyItsUseful:
