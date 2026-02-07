@@ -90,12 +90,12 @@ export const getPostBySlug = cache((slug: string) => {
       : "1970-01-01T00:00:00.000Z";
 
   const items: Post = {
+    ...data,
     slug: realSlug,
     title: data.title || realSlug.replace(/-/g, " "),
     date: safeDate,
     excerpt: data.excerpt || "",
     content: content,
-    ...data,
   };
 
   return items;

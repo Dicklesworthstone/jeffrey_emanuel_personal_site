@@ -91,7 +91,7 @@ export function XStatsCard() {
   return (
     <div
       ref={containerRef}
-      className="group relative bg-slate-950/40 px-6 py-6 backdrop-blur transition-colors hover:bg-slate-950/20"
+      className="group relative bg-slate-950/40 px-6 py-6 backdrop-blur transition-colors hover:bg-slate-950/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 focus-visible:ring-inset"
       onMouseEnter={() => {
         if (supportsHover) {
           setIsExpanded(true);

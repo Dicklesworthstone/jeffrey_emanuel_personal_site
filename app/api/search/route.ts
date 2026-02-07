@@ -10,6 +10,7 @@ export async function GET() {
   const searchIndex = posts.map((post) => {
     // Strip markdown syntax for smaller payload and better text matching
     const plainText = post.content
+      .replace(/<[^>]*>/g, "") // Remove HTML tags
     // Remove markdown images: ![alt](url) - handles one level of nested parens
       .replace(/!\[[^\]]*\]\((?:[^)(]+|\([^)(]*\))*\)/g, "")
       .replace(/\[([^\]]+)\]\(.*?\)/g, "$1") // Keep link text, remove URL

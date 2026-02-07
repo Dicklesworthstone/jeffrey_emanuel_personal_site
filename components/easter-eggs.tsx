@@ -93,7 +93,7 @@ export default function EasterEggs() {
               You found the easter egg!
             </h2>
             <p className="text-xl text-slate-400">
-              The Konami Code still works in 2025
+              The Konami Code still works in {new Date().getFullYear()}
             </p>
             <p className="mt-4 text-sm text-slate-500">
               Click anywhere to dismiss
