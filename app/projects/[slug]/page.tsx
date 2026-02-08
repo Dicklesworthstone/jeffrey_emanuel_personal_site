@@ -59,6 +59,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       description: project.description,
       url: `https://jeffreyemanuel.com/projects/${slug}`,
     },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.name} | Jeffrey Emanuel`,
+      description: project.description,
+    },
   };
 }
 
