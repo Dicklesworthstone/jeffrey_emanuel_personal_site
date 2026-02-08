@@ -18,6 +18,37 @@ import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import headshot from "@/assets/jeff_emanuel_headshot.webp";
 
+// Magnetic effect component for premium feel
+function Magnetic({ children, strength = 0.5 }: { children: React.ReactNode; strength?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const { clientX, clientY } = e;
+    const { left, top, width, height } = ref.current.getBoundingClientRect();
+    const x = (clientX - (left + width / 2)) * strength;
+    const y = (clientY - (top + height / 2)) * strength;
+    setPosition({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={{ x: position.x, y: position.y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 // Lazy-load Three.js to keep initial load lightweight across devices
 const ThreeScene = dynamic(() => import("@/components/three-scene"), {
   ssr: false,
@@ -148,16 +179,69 @@ export default function Hero({ stats = heroStats }: HeroProps) {
             <motion.h1
               className="text-balance-pro font-bold leading-[0.9] tracking-[-0.04em] text-white"
               style={{ fontSize: "clamp(2.5rem, 8vw, 6rem)" }}
-              initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.12, delayChildren: 0.2 }
+                }
+              }}
             >
-              Building the <br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-sky-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent filter drop-shadow-sm">
-                AI Infrastructure
-              </span>{" "}
+              {"Building the".split(" ").map((word, i) => (
+                <motion.span
+                  key={i}
+                  className="inline-block mr-[0.2em]"
+                  variants={{
+                    hidden: { opacity: 0, y: 40, filter: "blur(10px)", scale: 0.9 },
+                    visible: { 
+                      opacity: 1, 
+                      y: 0, 
+                      filter: "blur(0px)", 
+                      scale: 1,
+                      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
+                    }
+                  }}
+                >
+                  {word}
+                </motion.span>
+              ))}
               <br className="hidden sm:block" />
-              of the future.
+              <motion.span 
+                className="bg-gradient-to-r from-sky-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent filter drop-shadow-sm inline-block"
+                variants={{
+                  hidden: { opacity: 0, y: 40, filter: "blur(10px)", scale: 0.9 },
+                  visible: { 
+                    opacity: 1, 
+                    y: 0, 
+                    filter: "blur(0px)", 
+                    scale: 1,
+                    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
+                  }
+                }}
+              >
+                AI Infrastructure
+              </motion.span>{" "}
+              <br className="hidden sm:block" />
+              {"of the future.".split(" ").map((word, i) => (
+                <motion.span
+                  key={i}
+                  className="inline-block mr-[0.2em]"
+                  variants={{
+                    hidden: { opacity: 0, y: 40, filter: "blur(10px)", scale: 0.9 },
+                    visible: { 
+                      opacity: 1, 
+                      y: 0, 
+                      filter: "blur(0px)", 
+                      scale: 1,
+                      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
+                    }
+                  }}
+                >
+                  {word}
+                </motion.span>
+              ))}
             </motion.h1>
 
             <motion.div
@@ -174,8 +258,10 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               {/* Tools grid - horizontal scroll on mobile, grid on desktop */}
               <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar sm:grid sm:grid-cols-2 lg:grid-cols-3">
                 {heroContent.tools.map((tool) => (
-                  <div
+                  <motion.div
                     key={tool.name}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     className="snap-start shrink-0 w-[70vw] sm:w-auto group relative overflow-hidden rounded-xl border border-slate-700/40 bg-slate-800/40 p-3 backdrop-blur-sm transition-all hover:border-slate-600/60 hover:bg-slate-800/60"
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -205,7 +291,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
                 {/* Explore ecosystem link */}
                 <Link
@@ -218,9 +304,24 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               </div>
 
               {/* Achievement highlight callout */}
-              <div className="relative overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 via-slate-800/60 to-slate-900/80 p-5 backdrop-blur-sm">
-                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-500/10 blur-2xl" />
-                <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
+              <motion.div 
+                whileHover="hover"
+                className="relative overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 via-slate-800/60 to-slate-900/80 p-5 backdrop-blur-sm group"
+              >
+                <motion.div 
+                  className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-500/20 blur-2xl"
+                  variants={{
+                    hover: { scale: 1.5, opacity: 0.8, x: -20, y: 20 }
+                  }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+                <motion.div 
+                  className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-emerald-500/20 blur-2xl"
+                  variants={{
+                    hover: { scale: 1.5, opacity: 0.8, x: 20, y: -20 }
+                  }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
                 <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
                   <div className="flex items-baseline gap-2">
                     <span className="bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
@@ -262,27 +363,31 @@ export default function Hero({ stats = heroStats }: HeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.6 }}
           >
-            <Link
-              href={heroContent.primaryCta.href}
-              onTouchStart={mediumTap}
-              onClick={spawnParticles}
-              className={cn(
-                "btn-glow-primary group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white transition-all active:scale-95",
-              )}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100" aria-hidden="true" />
-              <Workflow className="relative z-10 h-4 w-4 transition-transform motion-reduce:transition-none group-hover:rotate-12" aria-hidden="true" />
-              <span className="relative z-10">{heroContent.primaryCta.label}</span>
-              <ArrowRight className="relative z-10 h-4 w-4 transition-transform motion-reduce:transition-none group-hover:translate-x-1" aria-hidden="true" />
-            </Link>
+            <Magnetic strength={0.25}>
+              <Link
+                href={heroContent.primaryCta.href}
+                onTouchStart={mediumTap}
+                onClick={spawnParticles}
+                className={cn(
+                  "btn-glow-primary group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white transition-all active:scale-95",
+                )}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100" aria-hidden="true" />
+                <Workflow className="relative z-10 h-4 w-4 transition-transform motion-reduce:transition-none group-hover:rotate-12" aria-hidden="true" />
+                <span className="relative z-10">{heroContent.primaryCta.label}</span>
+                <ArrowRight className="relative z-10 h-4 w-4 transition-transform motion-reduce:transition-none group-hover:translate-x-1" aria-hidden="true" />
+              </Link>
+            </Magnetic>
 
-            <Link
-              href={heroContent.secondaryCta.href}
-              className="btn-glow-secondary group inline-flex h-14 items-center gap-2.5 rounded-full border border-slate-700/50 bg-slate-900/40 px-8 text-sm font-bold tracking-wide text-white backdrop-blur-md transition-colors hover:border-slate-600 hover:bg-slate-800/60 active:scale-95"
-            >
-              <Briefcase className="h-4 w-4 text-slate-400 transition-colors motion-reduce:transition-none group-hover:text-sky-300" aria-hidden="true" />
-              <span>{heroContent.secondaryCta.label}</span>
-            </Link>
+            <Magnetic strength={0.15}>
+              <Link
+                href={heroContent.secondaryCta.href}
+                className="btn-glow-secondary group inline-flex h-14 items-center gap-2.5 rounded-full border border-slate-700/50 bg-slate-900/40 px-8 text-sm font-bold tracking-wide text-white backdrop-blur-md transition-all hover:border-slate-600 hover:bg-slate-800/60 hover:shadow-[0_0_20px_rgba(56,189,248,0.15)] active:scale-95"
+              >
+                <Briefcase className="h-4 w-4 text-slate-400 transition-colors motion-reduce:transition-none group-hover:text-sky-300" aria-hidden="true" />
+                <span>{heroContent.secondaryCta.label}</span>
+              </Link>
+            </Magnetic>
           </motion.div>
 
           <motion.div

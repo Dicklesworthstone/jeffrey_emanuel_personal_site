@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Star, GitFork, Box, Beaker, Repeat } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import type { Project } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
@@ -22,10 +23,20 @@ const KindIcon = ({ kind }: { kind: Project["kind"] }) => {
 
 export default function ProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
-  const divRef = useRef<HTMLDivElement>(null);
-  const rectRef = useRef<DOMRect | null>(null);
-  const [opacity, setOpacity] = useState(0);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { stiffness: 150, damping: 20 };
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [7, -7]), springConfig);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-7, 7]), springConfig);
+
+  const spotlightOpacity = useSpring(0, { stiffness: 300, damping: 30 });
 
   // Detect touch device to disable spotlight effect (better mobile performance)
   useEffect(() => {
@@ -34,27 +45,35 @@ export default function ProjectCard({ project }: { project: Project }) {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current || isTouchDevice || !rectRef.current) return;
+    if (!cardRef.current || isTouchDevice) return;
     
-    // Use cached rect to avoid layout thrashing
-    const rect = rectRef.current;
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    divRef.current.style.setProperty("--mouse-x", `${x}px`);
-    divRef.current.style.setProperty("--mouse-y", `${y}px`);
+    const rect = cardRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    const mouseXPos = e.clientX - rect.left;
+    const mouseYPos = e.clientY - rect.top;
+    
+    const xPct = mouseXPos / width - 0.5;
+    const yPct = mouseYPos / height - 0.5;
+    
+    x.set(xPct);
+    y.set(yPct);
+    
+    mouseX.set(mouseXPos);
+    mouseY.set(mouseYPos);
   };
 
   const handleMouseEnter = () => {
-    if (!isTouchDevice && divRef.current) {
-      setOpacity(1);
-      // Cache rect on enter to avoid recalculation during move
-      rectRef.current = divRef.current.getBoundingClientRect();
+    if (!isTouchDevice) {
+      spotlightOpacity.set(1);
     }
   };
 
   const handleMouseLeave = () => {
-    setOpacity(0);
+    spotlightOpacity.set(0);
+    x.set(0);
+    y.set(0);
   };
 
   // Extract star count from badge (handles formats like "123 stars", "1,001 stars", "2.8K stars", "10K+ stars")
@@ -100,42 +119,49 @@ export default function ProjectCard({ project }: { project: Project }) {
     <Link
       href={linkHref}
       {...(isInternalLink ? {} : { target: "_blank", rel: "noopener noreferrer" })}
-      className="block h-full"
+      className="block h-full perspective-1000"
       onTouchStart={lightTap}
     >
-      <article
-        ref={divRef}
+      <motion.article
+        ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        style={{
+          rotateX: isTouchDevice ? 0 : rotateX,
+          rotateY: isTouchDevice ? 0 : rotateY,
+          transformStyle: "preserve-3d",
+        }}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-black/20 p-4 sm:p-6 md:p-8",
-          "transition-all duration-300 ease-out",
-          "[box-shadow:var(--elevation-0)]",
-          "hover:bg-black/40 hover:-translate-y-1 hover:scale-[1.015] hover:[box-shadow:var(--elevation-2)]",
-          "active:scale-[0.98] active:translate-y-0 active:[box-shadow:var(--elevation-0)] active:brightness-110 active:border-white/10",
-          "focus-within:-translate-y-1 focus-within:scale-[1.015] focus-within:[box-shadow:var(--elevation-2)]",
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-slate-900/40 p-4 sm:p-6 md:p-8 backdrop-blur-sm",
+          "transition-colors duration-300 ease-out",
+          "hover:bg-slate-900/60 hover:border-white/10",
+          "active:scale-[0.98] active:brightness-110",
+          "focus-within:border-white/20",
           "will-change-transform",
           hoverBorder
         )}
       >
         {/* Custom Gradient Background */}
         {project.gradient && (
-           <div className={cn("absolute inset-0 opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15] bg-gradient-to-br", project.gradient)} aria-hidden="true" />
+           <div className={cn("absolute inset-0 opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.2] bg-gradient-to-br", project.gradient)} aria-hidden="true" />
         )}
 
         {/* Dynamic Spotlight Effect */}
-        <div
+        <motion.div
           className="pointer-events-none absolute -inset-px transition-opacity duration-500"
           style={{
-            opacity,
-            background: `radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(${spotlightColor}, 0.12), transparent 40%)`,
+            opacity: spotlightOpacity,
+            background: useTransform(
+              [mouseX, mouseY],
+              ([x, y]) => `radial-gradient(600px circle at ${x}px ${y}px, rgba(${spotlightColor}, 0.15), transparent 40%)`
+            ),
           }}
           aria-hidden="true"
         />
 
-        {/* Subtle gradient stroke on top border */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50" aria-hidden="true" />
+        {/* Subtle glass reflection effect on top border */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50" aria-hidden="true" />
 
         <div className="relative z-10 flex flex-1 flex-col">
           <div className="flex items-start justify-between gap-4">
@@ -204,7 +230,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             </div>
           </div>
         </div>
-      </article>
+      </motion.article>
     </Link>
   );
 }

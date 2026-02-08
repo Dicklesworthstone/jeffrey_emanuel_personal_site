@@ -51,6 +51,23 @@ export default function GlowOrbits() {
           scale: 1.06,
           stagger: 0.28,
         });
+
+        // Mouse interaction for parallax effect
+        const handleMouseMove = (e: MouseEvent) => {
+          const { clientX, clientY } = e;
+          const xPos = (clientX / window.innerWidth - 0.5) * 60;
+          const yPos = (clientY / window.innerHeight - 0.5) * 60;
+          
+          gsap.to(rootRef.current, {
+            x: xPos,
+            y: yPos,
+            duration: 1.5,
+            ease: "power2.out",
+          });
+        };
+
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
       }
     }, rootRef);
 
