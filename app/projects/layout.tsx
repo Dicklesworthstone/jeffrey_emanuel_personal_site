@@ -108,7 +108,7 @@ function generateSoftwareApplicationSchema(project: typeof projects[number]) {
 export default function ProjectsLayout({ children }: { children: React.ReactNode }) {
   // Filter for software projects (oss and product kinds)
   const softwareProjects = projects.filter(
-    (p) => p.kind === "oss" || p.kind === "product"
+    (p) => p.kind === "oss" || p.kind === "product" || p.kind === "rust-port"
   );
 
   // Generate ItemList schema with all software applications

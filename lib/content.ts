@@ -374,7 +374,7 @@ export type ProjectDetails = {
 
 export type Project = {
   name: string;
-  kind: "product" | "oss" | "research";
+  kind: "product" | "oss" | "research" | "rust-port";
   badge?: string;
   href: string;
   short: string;
@@ -1262,43 +1262,43 @@ export const projects: Project[] = [
   },
   {
     name: "FastMCP Rust",
-    kind: "oss",
+    kind: "rust-port",
     badge: "9 stars",
     href: "https://github.com/Dicklesworthstone/fastmcp_rust",
     short: "High-performance MCP framework for Rust with attribute macros and cancel-correct async.",
     description:
       "A zero-boilerplate Model Context Protocol framework built on asupersync. Features attribute macros for tools and resources, automatic timeout budgets, structured concurrency, and a 4-valued Outcome type. No unsafe code.",
-    tags: ["Rust", "MCP", "Async", "AI Tools", "Flywheel"],
+    tags: ["Rust", "MCP", "Async", "AI Tools", "Rust Port"],
   },
   {
     name: "Charmed Rust",
-    kind: "oss",
+    kind: "rust-port",
     badge: "9 stars",
     href: "https://github.com/Dicklesworthstone/charmed_rust",
     short: "Port of Charm's Bubbletea, Lipgloss, and Bubbles TUI libraries to idiomatic Rust.",
     description:
       "Brings the Elm architecture (pure update/view), CSS-like styling, 16 pre-built components, spring animations, Markdown rendering, and SSH app framework to Rust. 100% type-safe with no unsafe code.",
-    tags: ["Rust", "TUI", "Terminal", "UI Components"],
+    tags: ["Rust", "TUI", "Terminal", "UI Components", "Rust Port"],
   },
   {
     name: "Rich Rust",
-    kind: "oss",
+    kind: "rust-port",
     badge: "11 stars",
     href: "https://github.com/Dicklesworthstone/rich_rust",
     short: "Beautiful terminal output library for Rust inspired by Python's Rich.",
     description:
       "Markup syntax for styled text, auto-sizing tables, panels, progress bars, spinners, syntax highlighting for 100+ languages, Markdown rendering, and automatic color downgrade. Zero unsafe code.",
-    tags: ["Rust", "TUI", "Terminal", "Output"],
+    tags: ["Rust", "TUI", "Terminal", "Output", "Rust Port"],
   },
   {
     name: "OpenTUI Rust",
-    kind: "oss",
+    kind: "rust-port",
     badge: "10 stars",
     href: "https://github.com/Dicklesworthstone/opentui_rust",
     short: "High-performance TUI rendering engine with RGBA alpha blending and scissor clipping.",
     description:
       "Cell-based buffers with real alpha blending, scissor clipping for nested viewports, double-buffered diff rendering, rope-based text editing with undo/redo. A zero-opinion rendering engine for building terminal UI frameworks.",
-    tags: ["Rust", "TUI", "Rendering", "Graphics"],
+    tags: ["Rust", "TUI", "Rendering", "Graphics", "Rust Port"],
   },
   {
     name: "Post Compact Reminder",

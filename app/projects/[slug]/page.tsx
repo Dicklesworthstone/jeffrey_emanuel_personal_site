@@ -13,6 +13,7 @@ import {
   BookOpen,
   Link as LinkIcon,
   Users,
+  Repeat,
 } from "lucide-react";
 import { getProjectBySlug, getProjectSlugs, type Project } from "@/lib/content";
 import { JsonLd } from "@/components/json-ld";
@@ -70,6 +71,8 @@ function getKindIconNode(kind: Project["kind"], className = "h-5 w-5") {
       return <GitFork className={className} />;
     case "research":
       return <Beaker className={className} />;
+    case "rust-port":
+      return <Repeat className={className} />;
   }
 }
 
@@ -110,6 +113,10 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
     accentColor = "text-purple-400";
     accentBg = "bg-purple-500/10";
     accentRing = "ring-purple-500/20";
+  } else if (project.kind === "rust-port") {
+    accentColor = "text-orange-400";
+    accentBg = "bg-orange-500/10";
+    accentRing = "ring-orange-500/20";
   }
 
   // Schema.org structured data
@@ -138,7 +145,7 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
       <SectionShell
         id="project-detail"
         iconNode={getKindIconNode(project.kind)}
-        eyebrow={project.kind.charAt(0).toUpperCase() + project.kind.slice(1)}
+        eyebrow={project.kind.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
         title={project.name}
         kicker={project.short}
         headingLevel={1}
@@ -165,7 +172,7 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
             )}
           >
             {getKindIconNode(project.kind, "h-4 w-4")}
-            {project.kind}
+            {project.kind.replace("-", " ")}
           </span>
           {starCount && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-500/20">

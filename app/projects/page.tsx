@@ -7,7 +7,7 @@ import BentoGrid from "@/components/bento-grid";
 import FlywheelVisualization from "@/components/flywheel-visualization";
 import ErrorBoundary from "@/components/error-boundary";
 import { projects } from "@/lib/content";
-import { GitBranch, Layers, Zap, Beaker, Box, Workflow, Tag, X } from "lucide-react";
+import { GitBranch, Layers, Zap, Beaker, Box, Workflow, Tag, X, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const filters = [
@@ -15,6 +15,7 @@ const filters = [
   { id: "product", label: "Products", icon: Box },
   { id: "research", label: "Research", icon: Beaker },
   { id: "oss", label: "Open Source", icon: GitBranch },
+  { id: "rust-port", label: "Rust Ports", icon: Repeat },
   { id: "flywheel", label: "Flywheel", icon: Workflow },
 ] as const;
 
@@ -249,7 +250,7 @@ export default function ProjectsPage() {
           >
             GitHub profile
           </a>{" "}
-          for the full archive of 70+ repos.
+          for the full archive of 90+ repos.
         </p>
       </div>
     </SectionShell>

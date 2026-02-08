@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Star, GitFork, Box, Beaker } from "lucide-react";
+import { ArrowUpRight, Star, GitFork, Box, Beaker, Repeat } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import type { Project } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
@@ -15,6 +15,8 @@ const KindIcon = ({ kind }: { kind: Project["kind"] }) => {
       return <GitFork className="h-3 w-3" />;
     case "research":
       return <Beaker className="h-3 w-3" />;
+    case "rust-port":
+      return <Repeat className="h-3 w-3" />;
   }
 };
 
@@ -63,6 +65,7 @@ export default function ProjectCard({ project }: { project: Project }) {
   // Determine base colors based on kind or custom gradient
   const isProduct = project.kind === "product";
   const isResearch = project.kind === "research";
+  const isRustPort = project.kind === "rust-port";
 
   let accentColor = "text-emerald-400";
   let spotlightColor = "52, 211, 153"; // Emerald
@@ -81,6 +84,10 @@ export default function ProjectCard({ project }: { project: Project }) {
     accentColor = "text-purple-400";
     spotlightColor = "192, 132, 252"; // Purple
     hoverBorder = "group-hover:border-purple-500/30";
+  } else if (isRustPort) {
+    accentColor = "text-orange-400";
+    spotlightColor = "251, 146, 60"; // Orange
+    hoverBorder = "group-hover:border-orange-500/30";
   }
 
   const isLarge = project.size === "large";
@@ -141,7 +148,7 @@ export default function ProjectCard({ project }: { project: Project }) {
                   <KindIcon kind={project.kind} />
                 </span>
                 <span className="text-slate-500">
-                  {project.kind}
+                  {project.kind.replace("-", " ")}
                 </span>
               </div>
               <h3 className={cn(
