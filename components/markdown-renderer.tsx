@@ -148,7 +148,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             return <th className="px-6 py-4">{children}</th>;
           },
           td({ children }) {
-            return <td className="px-6 py-4 border-b border-slate-800/50 text-slate-400 whitespace-nowrap">{children}</td>;
+            return <td className="px-6 py-4 border-b border-slate-800/50 text-slate-400 whitespace-normal">{children}</td>;
           },
           img({ src, alt }) {
              const safeSrc = (src as string) || "";
