@@ -4,6 +4,7 @@ import { Github, Twitter, Mail, Linkedin, ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { siteConfig, navItems } from "@/lib/content";
 import { useState, useEffect } from "react";
+import Magnetic from "@/components/magnetic";
 
 const socialLinks = [
   { href: `mailto:${siteConfig.email}`, icon: Mail, label: "Email" },
@@ -43,7 +44,7 @@ export default function SiteFooter() {
             <p className="text-sm leading-relaxed text-slate-500">
               Building durable infrastructure for the agentic future.
               <br />
-              &copy; {year || "..."} Jeffrey Emanuel. All rights reserved.
+              &copy; {year || 2026} Jeffrey Emanuel. All rights reserved.
             </p>
           </div>
 
@@ -64,16 +65,17 @@ export default function SiteFooter() {
           <div className="flex flex-col items-end gap-6">
             <div className="flex items-center gap-3">
               {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="group relative flex h-10 w-10 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all hover:border-white/10 hover:bg-white/10 hover:text-white hover:scale-110"
-                  aria-label={social.label}
-                >
-                  <social.icon className="h-4 w-4 transition-transform group-hover:rotate-12" aria-hidden="true" />
-                </a>
+                <Magnetic key={social.label} strength={0.2}>
+                  <a
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="group relative flex h-10 w-10 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all hover:border-white/10 hover:bg-white/10 hover:text-white hover:scale-110"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-4 w-4 transition-transform group-hover:rotate-12" aria-hidden="true" />
+                  </a>
+                </Magnetic>
               ))}
             </div>
             <button
@@ -115,27 +117,29 @@ export default function SiteFooter() {
           {/* Social icons with text labels */}
           <div className="flex items-center gap-5">
             {socialLinks.map((social) => (
-              <a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="group flex flex-col items-center gap-1.5"
-                aria-label={social.label}
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all active:ring-2 active:ring-sky-500/30 group-hover:border-white/10 group-hover:bg-white/10 group-hover:text-white">
-                  <social.icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:hidden">
-                  {social.label}
-                </span>
-              </a>
+              <Magnetic key={social.label} strength={0.15}>
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="group flex flex-col items-center gap-1.5"
+                  aria-label={social.label}
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all active:ring-2 active:ring-sky-500/30 group-hover:border-white/10 group-hover:bg-white/10 group-hover:text-white">
+                    <social.icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:hidden">
+                    {social.label}
+                  </span>
+                </a>
+              </Magnetic>
             ))}
           </div>
 
           {/* Copyright */}
           <p className="text-xs text-slate-600">
-            &copy; {year || "..."} Jeffrey Emanuel. All rights reserved.
+            &copy; {year || 2026} Jeffrey Emanuel. All rights reserved.
           </p>
         </div>
       </div>

@@ -4,7 +4,7 @@ export const siteConfig = {
   name: "Jeffrey Emanuel",
   title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
   description:
-    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 10 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 90+ open-source projects with 10K+ GitHub stars.",
+    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 14 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. 90+ open-source projects with 16K+ GitHub stars.",
   email: "jeffreyemanuel@gmail.com",
   location: "",
   social: {
@@ -68,7 +68,7 @@ export const heroContent = {
   eyebrow: "Founder • Engineer • Former Hedge Fund Analyst",
   title: "Building the tools that sit between markets and frontier AI.",
   intro:
-    "Beginning in October of 2025, I began developing what I call my \"Agentic Coding Flywheel\": a collection of 10 core tools.",
+    "Beginning in October of 2025, I began developing what I call my \"Agentic Coding Flywheel\": a collection of 14 core tools.",
   tools: [
     {
       name: "MCP Agent Mail",
