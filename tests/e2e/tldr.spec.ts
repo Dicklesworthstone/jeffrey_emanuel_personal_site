@@ -34,8 +34,8 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
 
     // Check stats are displayed - use exact match to avoid ambiguity
     console.log("[E2E] Checking stats display");
-    await expect(page.getByText("13", { exact: true })).toBeVisible(); // Tools count
-    console.log("[E2E] Tools count (13) visible");
+    await expect(page.getByText("14", { exact: true })).toBeVisible(); // Tools count
+    console.log("[E2E] Tools count (14) visible");
 
     // Stars count - check that the stats section has numeric values
     // Stats use responsive font sizes: text-2xl sm:text-3xl md:text-4xl
@@ -200,7 +200,7 @@ test.describe("TLDR Page - Flywheel Tools Showcase", () => {
     const metaDescription = page.locator('meta[name="description"]');
     await expect(metaDescription).toHaveAttribute(
       "content",
-      /13 open-source tools/i
+      /14 open-source tools/i
     );
     console.log("[E2E] Meta description contains expected content");
     console.log("[E2E] Page metadata test passed");

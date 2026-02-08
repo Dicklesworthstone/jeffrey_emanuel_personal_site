@@ -89,7 +89,7 @@ describe("Project Schema Validation", () => {
 
       expect(project.name).toBeDefined();
       expect(project.name.length).toBeGreaterThan(0);
-      expect(["product", "oss", "research"]).toContain(project.kind);
+      expect(["product", "oss", "research", "rust-port"]).toContain(project.kind);
       expect(project.href).toBeDefined();
       expect(project.short).toBeDefined();
       expect(project.description).toBeDefined();

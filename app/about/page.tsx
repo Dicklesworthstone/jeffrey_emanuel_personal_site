@@ -38,7 +38,7 @@ export default function AboutPage() {
             <Link href="/tldr" className="font-semibold text-violet-400 hover:text-violet-300 transition-colors">
               Agentic Coding Tooling Flywheel
             </Link>
-            : thirteen interconnected tools that transform how AI coding agents collaborate.
+            : fourteen interconnected tools that transform how AI coding agents collaborate.
             Agent Mail is critical to my workflow - it lets multiple Claude Code instances
             coordinate without stepping on each other. Beads Viewer uses PageRank to surface
             which tasks unblock the most other work. CASS provides sub-millisecond search

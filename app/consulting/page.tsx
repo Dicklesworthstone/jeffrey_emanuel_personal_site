@@ -3,8 +3,9 @@
 import SectionShell from "@/components/section-shell";
 import ConsultingIntakeForm from "@/components/consulting-intake-form";
 import AnimatedGrid from "@/components/animated-grid";
-import { Cpu, LineChart, Users, MessageSquare, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Cpu, LineChart, Users, MessageSquare, CheckCircle2 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function ConsultingPage() {
   const prefersReducedMotion = useReducedMotion();

@@ -1,5 +1,4 @@
 import Hero from "@/components/hero";
-import Link from "next/link";
 import SectionShell from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
@@ -8,7 +7,7 @@ import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail
 import { careerTimeline, projects, threads, writingHighlights, tldrFlywheelTools, heroStats, featuredSites } from "@/lib/content";
 import FeaturedSites from "@/components/featured-sites";
 import { cn } from "@/lib/utils";
-import { HapticLink, HapticExternalLink } from "@/components/haptic-link";
+import { HapticLink } from "@/components/haptic-link";
 import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/content";
@@ -17,6 +16,11 @@ import DemoShowcase from "@/components/demo-showcase";
 import NewsletterSignup from "@/components/newsletter-signup";
 import NotableStargazers from "@/components/notable-stargazers-wrapper";
 import GitHubHeartbeat from "@/components/github-heartbeat-wrapper";
+
+import WritingCard from "@/components/writing-card";
+import ThreadCard from "@/components/thread-card";
+import Magnetic from "@/components/magnetic";
+import { SnapshotCard } from "@/components/homepage-snapshot";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
@@ -71,75 +75,33 @@ export default async function HomePage() {
           staggerDelay={0.12}
           scrollIndicator
         >
-          <motion.div 
-            whileHover={{ y: -4, scale: 1.01 }}
-            className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 border border-violet-500/20 bg-gradient-to-br from-violet-950/20 to-transparent transition-colors hover:border-violet-500/40"
-          >
-            <p className="text-xs font-bold uppercase tracking-widest text-violet-400 shadow-violet-500/20 drop-shadow-sm">
-              The Flywheel
-            </p>
-            <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
-              13 Tools That Amplify Each Other
-            </h3>
-            <p className="mt-4 text-base leading-relaxed text-slate-400">
-              MCP Agent Mail, Beads Viewer, CASS Memory, and 10 more tools that let
-              coding agents coordinate, remember, and work safely together. Each
-              tool makes the others more powerful.
-            </p>
-            <Link
-              href="/projects"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-violet-400 transition-colors hover:text-violet-300"
-            >
-              Explore the ecosystem
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </motion.div>
-          <motion.div 
-            whileHover={{ y: -4, scale: 1.01 }}
-            className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 transition-colors hover:border-fuchsia-500/30"
-          >
-            <p className="text-xs font-bold uppercase tracking-widest text-fuchsia-400 shadow-fuchsia-500/20 drop-shadow-sm">
-              Markets & research
-            </p>
-            <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
-              Essays that move numbers
-            </h3>
-            <p className="mt-4 text-base leading-relaxed text-slate-400">
-              Long-form work that connects model internals and infrastructure
-              economics all the way back to cash flows and valuations.
-            </p>
-            <Link
-              href="/writing"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-fuchsia-400 transition-colors hover:text-fuchsia-300"
-            >
-              Read essays
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </motion.div>
-          <motion.div 
-            whileHover={{ y: -4, scale: 1.01 }}
-            className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 transition-colors hover:border-sky-500/30"
-          >
-            <p className="text-xs font-bold uppercase tracking-widest text-sky-400 shadow-sky-500/20 drop-shadow-sm">
-              Infrastructure
-            </p>
-            <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 md:text-2xl">
-              Lumera Network
-            </h3>
-            <p className="mt-4 text-base leading-relaxed text-slate-400">
-              A Cosmos-based L1 for durable storage and AI verification, aimed
-              at the world where agents talk to chains as fluently as to APIs.
-            </p>
-            <a
-              href="https://pastel.network"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-sky-400 transition-colors hover:text-sky-300"
-            >
-              Visit Lumera
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </motion.div>
+          <SnapshotCard
+            eyebrow="The Flywheel"
+            title="14 Tools That Amplify Each Other"
+            description="MCP Agent Mail, Beads Viewer, CASS Memory, and 10 more tools that let coding agents coordinate, remember, and work safely together. Each tool makes the others more powerful."
+            href="/projects"
+            linkText="Explore the ecosystem"
+            accentColor="text-violet-400"
+            hoverBorder="hover:border-violet-500/40"
+          />
+          <SnapshotCard
+            eyebrow="Markets & research"
+            title="Essays that move numbers"
+            description="Long-form work that connects model internals and infrastructure economics all the way back to cash flows and valuations."
+            href="/writing"
+            linkText="Read essays"
+            accentColor="text-fuchsia-400"
+            hoverBorder="hover:border-fuchsia-500/30"
+          />
+          <SnapshotCard
+            eyebrow="Infrastructure"
+            title="Lumera Network"
+            description="A Cosmos-based L1 for durable storage and AI verification, aimed at the world where agents talk to chains as fluently as to APIs."
+            href="https://pastel.network"
+            linkText="Visit Lumera"
+            accentColor="text-sky-400"
+            hoverBorder="hover:border-sky-500/30"
+          />
         </AnimatedGrid>
       </SectionShell>
 
@@ -175,7 +137,7 @@ export default async function HomePage() {
                   </h2>
 
                   <p className="mt-4 text-base leading-relaxed text-slate-400 sm:text-lg">
-                    Thirteen interconnected tools that transform how AI coding agents work together.
+                    Fourteen interconnected tools that transform how AI coding agents work together.
                     Coordination, memory, task tracking, safety, and search. I use these to run
                     10+ agents simultaneously. My GitHub squares get darker green each month because
                     each tool amplifies the others.
@@ -232,10 +194,12 @@ export default async function HomePage() {
                     </div>
                   </div>
 
-                  <div className="mt-6 flex items-center gap-2 text-sm font-bold text-violet-400 transition-colors group-hover:text-violet-300">
-                    Explore the TLDR
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </div>
+                  <Magnetic strength={0.2}>
+                    <div className="mt-6 flex items-center gap-2 text-sm font-bold text-violet-400 transition-colors group-hover:text-violet-300">
+                      Explore the TLDR
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </Magnetic>
                 </div>
               </div>
             </div>
@@ -291,13 +255,15 @@ export default async function HomePage() {
         />
         {/* Subtle link to Nvidia story - understated but findable */}
         <div className="mt-8 text-center">
-          <HapticLink
-            href="/nvidia-story"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-300"
-          >
-            <span>See the story behind the $600B drop</span>
-            <ArrowRight className="h-3 w-3" />
-          </HapticLink>
+          <Magnetic strength={0.15} className="inline-block">
+            <HapticLink
+              href="/nvidia-story"
+              className="inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-300"
+            >
+              <span>See the story behind the $600B drop</span>
+              <ArrowRight className="h-3 w-3" />
+            </HapticLink>
+          </Magnetic>
         </div>
       </SectionShell>
 
@@ -314,30 +280,7 @@ export default async function HomePage() {
           scrollIndicator
         >
           {featuredWriting.map((item) => (
-            <HapticLink
-              key={item.title}
-              href={item.href}
-              className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-                <span>{item.source}</span>
-                <span className="h-0.5 w-0.5 rounded-full bg-slate-500" />
-                <span>{item.category}</span>
-              </div>
-
-              <h3 className="mt-4 text-xl font-bold leading-tight text-slate-50 transition-colors group-hover:text-sky-200">
-                {item.title}
-              </h3>
-
-              <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
-                {item.blurb}
-              </p>
-
-              <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
-                Read the essay
-                <span className="text-lg leading-none">→</span>
-              </div>
-            </HapticLink>
+            <WritingCard key={item.title} item={item} />
           ))}
         </AnimatedGrid>
       </SectionShell>
@@ -393,27 +336,7 @@ export default async function HomePage() {
             scrollIndicator
           >
             {featuredThreads.map((thread) => (
-              <HapticExternalLink
-                key={thread.href}
-                href={thread.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card group flex flex-col rounded-3xl p-8 hover:border-sky-500/30"
-              >
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                  Thread on X
-                </p>
-                <h3 className="mt-4 text-lg font-bold leading-snug text-slate-50 transition-colors group-hover:text-sky-200">
-                  {thread.title}
-                </h3>
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-slate-400">
-                  {thread.blurb}
-                </p>
-                <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 transition-colors group-hover:text-sky-300">
-                  Open thread
-                  <span className="text-lg leading-none">→</span>
-                </div>
-              </HapticExternalLink>
+              <ThreadCard key={thread.href} thread={thread} />
             ))}
           </AnimatedGrid>
         </SectionShell>

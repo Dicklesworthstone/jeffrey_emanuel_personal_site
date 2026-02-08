@@ -12,7 +12,7 @@ import EasterEggs from "@/components/easter-eggs";
 import ServiceWorkerRegistration from "@/components/service-worker-registration";
 import { useMobileOptimizations } from "@/hooks/use-mobile-optimizations";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
-import { useScroll, useSpring, useTransform } from "framer-motion";
+import { useScroll, useSpring } from "framer-motion";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 
 // Lazy load modals to reduce initial bundle size

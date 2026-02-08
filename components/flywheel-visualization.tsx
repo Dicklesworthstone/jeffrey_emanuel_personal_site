@@ -31,6 +31,8 @@ import { cn } from "@/lib/utils";
 import { getColorDefinition } from "@/lib/colors";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import BottomSheet from "@/components/bottom-sheet";
+import Magnetic from "@/components/magnetic";
+import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutGrid,
@@ -167,19 +169,16 @@ const ConnectionLine = React.memo(function ConnectionLine({
   // Calculate path length for dash animation (approximate)
   const dx = toPos.x - fromPos.x;
   const dy = toPos.y - fromPos.y;
-  const pathLength = Math.sqrt(dx * dx + dy * dy) * 1.2; // 1.2 accounts for curve
+  const pathLength = Math.sqrt(dx * dx + dy * dy) * 1.2;
 
   return (
     <g>
-      {/* Gradient definitions */}
       <defs>
-        {/* Static gradient for base line */}
         <linearGradient id={gradientId} gradientUnits="userSpaceOnUse"
           x1={fromPos.x} y1={fromPos.y} x2={toPos.x} y2={toPos.y}>
           <stop offset="0%" stopColor={color1} stopOpacity={isHighlighted ? 0.9 : 0.3} />
           <stop offset="100%" stopColor={color2} stopOpacity={isHighlighted ? 0.9 : 0.3} />
         </linearGradient>
-        {/* Animated gradient for flow effect */}
         <linearGradient id={flowGradientId} gradientUnits="userSpaceOnUse"
           x1={fromPos.x} y1={fromPos.y} x2={toPos.x} y2={toPos.y}>
           <stop offset="0%" stopColor={color1} stopOpacity={isHighlighted ? 0.8 : 0.5} />
@@ -188,20 +187,30 @@ const ConnectionLine = React.memo(function ConnectionLine({
         </linearGradient>
       </defs>
 
-      {/* Glow layer for highlighted connections */}
-      {isHighlighted && (
-        <motion.path
-          d={path}
-          fill="none"
-          stroke={`url(#${gradientId})`}
-          strokeWidth={8}
-          strokeLinecap="round"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          exit={{ opacity: 0 }}
-          style={{ filter: "blur(6px)" }}
-        />
-      )}
+      {/* Dynamic Glow Pulse for Highlighted Connections */}
+      <AnimatePresence>
+        {isHighlighted && (
+          <motion.path
+            key="glow"
+            d={path}
+            fill="none"
+            stroke={`url(#${gradientId})`}
+            strokeWidth={12}
+            strokeLinecap="round"
+            initial={{ opacity: 0, pathLength: 0 }}
+            animate={{ 
+              opacity: [0.2, 0.4, 0.2],
+              pathLength: 1 
+            }}
+            exit={{ opacity: 0 }}
+            transition={{
+              opacity: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+              pathLength: { duration: 0.8, ease: "easeOut" }
+            }}
+            style={{ filter: "blur(8px)" }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Base connection line */}
       <motion.path
@@ -221,27 +230,27 @@ const ConnectionLine = React.memo(function ConnectionLine({
         }}
       />
 
-      {/* Continuous flowing data animation - subtle pulsing dash */}
+      {/* Flowing data pulse */}
       {!reducedMotion && (
         <motion.path
           d={path}
           fill="none"
           stroke={`url(#${flowGradientId})`}
-          strokeWidth={isHighlighted ? 2 : 1}
+          strokeWidth={isHighlighted ? 3 : 1.5}
           strokeLinecap="round"
-          strokeDasharray={`${pathLength * 0.15} ${pathLength * 0.35}`}
+          strokeDasharray={`4, ${pathLength / 4}`}
           initial={{ strokeDashoffset: 0 }}
-          animate={{ strokeDashoffset: -pathLength * 0.5 }}
+          animate={{ strokeDashoffset: -pathLength }}
           transition={{
-            duration: isHighlighted ? 1.5 : 3,
+            duration: isHighlighted ? 2 : 4,
             repeat: Infinity,
             ease: "linear",
           }}
-          style={{ opacity: isHighlighted ? 0.7 : 0.3 }}
+          style={{ opacity: isHighlighted ? 0.8 : 0.2 }}
         />
       )}
 
-      {/* Flowing particles when active - only on devices that support CSS Motion Path */}
+      {/* Flowing particles */}
       {isActive && !reducedMotion && supportsMotionPath && (
         <>
           <FlowingParticle path={path} delay={0} duration={2} color={color1} enabled={supportsMotionPath} />
@@ -277,11 +286,17 @@ const ToolNode = React.memo(function ToolNode({
 }) {
   const Icon = iconMap[tool.icon] || Zap;
   const { lightTap } = useHapticFeedback();
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = useCallback(() => {
     lightTap();
     onSelect();
   }, [lightTap, onSelect]);
+
+  const handleHoverInternal = useCallback((hovering: boolean) => {
+    setIsHovered(hovering);
+    onHover(hovering);
+  }, [onHover]);
 
   return (
     <motion.div
@@ -291,6 +306,7 @@ const ToolNode = React.memo(function ToolNode({
         top: position.y - NODE_SIZE / 2,
         width: NODE_SIZE,
         height: NODE_SIZE,
+        zIndex: isSelected ? 30 : isConnected ? 20 : 10,
       }}
       initial={{ scale: 0, opacity: 0 }}
       animate={{
@@ -304,58 +320,88 @@ const ToolNode = React.memo(function ToolNode({
               type: "spring",
               stiffness: 260,
               damping: 20,
-              delay: index * 0.08,
+              delay: index * 0.05,
             }
       }
     >
-      <motion.button
-        onClick={handleClick}
-        onMouseEnter={() => onHover(true)}
-        onMouseLeave={() => onHover(false)}
-        onFocus={() => onHover(true)}
-        onBlur={() => onHover(false)}
-        aria-label={`${tool.name}: ${tool.tagline}`}
-        aria-pressed={isSelected}
-        className={cn(
-          "relative flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-xl border p-1.5",
-          "transition-all duration-200 outline-none",
-          "focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
-          isSelected
-            ? "border-white/50 bg-white/20 shadow-xl"
-            : isConnected
-            ? "border-white/30 bg-white/10"
-            : "border-white/10 bg-slate-900/80 hover:border-white/25 hover:bg-white/10"
-        )}
-        whileHover={reducedMotion ? {} : { scale: 1.1 }}
-        whileTap={reducedMotion ? {} : { scale: 0.95 }}
-      >
-        {/* Glow background */}
-        <motion.div
+      <Magnetic strength={0.25}>
+        <motion.button
+          onClick={handleClick}
+          onMouseEnter={() => handleHoverInternal(true)}
+          onMouseLeave={() => handleHoverInternal(false)}
+          onFocus={() => handleHoverInternal(true)}
+          onBlur={() => handleHoverInternal(false)}
+          aria-label={`${tool.name}: ${tool.tagline}`}
+          aria-pressed={isSelected}
           className={cn(
-            "absolute inset-0 rounded-xl blur-xl",
-            `bg-gradient-to-br ${tool.color}`
+            "relative flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-xl border p-1.5 overflow-hidden",
+            "transition-all duration-300 outline-none",
+            "focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+            isSelected
+              ? "border-white/50 bg-white/20 shadow-2xl shadow-violet-500/20"
+              : isConnected
+              ? "border-white/30 bg-white/10"
+              : "border-white/10 bg-slate-900/80 hover:border-white/25 hover:bg-white/10"
           )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isSelected ? 0.6 : isConnected ? 0.35 : 0.15 }}
-          transition={{ duration: reducedMotion ? 0 : 0.3 }}
-        />
-
-        {/* Icon */}
-        <div
-          className={cn(
-            "relative z-10 flex h-7 w-7 items-center justify-center rounded-lg",
-            `bg-gradient-to-br ${tool.color}`,
-            isSelected && "shadow-lg"
-          )}
+          whileHover={reducedMotion ? {} : { scale: 1.05 }}
+          whileTap={reducedMotion ? {} : { scale: 0.95 }}
         >
-          <Icon className="h-4 w-4 text-white" />
-        </div>
+          {/* Noise Overlay */}
+          <div 
+            className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-overlay transition-opacity duration-500 group-hover:opacity-[0.06]"
+            style={{ backgroundImage: `url("${NOISE_SVG_DATA_URI}")` }}
+          />
 
-        {/* Label */}
-        <span className="relative z-10 text-[10px] font-bold uppercase tracking-wider text-white leading-tight">
-          {tool.shortName}
-        </span>
-      </motion.button>
+          {/* Glow background */}
+          <motion.div
+            className={cn(
+              "absolute inset-0 rounded-xl blur-xl",
+              `bg-gradient-to-br ${tool.color}`
+            )}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isSelected ? 0.6 : isConnected ? 0.35 : isHovered ? 0.3 : 0.15 }}
+            transition={{ duration: reducedMotion ? 0 : 0.3 }}
+          />
+
+          {/* Icon with Chromatic Aberration on hover */}
+          <div
+            className={cn(
+              "relative z-10 flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden",
+              `bg-gradient-to-br ${tool.color}`,
+              isSelected && "shadow-lg"
+            )}
+          >
+            <AnimatePresence>
+              {isHovered && !reducedMotion && (
+                <>
+                  <motion.div 
+                    initial={{ opacity: 0, x: 0 }}
+                    animate={{ opacity: 0.5, x: -1.5 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center text-rose-500 mix-blend-screen"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </motion.div>
+                  <motion.div 
+                    initial={{ opacity: 0, x: 0 }}
+                    animate={{ opacity: 0.5, x: 1.5 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center text-cyan-500 mix-blend-screen"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+            <Icon className="relative z-10 h-4 w-4 text-white" />
+          </div>
+
+          {/* Label */}
+          <span className="relative z-10 text-[10px] font-bold uppercase tracking-wider text-white leading-tight">
+            {tool.shortName}
+          </span>
+        </motion.button>
+      </Magnetic>
     </motion.div>
   );
 });

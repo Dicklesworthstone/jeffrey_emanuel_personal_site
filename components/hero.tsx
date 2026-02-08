@@ -17,37 +17,7 @@ import { useClickParticles } from "@/hooks/use-click-particles";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import headshot from "@/assets/jeff_emanuel_headshot.webp";
-
-// Magnetic effect component for premium feel
-function Magnetic({ children, strength = 0.5 }: { children: React.ReactNode; strength?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!ref.current) return;
-    const { clientX, clientY } = e;
-    const { left, top, width, height } = ref.current.getBoundingClientRect();
-    const x = (clientX - (left + width / 2)) * strength;
-    const y = (clientY - (top + height / 2)) * strength;
-    setPosition({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setPosition({ x: 0, y: 0 });
-  };
-
-  return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      animate={{ x: position.x, y: position.y }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+import Magnetic from "@/components/magnetic";
 
 // Lazy-load Three.js to keep initial load lightweight across devices
 const ThreeScene = dynamic(() => import("@/components/three-scene"), {
@@ -258,49 +228,52 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               {/* Tools grid - horizontal scroll on mobile, grid on desktop */}
               <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar sm:grid sm:grid-cols-2 lg:grid-cols-3">
                 {heroContent.tools.map((tool) => (
-                  <motion.div
-                    key={tool.name}
-                    whileHover={{ y: -4, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className="snap-start shrink-0 w-[70vw] sm:w-auto group relative overflow-hidden rounded-xl border border-slate-700/40 bg-slate-800/40 p-3 backdrop-blur-sm transition-all hover:border-slate-600/60 hover:bg-slate-800/60"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-200">
-                            {tool.name}
-                          </span>
-                          {"highlight" in tool && tool.highlight && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-400/30">
-                              <svg className="h-3 w-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                              {tool.highlight}
+                  <Magnetic key={tool.name} strength={0.15}>
+                    <motion.div
+                      whileHover={{ y: -4, scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      className="snap-start shrink-0 w-[70vw] sm:w-auto group h-full relative overflow-hidden rounded-xl border border-slate-700/40 bg-slate-800/40 p-3 backdrop-blur-sm transition-all hover:border-slate-600/60 hover:bg-slate-800/60"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-200">
+                              {tool.name}
                             </span>
+                            {"highlight" in tool && tool.highlight && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-400/30">
+                                <svg className="h-3 w-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                {tool.highlight}
+                              </span>
+                            )}
+                          </div>
+                          {"tagline" in tool && tool.tagline && (
+                            <p className="mt-0.5 text-xs font-medium text-sky-400/80">
+                              {tool.tagline}
+                            </p>
+                          )}
+                          {"description" in tool && tool.description && (
+                            <p className="mt-1 text-xs leading-relaxed text-slate-400/80">
+                              {tool.description}
+                            </p>
                           )}
                         </div>
-                        {"tagline" in tool && tool.tagline && (
-                          <p className="mt-0.5 text-xs font-medium text-sky-400/80">
-                            {tool.tagline}
-                          </p>
-                        )}
-                        {"description" in tool && tool.description && (
-                          <p className="mt-1 text-xs leading-relaxed text-slate-400/80">
-                            {tool.description}
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  </Magnetic>
                 ))}
                 {/* Explore ecosystem link */}
-                <Link
-                  href="/tldr"
-                  className="snap-start shrink-0 w-[70vw] sm:w-auto group flex items-center justify-center gap-2 rounded-xl border border-slate-700/40 bg-gradient-to-br from-slate-800/40 to-slate-900/40 p-3 text-sm font-medium text-slate-400 transition-colors hover:border-violet-500/30 hover:bg-slate-800/60 hover:text-violet-300"
-                >
-                  <span>Explore all tools</span>
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5" aria-hidden="true" />
-                </Link>
+                <Magnetic strength={0.2}>
+                  <Link
+                    href="/tldr"
+                    className="snap-start shrink-0 w-[70vw] sm:w-auto h-full group flex items-center justify-center gap-2 rounded-xl border border-slate-700/40 bg-gradient-to-br from-slate-800/40 to-slate-900/40 p-3 text-sm font-medium text-slate-400 transition-colors hover:border-violet-500/30 hover:bg-slate-800/60 hover:text-violet-300"
+                  >
+                    <span>Explore all tools</span>
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5" aria-hidden="true" />
+                  </Link>
+                </Magnetic>
               </div>
 
               {/* Achievement highlight callout */}
@@ -341,7 +314,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Body paragraphs */}
               <div className="space-y-4">

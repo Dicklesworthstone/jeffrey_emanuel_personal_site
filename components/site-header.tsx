@@ -11,6 +11,8 @@ import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
+import NavItem from "@/components/nav-item";
+import Magnetic from "@/components/magnetic";
 
 // Dynamically import 3D header icon to avoid SSR issues
 const HeaderIcon3D = dynamic(() => import("@/components/header-icon-3d"), {
@@ -82,53 +84,42 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
         role="banner"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="group flex items-center gap-3"
-            onClick={() => setOpen(false)}
-          >
-            <div className="transition-transform group-hover:scale-105">
-              <HeaderIcon3D />
-            </div>
-            <div className="flex flex-col leading-none">
-              {siteConfig.location && (
-                <span className="text-xs font-bold uppercase tracking-widest text-slate-400 transition-colors group-hover:text-sky-400">
-                  {siteConfig.location.split(",")[0]}
+          <Magnetic strength={0.1}>
+            <Link
+              href="/"
+              className="group flex items-center gap-3"
+              onClick={() => setOpen(false)}
+            >
+              <div className="transition-transform group-hover:scale-105">
+                <HeaderIcon3D />
+              </div>
+              <div className="flex flex-col leading-none">
+                {siteConfig.location && (
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-400 transition-colors group-hover:text-sky-400">
+                    {siteConfig.location.split(",")[0]}
+                  </span>
+                )}
+                <span className="mt-0.5 text-lg font-bold tracking-tight text-slate-100">
+                  {siteConfig.name}
                 </span>
-              )}
-              <span className="mt-0.5 text-lg font-bold tracking-tight text-slate-100">
-                {siteConfig.name}
-              </span>
-            </div>
-          </Link>
+              </div>
+            </Link>
+          </Magnetic>
 
           {/* Desktop Nav */}
           <nav
             className="hidden items-center gap-4 md:flex lg:gap-8"
             aria-label="Main navigation"
           >
-            {navItems.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "relative rounded-full px-3 py-1.5 text-sm font-medium transition-all whitespace-nowrap",
-                    active ? "text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
-                  )}
-                >
-                  {active && (
-                    <motion.div
-                      layoutId={prefersReducedMotion ? undefined : "nav-pill"}
-                      className="absolute inset-0 rounded-full bg-white/[0.07] ring-1 ring-white/10"
-                      transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{item.label}</span>
-                </Link>
-              );
-            })}
+            {navItems.map((item) => (
+              <NavItem
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                active={isActive(item.href)}
+                prefersReducedMotion={prefersReducedMotion ?? false}
+              />
+            ))}
 
             {/* Search Button */}
             <button
@@ -146,13 +137,15 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               </kbd>
             </button>
 
-            <Link
-              href="/contact"
-              onTouchStart={mediumTap}
-              className="ml-2 lg:ml-4 inline-flex shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 lg:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
-            >
-              Let&apos;s talk
-            </Link>
+            <Magnetic strength={0.15}>
+              <Link
+                href="/contact"
+                onTouchStart={mediumTap}
+                className="ml-2 lg:ml-4 inline-flex shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 lg:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+              >
+                Let&apos;s talk
+              </Link>
+            </Magnetic>
           </nav>
 
           {/* Mobile Menu Toggle & Search */}

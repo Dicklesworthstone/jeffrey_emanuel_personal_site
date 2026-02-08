@@ -16,6 +16,8 @@ export default function GlowOrbits() {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mediaQuery.matches) return;
 
+    let handleMouseMove: ((e: MouseEvent) => void) | null = null;
+
     const ctx = gsap.context(() => {
       const rings = gsap.utils.toArray<HTMLElement>(".glow-ring");
 
@@ -53,11 +55,11 @@ export default function GlowOrbits() {
         });
 
         // Mouse interaction for parallax effect
-        const handleMouseMove = (e: MouseEvent) => {
+        handleMouseMove = (e: MouseEvent) => {
           const { clientX, clientY } = e;
           const xPos = (clientX / window.innerWidth - 0.5) * 60;
           const yPos = (clientY / window.innerHeight - 0.5) * 60;
-          
+
           gsap.to(rootRef.current, {
             x: xPos,
             y: yPos,
@@ -67,7 +69,6 @@ export default function GlowOrbits() {
         };
 
         window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
       }
     }, rootRef);
 
@@ -87,6 +88,9 @@ export default function GlowOrbits() {
 
     return () => {
       ctx.revert();
+      if (handleMouseMove) {
+        window.removeEventListener("mousemove", handleMouseMove);
+      }
       if (mediaQuery.removeEventListener) {
         mediaQuery.removeEventListener("change", handleMotionPreferenceChange);
       } else {

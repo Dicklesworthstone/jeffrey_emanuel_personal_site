@@ -3,6 +3,7 @@
 import { Github, Twitter, Mail, Linkedin, ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { siteConfig, navItems } from "@/lib/content";
+import { useState, useEffect } from "react";
 
 const socialLinks = [
   { href: `mailto:${siteConfig.email}`, icon: Mail, label: "Email" },
@@ -12,6 +13,13 @@ const socialLinks = [
 ];
 
 export default function SiteFooter() {
+  const [year, setYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration-safe: server renders null, client sets real year
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer
       className="relative mt-32"
@@ -32,10 +40,10 @@ export default function SiteFooter() {
             <p className="text-lg font-bold tracking-tight text-slate-100">
               {siteConfig.name}
             </p>
-            <p className="text-sm leading-relaxed text-slate-500" suppressHydrationWarning>
+            <p className="text-sm leading-relaxed text-slate-500">
               Building durable infrastructure for the agentic future.
               <br />
-              &copy; {new Date().getFullYear()} Jeffrey Emanuel. All rights reserved.
+              &copy; {year || "..."} Jeffrey Emanuel. All rights reserved.
             </p>
           </div>
 
@@ -86,7 +94,7 @@ export default function SiteFooter() {
             <p className="text-lg font-bold tracking-tight text-slate-100">
               {siteConfig.name}
             </p>
-            <p className="text-sm leading-relaxed text-slate-500" suppressHydrationWarning>
+            <p className="text-sm leading-relaxed text-slate-500">
               Building durable infrastructure for the agentic future.
             </p>
           </div>
@@ -126,11 +134,12 @@ export default function SiteFooter() {
           </div>
 
           {/* Copyright */}
-          <p className="text-xs text-slate-600" suppressHydrationWarning>
-            &copy; {new Date().getFullYear()} Jeffrey Emanuel. All rights reserved.
+          <p className="text-xs text-slate-600">
+            &copy; {year || "..."} Jeffrey Emanuel. All rights reserved.
           </p>
         </div>
       </div>
     </footer>
   );
 }
+

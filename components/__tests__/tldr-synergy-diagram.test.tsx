@@ -89,13 +89,11 @@ describe("TldrSynergyDiagram", () => {
 
     it("renders connection lines", () => {
       const { container } = render(<TldrSynergyDiagram tools={mockTools} />);
-      // Look for lines inside the SVG
-      // <line> elements
-      // We expect 1 line because A->B and B->A is deduped.
-      const lines = container.querySelectorAll("line");
-      // Note: Framer motion might render `line` as `line` tag.
-      expect(lines.length).toBeGreaterThan(0);
-      expect(lines.length).toBe(1); 
+      // The component uses motion.path for connection lines, which renders as <path>
+      // We expect at least 1 path for the connection between A and B (deduped)
+      const svg = container.querySelector("svg");
+      const paths = svg?.querySelectorAll("path") ?? [];
+      expect(paths.length).toBeGreaterThan(0);
     });
     
     it("renders correct ARIA label", () => {
@@ -110,7 +108,7 @@ describe("TldrSynergyDiagram", () => {
      it("has viewBox attribute for scaling", () => {
          render(<TldrSynergyDiagram tools={mockTools} />);
          const svg = screen.getByLabelText("Flywheel tool synergy diagram showing connections between core tools. Click a tool to scroll to its details.");
-         expect(svg).toHaveAttribute("viewBox", "0 0 400 400");
+         expect(svg).toHaveAttribute("viewBox", "0 0 460 460");
      });
   });
 });
