@@ -80,6 +80,12 @@ export const TAILWIND_GRADIENTS: Record<string, ColorDefinition> = {
     primary: "#22c55e",
     rgb: "34, 197, 94",
   },
+  "from-teal-500 to-emerald-600": {
+    from: "#14b8a6",
+    to: "#059669",
+    primary: "#14b8a6",
+    rgb: "20, 184, 166",
+  },
   "from-orange-500 to-amber-600": {
     from: "#f97316",
     to: "#d97706",

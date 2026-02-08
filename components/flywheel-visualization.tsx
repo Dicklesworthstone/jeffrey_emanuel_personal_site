@@ -18,6 +18,13 @@ import {
   Play,
   ArrowRight,
   Check,
+  Cog,
+  ShieldAlert,
+  RefreshCw,
+  Image,
+  Archive,
+  FileCode,
+  Sparkles,
 } from "lucide-react";
 import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -33,16 +40,23 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bug,
   Brain,
   Search,
+  Cog,
+  ShieldAlert,
+  RefreshCw,
+  Image,
+  Archive,
+  FileCode,
+  Sparkles,
 };
 
 // Layout constants - base values for desktop (scaled down on mobile via CSS transform)
-const CONTAINER_SIZE = 420;
-const RADIUS = 150;
+const CONTAINER_SIZE = 520;
+const RADIUS = 200;
 const CENTER = CONTAINER_SIZE / 2;
-const NODE_SIZE = 72;
+const NODE_SIZE = 60;
 
-// Mobile scale factor - fit 420px into ~300px viewport with padding
-const MOBILE_SCALE = 0.72;
+// Mobile scale factor - fit 520px into ~300px viewport with padding
+const MOBILE_SCALE = 0.58;
 
 // Calculate node positions in a circle
 function getNodePosition(index: number, total: number) {
@@ -303,7 +317,7 @@ const ToolNode = React.memo(function ToolNode({
         aria-label={`${tool.name}: ${tool.tagline}`}
         aria-pressed={isSelected}
         className={cn(
-          "relative flex h-full w-full flex-col items-center justify-center gap-1 rounded-2xl border p-2",
+          "relative flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-xl border p-1.5",
           "transition-all duration-200 outline-none",
           "focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
           isSelected
@@ -318,7 +332,7 @@ const ToolNode = React.memo(function ToolNode({
         {/* Glow background */}
         <motion.div
           className={cn(
-            "absolute inset-0 rounded-2xl blur-xl",
+            "absolute inset-0 rounded-xl blur-xl",
             `bg-gradient-to-br ${tool.color}`
           )}
           initial={{ opacity: 0 }}
@@ -329,16 +343,16 @@ const ToolNode = React.memo(function ToolNode({
         {/* Icon */}
         <div
           className={cn(
-            "relative z-10 flex h-9 w-9 items-center justify-center rounded-xl",
+            "relative z-10 flex h-7 w-7 items-center justify-center rounded-lg",
             `bg-gradient-to-br ${tool.color}`,
             isSelected && "shadow-lg"
           )}
         >
-          <Icon className="h-5 w-5 text-white" />
+          <Icon className="h-4 w-4 text-white" />
         </div>
 
         {/* Label */}
-        <span className="relative z-10 text-xs font-bold uppercase tracking-wider text-white">
+        <span className="relative z-10 text-[10px] font-bold uppercase tracking-wider text-white leading-tight">
           {tool.shortName}
         </span>
       </motion.button>
@@ -860,13 +874,13 @@ export default function FlywheelVisualization() {
           role="img"
           aria-label="Interactive flywheel showing tool connections"
         >
-          {/* Mobile-responsive wrapper: scales 420px flywheel to fit smaller screens */}
+          {/* Mobile-responsive wrapper: scales 520px flywheel to fit smaller screens */}
           <div
             className="relative origin-center scale-[var(--flywheel-scale)] md:scale-100"
             style={{
               width: CONTAINER_SIZE,
               height: CONTAINER_SIZE,
-              // CSS custom property for mobile scale - 420*0.72 ≈ 302px fits nicely on 375px screens
+              // CSS custom property for mobile scale - 520*0.58 ≈ 302px fits nicely on 375px screens
               "--flywheel-scale": MOBILE_SCALE,
             } as React.CSSProperties}
           >

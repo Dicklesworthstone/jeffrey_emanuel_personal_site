@@ -62,8 +62,7 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
       layout
       variants={containerVariants}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
+      animate="visible"
       className={cn(
         "grid grid-cols-1 gap-5 md:gap-6 lg:gap-8 md:grid-cols-3 auto-rows-[minmax(180px,auto)] grid-flow-dense",
         className
@@ -76,6 +75,8 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
             layout={!prefersReducedMotion}
             key={project.name}
             variants={variants}
+            initial="hidden"
+            exit="exit"
             className={cn(
               "relative",
               project.size === "large" && "md:col-span-2 md:row-span-2",

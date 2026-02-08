@@ -71,7 +71,10 @@ export default async function HomePage() {
           staggerDelay={0.12}
           scrollIndicator
         >
-          <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 border border-violet-500/20 bg-gradient-to-br from-violet-950/20 to-transparent">
+          <motion.div 
+            whileHover={{ y: -4, scale: 1.01 }}
+            className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 border border-violet-500/20 bg-gradient-to-br from-violet-950/20 to-transparent transition-colors hover:border-violet-500/40"
+          >
             <p className="text-xs font-bold uppercase tracking-widest text-violet-400 shadow-violet-500/20 drop-shadow-sm">
               The Flywheel
             </p>
@@ -90,8 +93,11 @@ export default async function HomePage() {
               Explore the ecosystem
               <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-          <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8">
+          </motion.div>
+          <motion.div 
+            whileHover={{ y: -4, scale: 1.01 }}
+            className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 transition-colors hover:border-fuchsia-500/30"
+          >
             <p className="text-xs font-bold uppercase tracking-widest text-fuchsia-400 shadow-fuchsia-500/20 drop-shadow-sm">
               Markets & research
             </p>
@@ -109,8 +115,11 @@ export default async function HomePage() {
               Read essays
               <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-          <div className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8">
+          </motion.div>
+          <motion.div 
+            whileHover={{ y: -4, scale: 1.01 }}
+            className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto glass-card rounded-3xl p-8 transition-colors hover:border-sky-500/30"
+          >
             <p className="text-xs font-bold uppercase tracking-widest text-sky-400 shadow-sky-500/20 drop-shadow-sm">
               Infrastructure
             </p>
@@ -130,7 +139,7 @@ export default async function HomePage() {
               Visit Lumera
               <ArrowRight className="h-4 w-4" />
             </a>
-          </div>
+          </motion.div>
         </AnimatedGrid>
       </SectionShell>
 
