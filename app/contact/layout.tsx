@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     description: "Get in touch for consulting, collaborations, or media inquiries.",
     url: "https://jeffreyemanuel.com/contact",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact | Jeffrey Emanuel",
+    description: "Get in touch for consulting, collaborations, or media inquiries.",
+  },
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

@@ -9,6 +9,16 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/about",
   },
+  openGraph: {
+    title: "About | Jeffrey Emanuel",
+    description: "From hedge funds to AI agent infrastructure. Background and career timeline.",
+    url: "https://jeffreyemanuel.com/about",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About | Jeffrey Emanuel",
+    description: "From hedge funds to AI agent infrastructure. Background and career timeline.",
+  },
 };
 
 export default function AboutLayout({ children }: { children: React.ReactNode }) {

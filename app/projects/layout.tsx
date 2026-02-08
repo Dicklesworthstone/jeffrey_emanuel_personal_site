@@ -13,6 +13,11 @@ export const metadata: Metadata = {
     description: "A catalog of experiments, open source tools, and products. The Agentic Coding Tooling Flywheel, Lumera Network, and more.",
     url: "https://jeffreyemanuel.com/projects",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Projects | Jeffrey Emanuel",
+    description: "A catalog of experiments, open source tools, and products. The Agentic Coding Tooling Flywheel, Lumera Network, and more.",
+  },
 };
 
 // Map project kinds to Schema.org application categories

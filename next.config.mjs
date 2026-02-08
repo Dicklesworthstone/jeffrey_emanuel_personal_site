@@ -41,7 +41,7 @@ const nextConfig = {
       },
     ],
   },
-  // Service worker headers for PWA
+  // Headers for caching and service worker
   async headers() {
     return [
       {
@@ -54,6 +54,34 @@ const nextConfig = {
           {
             key: "Content-Type",
             value: "application/javascript; charset=utf-8",
+          },
+        ],
+      },
+      {
+        // Long-lived cache for hashed static assets (JS, CSS chunks)
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        // Security headers for all routes
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
         ],
       },
