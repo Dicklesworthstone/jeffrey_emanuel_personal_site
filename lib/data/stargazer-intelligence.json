@@ -1,5 +1,5 @@
 {
-  "totalUniqueStargazers": 7161,
+  "totalUniqueStargazers": 7208,
   "combinedReach": 0,
   "topStargazers": [],
   "topCompanies": [],
@@ -17,37 +17,37 @@
       "topCompanies": []
     },
     "cass_memory_system": {
-      "totalCount": 205,
+      "totalCount": 212,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ultimate_bug_scanner": {
-      "totalCount": 144,
+      "totalCount": 153,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ntm": {
-      "totalCount": 122,
+      "totalCount": 133,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "simultaneous_launch_button": {
-      "totalCount": 54,
+      "totalCount": 56,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "coding_agent_session_search": {
-      "totalCount": 419,
+      "totalCount": 446,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "claude_code_agent_farm": {
-      "totalCount": 638,
+      "totalCount": 640,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -65,7 +65,7 @@
       "topCompanies": []
     },
     "your-source-to-prompt.html": {
-      "totalCount": 727,
+      "totalCount": 733,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -89,7 +89,7 @@
       "topCompanies": []
     },
     "mindmap-generator": {
-      "totalCount": 196,
+      "totalCount": 197,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -101,13 +101,13 @@
       "topCompanies": []
     },
     "ultimate_mcp_server": {
-      "totalCount": 134,
+      "totalCount": 136,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "fast_vector_similarity": {
-      "totalCount": 423,
+      "totalCount": 425,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -119,11 +119,11 @@
       "topCompanies": []
     },
     "model_guided_research": {
-      "totalCount": 92,
+      "totalCount": 93,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     }
   },
-  "lastUpdated": "2026-02-01T04:02:46.400Z"
+  "lastUpdated": "2026-02-08T06:10:04.698Z"
 }
