@@ -1040,7 +1040,7 @@ export const projects: Project[] = [
       ],
       installation: "```bash\n# Install via Cargo\ncargo install meta_skill\n\n# Or download pre-built binary from releases\n```",
       usage: "```bash\n# Start MCP server for AI agents\nms mcp serve\n\n# Search for skills\nms search 'error handling'\n\n# Token-packed loading within budget\nms load <skill> --pack 2000\n\n# Security scan for prompt injection\nms security scan <file>\n\n# Graph analysis via bv\nms graph insights\n```",
-      relatedProjects: ["cass", "clawdbot-skills"],
+      relatedProjects: ["cass", "mcp-agent-mail"],
     },
   },
   {
