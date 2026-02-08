@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform, useSpring } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { navItems, siteConfig } from "@/lib/content";
@@ -30,12 +30,24 @@ interface SiteHeaderProps {
 export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   // Initialize with Mac default to match SSR, update after hydration
   const [metaKey, setMetaKey] = useState("⌘");
   const { lightTap, mediumTap } = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
   const resolvedPath = pathname ?? "";
+
+  const { scrollY } = useScroll();
+  
+  // Smoothly interpolate header styles based on scroll position
+  // Starts at 0, fully "scrolled" at 50px
+  const headerOpacity = useTransform(scrollY, [0, 50], [0, 0.8]);
+  const headerBlur = useTransform(scrollY, [0, 50], [0, 12]);
+  const headerPadding = useTransform(scrollY, [0, 50], ["20px", "12px"]);
+  const headerBorderOpacity = useTransform(scrollY, [0, 50], [0, 0.5]);
+  
+  // Spring-smoothed values for buttery performance
+  const smoothOpacity = useSpring(headerOpacity, { stiffness: 300, damping: 30 });
+  const smoothBorderOpacity = useSpring(headerBorderOpacity, { stiffness: 300, damping: 30 });
 
   // Detect OS for meta key - must run after hydration to avoid mismatch
   useEffect(() => {
@@ -50,47 +62,23 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
     return resolvedPath.startsWith(href);
   };
 
-  // Shrink header on scroll (mobile only)
-  useEffect(() => {
-    let ticking = false;
-    let lastScrolled = false;
-
-    const update = () => {
-      const next = window.scrollY > 20;
-      if (next !== lastScrolled) {
-        lastScrolled = next;
-        setScrolled(next);
-      }
-      ticking = false;
-    };
-
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(update);
-        ticking = true;
-      }
-    };
-
-    // Set initial state in case page loads mid-scroll
-    update();
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   // Lock body scroll when menu is open
   useBodyScrollLock(open);
 
   return (
     <>
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300",
-          scrolled
-            ? "border-slate-950/50 bg-slate-950/80 backdrop-blur-xl py-3"
-            : "border-transparent bg-transparent py-5"
-        )}
-        style={{ paddingRight: "var(--scrollbar-width, 0px)" }}
+      <motion.header
+        className="fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-300"
+        style={{ 
+          paddingTop: headerPadding,
+          paddingBottom: headerPadding,
+          backgroundColor: useTransform(smoothOpacity, (v) => `rgba(2, 6, 23, ${v})`),
+          backdropFilter: useTransform(headerBlur, (v) => `blur(${v}px)`),
+          WebkitBackdropFilter: useTransform(headerBlur, (v) => `blur(${v}px)`),
+          borderColor: useTransform(smoothBorderOpacity, (v) => `rgba(15, 23, 42, ${v})`),
+          paddingRight: "var(--scrollbar-width, 0px)",
+          willChange: "padding, background-color, backdrop-filter, border-color"
+        }}
         role="banner"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -204,7 +192,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
           </button>
         </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>

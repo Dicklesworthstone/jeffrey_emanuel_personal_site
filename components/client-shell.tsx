@@ -12,6 +12,8 @@ import EasterEggs from "@/components/easter-eggs";
 import ServiceWorkerRegistration from "@/components/service-worker-registration";
 import { useMobileOptimizations } from "@/hooks/use-mobile-optimizations";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useScroll, useSpring, useTransform } from "framer-motion";
+import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 
 // Lazy load modals to reduce initial bundle size
 const CommandPalette = dynamic(() => import("@/components/command-palette"), {
@@ -27,6 +29,13 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const isDev = process.env.NODE_ENV === "development";
+
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   const handleProfiler = useCallback(
     (
@@ -92,7 +101,19 @@ export default function ClientShell({ children }: { children: React.ReactNode })
 
   return (
     <ErrorBoundary>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col relative overflow-x-hidden">
+        {/* Global Progress Bar */}
+        <motion.div
+          className="fixed top-0 left-0 right-0 z-[100] h-1 origin-left bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500"
+          style={{ scaleX }}
+        />
+
+        {/* Global Texture Overlay (GPU Accelerated) */}
+        <div 
+          className="pointer-events-none fixed inset-0 z-[9999] opacity-[0.03] mix-blend-overlay will-change-transform"
+          style={{ backgroundImage: `url("${NOISE_SVG_DATA_URI}")` }}
+        />
+
         <SiteHeader onOpenCommandPalette={openCommandPalette} />
         {(() => {
           const pageTransition = (
@@ -100,10 +121,15 @@ export default function ClientShell({ children }: { children: React.ReactNode })
               <motion.main
                 id="main-content"
                 key={pathname}
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -16, filter: "blur(4px)" }}
-                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.35, ease: [0.33, 1, 0.68, 1] }}
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.98, y: 10, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.02, y: -10, filter: "blur(10px)" }}
+                transition={prefersReducedMotion ? { duration: 0 } : { 
+                  opacity: { duration: 0.4 },
+                  scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                  filter: { duration: 0.4 }
+                }}
                 className="flex-1"
                 tabIndex={-1}
                 role="main"
