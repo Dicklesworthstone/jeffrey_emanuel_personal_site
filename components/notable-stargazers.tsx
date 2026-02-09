@@ -319,6 +319,11 @@ export function NotableStargazers({
   className,
 }: NotableStargazersProps) {
   const prefersReducedMotion = useReducedMotion();
+  const [isStale, setIsStale] = useState(false);
+
+  useEffect(() => {
+    setIsStale(isDataStale(stargazerData.lastUpdated));
+  }, []);
 
   // Get display config defaults for this variant
   const defaults = DISPLAY_DEFAULTS[variant];
@@ -330,7 +335,6 @@ export function NotableStargazers({
   const resolvedData =
     variant === "project" && repoSlug ? resolveRepoData(repoSlug) : HOMEPAGE_RESOLVED;
   const { stargazers, totalCount, companies, combinedReach } = resolvedData;
-  const isStale = isStargazerDataStale;
 
   // Don't render if no data
   if (stargazers.length === 0) {
@@ -445,6 +449,7 @@ export function NotableStargazers({
               month: "short",
               day: "numeric",
               year: "numeric",
+              timeZone: "UTC",
             })}
           </time>
         </motion.div>

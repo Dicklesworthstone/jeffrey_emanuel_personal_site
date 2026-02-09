@@ -29,6 +29,7 @@ import {
 import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { getColorDefinition } from "@/lib/colors";
+import { formatStarCount } from "@/lib/format-stars";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import BottomSheet from "@/components/bottom-sheet";
 import Magnetic from "@/components/magnetic";
@@ -472,14 +473,6 @@ const RichTooltip = React.memo(function RichTooltip({
     top: Math.max(20, Math.min(position.y - 100, containerSize - 280)),
   };
 
-  // Format star count
-  const formatStars = (count: number) => {
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}K`;
-    }
-    return count.toString();
-  };
-
   return (
     <motion.div
       initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: isRightHalf ? 10 : -10 }}
@@ -517,7 +510,7 @@ const RichTooltip = React.memo(function RichTooltip({
           {tool.stars && (
             <div className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-400">
               <Star className="h-3 w-3 fill-current" />
-              <span>{formatStars(tool.stars)}</span>
+              <span>{formatStarCount(tool.stars)}</span>
             </div>
           )}
         </div>

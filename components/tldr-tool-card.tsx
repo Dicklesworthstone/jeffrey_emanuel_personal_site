@@ -29,6 +29,7 @@ import { formatStarCount, formatStarCountFull } from "@/lib/format-stars";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { getColorDefinition } from "@/lib/colors";
 import type { TldrFlywheelTool } from "@/lib/content";
+import { memo } from "react";
 
 // =============================================================================
 // TYPES
@@ -125,7 +126,7 @@ function SynergyPill({
 // MAIN COMPONENT
 // =============================================================================
 
-export function TldrToolCard({
+export const TldrToolCard = memo(function TldrToolCard({
   tool,
   allTools,
   onMobileTap,

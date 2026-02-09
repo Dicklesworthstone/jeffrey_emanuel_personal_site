@@ -43,17 +43,27 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   // Smoothly interpolate header styles based on scroll position
   // Starts at 0, fully "scrolled" at 50px
   const headerOpacity = useTransform(scrollY, [0, 50], [0, 0.8]);
-  const headerBlur = useTransform(scrollY, [0, 50], [0, 12]);
-  const headerPadding = useTransform(scrollY, [0, 50], ["20px", "12px"]);
+  const headerBlurValue = useTransform(scrollY, [0, 50], [0, 12]);
+  const headerPaddingValue = useTransform(scrollY, [0, 50], [20, 12]);
   const headerBorderOpacity = useTransform(scrollY, [0, 50], [0, 0.5]);
   
   // Spring-smoothed values for buttery performance
   const smoothOpacity = useSpring(headerOpacity, { stiffness: 300, damping: 30 });
+  const smoothBlur = useSpring(headerBlurValue, { stiffness: 300, damping: 30 });
+  const smoothPadding = useSpring(headerPaddingValue, { stiffness: 300, damping: 30 });
   const smoothBorderOpacity = useSpring(headerBorderOpacity, { stiffness: 300, damping: 30 });
+
+  const headerPadding = useTransform(smoothPadding, (v) => `${v}px`);
+  const headerBlur = useTransform(smoothBlur, (v) => `blur(${v}px)`);
+  const headerWebkitBlur = useTransform(smoothBlur, (v) => `blur(${v}px)`);
 
   // Detect OS for meta key - must run after hydration to avoid mismatch
   useEffect(() => {
-    if (typeof navigator !== "undefined" && !/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
+    const isMac = typeof navigator !== "undefined" && 
+      (/Mac|iPod|iPhone|iPad/.test(navigator.platform) || 
+       /Macintosh|Mac OS X/i.test(navigator.userAgent));
+    
+    if (!isMac) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for SSR hydration safety
       setMetaKey("Ctrl+");
     }
@@ -75,8 +85,8 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
           paddingTop: headerPadding,
           paddingBottom: headerPadding,
           backgroundColor: useTransform(smoothOpacity, (v) => `rgba(2, 6, 23, ${v})`),
-          backdropFilter: useTransform(headerBlur, (v) => `blur(${v}px)`),
-          WebkitBackdropFilter: useTransform(headerBlur, (v) => `blur(${v}px)`),
+          backdropFilter: headerBlur,
+          WebkitBackdropFilter: headerWebkitBlur,
           borderColor: useTransform(smoothBorderOpacity, (v) => `rgba(15, 23, 42, ${v})`),
           paddingRight: "var(--scrollbar-width, 0px)",
           willChange: "padding, background-color, backdrop-filter, border-color"

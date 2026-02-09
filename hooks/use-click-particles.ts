@@ -217,5 +217,3 @@ function hexToRgbRaw(hex: string): string {
 }
 
 export default useClickParticles;
-
-export default useClickParticles;
