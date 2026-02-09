@@ -6,7 +6,6 @@ import AnimatedGrid from "@/components/animated-grid";
 import { Cpu, GitBranch, PenSquare, Workflow, Zap, ArrowRight, Quote, Play, Mail, Activity, Globe } from "lucide-react";
 import { careerTimeline, projects, threads, writingHighlights, tldrFlywheelTools, heroStats, featuredSites } from "@/lib/content";
 import FeaturedSites from "@/components/featured-sites";
-import { cn } from "@/lib/utils";
 import { HapticLink } from "@/components/haptic-link";
 import { fetchGitHubStats, formatStarsDisplay } from "@/lib/github-stats";
 import { JsonLd } from "@/components/json-ld";
@@ -78,7 +77,7 @@ export default async function HomePage() {
           <SnapshotCard
             eyebrow="The Flywheel"
             title="14 Tools That Amplify Each Other"
-            description="MCP Agent Mail, Beads Viewer, CASS Memory, and 10 more tools that let coding agents coordinate, remember, and work safely together. Each tool makes the others more powerful."
+            description="MCP Agent Mail, Beads Viewer, CASS Memory, and 11 more tools that let coding agents coordinate, remember, and work safely together. Each tool makes the others more powerful."
             href="/projects"
             linkText="Explore the ecosystem"
             accentColor="text-violet-400"
