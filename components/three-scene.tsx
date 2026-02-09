@@ -544,16 +544,39 @@ function SceneHelix({ palette, seed: _ }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 function TorusGarden({ palette, seed }: { palette: Palette; seed: number }) {
   const ref = useRef<THREE.Group>(null);
+  
+  // Shared geometry and materials to avoid recreation and leaks
+  const rand = useMemo(() => seededRandom(seed), [seed]);
   const torii = useMemo(() => {
-    const rand = seededRandom(seed);
     return Array.from({ length: 16 }).map((_, i) => ({
       radius: 0.6 + rand() * 1.6,
       tube: 0.08 + rand() * 0.12,
       tilt: rand() * Math.PI,
       wobble: 0.4 + rand() * 0.4,
       color: palette[i % palette.length],
+      p: 2 + i % 5,
+      q: 3 + (i % 3)
     }));
-  }, [palette, seed]);
+  }, [palette, seed, rand]);
+
+  const geometries = useMemo(() => 
+    torii.map(t => new THREE.TorusKnotGeometry(t.radius, t.tube, 120, 32, t.p, t.q)),
+  [torii]);
+
+  const materials = useMemo(() => 
+    torii.map(t => new THREE.MeshStandardMaterial({ 
+      color: t.color, 
+      emissive: t.color, 
+      emissiveIntensity: 0.4, 
+      metalness: 0.25, 
+      roughness: 0.35 
+    })),
+  [torii]);
+
+  useEffect(() => () => {
+    geometries.forEach(g => g.dispose());
+    materials.forEach(m => m.dispose());
+  }, [geometries, materials]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -568,10 +591,7 @@ function TorusGarden({ palette, seed }: { palette: Palette; seed: number }) {
   return (
     <group ref={ref}>
       {torii.map((t, i) => (
-        <mesh key={i} rotation={[0, 0, t.tilt]}>
-          <torusKnotGeometry args={[t.radius, t.tube, 120, 32, 2 + i % 5, 3 + (i % 3)]} />
-          <meshStandardMaterial color={t.color} emissive={t.color} emissiveIntensity={0.4} metalness={0.25} roughness={0.35} />
-        </mesh>
+        <mesh key={i} rotation={[0, 0, t.tilt]} geometry={geometries[i]} material={materials[i]} />
       ))}
     </group>
   );
@@ -823,13 +843,26 @@ function SceneSupershape({ palette, seed }: { palette: Palette; seed: number }) 
 function HopfFibers({ palette, seed, circles = 48 }: { palette: Palette; seed: number; circles?: number }) {
   const group = useRef<THREE.Group>(null);
   const rand = useMemo(() => seededRandom(seed), [seed]);
-  const fibers = useMemo(() => {
+  const fiberData = useMemo(() => {
     return Array.from({ length: circles }).map((_, i) => {
       const phase = (i / circles) * Math.PI * 2;
       const radius = 0.9 + 0.6 * rand();
-      return { phase, radius, tilt: rand() * Math.PI * 2 };
+      return { phase, radius, tilt: rand() * Math.PI * 2, thickness: 0.03 + (i % 3) * 0.01, color: palette[i % palette.length], emissive: palette[(i + 1) % palette.length] };
     });
-  }, [circles, rand]);
+  }, [circles, rand, palette]);
+
+  const geometries = useMemo(() => 
+    fiberData.map(f => new THREE.TorusGeometry(f.radius, f.thickness, 12, 90)),
+  [fiberData]);
+
+  const materials = useMemo(() =>
+    fiberData.map(f => new THREE.MeshStandardMaterial({ color: f.color, emissive: f.emissive, emissiveIntensity: 0.9, roughness: 0.35 })),
+  [fiberData]);
+
+  useEffect(() => () => {
+    geometries.forEach(g => g.dispose());
+    materials.forEach(m => m.dispose());
+  }, [geometries, materials]);
 
   useFrame(({ clock }) => {
     if (!group.current) return;
@@ -843,11 +876,8 @@ function HopfFibers({ palette, seed, circles = 48 }: { palette: Palette; seed: n
 
   return (
     <group ref={group}>
-      {fibers.map((f, i) => (
-        <mesh key={i} rotation={[0, f.phase, f.tilt]}>
-          <torusGeometry args={[f.radius, 0.03 + (i % 3) * 0.01, 12, 90]} />
-          <meshStandardMaterial color={palette[i % palette.length]} emissive={palette[(i + 1) % palette.length]} emissiveIntensity={0.9} roughness={0.35} />
-        </mesh>
+      {fiberData.map((f, i) => (
+        <mesh key={i} rotation={[0, f.phase, f.tilt]} geometry={geometries[i]} material={materials[i]} />
       ))}
     </group>
   );
@@ -1000,6 +1030,8 @@ function MobiusStrip({ palette, seed }: { palette: Palette; seed: number }) {
     return geom;
   }, []);
 
+  useEffect(() => () => stripGeom.dispose(), [stripGeom]);
+
   const stripMat = useMemo(
     () => new THREE.MeshStandardMaterial({
       color: palette[0],
@@ -1012,27 +1044,22 @@ function MobiusStrip({ palette, seed }: { palette: Palette; seed: number }) {
     [palette]
   );
 
+  useEffect(() => () => stripMat.dispose(), [stripMat]);
+
   const particleGeom = useMemo(() => new THREE.SphereGeometry(0.06, 8, 8), []);
+  useEffect(() => () => particleGeom.dispose(), [particleGeom]);
+
   const particleMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[2], emissive: palette[3], emissiveIntensity: 1.2 }),
     [palette]
   );
+  useEffect(() => () => particleMat.dispose(), [particleMat]);
 
   const particleCount = 80;
   const particlePhases = useMemo(() =>
     Array.from({ length: particleCount }, () => rand() * Math.PI * 2),
     [rand]
   );
-
-  useEffect(() => () => {
-    stripGeom.dispose();
-    particleGeom.dispose();
-  }, [stripGeom, particleGeom]);
-
-  useEffect(() => () => {
-    stripMat.dispose();
-    particleMat.dispose();
-  }, [stripMat, particleMat]);
 
   useFrame(({ clock }) => {
     if (!groupRef.current || !particlesRef.current) return;
@@ -1129,17 +1156,24 @@ function MobiusLoom({ palette, seed, bands = 3, points = 420 }: { palette: Palet
     });
   }, [bandDefs]);
 
+  useEffect(() => () => lineGeoms.forEach((g) => g.dispose()), [lineGeoms]);
+
   const lineMats = useMemo(
     () => bandDefs.map((_, i) => makeLineMaterial(palette[i % palette.length], 0.62)),
     [bandDefs, palette],
   );
 
+  useEffect(() => () => lineMats.forEach((m) => m.dispose()), [lineMats]);
+
   const particleCount = Math.max(24, Math.floor(points * quality.particleMultiplier));
   const particleGeom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  useEffect(() => () => particleGeom.dispose(), [particleGeom]);
+
   const particleMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[0], emissiveIntensity: 1.1, roughness: 0.35 }),
     [palette],
   );
+  useEffect(() => () => particleMat.dispose(), [particleMat]);
 
   const particleSeeds = useMemo(() => {
     const rand = seededRandom(seed + 99);
@@ -1152,16 +1186,6 @@ function MobiusLoom({ palette, seed, bands = 3, points = 420 }: { palette: Palet
       scale: 0.6 + rand() * 0.7,
     }));
   }, [particleCount, bandDefs.length, seed]);
-
-  useEffect(() => () => {
-    lineGeoms.forEach((g) => g.dispose());
-    particleGeom.dispose();
-  }, [lineGeoms, particleGeom]);
-
-  useEffect(() => () => {
-    lineMats.forEach((m) => m.dispose());
-    particleMat.dispose();
-  }, [lineMats, particleMat]);
 
   useFrame(({ clock }) => {
     if (!groupRef.current || !particlesRef.current) return;
@@ -3598,7 +3622,7 @@ function ScenePolygonBloom({ palette, seed }: { palette: Palette; seed: number }
 // ---------------------------------------------------------------------------
 // Variant: Reaction-Diffusion Waves on a Torus
 // ---------------------------------------------------------------------------
-function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number }) {
+function ReactionDiffusionTorus({ palette, seed }: { palette: Palette; seed: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const geom = useMemo(() => new THREE.TorusGeometry(1.2, 0.5, 64, 128), []);
   const mat = useMemo(
@@ -3612,6 +3636,14 @@ function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number })
     [palette]
   );
 
+  const rand = useMemo(() => seededRandom(seed), [seed]);
+  const offsets = useMemo(() => ({
+    f1: 6 + rand() * 4,
+    f2: 5 + rand() * 3,
+    f3: 4 + rand() * 4,
+    f4: 6 + rand() * 3,
+  }), [rand]);
+
   const originalPositions = useMemo(() => {
     const pos = geom.attributes.position as THREE.BufferAttribute;
     return new Float32Array(pos.array);
@@ -3620,29 +3652,37 @@ function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number })
   useEffect(() => () => geom.dispose(), [geom]);
   useEffect(() => () => mat.dispose(), [mat]);
 
+  const frameCount = useRef(0);
+
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
     const pos = geom.attributes.position as THREE.BufferAttribute;
 
     for (let i = 0; i < pos.count; i++) {
-      const ox = originalPositions[i * 3];
-      const oy = originalPositions[i * 3 + 1];
-      const oz = originalPositions[i * 3 + 2];
+      const idx = i * 3;
+      const ox = originalPositions[idx];
+      const oy = originalPositions[idx + 1];
+      const oz = originalPositions[idx + 2];
 
       // Create reaction-diffusion-like patterns
       const angle1 = Math.atan2(oy, ox);
       const angle2 = Math.atan2(oz, Math.sqrt(ox * ox + oy * oy) - 1.2);
 
-      const wave1 = Math.sin(angle1 * 8 + t * 2) * Math.cos(angle2 * 6 - t * 1.5);
-      const wave2 = Math.cos(angle1 * 5 - t * 1.2) * Math.sin(angle2 * 7 + t * 0.8);
+      const wave1 = Math.sin(angle1 * offsets.f1 + t * 2) * Math.cos(angle2 * offsets.f2 - t * 1.5);
+      const wave2 = Math.cos(angle1 * offsets.f3 - t * 1.2) * Math.sin(angle2 * offsets.f4 + t * 0.8);
       const displacement = 1 + 0.08 * (wave1 + wave2);
 
       pos.setXYZ(i, ox * displacement, oy * displacement, oz * displacement);
     }
     // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
-    geom.computeVertexNormals();
+    
+    // Only recompute normals every 2 frames to save CPU
+    frameCount.current++;
+    if (frameCount.current % 2 === 0) {
+      geom.computeVertexNormals();
+    }
 
     meshRef.current.rotation.y = t * 0.2;
     meshRef.current.rotation.x = t * 0.1;
@@ -3651,13 +3691,13 @@ function ReactionDiffusionTorus({ palette }: { palette: Palette; seed: number })
   return <mesh ref={meshRef} geometry={geom} material={mat} />;
 }
 
-function SceneReactionDiffusion({ palette, seed: _ }: { palette: Palette; seed: number }) {
+function SceneReactionDiffusion({ palette, seed }: { palette: Palette; seed: number }) {
   return (
     <>
       <ambientLight intensity={0.5} />
       <directionalLight position={[3, 4, 2]} intensity={1.2} color={palette[2]} />
       <pointLight position={[-2, -2, 3]} intensity={0.8} color={palette[0]} />
-      <ReactionDiffusionTorus palette={palette} seed={0} />
+      <ReactionDiffusionTorus palette={palette} seed={seed} />
       <StarField density={280} color={palette[3]} />
     </>
   );

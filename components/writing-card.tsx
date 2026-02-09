@@ -13,6 +13,7 @@ import Magnetic from "@/components/magnetic";
 export default function WritingCard({ item }: { item: WritingItem }) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -26,20 +27,23 @@ export default function WritingCard({ item }: { item: WritingItem }) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || isTouchDevice) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    mouseX.set(e.clientX - rect.left);
-    mouseY.set(e.clientY - rect.top);
+    if (!rectRef.current || isTouchDevice) return;
+    mouseX.set(e.clientX - rectRef.current.left);
+    mouseY.set(e.clientY - rectRef.current.top);
   }, [isTouchDevice, mouseX, mouseY]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
     if (!isTouchDevice) spotlightOpacity.set(1);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
     spotlightOpacity.set(0);
+    rectRef.current = null;
   };
 
   const isFeatured = item.featured;

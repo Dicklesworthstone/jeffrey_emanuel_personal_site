@@ -443,6 +443,23 @@ function MicroHelix() {
 // 16: Gyroscope rings
 function MicroGyroscope() {
   const ref = useRef<THREE.Group>(null);
+  
+  const geometries = useMemo(() => [
+    new THREE.TorusGeometry(0.45, 0.03, 8, 32),
+    new THREE.TorusGeometry(0.35, 0.03, 8, 32),
+    new THREE.TorusGeometry(0.25, 0.03, 8, 32)
+  ], []);
+
+  const materials = useMemo(() => [
+    new THREE.MeshBasicMaterial({ color: colors.sky }),
+    new THREE.MeshBasicMaterial({ color: colors.violet }),
+    new THREE.MeshBasicMaterial({ color: colors.emerald })
+  ], []);
+
+  useEffect(() => () => {
+    geometries.forEach(g => g.dispose());
+    materials.forEach(m => m.dispose());
+  }, [geometries, materials]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -453,18 +470,9 @@ function MicroGyroscope() {
 
   return (
     <group ref={ref}>
-      <mesh>
-        <torusGeometry args={[0.45, 0.03, 8, 32]} />
-        <meshBasicMaterial color={colors.sky} />
-      </mesh>
-      <mesh>
-        <torusGeometry args={[0.35, 0.03, 8, 32]} />
-        <meshBasicMaterial color={colors.violet} />
-      </mesh>
-      <mesh>
-        <torusGeometry args={[0.25, 0.03, 8, 32]} />
-        <meshBasicMaterial color={colors.emerald} />
-      </mesh>
+      <mesh geometry={geometries[0]} material={materials[0]} />
+      <mesh geometry={geometries[1]} material={materials[1]} />
+      <mesh geometry={geometries[2]} material={materials[2]} />
     </group>
   );
 }
@@ -510,6 +518,22 @@ function MicroPyramid() {
 function MicroAtom() {
   const ref = useRef<THREE.Group>(null);
 
+  const sphereGeom = useMemo(() => new THREE.SphereGeometry(0.15, 16, 16), []);
+  const torusGeom = useMemo(() => new THREE.TorusGeometry(0.4, 0.02, 8, 32), []);
+  const sphereMat = useMemo(() => new THREE.MeshStandardMaterial({ color: colors.violet, emissive: colors.sky, emissiveIntensity: 0.6 }), []);
+  const skyMat = useMemo(() => new THREE.MeshBasicMaterial({ color: colors.sky }), []);
+  const emeraldMat = useMemo(() => new THREE.MeshBasicMaterial({ color: colors.emerald }), []);
+  const violetMat = useMemo(() => new THREE.MeshBasicMaterial({ color: colors.violet }), []);
+
+  useEffect(() => () => {
+    sphereGeom.dispose();
+    torusGeom.dispose();
+    sphereMat.dispose();
+    skyMat.dispose();
+    emeraldMat.dispose();
+    violetMat.dispose();
+  }, [sphereGeom, torusGeom, sphereMat, skyMat, emeraldMat, violetMat]);
+
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.rotation.y = clock.getElapsedTime() * 0.5;
@@ -518,22 +542,10 @@ function MicroAtom() {
 
   return (
     <group ref={ref}>
-      <mesh>
-        <sphereGeometry args={[0.15, 16, 16]} />
-        <meshStandardMaterial color={colors.violet} emissive={colors.sky} emissiveIntensity={0.6} />
-      </mesh>
-      <mesh rotation={[0, 0, 0]}>
-        <torusGeometry args={[0.4, 0.02, 8, 32]} />
-        <meshBasicMaterial color={colors.sky} />
-      </mesh>
-      <mesh rotation={[Math.PI / 3, 0, 0]}>
-        <torusGeometry args={[0.4, 0.02, 8, 32]} />
-        <meshBasicMaterial color={colors.emerald} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 3, 0, 0]}>
-        <torusGeometry args={[0.4, 0.02, 8, 32]} />
-        <meshBasicMaterial color={colors.violet} />
-      </mesh>
+      <mesh geometry={sphereGeom} material={sphereMat} />
+      <mesh rotation={[0, 0, 0]} geometry={torusGeom} material={skyMat} />
+      <mesh rotation={[Math.PI / 3, 0, 0]} geometry={torusGeom} material={emeraldMat} />
+      <mesh rotation={[-Math.PI / 3, 0, 0]} geometry={torusGeom} material={violetMat} />
     </group>
   );
 }
@@ -608,17 +620,29 @@ function MicroFlower() {
   const ref = useRef<THREE.Group>(null);
   const r = 0.18;
 
-  // Memoize circle positions to avoid recalculating every render
+  const torusGeom = useMemo(() => new THREE.TorusGeometry(r, 0.02, 8, 32), [r]);
+  const skyMat = useMemo(() => new THREE.MeshBasicMaterial({ color: colors.sky }), []);
+  const violetMat = useMemo(() => new THREE.MeshBasicMaterial({ color: colors.violet }), []);
+  const emeraldMat = useMemo(() => new THREE.MeshBasicMaterial({ color: colors.emerald }), []);
+
+  useEffect(() => () => {
+    torusGeom.dispose();
+    skyMat.dispose();
+    violetMat.dispose();
+    emeraldMat.dispose();
+  }, [torusGeom, skyMat, violetMat, emeraldMat]);
+
+  // Memoize circle positions
   const circleData = useMemo(() => {
     return Array.from({ length: 6 }, (_, i) => {
       const angle = (i / 6) * Math.PI * 2;
       return {
         key: i,
         position: [Math.cos(angle) * r, Math.sin(angle) * r, 0] as [number, number, number],
-        color: i % 2 === 0 ? colors.sky : colors.violet,
+        material: i % 2 === 0 ? skyMat : violetMat,
       };
     });
-  }, []);
+  }, [r, skyMat, violetMat]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -627,15 +651,9 @@ function MicroFlower() {
 
   return (
     <group ref={ref}>
-      <mesh>
-        <torusGeometry args={[r, 0.02, 8, 32]} />
-        <meshBasicMaterial color={colors.emerald} />
-      </mesh>
-      {circleData.map(({ key, position, color }) => (
-        <mesh key={key} position={position}>
-          <torusGeometry args={[r, 0.02, 8, 32]} />
-          <meshBasicMaterial color={color} />
-        </mesh>
+      <mesh geometry={torusGeom} material={emeraldMat} />
+      {circleData.map(({ key, position, material }) => (
+        <mesh key={key} position={position} geometry={torusGeom} material={material} />
       ))}
     </group>
   );
@@ -644,21 +662,32 @@ function MicroFlower() {
 // 23: Spherical harmonics blob
 function MicroHarmonics() {
   const ref = useRef<THREE.Mesh>(null);
-  const geomRef = useRef<THREE.SphereGeometry>(null);
   const originalPositions = useRef<Float32Array | null>(null);
+  
+  const geom = useMemo(() => new THREE.SphereGeometry(0.4, 24, 24), []);
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: colors.violet, 
+    emissive: colors.emerald, 
+    emissiveIntensity: 0.4, 
+    metalness: 0.4, 
+    roughness: 0.3 
+  }), []);
 
   useEffect(() => {
-    if (geomRef.current && !originalPositions.current) {
-      const pos = geomRef.current.attributes.position as THREE.BufferAttribute;
-      originalPositions.current = new Float32Array(pos.array);
-    }
-  }, []);
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+    originalPositions.current = new Float32Array(pos.array);
+    
+    return () => {
+      geom.dispose();
+      mat.dispose();
+    };
+  }, [geom, mat]);
 
   useFrame(({ clock }) => {
-    if (!ref.current || !geomRef.current || !originalPositions.current) return;
+    if (!ref.current || !originalPositions.current) return;
     ref.current.rotation.y = clock.getElapsedTime() * 0.3;
 
-    const pos = geomRef.current.attributes.position as THREE.BufferAttribute;
+    const pos = geom.attributes.position as THREE.BufferAttribute;
     const orig = originalPositions.current;
     const t = clock.getElapsedTime();
 
@@ -672,15 +701,10 @@ function MicroHarmonics() {
       pos.setXYZ(i, x * harmonic, y * harmonic, z * harmonic);
     }
     pos.needsUpdate = true;
-    geomRef.current.computeVertexNormals();
+    geom.computeVertexNormals();
   });
 
-  return (
-    <mesh ref={ref}>
-      <sphereGeometry ref={geomRef} args={[0.4, 24, 24]} />
-      <meshStandardMaterial color={colors.violet} emissive={colors.emerald} emissiveIntensity={0.4} metalness={0.4} roughness={0.3} />
-    </mesh>
-  );
+  return <mesh ref={ref} geometry={geom} material={mat} />;
 }
 
 // ---------------------------------------------------------------------------

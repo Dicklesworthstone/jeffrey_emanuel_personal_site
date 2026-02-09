@@ -15,14 +15,21 @@ interface MagneticProps {
  */
 export default function Magnetic({ children, strength = 0.3, className }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   
   const x = useSpring(0, { stiffness: 150, damping: 15, mass: 0.1 });
   const y = useSpring(0, { stiffness: 150, damping: 15, mass: 0.1 });
 
+  const handleMouseEnter = useCallback(() => {
+    if (ref.current) {
+      rectRef.current = ref.current.getBoundingClientRect();
+    }
+  }, []);
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!ref.current) return;
+    if (!rectRef.current) return;
     const { clientX, clientY } = e;
-    const { left, top, width, height } = ref.current.getBoundingClientRect();
+    const { left, top, width, height } = rectRef.current;
     
     // Calculate distance from center
     const centerX = left + width / 2;
@@ -38,11 +45,13 @@ export default function Magnetic({ children, strength = 0.3, className }: Magnet
   const handleMouseLeave = useCallback(() => {
     x.set(0);
     y.set(0);
+    rectRef.current = null;
   }, [x, y]);
 
   return (
     <motion.div
       ref={ref}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x, y }}

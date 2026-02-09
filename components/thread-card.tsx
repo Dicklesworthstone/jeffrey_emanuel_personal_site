@@ -14,6 +14,7 @@ export default function ThreadCard({
   thread: { href: string; title: string; blurb: string } 
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   const mouseX = useMotionValue(0);
@@ -26,18 +27,21 @@ export default function ThreadCard({
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || isTouchDevice) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    mouseX.set(e.clientX - rect.left);
-    mouseY.set(e.clientY - rect.top);
+    if (!rectRef.current || isTouchDevice) return;
+    mouseX.set(e.clientX - rectRef.current.left);
+    mouseY.set(e.clientY - rectRef.current.top);
   }, [isTouchDevice, mouseX, mouseY]);
 
   const handleMouseEnter = () => {
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
     if (!isTouchDevice) spotlightOpacity.set(1);
   };
 
   const handleMouseLeave = () => {
     spotlightOpacity.set(0);
+    rectRef.current = null;
   };
 
   const spotlightBackground = useTransform(

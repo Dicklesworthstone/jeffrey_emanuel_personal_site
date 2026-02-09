@@ -26,6 +26,7 @@ const KindIcon = ({ kind, className }: { kind: Project["kind"]; className?: stri
 export default function ProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -48,14 +49,12 @@ export default function ProjectCard({ project }: { project: Project }) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || isTouchDevice) return;
+    if (!rectRef.current || isTouchDevice) return;
     
-    const rect = cardRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
+    const { left, top, width, height } = rectRef.current;
     
-    const mouseXPos = e.clientX - rect.left;
-    const mouseYPos = e.clientY - rect.top;
+    const mouseXPos = e.clientX - left;
+    const mouseYPos = e.clientY - top;
     
     const xPct = mouseXPos / width - 0.5;
     const yPct = mouseYPos / height - 0.5;
@@ -69,6 +68,9 @@ export default function ProjectCard({ project }: { project: Project }) {
 
   const handleMouseEnter = () => {
     setIsHovered(true);
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
     if (!isTouchDevice) {
       spotlightOpacity.set(1);
     }
@@ -79,6 +81,7 @@ export default function ProjectCard({ project }: { project: Project }) {
     spotlightOpacity.set(0);
     x.set(0);
     y.set(0);
+    rectRef.current = null;
   };
 
   // Extract star count from badge
