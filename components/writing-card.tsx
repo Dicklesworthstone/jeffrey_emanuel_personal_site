@@ -10,7 +10,10 @@ import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 import Magnetic from "@/components/magnetic";
 
-export default function WritingCard({ item }: { item: WritingItem }) {
+import Magnetic from "@/components/magnetic";
+import { memo } from "react";
+
+export const WritingCard = memo(function WritingCard({ item }: { item: WritingItem }) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
@@ -165,4 +168,6 @@ export default function WritingCard({ item }: { item: WritingItem }) {
       </motion.article>
     </Link>
   );
-}
+});
+
+export default WritingCard;

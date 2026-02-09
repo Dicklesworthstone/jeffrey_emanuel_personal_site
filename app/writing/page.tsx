@@ -33,26 +33,34 @@ export default function WritingPage() {
     gradient: post.gradient as string | undefined,
   }));
 
-  // Get featured items from manual highlights (curated)
-  const featured = writingHighlights.filter((w) => w.featured);
+  // Combine MDX items and writing highlights to find all featured items
+  // Manual highlights take precedence for duplicates
+  const allItems = [...mdxItems, ...writingHighlights];
+  
+  // Use a map to handle duplicates by href
+  const itemsByHref = new Map<string, WritingItem>();
+  allItems.forEach(item => {
+    // If we already have this href, merge it (manual highlights win)
+    const existing = itemsByHref.get(item.href);
+    if (existing) {
+      itemsByHref.set(item.href, { ...existing, ...item });
+    } else {
+      itemsByHref.set(item.href, item);
+    }
+  });
+
+  const mergedItems = Array.from(itemsByHref.values());
+
+  // Get featured items
+  const featured = mergedItems.filter((item) => item.featured)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  
   const featuredHrefs = new Set(featured.map((f) => f.href));
 
-  // Get external archive items from highlights
-  const externalArchive = writingHighlights.filter(
-    (w) => !w.featured && w.href.startsWith("http")
-  );
-
-  // Combine MDX posts and external archive, filtering out duplicates already in featured
-  const archive = [...mdxItems, ...externalArchive]
+  // Get archive items (non-featured)
+  const archive = mergedItems
     .filter((item) => !featuredHrefs.has(item.href))
-    .sort((a, b) => {
-      // Handle potential invalid dates gracefully
-      const t1 = new Date(a.date).getTime();
-      const t2 = new Date(b.date).getTime();
-      if (Number.isNaN(t1)) return 1;
-      if (Number.isNaN(t2)) return -1;
-      return t2 - t1;
-    });
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <div>

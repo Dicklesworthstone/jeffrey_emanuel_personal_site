@@ -9,6 +9,7 @@ import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 import Magnetic from "@/components/magnetic";
+import { memo } from "react";
 
 const KindIcon = ({ kind, className }: { kind: Project["kind"]; className?: string }) => {
   switch (kind) {
@@ -23,7 +24,7 @@ const KindIcon = ({ kind, className }: { kind: Project["kind"]; className?: stri
   }
 };
 
-export default function ProjectCard({ project }: { project: Project }) {
+export const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
@@ -269,4 +270,6 @@ export default function ProjectCard({ project }: { project: Project }) {
       </motion.article>
     </Link>
   );
-}
+});
+
+export default ProjectCard;
