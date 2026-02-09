@@ -1,110 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import { TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// =============================================================================
-// ANIMATED COUNTER
-// Counts up to a target number with easing
-// =============================================================================
-
-interface AnimatedCounterProps {
-  /** Target value to count to */
-  target: number;
-  /** Duration of animation in seconds */
-  duration?: number;
-  /** Prefix (e.g., "$") */
-  prefix?: string;
-  /** Suffix (e.g., "B") */
-  suffix?: string;
-  /** Number of decimal places */
-  decimals?: number;
-  /** Additional classes */
-  className?: string;
-  /** Start animation when in view */
-  startOnView?: boolean;
-}
-
-export function AnimatedCounter({
-  target,
-  duration = 2,
-  prefix = "",
-  suffix = "",
-  decimals = 0,
-  className,
-  startOnView = true,
-}: AnimatedCounterProps) {
-  const prefersReducedMotion = useReducedMotion();
-  // Initialize with 0 to avoid hydration mismatch (prefersReducedMotion differs server vs client)
-  const [count, setCount] = useState(0);
-  const hasStartedRef = useRef(false);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  // Handle reduced motion preference after hydration
-  useEffect(() => {
-    if (prefersReducedMotion && !hasStartedRef.current) {
-      const hydrationId = setTimeout(() => {
-        setCount(target);
-        hasStartedRef.current = true;
-      }, 0);
-      return () => clearTimeout(hydrationId);
-    }
-    return undefined;
-  }, [prefersReducedMotion, target]);
-
-  useEffect(() => {
-    // Skip animation entirely if reduced motion preferred
-    if (prefersReducedMotion) return;
-
-    // Start immediately if not waiting for view
-    const shouldStart = startOnView ? isInView : true;
-    if (!shouldStart || hasStartedRef.current) return;
-
-    hasStartedRef.current = true;
-
-    // Animate the counter
-    const startTime = performance.now();
-    const durationMs = duration * 1000;
-    let animationId: number;
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / durationMs, 1);
-
-      // Ease out cubic for smooth deceleration
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * target));
-
-      if (progress < 1) {
-        animationId = requestAnimationFrame(animate);
-      } else {
-        setCount(target);
-      }
-    };
-
-    animationId = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationId) cancelAnimationFrame(animationId);
-    };
-  }, [target, duration, isInView, startOnView, prefersReducedMotion]);
-
-  const formattedCount = count.toLocaleString("en-US", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
-
-  return (
-    <span ref={ref} className={className} aria-label={`${prefix}${target.toLocaleString()}${suffix}`}>
-      {prefix}
-      {formattedCount}
-      {suffix}
-    </span>
-  );
-}
+import { AnimatedNumber } from "@/components/animated-number";
 
 // =============================================================================
 // MARKET CAP DROP VISUALIZATION
@@ -139,7 +39,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
           className="mb-2 flex items-center justify-center gap-2 text-rose-400"
         >
           <TrendingDown className="h-5 w-5" />
-          <span className="text-sm font-medium uppercase tracking-wider">
+          <span className="text-sm font-medium uppercase tracking-widest">
             Single-Day Market Cap Drop
           </span>
         </motion.div>
@@ -150,12 +50,12 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
           transition={{ duration: 0.8, delay: 0.4, type: "spring", bounce: 0.3 }}
         >
           <span className="block text-6xl font-black tracking-tight text-white sm:text-7xl md:text-8xl lg:text-9xl">
-            <AnimatedCounter
-              target={600}
-              duration={prefersReducedMotion ? 0 : 2.5}
+            <AnimatedNumber
+              value={600}
+              duration={2500}
               prefix="$"
               suffix="B"
-              startOnView={false}
+              isVisible={isInView}
             />
           </span>
         </motion.div>

@@ -147,25 +147,31 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           th({ children }) {
             return <th className="px-6 py-4">{children}</th>;
           },
-          td({ children }) {
-            return <td className="px-6 py-4 border-b border-slate-800/50 text-slate-400 whitespace-normal">{children}</td>;
-          },
           img({ src, alt }) {
              const safeSrc = (src as string) || "";
+             // Extract optional width/height from alt text if provided in format "alt text | 600x400"
+             const altParts = alt?.split("|") || [];
+             const cleanAlt = altParts[0]?.trim() || "";
+             const dimensions = altParts[1]?.trim().match(/(\d+)x(\d+)/);
+             const width = dimensions ? parseInt(dimensions[1], 10) : undefined;
+             const height = dimensions ? parseInt(dimensions[2], 10) : undefined;
+
              return (
                  <figure className="block my-8 relative">
-                    {/* Use a standard img tag to avoid unknown-dimension Next/Image errors */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={safeSrc}
-                      alt={alt || ""}
+                      alt={cleanAlt}
+                      width={width}
+                      height={height}
                       loading="lazy"
                       decoding="async"
-                      className="rounded-xl border border-slate-800 shadow-2xl mx-auto w-full h-auto"
+                      className="rounded-xl border border-slate-800 shadow-2xl mx-auto max-w-full h-auto"
+                      style={{ aspectRatio: width && height ? `${width}/${height}` : "auto" }}
                     />
-                    {alt && (
+                    {cleanAlt && (
                       <figcaption className="block text-center text-sm text-slate-500 mt-2 italic">
-                        {alt}
+                        {cleanAlt}
                       </figcaption>
                     )}
                  </figure>

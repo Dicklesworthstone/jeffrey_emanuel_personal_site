@@ -59,38 +59,49 @@ export async function fetchGitHubStats(): Promise<GitHubStats | null> {
 
     const userData = (await userResponse.json()) as GitHubUser;
     const publicRepos = userData.public_repos || 0;
-    // Cap at 5 pages (500 repos) to avoid rate limits and timeouts
-    const pages = Math.min(Math.ceil(publicRepos / 100), 5);
+    
+    // Fetch repositories using Search API which is more efficient for star counting
+    // We fetch non-fork repos for the user, up to 1000 repos (10 pages)
+    const pages = Math.min(Math.ceil(publicRepos / 100), 10);
+    const results = [];
 
-    // Fetch repositories in parallel
-    const pagePromises = [];
     for (let i = 1; i <= pages; i++) {
-      pagePromises.push(
-        fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&page=${i}&sort=updated`,
-          {
-            headers: {
-              Accept: "application/vnd.github.v3+json",
-              ...(process.env.GITHUB_TOKEN && {
-                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-              }),
-            },
-            next: { revalidate: 3600 },
-          }
-        ).then((res) => {
-          if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
-          return res.json() as Promise<GitHubRepo[]>;
-        })
+      // Use search API which is more efficient
+      const response = await fetch(
+        `https://api.github.com/search/repositories?q=user:${GITHUB_USERNAME}+fork:false&per_page=100&page=${i}&sort=stars`,
+        {
+          headers: {
+            Accept: "application/vnd.github.v3+json",
+            ...(process.env.GITHUB_TOKEN && {
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            }),
+          },
+          next: { revalidate: 3600 },
+          signal: AbortSignal.timeout(10000), // 10s timeout
+        }
       );
-    }
 
-    const results = await Promise.all(pagePromises);
+      if (!response.ok) {
+        const body = await response.text();
+        console.warn(`[github-stats] Search API error on page ${i}: ${response.status} ${body}`);
+        break; // Stop fetching more pages if we hit an error (likely rate limit)
+      }
+
+      const data = await response.json();
+      results.push(data);
+
+      // If we have more than one page, add a tiny delay to be nice to the Search API rate limit (30/min authenticated)
+      if (pages > 1 && i < pages) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
     
     let totalStars = 0;
     let repoCount = 0;
 
-    for (const repos of results) {
-      for (const repo of repos) {
+    for (const result of results) {
+      if (!result.items) continue;
+      for (const repo of result.items) {
         if (repo.fork) continue;
         totalStars += repo.stargazers_count || 0;
         repoCount++;

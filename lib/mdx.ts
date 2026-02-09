@@ -114,14 +114,8 @@ export function getAllPosts() {
     }
   }
 
-  // sort posts by date in descending order
-  return posts.sort((post1, post2) => {
-    const t1 = new Date(post1.date).getTime();
-    const t2 = new Date(post2.date).getTime();
-    if (Number.isNaN(t1)) return 1;
-    if (Number.isNaN(t2)) return -1;
-    return t2 - t1;
-  });
+  // sort posts by date in descending order (newest first)
+  return posts.sort((a, b) => b.date.localeCompare(a.date));
 }
 
 /**
@@ -129,26 +123,35 @@ export function getAllPosts() {
  * Optimized for listing pages to reduce memory usage and payload size.
  */
 export function getAllPostsMeta() {
+  if (!postsDirectory) return [];
+  
   const slugs = getPostSlugs();
   const posts: Omit<Post, "content">[] = [];
 
   for (const slug of slugs) {
     try {
-      // We still have to read the file, but we don't pass the heavy content string around
-      const post = getPostBySlug(slug);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { content, ...meta } = post;
-      posts.push(meta);
+      const realSlug = slug.replace(/\.md$/, "");
+      const fullPath = path.join(postsDirectory, slug);
+      const fileContents = fs.readFileSync(fullPath, "utf8");
+      const { data } = matter(fileContents);
+      
+      const parsedDate = data.date ? new Date(data.date) : null;
+      const safeDate =
+        parsedDate && !Number.isNaN(parsedDate.getTime())
+          ? parsedDate.toISOString()
+          : "1970-01-01T00:00:00.000Z";
+
+      posts.push({
+        ...data,
+        slug: realSlug,
+        title: data.title || realSlug.replace(/-/g, " "),
+        date: safeDate,
+        excerpt: data.excerpt || "",
+      } as Omit<Post, "content">);
     } catch (err) {
-      console.warn(`[content] Skipping ${slug}: ${(err as Error).message}`);
+      console.warn(`[content] Skipping ${slug} meta: ${(err as Error).message}`);
     }
   }
 
-  return posts.sort((post1, post2) => {
-    const t1 = new Date(post1.date as string).getTime();
-    const t2 = new Date(post2.date as string).getTime();
-    if (Number.isNaN(t1)) return 1;
-    if (Number.isNaN(t2)) return -1;
-    return t2 - t1;
-  });
+  return posts.sort((a, b) => b.date.localeCompare(a.date));
 }
