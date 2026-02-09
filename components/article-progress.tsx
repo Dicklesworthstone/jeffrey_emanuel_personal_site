@@ -33,7 +33,7 @@ export default function ArticleProgress() {
       const scrollRange = end - start;
 
       if (!Number.isFinite(scrollRange) || scrollRange <= 0) {
-        progress.set(1);
+        progress.set(0); // Default to 0 instead of 1
         return;
       }
 
@@ -47,7 +47,7 @@ export default function ArticleProgress() {
 
     const onScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
+        rafId = window.requestAnimationFrame(() => {
           calculateProgress();
           ticking = false;
         });
@@ -58,6 +58,8 @@ export default function ArticleProgress() {
       measure();
       onScroll();
     };
+
+    let rafId: number | null = null;
 
     // Measure and calculate on mount
     const article = measure();
@@ -79,6 +81,9 @@ export default function ArticleProgress() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
       if (resizeObserver) {
         resizeObserver.disconnect();
       }

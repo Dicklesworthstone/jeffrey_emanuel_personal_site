@@ -440,7 +440,13 @@ export function NotableStargazers({
         >
           <ExternalLink className="h-3 w-3" />
           Data last updated{" "}
-          {new Date(stargazerData.lastUpdated).toLocaleDateString()}
+          <time dateTime={stargazerData.lastUpdated} suppressHydrationWarning>
+            {new Date(stargazerData.lastUpdated).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </time>
         </motion.div>
       )}
     </motion.div>

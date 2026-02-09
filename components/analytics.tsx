@@ -26,10 +26,7 @@ export function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
       window.dataLayer.push(args);
     };
     window.gtag("js", new Date());
-    window.gtag("config", gaId, {
-      page_path: window.location.pathname,
-      anonymize_ip: true,
-    });
+    // Config will be called by the page view effect
 
     // Load the GA script
     const script = document.createElement("script");

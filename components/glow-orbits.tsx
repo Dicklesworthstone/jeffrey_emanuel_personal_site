@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
 export default function GlowOrbits() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     if (!rootRef.current) return;
 
-    // Detect mobile device (server-safe)
+    // Detect mobile device (safe inside useEffect)
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     // Check if user prefers reduced motion
@@ -98,6 +100,8 @@ export default function GlowOrbits() {
       }
     };
   }, []);
+
+  if (!isMounted) return null;
 
   return (
     <div

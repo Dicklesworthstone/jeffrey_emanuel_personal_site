@@ -78,8 +78,9 @@ export async function GET(request: NextRequest) {
     throw new Error("Too many redirects");
   }
 
-  // Check cache
-  const cached = imageCache.get(url);
+// Check cache
+  const cacheKey = url;
+  const cached = imageCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
     return new NextResponse(cached.data, {
       headers: {
@@ -95,72 +96,47 @@ export async function GET(request: NextRequest) {
     const response = await fetchAllowedImage(url);
 
     if (!response.ok) {
-      // Don't leak upstream status codes - return generic error
       return NextResponse.json(
-        { error: "Failed to fetch image" },
+        { error: `Failed to fetch image: ${response.statusText}` },
         { status: 502 }
       );
     }
 
+    // Verify final URL after redirects
+    const finalUrl = new URL(response.url);
+    if (!["https:", "http:"].includes(finalUrl.protocol) || !ALLOWED_DOMAINS.includes(finalUrl.hostname)) {
+      return NextResponse.json({ error: "Final redirect domain not allowed" }, { status: 403 });
+    }
+
     const contentType = response.headers.get("content-type") || "image/png";
 
-    // Only cache images
+    // Only cache actual images
     if (!contentType.startsWith("image/")) {
-      return NextResponse.json({ error: "Not an image" }, { status: 400 });
+      return NextResponse.json({ error: "Content is not an image" }, { status: 400 });
     }
 
-    const reader = response.body?.getReader();
-    if (!reader) {
-      return NextResponse.json({ error: "Failed to read response body" }, { status: 502 });
-    }
-
-    const chunks: Uint8Array[] = [];
-    let receivedLength = 0;
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        if (value) {
-          receivedLength += value.length;
-          if (receivedLength > MAX_IMAGE_SIZE) {
-            reader.cancel();
-            return NextResponse.json({ error: "Image too large" }, { status: 413 });
-          }
-          chunks.push(value);
-        }
-      }
-    } catch (error) {
-      console.error("Stream read error:", error);
-      return NextResponse.json({ error: "Stream read failed" }, { status: 500 });
-    }
-
-    // Combine chunks
-    const data = new Uint8Array(receivedLength);
-    let offset = 0;
-    for (const chunk of chunks) {
-      data.set(chunk, offset);
-      offset += chunk.length;
+    const arrayBuffer = await response.arrayBuffer();
+    
+    if (arrayBuffer.byteLength > MAX_IMAGE_SIZE) {
+      return NextResponse.json({ error: "Image too large" }, { status: 413 });
     }
 
     // Cache the result
-    imageCache.set(url, {
-      data: data.buffer as ArrayBuffer,
+    imageCache.set(cacheKey, {
+      data: arrayBuffer,
       contentType,
       timestamp: Date.now(),
     });
 
     // Clean up old cache entries to prevent unbounded growth
     if (imageCache.size > MAX_CACHE_SIZE) {
-      // Remove oldest entry (Map preserves insertion order)
       const firstKey = imageCache.keys().next().value;
       if (firstKey) {
         imageCache.delete(firstKey);
       }
     }
 
-    return new NextResponse(data, {
+    return new NextResponse(arrayBuffer, {
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400, immutable",
@@ -170,7 +146,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("OG image fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch image" },
+      { error: error instanceof Error ? error.message : "Failed to fetch image" },
       { status: 500 }
     );
   }
