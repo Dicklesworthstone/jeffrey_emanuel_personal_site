@@ -1,10 +1,8 @@
-"use client";
-
 import SectionShell from "@/components/section-shell";
 import { MediaItem, mediaItems } from "@/lib/content";
 import { Newspaper, Podcast, PenLine, User, type LucideIcon } from "lucide-react";
 
-// Icon lookup object defined at module level to avoid creating components during render
+// Icon lookup object defined at module level
 const mediaIconMap: Record<MediaItem["kind"], LucideIcon> = {
   Podcast: Podcast,
   Blog: PenLine,

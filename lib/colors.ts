@@ -107,6 +107,9 @@ const DEFAULT_COLOR: ColorDefinition = {
   rgb: "139, 92, 246",
 };
 
+// Simple cache for partial matches
+const partialMatchCache = new Map<string, ColorDefinition>();
+
 /**
  * Get color definition for a Tailwind gradient class string.
  * Falls back to violet if not found.
@@ -117,9 +120,17 @@ export function getColorDefinition(colorClass: string): ColorDefinition {
     return TAILWIND_GRADIENTS[colorClass];
   }
 
+  // Check cache for previous partial matches
+  const cached = partialMatchCache.get(colorClass);
+  if (cached) return cached;
+
   // Try partial match (e.g. if class has extra spaces or slightly different format)
   // This is a heuristic fallback
-  const key = Object.keys(TAILWIND_GRADIENTS).find(k => colorClass.includes(k.split(" ")[0].replace("from-", "")));
+  const key = Object.keys(TAILWIND_GRADIENTS).find(k => 
+    colorClass.includes(k.split(" ")[0].replace("from-", ""))
+  );
   
-  return key ? TAILWIND_GRADIENTS[key] : DEFAULT_COLOR;
+  const result = key ? TAILWIND_GRADIENTS[key] : DEFAULT_COLOR;
+  partialMatchCache.set(colorClass, result);
+  return result;
 }

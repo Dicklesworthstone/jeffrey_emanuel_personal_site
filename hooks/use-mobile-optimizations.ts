@@ -127,15 +127,20 @@ function detectCapabilities(): DeviceCapabilities {
 
   // Downgrade based on indicators
   let score = 0;
-  if (isMobile) score += 2;
+  
+  // High-end mobile detection (e.g. iPhone 15/16, modern Android flagships)
+  const isHighEndMobile = isMobile && hardwareConcurrency >= 6 && !hasLowMemory;
+  
+  if (isMobile && !isHighEndMobile) score += 2;
   if (isSlowConnection) score += 3;
-  if (hardwareConcurrency <= 2) score += 2;
-  if (hardwareConcurrency <= 4) score += 1;
+  if (hardwareConcurrency <= 2) score += 3;
+  else if (hardwareConcurrency <= 4) score += 1;
+  
   if (hasLowMemory) score += 2;
-  if (devicePixelRatio > 2.5) score += 1; // High DPR = more GPU work
-  if (!supportsWebGL2) score += 1;
+  if (devicePixelRatio > 2.5 && !isHighEndMobile) score += 1; // High DPR + weak CPU = slow
+  if (!supportsWebGL2) score += 2;
   if (maxTextureSize < 4096) score += 1;
-  if (prefersReducedMotion) score += 2;
+  if (prefersReducedMotion) score += 4; // Heavily weight preference for simplicity
 
   if (score >= 6) tier = "low";
   else if (score >= 3) tier = "medium";

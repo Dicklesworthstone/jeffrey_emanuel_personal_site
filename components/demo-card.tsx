@@ -53,6 +53,7 @@ interface DemoCardProps {
 export default function DemoCard({ demo, featured = false, className }: DemoCardProps) {
   const { lightTap } = useHapticFeedback();
   const divRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   const [spotlightOpacity, setSpotlightOpacity] = useState(0);
 
   const config = categoryConfig[demo.category];
@@ -60,10 +61,9 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
 
   // Mouse tracking for spotlight effect
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current) return;
-    const rect = divRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    if (!rectRef.current) return;
+    const x = e.clientX - rectRef.current.left;
+    const y = e.clientY - rectRef.current.top;
 
     requestAnimationFrame(() => {
       divRef.current?.style.setProperty("--mouse-x", `${x}px`);
@@ -71,8 +71,17 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
     });
   };
 
-  const handleMouseEnter = () => setSpotlightOpacity(1);
-  const handleMouseLeave = () => setSpotlightOpacity(0);
+  const handleMouseEnter = () => {
+    if (divRef.current) {
+      rectRef.current = divRef.current.getBoundingClientRect();
+    }
+    setSpotlightOpacity(1);
+  };
+
+  const handleMouseLeave = () => {
+    setSpotlightOpacity(0);
+    rectRef.current = null;
+  };
 
   return (
     <a

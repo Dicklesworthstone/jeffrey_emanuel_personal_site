@@ -119,28 +119,24 @@ export function EndorsementShowcase({
     return Math.min(carouselIndex, otherItems.length - 1);
   }, [layout, carouselIndex, filteredEndorsements.length, otherItems.length]);
 
-  // Carousel navigation - use correct array length based on layout
-  const canGoPrev = safeCarouselIndex > 0;
-  const canGoNext = layout === "carousel"
-    ? safeCarouselIndex < filteredEndorsements.length - 1
-    : safeCarouselIndex < otherItems.length - 1;
+  // Carousel navigation
+  const carouselItems = layout === "carousel" ? filteredEndorsements : otherItems;
+  const itemCount = carouselItems.length;
+  const canGoPrev = itemCount > 1;
+  const canGoNext = itemCount > 1;
 
   const goToPrev = useCallback(() => {
-    if (canGoPrev) {
-      setCarouselIndex((i) => i - 1);
-    }
-  }, [canGoPrev]);
+    setCarouselIndex((i) => (i <= 0 ? itemCount - 1 : i - 1));
+  }, [itemCount]);
 
   const goToNext = useCallback(() => {
-    if (canGoNext) {
-      setCarouselIndex((i) => i + 1);
-    }
-  }, [canGoNext]);
+    setCarouselIndex((i) => (i >= itemCount - 1 ? 0 : i + 1));
+  }, [itemCount]);
 
   // Keyboard navigation for carousel
   useEffect(() => {
+    if (layout !== "carousel" && layout !== "featured") return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (layout !== "carousel" && layout !== "featured") return;
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         goToPrev();
@@ -150,11 +146,8 @@ export function EndorsementShowcase({
       }
     };
 
-    const container = carouselRef.current;
-    if (!container) return;
-
-    container.addEventListener("keydown", handleKeyDown);
-    return () => container.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [layout, goToPrev, goToNext]);
 
   // Touch/swipe support
@@ -416,11 +409,7 @@ export function EndorsementShowcase({
         {filteredEndorsements.length > 1 && (
           <div className="mt-4 flex items-center justify-center gap-4">
             <button
-              onClick={() =>
-                setCarouselIndex((i) =>
-                  i === 0 ? filteredEndorsements.length - 1 : i - 1
-                )
-              }
+              onClick={goToPrev}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
               aria-label="Previous endorsement"
             >
@@ -446,11 +435,7 @@ export function EndorsementShowcase({
             </div>
 
             <button
-              onClick={() =>
-                setCarouselIndex((i) =>
-                  i === filteredEndorsements.length - 1 ? 0 : i + 1
-                )
-              }
+              onClick={goToNext}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
               aria-label="Next endorsement"
             >

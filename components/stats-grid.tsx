@@ -11,21 +11,22 @@ import { AnimatedNumber } from "@/components/animated-number";
  */
 export function parseStatValue(value: string): {
   number: number;
+  prefix: string;
   suffix: string;
   isAnimatable: boolean;
 } {
-  // Match patterns like "10K+", "7", "15+", "20K+"
-  const match = value.match(/^([0-9,.]+)(K|M|B)?(\+)?$/i);
+  // Match patterns like "10K+", "7", "15+", "20K+", "$600B"
+  const match = value.match(/^([^0-9,.]+)?([0-9,.]+)(K|M|B)?(\+)?$/i);
 
   if (!match) {
-    return { number: 0, suffix: value, isAnimatable: false };
+    return { number: 0, prefix: "", suffix: value, isAnimatable: false };
   }
 
-  const [, numStr, magnitude, plus] = match;
+  const [, prefix, numStr, magnitude, plus] = match;
   const num = parseFloat(numStr.replace(/,/g, ""));
   const suffix = `${magnitude || ""}${plus || ""}`;
 
-  return { number: num, suffix, isAnimatable: true };
+  return { number: num, prefix: prefix || "", suffix, isAnimatable: true };
 }
 
 export default function StatsGrid({ stats }: { stats: Stat[] }) {
@@ -96,6 +97,7 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
               {parsed.isAnimatable ? (
                 <AnimatedNumber
                   value={parsed.number}
+                  prefix={parsed.prefix}
                   suffix={parsed.suffix}
                   duration={1800 + index * 200} // Slightly different duration for each
                   isVisible={isVisible}

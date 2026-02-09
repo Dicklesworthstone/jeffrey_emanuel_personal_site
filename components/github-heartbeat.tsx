@@ -454,7 +454,14 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     // Simple streak calculation (consecutive days with activity)
     const uniqueDays = new Set(events.map((e) => getLocalDayKey(e.timestamp)));
     let streak = 0;
+    
+    // Start checking from either today (if active) or yesterday
     let checkDate = todayKey;
+    if (!uniqueDays.has(checkDate)) {
+      const d = new Date(now.getTime());
+      d.setDate(d.getDate() - 1);
+      checkDate = getLocalDayKey(d);
+    }
 
     while (uniqueDays.has(checkDate)) {
       streak++;
