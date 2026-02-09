@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Copy, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";

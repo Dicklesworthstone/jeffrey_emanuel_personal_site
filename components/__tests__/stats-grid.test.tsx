@@ -1,6 +1,62 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import StatsGrid from "../stats-grid";
+import StatsGrid, { parseStatValue } from "../stats-grid";
+
+describe("parseStatValue", () => {
+  it("parses simple numbers", () => {
+    expect(parseStatValue("42")).toEqual({
+      number: 42,
+      prefix: "",
+      suffix: "",
+      isAnimatable: true,
+    });
+  });
+
+  it("parses numbers with K suffix", () => {
+    expect(parseStatValue("10K")).toEqual({
+      number: 10,
+      prefix: "",
+      suffix: "K",
+      isAnimatable: true,
+    });
+  });
+
+  it("parses numbers with M suffix and plus", () => {
+    expect(parseStatValue("2.3M+")).toEqual({
+      number: 2.3,
+      prefix: "",
+      suffix: "M+",
+      isAnimatable: true,
+    });
+  });
+
+  it("parses numbers with currency prefix", () => {
+    expect(parseStatValue("$600B")).toEqual({
+      number: 600,
+      prefix: "$",
+      suffix: "B",
+      isAnimatable: true,
+    });
+  });
+
+  it("parses numbers with commas", () => {
+    expect(parseStatValue("1,234")).toEqual({
+      number: 1234,
+      prefix: "",
+      suffix: "",
+      isAnimatable: true,
+    });
+  });
+
+  it("handles non-animatable strings", () => {
+    expect(parseStatValue("~15M")).toEqual({
+      number: 0,
+      prefix: "",
+      suffix: "~15M",
+      isAnimatable: false,
+    });
+  });
+});
 
 describe("StatsGrid", () => {
   const mockStats = [

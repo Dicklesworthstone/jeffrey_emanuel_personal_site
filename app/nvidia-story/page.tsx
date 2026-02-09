@@ -7,7 +7,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "The $600B Drop: How a Blog Post Moved Markets",
   datePublished: nvidiaStoryData.stats.publishDate,
-  dateModified: "2025-01-27",
+  dateModified: nvidiaStoryData.stats.dropDate,
   description: nvidiaStoryData.hero.subheadline,
   author: {
     "@type": "Person",

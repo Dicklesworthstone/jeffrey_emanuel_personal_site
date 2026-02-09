@@ -480,6 +480,13 @@ function MicroGyroscope() {
 // 17: Morphing sphere (breathing)
 function MicroBreathingSphere() {
   const ref = useRef<THREE.Mesh>(null);
+  const geom = useMemo(() => new THREE.SphereGeometry(0.4, 24, 24), []);
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: colors.violet, emissive: colors.sky, emissiveIntensity: 0.5, metalness: 0.5, roughness: 0.2 }), []);
+
+  useEffect(() => () => {
+    geom.dispose();
+    mat.dispose();
+  }, [geom, mat]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -488,17 +495,19 @@ function MicroBreathingSphere() {
     ref.current.rotation.y = clock.getElapsedTime() * 0.3;
   });
 
-  return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[0.4, 24, 24]} />
-      <meshStandardMaterial color={colors.violet} emissive={colors.sky} emissiveIntensity={0.5} metalness={0.5} roughness={0.2} />
-    </mesh>
-  );
+  return <mesh ref={ref} geometry={geom} material={mat} />;
 }
 
 // 18: Pyramid
 function MicroPyramid() {
   const ref = useRef<THREE.Mesh>(null);
+  const geom = useMemo(() => new THREE.ConeGeometry(0.45, 0.7, 4), []);
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: colors.sky, emissive: colors.emerald, emissiveIntensity: 0.4, metalness: 0.3, roughness: 0.4 }), []);
+
+  useEffect(() => () => {
+    geom.dispose();
+    mat.dispose();
+  }, [geom, mat]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -506,12 +515,7 @@ function MicroPyramid() {
     ref.current.position.y = Math.sin(clock.getElapsedTime() * 0.8) * 0.1;
   });
 
-  return (
-    <mesh ref={ref}>
-      <coneGeometry args={[0.45, 0.7, 4]} />
-      <meshStandardMaterial color={colors.sky} emissive={colors.emerald} emissiveIntensity={0.4} metalness={0.3} roughness={0.4} />
-    </mesh>
-  );
+  return <mesh ref={ref} geometry={geom} material={mat} />;
 }
 
 // 19: Atom model
@@ -582,7 +586,12 @@ function MicroMobius() {
     return geom;
   }, []);
 
-  useEffect(() => () => geometry.dispose(), [geometry]);
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: colors.emerald, emissive: colors.violet, emissiveIntensity: 0.4, side: THREE.DoubleSide, metalness: 0.3, roughness: 0.4 }), []);
+
+  useEffect(() => () => {
+    geometry.dispose();
+    mat.dispose();
+  }, [geometry, mat]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -590,16 +599,19 @@ function MicroMobius() {
     ref.current.rotation.y = clock.getElapsedTime() * 0.5;
   });
 
-  return (
-    <mesh ref={ref} geometry={geometry}>
-      <meshStandardMaterial color={colors.emerald} emissive={colors.violet} emissiveIntensity={0.4} side={THREE.DoubleSide} metalness={0.3} roughness={0.4} />
-    </mesh>
-  );
+  return <mesh ref={ref} geometry={geometry} material={mat} />;
 }
 
 // 21: Klein bottle approximation
 function MicroKlein() {
   const ref = useRef<THREE.Mesh>(null);
+  const geom = useMemo(() => new THREE.TorusKnotGeometry(0.28, 0.12, 64, 8, 3, 2), []);
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: colors.sky, emissive: colors.violet, emissiveIntensity: 0.4, metalness: 0.4, roughness: 0.3 }), []);
+
+  useEffect(() => () => {
+    geom.dispose();
+    mat.dispose();
+  }, [geom, mat]);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
@@ -607,12 +619,7 @@ function MicroKlein() {
     ref.current.rotation.y = clock.getElapsedTime() * 0.5;
   });
 
-  return (
-    <mesh ref={ref}>
-      <torusKnotGeometry args={[0.28, 0.12, 64, 8, 3, 2]} />
-      <meshStandardMaterial color={colors.sky} emissive={colors.violet} emissiveIntensity={0.4} metalness={0.4} roughness={0.3} />
-    </mesh>
-  );
+  return <mesh ref={ref} geometry={geom} material={mat} />;
 }
 
 // 22: Flower of life pattern
