@@ -43,6 +43,7 @@ const crimsonPro = Crimson_Pro({
   subsets: ["latin"],
   variable: "--font-crimson",
   display: "swap",
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -164,7 +165,7 @@ export function RaptorQArticle() {
 
         <EC>
           <div className="text-center pt-32 relative z-20">
-            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[10px] md:text-[11px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
+            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
               Protocol Intelligence / RFC 6330
             </div>
@@ -188,7 +189,7 @@ export function RaptorQArticle() {
           className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
           style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
         >
-          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />

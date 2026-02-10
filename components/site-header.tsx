@@ -41,12 +41,12 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const { scrollY } = useScroll();
   
   // Smoothly interpolate header styles based on scroll position
-  // Starts at 0, fully "scrolled" at 30px — Apple-style liquid glass
-  const headerOpacity = useTransform(scrollY, [0, 30], [0, 0.98]);
-  const headerBlurValue = useTransform(scrollY, [0, 30], [0, 40]);
-  const headerSaturateValue = useTransform(scrollY, [0, 30], [1, 1.8]);
-  const headerPaddingValue = useTransform(scrollY, [0, 30], [20, 12]);
-  const headerBorderOpacity = useTransform(scrollY, [0, 30], [0, 0.15]);
+  // Starts at 0, fully "scrolled" at 40px — Apple-style liquid glass
+  const headerOpacity = useTransform(scrollY, [0, 40], [0, 1]);
+  const headerBlurValue = useTransform(scrollY, [0, 40], [0, 40]);
+  const headerSaturateValue = useTransform(scrollY, [0, 40], [1, 1.8]);
+  const headerPaddingValue = useTransform(scrollY, [0, 40], [20, 12]);
+  const headerBorderOpacity = useTransform(scrollY, [0, 40], [0, 0.15]);
   
   // Spring-smoothed values for buttery performance
   const smoothOpacity = useSpring(headerOpacity, { stiffness: 300, damping: 30 });
@@ -56,6 +56,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const smoothBorderOpacity = useSpring(headerBorderOpacity, { stiffness: 300, damping: 30 });
 
   const headerPadding = useTransform(smoothPadding, (v) => `${v}px`);
+  
+  // Combine filters for backdrop - using more robust direct string interpolation if needed, 
+  // but useTransform with array is generally supported.
   const headerBackdrop = useTransform(
     [smoothBlur, smoothSaturate],
     ([blur, sat]) => `blur(${blur}px) saturate(${sat})`

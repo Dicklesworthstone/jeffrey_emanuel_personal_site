@@ -831,8 +831,8 @@ select:focus-visible {
 /* Display title - fluid clamp sizing */
 .raptorq-scope .rq-display-title {
   font-family: var(--font-bricolage), system-ui, sans-serif;
-  font-size: clamp(2.5rem, 8vw, 6.5rem);
-  line-height: 0.9;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.85;
   letter-spacing: -0.06em;
   font-weight: 900;
   text-transform: uppercase;
@@ -841,14 +841,14 @@ select:focus-visible {
 /* Section titles with cyan bar pseudo-element */
 .raptorq-scope .rq-section-title {
   font-family: var(--font-bricolage), system-ui, sans-serif;
-  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   letter-spacing: -0.05em;
   font-weight: 900;
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  margin-top: 6rem;
-  margin-bottom: 3rem;
+  margin-top: 8rem;
+  margin-bottom: 4rem;
   color: white;
 }
 
@@ -880,11 +880,11 @@ select:focus-visible {
   padding-left: 2rem;
   padding-top: 1rem;
   padding-bottom: 1rem;
-  margin-top: 2.5rem;
-  margin-bottom: 2.5rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
   font-style: italic;
-  font-size: 1.5rem;
-  line-height: 1.375;
+  font-size: 1.75rem;
+  line-height: 1.4;
   color: #e2e8f0;
   background: linear-gradient(to right, rgba(168, 85, 247, 0.05), transparent);
   border-radius: 0 0.75rem 0.75rem 0;
@@ -1059,18 +1059,19 @@ select:focus-visible {
 
 /* Editorial paragraph styling */
 .raptorq-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) {
-  font-size: 1.375rem;
+  font-size: 1.625rem;
   line-height: 1.85;
   color: #f1f5f9;
-  margin-bottom: 2.75rem;
+  margin-bottom: 4rem;
   margin-top: 0;
-  max-width: 68ch;
+  max-width: 72ch;
   text-wrap: pretty;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  font-weight: 450;
 }
 
 .raptorq-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) + p:not(.text-sm):not(.text-base):not(.text-xl) {
-  margin-top: 2.75rem;
+  margin-top: 4rem;
 }
 
 .raptorq-scope.rq-body strong {
@@ -1093,42 +1094,48 @@ select:focus-visible {
 /* Ensure card text remains readable but benefits from some lift */
 .raptorq-scope .rq-insight-card p {
   color: #cbd5e1;
-  line-height: 1.7;
+  line-height: 1.8;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.raptorq-scope .rq-insight-card p:last-child {
+  margin-bottom: 0;
 }
 
 /* Math styling */
 .raptorq-scope .rq-math-inline .katex {
-  font-size: 1.1em;
+  font-size: 1.25em;
   color: rgba(216, 180, 254, 0.9);
 }
 
 .raptorq-scope .rq-math-block {
   text-align: center;
-  margin: 1.5rem 0;
-  padding: 1rem;
+  margin: 2.5rem 0;
+  padding: 2rem;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .raptorq-scope .rq-math-block .katex {
-  font-size: 1.2em;
+  font-size: 1.5em;
   color: #22d3ee;
 }
 
 /* Sidebar note */
 .raptorq-scope .rq-sidebar-note {
-  font-size: 0.875rem;
-  color: #475569;
+  font-size: 1rem;
+  color: #64748b;
   border-left: 2px solid #1e293b;
   padding-left: 1.5rem;
   margin-left: 0;
   font-style: italic;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.625;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  line-height: 1.7;
 }
 
 @media (min-width: 768px) {
@@ -1160,9 +1167,14 @@ select:focus-visible {
   }
 
   .raptorq-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) {
-    font-size: 1.25rem;
+    font-size: 1.375rem;
     line-height: 1.85;
-    margin-bottom: 2.25rem;
+    margin-bottom: 3rem;
+  }
+
+  .raptorq-scope .rq-insight-card p {
+    font-size: 1.1875rem;
+    line-height: 1.75;
   }
 
   .raptorq-scope .rq-math-inline .katex {
