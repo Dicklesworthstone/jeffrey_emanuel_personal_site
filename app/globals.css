@@ -824,11 +824,13 @@ select:focus-visible {
   --rq-muted: #64748b;
   --rq-cyan: #22d3ee;
   --rq-purple: #a855f7;
+  font-family: var(--font-crimson), Georgia, "Times New Roman", serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss03", "cv05", "tnum";
 }
 
 /* Display title - fluid clamp sizing */
 .raptorq-scope .rq-display-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
   font-size: clamp(2.5rem, 8vw, 6.5rem);
   line-height: 0.9;
   letter-spacing: -0.06em;
@@ -838,6 +840,7 @@ select:focus-visible {
 
 /* Section titles with cyan bar pseudo-element */
 .raptorq-scope .rq-section-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
   font-size: clamp(1.75rem, 4vw, 3rem);
   letter-spacing: -0.05em;
   font-weight: 900;
@@ -1052,22 +1055,23 @@ select:focus-visible {
 }
 
 /* Editorial paragraph styling */
-.raptorq-scope .rq-body p {
-  font-size: 1.1rem;
-  line-height: 1.6;
+.raptorq-scope.rq-body p {
+  font-size: 1.2rem;
+  line-height: 1.7;
   color: #94a3b8;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75em;
   max-width: 65ch;
   text-wrap: pretty;
 }
 
-.raptorq-scope .rq-body strong {
+.raptorq-scope.rq-body strong {
   color: white;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.raptorq-scope .rq-body code {
+.raptorq-scope.rq-body code {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
   color: #22d3ee;
   background: rgba(8, 145, 178, 0.15);
   padding: 0.125rem 0.375rem;
@@ -1140,8 +1144,9 @@ select:focus-visible {
     margin-bottom: 1.5rem;
   }
 
-  .raptorq-scope .rq-body p {
-    font-size: 1rem;
+  .raptorq-scope.rq-body p {
+    font-size: 1.125rem;
+    line-height: 1.75;
   }
 
   .raptorq-scope .rq-math-inline .katex {

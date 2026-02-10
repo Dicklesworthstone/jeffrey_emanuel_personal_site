@@ -41,21 +41,25 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const { scrollY } = useScroll();
   
   // Smoothly interpolate header styles based on scroll position
-  // Starts at 0, fully "scrolled" at 50px
-  const headerOpacity = useTransform(scrollY, [0, 50], [0, 0.8]);
-  const headerBlurValue = useTransform(scrollY, [0, 50], [0, 12]);
+  // Starts at 0, fully "scrolled" at 50px — Apple-style liquid glass
+  const headerOpacity = useTransform(scrollY, [0, 50], [0, 0.55]);
+  const headerBlurValue = useTransform(scrollY, [0, 50], [0, 24]);
+  const headerSaturateValue = useTransform(scrollY, [0, 50], [1, 1.8]);
   const headerPaddingValue = useTransform(scrollY, [0, 50], [20, 12]);
-  const headerBorderOpacity = useTransform(scrollY, [0, 50], [0, 0.5]);
+  const headerBorderOpacity = useTransform(scrollY, [0, 50], [0, 0.12]);
   
   // Spring-smoothed values for buttery performance
   const smoothOpacity = useSpring(headerOpacity, { stiffness: 300, damping: 30 });
   const smoothBlur = useSpring(headerBlurValue, { stiffness: 300, damping: 30 });
+  const smoothSaturate = useSpring(headerSaturateValue, { stiffness: 300, damping: 30 });
   const smoothPadding = useSpring(headerPaddingValue, { stiffness: 300, damping: 30 });
   const smoothBorderOpacity = useSpring(headerBorderOpacity, { stiffness: 300, damping: 30 });
 
   const headerPadding = useTransform(smoothPadding, (v) => `${v}px`);
-  const headerBlur = useTransform(smoothBlur, (v) => `blur(${v}px)`);
-  const headerWebkitBlur = useTransform(smoothBlur, (v) => `blur(${v}px)`);
+  const headerBackdrop = useTransform(
+    [smoothBlur, smoothSaturate],
+    ([blur, sat]) => `blur(${blur}px) saturate(${sat})`
+  );
 
   // Detect OS for meta key - must run after hydration to avoid mismatch
   useEffect(() => {
@@ -81,13 +85,13 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
     <>
       <motion.header
         className="fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-300"
-        style={{ 
+        style={{
           paddingTop: headerPadding,
           paddingBottom: headerPadding,
           backgroundColor: useTransform(smoothOpacity, (v) => `rgba(2, 6, 23, ${v})`),
-          backdropFilter: headerBlur,
-          WebkitBackdropFilter: headerWebkitBlur,
-          borderColor: useTransform(smoothBorderOpacity, (v) => `rgba(15, 23, 42, ${v})`),
+          backdropFilter: headerBackdrop,
+          WebkitBackdropFilter: headerBackdrop,
+          borderColor: useTransform(smoothBorderOpacity, (v) => `rgba(255, 255, 255, ${v})`),
           paddingRight: "var(--scrollbar-width, 0px)",
           willChange: "padding, background-color, backdrop-filter, border-color"
         }}
