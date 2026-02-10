@@ -20,14 +20,14 @@ export default async function Image() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#020204",
+          background:
+            "linear-gradient(145deg, #0a0a12 0%, #0f1218 35%, #121620 65%, #0a0a12 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
           position: "relative",
           overflow: "hidden",
-          border: "2px solid #1e293b",
         }}
       >
-        {/* Background Atmosphere */}
+        {/* Grid pattern */}
         <div
           style={{
             position: "absolute",
@@ -35,261 +35,294 @@ export default async function Image() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, rgba(2, 2, 4, 1) 100%)",
+            opacity: 0.03,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2322d3ee' stroke-width='0.5'%3E%3Cpath d='M0 20h40M20 0v40'/%3E%3C/g%3E%3C/svg%3E")`,
             display: "flex",
           }}
         />
 
-        {/* Blueprint Grid */}
+        {/* Glowing orb - cyan top left */}
         <div
           style={{
             position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            opacity: 0.05,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%233b82f6' stroke-width='0.5'%3E%3Cpath d='M0 30h60M30 0v60'/%3E%3Ccircle cx='30' cy='30' r='1' fill='%233b82f6'/%3E%3C/g%3E%3C/svg%3E")`,
+            top: -160,
+            left: -130,
+            width: 520,
+            height: 520,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(34,211,238,0.18) 0%, transparent 60%)",
             display: "flex",
           }}
         />
 
-        {/* Stitched Border Detail */}
+        {/* Glowing orb - purple bottom right */}
         <div
           style={{
             position: "absolute",
-            top: 10,
-            left: 10,
-            right: 10,
-            bottom: 10,
-            border: "1px dashed rgba(51, 65, 85, 0.3)",
-            borderRadius: "4px",
+            bottom: -200,
+            right: -130,
+            width: 580,
+            height: 580,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 60%)",
             display: "flex",
           }}
         />
 
-        {/* Corner Bolts */}
-        <div style={{ position: "absolute", top: 20, left: 20, width: 12, height: 12, background: "#334155", borderRadius: "50%", border: "2px solid #1e293b", display: "flex" }} />
-        <div style={{ position: "absolute", top: 20, right: 20, width: 12, height: 12, background: "#334155", borderRadius: "50%", border: "2px solid #1e293b", display: "flex" }} />
-        <div style={{ position: "absolute", bottom: 20, left: 20, width: 12, height: 12, background: "#334155", borderRadius: "50%", border: "2px solid #1e293b", display: "flex" }} />
-        <div style={{ position: "absolute", bottom: 20, right: 20, width: 12, height: 12, background: "#334155", borderRadius: "50%", border: "2px solid #1e293b", display: "flex" }} />
-
-        {/* Main Content Layout */}
+        {/* Main content */}
         <div
           style={{
             display: "flex",
             flexDirection: "row",
-            width: "100%",
-            height: "100%",
-            padding: "60px 90px",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "center",
+            gap: 60,
             zIndex: 10,
+            padding: "40px 70px",
+            width: "100%",
           }}
         >
-          {/* Left Side: Technical Alchemical Illustration */}
+          {/* Left side - Fountain code visualization */}
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              width: "460px",
-              height: "460px",
-              position: "relative",
               alignItems: "center",
               justifyContent: "center",
+              position: "relative",
             }}
           >
-            {/* The "Sigil" Glow */}
+            {/* Outer glow */}
             <div
               style={{
                 position: "absolute",
-                width: "400px",
-                height: "400px",
+                width: 260,
+                height: 260,
                 borderRadius: "50%",
-                background: "radial-gradient(circle, rgba(34,211,238,0.15) 0%, rgba(168,85,247,0.1) 50%, transparent 70%)",
+                background:
+                  "radial-gradient(circle, rgba(34,211,238,0.28) 0%, rgba(168,85,247,0.18) 50%, transparent 70%)",
+                filter: "blur(28px)",
                 display: "flex",
               }}
             />
 
+            {/* Network/fountain SVG */}
             <svg
-              width="460"
-              height="460"
-              viewBox="0 0 400 400"
+              width="200"
+              height="200"
+              viewBox="0 0 100 100"
               fill="none"
+              style={{
+                filter: "drop-shadow(0 0 24px rgba(34,211,238,0.35))",
+              }}
             >
               <defs>
-                <linearGradient id="magicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient id="rqGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#22d3ee" />
                   <stop offset="50%" stopColor="#3b82f6" />
                   <stop offset="100%" stopColor="#a855f7" />
                 </linearGradient>
               </defs>
 
-              {/* Central Alchemical Sigil / Math Ring */}
-              <circle cx="200" cy="200" r="180" stroke="#1e293b" strokeWidth="1" strokeDasharray="5,5" />
-              <circle cx="200" cy="200" r="160" stroke="url(#magicGrad)" strokeWidth="0.5" opacity="0.3" />
-              
-              {/* Hexagonal Matrix Frame */}
-              <polygon
-                points="200,40 340,120 340,280 200,360 60,280 60,120"
-                stroke="url(#magicGrad)"
-                strokeWidth="1.5"
-                opacity="0.4"
-                strokeDasharray="10,5"
-              />
+              {/* Outer ring */}
+              <circle cx="50" cy="50" r="45" stroke="url(#rqGrad)" strokeWidth="2" fill="none" opacity="0.6" />
+              <circle cx="50" cy="50" r="38" stroke="#22d3ee" strokeWidth="0.5" fill="none" opacity="0.3" />
 
-              {/* Source Symbols (K) */}
-              <g transform="translate(180, 80)">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <rect
-                    key={i}
-                    x={Math.cos((i / 6) * Math.PI * 2) * 60 - 10}
-                    y={Math.sin((i / 6) * Math.PI * 2) * 60 - 10}
-                    width="20"
-                    height="20"
-                    rx="4"
-                    fill="#0f172a"
-                    stroke="#22d3ee"
-                    strokeWidth="1.5"
-                    opacity="0.8"
-                  />
-                ))}
-                <text x="0" y="5" fill="#22d3ee" fontSize="10" fontWeight="bold" textAnchor="middle">SOURCE K</text>
-              </g>
+              {/* Source nodes (top) */}
+              <rect x="30" y="15" width="10" height="10" rx="2" fill="#0f172a" stroke="#22d3ee" strokeWidth="1.5" opacity="0.9" />
+              <rect x="45" y="12" width="10" height="10" rx="2" fill="#0f172a" stroke="#22d3ee" strokeWidth="1.5" opacity="0.9" />
+              <rect x="60" y="15" width="10" height="10" rx="2" fill="#0f172a" stroke="#22d3ee" strokeWidth="1.5" opacity="0.9" />
 
-              {/* Fountain Flow Lines */}
-              <g>
-                <path d="M 200 140 Q 300 200 200 320" stroke="url(#magicGrad)" strokeWidth="2" opacity="0.5" fill="none" />
-                <path d="M 200 140 Q 100 200 200 320" stroke="url(#magicGrad)" strokeWidth="2" opacity="0.5" fill="none" />
-              </g>
+              {/* Flow lines from source to encoded */}
+              <path d="M35 25 Q 40 50 30 72" stroke="#22d3ee" strokeWidth="1" fill="none" opacity="0.4" />
+              <path d="M50 22 Q 50 50 50 72" stroke="#3b82f6" strokeWidth="1" fill="none" opacity="0.4" />
+              <path d="M65 25 Q 60 50 70 72" stroke="#a855f7" strokeWidth="1" fill="none" opacity="0.4" />
+              <path d="M35 25 Q 55 45 70 72" stroke="#22d3ee" strokeWidth="0.8" fill="none" opacity="0.25" />
+              <path d="M65 25 Q 45 45 30 72" stroke="#a855f7" strokeWidth="0.8" fill="none" opacity="0.25" />
 
-              {/* Encoded Symbols */}
-              <g transform="translate(200, 320)">
-                <rect x="-40" y="-15" width="80" height="30" rx="6" fill="#0f172a" stroke="#a855f7" strokeWidth="2" />
-                <text y="5" fill="#a855f7" fontSize="12" fontWeight="bold" textAnchor="middle">ENCODED</text>
-              </g>
+              {/* Encoded nodes (bottom) */}
+              <circle cx="30" cy="78" r="6" fill="#0f172a" stroke="#a855f7" strokeWidth="1.5" opacity="0.9" />
+              <circle cx="50" cy="80" r="6" fill="#0f172a" stroke="#a855f7" strokeWidth="1.5" opacity="0.9" />
+              <circle cx="70" cy="78" r="6" fill="#0f172a" stroke="#a855f7" strokeWidth="1.5" opacity="0.9" />
 
-              {/* Mathematical Formulas */}
-              <text x="280" y="100" fill="#475569" fontSize="8">Ax = b</text>
-              <text x="80" y="100" fill="#475569" fontSize="8">GF(256)</text>
-              <text x="280" y="300" fill="#475569" fontSize="8">Ω(d)</text>
-              <text x="80" y="300" fill="#475569" fontSize="8">P = A ⊕ C</text>
+              {/* Center symbol */}
+              <circle cx="50" cy="50" r="8" fill="rgba(34,211,238,0.15)" stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
+              <path d="M47 50 L50 46 L53 50 L50 54 Z" fill="#22d3ee" opacity="0.8" />
             </svg>
           </div>
 
-          {/* Right Side: Typography & Metadata */}
+          {/* Right side - Text content */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-start",
               justifyContent: "center",
-              width: "520px",
+              maxWidth: 640,
             }}
           >
-            {/* Project ID / Tag */}
+            {/* Page label */}
             <div
               style={{
                 display: "flex",
-                flexDirection: "row",
                 alignItems: "center",
-                gap: "10px",
-                marginBottom: "30px",
+                gap: 8,
+                marginBottom: 18,
+                padding: "7px 15px",
+                borderRadius: 18,
+                background: "rgba(34,211,238,0.12)",
+                border: "1px solid rgba(34,211,238,0.28)",
               }}
             >
-              <div style={{ width: "12px", height: "12px", background: "#22d3ee", display: "flex" }} />
               <span
                 style={{
-                  fontSize: "13px",
-                  fontWeight: "900",
-                  color: "#475569",
-                  letterSpacing: "0.3em",
+                  fontSize: 13,
+                  color: "#22d3ee",
+                  fontWeight: 600,
+                  letterSpacing: "0.06em",
                   textTransform: "uppercase",
+                  display: "flex",
                 }}
               >
-                PROTOCOL INTEL // RFC 6330
+                Deep Dive — RFC 6330
               </span>
             </div>
 
             {/* Title */}
-            <div
+            <h1
               style={{
+                fontSize: 56,
+                fontWeight: 800,
+                background:
+                  "linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%)",
+                backgroundClip: "text",
+                color: "transparent",
+                margin: 0,
+                marginBottom: 8,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
                 display: "flex",
-                flexDirection: "column",
-                marginBottom: "16px",
               }}
             >
-              <span style={{ opacity: 0.7, fontSize: "24px", letterSpacing: "0.2em", marginBottom: "8px", color: "#22d3ee", fontWeight: "900" }}>THE BLACK MAGIC OF</span>
-              <span style={{ fontSize: "64px", fontWeight: "900", color: "#fff", letterSpacing: "-0.04em", lineHeight: "1.0" }}>LIQUID DATA</span>
-            </div>
+              The Black Magic of
+            </h1>
+            <h1
+              style={{
+                fontSize: 56,
+                fontWeight: 800,
+                background:
+                  "linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%)",
+                backgroundClip: "text",
+                color: "transparent",
+                margin: 0,
+                marginBottom: 22,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                display: "flex",
+              }}
+            >
+              Liquid Data
+            </h1>
 
-            {/* Subtitle / Description */}
+            {/* Description */}
             <p
               style={{
-                fontSize: "22px",
+                fontSize: 20,
                 color: "#94a3b8",
-                lineHeight: "1.5",
                 margin: 0,
-                marginBottom: "40px",
-                maxWidth: "460px",
-                fontWeight: "500",
+                marginBottom: 28,
+                lineHeight: 1.55,
                 display: "flex",
               }}
             >
               How RaptorQ turns any file into an infinite stream of
-              self-healing packets with near-zero overhead.
+              self-healing packets with under 5% overhead
             </p>
 
-            {/* Technical Specs Rows */}
+            {/* Tags */}
             <div
               style={{
                 display: "flex",
-                flexDirection: "row",
-                gap: "20px",
-                width: "100%",
-                padding: "20px",
-                background: "rgba(15, 23, 42, 0.5)",
-                border: "1px solid rgba(51, 65, 85, 0.5)",
-                borderRadius: "8px",
+                alignItems: "center",
+                gap: 14,
+                fontSize: 14,
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                <span style={{ fontSize: "10px", color: "#475569", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em" }}>Complexity</span>
-                <span style={{ fontSize: "16px", color: "#22d3ee", fontWeight: "bold" }}>O(K) Linear Time</span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "7px 14px",
+                  borderRadius: 7,
+                  background: "rgba(34,211,238,0.14)",
+                  border: "1px solid rgba(34,211,238,0.26)",
+                }}
+              >
+                <span style={{ color: "#22d3ee", fontWeight: 600, display: "flex" }}>
+                  Fountain Codes
+                </span>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                <span style={{ fontSize: "10px", color: "#475569", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em" }}>Recovery</span>
-                <span style={{ fontSize: "16px", color: "#a855f7", fontWeight: "bold" }}>99.9999% Prob.</span>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "7px 14px",
+                  borderRadius: 7,
+                  background: "rgba(59,130,246,0.14)",
+                  border: "1px solid rgba(59,130,246,0.26)",
+                }}
+              >
+                <span style={{ color: "#60a5fa", fontWeight: 600, display: "flex" }}>
+                  Linear Algebra
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "7px 14px",
+                  borderRadius: 7,
+                  background: "rgba(168,85,247,0.14)",
+                  border: "1px solid rgba(168,85,247,0.26)",
+                }}
+              >
+                <span style={{ color: "#c084fc", fontWeight: 600, display: "flex" }}>
+                  O(K) Decoding
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer / Domain Status Bar */}
+        {/* Bottom gradient accent */}
         <div
           style={{
             position: "absolute",
-            bottom: "0",
-            left: "0",
-            right: "0",
-            height: "40px",
-            background: "#0f172a",
-            borderTop: "1px solid #1e293b",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 4,
+            background:
+              "linear-gradient(90deg, transparent 0%, #22d3ee 25%, #a855f7 50%, #f472b6 75%, transparent 100%)",
             display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            padding: "0 40px",
-            justifyContent: "space-between",
+          }}
+        />
+
+        {/* Domain */}
+        <div
+          style={{
+            position: "absolute",
+            top: 28,
+            right: 38,
+            fontSize: 14,
+            color: "#475569",
+            display: "flex",
           }}
         >
-          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "15px" }}>
-            <span style={{ fontSize: "11px", color: "#334155", fontWeight: "bold" }}>[ STATUS: OPERATIONAL ]</span>
-            <span style={{ fontSize: "11px", color: "#22d3ee", fontWeight: "bold" }}>JEFFREYEMANUEL.COM</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "row", gap: "20px" }}>
-            <span style={{ fontSize: "11px", color: "#475569" }}>TYPE: FOUNTAIN_CODE</span>
-            <span style={{ fontSize: "11px", color: "#475569" }}>v6330.0.1</span>
-          </div>
+          <span style={{ display: "flex" }}>jeffreyemanuel.com</span>
         </div>
       </div>
     ),
