@@ -1062,7 +1062,7 @@ select:focus-visible {
   font-size: 1.625rem;
   line-height: 1.85;
   color: #f1f5f9;
-  margin-bottom: 4rem;
+  margin-bottom: 2.25rem;
   margin-top: 0;
   max-width: 72ch;
   text-wrap: pretty;
@@ -1071,7 +1071,7 @@ select:focus-visible {
 }
 
 .raptorq-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) + p:not(.text-sm):not(.text-base):not(.text-xl) {
-  margin-top: 4rem;
+  margin-top: 2.25rem;
 }
 
 .raptorq-scope.rq-body strong {

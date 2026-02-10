@@ -42,8 +42,8 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   
   // Smoothly interpolate header styles based on scroll position
   // Starts at 0, fully "scrolled" at 40px — Apple-style liquid glass
-  const headerOpacity = useTransform(scrollY, [0, 40], [0, 1]);
-  const headerBlurValue = useTransform(scrollY, [0, 40], [0, 40]);
+  const headerOpacity = useTransform(scrollY, [0, 40], [0, 0.85]);
+  const headerBlurValue = useTransform(scrollY, [0, 40], [0, 20]);
   const headerSaturateValue = useTransform(scrollY, [0, 40], [1, 1.8]);
   const headerPaddingValue = useTransform(scrollY, [0, 40], [20, 12]);
   const headerBorderOpacity = useTransform(scrollY, [0, 40], [0, 0.15]);

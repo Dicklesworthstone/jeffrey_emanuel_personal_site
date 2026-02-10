@@ -1998,6 +1998,17 @@ export const threads: ThreadItem[] = [
 
 export const writingHighlights: WritingItem[] = [
   {
+    title: "RaptorQ: The Black Magic of Liquid Data",
+    href: "/writing/raptorq",
+    source: "Blog",
+    category: "Algorithms & Networking",
+    blurb:
+      "A deep dive into RaptorQ (RFC 6330), the fountain code that turns any file into an infinite stream of interchangeable packets with 0.02% overhead.",
+    date: "2025-06-15",
+    featured: true,
+    gradient: "from-cyan-500/20 via-blue-500/20 to-purple-500/20",
+  },
+  {
     title: "The Short Case for Nvidia Stock",
     href: "/writing/the_short_case_for_nvda",
     source: "YTO",
