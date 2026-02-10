@@ -190,8 +190,8 @@ export function RaptorQArticle() {
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-12 font-light">
               Turn any file into an infinite stream of interchangeable packets.
               Collect any K of them, in any order, and recover the original. The
-              overhead: about{" "}
-              <span className="text-white font-medium italic">0.02%</span>.
+              total overhead: under{" "}
+              <span className="text-white font-medium italic">5%</span>.
             </p>
           </div>
         </EC>
@@ -216,9 +216,10 @@ export function RaptorQArticle() {
             The idea that you can take some arbitrary file, turn it into a stream of
             fungible blobs, receive those blobs in literally any order, and have each
             new one help you reconstruct the original already seems pretty
-            impressive. But then you learn that the overhead for all of this is
-            something like 0.02%, and that seems both magical and frankly
-            improbable.
+            impressive. But then you learn that the total overhead for all of
+            this is under 5%, and that the receiver often needs just two extra
+            symbols beyond the bare minimum to decode with near-certainty.
+            That seems both magical and frankly improbable.
           </p>
           <p>
             To see why this matters, think about how we normally move data around.
@@ -257,17 +258,18 @@ export function RaptorQArticle() {
                 the <em>average</em> decode failure rate must be at most 1 in 100
                 when receiving <M t="K'" /> symbols, 1 in 10,000 at{" "}
                 <M t="K'+1" />, and 1 in 1,000,000 at <M t="K'+2" />.
-                To be clear about what that means: at <M t="K \approx 10{,}000" />,
-                two extra symbols is about{" "}
-                <span className="text-cyan-400 font-mono font-bold">0.02%</span>{" "}
-                overhead. That&rsquo;s it.
+                The receiver almost never needs more than{" "}
+                <span className="text-cyan-400 font-mono font-bold">K + 2</span>{" "}
+                symbols to decode perfectly.
               </p>
               <p className="text-slate-500 text-sm mt-4 mb-0 leading-relaxed">
-                One caveat: that 0.02% figure is a function of block size. The
-                absolute overhead is &quot;+2 symbols&quot; regardless of <M t="K" />,
-                so the <em>percentage</em> depends on how big your block is.
-                At <M t="K = 10{,}000" />, two extra symbols is 0.02%.
-                At <M t="K = 50" />, those same two symbols are 4%.
+                But &quot;+2 symbols&quot; is only the <em>reception</em> overhead&mdash;the
+                extra packets the receiver must collect. The full picture includes
+                the precode&rsquo;s internal expansion from <M t="K" /> source symbols
+                to <M t="L \approx 1.025K" /> intermediate symbols. That ~2.5%
+                structural redundancy is what makes the &quot;+2 symbols&quot; trick
+                possible. Combined with the LT layer, total system overhead is
+                under 5%&mdash;still remarkably small.
               </p>
             </div>
           </div>
