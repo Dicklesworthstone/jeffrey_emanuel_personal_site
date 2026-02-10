@@ -5,7 +5,7 @@ export const runtime = "edge";
 export const alt = "RaptorQ: The Black Magic of Liquid Data | Jeffrey Emanuel";
 export const size = {
   width: 1200,
-  height: 630,
+  height: 600,
 };
 export const contentType = "image/png";
 
@@ -92,8 +92,8 @@ export default async function Image() {
             style={{
               display: "flex",
               flexDirection: "column",
-              width: "460px",
-              height: "460px",
+              width: "440px",
+              height: "440px",
               position: "relative",
               alignItems: "center",
               justifyContent: "center",
@@ -103,8 +103,8 @@ export default async function Image() {
             <div
               style={{
                 position: "absolute",
-                width: "400px",
-                height: "400px",
+                width: "380px",
+                height: "380px",
                 borderRadius: "50%",
                 background: "radial-gradient(circle, rgba(34,211,238,0.15) 0%, rgba(168,85,247,0.1) 50%, transparent 70%)",
                 display: "flex",
@@ -112,8 +112,8 @@ export default async function Image() {
             />
 
             <svg
-              width="460"
-              height="460"
+              width="440"
+              height="440"
               viewBox="0 0 400 400"
               fill="none"
             >
@@ -125,11 +125,9 @@ export default async function Image() {
                 </linearGradient>
               </defs>
 
-              {/* Central Alchemical Sigil / Math Ring */}
               <circle cx="200" cy="200" r="180" stroke="#1e293b" strokeWidth="1" strokeDasharray="5,5" />
               <circle cx="200" cy="200" r="160" stroke="url(#magicGrad)" strokeWidth="0.5" opacity="0.3" />
               
-              {/* Hexagonal Matrix Frame */}
               <polygon
                 points="200,40 340,120 340,280 200,360 60,280 60,120"
                 stroke="url(#magicGrad)"
@@ -138,7 +136,6 @@ export default async function Image() {
                 strokeDasharray="10,5"
               />
 
-              {/* Source Symbols (K) */}
               <g transform="translate(180, 80)">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <rect
@@ -157,19 +154,16 @@ export default async function Image() {
                 <text x="0" y="5" fill="#22d3ee" fontSize="10" fontWeight="bold" textAnchor="middle">SOURCE K</text>
               </g>
 
-              {/* Fountain Flow Lines */}
               <g>
                 <path d="M 200 140 Q 300 200 200 320" stroke="url(#magicGrad)" strokeWidth="2" opacity="0.5" fill="none" />
                 <path d="M 200 140 Q 100 200 200 320" stroke="url(#magicGrad)" strokeWidth="2" opacity="0.5" fill="none" />
               </g>
 
-              {/* Encoded Symbols */}
               <g transform="translate(200, 320)">
                 <rect x="-40" y="-15" width="80" height="30" rx="6" fill="#0f172a" stroke="#a855f7" strokeWidth="2" />
                 <text y="5" fill="#a855f7" fontSize="12" fontWeight="bold" textAnchor="middle">ENCODED</text>
               </g>
 
-              {/* Mathematical Formulas */}
               <text x="280" y="100" fill="#475569" fontSize="8">Ax = b</text>
               <text x="80" y="100" fill="#475569" fontSize="8">GF(256)</text>
               <text x="280" y="300" fill="#475569" fontSize="8">Ω(d)</text>
@@ -184,7 +178,7 @@ export default async function Image() {
               flexDirection: "column",
               alignItems: "flex-start",
               justifyContent: "center",
-              width: "520px",
+              width: "500px",
             }}
           >
             {/* Project ID / Tag */}
@@ -194,13 +188,13 @@ export default async function Image() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: "10px",
-                marginBottom: "30px",
+                marginBottom: "24px",
               }}
             >
               <div style={{ width: "12px", height: "12px", background: "#22d3ee", display: "flex" }} />
               <span
                 style={{
-                  fontSize: "13px",
+                  fontSize: "12px",
                   fontWeight: "900",
                   color: "#475569",
                   letterSpacing: "0.3em",
@@ -216,22 +210,22 @@ export default async function Image() {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                marginBottom: "16px",
+                marginBottom: "12px",
               }}
             >
-              <span style={{ opacity: 0.7, fontSize: "24px", letterSpacing: "0.2em", marginBottom: "8px", color: "#22d3ee", fontWeight: "900" }}>THE BLACK MAGIC OF</span>
-              <span style={{ fontSize: "64px", fontWeight: "900", color: "#fff", letterSpacing: "-0.04em", lineHeight: "1.0" }}>LIQUID DATA</span>
+              <span style={{ opacity: 0.7, fontSize: "20px", letterSpacing: "0.2em", marginBottom: "6px", color: "#22d3ee", fontWeight: "900" }}>THE BLACK MAGIC OF</span>
+              <span style={{ fontSize: "56px", fontWeight: "900", color: "#fff", letterSpacing: "-0.04em", lineHeight: "1.0" }}>LIQUID DATA</span>
             </div>
 
             {/* Subtitle / Description */}
             <p
               style={{
-                fontSize: "22px",
+                fontSize: "20px",
                 color: "#94a3b8",
                 lineHeight: "1.5",
                 margin: 0,
-                marginBottom: "40px",
-                maxWidth: "460px",
+                marginBottom: "32px",
+                maxWidth: "440px",
                 fontWeight: "500",
                 display: "flex",
               }}
@@ -247,18 +241,18 @@ export default async function Image() {
                 flexDirection: "row",
                 gap: "20px",
                 width: "100%",
-                padding: "20px",
+                padding: "16px",
                 background: "rgba(15, 23, 42, 0.5)",
                 border: "1px solid rgba(51, 65, 85, 0.5)",
                 borderRadius: "8px",
               }}
             >
               <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                <span style={{ fontSize: "10px", color: "#475569", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em" }}>Complexity</span>
-                <span style={{ fontSize: "16px", color: "#22d3ee", fontWeight: "bold" }}>O(K) Linear Time</span>
+                <span style={{ fontSize: "9px", color: "#475569", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em" }}>Complexity</span>
+                <span style={{ fontSize: "15px", color: "#22d3ee", fontWeight: "bold" }}>O(K) Linear Time</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                <span style={{ fontSize: "10px", color: "#475569", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em" }}>Recovery</span>
+                <span style={{ fontSize: "9px", color: "#475569", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em" }}>Recovery</span>
                 <span style={{ fontSize: "16px", color: "#a855f7", fontWeight: "bold" }}>99.9999% Prob.</span>
               </div>
             </div>
@@ -272,7 +266,7 @@ export default async function Image() {
             bottom: "0",
             left: "0",
             right: "0",
-            height: "40px",
+            height: "36px",
             background: "#0f172a",
             borderTop: "1px solid #1e293b",
             display: "flex",
@@ -283,12 +277,12 @@ export default async function Image() {
           }}
         >
           <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "15px" }}>
-            <span style={{ fontSize: "11px", color: "#334155", fontWeight: "bold" }}>[ STATUS: OPERATIONAL ]</span>
-            <span style={{ fontSize: "11px", color: "#22d3ee", fontWeight: "bold" }}>JEFFREYEMANUEL.COM</span>
+            <span style={{ fontSize: "10px", color: "#334155", fontWeight: "bold" }}>[ STATUS: OPERATIONAL ]</span>
+            <span style={{ fontSize: "10px", color: "#22d3ee", fontWeight: "bold" }}>JEFFREYEMANUEL.COM</span>
           </div>
           <div style={{ display: "flex", flexDirection: "row", gap: "20px" }}>
-            <span style={{ fontSize: "11px", color: "#475569" }}>TYPE: FOUNTAIN_CODE</span>
-            <span style={{ fontSize: "11px", color: "#475569" }}>v6330.0.1</span>
+            <span style={{ fontSize: "10px", color: "#475569" }}>TYPE: FOUNTAIN_CODE</span>
+            <span style={{ fontSize: "10px", color: "#475569" }}>v6330.0.1</span>
           </div>
         </div>
       </div>
