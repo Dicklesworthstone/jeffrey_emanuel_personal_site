@@ -893,7 +893,7 @@ export function PrecodeViz() {
           width="100%"
           height="460"
           viewBox="0 0 700 460"
-          className="overflow-visible min-w-[500px]"
+          className="overflow-visible min-w-[340px]"
         />
         <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6">
           <button onClick={animate} className="rq-btn-action">
