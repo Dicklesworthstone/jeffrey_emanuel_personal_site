@@ -809,3 +809,318 @@ select:focus-visible {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/*
+  ========================================
+  RAPTORQ ARTICLE - SCOPED STYLES
+  All styles scoped under .raptorq-scope
+  to avoid leaking to the rest of the site.
+  ========================================
+*/
+
+.raptorq-scope {
+  --rq-bg: #020204;
+  --rq-text: #f8fafc;
+  --rq-muted: #64748b;
+  --rq-cyan: #22d3ee;
+  --rq-purple: #a855f7;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss03", "cv05", "tnum";
+}
+
+/* Display title - fluid clamp sizing */
+.raptorq-scope .rq-display-title {
+  font-size: clamp(2.5rem, 8vw, 6.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* Section titles with cyan bar pseudo-element */
+.raptorq-scope .rq-section-title {
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.raptorq-scope .rq-section-title::before {
+  content: "";
+  width: 0.375rem;
+  height: 2rem;
+  background-color: var(--rq-cyan);
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Drop cap for intro paragraph */
+.raptorq-scope .rq-drop-cap::first-letter {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--rq-cyan);
+  float: left;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+/* Callout blockquote */
+.raptorq-scope .rq-callout {
+  border-left: 4px solid rgba(168, 85, 247, 0.5);
+  padding-left: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+  font-size: 1.5rem;
+  line-height: 1.375;
+  color: #e2e8f0;
+  background: linear-gradient(to right, rgba(168, 85, 247, 0.05), transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+/* Viz containers and headers */
+.raptorq-scope .rq-viz-container {
+  width: 100%;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08080a;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 100px -20px rgba(34, 211, 238, 0.05);
+}
+
+.raptorq-scope .rq-viz-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+}
+
+@media (min-width: 768px) {
+  .raptorq-scope .rq-viz-header {
+    padding: 2rem;
+  }
+}
+
+/* Buttons */
+.raptorq-scope .rq-btn-action {
+  padding: 0.625rem 1.25rem;
+  background: var(--rq-cyan);
+  color: black;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.raptorq-scope .rq-btn-action:hover {
+  background: #67e8f9;
+  transform: scale(1.05);
+}
+
+.raptorq-scope .rq-btn-action:active {
+  transform: scale(0.95);
+}
+
+.raptorq-scope .rq-btn-secondary {
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.raptorq-scope .rq-btn-secondary:hover {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@media (min-width: 768px) {
+  .raptorq-scope .rq-btn-action,
+  .raptorq-scope .rq-btn-secondary {
+    padding: 0.75rem 2rem;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+  }
+}
+
+/* Data grid cells for matrix viz */
+.raptorq-scope .rq-data-grid-cell {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 0.75rem;
+  transition: all 0.5s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .raptorq-scope .rq-data-grid-cell {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+.raptorq-scope .rq-cell-1 {
+  background: rgba(34, 211, 238, 0.2);
+  color: #67e8f9;
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+}
+
+.raptorq-scope .rq-cell-0 {
+  background: rgba(255, 255, 255, 0.05);
+  color: #334155;
+}
+
+.raptorq-scope .rq-cell-pivot {
+  outline: 3px solid #22d3ee;
+  outline-offset: 3px;
+  z-index: 10;
+}
+
+/* Insight card */
+.raptorq-scope .rq-insight-card {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .raptorq-scope .rq-insight-card {
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+  }
+}
+
+/* Scroll progress bar */
+.raptorq-scope .rq-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, #22d3ee, #a855f7, #3b82f6);
+  z-index: 50;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Editorial paragraph styling */
+.raptorq-scope .rq-body p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin-bottom: 1.5rem;
+  max-width: 65ch;
+  text-wrap: pretty;
+}
+
+.raptorq-scope .rq-body strong {
+  color: white;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.raptorq-scope .rq-body code {
+  color: #22d3ee;
+  background: rgba(8, 145, 178, 0.15);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+/* Math styling */
+.raptorq-scope .rq-math-inline .katex {
+  font-size: 1.1em;
+  color: rgba(216, 180, 254, 0.9);
+}
+
+.raptorq-scope .rq-math-block {
+  text-align: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.raptorq-scope .rq-math-block .katex {
+  font-size: 1.2em;
+  color: #22d3ee;
+}
+
+/* Sidebar note */
+.raptorq-scope .rq-sidebar-note {
+  font-size: 0.875rem;
+  color: #475569;
+  border-left: 2px solid #1e293b;
+  padding-left: 1.5rem;
+  margin-left: 0;
+  font-style: italic;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.625;
+}
+
+@media (min-width: 768px) {
+  .raptorq-scope .rq-sidebar-note {
+    margin-left: 1.5rem;
+  }
+}
+
+/* Mobile full-bleed vizualizations */
+@media (max-width: 640px) {
+  .raptorq-scope .rq-viz-container {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+}
