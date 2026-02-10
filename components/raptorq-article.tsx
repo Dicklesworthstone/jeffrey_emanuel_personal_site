@@ -11,6 +11,7 @@ import {
 } from "next/font/google";
 import katex from "katex";
 import { RaptorQJargon } from "./raptorq-jargon";
+import { RaptorQMathTooltip } from "./raptorq-math-tooltip";
 
 // Dynamic import visualizations (no SSR - they use browser APIs)
 const HeroParticles = dynamic(
@@ -57,30 +58,40 @@ const bricolageGrotesque = Bricolage_Grotesque({
 });
 
 // KaTeX helpers
-function M({ t }: { t: string }) {
+function M({ t, explanation }: { t: string; explanation?: string }) {
   const html = katex.renderToString(t, {
     throwOnError: false,
     displayMode: false,
   });
-  return (
+  const content = (
     <span
       className="rq-math-inline"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
+
+  if (explanation) {
+    return <RaptorQMathTooltip mathKey={explanation}>{content}</RaptorQMathTooltip>;
+  }
+  return content;
 }
 
-function MBlock({ t }: { t: string }) {
+function MBlock({ t, explanation }: { t: string; explanation?: string }) {
   const html = katex.renderToString(t, {
     throwOnError: false,
     displayMode: true,
   });
-  return (
+  const content = (
     <div
       className="rq-math-block"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
+
+  if (explanation) {
+    return <RaptorQMathTooltip mathKey={explanation}>{content}</RaptorQMathTooltip>;
+  }
+  return content;
 }
 
 // Shorthand for jargon
@@ -295,7 +306,7 @@ export function RaptorQArticle() {
               <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-cyan-400 transition-colors">
                 You must choose <M t="R" /> in advance
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-0 font-light">
+              <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light">
                 Reed-Solomon is <strong>fixed-rate</strong>. You pick your
                 redundancy budget before you send anything. If the channel is
                 worse than expected, you&rsquo;re dead. If it&rsquo;s better, you wasted
@@ -306,7 +317,7 @@ export function RaptorQArticle() {
               <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-purple-400 transition-colors">
                 It gets slow at scale
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-0 font-light">
+              <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light">
                 Reed-Solomon encoding and decoding cost grows with block size.
                 Standard implementations are <M t="O(n \cdot K)" /> for encoding
                 and <M t="O(K^2)" /> for decoding.
@@ -479,7 +490,7 @@ export function RaptorQArticle() {
               chosen source symbols. After receiving <M t="n" /> packets, the
               probability a specific symbol was <em>never</em> touched is:
             </p>
-            <MBlock t="P(x_i \text{ untouched}) \approx \left(1 - \frac{1}{K}\right)^{dn} \approx e^{-dn/K}" />
+            <MBlock t="P(x_i \text{ untouched}) \approx \left(1 - \frac{1}{K}\right)^{dn} \approx e^{-dn/K}" explanation="untouched-probability" />
             <p className="text-slate-300 text-sm leading-relaxed mb-0">
               With <M t="d = 5" />, you should expect about{" "}
               <M t="e^{-5} \approx 0.7\%" /> of your symbols to have{" "}
@@ -927,7 +938,7 @@ y = XOR(C[i] for i in indices)`}
             random <M t="K \times K" /> matrix over <M t="GF(q)" />, the
             probability it&rsquo;s full rank is:
           </p>
-          <MBlock t="P(\text{full rank}) = \prod_{j=1}^{K} \left(1 - q^{-j}\right)" />
+          <MBlock t="P(\text{full rank}) = \prod_{j=1}^{K} \left(1 - q^{-j}\right)" explanation="full-rank-probability" />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
             <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 md:p-6">

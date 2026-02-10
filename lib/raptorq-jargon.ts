@@ -1,8 +1,8 @@
 /**
- * RaptorQ Jargon Dictionary
+ * RaptorQ Jargon & Math Dictionary
  *
- * Technical terms from the RaptorQ / fountain codes article,
- * with plain-language explanations for newcomers.
+ * Technical terms and mathematical concepts from the RaptorQ / fountain codes article,
+ * with plain-language explanations.
  */
 
 export interface JargonTerm {
@@ -20,7 +20,7 @@ export interface JargonTerm {
   related?: string[];
 }
 
-const jargonDictionary: Record<string, JargonTerm> = {
+export const jargonDictionary: Record<string, JargonTerm> = {
   "fountain-code": {
     term: "Fountain Code",
     short: "An erasure code that can generate a potentially infinite stream of encoded packets from source data.",
@@ -72,7 +72,7 @@ const jargonDictionary: Record<string, JargonTerm> = {
   "mds": {
     term: "MDS (Maximum Distance Separable)",
     short: "The theoretical optimum: any K of N encoded symbols perfectly reconstruct K source symbols.",
-    long: "An MDS code achieves zero overhead — you need exactly K symbols to recover K source symbols, no more. Reed-Solomon codes are MDS. RaptorQ is 'near-MDS': it needs K + ε symbols, where ε is typically 0–2.",
+    long: "An MDS code achieves zero overhead — you need exactly K symbols to recover K source symbols, no more. Reed-Solomon codes are MDS. RaptorQ is 'near-MDS': it needs K + \u03b5 symbols, where \u03b5 is typically 0\u20132.",
     related: ["reed-solomon", "raptorq"],
   },
   "systematic-encoding": {
@@ -110,50 +110,50 @@ const jargonDictionary: Record<string, JargonTerm> = {
   "inactivation-decoding": {
     term: "Inactivation Decoding",
     short: "When peeling stalls, temporarily 'park' a variable and keep going.",
-    long: "When every remaining equation has degree ≥ 2 (a stopping set), inactivation decoding picks a variable, marks it as 'inactive' (treat it as known for now), and continues peeling. After peeling completes, the small set of inactive variables is solved via Gaussian elimination. The cubic cost is confined to a tiny core (~√K variables), not the full system.",
+    long: "When every remaining equation has degree \u2265 2 (a stopping set), inactivation decoding picks a variable, marks it as 'inactive' (treat it as known for now), and continues peeling. After peeling completes, the small set of inactive variables is solved via Gaussian elimination. The cubic cost is confined to a tiny core (~\u221aK variables), not the full system.",
     related: ["peeling-decoder", "stopping-set", "gaussian-elimination"],
   },
   "stopping-set": {
     term: "Stopping Set (2-Core)",
-    short: "A subgraph where every remaining equation has degree ≥ 2, so peeling cannot proceed.",
-    long: "A stopping set is a configuration where no equation has a single unknown — peeling is stuck. In graph terms, it's the 2-core of the bipartite graph. Without inactivation, the decoder fails at this point. RaptorQ uses inactivation to break through stopping sets cheaply.",
+    short: "A subgraph where every remaining equation has degree \u2265 2, so peeling cannot proceed.",
+    long: "A stopping set is a configuration where no equation has a single unknown \u2014 peeling is stuck. In graph terms, it's the 2-core of the bipartite graph. Without inactivation, the decoder fails at this point. RaptorQ uses inactivation to break through stopping sets cheaply.",
     related: ["peeling-decoder", "inactivation-decoding"],
   },
   "gaussian-elimination": {
     term: "Gaussian Elimination",
-    short: "The brute-force method for solving linear systems — cubic time but always works.",
-    long: "Gaussian elimination row-reduces a matrix to echelon form by pivoting and eliminating. It costs O(K³) for a K×K system. RaptorQ confines this expensive step to a tiny ~√K × √K inactive core, keeping the total cost nearly linear.",
+    short: "The brute-force method for solving linear systems \u2014 cubic time but always works.",
+    long: "Gaussian elimination row-reduces a matrix to echelon form by pivoting and eliminating. It costs O(K\u00b3) for a K\u00d7K system. RaptorQ confines this expensive step to a tiny ~\u221aK \u00d7 \u221aK inactive core, keeping the total cost nearly linear.",
     related: ["rank", "inactivation-decoding"],
   },
   "rank": {
     term: "Rank",
-    short: "The number of linearly independent equations in the system — when it equals K, you can solve.",
-    long: "The rank of a matrix is the number of linearly independent rows. A system of K unknowns is solvable exactly when the coefficient matrix has rank K. Each new independent packet increases the rank by 1. When rank equals the number of unknowns, the solution is unique — your file.",
+    short: "The number of linearly independent equations in the system \u2014 when it equals K, you can solve.",
+    long: "The rank of a matrix is the number of linearly independent rows. A system of K unknowns is solvable exactly when the coefficient matrix has rank K. Each new independent packet increases the rank by 1. When rank equals the number of unknowns, the solution is unique \u2014 your file.",
     related: ["linear-independence", "gaussian-elimination"],
   },
   "linear-independence": {
     term: "Linear Independence",
-    short: "Equations that each contribute new information — none is a combination of others.",
-    long: "A set of equations is linearly independent if no equation can be produced by XORing others together. Independent equations each constrain the solution further. Dependent equations are redundant — they add no new information. A system with K unknowns needs K independent equations to solve.",
+    short: "Equations that each contribute new information \u2014 none is a combination of others.",
+    long: "A set of equations is linearly independent if no equation can be produced by XORing others together. Independent equations each constrain the solution further. Dependent equations are redundant \u2014 they add no new information. A system with K unknowns needs K independent equations to solve.",
     related: ["rank", "gf2"],
   },
   "reed-solomon": {
     term: "Reed-Solomon Codes",
-    short: "MDS erasure codes based on polynomial evaluation — optimal but slow at scale.",
-    long: "Reed-Solomon codes encode K data symbols as evaluations of a degree-(K-1) polynomial at N distinct points. Any K evaluations recover the polynomial via interpolation. They're MDS-optimal (zero overhead) but encoding is O(n·K) and decoding O(K²). For K = 50,000, that's too slow for real-time applications.",
+    short: "MDS erasure codes based on polynomial evaluation \u2014 optimal but slow at scale.",
+    long: "Reed-Solomon codes encode K data symbols as evaluations of a degree-(K-1) polynomial at N distinct points. Any K evaluations recover the polynomial via interpolation. They're MDS-optimal (zero overhead) but encoding is O(n\u00b7K) and decoding O(K\u00b2). For K = 50,000, that's too slow for real-time applications.",
     analogy: "A polynomial curve through K points is unique. Evaluate it at extra points for redundancy. Any K points reconstruct the curve.",
     related: ["mds", "shamirs-secret-sharing"],
   },
   "ldpc": {
     term: "LDPC Constraints",
     short: "Sparse parity-check equations that provide cheap XOR-based redundancy.",
-    long: "LDPC (Low-Density Parity-Check) constraints are sparse equations over GF(2) — each involves only a few symbols. They're very cheap to compute (just XORs) and form part of RaptorQ's precode. They handle the 'easy' redundancy while HDPC handles the hard cases.",
+    long: "LDPC (Low-Density Parity-Check) constraints are sparse equations over GF(2) \u2014 each involves only a few symbols. They're very cheap to compute (just XORs) and form part of RaptorQ's precode. They handle the 'easy' redundancy while HDPC handles the hard cases.",
     related: ["hdpc", "precode", "gf2"],
   },
   "hdpc": {
     term: "HDPC Constraints",
     short: "Dense parity-check equations over GF(256) that crush rank deficiency.",
-    long: "HDPC (High-Density Parity-Check) constraints use GF(256) arithmetic, making random coefficient vectors dramatically more independent than GF(2). This is RaptorQ's 'insurance policy' — a small set of equations that make decode failure vanishingly unlikely. The GF(256) cost is higher per operation but confined to a small subsystem.",
+    long: "HDPC (High-Density Parity-Check) constraints use GF(256) arithmetic, making random coefficient vectors dramatically more independent than GF(2). This is RaptorQ's 'insurance policy' \u2014 a small set of equations that make decode failure vanishingly unlikely. The GF(256) cost is higher per operation but confined to a small subsystem.",
     related: ["ldpc", "gf256", "precode"],
   },
   "intermediate-symbols": {
@@ -165,14 +165,14 @@ const jargonDictionary: Record<string, JargonTerm> = {
   "coupon-collector": {
     term: "Coupon Collector Problem",
     short: "The mathematical curse that makes sparse random codes need O(K log K) packets.",
-    long: "If each packet randomly 'touches' a few symbols, some symbols will be touched many times while others are missed entirely. Covering all K symbols requires O(K log K) packets — a log(K) overhead. For K = 10,000, that's roughly a 10× overhead. The precode trick eliminates this by not requiring 100% coverage from the fountain layer.",
+    long: "If each packet randomly 'touches' a few symbols, some symbols will be touched many times while others are missed entirely. Covering all K symbols requires O(K log K) packets \u2014 a log(K) overhead. For K = 10,000, that's roughly a 10\u00d7 overhead. The precode trick eliminates this by not requiring 100% coverage from the fountain layer.",
     analogy: "Collecting all items in a random sticker pack. The first few are easy, but the last few take forever because you keep getting duplicates.",
     related: ["precode", "lt-codes"],
   },
   "feedback-implosion": {
     term: "Feedback Implosion",
     short: "When millions of receivers simultaneously send retransmission requests, drowning the sender.",
-    long: "In TCP-style protocols, each receiver tells the sender which packets it's missing. With a million receivers each losing different packets, the sender gets a million retransmission requests at once. Fountain codes eliminate this by removing the need for feedback entirely — the sender just keeps spraying, and each receiver stops when it has enough.",
+    long: "In TCP-style protocols, each receiver tells the sender which packets it's missing. With a million receivers each losing different packets, the sender gets a million retransmission requests at once. Fountain codes eliminate this by removing the need for feedback entirely \u2014 the sender just keeps spraying, and each receiver stops when it has enough.",
     related: ["fountain-code", "rateless"],
   },
   "rateless": {
@@ -184,15 +184,36 @@ const jargonDictionary: Record<string, JargonTerm> = {
   "shamirs-secret-sharing": {
     term: "Shamir's Secret Sharing",
     short: "A cryptographic scheme for splitting a secret into N shares where any K reconstruct it.",
-    long: "Shamir's scheme encodes a secret as the constant term of a random polynomial of degree K-1, then evaluates it at N distinct points. Any K shares determine the polynomial via Lagrange interpolation; K-1 shares reveal nothing. It's the cryptographic cousin of erasure coding — same linear algebra, different goal.",
+    long: "Shamir's scheme encodes a secret as the constant term of a random polynomial of degree K-1, then evaluates it at N distinct points. Any K shares determine the polynomial via Lagrange interpolation; K-1 shares reveal nothing. It's the cryptographic cousin of erasure coding \u2014 same linear algebra, different goal.",
     analogy: "Hide a number as the y-intercept of a curve. Give people points on the curve. Any K points determine the curve (and the secret), but K-1 points could fit any curve.",
     related: ["reed-solomon", "rank"],
   },
+};
+
+export const mathDictionary: Record<string, JargonTerm> = {
+  "k-plus-epsilon": {
+    term: "K + \u03b5",
+    short: "The number of symbols needed to decode, where \u03b5 is a tiny overhead.",
+    long: "In an ideal world, you'd need exactly K symbols. In reality, random mixing means you might need a few extra (\u03b5) to guarantee the equations are linearly independent. In RaptorQ, \u03b5 is typically just 2 symbols.",
+  },
+  "untouched-probability": {
+    term: "Coupon Collector Probability",
+    short: "The odds that a symbol is never 'hit' by a random packet.",
+    long: "This formula predicts how many source symbols will be left 'dry' after sending a certain number of packets. It shows that if you use sparse equations (small d), you will inevitably miss some symbols unless you send a massive amount of redundant data.",
+    analogy: "If you throw 100 darts at 100 balloons, some balloons will get hit twice and others won't be hit at all. To hit every single balloon, you need way more than 100 darts.",
+    why: "This 'miss rate' is why pure sparse codes are inefficient, and why RaptorQ uses a precode to handle the symbols that the fountain layer inevitably misses.",
+  },
+  "full-rank-probability": {
+    term: "Full Rank Probability",
+    short: "The probability that K random equations are enough to solve for K unknowns.",
+    long: "This product formula calculates the odds that a random matrix is solvable. It reveals a deep truth: over simple binary XOR, the odds are mediocre (29%), but over larger fields like GF(256), the odds become near-certainty.",
+  }
 };
 
 /**
  * Look up a jargon term by key. Keys are lowercase with hyphens.
  */
 export function getJargon(key: string): JargonTerm | undefined {
-  return jargonDictionary[key.toLowerCase().replace(/[\s_]+/g, "-")];
+  const normalizedKey = key.toLowerCase().replace(/[\s_]+/g, "-");
+  return jargonDictionary[normalizedKey] || mathDictionary[normalizedKey];
 }

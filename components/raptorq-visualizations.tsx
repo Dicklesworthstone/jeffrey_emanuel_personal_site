@@ -275,8 +275,8 @@ export function MatrixViz() {
             </svg>
           </div>
           <div>
-            <h4 className="font-bold text-white text-sm uppercase tracking-widest">Interactive 01</h4>
-            <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono">The Matrix View</div>
+            <h4 className="font-bold text-white text-base uppercase tracking-widest">Interactive 01</h4>
+            <div className="text-[11px] text-slate-400 uppercase tracking-[0.2em] font-mono">The Matrix View</div>
           </div>
         </div>
         <div className="flex gap-3">
@@ -284,56 +284,58 @@ export function MatrixViz() {
           <button onClick={reset} className="rq-btn-secondary">Reset</button>
         </div>
       </div>
-      <div className="flex-1 p-6 md:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-        <div className="font-mono text-sm leading-relaxed overflow-visible min-h-[200px] md:min-h-[300px]">
+      <div className="flex-1 p-6 md:p-10 flex flex-col xl:flex-row gap-10 xl:gap-20 items-start xl:items-center overflow-hidden">
+        <div className="font-mono text-sm leading-relaxed overflow-x-auto w-full xl:w-auto xl:min-w-[450px] min-h-[200px] md:min-h-[300px] pb-4 scrollbar-thin scrollbar-thumb-white/10">
           {rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 md:py-36 opacity-20 border-2 border-dashed border-white/5 rounded-3xl">
+            <div className="flex flex-col items-center justify-center py-20 md:py-36 opacity-20 border-2 border-dashed border-white/5 rounded-3xl w-full">
               <div className="text-sm font-mono uppercase tracking-[0.5em] font-black text-slate-500">
                 Waiting for Stream
               </div>
             </div>
           ) : (
-            rows.map((row, rIdx) => {
-              const hasPivot = pivots.some((p) => p.row === rIdx);
-              return (
-                <div key={row.id} className="flex items-center gap-4 md:gap-12 mb-4 md:mb-8 group relative">
-                  <div className="flex gap-2 md:gap-4 p-2 md:p-4 bg-white/[0.02] rounded-2xl md:rounded-3xl border border-white/5 shadow-2xl backdrop-blur-xl transition-all group-hover:border-white/10 group-hover:bg-white/[0.04]">
-                    {row.data.map((val, cIdx) => {
-                      const isPivot = pivots.some(
-                        (p) => p.row === rIdx && p.col === cIdx
-                      );
-                      return (
-                        <div
-                          key={cIdx}
-                          className={`rq-data-grid-cell ${val ? "rq-cell-1" : "rq-cell-0"} ${isPivot ? "rq-cell-pivot" : ""}`}
-                        >
-                          {val}
-                        </div>
-                      );
-                    })}
+            <div className="inline-flex flex-col">
+              {rows.map((row, rIdx) => {
+                const hasPivot = pivots.some((p) => p.row === rIdx);
+                return (
+                  <div key={row.id} className="flex items-center gap-4 md:gap-8 mb-4 md:mb-6 group relative whitespace-nowrap">
+                    <div className="flex gap-2 md:gap-3 p-2 md:p-3 bg-white/[0.02] rounded-2xl md:rounded-[1.25rem] border border-white/5 shadow-2xl backdrop-blur-xl transition-all group-hover:border-white/10 group-hover:bg-white/[0.04]">
+                      {row.data.map((val, cIdx) => {
+                        const isPivot = pivots.some(
+                          (p) => p.row === rIdx && p.col === cIdx
+                        );
+                        return (
+                          <div
+                            key={cIdx}
+                            className={`rq-data-grid-cell ${val ? "rq-cell-1" : "rq-cell-0"} ${isPivot ? "rq-cell-pivot" : ""}`}
+                          >
+                            {val}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-[120px] md:min-w-[150px] shrink-0">
+                      <span className="text-[9px] md:text-[10px] font-mono text-slate-500 font-black uppercase tracking-[0.3em]">
+                        Packet {rIdx + 1}
+                      </span>
+                      <span
+                        className={`text-[8px] md:text-[9px] font-mono uppercase tracking-[0.15em] ${hasPivot ? "text-cyan-400 font-bold" : "text-red-500/70"}`}
+                      >
+                        {hasPivot ? "Information Pivot" : "Linear Dependency"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-1 min-w-[120px] md:min-w-[180px]">
-                    <span className="text-[10px] md:text-[11px] font-mono text-slate-600 font-[900] uppercase tracking-[0.4em]">
-                      Packet {rIdx + 1}
-                    </span>
-                    <span
-                      className={`text-[9px] font-mono uppercase tracking-[0.2em] ${hasPivot ? "text-cyan-400 font-bold" : "text-red-500"}`}
-                    >
-                      {hasPivot ? "Information Pivot" : "Linear Dependency"}
-                    </span>
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
-        <div className="space-y-8">
+        <div className="space-y-8 w-full xl:flex-1">
           <div>
-            <div className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-bold mb-3">
+            <div className="text-[10px] text-slate-400 uppercase tracking-[0.3em] font-bold mb-3">
               System Solvability
             </div>
             <div
-              className={`text-4xl md:text-6xl font-bold tracking-tighter transition-all duration-700 ${
+              className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter transition-all duration-700 ${
                 rank >= unknowns
                   ? "text-cyan-400 drop-shadow-[0_0_40px_rgba(34,211,238,0.5)]"
                   : "text-slate-800"
@@ -342,14 +344,14 @@ export function MatrixViz() {
               RANK: {rank} / {unknowns}
             </div>
           </div>
-          <p className="text-slate-400 text-sm md:text-base leading-relaxed font-light">
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed font-light max-w-xl">
             We are solving <em>Ax = b</em> over GF(2). In this field, addition is XOR. In the
             real RFC 6330 scheme, most work stays XOR-cheap, but a small
             &quot;insurance&quot; component uses GF(256) to improve rank.
           </p>
-          <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 md:p-8 rounded-2xl border border-white/10 text-sm text-blue-200/80 backdrop-blur-xl relative overflow-hidden group">
+          <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 md:p-8 rounded-2xl border border-white/10 text-sm text-blue-200/80 backdrop-blur-xl relative overflow-hidden group max-w-xl">
             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-500" />
-            <strong className="block mb-2 text-blue-300 text-base md:text-lg relative z-10">
+            <strong className="block mb-2 text-blue-300 text-base md:text-lg relative z-10 font-bold">
               Rank-Nullity Theorem
             </strong>
             <span className="relative z-10">
@@ -486,7 +488,7 @@ export function DegreeRippleViz() {
   return (
     <div ref={containerRef} className="rq-viz-container" id="viz-degree-ripple">
       <div className="rq-viz-header">
-        <h4 className="font-bold text-white uppercase tracking-widest text-xs flex items-center gap-2">
+        <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
           <span className="w-2 h-2 bg-purple-400 rounded-full" />
           Interactive 02: Degrees &amp; Ripple
         </h4>
@@ -671,7 +673,7 @@ export function PeelingViz() {
   return (
     <div ref={containerRef} className="rq-viz-container" id="viz-peeling">
       <div className="rq-viz-header">
-        <h4 className="font-bold text-white uppercase tracking-widest text-xs flex items-center gap-2">
+        <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
           <span className="w-2 h-2 bg-emerald-400 rounded-full" />
           Interactive 05: The Peeling Cascade
         </h4>
@@ -767,11 +769,11 @@ export function PrecodeViz() {
         .append("text")
         .attr("x", (_, i) => i * 220 + size / 2)
         .attr("y", -20)
-        .attr("fill", COLORS.slate)
+        .attr("fill", "#94a3b8") // Slate-400 for better contrast
         .attr("text-anchor", "middle")
-        .attr("font-size", "10")
+        .attr("font-size", "12") // Increased from 10
         .attr("font-weight", "900")
-        .attr("letter-spacing", "0.15em")
+        .attr("letter-spacing", "0.2em")
         .text((d) => d);
 
       const data = d3.range(L).map((i) => ({
@@ -882,7 +884,7 @@ export function PrecodeViz() {
   return (
     <div className="rq-viz-container" id="viz-precode">
       <div className="rq-viz-header">
-        <h4 className="font-bold text-white uppercase tracking-widest text-xs flex items-center gap-2">
+        <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
           <span className="w-2 h-2 bg-purple-400 rounded-full" />
           Interactive 03: The Precode Repair
         </h4>
@@ -1010,7 +1012,7 @@ export function ToyDecodeViz() {
   return (
     <div className="rq-viz-container" id="viz-toy-decode">
       <div className="rq-viz-header flex-wrap gap-3">
-        <h4 className="font-bold text-white uppercase tracking-widest text-xs flex items-center gap-2">
+        <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
           <span className="w-2 h-2 bg-cyan-400 rounded-full" />
           Interactive 04: End-to-End Toy Decode
         </h4>
