@@ -1124,3 +1124,37 @@ select:focus-visible {
     border-right: none;
   }
 }
+
+/* Section reveal on scroll */
+.raptorq-scope .rq-fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.raptorq-scope .rq-fade-section.rq-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .raptorq-scope .rq-fade-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Button focus-visible */
+.raptorq-scope .rq-btn-action:focus-visible,
+.raptorq-scope .rq-btn-secondary:focus-visible {
+  outline: 2px solid var(--rq-cyan);
+  outline-offset: 2px;
+}
+
+/* Text selection */
+.raptorq-scope ::selection {
+  background: rgba(34, 211, 238, 0.2);
+}

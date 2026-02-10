@@ -95,7 +95,7 @@ function J({
 
 // Section divider
 function Divider() {
-  return <div className="w-full h-px bg-white/10 my-12 md:my-16" />;
+  return <div className="w-full h-px my-12 md:my-16 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />;
 }
 
 // Editorial container
@@ -120,6 +120,31 @@ export function RaptorQArticle() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Section reveal on scroll
+  useEffect(() => {
+    const root = articleRef.current;
+    if (!root) return;
+    const targets = root.querySelectorAll(
+      ":scope > section:not(:first-child), :scope > article"
+    );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("rq-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" }
+    );
+    targets.forEach((el) => {
+      el.classList.add("rq-fade-section");
+      observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
       ref={articleRef}
@@ -140,7 +165,7 @@ export function RaptorQArticle() {
         <EC>
           <div className="text-center pt-32 relative z-20">
             <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[10px] md:text-[11px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
-              <span className="w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
+              <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
               Protocol Intelligence / RFC 6330
             </div>
             <h1 className="rq-display-title mb-6 text-white">
@@ -159,7 +184,10 @@ export function RaptorQArticle() {
           </div>
         </EC>
 
-        <div className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 opacity-50 z-20">
+        <div
+          className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
+          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+        >
           <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">
             Scroll to Explore
           </span>
