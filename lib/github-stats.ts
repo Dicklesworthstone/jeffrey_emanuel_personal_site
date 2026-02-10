@@ -18,7 +18,7 @@ interface GitHubUser {
   followers: number;
 }
 
-interface GitHubRepo {
+interface _GitHubRepo {
   stargazers_count: number;
   fork?: boolean;
 }

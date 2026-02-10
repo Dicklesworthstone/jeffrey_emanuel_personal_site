@@ -35,7 +35,7 @@ const defaultColors = [
 let globalCanvas: HTMLCanvasElement | null = null;
 let globalParticles: Particle[] = [];
 let animationId: number | null = null;
-let activeHookCount = 0;
+let _activeHookCount = 0;
 
 /**
  * Hook that creates particle burst effects on click.
@@ -52,7 +52,7 @@ export function useClickParticles({
   const prefersReducedMotionRef = useRef(false);
 
   useEffect(() => {
-    activeHookCount++;
+    _activeHookCount++;
     
     if (typeof window !== "undefined") {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -69,7 +69,7 @@ export function useClickParticles({
       }
 
       return () => {
-        activeHookCount--;
+        _activeHookCount--;
         if (mediaQuery.removeEventListener) {
           mediaQuery.removeEventListener("change", handler);
         } else {
@@ -80,7 +80,7 @@ export function useClickParticles({
         // but keeping the singleton alive is generally fine for SPAs
       };
     }
-    return () => { activeHookCount--; };
+    return () => { _activeHookCount--; };
   }, []);
 
   const getCanvas = useCallback(() => {

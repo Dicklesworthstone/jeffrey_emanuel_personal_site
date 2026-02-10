@@ -69,8 +69,6 @@ function resolveRepoData(repoSlug: string): ResolvedStargazerData {
   return resolved;
 }
 
-const isStargazerDataStale = isDataStale(stargazerData.lastUpdated);
-
 interface NotableStargazersProps {
   /** Display mode */
   variant?: "homepage" | "project" | "compact";
@@ -322,6 +320,7 @@ export function NotableStargazers({
   const [isStale, setIsStale] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsStale(isDataStale(stargazerData.lastUpdated));
   }, []);
 

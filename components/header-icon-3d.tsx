@@ -707,7 +707,7 @@ function MicroHarmonics() {
       const harmonic = 1 + 0.15 * Math.sin(2 * theta) * Math.cos(3 * phi + t * 2);
       pos.setXYZ(i, x * harmonic, y * harmonic, z * harmonic);
     }
-    pos.needsUpdate = true;
+    pos.needsUpdate = true; // eslint-disable-line react-hooks/immutability
     geom.computeVertexNormals();
   });
 

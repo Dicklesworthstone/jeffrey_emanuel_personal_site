@@ -557,7 +557,7 @@ function TorusGarden({ palette, seed }: { palette: Palette; seed: number }) {
       p: 2 + i % 5,
       q: 3 + (i % 3)
     }));
-  }, [palette, seed, rand]);
+  }, [palette, rand]);
 
   const geometries = useMemo(() => 
     torii.map(t => new THREE.TorusKnotGeometry(t.radius, t.tube, 120, 32, t.p, t.q)),
