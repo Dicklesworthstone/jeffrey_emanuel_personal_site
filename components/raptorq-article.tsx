@@ -296,7 +296,7 @@ export function RaptorQArticle() {
             <strong>
               <J t="mds">MDS</J>
             </strong>{" "}
-            (Maximum Distance Separable) behavior: any <M t="K" /> of{" "}
+            (Maximum Distance Separable) behavior: any <M t="K" explanation="k-plus-epsilon" /> of{" "}
             <M t="K+R" /> encoded symbols perfectly reconstruct <M t="K" /> source
             symbols. Zero overhead. Mathematically optimal.
           </p>
@@ -319,8 +319,8 @@ export function RaptorQArticle() {
               </h4>
               <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light">
                 Reed-Solomon encoding and decoding cost grows with block size.
-                Standard implementations are <M t="O(n \cdot K)" /> for encoding
-                and <M t="O(K^2)" /> for decoding.
+                Standard implementations are <M t="O(n \cdot K)" explanation="complexity-quadratic" /> for encoding
+                and <M t="O(K^2)" explanation="complexity-quadratic" /> for decoding.
               </p>
             </div>
           </div>
@@ -545,9 +545,10 @@ export function RaptorQArticle() {
               degree law:
             </p>
             <div className="bg-black/50 border border-white/5 rounded-2xl p-4 md:p-6 font-mono text-sm text-slate-300 leading-relaxed overflow-x-auto mt-4">
-              <M t="\rho(1) = 1/K" />
-              <br />
-              <M t="\rho(d) = 1/(d(d-1))" /> for <M t="d = 2,3,\dots,K" />
+              <MBlock
+                t="\begin{aligned} \rho(1) &= 1/K \\ \rho(d) &= 1/(d(d-1)) \text{ for } d = 2,3,\dots,K \end{aligned}"
+                explanation="soliton-formula"
+              />
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mt-6 mb-0">
               In practice the Ideal Soliton is too fragile. It maintains an
@@ -590,7 +591,7 @@ export function RaptorQArticle() {
             This is the part I find most interesting. The idea is simple once you
             see it:
           </p>
-          <p className="text-2xl md:text-3xl font-bold text-center text-white my-12 md:my-16 leading-tight">
+          <p className="text-lg md:text-xl font-bold text-center text-white my-12 md:my-16 leading-tight">
             Don&rsquo;t make the fountain code perfect.
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
@@ -627,10 +628,10 @@ export function RaptorQArticle() {
           <PrecodeViz />
 
           <p>The workflow becomes two stages:</p>
-          <ol className="list-decimal list-inside space-y-4 text-slate-300 ml-4 mb-12 border-l border-white/10 pl-6">
+          <ol className="list-decimal list-inside space-y-6 text-slate-200 text-lg md:text-xl lg:text-2xl ml-4 mb-16 border-l border-white/10 pl-8 font-light">
             <li>
               <strong>The Precode (Insurance):</strong> Expand source{" "}
-              <M t="K" /> to Intermediate <M t="L" /> (adding ~3% structured
+              <M t="K" explanation="k-plus-epsilon" /> to Intermediate <M t="L" /> (adding ~3% structured
               redundancy).
             </li>
             <li>
@@ -992,14 +993,17 @@ y = XOR(C[i] for i in indices)`}
             fraction <M t="\epsilon'" /> (say, 2%) to get peeling &quot;close enough.&quot;
             Combined:
           </p>
-          <MBlock t="K(1+\delta)(1+\epsilon') = K(1 + \delta + \epsilon' + \delta\epsilon') \approx K(1 + 0.05)" />
+          <MBlock
+            t="K(1+\delta)(1+\epsilon') = K(1 + \delta + \epsilon' + \delta\epsilon') \approx K(1 + 0.05)"
+            explanation="composition-overhead"
+          />
           <p>
             Both <M t="\delta" /> and <M t="\epsilon'" /> are{" "}
             <strong>constants independent of <M t="K" /></strong>. The{" "}
             <M t="\log K" /> is gone. Raptor codes are provably{" "}
             <strong>universally capacity-achieving</strong> on the binary erasure
             channel: for <em>any</em> erasure rate <M t="q" />, a Raptor code can
-            transmit at rate <M t="1 - q - \epsilon" /> for arbitrarily small{" "}
+            transmit at rate <M t="1 - q - \epsilon" explanation="shannon-capacity" /> for arbitrarily small{" "}
             <M t="\epsilon" />, with linear encoding and decoding time.
           </p>
         </EC>
@@ -1068,7 +1072,7 @@ y = XOR(C[i] for i in indices)`}
           </h2>
           <p>
             In 1979, Adi Shamir published a scheme for splitting a secret into{" "}
-            <M t="N" /> pieces such that any <M t="K" /> of them can reconstruct
+            <M t="N" /> pieces such that any <M t="K" explanation="k-plus-epsilon" /> of them can reconstruct
             the secret, but <M t="K-1" /> pieces reveal <em>absolutely nothing</em>.
             It&rsquo;s called{" "}
             <strong>
@@ -1092,7 +1096,7 @@ y = XOR(C[i] for i in indices)`}
               constant term to your secret:
             </p>
             <div className="bg-black/50 border border-white/5 rounded-2xl p-4 font-mono text-sm text-cyan-400 leading-relaxed mb-6">
-              <M t="f(x) = 42 + 7x + 3x^2" />
+              <M t="f(x) = 42 + 7x + 3x^2" explanation="polynomial-secret" />
             </div>
             <p className="text-slate-300 mb-4">
               Evaluate at 5 distinct points to create shares:

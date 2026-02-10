@@ -207,6 +207,57 @@ export const mathDictionary: Record<string, JargonTerm> = {
     term: "Full Rank Probability",
     short: "The probability that K random equations are enough to solve for K unknowns.",
     long: "This product formula calculates the odds that a random matrix is solvable. It reveals a deep truth: over simple binary XOR, the odds are mediocre (29%), but over larger fields like GF(256), the odds become near-certainty.",
+  },
+  "soliton-formula": {
+    term: "Soliton Distribution",
+    short: "The mathematical 'recipe' for picking how many symbols to mix into each packet.",
+    long: "This formula defines the Ideal Soliton distribution. It's designed so that, on average, the decoder always has exactly one equation it can solve at any given moment, creating a perfect chain reaction.",
+    analogy: "Like a perfectly balanced line of falling dominoes, where each tile is positioned to hit exactly one other tile.",
+  },
+  "capacity-achieving": {
+    term: "Capacity Achieving",
+    short: "Proof that this code is as efficient as physically possible.",
+    long: "This formula shows that Raptor codes can reach the 'Shannon Limit' — the maximum theoretical amount of information that can be sent over a noisy channel without errors.",
+  },
+  "linear-system": {
+    term: "Linear System (Ax = b)",
+    short: "The fundamental math of 'solving for X' at a massive scale.",
+    long: "We represent the encoded packets as a matrix (A), the unknown file data as a vector (x), and the received values as (b). Solving the system means finding the unique data that satisfies all received equations.",
+  },
+  "shannon-limit": {
+    term: "Shannon Limit",
+    short: "The absolute speed limit of information.",
+    long: "Named after Claude Shannon, this is the maximum rate at which data can be transmitted over a communication channel with a specific noise level.",
+  },
+  "composition-overhead": {
+    term: "Overhead Composition",
+    short: "How two 'sloppy' codes combine to make one perfect code.",
+    long: "This formula shows how the small overhead from the Precode (\u03b4) and the small overhead from the Fountain layer (\u03b5) multiply together. Because both are tiny constants, the total overhead stays near zero even for huge files.",
+  },
+  "complexity-linear": {
+    term: "Linear Complexity O(K)",
+    short: "The gold standard of efficiency.",
+    long: "This means the time it takes to encode or decode grows at the same speed as the file size. If you double the data, it takes twice as long—not four times as long like older methods.",
+  },
+  "complexity-quadratic": {
+    term: "Quadratic Complexity O(K\u00b2)",
+    short: "Efficiency that breaks at scale.",
+    long: "This means if you double the file size, the work required increases by four times. For large files (like 4K video), this becomes impossibly slow.",
+  },
+  "finite-field-rank": {
+    term: "Matrix Rank over Finite Fields",
+    short: "The count of unique information 'slices.'",
+    long: "In digital communications, we use finite fields (like binary) to ensure our equations stay within fixed bit-sizes. The rank tells us if we have enough distinct equations to solve for our original data.",
+  },
+  "shannon-capacity": {
+    term: "Shannon Capacity",
+    short: "The theoretical speed limit of a communication channel.",
+    long: "Proven by Claude Shannon in 1948, this is the maximum amount of error-free data that can be transmitted over a noisy link. RaptorQ is one of the few codes that can actually reach this limit.",
+  },
+  "polynomial-secret": {
+    term: "Polynomial Secret Sharing",
+    short: "Hiding a secret inside a mathematical curve.",
+    long: "By using a secret number as the starting point (y-intercept) of a random curve, we can give points on that curve to different people. You need a specific number of points to reconstruct the exact curve and find the secret.",
   }
 };
 

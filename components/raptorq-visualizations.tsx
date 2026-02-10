@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
+import { RaptorQMathTooltip } from "./raptorq-math-tooltip";
 
 const COLORS = {
   bg: "#020204",
@@ -345,9 +346,13 @@ export function MatrixViz() {
             </div>
           </div>
           <p className="text-slate-400 text-sm md:text-base leading-relaxed font-light max-w-xl">
-            We are solving <em>Ax = b</em> over GF(2). In this field, addition is XOR. In the
-            real RFC 6330 scheme, most work stays XOR-cheap, but a small
-            &quot;insurance&quot; component uses GF(256) to improve rank.
+            We are solving{" "}
+            <RaptorQMathTooltip mathKey="linear-system">
+              <em className="text-slate-200 font-mono italic">Ax = b</em>
+            </RaptorQMathTooltip>{" "}
+            over GF(2). In this field, addition is XOR. In the real RFC 6330
+            scheme, most work stays XOR-cheap, but a small &quot;insurance&quot;
+            component uses GF(256) to improve rank.
           </p>
           <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 md:p-8 rounded-2xl border border-white/10 text-sm text-blue-200/80 backdrop-blur-xl relative overflow-hidden group max-w-xl">
             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-500" />
