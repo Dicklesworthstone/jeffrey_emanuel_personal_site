@@ -20,6 +20,7 @@ import WritingCard from "@/components/writing-card";
 import ThreadCard from "@/components/thread-card";
 import Magnetic from "@/components/magnetic";
 import { SnapshotCard } from "@/components/homepage-snapshot";
+import { cn } from "@/lib/utils";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);

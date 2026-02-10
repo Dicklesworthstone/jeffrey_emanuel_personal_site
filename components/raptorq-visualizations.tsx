@@ -19,6 +19,7 @@ const COLORS = {
 function useIntersectionInit(callback: () => (() => void) | void) {
   const containerRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
+  const cleanupRef = useRef<(() => void) | void>(undefined);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -28,16 +29,18 @@ function useIntersectionInit(callback: () => (() => void) | void) {
       ([entry]) => {
         if (entry.isIntersecting && !initialized.current) {
           initialized.current = true;
-          const cleanup = callback();
+          cleanupRef.current = callback();
           observer.disconnect();
-          if (cleanup) return cleanup;
         }
       },
       { rootMargin: "200px" }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      cleanupRef.current?.();
+    };
   }, [callback]);
 
   return containerRef;
@@ -55,7 +58,7 @@ export function HeroParticles() {
     if (!container) return;
 
     let animationId: number;
-    let renderer: THREE.WebGLRenderer | undefined;
+    let renderer: import("three").WebGLRenderer | undefined;
 
     const init = async () => {
       const THREE = await import("three");
@@ -245,10 +248,10 @@ export function MatrixViz() {
 
   const addEquation = useCallback(() => {
     if (rows.length >= 8) return;
-    const rowData = Array.from({ length: unknowns }, () =>
+    const rowData: number[] = Array.from({ length: unknowns }, () =>
       Math.random() > 0.65 ? 1 : 0
     );
-    if (rowData.every((x) => x === 0))
+    if (rowData.reduce((s, v) => s + v, 0) === 0)
       rowData[Math.floor(Math.random() * unknowns)] = 1;
     const newRow: MatrixRow = { data: rowData, id: `row-${Date.now()}` };
     const newRows = [...rows, newRow];
@@ -401,33 +404,6 @@ export function DegreeRippleViz() {
     [K]
   );
 
-  const runSimulation = useCallback(() => {
-    const distribution = getDistribution(dist);
-    const steps = 100;
-    const rippleSeries: { step: number; ripple: number }[] = [];
-    let currentRipple = Math.ceil(K * distribution.p[0] * 2.0);
-    let solved = 0;
-    for (let i = 0; i < steps; i++) {
-      const progress = i / steps;
-      if (progress < 0.88) {
-        currentRipple += (Math.random() - 0.48) * (K / 30);
-      } else {
-        currentRipple *= 0.7;
-      }
-      if (currentRipple < 0) currentRipple = 0;
-      rippleSeries.push({ step: i * (K / steps), ripple: currentRipple });
-      if (currentRipple > 0) solved += K / steps;
-    }
-    const recoveredPct = Math.min(100, (solved / K) * 100);
-    const mCount = Math.ceil(K * (1 + overheadPct / 100));
-    setStats(
-      `Variables: ${K} | Equations: ${mCount} | Overhead: ${overheadPct}% | Success: ${recoveredPct.toFixed(1)}%`
-    );
-
-    // Render using D3
-    renderCharts(distribution, rippleSeries);
-  }, [dist, K, overheadPct, getDistribution]);
-
   const renderCharts = useCallback(
     (
       distribution: { p: number[]; labels: string[] },
@@ -479,6 +455,33 @@ export function DegreeRippleViz() {
     },
     [K]
   );
+
+  const runSimulation = useCallback(() => {
+    const distribution = getDistribution(dist);
+    const steps = 100;
+    const rippleSeries: { step: number; ripple: number }[] = [];
+    let currentRipple = Math.ceil(K * distribution.p[0] * 2.0);
+    let solved = 0;
+    for (let i = 0; i < steps; i++) {
+      const progress = i / steps;
+      if (progress < 0.88) {
+        currentRipple += (Math.random() - 0.48) * (K / 30);
+      } else {
+        currentRipple *= 0.7;
+      }
+      if (currentRipple < 0) currentRipple = 0;
+      rippleSeries.push({ step: i * (K / steps), ripple: currentRipple });
+      if (currentRipple > 0) solved += K / steps;
+    }
+    const recoveredPct = Math.min(100, (solved / K) * 100);
+    const mCount = Math.ceil(K * (1 + overheadPct / 100));
+    setStats(
+      `Variables: ${K} | Equations: ${mCount} | Overhead: ${overheadPct}% | Success: ${recoveredPct.toFixed(1)}%`
+    );
+
+    // Render using D3
+    renderCharts(distribution, rippleSeries);
+  }, [dist, K, overheadPct, getDistribution, renderCharts]);
 
   return (
     <div ref={containerRef} className="rq-viz-container" id="viz-degree-ripple">

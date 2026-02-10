@@ -1,3 +1,5 @@
+"use client";
+
 import SectionShell from "@/components/section-shell";
 import { MediaItem, mediaItems } from "@/lib/content";
 import { Newspaper, Podcast, PenLine, User, type LucideIcon } from "lucide-react";

@@ -429,6 +429,6 @@ export const TldrToolCard = memo(function TldrToolCard({
       </div>
     </motion.div>
   );
-}
+});
 
 export default TldrToolCard;

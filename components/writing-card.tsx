@@ -9,8 +9,6 @@ import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 import Magnetic from "@/components/magnetic";
-
-import Magnetic from "@/components/magnetic";
 import { memo } from "react";
 
 export const WritingCard = memo(function WritingCard({ item }: { item: WritingItem }) {

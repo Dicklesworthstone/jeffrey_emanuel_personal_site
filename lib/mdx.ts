@@ -115,7 +115,7 @@ export function getAllPosts() {
   }
 
   // sort posts by date in descending order (newest first)
-  return posts.sort((a, b) => b.date.localeCompare(a.date));
+  return posts.sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 
 /**
@@ -153,5 +153,5 @@ export function getAllPostsMeta() {
     }
   }
 
-  return posts.sort((a, b) => b.date.localeCompare(a.date));
+  return posts.sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }

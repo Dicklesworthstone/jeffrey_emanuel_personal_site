@@ -75,11 +75,12 @@ export function useClickParticles({
         } else {
           mediaQuery.removeListener(handler);
         }
-        
+
         // If no more hooks are active and no particles are moving, we could clean up
         // but keeping the singleton alive is generally fine for SPAs
       };
     }
+    return () => { activeHookCount--; };
   }, []);
 
   const getCanvas = useCallback(() => {
