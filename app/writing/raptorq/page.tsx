@@ -9,21 +9,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/writing/raptorq",
   },
-  openGraph: {
-    title: "RaptorQ: The Black Magic of Liquid Data",
-    description:
-      "How RaptorQ turns files into mathematical liquid — collect any K packets in any order and recover the original. Total overhead: under 5%.",
-    url: "https://jeffreyemanuel.com/writing/raptorq",
-    type: "article",
-    publishedTime: "2025-06-15",
-    authors: ["Jeffrey Emanuel"],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "RaptorQ: The Black Magic of Liquid Data",
-    description:
-      "How RaptorQ turns files into mathematical liquid — collect any K packets in any order and recover the original.",
-  },
 };
 
 const articleSchema = {
