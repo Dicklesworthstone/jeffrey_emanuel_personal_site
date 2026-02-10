@@ -44,6 +44,7 @@ export function RaptorQJargon({ term, children, className }: RaptorQJargonProps)
   const triggerRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const prefersReducedMotion = useReducedMotion();
 
   const termKey = term.toLowerCase().replace(/[\s_]+/g, "-");
@@ -54,6 +55,7 @@ export function RaptorQJargon({ term, children, className }: RaptorQJargonProps)
   useEffect(() => {
     return () => {
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+      if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
     };
   }, []);
 
@@ -87,17 +89,20 @@ export function RaptorQJargon({ term, children, className }: RaptorQJargonProps)
   const handleMouseEnter = useCallback(() => {
     if (isMobile) return;
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    setIsOpen(true);
+    if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
+    openTimeoutRef.current = setTimeout(() => setIsOpen(true), 300);
   }, [isMobile]);
 
   const handleMouseLeave = useCallback(() => {
     if (isMobile) return;
+    if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
     closeTimeoutRef.current = setTimeout(() => setIsOpen(false), 150);
   }, [isMobile]);
 
   const handleFocus = useCallback(() => {
     if (isMobile) return;
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
     setIsOpen(true);
   }, [isMobile]);
 
