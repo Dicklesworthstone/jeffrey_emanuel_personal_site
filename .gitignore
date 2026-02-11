@@ -29,6 +29,14 @@ pnpm-lock.yaml
 .DS_Store
 *.pem
 
+# macOS resource forks
+._*
+
+# Browser screenshots (temp captures from testing/debugging)
+Chrome_*.png
+Firefox_*.png
+Safari_*.png
+
 # debug
 npm-debug.log*
 yarn-debug.log*
