@@ -567,7 +567,7 @@ export function ProcessNexus() {
         );
       })}
 
-      <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 md:gap-6 px-6 md:px-8 py-2 md:py-3 rounded-full bg-black/40 border border-white/10 backdrop-blur-3xl shadow-2xl">
+      <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 md:gap-6 px-4 md:px-8 py-2 md:py-3 rounded-full bg-black/40 border border-white/10 backdrop-blur-3xl shadow-2xl max-w-[calc(100%-1rem)] md:max-w-none overflow-x-auto no-scrollbar">
          <div className="flex items-center gap-1.5 md:gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
             <span className="text-[8px] md:text-[10px] text-slate-400 uppercase font-mono tracking-widest">Doorway</span>

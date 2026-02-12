@@ -430,7 +430,7 @@ export function FactorCorrelationMatrix() {
        <AnimatePresence>
           {selected && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-              className="absolute bottom-8 left-8 p-6 rounded-[2rem] bg-black/60 border border-white/10 backdrop-blur-xl max-w-xs pointer-events-auto shadow-2xl"
+              className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-auto p-4 md:p-6 rounded-[1.25rem] md:rounded-[2rem] bg-black/60 border border-white/10 backdrop-blur-xl max-w-none md:max-w-xs pointer-events-auto shadow-2xl"
             >
                <h5 className="font-black text-white uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: factors.find(f => f.name === selected)?.color }} />

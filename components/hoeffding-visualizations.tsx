@@ -589,15 +589,15 @@ export function RankingVisualizer() {
 
   return (
     <div className="hd-viz-container hd-glass-panel">
-       <div className="hd-viz-header p-8 flex items-center justify-between">
+      <div className="hd-viz-header p-4 md:p-8 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="hd-instrument-label mb-1">Data Pipeline</div>
           <h4 className="text-white font-black text-lg uppercase tracking-tighter italic">Linear Compression</h4>
         </div>
-        <button onClick={addVal} className="hd-btn-action !px-10 !bg-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]">Inject Data</button>
+        <button onClick={addVal} className="hd-btn-action !px-4 md:!px-10 !bg-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]">Inject Data</button>
       </div>
       <div className="p-12 md:p-20 overflow-x-auto no-scrollbar">
-        <div className="flex gap-6 min-w-max items-center">
+        <div className="flex gap-4 md:gap-6 min-w-0 md:min-w-max items-center flex-wrap md:flex-nowrap">
           <AnimatePresence mode="popLayout">
             {items.map((item, i) => (
               <motion.div
