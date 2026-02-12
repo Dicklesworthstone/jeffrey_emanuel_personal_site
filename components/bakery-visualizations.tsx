@@ -404,8 +404,8 @@ export function ProcessNexus() {
   useEffect(() => {
     const handleResize = () => {
       const isMob = window.innerWidth < 768;
-      // On mobile we use a smaller radius and nodes to prevent overflow
-      setRadius(isMob ? Math.min(window.innerWidth * 0.35, 140) : Math.min(window.innerWidth * 0.32, 260));
+      // Shrink further on mobile to guarantee no overflow on narrow screens
+      setRadius(isMob ? Math.min(window.innerWidth * 0.3, 120) : Math.min(window.innerWidth * 0.32, 260));
     };
     handleResize();
     window.addEventListener('resize', handleResize);

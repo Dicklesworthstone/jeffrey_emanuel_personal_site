@@ -20,6 +20,8 @@ interface MathTooltipProps {
   mode?: TooltipMode;
   /** Optional: additional class names */
   className?: string;
+  /** Optional: hide the icon indicator */
+  simple?: boolean;
 }
 
 const VARIANT_STYLES = {
@@ -121,7 +123,7 @@ const VARIANT_STYLES = {
  * Unified implementation for all interactive articles.
  * Handles both Math (Sigma) and Jargon (Lightbulb) modes.
  */
-export function MathTooltip({ term, children, variant = "cyan", mode = "math", className }: MathTooltipProps) {
+export function MathTooltip({ term, children, variant = "cyan", mode = "math", simple = false, className }: MathTooltipProps) {
   if (!term) {
     return <>{children}</>;
   }
@@ -149,7 +151,7 @@ export function MathTooltip({ term, children, variant = "cyan", mode = "math", c
     >
       <div className={mode === "math" ? "relative" : ""}>
         {children}
-        {mode === "math" && (
+        {mode === "math" && !simple && (
           <div className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
             <div className={cn("flex h-3.5 w-3.5 items-center justify-center rounded-full shadow-lg border border-white/10", styles.iconBg)}>
               <Icon className={cn("h-2 w-2", styles.iconText)} />
