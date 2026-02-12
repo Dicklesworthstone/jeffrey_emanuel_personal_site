@@ -8,7 +8,6 @@ import {
   Bricolage_Grotesque,
 } from "next/font/google";
 import { 
-  Users, 
   ShieldCheck, 
   Cpu, 
   Zap,
@@ -28,10 +27,6 @@ const BakeryHero = dynamic(
 );
 const ProcessNexus = dynamic(
   () => import("./bakery-visualizations").then((m) => ({ default: m.ProcessNexus })),
-  { ssr: false }
-);
-const TieBreakerViz = dynamic(
-  () => import("./bakery-visualizations").then((m) => ({ default: m.TieBreakerViz })),
   { ssr: false }
 );
 const DoorwayRaceViz = dynamic(
@@ -79,7 +74,6 @@ export function BakeryArticle() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
   
-  // Real content-based reading time calculation
   const readingTime = calculateReadingTime(`
     The Bakery Algorithm was invented by Leslie Lamport in 1974. 
     It's a locking mechanism used in concurrent programming to prevent 
@@ -107,7 +101,6 @@ export function BakeryArticle() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Section reveal on scroll
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
@@ -138,7 +131,6 @@ export function BakeryArticle() {
       className={`bakery-scope ba-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
-      {/* Scroll Progress */}
       <div
         className="ba-progress-bar"
         style={{ transform: `scaleX(${scrollProgress})` }}
@@ -500,7 +492,6 @@ export function BakeryArticle() {
         </EC>
       </section>
 
-      {/* Footer spacing */}
       <div className="h-32" />
     </div>
   );

@@ -48,9 +48,10 @@ export function BakeryHero() {
     if (!container) return;
 
     let animationId: number;
-    let renderer: THREE.WebGLRenderer;
+    let renderer: THREE.WebGLRenderer | null = null;
     let isMounted = true;
-    let handleResize: () => void;
+    let handleResize: (() => void) | null = null;
+    const disposables: { dispose: () => void }[] = [];
 
     const init = async () => {
       const THREE = await import("three");
@@ -70,8 +71,6 @@ export function BakeryHero() {
       scene.add(group);
 
       const ticketCount = 40;
-      const ticketGeos: THREE.BoxGeometry[] = [];
-      const ticketMats: THREE.MeshBasicMaterial[] = [];
       const tickets: THREE.Mesh[] = [];
 
       for (let i = 0; i < ticketCount; i++) {
@@ -84,8 +83,7 @@ export function BakeryHero() {
         });
         const ticket = new THREE.Mesh(geo, mat);
         
-        ticketGeos.push(geo);
-        ticketMats.push(mat);
+        disposables.push(geo, mat);
 
         const angle = (i / ticketCount) * Math.PI * 2 * 4;
         const radius = 10 + (i * 0.5);
@@ -108,6 +106,7 @@ export function BakeryHero() {
       });
       const core = new THREE.Mesh(coreGeo, coreMat);
       scene.add(core);
+      disposables.push(coreGeo, coreMat);
 
       const animate = () => {
         if (!isMounted) return;
@@ -122,7 +121,7 @@ export function BakeryHero() {
           t.rotation.z += 0.01;
         });
 
-        renderer.render(scene, camera);
+        renderer?.render(scene, camera);
       };
 
       animate();
@@ -134,14 +133,6 @@ export function BakeryHero() {
         renderer.setSize(container.clientWidth, container.clientHeight);
       };
       window.addEventListener("resize", handleResize);
-
-      // Store geos and mats for explicit disposal
-      (scene as any)._cleanup = () => {
-        ticketGeos.forEach(g => g.dispose());
-        ticketMats.forEach(m => m.dispose());
-        coreGeo.dispose();
-        coreMat.dispose();
-      };
     };
 
     init();
@@ -150,14 +141,13 @@ export function BakeryHero() {
       isMounted = false;
       cancelAnimationFrame(animationId);
       if (handleResize) window.removeEventListener("resize", handleResize);
+      disposables.forEach(d => d.dispose());
       if (renderer) {
         renderer.dispose();
-        if (container.contains(renderer.domElement)) {
+        if (container && container.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement);
         }
       }
-      // Explicitly cleanup scene objects
-      if ((scene as any)?._cleanup) (scene as any)._cleanup();
     };
   }, []);
 
