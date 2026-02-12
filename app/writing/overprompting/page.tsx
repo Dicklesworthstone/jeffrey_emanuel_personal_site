@@ -9,6 +9,29 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/writing/overprompting",
   },
+  openGraph: {
+    title: "The Overprompting Trap",
+    description:
+      "Why giving AI models too many constraints degrades output quality, the chef analogy, the face-in-hole effect, and a two-phase approach to prompting: be open during planning, precise during execution.",
+    type: "article",
+    publishedTime: "2026-02-12",
+    url: "https://jeffreyemanuel.com/writing/overprompting",
+    images: [
+      {
+        url: "/writing/overprompting/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "The Overprompting Trap | Jeffrey Emanuel",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Overprompting Trap",
+    description:
+      "Why giving AI models too many constraints degrades output quality, the chef analogy, the face-in-hole effect, and a two-phase approach to prompting.",
+    images: ["/writing/overprompting/twitter-image"],
+  },
 };
 
 const articleSchema = {

@@ -429,7 +429,7 @@ export function TldrSynergyDiagram({
                   cy={pos.y}
                   r={ringRadius}
                   fill="none"
-                  stroke={`url(#${scopeId}-gradient-${tool.id}`)}
+                  stroke={`url(#${scopeId}-gradient-${tool.id})`}
                   strokeWidth={isHovered ? 3 : 2}
                   opacity={isHovered ? 0.9 : 0.6}
                   style={{ transition: "stroke-width 120ms linear, opacity 120ms linear" }}

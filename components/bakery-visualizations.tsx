@@ -382,11 +382,11 @@ function TemporalCard({ label, data, id }: { label: string; data: TemporalProces
 
             <div className="grid grid-cols-2 gap-3 md:gap-4">
                <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
-                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-widest">Ticket</p>
+                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-tight">Ticket</p>
                   <p className="text-xl md:text-3xl font-black text-white">{data.val || '—'}</p>
                </div>
                <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
-                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-widest">Priority</p>
+                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-tight">Priority</p>
                   <p className="text-xl md:text-3xl font-black text-white/20 group-hover:text-white/40 transition-colors">#{id}</p>
                </div>
             </div>

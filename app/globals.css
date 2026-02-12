@@ -1550,43 +1550,105 @@ select:focus-visible {
   font-size: 1rem;
 }
 
-.overprompting-scope .op-viz-container [class*="text-[7px]"],
-.raptorq-scope .rq-viz-container [class*="text-[7px]"],
-.cmaes-scope .rq-viz-container [class*="text-[7px]"],
-.hoeffding-scope .hd-viz-container [class*="text-[7px]"],
-.bakery-scope .ba-viz-container [class*="text-[7px]"],
-.barra-scope .barra-viz-container [class*="text-[7px]"],
-.overprompting-scope .op-viz-container [class*="text-[8px]"],
-.raptorq-scope .rq-viz-container [class*="text-[8px]"],
-.cmaes-scope .rq-viz-container [class*="text-[8px]"],
-.hoeffding-scope .hd-viz-container [class*="text-[8px]"],
-.bakery-scope .ba-viz-container [class*="text-[8px]"],
-.barra-scope .barra-viz-container [class*="text-[8px]"],
-.overprompting-scope .op-viz-container [class*="text-[9px]"],
-.raptorq-scope .rq-viz-container [class*="text-[9px]"],
-.cmaes-scope .rq-viz-container [class*="text-[9px]"],
-.hoeffding-scope .hd-viz-container [class*="text-[9px]"],
-.bakery-scope .ba-viz-container [class*="text-[9px]"],
-.barra-scope .barra-viz-container [class*="text-[9px]"],
-.overprompting-scope .op-viz-container [class*="text-[10px]"],
-.raptorq-scope .rq-viz-container [class*="text-[10px]"],
-.cmaes-scope .rq-viz-container [class*="text-[10px]"],
-.hoeffding-scope .hd-viz-container [class*="text-[10px]"],
-.bakery-scope .ba-viz-container [class*="text-[10px]"],
-.barra-scope .barra-viz-container [class*="text-[10px]"],
-.overprompting-scope .op-viz-container [class*="text-[11px]"],
-.raptorq-scope .rq-viz-container [class*="text-[11px]"],
-.cmaes-scope .rq-viz-container [class*="text-[11px]"],
-.hoeffding-scope .hd-viz-container [class*="text-[11px]"],
-.bakery-scope .ba-viz-container [class*="text-[11px]"],
-.barra-scope .barra-viz-container [class*="text-[11px]"],
-.overprompting-scope .op-viz-container [class*="text-[12px]"],
-.raptorq-scope .rq-viz-container [class*="text-[12px]"],
-.cmaes-scope .rq-viz-container [class*="text-[12px]"],
-.hoeffding-scope .hd-viz-container [class*="text-[12px]"],
-.bakery-scope .ba-viz-container [class*="text-[12px]"],
-.barra-scope .barra-viz-container [class*="text-[12px]"] {
-  font-size: inherit !important;
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container) [class~="text-[7px]"] {
+  font-size: 0.625rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container) [class~="text-[8px]"] {
+  font-size: 0.67rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container) [class~="text-[9px]"] {
+  font-size: 0.75rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container) [class~="text-[10px]"] {
+  font-size: 0.8rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container) [class~="text-[11px]"] {
+  font-size: 0.85rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container) [class~="text-[12px]"] {
+  font-size: 0.9rem;
+}
+
+@media (min-width: 768px) {
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container) [class~="md:text-[8px]"] {
+    font-size: 0.75rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container) [class~="md:text-[9px]"] {
+    font-size: 0.8rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container) [class~="md:text-[10px]"] {
+    font-size: 0.875rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container) [class~="md:text-[11px]"] {
+    font-size: 0.93rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container) [class~="md:text-[12px]"] {
+    font-size: 1rem;
+  }
 }
 
 .overprompting-scope .op-btn-secondary:disabled {
