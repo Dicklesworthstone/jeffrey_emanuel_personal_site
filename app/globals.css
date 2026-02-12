@@ -1958,6 +1958,19 @@ select:focus-visible {
     transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.bakery-scope .ba-fade-section.ba-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bakery-scope .ba-fade-section {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 /*
   ========================================
   CMA-ES ARTICLE - SCOPED STYLES
