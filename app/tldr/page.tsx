@@ -122,6 +122,7 @@ function FooterCTA({ id }: { id?: string }) {
                   {INSTALL_COMMAND}
                 </code>
                 <button
+                  type="button"
                   onClick={handleCopy}
                   className="flex-shrink-0 flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg bg-slate-800 p-2.5 text-slate-400 transition-all duration-200 hover:bg-violet-600 hover:text-white active:scale-95 sm:p-2.5"
                   aria-label={copied ? "Copied!" : "Copy to clipboard"}

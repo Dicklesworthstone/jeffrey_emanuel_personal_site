@@ -16,7 +16,7 @@ import * as d3 from "d3";
 import { motion } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
 import { cn } from "@/lib/utils";
-import { Play, RotateCcw, ChevronRight, Activity, Cpu, Box, Zap, Target } from "lucide-react";
+import { Play, RotateCcw, ChevronRight, Activity, Cpu, Box, Zap, Target, Flame, TrendingUp } from "lucide-react";
 
 const COLORS = {
   bg: "#020204",
@@ -164,7 +164,7 @@ class ProCMAES {
     const hsig_delta = (1 - hsig) * this.cc * (2 - this.cc);
     const decay_coeff = 1 - this.c1 - this.cmu;
     for (let i = 0; i < this.dim; i++) {
-      for (let j = 0; j < this.dim; j++) {
+      for (let j = 0; j <= i; j++) {
         let rankMu = 0;
         for (let k = 0; k < this.mu; k++) {
           const idx = bestIndices[k];
@@ -446,7 +446,11 @@ export function SelectionWalkthrough() {
             </div>
           </div>
         </div>
-        <button onClick={nextStep} className="rq-btn-action !py-3.5 !px-4 md:!px-10 flex items-center gap-3 group md:ml-auto">
+        <button
+          type="button"
+          onClick={nextStep}
+          className="rq-btn-action !py-3.5 !px-4 md:!px-10 flex items-center gap-3 group md:ml-auto"
+        >
           {stepIdx === 3 ? `Complete Loop ${currentLoop}` : "Next Phase"}
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
@@ -578,10 +582,18 @@ export function ComparisonViz() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 bg-black/40 p-1.5 rounded-2xl border border-white/10 md:ml-auto">
-          <button onClick={() => setActive("cma")} className={cn("px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
-            active === "cma" ? "bg-amber-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}>CMA-ES</button>
-          <button onClick={() => setActive("gd")} className={cn("px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
-            active === "gd" ? "bg-blue-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}>Gradient</button>
+          <button
+            type="button"
+            onClick={() => setActive("cma")}
+            className={cn("px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
+            active === "cma" ? "bg-amber-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}
+          >CMA-ES</button>
+          <button
+            type="button"
+            onClick={() => setActive("gd")}
+            className={cn("px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
+            active === "gd" ? "bg-blue-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}
+          >Gradient</button>
         </div>
       </div>
       <div className="flex flex-col lg:flex-row">
@@ -590,7 +602,12 @@ export function ComparisonViz() {
             In a <strong>narrow, rotated valley</strong>, standard Gradient Descent often oscillates wildly because its steps aren&apos;t aligned with the curvature. 
             <span className="text-amber-400 font-bold block mt-4 px-4 py-3 bg-amber-500/5 border border-amber-500/10 rounded-xl not-italic">CMA-ES learns the valley&apos;s very shape, stretching its distribution to glide straight to the global minimum.</span>
           </p>
-          <button onClick={run} disabled={isRunning} className="w-full rq-btn-action !py-4 flex items-center justify-center gap-3 group">
+          <button
+            type="button"
+            onClick={run}
+            disabled={isRunning}
+            className="w-full rq-btn-action !py-4 flex items-center justify-center gap-3 group"
+          >
             {isRunning ? "Running Analysis..." : "Execute Simulation"}
             <Play className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
           </button>
@@ -696,7 +713,14 @@ export function BenchmarkRunner() {
           <select value={selected} onChange={e => setSelected(e.target.value as keyof typeof BENCHMARKS)} className="bg-transparent border-none text-[12px] font-black uppercase text-white outline-none px-3 md:px-6 min-w-[9rem]">
             {Object.keys(BENCHMARKS).map(b => <option key={b} value={b}>{b}</option>)}
           </select>
-          <button onClick={run} disabled={isRunning} className="rq-btn-action !shadow-none !py-3.5 !px-4 md:!px-8 w-full sm:w-auto">Execute Optimization</button>
+          <button
+            type="button"
+            onClick={run}
+            disabled={isRunning}
+            className="rq-btn-action !shadow-none !py-3.5 !px-4 md:!px-8 w-full sm:w-auto"
+          >
+            Execute Optimization
+          </button>
         </div>
       </div>
       
@@ -813,8 +837,14 @@ export function NoiseRobustnessViz() {
               <span className="text-emerald-400">{Math.round(noiseLevel * 100)}%</span>
             </div>
             <input type="range" min="0" max="1" step="0.1" value={noiseLevel} onChange={e => setNoiseLevel(parseFloat(e.target.value))} className="w-full h-1 bg-white/10 rounded-full appearance-none accent-emerald-500" />
-            <button onClick={run} disabled={isRunning} className="w-full rq-btn-action !bg-emerald-500 !text-black flex items-center justify-center gap-2 !shadow-none !py-3">
-              <Play className="w-4 h-4 fill-current" /> Play Simulation
+            <button
+              type="button"
+              onClick={run}
+              disabled={isRunning}
+              className="w-full rq-btn-action !bg-emerald-500 !text-black flex items-center justify-center gap-2 !shadow-none !py-3"
+            >
+              <Flame className="w-4 h-4" />
+              {isRunning ? "Running" : "Run New Strategy"}
             </button>
           </div>
         </div>
@@ -887,8 +917,14 @@ export function RestartViz() {
               <span className="text-base md:text-xl font-mono font-bold text-white">{bestVal.toFixed(4)}</span>
             </div>
           </div>
-          <button onClick={run} disabled={isRunning} className="w-full rq-btn-action !bg-purple-500 !text-white flex items-center justify-center gap-2 !shadow-none !py-3">
-            <Play className="w-4 h-4 fill-current" /> {isRunning ? "Optimizing..." : "Execute IPOP-CMA-ES"}
+          <button
+            type="button"
+            onClick={run}
+            disabled={isRunning}
+            className="w-full rq-btn-action !bg-purple-500 !text-white flex items-center justify-center gap-2 !shadow-none !py-3"
+          >
+            <TrendingUp className="w-4 h-4" />
+            {isRunning ? "Optimizing..." : "Execute IPOP-CMA-ES"}
           </button>
         </div>
         <div className="flex-1 grid grid-cols-2 gap-4 h-full">

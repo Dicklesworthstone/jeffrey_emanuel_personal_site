@@ -40,6 +40,7 @@ export default function GlobalError({
 
           <div className="space-y-4">
             <button
+              type="button"
               onClick={() => reset()}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:bg-violet-500 hover:shadow-violet-500/25 active:scale-95"
             >

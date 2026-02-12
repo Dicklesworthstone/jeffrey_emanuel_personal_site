@@ -107,6 +107,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
       {/* Mobile/Tablet: Floating toggle button */}
       <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 z-40 xl:hidden">
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
             "flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium shadow-lg backdrop-blur-md transition-all",
@@ -154,6 +155,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                   Contents
                 </h3>
                 <button
+                  type="button"
                   onClick={() => setIsOpen(false)}
                   className="text-slate-400 hover:text-white"
                 >
@@ -165,6 +167,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                   {headings.map((heading) => (
                     <li key={heading.id}>
                       <button
+                        type="button"
                         onClick={() => scrollToHeading(heading.id)}
                         className={cn(
                           "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
@@ -197,6 +200,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               {headings.map((heading) => (
                 <li key={heading.id}>
                   <button
+                    type="button"
                     onClick={() => scrollToHeading(heading.id)}
                     className={cn(
                       "group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-all",

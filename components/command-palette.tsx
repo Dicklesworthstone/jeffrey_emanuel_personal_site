@@ -532,6 +532,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             id={cmd.id}
                             tabIndex={-1}
                             data-index={index}
+                            type="button"
                             onClick={cmd.action}
                             onMouseEnter={() => setSelectedIndex(index)}
                             className={cn(

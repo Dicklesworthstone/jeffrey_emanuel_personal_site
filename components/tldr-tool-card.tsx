@@ -245,6 +245,7 @@ export const TldrToolCard = memo(function TldrToolCard({
               e.stopPropagation();
               onToggleCompare?.(tool);
             }}
+            type="button"
             className="absolute inset-0 z-20 cursor-pointer"
             aria-label={isSelectedForCompare ? `Remove ${tool.shortName} from comparison` : `Add ${tool.shortName} to comparison`}
           >
@@ -345,6 +346,7 @@ export const TldrToolCard = memo(function TldrToolCard({
           {onMobileTap && (
             <div className="border-t border-white/10 p-4 md:hidden">
               <button
+                type="button"
                 onClick={() => {
                   lightTap();
                   onMobileTap(tool);

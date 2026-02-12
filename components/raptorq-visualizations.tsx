@@ -281,8 +281,8 @@ export function MatrixViz() {
           </div>
         </div>
         <div className="flex gap-3">
-          <button onClick={addEquation} className="rq-btn-action">Add Equation</button>
-          <button onClick={reset} className="rq-btn-secondary">Reset</button>
+          <button type="button" onClick={addEquation} className="rq-btn-action">Add Equation</button>
+          <button type="button" onClick={reset} className="rq-btn-secondary">Reset</button>
         </div>
       </div>
       <div className="flex-1 p-6 md:p-10 flex flex-col xl:flex-row gap-10 xl:gap-14 items-start overflow-hidden">
@@ -498,7 +498,7 @@ export function DegreeRippleViz() {
           Interactive 02: Degrees &amp; Ripple
         </h4>
         <div className="flex gap-2">
-          <button onClick={runSimulation} className="rq-btn-action">Simulate</button>
+          <button type="button" onClick={runSimulation} className="rq-btn-action">Simulate</button>
         </div>
       </div>
       <div className="p-4 md:p-6 border-b border-white/5 bg-white/[0.01]">
@@ -683,8 +683,8 @@ export function PeelingViz() {
           Interactive 05: The Peeling Cascade
         </h4>
         <div className="flex gap-2">
-          <button onClick={step} className="rq-btn-action">Peel Step</button>
-          <button onClick={resetViz} className="rq-btn-secondary">Reset</button>
+          <button type="button" onClick={step} className="rq-btn-action">Peel Step</button>
+          <button type="button" onClick={resetViz} className="rq-btn-secondary">Reset</button>
         </div>
       </div>
       <div className="flex-1 w-full h-[300px] md:h-[400px] relative">
@@ -903,7 +903,7 @@ export function PrecodeViz() {
           className="overflow-visible min-w-[280px] sm:min-w-[340px]"
         />
         <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6">
-          <button onClick={animate} className="rq-btn-action">
+          <button type="button" onClick={animate} className="rq-btn-action">
             Run Simulation
           </button>
         </div>
@@ -1022,10 +1022,10 @@ export function ToyDecodeViz() {
           Interactive 04: End-to-End Toy Decode
         </h4>
         <div className="flex gap-2 flex-wrap">
-          <button onClick={prev} className="rq-btn-secondary">Back</button>
-          <button onClick={next} className="rq-btn-action">Next</button>
-          <button onClick={reset} className="rq-btn-secondary">Reset</button>
-          <button onClick={autoPlay} className="rq-btn-action">Auto</button>
+          <button type="button" onClick={prev} className="rq-btn-secondary">Back</button>
+          <button type="button" onClick={next} className="rq-btn-action">Next</button>
+          <button type="button" onClick={reset} className="rq-btn-secondary">Reset</button>
+          <button type="button" onClick={autoPlay} className="rq-btn-action">Auto</button>
         </div>
       </div>
       <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">

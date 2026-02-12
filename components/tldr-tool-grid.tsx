@@ -68,6 +68,7 @@ const ToolSearchBar = memo(function ToolSearchBar({
           <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 pr-3 sm:gap-2 sm:pr-4">
             {query && (
               <button
+                type="button"
                 onClick={() => onQueryChange("")}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50"
                 aria-label="Clear search"
@@ -148,6 +149,7 @@ const EmptySearchState = memo(function EmptySearchState({
         &quot;search&quot;
       </p>
       <button
+        type="button"
         onClick={onClear}
         className="mt-6 inline-flex items-center gap-2 rounded-lg bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50"
       >
@@ -420,6 +422,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
       {/* Compare Mode Controls */}
       <div className="flex items-center justify-end gap-3 -mt-4 sm:-mt-6">
         <button
+          type="button"
           onClick={() => {
             if (compareMode) {
               exitCompareMode();
@@ -453,6 +456,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
             </span>
             {compareIds.size >= 2 && (
               <button
+                type="button"
                 onClick={() => setShowComparison(true)}
                 className="rounded-full bg-violet-500 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-violet-400"
               >
@@ -460,6 +464,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
               </button>
             )}
             <button
+              type="button"
               onClick={exitCompareMode}
               className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
               aria-label="Exit compare mode"

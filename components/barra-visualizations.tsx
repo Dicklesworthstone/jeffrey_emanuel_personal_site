@@ -540,12 +540,18 @@ export function LiveRegression() {
          <div className="flex gap-3 items-center flex-wrap justify-end">
             <div className="flex p-1 bg-white/5 rounded-lg h-8 max-w-full overflow-x-auto no-scrollbar">
                {(["code", "console", "visual"] as const).map((t) => (
-                 <button key={t} onClick={() => setActiveTab(t)}
+                 <button
+                   type="button"
+                   key={t}
+                   onClick={() => setActiveTab(t)}
                    className={`px-3 rounded-md text-[8px] font-black uppercase tracking-widest transition-all ${activeTab === t ? "bg-emerald-500 text-black shadow-lg" : "text-slate-500 hover:text-slate-300"}`}
                  >{t}</button>
                ))}
             </div>
-            <button onClick={runCode} disabled={isExecuting}
+            <button
+              type="button"
+              onClick={runCode}
+              disabled={isExecuting}
               className="px-4 h-8 rounded-lg bg-emerald-500 text-black text-[8px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
             >
               {isExecuting ? <Activity className="w-3 h-3 animate-spin" /> : <Maximize2 className="w-3 h-3" />}

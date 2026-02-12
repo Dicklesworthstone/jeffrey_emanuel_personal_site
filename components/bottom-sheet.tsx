@@ -195,6 +195,7 @@ export default function BottomSheet({
                   {title}
                 </h2>
                 <button
+                  type="button"
                   onClick={onClose}
                   onTouchStart={mediumTap}
                   className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
@@ -208,6 +209,7 @@ export default function BottomSheet({
             {/* Close button when no title */}
             {!title && (
               <button
+                type="button"
                 onClick={onClose}
                 onTouchStart={mediumTap}
                 className="absolute top-4 right-4 z-10 rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"

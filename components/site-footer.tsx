@@ -79,6 +79,7 @@ export default function SiteFooter() {
               ))}
             </div>
             <button
+              type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-300"
               aria-label="Back to top"

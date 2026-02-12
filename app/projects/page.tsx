@@ -107,6 +107,7 @@ export default function ProjectsPage() {
             const isActive = activeFilter === filter.id;
             return (
               <button
+                type="button"
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
                 role="tab"
@@ -170,6 +171,7 @@ export default function ProjectsPage() {
           </span>
           {selectedTags.size > 0 && (
             <button
+              type="button"
               onClick={clearTags}
               className="ml-2 flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
               aria-label={`Clear ${selectedTags.size} selected tags`}
@@ -189,6 +191,7 @@ export default function ProjectsPage() {
             const count = tagCounts[tag];
             return (
               <button
+                type="button"
                 key={tag}
                 onClick={() => toggleTag(tag)}
                 aria-pressed={isSelected}

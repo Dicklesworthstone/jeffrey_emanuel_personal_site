@@ -48,6 +48,7 @@ export default function CopyButton({ text, className, onCopy }: CopyButtonProps)
   return (
     <button
       onClick={handleCopy}
+      type="button"
       className={cn(
         "inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900",
         status === "idle" && "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600 hover:bg-slate-700 hover:text-slate-200",

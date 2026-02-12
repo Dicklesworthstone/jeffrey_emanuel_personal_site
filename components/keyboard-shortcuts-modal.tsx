@@ -147,6 +147,7 @@ export default function KeyboardShortcutsModal({
                 </div>
                 <button
                   ref={closeButtonRef}
+                  type="button"
                   onClick={onClose}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
                   aria-label="Close shortcuts modal"

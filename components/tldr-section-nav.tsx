@@ -110,6 +110,7 @@ export function TldrSectionNav({
               const isActive = activeSection === section.id;
               return (
                 <button
+                  type="button"
                   key={section.id}
                   onClick={() => handleNavigate(section.id)}
                   aria-current={isActive ? "true" : undefined}

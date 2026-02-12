@@ -580,6 +580,7 @@ ${data.message}`
         </p>
 
         <button
+          type="button"
           onClick={() => {
             setIsSubmitted(false);
             setStepIndex(0);
