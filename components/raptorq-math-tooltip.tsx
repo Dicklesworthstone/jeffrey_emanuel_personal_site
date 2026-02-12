@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Sigma, HelpCircle, Info } from "lucide-react";
+import { Sigma } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getJargon, type JargonTerm } from "@/lib/raptorq-jargon";
 import { TooltipShell } from "./tooltip-shell";

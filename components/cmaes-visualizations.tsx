@@ -2,24 +2,21 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { 
-  OrbitControls, 
   PerspectiveCamera, 
   Float, 
   MeshTransmissionMaterial,
   Environment,
-  Text,
   ContactShadows,
   PresentationControls,
-  Html,
   Line
 } from "@react-three/drei";
 import * as d3 from "d3";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
 import { cn } from "@/lib/utils";
-import { Play, RotateCcw, ChevronRight, Activity, Cpu, Box, Zap, Target, Sliders } from "lucide-react";
+import { Play, RotateCcw, ChevronRight, Activity, Cpu, Box, Zap, Target } from "lucide-react";
 
 const COLORS = {
   bg: "#020204",

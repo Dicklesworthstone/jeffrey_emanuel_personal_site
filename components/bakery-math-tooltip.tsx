@@ -28,11 +28,6 @@ export function BakeryMathTooltip({ mathKey, children, className, theme = "amber
     return <>{children}</>;
   }
 
-  const themeColors = {
-    amber: "bg-amber-500 ring-amber-400 text-amber-400 bg-amber-400/20 border-amber-500/10",
-    cyan: "bg-cyan-500 ring-cyan-400 text-cyan-400 bg-cyan-400/20 border-cyan-500/10"
-  };
-
   return (
     <TooltipShell
       title={mathData.term}

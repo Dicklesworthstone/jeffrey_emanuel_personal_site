@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Float, Text, MeshWobbleMaterial, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, TrendingDown, Zap, Terminal, Shield, Activity, Maximize2, Layers } from "lucide-react";
+import { Zap, Shield, Activity, Maximize2, Layers } from "lucide-react";
 import { BarraJargon } from "./barra-jargon";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
 
@@ -20,8 +20,6 @@ const COLORS = {
   slate: "#64748b",
   white: "#f8fafc",
 };
-
-const INTER_FONT = "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hjw.woff";
 
 function deterministicUnit(seed: number) {
   const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
@@ -119,7 +117,6 @@ export function FactorHero() {
                   color={f.color}
                   anchorX="center"
                   anchorY="middle"
-                  font={INTER_FONT}
                   outlineWidth={0.2}
                   outlineColor="#000000"
                 >
@@ -386,11 +383,11 @@ function FactorPlanet({ name, color, index, active, onSelect }: { name: string, 
   });
 
   return (
-    <mesh ref={meshRef} onClick={onSelect}>
-      <sphereGeometry args={[active ? 5 : 2.5, 32, 32]} />
-      <MeshWobbleMaterial color={color} factor={active ? 0.3 : 0.1} speed={2} emissive={color} emissiveIntensity={0.4} />
-      <Text position={[0, active ? 7 : 4, 0]} fontSize={active ? 2.5 : 1.8} color="white" font={INTER_FONT} fontStyle="italic">{name}</Text>
-    </mesh>
+      <mesh ref={meshRef} onClick={onSelect}>
+        <sphereGeometry args={[active ? 5 : 2.5, 32, 32]} />
+        <MeshWobbleMaterial color={color} factor={active ? 0.3 : 0.1} speed={2} emissive={color} emissiveIntensity={0.4} />
+        <Text position={[0, active ? 7 : 4, 0]} fontSize={active ? 2.5 : 1.8} color="white" fontStyle="italic">{name}</Text>
+      </mesh>
   );
 }
 

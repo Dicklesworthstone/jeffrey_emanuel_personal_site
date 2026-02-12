@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, 
+  Minimize2, 
   ChevronRight, RotateCcw, Layers, Microscope, LayoutTemplate, MousePointer2
 } from "lucide-react";
-import { Canvas, useFrame, extend } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { 
   Float, PerspectiveCamera, Stars, MeshTransmissionMaterial, 
-  Text, Html, Trail, CameraControls, Environment, Grid
+  CameraControls, Environment, Grid
 } from "@react-three/drei";
 import { EffectComposer, Bloom, Noise, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
@@ -189,13 +189,13 @@ function ManifoldMesh({ level }: { level: number }) {
 
       {/* Visualizing the Slicers (Laser Planes) */}
       {planes.map((plane, i) => (
-        <PlaneVisualizer key={i} plane={plane} isActive={i < level} index={i} />
+        <PlaneVisualizer key={i} plane={plane} isActive={i < level} />
       ))}
     </group>
   );
 }
 
-function PlaneVisualizer({ plane, isActive, index }: { plane: THREE.Plane; isActive: boolean; index: number }) {
+function PlaneVisualizer({ plane, isActive }: { plane: THREE.Plane; isActive: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame(() => {
@@ -298,7 +298,7 @@ export function ConstraintViz() {
                 {level === 0 ? (
                   <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-slate-500 italic text-xs">&gt; Unconstrained...</motion.div>
                 ) : (
-                  SLICE_LABELS.slice(0, level).map((label, i) => (
+                  SLICE_LABELS.slice(0, level).map((label) => (
                     <motion.div 
                       key={label}
                       initial={{ x: -20, opacity: 0 }}

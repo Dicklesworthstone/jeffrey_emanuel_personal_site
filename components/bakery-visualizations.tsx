@@ -1,28 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { 
-  Zap, 
-  AlertTriangle, 
   CheckCircle2, 
-  Info, 
-  Play, 
-  Pause, 
-  RotateCcw,
-  Users,
   Lock,
   Unlock,
-  Timer,
-  Cpu,
   ShieldAlert,
-  Fingerprint,
   Activity,
-  ChevronRight,
-  ChevronLeft,
-  MousePointer2,
-  Terminal,
-  Layers
+  Terminal
 } from "lucide-react";
 import * as THREE from "three";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
