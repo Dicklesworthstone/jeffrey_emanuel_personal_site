@@ -1134,7 +1134,7 @@ select:focus-visible {
   backdrop-filter: blur(12px);
 }
 
-.raptorq-scope .rq-progress-bar {
+:is(.raptorq-scope, .cmaes-scope) .rq-progress-bar {
   position: fixed;
   top: 0;
   left: 0;
@@ -1142,7 +1142,7 @@ select:focus-visible {
   width: 100%;
   transform-origin: left;
   background: linear-gradient(to right, #22d3ee, #a855f7);
-  z-index: 50;
+  z-index: 40;
   pointer-events: none;
 }
 
@@ -1197,7 +1197,7 @@ select:focus-visible {
     margin-bottom: 1.5rem;
   }
 
-  .raptorq-scope .rq-progress-bar {
+  :is(.raptorq-scope, .cmaes-scope) .rq-progress-bar {
     top: env(safe-area-inset-top, 0px);
   }
 }
@@ -1405,9 +1405,10 @@ select:focus-visible {
   height: 3px;
   width: 100%;
   background: linear-gradient(to right, #22d3ee, #a855f7);
-  z-index: 50;
+  z-index: 40;
   transform-origin: 0 0;
   will-change: transform;
+  pointer-events: none;
 }
 
 .hoeffding-scope .hd-math-block {
@@ -1614,7 +1615,7 @@ select:focus-visible {
   width: 100%;
   transform-origin: left;
   background: linear-gradient(90deg, #f59e0b, #f97316, #f43f5e);
-  z-index: 9999;
+  z-index: 40;
   pointer-events: none;
 }
 
@@ -1947,6 +1948,18 @@ select:focus-visible {
 .bakery-scope .ba-fade-section.ba-visible {
   opacity: 1;
   transform: translateY(0) scale(1);
+}
+
+.bakery-scope .ba-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(to right, #f59e0b, #f97316, #f43f5e);
+  z-index: 40;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2286,9 +2299,10 @@ select:focus-visible {
   height: 3px;
   width: 100%;
   background: linear-gradient(to right, #10b981, #22d3ee, #3b82f6);
-  z-index: 50;
+  z-index: 40;
   transform-origin: 0 0;
   will-change: transform;
+  pointer-events: none;
 }
 
 .barra-scope.barra-body p:not(.text-sm):not(.text-base):not(.text-xl) {
@@ -2384,8 +2398,10 @@ select:focus-visible {
   .overprompting-scope section[data-section="hero"],
   .raptorq-scope section[data-section="hero"],
   .bakery-scope section[data-section="hero"],
-  .barra-scope section[data-section="hero"] {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 6.5rem) !important;
+  .barra-scope section[data-section="hero"],
+  .cmaes-scope section[data-section="hero"],
+  .hoeffding-scope section[data-section="hero"] {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 7rem) !important;
   }
 
   .overprompting-scope .op-viz-container,

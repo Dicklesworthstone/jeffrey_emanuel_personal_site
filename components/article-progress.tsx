@@ -91,7 +91,7 @@ export default function ArticleProgress() {
   }, [progress]);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-900/50">
+    <div className="fixed top-0 left-0 right-0 z-40 h-1 bg-slate-900/50">
       <motion.div
         className="h-full bg-gradient-to-r from-sky-500 to-violet-500 origin-left"
         style={{ scaleX: prefersReducedMotion ? progress : scaleX }}

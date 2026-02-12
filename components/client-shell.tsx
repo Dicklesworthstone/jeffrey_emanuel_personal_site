@@ -104,7 +104,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       <div className="flex min-h-screen flex-col relative overflow-x-hidden">
         {/* Global Progress Bar */}
         <motion.div
-          className="fixed top-0 left-0 right-0 z-[100] h-1 origin-left bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500"
+          className="fixed top-0 left-0 right-0 z-40 h-1 origin-left bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500"
           style={{ scaleX }}
         />
 

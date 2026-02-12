@@ -41,11 +41,11 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const { scrollY } = useScroll();
   
   // Keep an always-visible frosted header to prevent text overlap on article pages.
-  const headerOpacity = useTransform(scrollY, [0, 40], [0.82, 0.9]);
-  const headerBlurValue = useTransform(scrollY, [0, 40], [16, 24]);
-  const headerSaturateValue = useTransform(scrollY, [0, 40], [1.25, 1.8]);
+  const headerOpacity = useTransform(scrollY, [0, 40], [0.92, 0.97]);
+  const headerBlurValue = useTransform(scrollY, [0, 40], [18, 26]);
+  const headerSaturateValue = useTransform(scrollY, [0, 40], [1.1, 1.4]);
   const headerPaddingValue = useTransform(scrollY, [0, 40], [12, 8]);
-  const headerBorderOpacity = useTransform(scrollY, [0, 40], [0.18, 0.24]);
+  const headerBorderOpacity = useTransform(scrollY, [0, 40], [0.22, 0.3]);
   
   // Spring-smoothed values for buttery performance
   const smoothOpacity = useSpring(headerOpacity, { stiffness: 300, damping: 30 });
@@ -66,6 +66,8 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
     [smoothBlur, smoothSaturate],
     ([blur, sat]) => `blur(${blur}px) saturate(${sat})`
   );
+  const headerBackgroundColor = useTransform(smoothOpacity, (v) => `rgba(2, 6, 23, ${v})`);
+  const headerBorderColor = useTransform(smoothBorderOpacity, (v) => `rgba(255, 255, 255, ${v})`);
 
   // Detect OS for meta key - must run after hydration to avoid mismatch
   useEffect(() => {
@@ -94,10 +96,11 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
         style={{
           paddingTop: headerPaddingTop,
           paddingBottom: headerPaddingBottom,
-          backgroundColor: useTransform(smoothOpacity, (v) => `rgba(2, 6, 23, ${v})`),
+          backgroundColor: headerBackgroundColor,
           backdropFilter: headerBackdrop,
           WebkitBackdropFilter: headerBackdrop,
-          borderColor: useTransform(smoothBorderOpacity, (v) => `rgba(255, 255, 255, ${v})`),
+          borderColor: headerBorderColor,
+          boxShadow: "0 12px 36px -26px rgba(2, 6, 23, 0.95)",
           paddingRight: "var(--scrollbar-width, 0px)",
           willChange: "padding, background-color, backdrop-filter, border-color"
         }}
