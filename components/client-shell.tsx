@@ -130,7 +130,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
                   y: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
                   filter: { duration: 0.4 }
                 }}
-                className="flex-1"
+                className="flex-1 min-h-screen"
                 tabIndex={-1}
                 role="main"
               >

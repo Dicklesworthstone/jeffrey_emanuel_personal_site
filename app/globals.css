@@ -164,7 +164,8 @@
 }
 
 html {
-  height: 100%;
+  min-height: 100%;
+  height: auto;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   text-rendering: optimizeLegibility;
@@ -173,7 +174,8 @@ html {
 }
 
 body {
-  height: 100%;
+  min-height: 100%;
+  height: auto;
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
