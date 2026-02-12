@@ -1998,6 +1998,17 @@ export const threads: ThreadItem[] = [
 
 export const writingHighlights: WritingItem[] = [
   {
+    title: "The Overprompting Trap",
+    href: "/writing/overprompting",
+    source: "Blog",
+    category: "AI & Prompting",
+    blurb:
+      "Why giving AI models too many constraints degrades output quality. The chef analogy, the two-phase approach, and how to get out of the model's way.",
+    date: "2026-02-12",
+    featured: true,
+    gradient: "from-amber-500/20 via-orange-500/20 to-rose-500/20",
+  },
+  {
     title: "RaptorQ: The Black Magic of Liquid Data",
     href: "/writing/raptorq",
     source: "Blog",
