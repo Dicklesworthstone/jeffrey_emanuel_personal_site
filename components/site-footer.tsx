@@ -23,7 +23,7 @@ export default function SiteFooter() {
 
   return (
     <footer
-      className="relative mt-32"
+      className="relative mt-16 md:mt-24 lg:mt-32"
       role="contentinfo"
       aria-label="Site footer"
     >
@@ -146,4 +146,3 @@ export default function SiteFooter() {
     </footer>
   );
 }
-

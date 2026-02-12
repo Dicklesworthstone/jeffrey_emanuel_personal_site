@@ -41,7 +41,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const { scrollY } = useScroll();
   
   // Keep an always-visible frosted header to prevent text overlap on article pages.
-  const headerOpacity = useTransform(scrollY, [0, 40], [0.92, 0.97]);
+  const headerOpacity = useTransform(scrollY, [0, 40], [0.985, 0.995]);
   const headerBlurValue = useTransform(scrollY, [0, 40], [18, 26]);
   const headerSaturateValue = useTransform(scrollY, [0, 40], [1.1, 1.4]);
   const headerPaddingValue = useTransform(scrollY, [0, 40], [12, 8]);
@@ -218,7 +218,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             animate={{ opacity: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 z-40 flex flex-col bg-slate-950/98 backdrop-blur-lg md:hidden overflow-y-auto will-change-[opacity]"
+            className="fixed inset-0 z-[70] flex flex-col bg-slate-950/98 backdrop-blur-lg md:hidden overflow-y-auto will-change-[opacity]"
             style={{ transform: "translateZ(0)" }}
             role="dialog"
             aria-modal="true"
