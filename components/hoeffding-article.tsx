@@ -13,7 +13,8 @@ import katex from "katex";
 import { Calculator, ShieldCheck, Layers, ArrowLeft, ChevronDown, Sigma } from "lucide-react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { HoeffdingMathTooltip as MT } from "./hoeffding-math-tooltip";
+import { MathTooltip, type TooltipVariant } from "./math-tooltip";
+import { getHoeffdingMath } from "@/lib/hoeffding-math";
 
 // Dynamic import visualizations
 const HoeffdingHero = dynamic(
@@ -54,6 +55,25 @@ const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-bricolage",
   display: "swap",
 });
+
+// Tooltip Wrapper
+const MT = ({ mathKey, children, color, simple }: { mathKey: string, children: React.ReactNode, color?: string, simple?: boolean }) => {
+  const term = getHoeffdingMath(mathKey);
+  const hexToVariant: Record<string, TooltipVariant> = {
+    "#22d3ee": "cyan",
+    "#a855f7": "purple",
+    "#ec4899": "rose",
+    "#f59e0b": "amber",
+    "#10b981": "emerald",
+    "#3b82f6": "blue",
+    "#f8fafc": "blue"
+  };
+  
+  const activeColor = color || term?.color || "#a855f7";
+  const variant = hexToVariant[activeColor] || "purple";
+
+  return <MathTooltip term={term} variant={variant} simple={simple}>{children}</MathTooltip>;
+};
 
 // Memoized KaTeX helpers
 const M = memo(function M({ t }: { t: string }) {

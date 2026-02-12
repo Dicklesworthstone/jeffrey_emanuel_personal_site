@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Sigma } from "lucide-react";
+import { Sigma, HelpCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHoeffdingMath, type MathTerm } from "@/lib/hoeffding-math";
 import { TooltipShell } from "./tooltip-shell";
@@ -33,7 +33,6 @@ export function HoeffdingMathTooltip({ mathKey, children, className, color, simp
       title={mathData.term}
       ariaLabel={`Explain: ${mathData.term}`}
       variant="purple"
-      portalClassName="hoeffding-scope"
       className={cn(
         "relative inline-block cursor-help transition-all duration-300 group/math",
         "hover:scale-[1.05] focus:outline-none rounded-lg p-0.5",
@@ -138,7 +137,7 @@ function MathSheetContent({ math, activeColor }: { math: MathTerm; activeColor: 
             style={{ borderColor: `${activeColor}20`, backgroundColor: `${activeColor}05` }}
           >
             <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: activeColor }}>Intuitive Analogy</h4>
-            <p className="text-lg leading-relaxed text-slate-300 italic">
+            <p className="text-lg leading-relaxed text-slate-300 italic font-serif">
               &ldquo;{math.analogy}&rdquo;
             </p>
           </div>
