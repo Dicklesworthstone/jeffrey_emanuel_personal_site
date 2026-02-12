@@ -45,7 +45,7 @@ export default function BottomSheet({
   onClose,
   title,
   children,
-  maxHeight = 90,
+  maxHeight = 95,
   showDragHandle = true,
   closeOnBackdrop = true,
   closeOnEscape = true,
@@ -222,7 +222,7 @@ export default function BottomSheet({
                 contentClassName
               )}
               style={{
-                maxHeight: `calc(${maxHeight}vh - ${title ? 100 : 60}px)`,
+                maxHeight: `calc(${maxHeight}vh - ${title ? 80 : 60}px)`,
               }}
               data-testid="sheet-content"
             >
