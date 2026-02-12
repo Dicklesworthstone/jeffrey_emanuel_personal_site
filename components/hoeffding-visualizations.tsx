@@ -486,17 +486,17 @@ export function OutlierCrusher() {
 
   return (
     <div className="hd-viz-container hd-glass-panel">
-      <div className="flex justify-between items-center p-8 border-b border-white/5">
+      <div className="p-4 md:p-8 flex flex-wrap items-center justify-between gap-3 border-b border-white/5">
         <div>
           <div className="hd-instrument-label mb-1">Stress Test</div>
           <h4 className="text-white font-black text-lg uppercase tracking-tight italic">Magnitude Sanitization</h4>
         </div>
-        <div className="flex p-1 bg-white/5 rounded-2xl border border-white/10">
+        <div className="flex p-1 bg-white/5 rounded-2xl border border-white/10 w-full sm:w-auto justify-center">
           {(["raw", "ranked"] as const).map(m => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${mode === m ? "bg-amber-500 text-black shadow-lg" : "text-slate-500 hover:text-white"}`}
+              className={`px-3 md:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${mode === m ? "bg-amber-500 text-black shadow-lg" : "text-slate-500 hover:text-white"}`}
             >
               {m} View
             </button>

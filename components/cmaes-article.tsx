@@ -580,7 +580,7 @@ export function CMAESArticle() {
               </p>
             </div>
 
-            <div className="bg-black/50 border border-white/5 rounded-2xl p-10 flex justify-center overflow-x-auto">
+            <div className="bg-black/50 border border-white/5 rounded-2xl p-4 md:p-10 flex justify-center overflow-x-auto">
               <GranularMath 
                 parts={[
                   { tex: "p_\\sigma", key: "evolution-path", color: "purple" },

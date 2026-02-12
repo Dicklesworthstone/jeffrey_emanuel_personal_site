@@ -1188,8 +1188,8 @@ y = XOR(C[i] for i in indices)`}
             RaptorQ vs. The Alternatives
           </h2>
           <p>It helps to see RaptorQ in context.</p>
-          <div className="overflow-x-auto my-12 -mx-4 md:mx-0 custom-scrollbar">
-            <table className="min-w-[600px] w-full text-sm text-slate-300 border border-white/10 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto my-12 custom-scrollbar">
+            <table className="min-w-[560px] w-full text-sm text-slate-300 border border-white/10 rounded-2xl overflow-hidden">
               <thead className="bg-white/5 text-slate-400 uppercase tracking-widest text-[10px]">
                 <tr>
                   <th className="text-left p-3 md:p-4 font-black">Scheme</th>

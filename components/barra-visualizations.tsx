@@ -186,7 +186,7 @@ export function ReturnDecomposition() {
           <Activity className="w-4 h-4 text-emerald-400" />
           <h4 className="font-black text-white uppercase tracking-widest text-[10px]">Forensic Return Prism</h4>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap justify-end">
           {Object.keys(stocks).map(s => (
             <button 
               key={s} onClick={() => setActiveStock(s)}
@@ -289,7 +289,7 @@ export function PodSimulator() {
 
   return (
     <div className="barra-viz-container overflow-hidden bg-slate-950">
-       <div className="barra-viz-header flex justify-between items-center bg-black/60">
+       <div className="barra-viz-header flex flex-wrap justify-between items-center gap-3 bg-black/60">
           <div className="flex items-center gap-3">
              <Shield className={`w-5 h-5 ${lpLoss > 25 ? "text-rose-500 animate-pulse" : "text-emerald-500"}`} />
              <h4 className="font-black text-white uppercase tracking-[0.2em] text-[10px]">Structural Integrity Test</h4>
@@ -339,7 +339,7 @@ export function PodSimulator() {
              </div>
              <div className="pt-8 border-t border-white/5">
                 <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-4">Capital Impact</div>
-                <div className={`text-7xl font-black tracking-tighter ${lpLoss >= 50 ? "text-rose-500" : lpLoss >= 25 ? "text-amber-500" : "text-emerald-500"}`}>-{lpLoss}%</div>
+                <div className={`text-5xl md:text-7xl font-black tracking-tighter ${lpLoss >= 50 ? "text-rose-500" : lpLoss >= 25 ? "text-amber-500" : "text-emerald-500"}`}>-{lpLoss}%</div>
              </div>
           </div>
        </div>
@@ -405,12 +405,12 @@ export function FactorCorrelationMatrix() {
 
   return (
     <div className="barra-viz-container min-h-[500px] relative bg-black">
-       <div className="barra-viz-header flex justify-between items-center bg-white/[0.02] border-b border-white/5 relative z-10 px-6">
+       <div className="barra-viz-header flex flex-wrap justify-between items-center gap-3 bg-white/[0.02] border-b border-white/5 relative z-10 px-6">
           <div className="flex items-center gap-3">
              <Layers className="w-4 h-4 text-cyan-400" />
              <h4 className="font-black text-white uppercase tracking-[0.2em] text-[10px]">The Factor Cosmos</h4>
           </div>
-          <div className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.3em] animate-pulse">Select Orbit to Analyze</div>
+          <div className="hidden sm:block text-[9px] font-black text-emerald-400 uppercase tracking-[0.3em] animate-pulse">Select Orbit to Analyze</div>
        </div>
 
        <div className="absolute inset-0">
@@ -506,7 +506,7 @@ export function LiveRegression() {
 
   return (
     <div className="barra-viz-container !bg-[#050508] border-emerald-500/20 overflow-hidden min-h-[450px]">
-       <div className="barra-viz-header !bg-black/60 border-b border-white/10 flex justify-between items-center px-6 h-14">
+       <div className="barra-viz-header !bg-black/60 border-b border-white/10 flex flex-wrap justify-between items-center gap-3 px-4 md:px-6 py-3 md:h-14">
          <div className="flex items-center gap-3">
             <div className="flex gap-1.5">
                <div className="w-2 h-2 rounded-full bg-rose-500/50" />
@@ -515,8 +515,8 @@ export function LiveRegression() {
             </div>
             <h4 className="font-mono text-[9px] text-slate-400 uppercase tracking-widest font-black">wls_optimizer.exe</h4>
          </div>
-         <div className="flex gap-3 items-center">
-            <div className="flex p-1 bg-white/5 rounded-lg h-8">
+         <div className="flex gap-3 items-center flex-wrap justify-end">
+            <div className="flex p-1 bg-white/5 rounded-lg h-8 max-w-full overflow-x-auto no-scrollbar">
                {(["code", "console", "visual"] as const).map((t) => (
                  <button key={t} onClick={() => setActiveTab(t)}
                    className={`px-3 rounded-md text-[8px] font-black uppercase tracking-widest transition-all ${activeTab === t ? "bg-emerald-500 text-black shadow-lg" : "text-slate-500 hover:text-slate-300"}`}

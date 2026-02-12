@@ -190,7 +190,7 @@ export function BakeryHero() {
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full h-full min-h-[450px] md:min-h-[600px] relative overflow-hidden">
+    <div ref={containerRef} className="w-full h-full min-h-[360px] sm:min-h-[450px] md:min-h-[600px] relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] pointer-events-none z-10" />
       
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20 pointer-events-none w-[90%] max-w-lg">
@@ -475,7 +475,7 @@ export function ProcessNexus() {
   };
 
   return (
-    <div className="ba-viz-container h-[500px] md:h-[750px] flex items-center justify-center p-0 overflow-hidden relative">
+    <div className="ba-viz-container h-[420px] sm:h-[500px] md:h-[750px] flex items-center justify-center p-0 overflow-hidden relative">
       <div className="absolute inset-0 bg-[#050507] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)]" />
       

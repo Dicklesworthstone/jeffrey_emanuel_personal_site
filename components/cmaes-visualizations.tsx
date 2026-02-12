@@ -402,7 +402,7 @@ export function SelectionWalkthrough() {
 
   return (
     <div className="rq-viz-container !p-0">
-      <div className="rq-viz-header flex-col md:flex-row gap-6 p-8 border-b-0">
+      <div className="rq-viz-header flex-col md:flex-row gap-6 p-4 md:p-8 border-b-0">
         <div className="flex items-center gap-5">
           <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shadow-inner">
             <Zap className="w-7 h-7 text-amber-400" />
@@ -412,7 +412,7 @@ export function SelectionWalkthrough() {
             <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black">Step-by-Step Adaptation</p>
           </div>
         </div>
-        <button onClick={nextStep} className="rq-btn-action !py-3.5 px-10 flex items-center gap-3 group md:ml-auto">
+        <button onClick={nextStep} className="rq-btn-action !py-3.5 !px-4 md:!px-10 flex items-center gap-3 group md:ml-auto">
           {stepIdx === 3 ? "Reset Sequence" : "Next Phase"}
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
@@ -521,7 +521,7 @@ export function ComparisonViz() {
 
   return (
     <div className="rq-viz-container !p-0">
-      <div className="rq-viz-header border-b-0 p-8">
+      <div className="rq-viz-header border-b-0 p-4 md:p-8">
         <div className="flex items-center gap-5">
           <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shadow-inner">
             <Activity className="w-7 h-7 text-orange-400" />
@@ -531,15 +531,15 @@ export function ComparisonViz() {
             <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black">CMA-ES vs Traditional Gradient</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 bg-black/40 p-1.5 rounded-full border border-white/10 md:ml-auto">
-          <button onClick={() => setActive("cma")} className={cn("px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
+        <div className="flex flex-wrap items-center gap-3 bg-black/40 p-1.5 rounded-2xl border border-white/10 md:ml-auto">
+          <button onClick={() => setActive("cma")} className={cn("px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
             active === "cma" ? "bg-amber-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}>CMA-ES</button>
-          <button onClick={() => setActive("gd")} className={cn("px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
+          <button onClick={() => setActive("gd")} className={cn("px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all", 
             active === "gd" ? "bg-blue-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}>Gradient</button>
         </div>
       </div>
       <div className="flex flex-col lg:flex-row">
-        <div className="lg:w-1/3 p-10 border-r border-white/5 bg-white/[0.01]">
+        <div className="lg:w-1/3 p-6 md:p-10 border-r border-white/5 bg-white/[0.01]">
           <p className="text-base text-slate-300 leading-relaxed italic mb-10">
             In a <strong>narrow, rotated valley</strong>, standard Gradient Descent often oscillates wildly because its steps aren't aligned with the curvature. 
             <span className="text-amber-400 font-bold block mt-4 px-4 py-3 bg-amber-500/5 border border-amber-500/10 rounded-xl not-italic">CMA-ES learns the valley's very shape, stretching its distribution to glide straight to the global minimum.</span>
@@ -549,7 +549,7 @@ export function ComparisonViz() {
             <Play className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
           </button>
         </div>
-        <div className="lg:w-2/3 h-[500px] relative">
+        <div className="lg:w-2/3 h-[380px] sm:h-[500px] relative">
           <Canvas dpr={[1, 2]} camera={{ position: [8, 8, 8], fov: 40 }}>
             <color attach="background" args={["#020204"]} />
             <ambientLight intensity={0.5} />
@@ -636,7 +636,7 @@ export function BenchmarkRunner() {
 
   return (
     <div className="rq-viz-container !p-0">
-      <div className="rq-viz-header flex-col md:flex-row p-10 gap-8 border-b-0">
+      <div className="rq-viz-header flex-col md:flex-row p-4 md:p-10 gap-8 border-b-0">
         <div className="flex items-center gap-6">
           <div className="w-16 h-14 rounded-2xl bg-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.4)] flex items-center justify-center">
             <Cpu className="w-9 h-9 text-black" />
@@ -646,16 +646,16 @@ export function BenchmarkRunner() {
             <p className="text-xs text-slate-500 uppercase tracking-widest font-black">High-Performance Black-Box Solver</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 bg-white/5 p-2.5 rounded-2xl border border-white/10 md:ml-auto">
-          <select value={selected} onChange={e => setSelected(e.target.value as any)} className="bg-transparent border-none text-[12px] font-black uppercase text-white outline-none px-6">
+        <div className="flex flex-wrap items-center gap-3 bg-white/5 p-2.5 rounded-2xl border border-white/10 w-full md:w-auto md:ml-auto">
+          <select value={selected} onChange={e => setSelected(e.target.value as any)} className="bg-transparent border-none text-[12px] font-black uppercase text-white outline-none px-3 md:px-6 min-w-[9rem]">
             {Object.keys(BENCHMARKS).map(b => <option key={b} value={b}>{b}</option>)}
           </select>
-          <button onClick={run} disabled={isRunning} className="rq-btn-action !shadow-none !py-3.5 !px-8">Execute Optimization</button>
+          <button onClick={run} disabled={isRunning} className="rq-btn-action !shadow-none !py-3.5 !px-4 md:!px-8 w-full sm:w-auto">Execute Optimization</button>
         </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-white/5 border-t border-white/10">
-        <div className="lg:col-span-4 p-10 flex flex-col gap-12 bg-white/[0.01]">
+        <div className="lg:col-span-4 p-6 md:p-10 flex flex-col gap-12 bg-white/[0.01]">
           <div className="space-y-6">
             <div className="flex justify-between items-center text-xs font-black uppercase text-slate-500 tracking-widest">
               <span>Hypercube Dimension</span>
@@ -679,7 +679,7 @@ export function BenchmarkRunner() {
           </div>
         </div>
 
-        <div className="lg:col-span-8 p-10 bg-black/40 flex flex-col gap-10">
+        <div className="lg:col-span-8 p-6 md:p-10 bg-black/40 flex flex-col gap-10">
           <div className="flex items-center gap-12">
             <div className="flex items-center gap-4">
               <div className="w-4 h-4 rounded-full bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)]" />
