@@ -76,6 +76,7 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
             key={project.name}
             variants={variants}
             initial="hidden"
+            animate="visible"
             exit="exit"
             className={cn(
               "relative",
