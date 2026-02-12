@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, ChevronRight } from "lucide-react";
+import { Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, ChevronRight, RotateCcw } from "lucide-react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, PerspectiveCamera, Stars } from "@react-three/drei";
 import * as THREE from "three";
@@ -24,6 +24,15 @@ const CONSTRAINT_IMPACT = [
   "−15% remaining",
   "−10% remaining",
   "−5% remaining",
+];
+
+const HUD_LABELS = [
+  "LIKENESS_LOCK_V2",
+  "POSE_MATCH_STRICT",
+  "CLOTHING_SYNC_ID",
+  "BEARD_LOGIC_CHK",
+  "LIGHTING_FIX_REL",
+  "BG_MATCH_SCENE"
 ];
 
 // ============================================================
@@ -154,6 +163,7 @@ export function ConstraintViz() {
       </div>
 
       <div className="px-4 md:px-6 py-6 md:py-8">
+        {/* 3D Canvas + HUD */}
         <div className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
           <Canvas gl={{ alpha: true }}>
             <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
@@ -167,6 +177,7 @@ export function ConstraintViz() {
 
           {/* HUD Overlay */}
           <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between">
+            {/* Top Bar */}
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <div className="h-px w-12 bg-amber-500/50" />
@@ -180,9 +191,10 @@ export function ConstraintViz() {
               </div>
             </div>
 
-            <div className="flex justify-center">
+            {/* Center Warning */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                <motion.div 
-                 animate={{ opacity: level > 4 ? 1 : 0 }}
+                 animate={{ opacity: level > 4 ? 1 : 0, scale: level > 4 ? 1 : 0.9 }}
                  className="px-4 py-2 bg-rose-500/20 border border-rose-500/40 rounded-full backdrop-blur-md"
                >
                  <span className="text-[10px] font-bold text-rose-400 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -190,90 +202,87 @@ export function ConstraintViz() {
                  </span>
                </motion.div>
             </div>
+
+            {/* Bottom System Log */}
+            <div className="flex justify-between items-end">
+              <div className="font-mono text-[9px] md:text-[10px] space-y-1.5 max-w-[200px]">
+                <div className="text-slate-600 uppercase tracking-widest mb-2">Active Protocols</div>
+                <AnimatePresence>
+                  {level === 0 ? (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-slate-500 italic"
+                    >
+                      &gt; System open...
+                    </motion.div>
+                  ) : (
+                    HUD_LABELS.slice(0, level).slice(-3).map((label) => {
+                      const idx = HUD_LABELS.indexOf(label);
+                      return (
+                        <motion.div
+                          key={label}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-2 text-amber-400/80"
+                        >
+                          <span>&gt;</span>
+                          <span className="opacity-70">{label}</span>
+                          <span className="text-rose-400 ml-auto">{CONSTRAINT_IMPACT[idx]}</span>
+                        </motion.div>
+                      );
+                    })
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-          <div>
-            <div className="flex items-center justify-between text-sm mb-3">
-              <span className="text-slate-400 font-medium flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-400" />
-                Creative Potential
-              </span>
-              <span className="font-mono font-bold text-amber-400">{visiblePct}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+        {/* Unified Controls Toolbar */}
+        <div className="mt-6 p-1 bg-white/5 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center gap-6 md:gap-8 pr-2 pl-6 py-2">
+          {/* Progress Bar Section */}
+          <div className="w-full flex items-center gap-4 py-2 md:py-0">
+            <span className="text-xs font-mono text-slate-400 shrink-0 uppercase tracking-wider">Potential</span>
+            <div className="h-1.5 flex-grow rounded-full bg-white/10 overflow-hidden">
               <motion.div
                 className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500"
                 animate={{ width: `${visiblePct}%` }}
                 transition={{ type: "spring", stiffness: 50, damping: 20 }}
               />
             </div>
-            
-            <div className="mt-6 flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="op-btn-action flex items-center gap-2 group/btn"
-                onClick={() => setLevel((l) => Math.min(l + 1, 6))}
-                disabled={level >= 6}
-              >
-                <Minimize2 className="w-3 h-3 group-hover/btn:scale-125 transition-transform" />
-                ADD CONSTRAINT
-              </button>
-              <button
-                type="button"
-                className="op-btn-secondary flex items-center gap-2"
-                onClick={() => setLevel((l) => Math.max(l - 1, 0))}
-                disabled={level <= 0}
-              >
-                <Maximize2 className="w-3 h-3" />
-                REMOVE
-              </button>
-              <button
-                type="button"
-                className="op-btn-secondary"
-                onClick={() => setLevel(0)}
-                disabled={level === 0}
-              >
-                RESET
-              </button>
-            </div>
+            <span className="text-xs font-mono font-bold text-amber-400 tabular-nums shrink-0">{visiblePct}%</span>
           </div>
 
-          <div className="bg-white/[0.02] rounded-2xl p-5 border border-white/5 min-h-[160px] relative overflow-hidden">
-            <h4 className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">Active Constraints</h4>
-            <div className="space-y-3 relative z-10">
-              <AnimatePresence mode="popLayout">
-                {level === 0 ? (
-                  <motion.p 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-sm text-slate-500 italic mt-4"
-                  >
-                    No constraints added. The model has full creative range.
-                  </motion.p>
-                ) : (
-                  CONSTRAINT_LABELS.slice(0, level).map((label, i) => (
-                    <motion.div
-                      key={label}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
-                      className="flex items-start gap-3"
-                    >
-                      <div className="mt-1 w-4 h-4 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-300 font-medium leading-none">{label}</p>
-                        <p className="text-[10px] text-rose-400/60 mt-1 font-mono uppercase">{CONSTRAINT_IMPACT[i]}</p>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </AnimatePresence>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex gap-2 w-full md:w-auto shrink-0">
+            <button
+              type="button"
+              className="op-btn-action flex-grow md:flex-grow-0 flex items-center justify-center gap-2 group/btn px-6"
+              onClick={() => setLevel((l) => Math.min(l + 1, 6))}
+              disabled={level >= 6}
+            >
+              <Minimize2 className="w-3 h-3 group-hover/btn:scale-125 transition-transform" />
+              ADD
+            </button>
+            <button
+              type="button"
+              className="op-btn-secondary flex-grow md:flex-grow-0 flex items-center justify-center gap-2 px-4"
+              onClick={() => setLevel((l) => Math.max(l - 1, 0))}
+              disabled={level <= 0}
+              aria-label="Remove constraint"
+            >
+              <Maximize2 className="w-3 h-3" />
+            </button>
+            <button
+              type="button"
+              className="op-btn-secondary w-10 flex items-center justify-center"
+              onClick={() => setLevel(0)}
+              disabled={level === 0}
+              aria-label="Reset"
+            >
+              <RotateCcw className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>
