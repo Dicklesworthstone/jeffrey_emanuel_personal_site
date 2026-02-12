@@ -1,7 +1,5 @@
 import { Metadata } from "next";
 import { CMAESArticle } from "@/components/cmaes-article";
-import SiteHeader from "@/components/site-header";
-import SiteFooter from "@/components/site-footer";
 
 export const metadata: Metadata = {
   title: "The Incredible Magic of CMA-ES | Jeffrey Emanuel",
@@ -24,10 +22,8 @@ export const metadata: Metadata = {
 
 export default function CMAESPage() {
   return (
-    <main className="min-h-screen bg-[#020204]">
-      <SiteHeader />
+    <>
       <CMAESArticle />
-      <SiteFooter />
-    </main>
+    </>
   );
 }

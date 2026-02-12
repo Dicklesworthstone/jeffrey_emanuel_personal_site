@@ -135,7 +135,7 @@ export function HoeffdingArticle() {
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* HUD Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-1 z-[100] bg-white/5">
+      <div className="fixed top-0 left-0 w-full h-1 z-40 bg-white/5 pointer-events-none">
         <motion.div 
           className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-blue-500"
           style={{ scaleX: scrollProgress, transformOrigin: "0%" }}
@@ -143,7 +143,7 @@ export function HoeffdingArticle() {
       </div>
 
       {/* Floating Navigation */}
-      <nav className="fixed top-8 left-8 z-[100] hidden lg:block">
+      <nav className="fixed top-24 left-8 z-40 hidden lg:block">
         <Link 
           href="/writing"
           className="hd-glass-panel px-6 py-3 rounded-full flex items-center gap-3 hover:scale-105 transition-all group"
@@ -154,14 +154,14 @@ export function HoeffdingArticle() {
       </nav>
 
       {/* ========== HERO ========== */}
-      <section className="min-h-screen flex flex-col justify-center relative overflow-hidden">
+      <section data-section="hero" className="min-h-screen flex flex-col justify-start relative overflow-hidden pt-24 md:pt-32 pb-20">
         <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="absolute inset-0">
           <HoeffdingHero />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/40 to-[#020204] z-10" />
 
         <EC>
-          <div className="text-center relative z-20 pt-20">
+          <div className="text-center relative z-20">
             <motion.div 
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-3 mb-16 px-6 py-3 rounded-full hd-glass-panel"

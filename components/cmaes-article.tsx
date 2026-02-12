@@ -154,12 +154,12 @@ export function CMAESArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
+      <section data-section="hero" className="min-h-screen flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
         <HeroCMAES />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
-          <div className="text-center pt-32 relative z-20">
+          <div className="text-center relative z-20">
             <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
               Non-Convex Intelligence / Adaptive Search
@@ -599,9 +599,9 @@ export function CMAESArticle() {
       </section>
 
       {/* Floating Scroll to Top */}
-      <button 
+      <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50 opacity-0"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 md:bottom-8 w-12 h-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50 opacity-0"
         style={{ opacity: scrollProgress > 0.2 ? 1 : 0, pointerEvents: scrollProgress > 0.2 ? 'auto' : 'none' }}
       >
         <RotateCcw className="w-6 h-6" />
