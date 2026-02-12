@@ -167,7 +167,7 @@ export function HoeffdingArticle() {
               transition={{ delay: 0.4 }}
               className="text-xl md:text-3xl text-slate-400 max-w-2xl mx-auto leading-tight font-light"
             >
-              Why Hoeffding&apos;s <MT mathKey="d1-term"><M t="D" /></MT> is my favorite measure for quantifying the deep dependencies that standard correlation misses.
+              Hoeffding&apos;s <MT mathKey="d1-term"><M t="D" /></MT> provides a robust method for quantifying dependencies that standard correlation often misses.
             </motion.p>
           </div>
         </EC>
@@ -185,20 +185,32 @@ export function HoeffdingArticle() {
       {/* ========== NARRATIVE START ========== */}
       <article className="pt-20">
         <EC>
-          <p className="hd-drop-cap text-2xl md:text-3xl leading-relaxed text-white font-medium mb-16">
-            Suppose you have two sequences of numbers. You want to know if they are related. In most settings, we have no clue <em>a priori</em> what the nature of that relationship might be. Are they linear? Cyclical? Sinusoidal? 
+          <p className="hd-drop-cap text-2xl md:text-3xl leading-relaxed text-white font-medium mb-16 text-pretty">
+            Determining the connection between two datasets is often difficult without knowing the underlying structure. Most measures look for a specific <em>type</em> of relationship, such as a straight line. Hoeffding&apos;s <M t="D" /> takes a broader approach by measuring the <strong>Independence Gap</strong>.
           </p>
-          <p>
-            Standard correlation measures—Pearson and Spearman—make massive assumptions. They look for straight lines or monotonic trends. If your data forms a ring or an &quot;X&quot; shape, these measures will often report <strong>zero correlation</strong>, even though the dependency is obvious to any human eye.
-          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+            <div className="space-y-4">
+              <h4 className="text-white font-black uppercase tracking-widest text-sm">The Detection Limit</h4>
+              <p className="text-slate-400 leading-relaxed">
+                Standard measures like Pearson and Spearman rely on the assumption of directionality. They ask: &quot;As X goes up, does Y go up?&quot; This logic fails completely if the data forms a circle, a cross, or a sine wave. In these cases, the &quot;average&quot; direction is zero, making the relationship invisible to traditional tools.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-white font-black uppercase tracking-widest text-sm">The Independence Gap</h4>
+              <p className="text-slate-400 leading-relaxed">
+                Hoeffding&apos;s <M t="D" /> ignores direction entirely. It asks a more fundamental question: &quot;Is the joint behavior of X and Y different from what we would expect if they were purely random?&quot; It quantifies the distance between the observed data and a state of total independence.
+              </p>
+            </div>
+          </div>
 
           <div className="hd-callout hd-glass-panel !border-l-cyan-400">
             <div className="flex gap-6 items-start">
               <Layers className="text-cyan-400 w-10 h-10 shrink-0 mt-2" />
               <div>
-                <h3 className="text-white font-black text-2xl mb-4 uppercase tracking-tighter italic">The Delta Insight</h3>
+                <h3 className="text-white font-black text-2xl mb-4 uppercase tracking-tighter italic">Why Quadruples Matter</h3>
                 <p className="text-lg text-slate-300 leading-relaxed m-0">
-                  The &quot;brilliant&quot; logic behind Hoeffding&apos;s <MT mathKey="d1-term"><M t="D" /></MT> is comparing the <MT mathKey="joint-distribution"><strong>Joint Distribution</strong></MT> of your data to the <MT mathKey="marginals"><strong>Product of Marginals</strong></MT>. If <M t="X" /> and <M t="Y" /> are independent, the product of their individual behaviors should perfectly predict their joint behavior. Any deviation from this is dependency.
+                  To detect a line, you only need two points. To detect a monotonic curve, you need three. But to detect a non-monotonic relationship (like a turn or a crossing), you need at least <strong>four points</strong>. Hoeffding&apos;s <M t="D" /> uses <MT mathKey="combinatorial-probing"><strong>Combinatorial Probing</strong></MT> to evaluate sets of quadruples, allowing it to see shapes that pairwise measures miss.
                 </p>
               </div>
             </div>
@@ -261,10 +273,42 @@ export function HoeffdingArticle() {
         <EC>
           <div className="mb-16">
             <div className="hd-instrument-label mb-4 text-purple-400">The Formalism</div>
-            <h2 className="hd-section-title !mt-0 !mb-6">The Statistical Engine</h2>
-            <p className="text-lg text-slate-400 text-pretty">
-              Wassily Hoeffding&apos;s 1948 paper defines <M t="D" /> through a series of intermediate terms that evaluate every possible <MT mathKey="n-choose-4"><strong>quadruple</strong></MT> of points in your dataset.
+            <h2 className="hd-section-title !mt-0 !mb-6 text-balance">The Statistical Engine</h2>
+            <p className="text-xl text-slate-200 font-medium mb-6">
+              Hoeffding&apos;s <M t="D" /> is an information-theoretic independence test disguised as a correlation measure.
             </p>
+            <p className="text-lg text-slate-400 text-pretty">
+              Instead of fitting a line, it evaluates the <MT mathKey="independence-gap"><strong>Independence Gap</strong></MT> by processing every possible <MT mathKey="combinatorial-probing"><strong>quadruple</strong></MT> of points. This combinatorial approach is the key to its universal detection capability.
+            </p>
+          </div>
+
+          <div className="mb-20 overflow-x-auto hd-glass-panel rounded-3xl">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-white/5">
+                  <th className="p-6 text-[10px] uppercase tracking-widest font-black text-slate-500">Measure</th>
+                  <th className="p-6 text-[10px] uppercase tracking-widest font-black text-slate-500">Geometric Focus</th>
+                  <th className="p-6 text-[10px] uppercase tracking-widest font-black text-slate-500">Detectable Topologies</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                <tr>
+                  <td className="p-6 font-bold text-blue-400">Pearson</td>
+                  <td className="p-6 text-slate-300">Linearity</td>
+                  <td className="p-6 text-slate-400 text-sm">Straight lines only.</td>
+                </tr>
+                <tr>
+                  <td className="p-6 font-bold text-purple-400">Spearman</td>
+                  <td className="p-6 text-slate-300">Monotonicity</td>
+                  <td className="p-6 text-slate-400 text-sm">Any curve that only moves in one direction.</td>
+                </tr>
+                <tr>
+                  <td className="p-6 font-bold text-cyan-400">Hoeffding&apos;s D</td>
+                  <td className="p-6 text-slate-300">Independence Gap</td>
+                  <td className="p-6 text-white font-medium text-sm italic">Universal: Rings, Crosses, Waves, and Complex Patterns.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div className="hd-glass-panel rounded-[3rem] p-8 md:p-16 mb-16 relative overflow-hidden group">
@@ -376,7 +420,7 @@ export function HoeffdingArticle() {
             <div className="hd-instrument-label mb-4 text-emerald-400">Implementation</div>
             <h2 className="hd-section-title !mt-0 !mb-6">The TypeScript Kernel</h2>
             <p className="text-lg text-slate-400">
-              The magic of Hoeffding&apos;s <M t="D" /> is that such high-level topological analysis can be expressed in surprisingly few lines of code.
+              Hoeffding&apos;s <M t="D" /> is notable for its ability to perform sophisticated topological analysis through relatively straightforward logic.
             </p>
           </div>
 
@@ -402,7 +446,7 @@ export function HoeffdingArticle() {
             </p>
             
             <div className="hd-callout hd-glass-panel !border-l-purple-500 !bg-purple-500/[0.02]">
-              Hoeffding&apos;s <MT mathKey="d1-term"><M t="D" /></MT> allows us to rank the final candidates based on deep, non-linear dependency rather than just geometric alignment. It is the gold standard for quantifying true association in the modern data age.
+              Hoeffding&apos;s <MT mathKey="d1-term"><M t="D" /></MT> enables ranking candidates based on deep, non-linear dependencies rather than simple geometric alignment. It provides a robust measure for quantifying true association in complex modern datasets.
             </div>
           </div>
         </EC>
@@ -412,7 +456,7 @@ export function HoeffdingArticle() {
         <EC className="text-center space-y-8">
           <div className="hd-instrument-label tracking-[1em]">Conclusion</div>
           <p className="text-slate-500 max-w-lg mx-auto text-pretty">
-            Universal, robust, and topologically aware. Hoeffding&apos;s <M t="D" /> remains the most elegant solution to the problem of &quot;knowing if things are related.&quot;
+            Universal, robust, and topologically aware. Hoeffding&apos;s <M t="D" /> remains a sophisticated solution for identifying relationships in diverse datasets.
           </p>
           <Link 
             href="/writing"
