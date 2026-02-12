@@ -621,6 +621,7 @@ const ToolDetailPanel = React.memo(function ToolDetailPanel({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="hidden lg:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Close"

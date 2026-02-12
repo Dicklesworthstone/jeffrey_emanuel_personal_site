@@ -686,6 +686,7 @@ export function CMAESArticle() {
 
       {/* Floating Scroll to Top */}
       <button
+        type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 md:bottom-8 w-12 h-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50 opacity-0"
         style={{ opacity: scrollProgress > 0.2 ? 1 : 0, pointerEvents: scrollProgress > 0.2 ? 'auto' : 'none' }}

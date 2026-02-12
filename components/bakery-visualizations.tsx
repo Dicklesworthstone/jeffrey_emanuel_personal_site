@@ -311,9 +311,10 @@ export function DoorwayRaceViz() {
                     className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400"
                   />
                </div>
-               <div className="flex justify-between px-1">
+                <div className="flex justify-between px-1">
                   {DOORWAY_STEPS.map((s, i) => (
                     <button 
+                      type="button"
                       key={i} 
                       onClick={() => { setProgress(s.t); lightTap(); }}
                       className={`w-2.5 h-2.5 rounded-full transition-all duration-300 hover:scale-125 ${progress >= s.t ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]' : 'bg-white/10'}`} 

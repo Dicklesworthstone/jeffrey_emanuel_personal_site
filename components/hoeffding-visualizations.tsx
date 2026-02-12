@@ -402,6 +402,7 @@ export function DependencyLab() {
         <div className="p-6 flex gap-2 overflow-x-auto no-scrollbar bg-black/20">
           {(Object.keys(GENERATORS) as (keyof typeof GENERATORS)[]).map(s => (
             <button 
+              type="button"
               key={s} 
               onClick={() => setType(s)}
               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap border ${type === s ? "bg-cyan-400 text-black border-cyan-400" : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}
@@ -501,6 +502,7 @@ export function OutlierCrusher() {
         <div className="flex p-1 bg-white/5 rounded-2xl border border-white/10 w-full sm:w-auto justify-center">
           {(["raw", "ranked"] as const).map(m => (
             <button
+              type="button"
               key={m}
               onClick={() => setMode(m)}
               className={`px-3 md:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${mode === m ? "bg-amber-500 text-black shadow-lg" : "text-slate-500 hover:text-white"}`}
@@ -727,7 +729,8 @@ function rankdata(arr) {
           <div className="hd-instrument-label mb-1">Runtime Environment</div>
           <h4 className="text-white font-black text-lg uppercase tracking-tighter italic">TypeScript Kernel</h4>
         </div>
-        <button 
+        <button
+          type="button"
           onClick={runCode} 
           disabled={isLoading} 
           className="hd-btn-action !bg-amber-500 !px-4 md:!px-12 transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(245,158,11,0.2)]"

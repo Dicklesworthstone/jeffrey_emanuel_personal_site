@@ -82,6 +82,7 @@ export function DemoShowcase({
         <Filter className="h-4 w-4 text-slate-500" aria-hidden="true" />
         {categoryFilters.map((filter) => (
           <button
+            type="button"
             key={filter.value}
             onClick={() => setActiveCategory(filter.value)}
             className={cn(
@@ -107,6 +108,7 @@ export function DemoShowcase({
         <p className="mt-4 text-slate-500">No demos available for this category.</p>
         {activeCategory !== "all" && (
           <button
+            type="button"
             onClick={() => setActiveCategory("all")}
             className="mt-2 text-sm text-violet-400 hover:text-violet-300"
           >

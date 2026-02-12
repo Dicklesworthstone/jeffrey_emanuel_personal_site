@@ -206,6 +206,7 @@ export function EndorsementShowcase({
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <Filter className="h-4 w-4 text-slate-500" aria-hidden="true" />
         <button
+          type="button"
           onClick={() => setActiveTag(null)}
           className={cn(
             "rounded-full px-3 py-1 text-xs font-medium transition-colors",
@@ -219,6 +220,7 @@ export function EndorsementShowcase({
         </button>
         {allTags.map((tag) => (
           <button
+            type="button"
             key={tag}
             onClick={() => setActiveTag(activeTag === tag ? null : tag)}
             className={cn(
@@ -243,6 +245,7 @@ export function EndorsementShowcase({
     return (
       <div className="mt-4 flex items-center justify-center gap-4">
         <button
+          type="button"
           onClick={goToPrev}
           disabled={!canGoPrev}
           className={cn(
@@ -260,6 +263,7 @@ export function EndorsementShowcase({
         <div className="flex gap-2" role="tablist" aria-label="Endorsement navigation">
           {otherItems.map((_, idx) => (
             <button
+              type="button"
               key={idx}
               onClick={() => setCarouselIndex(idx)}
               className={cn(
@@ -276,6 +280,7 @@ export function EndorsementShowcase({
         </div>
 
         <button
+          type="button"
           onClick={goToNext}
           disabled={!canGoNext}
           className={cn(
@@ -299,6 +304,7 @@ export function EndorsementShowcase({
         <p className="text-slate-500">No endorsements found for the selected filter.</p>
         {activeTag && (
           <button
+            type="button"
             onClick={() => setActiveTag(null)}
             className="mt-2 text-sm text-sky-400 hover:text-sky-300"
           >
@@ -409,6 +415,7 @@ export function EndorsementShowcase({
         {filteredEndorsements.length > 1 && (
           <div className="mt-4 flex items-center justify-center gap-4">
             <button
+              type="button"
               onClick={goToPrev}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
               aria-label="Previous endorsement"
@@ -419,6 +426,7 @@ export function EndorsementShowcase({
             <div className="flex gap-2" role="tablist">
               {filteredEndorsements.map((_, idx) => (
                 <button
+                  type="button"
                   key={idx}
                   onClick={() => setCarouselIndex(idx)}
                   className={cn(
@@ -435,6 +443,7 @@ export function EndorsementShowcase({
             </div>
 
             <button
+              type="button"
               onClick={goToNext}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
               aria-label="Next endorsement"

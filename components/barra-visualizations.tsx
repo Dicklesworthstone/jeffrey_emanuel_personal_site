@@ -205,6 +205,7 @@ export function ReturnDecomposition() {
         <div className="flex gap-1 flex-wrap justify-end">
           {Object.keys(stocks).map(s => (
             <button 
+              type="button"
               key={s} onClick={() => setActiveStock(s)}
               className={`px-3 py-1 rounded-md text-[9px] font-black transition-all ${activeStock === s ? "bg-emerald-500 text-black shadow-lg" : "bg-white/5 text-slate-400 hover:bg-white/10"}`}
             >

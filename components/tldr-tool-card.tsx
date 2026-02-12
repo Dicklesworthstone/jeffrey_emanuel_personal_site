@@ -241,23 +241,29 @@ export const TldrToolCard = memo(function TldrToolCard({
         {/* Compare selection overlay */}
         {isCompareMode && (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onToggleCompare?.(tool);
             }}
-            type="button"
             className="absolute inset-0 z-20 cursor-pointer"
             aria-label={isSelectedForCompare ? `Remove ${tool.shortName} from comparison` : `Add ${tool.shortName} to comparison`}
           >
-            <div className={cn(
-              "absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all sm:right-4 sm:top-4",
-              isSelectedForCompare
-                ? "border-violet-400 bg-violet-500 text-white"
-                : "border-slate-500 bg-slate-900/80"
-            )}>
+            <div
+              className={cn(
+                "absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all sm:right-4 sm:top-4",
+                isSelectedForCompare
+                  ? "border-violet-400 bg-violet-500 text-white"
+                  : "border-slate-500 bg-slate-900/80"
+              )}
+            >
               {isSelectedForCompare && (
                 <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               )}
             </div>
