@@ -78,13 +78,13 @@ export default async function Image() {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            gap: 60,
+            gap: 80,
             zIndex: 10,
-            padding: "30px 70px",
+            padding: "30px 80px",
             width: "100%",
           }}
         >
-          {/* Left side - Constraint funnel visualization */}
+          {/* Left side - Singularity Visual */}
           <div
             style={{
               display: "flex",
@@ -93,72 +93,81 @@ export default async function Image() {
               position: "relative",
             }}
           >
-            {/* Outer glow */}
+            {/* HUD Rings */}
             <div
               style={{
                 position: "absolute",
-                width: 240,
-                height: 240,
+                width: 300,
+                height: 300,
                 borderRadius: "50%",
-                background:
-                  "radial-gradient(circle, rgba(245,158,11,0.24) 0%, rgba(244,63,94,0.14) 50%, transparent 70%)",
-                filter: "blur(28px)",
+                border: "1px solid rgba(245,158,11,0.1)",
+                display: "flex",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                width: 220,
+                height: 220,
+                borderRadius: "50%",
+                border: "1px solid rgba(245,158,11,0.2)",
                 display: "flex",
               }}
             />
 
-            {/* Funnel SVG */}
+            {/* Core Glow */}
+            <div
+              style={{
+                position: "absolute",
+                width: 160,
+                height: 160,
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(circle, rgba(245,158,11,0.3) 0%, rgba(244,63,94,0.1) 60%, transparent 80%)",
+                filter: "blur(20px)",
+                display: "flex",
+              }}
+            />
+
+            {/* Singularity SVG */}
             <svg
-              width="180"
-              height="180"
+              width="220"
+              height="240"
               viewBox="0 0 100 100"
               fill="none"
               style={{
-                filter: "drop-shadow(0 0 24px rgba(245,158,11,0.3))",
+                filter: "drop-shadow(0 0 20px rgba(245,158,11,0.4))",
               }}
             >
               <defs>
                 <linearGradient id="opGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#f59e0b" />
-                  <stop offset="50%" stopColor="#f97316" />
                   <stop offset="100%" stopColor="#f43f5e" />
                 </linearGradient>
               </defs>
 
-              {/* Outer ring */}
-              <circle cx="50" cy="50" r="45" stroke="url(#opGrad)" strokeWidth="2" fill="none" opacity="0.5" />
-              <circle cx="50" cy="50" r="38" stroke="#f59e0b" strokeWidth="0.5" fill="none" opacity="0.25" />
+              {/* Collapsing Rings */}
+              <circle cx="50" cy="50" r="45" stroke="url(#opGrad)" strokeWidth="0.5" strokeDasharray="2 4" opacity="0.3" />
+              <circle cx="50" cy="50" r="35" stroke="url(#opGrad)" strokeWidth="1" strokeDasharray="4 2" opacity="0.5" />
+              <circle cx="50" cy="50" r="20" stroke="url(#opGrad)" strokeWidth="2" opacity="0.8" />
+              
+              {/* Central Point */}
+              <circle cx="50" cy="50" r="4" fill="white" />
+              <circle cx="50" cy="50" r="8" fill="#f59e0b" opacity="0.4" />
 
-              {/* Funnel shape - wide top, narrow bottom */}
-              <path
-                d="M20 25 L80 25 L65 75 L35 75 Z"
-                fill="rgba(245,158,11,0.08)"
-                stroke="url(#opGrad)"
-                strokeWidth="1.5"
-                opacity="0.8"
-              />
+              {/* Coordinate Lines */}
+              <line x1="50" y1="5" x2="50" y2="15" stroke="#f59e0b" strokeWidth="0.5" opacity="0.5" />
+              <line x1="50" y1="85" x2="50" y2="95" stroke="#f59e0b" strokeWidth="0.5" opacity="0.5" />
+              <line x1="5" y1="50" x2="15" y2="50" stroke="#f59e0b" strokeWidth="0.5" opacity="0.5" />
+              <line x1="85" y1="50" x2="95" y2="50" stroke="#f59e0b" strokeWidth="0.5" opacity="0.5" />
 
-              {/* Constraint lines (crossing through funnel) */}
-              <line x1="25" y1="35" x2="75" y2="35" stroke="#f43f5e" strokeWidth="1" opacity="0.4" />
-              <line x1="30" y1="45" x2="70" y2="45" stroke="#f43f5e" strokeWidth="1" opacity="0.4" />
-              <line x1="35" y1="55" x2="65" y2="55" stroke="#f43f5e" strokeWidth="1" opacity="0.4" />
-              <line x1="40" y1="65" x2="60" y2="65" stroke="#f43f5e" strokeWidth="1" opacity="0.4" />
-
-              {/* Input dots (top - many) */}
-              <circle cx="30" cy="18" r="3" fill="#f59e0b" opacity="0.9" />
-              <circle cx="42" cy="16" r="2.5" fill="#f97316" opacity="0.8" />
-              <circle cx="50" cy="14" r="3" fill="#f59e0b" opacity="0.9" />
-              <circle cx="58" cy="16" r="2.5" fill="#f97316" opacity="0.8" />
-              <circle cx="70" cy="18" r="3" fill="#f59e0b" opacity="0.9" />
-
-              {/* Output dot (bottom - single, dim) */}
-              <circle cx="50" cy="82" r="4" fill="#f43f5e" opacity="0.5" />
-
-              {/* X marks for constraints */}
-              <path d="M22 32 L28 38 M28 32 L22 38" stroke="#f43f5e" strokeWidth="1.5" opacity="0.7" />
-              <path d="M72 32 L78 38 M78 32 L72 38" stroke="#f43f5e" strokeWidth="1.5" opacity="0.7" />
-              <path d="M27 52 L33 58 M33 52 L27 58" stroke="#f43f5e" strokeWidth="1.5" opacity="0.7" />
-              <path d="M67 52 L73 58 M73 52 L67 58" stroke="#f43f5e" strokeWidth="1.5" opacity="0.7" />
+              {/* Constraint 'X' marks on outer ring */}
+              <g opacity="0.6" stroke="#f43f5e" strokeWidth="1">
+                <path d="M18 18 L24 24 M24 18 L18 24" />
+                <path d="M76 18 L82 24 M82 18 L76 24" />
+                <path d="M18 76 L24 82 M24 76 L18 82" />
+                <path d="M76 76 L82 82 M82 76 L76 82" />
+              </g>
             </svg>
           </div>
 
@@ -169,7 +178,7 @@ export default async function Image() {
               flexDirection: "column",
               alignItems: "flex-start",
               justifyContent: "center",
-              maxWidth: 640,
+              maxWidth: 600,
             }}
           >
             {/* Page label */}
@@ -177,131 +186,102 @@ export default async function Image() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
-                marginBottom: 16,
-                padding: "7px 15px",
-                borderRadius: 18,
-                background: "rgba(245,158,11,0.12)",
-                border: "1px solid rgba(245,158,11,0.28)",
+                gap: 10,
+                marginBottom: 18,
+                padding: "8px 16px",
+                borderRadius: 20,
+                background: "rgba(245,158,11,0.1)",
+                border: "1px solid rgba(245,158,11,0.2)",
               }}
             >
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b" }} />
               <span
                 style={{
-                  fontSize: 13,
+                  fontSize: 12,
                   color: "#f59e0b",
-                  fontWeight: 600,
-                  letterSpacing: "0.06em",
+                  fontWeight: 700,
+                  letterSpacing: "0.15em",
                   textTransform: "uppercase",
                   display: "flex",
                 }}
               >
-                AI Prompting — Strategy
+                AI Strategy Analysis
               </span>
             </div>
 
             {/* Title */}
-            <h1
-              style={{
-                fontSize: 52,
-                fontWeight: 800,
-                background:
-                  "linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%)",
-                backgroundClip: "text",
-                color: "transparent",
-                margin: 0,
-                marginBottom: 6,
-                letterSpacing: "-0.03em",
-                lineHeight: 1.1,
-                display: "flex",
-              }}
-            >
-              The Overprompting
-            </h1>
-            <h1
-              style={{
-                fontSize: 52,
-                fontWeight: 800,
-                background:
-                  "linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f43f5e 100%)",
-                backgroundClip: "text",
-                color: "transparent",
-                margin: 0,
-                marginBottom: 20,
-                letterSpacing: "-0.03em",
-                lineHeight: 1.1,
-                display: "flex",
-              }}
-            >
-              Trap
-            </h1>
+            <div style={{ display: "flex", flexDirection: "column", marginBottom: 20 }}>
+              <h1
+                style={{
+                  fontSize: 60,
+                  fontWeight: 900,
+                  color: "white",
+                  margin: 0,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1,
+                  display: "flex",
+                }}
+              >
+                The Overprompting
+              </h1>
+              <h1
+                style={{
+                  fontSize: 60,
+                  fontWeight: 900,
+                  background:
+                    "linear-gradient(to right, #f59e0b, #f43f5e)",
+                  backgroundClip: "text",
+                  color: "transparent",
+                  margin: 0,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1,
+                  display: "flex",
+                }}
+              >
+                Trap
+              </h1>
+            </div>
 
             {/* Description */}
             <p
               style={{
-                fontSize: 19,
+                fontSize: 21,
                 color: "#94a3b8",
                 margin: 0,
-                marginBottom: 24,
-                lineHeight: 1.55,
+                marginBottom: 28,
+                lineHeight: 1.5,
+                fontWeight: 400,
                 display: "flex",
               }}
             >
-              {"Why your best intentions are the model's worst enemy—and what to do instead"}
+              {"Why your best intentions are the model's worst enemy, and what to do instead"}
             </p>
 
-            {/* Tags */}
+            {/* Badges */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 14,
-                fontSize: 14,
+                gap: 12,
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "7px 14px",
-                  borderRadius: 7,
-                  background: "rgba(245,158,11,0.14)",
-                  border: "1px solid rgba(245,158,11,0.26)",
-                }}
-              >
-                <span style={{ color: "#f59e0b", fontWeight: 600, display: "flex" }}>
-                  Chef Analogy
-                </span>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "7px 14px",
-                  borderRadius: 7,
-                  background: "rgba(249,115,22,0.14)",
-                  border: "1px solid rgba(249,115,22,0.26)",
-                }}
-              >
-                <span style={{ color: "#fb923c", fontWeight: 600, display: "flex" }}>
-                  Two-Phase
-                </span>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "7px 14px",
-                  borderRadius: 7,
-                  background: "rgba(244,63,94,0.14)",
-                  border: "1px solid rgba(244,63,94,0.26)",
-                }}
-              >
-                <span style={{ color: "#fb7185", fontWeight: 600, display: "flex" }}>
-                  Search Space
-                </span>
-              </div>
+              {["Chef Analogy", "Two-Phase Workflow", "Search Space"].map((tag) => (
+                <div
+                  key={tag}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "6px 14px",
+                    borderRadius: 8,
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <span style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600, display: "flex" }}>
+                    {tag}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

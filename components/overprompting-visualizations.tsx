@@ -1,208 +1,281 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, ChevronRight } from "lucide-react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Float, PerspectiveCamera, Stars } from "@react-three/drei";
+import * as THREE from "three";
+
+// Constraint labels for visualization
+const CONSTRAINT_LABELS = [
+  "Facial likeness must be instantly recognizable",
+  "Pose and orientation must match exactly",
+  "Clothing must be identical to reference",
+  "No beard if the target is clean-shaven",
+  "Skin tone and lighting must be realistic",
+  "Background must match the original scene",
+];
+
+const CONSTRAINT_IMPACT = [
+  "−40% search space",
+  "−25% remaining",
+  "−20% remaining",
+  "−15% remaining",
+  "−10% remaining",
+  "−5% remaining",
+];
 
 // ============================================================
-// 1. CONSTRAINT VISUALIZATION
+// 1. CONSTRAINT VISUALIZATION (3D)
 // Shows how adding constraints narrows the creative search space
 // ============================================================
 
-const CONSTRAINT_LABELS = [
-  "\u201CFacial likeness must be instantly recognizable\u201D",
-  "\u201CPose and orientation must match exactly\u201D",
-  "\u201CClothing must be identical to reference\u201D",
-  "\u201CNo beard if the target is clean-shaven\u201D",
-  "\u201CSkin tone and lighting must be realistic\u201D",
-  "\u201CBackground must match the original scene\u201D",
-];
-
-// Deterministic dot grid. Each dot has a "threshold" — the constraint
-// count at which it disappears. Lower threshold = eliminated sooner.
-interface Dot {
-  id: number;
-  cx: number;
-  cy: number;
-  r: number;
-  hue: number;
-  sat: number;
-  light: number;
-  threshold: number;
-}
-
-function buildDots(cols: number, rows: number, width: number, height: number): Dot[] {
-  const dots: Dot[] = [];
-  const padX = width / (cols + 1);
-  const padY = height / (rows + 1);
-  let id = 0;
-
-  // Deterministic distribution of thresholds across the grid
-  // We want ~70 dots with a nice falloff
-  const thresholds = [
-    // Row 0
-    6, 3, 5, 1, 4, 2, 6, 3, 5, 1,
-    // Row 1
-    2, 5, 1, 4, 6, 3, 2, 5, 1, 4,
-    // Row 2
-    4, 1, 6, 3, 2, 5, 4, 1, 6, 2,
-    // Row 3
-    3, 6, 2, 5, 1, 4, 3, 6, 2, 5,
-    // Row 4
-    5, 2, 4, 1, 3, 6, 5, 2, 4, 1,
-    // Row 5
-    1, 4, 3, 6, 5, 2, 1, 4, 3, 6,
-    // Row 6
-    6, 3, 5, 2, 4, 1, 6, 3, 5, 2,
-  ];
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const idx = r * cols + c;
-      const seed = (c * 7 + r * 13 + 37) % 100;
-      dots.push({
-        id: id,
-        cx: padX * (c + 1) + ((seed % 7) - 3),
-        cy: padY * (r + 1) + ((seed % 5) - 2),
-        r: 4 + (seed % 5),
-        hue: 20 + (seed % 40),          // 20-60: red-orange-gold
-        sat: 70 + (seed % 30),           // 70-100%
-        light: 50 + (seed % 20),         // 50-70%
-        threshold: thresholds[idx] ?? 3,
-      });
-      id++;
+function ParticleCloud({ level }: { level: number }) {
+  const pointsRef = useRef<THREE.Points>(null);
+  const count = 1500;
+  
+  const { positions, originalPositions, colors } = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const orig = new Float32Array(count * 3);
+    const cols = new Float32Array(count * 3);
+    const color = new THREE.Color();
+    
+    for (let i = 0; i < count; i++) {
+      // Create a sphere of particles
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 2.5 * Math.pow(Math.random(), 1/3);
+      
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = r * Math.sin(phi) * Math.sin(theta);
+      const z = r * Math.cos(phi);
+      
+      pos[i * 3] = x;
+      pos[i * 3 + 1] = y;
+      pos[i * 3 + 2] = z;
+      
+      orig[i * 3] = x;
+      orig[i * 3 + 1] = y;
+      orig[i * 3 + 2] = z;
+      
+      // Warm palette
+      const hue = 0.05 + Math.random() * 0.1; // Amber/Orange
+      color.setHSL(hue, 0.8, 0.5 + Math.random() * 0.2);
+      cols[i * 3] = color.r;
+      cols[i * 3 + 1] = color.g;
+      cols[i * 3 + 2] = color.b;
     }
-  }
-  return dots;
+    return { positions: pos, originalPositions: orig, colors: cols };
+  }, []);
+
+  useFrame((state) => {
+    if (!pointsRef.current) return;
+    const time = state.clock.getElapsedTime();
+    const posAttr = pointsRef.current.geometry.attributes.position;
+    
+    // Collapse factor based on level (0 to 6)
+    // Level 0: Sphere
+    // Level 3: Disk
+    // Level 5: Line
+    // Level 6: Point
+    const collapseX = Math.pow(0.15, level / 6);
+    const collapseY = Math.pow(0.05, level / 6);
+    const collapseZ = Math.pow(0.1, level / 6);
+    
+    for (let i = 0; i < count; i++) {
+      const ix = i * 3;
+      const iy = i * 3 + 1;
+      const iz = i * 3 + 2;
+      
+      // Target position
+      const tx = originalPositions[ix] * collapseX;
+      const ty = originalPositions[iy] * collapseY;
+      const tz = originalPositions[iz] * collapseZ;
+      
+      // Add some "vibration" as they get squeezed
+      const noise = level > 0 ? Math.sin(time * 10 + i) * (level * 0.01) : 0;
+      
+      posAttr.array[ix] += (tx - posAttr.array[ix]) * 0.1;
+      posAttr.array[iy] += (ty - posAttr.array[iy]) * 0.1 + noise;
+      posAttr.array[iz] += (tz - posAttr.array[iz]) * 0.1;
+    }
+    
+    posAttr.needsUpdate = true;
+    pointsRef.current.rotation.y = time * 0.1;
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[positions, 3]}
+        />
+        <bufferAttribute
+          attach="attributes-color"
+          args={[colors, 3]}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.035}
+        vertexColors
+        transparent
+        opacity={0.8}
+        blending={THREE.AdditiveBlending}
+        sizeAttenuation={true}
+      />
+    </points>
+  );
 }
 
 export function ConstraintViz() {
   const [level, setLevel] = useState(0);
-  const dots = useMemo(() => buildDots(10, 7, 560, 280), []);
-
-  const visible = dots.filter((d) => d.threshold > level);
-  const pct = Math.round((visible.length / dots.length) * 100);
+  const visiblePct = Math.max(5, Math.round(100 * Math.pow(0.2, level / 6)));
 
   return (
-    <div>
+    <div className="relative overflow-hidden group">
       <div className="op-viz-header">
-        <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0">
-          The Constraint Paradox
-        </h3>
-        <p className="text-sm text-slate-400 m-0">
-          Each dot is a creative direction the model could take. Add constraints to see how the search space shrinks.
-        </p>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0 flex items-center gap-2">
+              <Minimize2 className="w-5 h-5 text-amber-400" />
+              The Constraint Paradox
+            </h3>
+            <p className="text-sm text-slate-400 m-0 mt-1">
+              Adding constraints collapses the model&rsquo;s creative search space.
+            </p>
+          </div>
+          <div className="hidden md:flex flex-col items-end">
+             <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Creative Freedom</span>
+             <span className="text-xl font-mono font-bold text-amber-400 tabular-nums">{visiblePct}%</span>
+          </div>
+        </div>
       </div>
 
-      <div className="px-4 md:px-6 py-4 md:py-6">
-        {/* SVG dot grid */}
-        <div className="w-full overflow-hidden rounded-xl bg-black/40 border border-white/5">
-          <svg
-            viewBox="0 0 560 280"
-            className="w-full h-auto"
-            aria-label={`Creative space visualization: ${pct}% of directions remain with ${level} constraints`}
-          >
-            {dots.map((dot) => {
-              const alive = dot.threshold > level;
-              return (
-                <circle
-                  key={dot.id}
-                  cx={dot.cx}
-                  cy={dot.cy}
-                  r={alive ? dot.r : 2}
-                  fill={
-                    alive
-                      ? `hsla(${dot.hue}, ${dot.sat}%, ${dot.light}%, 0.85)`
-                      : "rgba(100,116,139,0.12)"
-                  }
-                  style={{
-                    transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-                    filter: alive
-                      ? `drop-shadow(0 0 ${dot.r * 1.5}px hsla(${dot.hue}, ${dot.sat}%, ${dot.light}%, 0.4))`
-                      : "none",
-                  }}
-                />
-              );
-            })}
-          </svg>
-        </div>
+      <div className="px-4 md:px-6 py-6 md:py-8">
+        <div className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
+          <Canvas gl={{ alpha: true }}>
+            <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+            <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} intensity={1} />
+            <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+              <ParticleCloud level={level} />
+            </Float>
+          </Canvas>
 
-        {/* Creative freedom meter */}
-        <div className="mt-5 mb-4">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-slate-400 font-medium">Creative Freedom</span>
-            <span
-              className="font-mono font-bold tabular-nums"
-              style={{
-                color: pct > 60 ? "#f59e0b" : pct > 30 ? "#f97316" : "#f43f5e",
-              }}
-            >
-              {pct}%
-            </span>
-          </div>
-          <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${pct}%`,
-                background:
-                  pct > 60
-                    ? "linear-gradient(90deg, #f59e0b, #f97316)"
-                    : pct > 30
-                      ? "linear-gradient(90deg, #f97316, #f43f5e)"
-                      : "linear-gradient(90deg, #f43f5e, #e11d48)",
-                transition: "width 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-              }}
-            />
+          {/* HUD Overlay */}
+          <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <div className="h-px w-12 bg-amber-500/50" />
+                <span className="text-[10px] font-mono text-amber-500/50 uppercase tracking-tighter">Latent Space Analysis</span>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-mono text-slate-500 uppercase">State</div>
+                <div className="text-xs font-bold text-white uppercase tracking-widest">
+                  {level === 0 ? "Infinite" : level < 3 ? "Restricted" : level < 5 ? "Compressed" : "Singularity"}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+               <motion.div 
+                 animate={{ opacity: level > 4 ? 1 : 0 }}
+                 className="px-4 py-2 bg-rose-500/20 border border-rose-500/40 rounded-full backdrop-blur-md"
+               >
+                 <span className="text-[10px] font-bold text-rose-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                   <AlertTriangle className="w-3 h-3" /> Warning: Creative Singularity
+                 </span>
+               </motion.div>
+            </div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex flex-wrap items-center gap-3 mt-4">
-          <button
-            type="button"
-            className="op-btn-action"
-            onClick={() => setLevel((l) => Math.min(l + 1, 6))}
-            disabled={level >= 6}
-          >
-            + ADD CONSTRAINT
-          </button>
-          <button
-            type="button"
-            className="op-btn-secondary"
-            onClick={() => setLevel((l) => Math.max(l - 1, 0))}
-            disabled={level <= 0}
-          >
-            &minus; REMOVE
-          </button>
-          <button
-            type="button"
-            className="op-btn-secondary"
-            onClick={() => setLevel(0)}
-            disabled={level === 0}
-          >
-            RESET
-          </button>
-          <span className="text-xs text-slate-500 font-mono ml-auto">
-            {level}/6 constraints
-          </span>
-        </div>
-
-        {/* Active constraints list */}
-        {level > 0 && (
-          <div className="mt-5 space-y-2">
-            {CONSTRAINT_LABELS.slice(0, level).map((label, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-2 text-sm"
-                style={{
-                  animation: "opFadeIn 0.4s ease-out",
-                }}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          <div>
+            <div className="flex items-center justify-between text-sm mb-3">
+              <span className="text-slate-400 font-medium flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-400" />
+                Creative Potential
+              </span>
+              <span className="font-mono font-bold text-amber-400">{visiblePct}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500"
+                animate={{ width: `${visiblePct}%` }}
+                transition={{ type: "spring", stiffness: 50, damping: 20 }}
+              />
+            </div>
+            
+            <div className="mt-6 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="op-btn-action flex items-center gap-2 group/btn"
+                onClick={() => setLevel((l) => Math.min(l + 1, 6))}
+                disabled={level >= 6}
               >
-                <span className="text-rose-400 mt-0.5 shrink-0">&#x2715;</span>
-                <span className="text-slate-400 italic">{label}</span>
-              </div>
-            ))}
+                <Minimize2 className="w-3 h-3 group-hover/btn:scale-125 transition-transform" />
+                ADD CONSTRAINT
+              </button>
+              <button
+                type="button"
+                className="op-btn-secondary flex items-center gap-2"
+                onClick={() => setLevel((l) => Math.max(l - 1, 0))}
+                disabled={level <= 0}
+              >
+                <Maximize2 className="w-3 h-3" />
+                REMOVE
+              </button>
+              <button
+                type="button"
+                className="op-btn-secondary"
+                onClick={() => setLevel(0)}
+                disabled={level === 0}
+              >
+                RESET
+              </button>
+            </div>
           </div>
-        )}
+
+          <div className="bg-white/[0.02] rounded-2xl p-5 border border-white/5 min-h-[160px] relative overflow-hidden">
+            <h4 className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">Active Constraints</h4>
+            <div className="space-y-3 relative z-10">
+              <AnimatePresence mode="popLayout">
+                {level === 0 ? (
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-sm text-slate-500 italic mt-4"
+                  >
+                    No constraints added. The model has full creative range.
+                  </motion.p>
+                ) : (
+                  CONSTRAINT_LABELS.slice(0, level).map((label, i) => (
+                    <motion.div
+                      key={label}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="flex items-start gap-3"
+                    >
+                      <div className="mt-1 w-4 h-4 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-300 font-medium leading-none">{label}</p>
+                        <p className="text-[10px] text-rose-400/60 mt-1 font-mono uppercase">{CONSTRAINT_IMPACT[i]}</p>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -213,22 +286,39 @@ export function ConstraintViz() {
 // Shows the inverted-U relationship: prompt detail vs quality
 // ============================================================
 
-// Quality curve chart constants (hoisted for stable references)
 const CURVE_W = 600;
-const CURVE_H = 300;
-const CURVE_PAD = { top: 30, right: 30, bottom: 60, left: 50 } as const;
+const CURVE_H = 350;
+const CURVE_PAD = { top: 40, right: 40, bottom: 60, left: 60 } as const;
 const CURVE_PLOT_W = CURVE_W - CURVE_PAD.left - CURVE_PAD.right;
 const CURVE_PLOT_H = CURVE_H - CURVE_PAD.top - CURVE_PAD.bottom;
+
+const ZONE_INFO = {
+  vague: {
+    title: "Underspecified",
+    desc: "The model lacks context and resorts to generic patterns.",
+    icon: Info,
+    color: "#f59e0b",
+  },
+  sweet: {
+    title: "The Sweet Spot",
+    desc: "Perfect balance of intent and creative freedom.",
+    icon: CheckCircle2,
+    color: "#10b981",
+  },
+  over: {
+    title: "Overprompted",
+    desc: "Constraints conflict; the model enters 'Ninja' mode to survive.",
+    icon: AlertTriangle,
+    color: "#f43f5e",
+  }
+};
 
 export function QualityCurveViz() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [drawn, setDrawn] = useState(false);
   const [hoverX, setHoverX] = useState<number | null>(null);
 
-  // Animate curve drawing on scroll
   useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -238,32 +328,29 @@ export function QualityCurveViz() {
       },
       { threshold: 0.3 }
     );
-    observer.observe(svg);
+    if (svgRef.current) observer.observe(svgRef.current);
     return () => observer.disconnect();
   }, []);
 
-  // Curve: quality as a function of prompt detail (0-1 → 0-1)
-  // Peaks around x=0.3, then falls
+  const getQualityAtX = (x: number) => {
+    const t = Math.max(0, Math.min(1, x));
+    return Math.exp(-((t - 0.3) ** 2) / (2 * 0.06)) * 0.9 + 0.05;
+  };
+
   const curvePoints = useMemo(() => {
     const pts: Array<{ x: number; y: number }> = [];
     for (let i = 0; i <= 100; i++) {
       const t = i / 100;
-      // Skewed bell: peaks around 0.3
-      const y = Math.exp(-((t - 0.3) ** 2) / (2 * 0.06)) * 0.9 + 0.05;
-      pts.push({ x: t, y });
+      pts.push({ x: t, y: getQualityAtX(t) });
     }
     return pts;
   }, []);
 
-  const toSVG = useCallback(
-    (x: number, y: number) => ({
-      sx: CURVE_PAD.left + x * CURVE_PLOT_W,
-      sy: CURVE_PAD.top + (1 - y) * CURVE_PLOT_H,
-    }),
-    []
-  );
+  const toSVG = (x: number, y: number) => ({
+    sx: CURVE_PAD.left + x * CURVE_PLOT_W,
+    sy: CURVE_PAD.top + (1 - y) * CURVE_PLOT_H,
+  });
 
-  // Build SVG path (memoized since curvePoints and toSVG are stable)
   const pathD = useMemo(
     () =>
       curvePoints
@@ -272,220 +359,160 @@ export function QualityCurveViz() {
           return `${i === 0 ? "M" : "L"} ${sx} ${sy}`;
         })
         .join(" "),
-    [curvePoints, toSVG]
+    [curvePoints]
   );
 
-  // Zone boundaries
   const zones = [
-    { start: 0, end: 0.15, label: "Too Vague", color: "rgba(245,158,11,0.08)" },
-    { start: 0.15, end: 0.45, label: "Sweet Spot", color: "rgba(34,197,94,0.08)" },
-    { start: 0.45, end: 1, label: "Overprompted", color: "rgba(244,63,94,0.08)" },
+    { type: "vague" as const, start: 0, end: 0.15, color: "rgba(245,158,11,0.05)" },
+    { type: "sweet" as const, start: 0.15, end: 0.45, color: "rgba(16,185,129,0.05)" },
+    { type: "over" as const, start: 0.45, end: 1, color: "rgba(244,63,94,0.05)" },
   ];
-
-  // Hover info
-  const getQualityAtX = (x: number) => {
-    const t = Math.max(0, Math.min(1, x));
-    return Math.exp(-((t - 0.3) ** 2) / (2 * 0.06)) * 0.9 + 0.05;
-  };
 
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     const svg = svgRef.current;
     if (!svg) return;
     const rect = svg.getBoundingClientRect();
-    const scaleX = CURVE_W / rect.width;
-    const mx = (e.clientX - rect.left) * scaleX;
-    const x = (mx - CURVE_PAD.left) / CURVE_PLOT_W;
-    if (x >= 0 && x <= 1) setHoverX(x);
+    const x = (e.clientX - rect.left) / rect.width;
+    const plotX = (x * CURVE_W - CURVE_PAD.left) / CURVE_PLOT_W;
+    if (plotX >= 0 && plotX <= 1) setHoverX(plotX);
     else setHoverX(null);
   };
+
+  const currentZone = hoverX === null ? null : 
+    hoverX < 0.15 ? "vague" : hoverX < 0.45 ? "sweet" : "over";
 
   return (
     <div>
       <div className="op-viz-header">
-        <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0">
+        <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0 flex items-center gap-2">
+          <Target className="w-5 h-5 text-amber-400" />
           The Quality Curve
         </h3>
         <p className="text-sm text-slate-400 m-0">
-          Output quality peaks with moderate guidance, then drops as constraints accumulate.
+          Output quality peaks with moderate guidance, then drops as constraints pile up.
         </p>
       </div>
 
-      <div className="px-4 md:px-6 py-4 md:py-6">
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${CURVE_W} ${CURVE_H}`}
-          className="w-full h-auto"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => setHoverX(null)}
-          aria-label="Chart showing output quality peaking with moderate prompt detail then declining with excessive detail"
-        >
-          {/* Zone backgrounds */}
-          {zones.map((z) => {
-            const x1 = CURVE_PAD.left + z.start * CURVE_PLOT_W;
-            const x2 = CURVE_PAD.left + z.end * CURVE_PLOT_W;
-            return (
-              <rect
-                key={z.label}
-                x={x1}
-                y={CURVE_PAD.top}
-                width={x2 - x1}
-                height={CURVE_PLOT_H}
-                fill={z.color}
-              />
-            );
-          })}
-
-          {/* Grid lines */}
-          {[0.25, 0.5, 0.75].map((y) => {
-            const { sy } = toSVG(0, y);
-            return (
-              <line
-                key={y}
-                x1={CURVE_PAD.left}
-                y1={sy}
-                x2={CURVE_PAD.left + CURVE_PLOT_W}
-                y2={sy}
-                stroke="rgba(255,255,255,0.05)"
-                strokeDasharray="4 4"
-              />
-            );
-          })}
-
-          {/* Axes */}
-          <line
-            x1={CURVE_PAD.left}
-            y1={CURVE_PAD.top + CURVE_PLOT_H}
-            x2={CURVE_PAD.left + CURVE_PLOT_W}
-            y2={CURVE_PAD.top + CURVE_PLOT_H}
-            stroke="rgba(255,255,255,0.15)"
-          />
-          <line
-            x1={CURVE_PAD.left}
-            y1={CURVE_PAD.top}
-            x2={CURVE_PAD.left}
-            y2={CURVE_PAD.top + CURVE_PLOT_H}
-            stroke="rgba(255,255,255,0.15)"
-          />
-
-          {/* Y-axis label */}
-          <text
-            x={14}
-            y={CURVE_PAD.top + CURVE_PLOT_H / 2}
-            fill="#94a3b8"
-            fontSize="11"
-            textAnchor="middle"
-            transform={`rotate(-90, 14, ${CURVE_PAD.top + CURVE_PLOT_H / 2})`}
+      <div className="px-4 md:px-6 py-8">
+        <div className="relative bg-[#050508] rounded-2xl border border-white/5 overflow-hidden p-2">
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${CURVE_W} ${CURVE_H}`}
+            className="w-full h-auto cursor-crosshair"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHoverX(null)}
           >
-            Output Quality
-          </text>
-
-          {/* X-axis label */}
-          <text
-            x={CURVE_PAD.left + CURVE_PLOT_W / 2}
-            y={CURVE_H - 8}
-            fill="#94a3b8"
-            fontSize="11"
-            textAnchor="middle"
-          >
-            Prompt Specificity
-          </text>
-
-          {/* Zone labels */}
-          {zones.map((z) => {
-            const cx = CURVE_PAD.left + ((z.start + z.end) / 2) * CURVE_PLOT_W;
-            return (
-              <text
-                key={z.label}
-                x={cx}
-                y={CURVE_H - 28}
-                fill={
-                  z.label === "Sweet Spot"
-                    ? "#4ade80"
-                    : z.label === "Too Vague"
-                      ? "#fbbf24"
-                      : "#fb7185"
-                }
-                fontSize="10"
-                fontWeight="600"
-                textAnchor="middle"
-                letterSpacing="0.08em"
-              >
-                {z.label.toUpperCase()}
-              </text>
-            );
-          })}
-
-          {/* The curve */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke="url(#opCurveGrad)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              strokeDasharray: drawn ? "none" : "2000",
-              strokeDashoffset: drawn ? 0 : 2000,
-              transition: "stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-          />
-
-          {/* Glow under curve */}
-          {drawn && (
-            <path
-              d={pathD + ` L ${CURVE_PAD.left + CURVE_PLOT_W} ${CURVE_PAD.top + CURVE_PLOT_H} L ${CURVE_PAD.left} ${CURVE_PAD.top + CURVE_PLOT_H} Z`}
-              fill="url(#opAreaGrad)"
-              opacity="0.15"
-            />
-          )}
-
-          {/* Peak marker */}
-          {drawn && (() => {
-            const { sx, sy } = toSVG(0.3, getQualityAtX(0.3));
-            return (
-              <>
-                <circle cx={sx} cy={sy} r="5" fill="#f59e0b" />
-                <circle cx={sx} cy={sy} r="10" fill="none" stroke="#f59e0b" strokeWidth="1" opacity="0.4" />
-              </>
-            );
-          })()}
-
-          {/* Hover indicator */}
-          {hoverX !== null && drawn && (() => {
-            const y = getQualityAtX(hoverX);
-            const { sx, sy } = toSVG(hoverX, y);
-            return (
-              <>
-                <line
-                  x1={sx}
-                  y1={CURVE_PAD.top}
-                  x2={sx}
-                  y2={CURVE_PAD.top + CURVE_PLOT_H}
-                  stroke="rgba(255,255,255,0.1)"
-                  strokeDasharray="3 3"
+            {/* Zones */}
+            {zones.map((z) => {
+              const x1 = CURVE_PAD.left + z.start * CURVE_PLOT_W;
+              const x2 = CURVE_PAD.left + z.end * CURVE_PLOT_W;
+              return (
+                <rect
+                  key={z.type}
+                  x={x1}
+                  y={CURVE_PAD.top}
+                  width={x2 - x1}
+                  height={CURVE_PLOT_H}
+                  fill={z.color}
                 />
-                <circle cx={sx} cy={sy} r="4" fill="#f8fafc" stroke="#f59e0b" strokeWidth="2" />
-                <text x={sx} y={sy - 12} fill="#f8fafc" fontSize="11" textAnchor="middle" fontWeight="600">
-                  {Math.round(y * 100)}%
-                </text>
-              </>
-            );
-          })()}
+              );
+            })}
 
-          {/* Gradients */}
-          <defs>
-            <linearGradient id="opCurveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#fbbf24" />
-              <stop offset="30%" stopColor="#f59e0b" />
-              <stop offset="60%" stopColor="#f97316" />
-              <stop offset="100%" stopColor="#f43f5e" />
-            </linearGradient>
-            <linearGradient id="opAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#f59e0b" />
-              <stop offset="100%" stopColor="transparent" />
-            </linearGradient>
-          </defs>
-        </svg>
+            {/* Axes */}
+            <g stroke="rgba(255,255,255,0.1)" strokeWidth="1">
+              <line x1={CURVE_PAD.left} y1={CURVE_H - CURVE_PAD.bottom} x2={CURVE_W - CURVE_PAD.right} y2={CURVE_H - CURVE_PAD.bottom} />
+              <line x1={CURVE_PAD.left} y1={CURVE_PAD.top} x2={CURVE_PAD.left} y2={CURVE_H - CURVE_PAD.bottom} />
+            </g>
+
+            {/* Labels */}
+            <text x={CURVE_PAD.left - 10} y={CURVE_PAD.top} fill="#475569" fontSize="10" textAnchor="end" fontFamily="monospace">HIGH</text>
+            <text x={CURVE_PAD.left - 10} y={CURVE_H - CURVE_PAD.bottom} fill="#475569" fontSize="10" textAnchor="end" fontFamily="monospace">LOW</text>
+            <text x={CURVE_W / 2} y={CURVE_H - 10} fill="#475569" fontSize="10" textAnchor="middle" fontFamily="monospace" letterSpacing="0.2em">PROMPT SPECIFICITY &rarr;</text>
+
+            <path
+              d={pathD}
+              fill="none"
+              stroke="url(#curveGrad)"
+              strokeWidth="4"
+              strokeLinecap="round"
+              style={{
+                strokeDasharray: 2000,
+                strokeDashoffset: drawn ? 0 : 2000,
+                transition: "stroke-dashoffset 2s ease-out",
+              }}
+            />
+
+            {/* Dynamic Glow */}
+            <AnimatePresence>
+              {hoverX !== null && (
+                <motion.g
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <motion.line 
+                    x1={toSVG(hoverX, 0).sx} 
+                    y1={CURVE_PAD.top} 
+                    x2={toSVG(hoverX, 0).sx} 
+                    y2={CURVE_H - CURVE_PAD.bottom} 
+                    stroke="rgba(255,255,255,0.1)" 
+                    strokeDasharray="4 4" 
+                  />
+                  <circle 
+                    cx={toSVG(hoverX, getQualityAtX(hoverX)).sx} 
+                    cy={toSVG(hoverX, getQualityAtX(hoverX)).sy} 
+                    r="6" 
+                    fill="white" 
+                    className="shadow-xl"
+                  />
+                </motion.g>
+              )}
+            </AnimatePresence>
+
+            {/* Peak Marker */}
+            <g transform={`translate(${toSVG(0.3, getQualityAtX(0.3)).sx}, ${toSVG(0.3, getQualityAtX(0.3)).sy})`} key="peak-marker">
+              <circle r="12" fill="#10b981" opacity="0.1" className="animate-pulse" />
+              <circle r="4" fill="#10b981" />
+            </g>
+
+            <defs>
+              <linearGradient id="curveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="30%" stopColor="#10b981" />
+                <stop offset="60%" stopColor="#f97316" />
+                <stop offset="100%" stopColor="#f43f5e" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          {/* Floating Zone Info */}
+          <div className="absolute top-4 right-4 w-48 pointer-events-none">
+            <AnimatePresence mode="wait">
+              {currentZone ? (
+                <motion.div
+                  key={currentZone}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-2xl"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    {(() => {
+                      const Icon = ZONE_INFO[currentZone].icon;
+                      return <Icon className="w-3 h-3" style={{ color: ZONE_INFO[currentZone].color }} />;
+                    })()}
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white">
+                      {ZONE_INFO[currentZone].title}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 leading-tight">
+                    {ZONE_INFO[currentZone].desc}
+                  </p>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -498,29 +525,12 @@ export function QualityCurveViz() {
 
 export function PlanExecuteViz() {
   const [phase, setPhase] = useState<"plan" | "execute">("plan");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [revealed, setRevealed] = useState(false);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setRevealed(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   return (
-    <div ref={containerRef}>
+    <div>
       <div className="op-viz-header">
-        <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0">
+        <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0 flex items-center gap-2">
+          <Zap className="w-5 h-5 text-amber-400" />
           The Two-Phase Approach
         </h3>
         <p className="text-sm text-slate-400 m-0">
@@ -528,155 +538,181 @@ export function PlanExecuteViz() {
         </p>
       </div>
 
-      <div className="px-4 md:px-6 py-4 md:py-6">
-        {/* Toggle */}
-        <div className="flex items-center gap-2 mb-6 p-1 bg-white/5 rounded-xl w-fit">
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-lg text-xs font-bold tracking-widest uppercase transition-all duration-300 ${
-              phase === "plan"
-                ? "bg-amber-500/20 text-amber-400 shadow-lg shadow-amber-500/10"
-                : "text-slate-500 hover:text-slate-300"
-            }`}
-            onClick={() => setPhase("plan")}
-          >
-            Planning
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-lg text-xs font-bold tracking-widest uppercase transition-all duration-300 ${
-              phase === "execute"
-                ? "bg-rose-500/20 text-rose-400 shadow-lg shadow-rose-500/10"
-                : "text-slate-500 hover:text-slate-300"
-            }`}
-            onClick={() => setPhase("execute")}
-          >
-            Execution
-          </button>
-        </div>
-
-        {/* Two-phase panels */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
-          style={{
-            opacity: revealed ? 1 : 0,
-            transform: revealed ? "translateY(0)" : "translateY(20px)",
-            transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
-        >
-          {/* Planning phase */}
-          <div
-            className="rounded-2xl p-5 md:p-7 border transition-all duration-500"
-            style={{
-              borderColor:
-                phase === "plan"
-                  ? "rgba(245,158,11,0.3)"
-                  : "rgba(255,255,255,0.05)",
-              background:
-                phase === "plan"
-                  ? "rgba(245,158,11,0.06)"
-                  : "rgba(255,255,255,0.02)",
-              transform: phase === "plan" ? "scale(1.02)" : "scale(0.98)",
-              opacity: phase === "plan" ? 1 : 0.5,
-            }}
-          >
-            <div className="flex items-center gap-3 mb-5">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{
-                  background: "#f59e0b",
-                  boxShadow: "0 0 12px rgba(245,158,11,0.5)",
-                }}
-              />
-              <span className="text-xs font-bold tracking-[0.2em] uppercase text-amber-400">
-                Planning Phase
-              </span>
-            </div>
-
-            <p className="text-sm text-slate-300 leading-relaxed mb-5">
-              Give the model maximum creative freedom. Focus on <em>what</em> and <em>why</em>, not <em>how</em>.
-            </p>
-
-            <ul className="space-y-3">
-              {[
-                "High-level goals",
-                "Purpose and intent",
-                "Desired end state",
-                "Target user experience",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-slate-400">
-                  <span className="text-amber-400 mt-0.5">&#x25CB;</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-5 pt-4 border-t border-white/5 text-xs text-slate-500 italic">
-              &ldquo;Less seafood, lots of veggies&rdquo;
-            </div>
-          </div>
-
-          {/* Execution phase */}
-          <div
-            className="rounded-2xl p-5 md:p-7 border transition-all duration-500"
-            style={{
-              borderColor:
-                phase === "execute"
-                  ? "rgba(244,63,94,0.3)"
-                  : "rgba(255,255,255,0.05)",
-              background:
-                phase === "execute"
-                  ? "rgba(244,63,94,0.06)"
-                  : "rgba(255,255,255,0.02)",
-              transform: phase === "execute" ? "scale(1.02)" : "scale(0.98)",
-              opacity: phase === "execute" ? 1 : 0.5,
-            }}
-          >
-            <div className="flex items-center gap-3 mb-5">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{
-                  background: "#f43f5e",
-                  boxShadow: "0 0 12px rgba(244,63,94,0.5)",
-                }}
-              />
-              <span className="text-xs font-bold tracking-[0.2em] uppercase text-rose-400">
-                Execution Phase
-              </span>
-            </div>
-
-            <p className="text-sm text-slate-300 leading-relaxed mb-5">
-              Now get extremely specific. Turn the plan into detailed marching orders.
-            </p>
-
-            <ul className="space-y-3">
-              {[
-                "Epics with clear scope",
-                "Tasks with acceptance criteria",
-                "Subtasks for each step",
-                "Specific implementation details",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-slate-400">
-                  <span className="text-rose-400 mt-0.5">&#x25A0;</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-5 pt-4 border-t border-white/5 text-xs text-slate-500 italic">
-              &ldquo;Make a good pastrami sandwich&rdquo;
-            </div>
+      <div className="px-4 md:px-6 py-8">
+        {/* Toggle Controls */}
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex p-1 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-xl">
+            <button
+              onClick={() => setPhase("plan")}
+              className={`relative px-6 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all duration-300 ${
+                phase === "plan" ? "text-amber-400" : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              {phase === "plan" && (
+                <motion.div layoutId="phase-bg" className="absolute inset-0 bg-amber-500/10 border border-amber-500/20 rounded-xl" />
+              )}
+              <span className="relative z-10">1. Planning</span>
+            </button>
+            <button
+              onClick={() => setPhase("execute")}
+              className={`relative px-6 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all duration-300 ${
+                phase === "execute" ? "text-rose-400" : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              {phase === "execute" && (
+                <motion.div layoutId="phase-bg" className="absolute inset-0 bg-rose-500/10 border border-rose-500/20 rounded-xl" />
+              )}
+              <span className="relative z-10">2. Execution</span>
+            </button>
           </div>
         </div>
 
-        {/* Arrow / flow */}
-        <div className="flex items-center justify-center gap-3 mt-6 text-xs text-slate-500">
-          <span className="font-mono text-amber-400/60">WIDE &amp; OPEN</span>
-          <svg width="60" height="12" viewBox="0 0 60 12" className="text-slate-600">
-            <line x1="0" y1="6" x2="50" y2="6" stroke="currentColor" strokeWidth="1" />
-            <path d="M48 2 L56 6 L48 10" fill="none" stroke="currentColor" strokeWidth="1" />
-          </svg>
-          <span className="font-mono text-rose-400/60">NARROW &amp; PRECISE</span>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+          {/* Phase Illustration */}
+          <div className="lg:col-span-2 relative aspect-square bg-[#050508] rounded-3xl border border-white/5 overflow-hidden flex items-center justify-center p-8">
+            <AnimatePresence mode="wait">
+              {phase === "plan" ? (
+                <motion.div
+                  key="plan-viz"
+                  initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 1.2, rotate: 10 }}
+                  className="relative w-full h-full"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-3xl" />
+                  <div className="relative w-full h-full border-2 border-dashed border-amber-500/20 rounded-full animate-[spin_20s_linear_infinite] flex items-center justify-center">
+                    {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                      <div 
+                        key={deg} 
+                        className="absolute w-2 h-2 bg-amber-400 rounded-full"
+                        style={{ transform: `rotate(${deg}deg) translateY(-80px)` }}
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-amber-400 text-center">
+                      <Maximize2 className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <span className="text-[10px] font-mono tracking-widest uppercase">Wide Intent</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="execute-viz"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.2 }}
+                  className="relative w-full h-full"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 to-transparent rounded-full blur-3xl" />
+                  <div className="relative w-full h-full grid grid-cols-4 grid-rows-4 gap-2">
+                    {Array.from({ length: 16 }).map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: i * 0.02 }}
+                        className="bg-rose-500/20 border border-rose-500/40 rounded-sm"
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="text-rose-400 text-center bg-[#050508]/80 backdrop-blur-sm p-4 rounded-2xl border border-rose-500/30">
+                      <Minimize2 className="w-8 h-8 mx-auto mb-2" />
+                      <span className="text-[10px] font-mono tracking-widest uppercase">Precise Steps</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Phase Content */}
+          <div className="lg:col-span-3 space-y-6">
+            <AnimatePresence mode="wait">
+              {phase === "plan" ? (
+                <motion.div
+                  key="plan-content"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <span className="text-amber-400 font-mono text-[10px] uppercase tracking-widest bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">Planning Mode</span>
+                    <h4 className="text-2xl font-bold text-white mt-4">Focus on the &ldquo;What&rdquo; and &ldquo;Why&rdquo;</h4>
+                    <p className="text-slate-400 mt-2 leading-relaxed">During the planning phase, you want the model to act as a world-class architect. Avoid implementation details to give it maximum degrees of freedom.</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { title: "High-level goals", icon: Target },
+                      { title: "Purpose and intent", icon: Info },
+                      { title: "Target experience", icon: Zap },
+                      { title: "Core constraints", icon: Minimize2 },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-amber-500/[0.03] hover:border-amber-500/20 transition-colors">
+                        <item.icon className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-sm font-medium text-slate-300">{item.title}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl italic text-xs text-amber-300/60">
+                    &ldquo;I want a system that helps me organize my thoughts without being intrusive.&rdquo;
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="execute-content"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <span className="text-rose-400 font-mono text-[10px] uppercase tracking-widest bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">Execution Mode</span>
+                    <h4 className="text-2xl font-bold text-white mt-4">Focus on the &ldquo;How&rdquo;</h4>
+                    <p className="text-slate-400 mt-2 leading-relaxed">Once the plan is solidified, flip the switch. Provide extremely specific, step-by-step instructions that leave no room for ambiguity.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { title: "Scoped Epics", icon: CheckCircle2 },
+                      { title: "Acceptance Criteria", icon: Target },
+                      { title: "Tech Stack Rules", icon: Info },
+                      { title: "Step-by-step logic", icon: ChevronRight },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:bg-rose-500/[0.03] hover:border-rose-500/20 transition-colors">
+                        <item.icon className="w-5 h-5 text-rose-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-sm font-medium text-slate-300">{item.title}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-xl italic text-xs text-rose-300/60">
+                    &ldquo;Use Framer Motion for the enter transition, with a duration of 0.5s and ease-out easing.&rdquo;
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Pro-Tip */}
+            <div className="mt-8 p-5 bg-white/[0.03] border border-white/10 rounded-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Target className="w-12 h-12 text-amber-400" />
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400">Pro Tip: The Flip</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Start with a <span className="text-amber-200">Phase 1</span> prompt to get the architecture right. Once you approve the plan, ask the model to &ldquo;Transform this plan into a Phase 2 implementation spec&rdquo; and use <em>that</em> for the actual build.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

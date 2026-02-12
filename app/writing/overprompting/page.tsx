@@ -5,7 +5,7 @@ import { OverpromptingArticle } from "@/components/overprompting-article";
 export const metadata: Metadata = {
   title: "The Overprompting Trap | Jeffrey Emanuel",
   description:
-    "Why giving AI models too many constraints degrades output quality. The chef analogy, the face-in-hole effect, and a two-phase approach to prompting: be open during planning, precise during execution.",
+    "Why giving AI models too many constraints degrades output quality, the chef analogy, the face-in-hole effect, and a two-phase approach to prompting: be open during planning, precise during execution.",
   alternates: {
     canonical: "/writing/overprompting",
   },
@@ -18,7 +18,7 @@ const articleSchema = {
   datePublished: "2026-02-12",
   dateModified: "2026-02-12",
   description:
-    "Why giving AI models too many constraints degrades output quality. A deep dive into the paradox of prompt specificity and how to escape it.",
+    "Why giving AI models too many constraints degrades output quality, the chef analogy, the face-in-hole effect, and a two-phase approach to prompting: be open during planning, precise during execution.",
   author: {
     "@type": "Person",
     name: "Jeffrey Emanuel",

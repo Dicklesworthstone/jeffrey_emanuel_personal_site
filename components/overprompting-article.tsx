@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Crimson_Pro,
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
+import { Zap, AlertTriangle, CheckCircle2 } from "lucide-react";
 import illustration from "@/assets/overprompting_post_illustration.webp";
 
 // Dynamic import visualizations (no SSR — they use browser APIs / refs)
@@ -69,6 +71,7 @@ function EC({ children }: { children: React.ReactNode }) {
 
 export function OverpromptingArticle() {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [chefMode, setChefMode] = useState<"annoying" | "trusting">("annoying");
   const articleRef = useRef<HTMLDivElement>(null);
 
   // Scroll progress bar
@@ -149,7 +152,7 @@ export function OverpromptingArticle() {
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
-              Why your best intentions are the model&rsquo;s worst enemy&mdash;and
+              Why your best intentions are the model&rsquo;s worst enemy, and
               what to do instead.
             </p>
 
@@ -325,6 +328,88 @@ export function OverpromptingArticle() {
             be so great to use those, too.&rdquo; And on and on, you give more rules
             and requirements and constraints.
           </p>
+
+          {/* Interactive Chef Widget */}
+          <div className="my-12 p-1 bg-white/5 rounded-[2rem] border border-white/10 overflow-hidden relative group">
+             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-rose-500/5 opacity-50" />
+             
+             <div className="relative z-10 p-6 md:p-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                   <div>
+                      <h4 className="text-xl font-bold text-white mb-1">Kitchen Simulator</h4>
+                      <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">Cognitive Load Analysis</p>
+                   </div>
+                   
+                   <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 backdrop-blur-md">
+                      <button 
+                        onClick={() => setChefMode("annoying")}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "annoying" ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" : "text-slate-500 hover:text-slate-300"}`}
+                      >
+                        Annoying Planner
+                      </button>
+                      <button 
+                        onClick={() => setChefMode("trusting")}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "trusting" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-slate-300"}`}
+                      >
+                        Trusting Client
+                      </button>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                   <div className="space-y-6">
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-[10px] font-mono uppercase">
+                            <span className="text-slate-400">Creative Flow</span>
+                            <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
+                               {chefMode === "trusting" ? "Unobstructed" : "Blocked"}
+                            </span>
+                         </div>
+                         <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                               initial={false}
+                               animate={{ width: chefMode === "trusting" ? "100%" : "15%" }}
+                               className={`h-full ${chefMode === "trusting" ? "bg-emerald-500" : "bg-rose-500"}`}
+                            />
+                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-[10px] font-mono uppercase">
+                            <span className="text-slate-400">Output Artistry</span>
+                            <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
+                               {chefMode === "trusting" ? "Michelin Star" : "Diner Food"}
+                            </span>
+                         </div>
+                         <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                               initial={false}
+                               animate={{ width: chefMode === "trusting" ? "95%" : "40%" }}
+                               className={`h-full ${chefMode === "trusting" ? "bg-emerald-500" : "bg-rose-500"}`}
+                            />
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="p-6 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                         {chefMode === "trusting" ? <CheckCircle2 className="w-12 h-12 text-emerald-400" /> : <AlertTriangle className="w-12 h-12 text-rose-400" />}
+                      </div>
+                      <p className="text-sm text-slate-300 leading-relaxed italic relative z-10">
+                         {chefMode === "trusting" 
+                           ? "“I trust your expertise. We want a vegetable-forward summer experience. Surprize us.”"
+                           : "“Use the 2024 vintage oil, no nuts, keep it under 400 calories, and make sure the plating is symmetrical.”"}
+                      </p>
+                      <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
+                         <div className={`w-2 h-2 rounded-full ${chefMode === "trusting" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
+                         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                            {chefMode === "trusting" ? "Chef is in the zone" : "Chef is frustrated"}
+                         </span>
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
 
           <p>
             The chef wants to be helpful (assume you&rsquo;re paying them a lot), but
@@ -525,6 +610,59 @@ export function OverpromptingArticle() {
                 the chef, but you&rsquo;ll still end up with a very good meal.
                 Something to keep in mind.
               </p>
+            </div>
+          </div>
+        </EC>
+      </section>
+
+      <Divider />
+
+      {/* ========== KEY TAKEAWAYS ========== */}
+      <section className="pb-24">
+        <EC>
+          <div className="rounded-3xl p-8 md:p-12 border border-white/10 bg-white/[0.02] relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <Zap className="w-32 h-32 text-amber-400" />
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight">Key Takeaways</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+              <div className="space-y-4">
+                <h3 className="text-amber-400 font-mono text-xs uppercase tracking-widest">The Problem</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3 text-slate-300">
+                    <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                    <span>Every constraint restricts the model&rsquo;s creative search space.</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-slate-300">
+                    <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                    <span>Detailed instructions often lead to &ldquo;face-in-hole&rdquo; outputs with no artistry.</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-slate-300">
+                    <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                    <span>The more you tell a model <em>how</em> to do something, the less it focuses on the <em>goal</em>.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-emerald-400 font-mono text-xs uppercase tracking-widest">The Solution</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3 text-slate-300">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span><strong>Phase 1:</strong> Be open and intent-focused during planning.</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-slate-300">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span><strong>Phase 2:</strong> Be extremely precise once the plan is set.</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-slate-300">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Trust the model&rsquo;s latent space to find the best implementation path.</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </EC>
