@@ -2063,12 +2063,14 @@ export const writingHighlights: WritingItem[] = [
   },
   {
     title: "Factor Risk Models and the Hedge Fund Business",
-    href: "/writing/barra_factor_model_article",
+    href: "/writing/barra-factor-model",
     source: "FMD",
     category: "Investing",
     blurb:
       "An insider's look at how 'smart' risk models like Barra often unknowingly distort incentives, encourage crowding, and create hidden systemic risks within multi-manager platforms.",
     date: "2025-09-23",
+    featured: true,
+    gradient: "from-emerald-500/20 via-cyan-500/20 to-blue-500/20",
   },
   {
     title: "LLM Introspective Compression",
