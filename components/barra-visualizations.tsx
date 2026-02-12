@@ -23,6 +23,11 @@ const COLORS = {
 
 const INTER_FONT = "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hjw.woff";
 
+function deterministicUnit(seed: number) {
+  const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 // ============================================
 // 1. RISK TOPOGRAPHY (Hero)
 // ============================================
@@ -379,9 +384,9 @@ function CosmosStars() {
   const points = useMemo(() => {
     const p = new Float32Array(3000 * 3);
     for (let i = 0; i < 3000; i++) {
-      p[i * 3] = (Math.random() - 0.5) * 200;
-      p[i * 3 + 1] = (Math.random() - 0.5) * 200;
-      p[i * 3 + 2] = (Math.random() - 0.5) * 200;
+      p[i * 3] = (deterministicUnit(i * 3 + 11) - 0.5) * 200;
+      p[i * 3 + 1] = (deterministicUnit(i * 3 + 17) - 0.5) * 200;
+      p[i * 3 + 2] = (deterministicUnit(i * 3 + 23) - 0.5) * 200;
     }
     return p;
   }, []);
@@ -458,9 +463,15 @@ export function FactorCorrelationMatrix() {
 // 5. VISUAL REGRESSION ENGINE
 // ============================================
 function RegressionPlot() {
-  const points = useMemo(() => Array.from({ length: 80 }).map(() => ({
-    x: (Math.random() - 0.5) * 30, z: (Math.random() - 0.5) * 30, size: 0.2 + Math.random() * 0.6,
-  })), []);
+  const points = useMemo(
+    () =>
+      Array.from({ length: 80 }, (_, i) => ({
+        x: (deterministicUnit(i * 5 + 101) - 0.5) * 30,
+        z: (deterministicUnit(i * 5 + 131) - 0.5) * 30,
+        size: 0.2 + deterministicUnit(i * 5 + 167) * 0.6,
+      })),
+    []
+  );
   return (
     <group position={[0, -5, 0]}>
        <mesh rotation={[-Math.PI / 4, 0, 0]}>

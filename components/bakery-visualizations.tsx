@@ -39,6 +39,68 @@ const COLORS = {
   slate: "#64748b",
 };
 
+type ProcessState = "IDLE" | "CHOOSING" | "WAITING" | "CRITICAL";
+
+interface TemporalProcess {
+  state: ProcessState;
+  val: number;
+  choosing: boolean;
+  color: string;
+}
+
+interface DoorwayStep {
+  t: number;
+  title: string;
+  desc: string;
+  a: TemporalProcess;
+  b: TemporalProcess;
+}
+
+interface NexusProcess {
+  id: number;
+  state: ProcessState;
+  number: number;
+  choosing: boolean;
+}
+
+const DOORWAY_STEPS: DoorwayStep[] = [
+  {
+    t: 0,
+    title: "Quiescent State",
+    desc: "Process 0 and 1 are idle. No entries requested.",
+    a: { state: "IDLE", val: 0, choosing: false, color: COLORS.slate },
+    b: { state: "IDLE", val: 0, choosing: false, color: COLORS.slate },
+  },
+  {
+    t: 0.25,
+    title: "The Choosing Guard",
+    desc: "Both processes signal intent simultaneously. The 'Choosing' flags go HIGH.",
+    a: { state: "CHOOSING", val: 0, choosing: true, color: COLORS.cyan },
+    b: { state: "CHOOSING", val: 0, choosing: true, color: COLORS.cyan },
+  },
+  {
+    t: 0.5,
+    title: "Concurrent Ticket Read",
+    desc: "A race condition! Both read 'Max=5' and decide on '6'. Collision state detected.",
+    a: { state: "WAITING", val: 6, choosing: false, color: COLORS.amber },
+    b: { state: "WAITING", val: 6, choosing: false, color: COLORS.amber },
+  },
+  {
+    t: 0.75,
+    title: "Logical Resolution",
+    desc: "Process 0 wins the tie-break because its ID is lower. Priority assigned.",
+    a: { state: "CRITICAL", val: 6, choosing: false, color: COLORS.emerald },
+    b: { state: "WAITING", val: 6, choosing: false, color: COLORS.amber },
+  },
+  {
+    t: 1,
+    title: "Starvation-Free Release",
+    desc: "P0 exits, P1 inherits the lowest (Ticket, ID) and enters next.",
+    a: { state: "IDLE", val: 0, choosing: false, color: COLORS.slate },
+    b: { state: "CRITICAL", val: 6, choosing: false, color: COLORS.emerald },
+  },
+];
+
 // ============================================================
 // 1. CHRONOS SUBSTRATE HERO (Three.js)
 // Advanced particle system with mouse-parallax depth
@@ -221,48 +283,10 @@ export function BakeryHero() {
 export function DoorwayRaceViz() {
   const [progress, setProgress] = useState(0);
   const { lightTap } = useHapticFeedback();
-  
-  const steps = [
-    {
-      t: 0,
-      title: "Quiescent State",
-      desc: "Process 0 and 1 are idle. No entries requested.",
-      a: { state: 'IDLE', val: 0, choosing: false, color: COLORS.slate },
-      b: { state: 'IDLE', val: 0, choosing: false, color: COLORS.slate },
-    },
-    {
-      t: 0.25,
-      title: "The Choosing Guard",
-      desc: "Both processes signal intent simultaneously. The 'Choosing' flags go HIGH.",
-      a: { state: 'CHOOSING', val: 0, choosing: true, color: COLORS.cyan },
-      b: { state: 'CHOOSING', val: 0, choosing: true, color: COLORS.cyan },
-    },
-    {
-      t: 0.5,
-      title: "Concurrent Ticket Read",
-      desc: "A race condition! Both read 'Max=5' and decide on '6'. Collision state detected.",
-      a: { state: 'WAITING', val: 6, choosing: false, color: COLORS.amber },
-      b: { state: 'WAITING', val: 6, choosing: false, color: COLORS.amber },
-    },
-    {
-      t: 0.75,
-      title: "Logical Resolution",
-      desc: "Process 0 wins the tie-break because its ID is lower. Priority assigned.",
-      a: { state: 'CRITICAL', val: 6, choosing: false, color: COLORS.emerald },
-      b: { state: 'WAITING', val: 6, choosing: false, color: COLORS.amber },
-    },
-    {
-      t: 1,
-      title: "Starvation-Free Release",
-      desc: "P0 exits, P1 inherits the lowest (Ticket, ID) and enters next.",
-      a: { state: 'IDLE', val: 0, choosing: false, color: COLORS.slate },
-      b: { state: 'CRITICAL', val: 6, choosing: false, color: COLORS.emerald },
-    }
-  ];
 
   const currentStep = useMemo(() => {
-    let best = steps[0];
-    for (const s of steps) {
+    let best = DOORWAY_STEPS[0];
+    for (const s of DOORWAY_STEPS) {
       if (progress >= s.t) best = s;
     }
     return best;
@@ -302,7 +326,7 @@ export function DoorwayRaceViz() {
                   />
                </div>
                <div className="flex justify-between px-1">
-                  {steps.map((s, i) => (
+                  {DOORWAY_STEPS.map((s, i) => (
                     <button 
                       key={i} 
                       onClick={() => { setProgress(s.t); lightTap(); }}
@@ -325,7 +349,7 @@ export function DoorwayRaceViz() {
   );
 }
 
-function TemporalCard({ label, data, id }: any) {
+function TemporalCard({ label, data, id }: { label: string; data: TemporalProcess; id: number }) {
   return (
     <motion.div 
       layout
@@ -391,14 +415,24 @@ function TemporalCard({ label, data, id }: any) {
 // ============================================================
 
 export function ProcessNexus() {
-  const [numProcesses] = useState(6);
-  const [processes, setProcesses] = useState<any[]>([]);
+  const numProcesses = 6;
+  const initialProcesses = useMemo<NexusProcess[]>(
+    () =>
+      Array.from({ length: numProcesses }, (_, i) => ({
+        id: i,
+        state: "IDLE",
+        number: 0,
+        choosing: false,
+      })),
+    [numProcesses]
+  );
+  const [processes, setProcesses] = useState<NexusProcess[]>(initialProcesses);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [checkingId, setCheckingId] = useState<number | null>(null);
   const [targetId, setTargetId] = useState<number | null>(null);
   const [radius, setRadius] = useState(240);
   const isMountedRef = useRef(true);
-  const processesRef = useRef<any[]>([]);
+  const processesRef = useRef<NexusProcess[]>(initialProcesses);
   const { lightTap, mediumTap } = useHapticFeedback();
 
   useEffect(() => {
@@ -410,22 +444,13 @@ export function ProcessNexus() {
     handleResize();
     window.addEventListener('resize', handleResize);
     
-    const initial = Array.from({ length: numProcesses }, (_, i) => ({
-      id: i,
-      state: 'IDLE',
-      number: 0,
-      choosing: false
-    }));
-    setProcesses(initial);
-    processesRef.current = initial;
-    
     return () => { 
       isMountedRef.current = false;
       window.removeEventListener('resize', handleResize);
     };
   }, [numProcesses]);
 
-  const updateProcess = (id: number, updates: any) => {
+  const updateProcess = (id: number, updates: Partial<NexusProcess>) => {
     if (!isMountedRef.current) return;
     setProcesses(prev => {
       const next = prev.map(p => p.id === id ? { ...p, ...updates } : p);

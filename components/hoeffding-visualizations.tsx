@@ -158,13 +158,20 @@ export function HoeffdingHero() {
     const container = containerRef.current;
     if (!container) return;
 
+    type HeroApi = {
+      renderer: import("three").WebGLRenderer;
+      camera: import("three").PerspectiveCamera;
+      geometry: import("three").BufferGeometry;
+      material: import("three").PointsMaterial;
+    };
+
     let renderer: import("three").WebGLRenderer;
     let scene: import("three").Scene;
     let camera: import("three").PerspectiveCamera;
     let points: import("three").Points;
     let animationId: number;
     let mounted = true;
-    let api: any = null;
+    let api: HeroApi | null = null;
 
     const count = capabilities.tier === "low" ? 1000 : 5000;
     const targetPosArray = new Float32Array(count * 3);
