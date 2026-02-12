@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Float, Text, MeshWobbleMaterial, Stars } from "@react-three/drei";
 import * as THREE from "three";
@@ -20,6 +20,8 @@ const COLORS = {
   slate: "#64748b",
   white: "#f8fafc",
 };
+
+const INTER_FONT = "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hjw.woff";
 
 // ============================================
 // 1. RISK TOPOGRAPHY (Hero)
@@ -98,7 +100,7 @@ export function FactorHero() {
                   color={f.color}
                   anchorX="center"
                   anchorY="middle"
-                  fontStyle="italic"
+                  font={INTER_FONT}
                   outlineWidth={0.2}
                   outlineColor="#000000"
                 >
@@ -132,7 +134,7 @@ function ForensicCore() {
 
 function PrismSplinter({ factor, index }: { factor: any, index: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  const angle = (index / 5) * Math.PI * 2;
+  const points = useMemo(() => new Float32Array([0, 0, 0, 15, 0, 0]), []);
   
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
@@ -146,7 +148,7 @@ function PrismSplinter({ factor, index }: { factor: any, index: number }) {
     <group ref={groupRef}>
       <line>
         <bufferGeometry attach="geometry">
-          <float32BufferAttribute attach="attributes-position" args={[new Float32Array([0, 0, 0, 15, 0, 0]), 3]} />
+          <bufferAttribute attach="attributes-position" args={[points, 3]} />
         </bufferGeometry>
         <lineBasicMaterial attach="material" color={factor.color} linewidth={2} transparent opacity={0.6} />
       </line>
@@ -188,7 +190,7 @@ export function ReturnDecomposition() {
           {Object.keys(stocks).map(s => (
             <button 
               key={s} onClick={() => setActiveStock(s)}
-              className={`px-3 py-1 rounded-md text-[9px] font-black transition-all ${activeStock === s ? "bg-emerald-500 text-black" : "bg-white/5 text-slate-400 hover:bg-white/10"}`}
+              className={`px-3 py-1 rounded-md text-[9px] font-black transition-all ${activeStock === s ? "bg-emerald-500 text-black shadow-lg" : "bg-white/5 text-slate-400 hover:bg-white/10"}`}
             >
               {s}
             </button>
@@ -234,7 +236,9 @@ export function ReturnDecomposition() {
                     <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${Math.max(5, Math.abs(f.val / 1.5) * 100)}%` }}
                         className="h-full relative" style={{ backgroundColor: f.color, marginLeft: f.val < 0 ? "auto" : "0", marginRight: f.val > 0 ? "auto" : "0" }}
-                      />
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
+                      </motion.div>
                     </div>
                   </div>
                 ))}
@@ -366,8 +370,29 @@ function FactorPlanet({ name, color, index, active, onSelect }: { name: string, 
     <mesh ref={meshRef} onClick={onSelect}>
       <sphereGeometry args={[active ? 5 : 2.5, 32, 32]} />
       <MeshWobbleMaterial color={color} factor={active ? 0.3 : 0.1} speed={2} emissive={color} emissiveIntensity={0.4} />
-      <Text position={[0, active ? 7 : 4, 0]} fontSize={active ? 2.5 : 1.8} color="white" fontStyle="italic">{name}</Text>
+      <Text position={[0, active ? 7 : 4, 0]} fontSize={active ? 2.5 : 1.8} color="white" font={INTER_FONT} fontStyle="italic">{name}</Text>
     </mesh>
+  );
+}
+
+function CosmosStars() {
+  const points = useMemo(() => {
+    const p = new Float32Array(3000 * 3);
+    for (let i = 0; i < 3000; i++) {
+      p[i * 3] = (Math.random() - 0.5) * 200;
+      p[i * 3 + 1] = (Math.random() - 0.5) * 200;
+      p[i * 3 + 2] = (Math.random() - 0.5) * 200;
+    }
+    return p;
+  }, []);
+
+  return (
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[points, 3]} />
+      </bufferGeometry>
+      <pointsMaterial size={0.1} color={COLORS.white} transparent opacity={0.5} />
+    </points>
   );
 }
 
@@ -398,7 +423,7 @@ export function FactorCorrelationMatrix() {
                 ))}
              </group>
              <OrbitControls enableZoom={false} autoRotate={!selected} autoRotateSpeed={0.5} />
-             <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
+             <CosmosStars />
           </Canvas>
        </div>
 
@@ -461,17 +486,12 @@ export function LiveRegression() {
 
   const runCode = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    setIsExecuting(true); 
-    setActiveTab("console"); 
-    setProgress(0);
-    
+    setIsExecuting(true); setActiveTab("console"); setProgress(0);
     intervalRef.current = setInterval(() => {
       setProgress(p => {
         if (p >= 100) { 
           if (intervalRef.current) clearInterval(intervalRef.current);
-          setIsExecuting(false); 
-          setActiveTab("visual"); 
-          return 100; 
+          setIsExecuting(false); setActiveTab("visual"); return 100; 
         }
         return p + 10;
       });

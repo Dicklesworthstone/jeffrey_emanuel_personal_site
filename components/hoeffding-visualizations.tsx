@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as d3 from "d3";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
+import { Activity, Zap, Compass, Info, MousePointer2, Settings2 } from "lucide-react";
 
 const COLORS = {
   bg: "#020204",
@@ -19,7 +20,7 @@ const COLORS = {
 };
 
 // ============================================
-// STATISTICS CORE (High Performance)
+// STATISTICS CORE
 // ============================================
 
 function getRanks(arr: number[]) {
@@ -36,6 +37,25 @@ function getRanks(arr: number[]) {
     i = j;
   }
   return ranks;
+}
+
+function calculatePearson(x: number[], y: number[]) {
+  const n = x.length;
+  if (n === 0) return 0;
+  const muX = d3.mean(x) || 0;
+  const muY = d3.mean(y) || 0;
+  let num = 0;
+  let denX = 0;
+  let denY = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = x[i] - muX;
+    const dy = y[i] - muY;
+    num += dx * dy;
+    denX += dx * dx;
+    denY += dy * dy;
+  }
+  if (denX === 0 || denY === 0) return 0;
+  return num / Math.sqrt(denX * denY);
 }
 
 function calculateHoeffdingD(x: number[], y: number[]) {
@@ -64,23 +84,6 @@ function calculateHoeffdingD(x: number[], y: number[]) {
   return 30 * ((n - 2) * (n - 3) * D1 + D2 - 2 * (n - 2) * D3) / (n * (n - 1) * (n - 2) * (n - 3) * (n - 4));
 }
 
-function pearsonCorrelation(x: number[], y: number[]): number {
-  const n = x.length;
-  if (n === 0) return 0;
-  const meanX = d3.mean(x) || 0;
-  const meanY = d3.mean(y) || 0;
-  let num = 0, denX = 0, denY = 0;
-  for (let i = 0; i < n; i++) {
-    const dx = x[i] - meanX;
-    const dy = y[i] - meanY;
-    num += dx * dy;
-    denX += dx * dx;
-    denY += dy * dy;
-  }
-  const den = Math.sqrt(denX * denY);
-  return den === 0 ? 0 : num / den;
-}
-
 // ============================================
 // DATA GENERATORS
 // ============================================
@@ -100,43 +103,55 @@ const GENERATORS = {
     const side = Math.random() > 0.5 ? 1 : -1;
     return { x, y: x * side + (Math.random() - 0.5) * 0.1 };
   }),
-  random: (n: number) => Array.from({ length: n }, () => ({
-    x: Math.random() * 2 - 1, y: Math.random() * 2 - 1
-  })),
   sinusoidal: (n: number) => Array.from({ length: n }, () => {
     const x = Math.random() * 4 - 2;
     return { x, y: Math.sin(x * Math.PI) * 0.8 + (Math.random() - 0.5) * 0.1 };
   }),
+  noise: (n: number) => Array.from({ length: n }, () => ({
+    x: Math.random() * 2 - 1, y: Math.random() * 2 - 1
+  })),
 };
 
 const GEN_LABELS: Record<string, string> = {
-  linear: "Linear",
-  ring: "Ring",
-  x_shape: "X-Shape",
-  random: "Random",
-  sinusoidal: "Wave",
+  linear: "Correlation",
+  ring: "Cyclical",
+  x_shape: "Intersection",
+  sinusoidal: "Harmonic",
+  noise: "Entropy",
 };
 
 // ============================================
-// 1. TOPOLOGICAL HERO (Three.js Morphing)
+// 1. INSTRUMENT HERO (Optimized Three.js)
 // ============================================
 
 export function HoeffdingHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { capabilities } = useDeviceCapabilities();
-  const [currentShape, setCurrentShape] = useState<keyof typeof GENERATORS>("linear");
-  const shapeRef = useRef(currentShape);
+  const [shape, setShape] = useState<keyof typeof GENERATORS>("linear");
+  const shapeRef = useRef(shape);
+  const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const shapes: (keyof typeof GENERATORS)[] = ["linear", "ring", "x_shape", "sinusoidal"];
+    let i = 0;
     const interval = setInterval(() => {
-      setCurrentShape(prev => {
-        const next = shapes[(shapes.indexOf(prev) + 1) % shapes.length];
-        shapeRef.current = next;
-        return next;
-      });
-    }, 4000);
+      i = (i + 1) % shapes.length;
+      const next = shapes[i];
+      setShape(next);
+      shapeRef.current = next;
+    }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = {
+        x: (e.clientX / window.innerWidth) * 2 - 1,
+        y: -(e.clientY / window.innerHeight) * 2 + 1,
+      };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   useEffect(() => {
@@ -149,6 +164,10 @@ export function HoeffdingHero() {
     let points: import("three").Points;
     let animationId: number;
     let mounted = true;
+    let api: any = null;
+
+    const count = capabilities.tier === "low" ? 1000 : 5000;
+    const targetPosArray = new Float32Array(count * 3);
 
     const init = async () => {
       const THREE = await import("three");
@@ -156,26 +175,24 @@ export function HoeffdingHero() {
 
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-      camera.position.z = 40;
+      camera.position.z = 45;
 
       renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(renderer.domElement);
 
-      const count = capabilities.tier === "low" ? 1000 : 4000;
       const geometry = new THREE.BufferGeometry();
       const posArray = new Float32Array(count * 3);
       const colorArray = new Float32Array(count * 3);
-      const targetPosArray = new Float32Array(count * 3);
 
       const color1 = new THREE.Color(COLORS.cyan);
       const color2 = new THREE.Color(COLORS.purple);
 
       for (let i = 0; i < count; i++) {
-        posArray[i * 3] = (Math.random() - 0.5) * 60;
-        posArray[i * 3 + 1] = (Math.random() - 0.5) * 60;
-        posArray[i * 3 + 2] = (Math.random() - 0.5) * 20;
+        posArray[i * 3] = (Math.random() - 0.5) * 100;
+        posArray[i * 3 + 1] = (Math.random() - 0.5) * 100;
+        posArray[i * 3 + 2] = (Math.random() - 0.5) * 50;
         const mix = color1.clone().lerp(color2, Math.random());
         colorArray[i * 3] = mix.r;
         colorArray[i * 3 + 1] = mix.g;
@@ -186,10 +203,10 @@ export function HoeffdingHero() {
       geometry.setAttribute("color", new THREE.BufferAttribute(colorArray, 3));
 
       const material = new THREE.PointsMaterial({
-        size: 0.25,
+        size: 0.2,
         vertexColors: true,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.4,
         sizeAttenuation: true,
         blending: THREE.AdditiveBlending,
       });
@@ -197,59 +214,56 @@ export function HoeffdingHero() {
       points = new THREE.Points(geometry, material);
       scene.add(points);
 
-      const updateTargets = (shape: keyof typeof GENERATORS) => {
-        const data = GENERATORS[shape](count);
+      const updateTargets = (currentShape: keyof typeof GENERATORS) => {
+        const data = GENERATORS[currentShape](count);
         for (let i = 0; i < count; i++) {
-          targetPosArray[i * 3] = data[i].x * 20;
-          targetPosArray[i * 3 + 1] = data[i].y * 20;
-          targetPosArray[i * 3 + 2] = (Math.random() - 0.5) * 5;
+          targetPosArray[i * 3] = data[i].x * 25;
+          targetPosArray[i * 3 + 1] = data[i].y * 25;
+          targetPosArray[i * 3 + 2] = (Math.random() - 0.5) * 10;
         }
       };
 
-      let lastUsedShape = "";
+      let lastShape = "";
       const animate = () => {
         if (!mounted) return;
         animationId = requestAnimationFrame(animate);
         
-        if (shapeRef.current !== lastUsedShape) {
+        if (shapeRef.current !== lastShape) {
           updateTargets(shapeRef.current);
-          lastUsedShape = shapeRef.current;
+          lastShape = shapeRef.current;
         }
 
         const positions = points.geometry.attributes.position.array as Float32Array;
-        const time = Date.now() * 0.001;
-
         for (let i = 0; i < count * 3; i++) {
-          positions[i] += (targetPosArray[i] - positions[i]) * 0.05;
-          positions[i] += Math.sin(time + i) * 0.02;
+          positions[i] += (targetPosArray[i] - positions[i]) * 0.03;
         }
+        
         points.geometry.attributes.position.needsUpdate = true;
-        points.rotation.y += 0.001;
-        points.rotation.z += 0.0005;
+        points.rotation.y += 0.001 + mouseRef.current.x * 0.002;
+        points.rotation.x += mouseRef.current.y * 0.001;
 
         renderer.render(scene, camera);
       };
 
       animate();
-
-      return { renderer, geometry, material, camera };
+      return { renderer, camera, geometry, material };
     };
 
-    let cleanupApi: any;
     init().then(res => {
-      if (mounted) cleanupApi = res;
-      else {
+      if (!mounted) {
         res?.renderer?.dispose();
         res?.geometry?.dispose();
         res?.material?.dispose();
+      } else {
+        api = res;
       }
     });
 
     const onResize = () => {
-      if (!cleanupApi?.renderer || !container) return;
-      cleanupApi.camera.aspect = container.clientWidth / container.clientHeight;
-      cleanupApi.camera.updateProjectionMatrix();
-      cleanupApi.renderer.setSize(container.clientWidth, container.clientHeight);
+      if (!api?.renderer || !container) return;
+      api.camera.aspect = container.clientWidth / container.clientHeight;
+      api.camera.updateProjectionMatrix();
+      api.renderer.setSize(container.clientWidth, container.clientHeight);
     };
     window.addEventListener("resize", onResize);
 
@@ -257,32 +271,27 @@ export function HoeffdingHero() {
       mounted = false;
       window.removeEventListener("resize", onResize);
       cancelAnimationFrame(animationId);
-      cleanupApi?.renderer?.dispose();
-      cleanupApi?.geometry?.dispose();
-      cleanupApi?.material?.dispose();
-      if (cleanupApi?.renderer?.domElement && container.contains(cleanupApi.renderer.domElement)) {
-        container.removeChild(cleanupApi.renderer.domElement);
+      if (api?.renderer) {
+        api.renderer.dispose();
+        api.geometry.dispose();
+        api.material.dispose();
+        if (api.renderer.domElement && container.contains(api.renderer.domElement)) {
+          container.removeChild(api.renderer.domElement);
+        }
       }
     };
   }, [capabilities.tier]);
 
   return (
-    <div className="absolute inset-0 z-0">
-      <div ref={containerRef} className="w-full h-full opacity-60" />
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex gap-4 z-20">
-        {(["linear", "ring", "x_shape", "sinusoidal"] as const).map(s => (
-          <div 
-            key={s} 
-            className={`w-2 h-2 rounded-full transition-all duration-1000 ${currentShape === s ? "bg-cyan-400 w-8" : "bg-white/20"}`} 
-          />
-        ))}
-      </div>
+    <div className="absolute inset-0 z-0 overflow-hidden">
+      <div ref={containerRef} className="w-full h-full" />
+      <div className="absolute inset-0 bg-radial-gradient from-transparent to-[#020204] pointer-events-none" />
     </div>
   );
 }
 
 // ============================================
-// 2. THE DEPENDENCY LAB
+// 2. DEPENDENCY LAB
 // ============================================
 
 export function DependencyLab() {
@@ -297,12 +306,12 @@ export function DependencyLab() {
     const ys = data.map(d => d.y);
     return {
       hoeffding: calculateHoeffdingD(xs, ys),
-      pearson: d3.deviation(xs) ? pearsonCorrelation(xs, ys) : 0
+      pearson: calculatePearson(xs, ys)
     };
   }, [data]);
 
   useEffect(() => {
-    setData(GENERATORS[type](300));
+    setData(GENERATORS[type](400));
   }, [type]);
 
   useEffect(() => {
@@ -311,39 +320,37 @@ export function DependencyLab() {
     const rx = getRanks(data.map(d => d.x));
     const ry = getRanks(data.map(d => d.y));
 
-    // Responsive sizing
+    const size = 400;
+    const pad = 40;
+
+    // SCATTER PLOT
     const sSvg = d3.select(scatterRef.current);
     sSvg.selectAll("*").remove();
-    const pad = 40;
-    const size = 400; // Internal coordinate system
-
     sSvg.attr("viewBox", `0 0 ${size} ${size}`);
-
-    const xS = d3.scaleLinear().domain([0, n]).range([pad, size - pad]);
-    const yS = d3.scaleLinear().domain([0, n]).range([size - pad, pad]);
-
-    sSvg.append("g").attr("transform", `translate(0,${size - pad})`).call(d3.axisBottom(xS).ticks(5).tickSize(0).tickPadding(10)).attr("class", "opacity-20 text-white font-mono text-[8px]");
-    sSvg.append("g").attr("transform", `translate(${pad},0)`).call(d3.axisLeft(yS).ticks(5).tickSize(0).tickPadding(10)).attr("class", "opacity-20 text-white font-mono text-[8px]");
+    const scale = d3.scaleLinear().domain([0, n]).range([pad, size - pad]);
 
     sSvg.selectAll("circle")
       .data(data)
       .enter()
       .append("circle")
-      .attr("cx", (_, i) => xS(rx[i]))
-      .attr("cy", (_, i) => yS(ry[i]))
-      .attr("r", 2.5)
+      .attr("cx", (_, i) => scale(rx[i]))
+      .attr("cy", (_, i) => size - scale(ry[i]))
+      .attr("r", 2)
       .attr("fill", COLORS.cyan)
-      .attr("opacity", 0.5);
+      .attr("opacity", 0)
+      .transition()
+      .duration(800)
+      .delay((_, i) => i * 1)
+      .attr("opacity", 0.6);
 
     // HEATMAP
     const hSvg = d3.select(heatRef.current);
     hSvg.selectAll("*").remove();
     hSvg.attr("viewBox", `0 0 ${size} ${size}`);
     
-    const bins = 15;
+    const bins = 20;
     const binSize = n / bins;
     const grid = Array.from({ length: bins * bins }, () => 0);
-    
     for (let i = 0; i < n; i++) {
       const bx = Math.min(bins - 1, Math.floor(rx[i] / binSize));
       const by = Math.min(bins - 1, Math.floor(ry[i] / binSize));
@@ -352,39 +359,45 @@ export function DependencyLab() {
 
     const expected = n / (bins * bins);
     const colorScale = d3.scaleDiverging(d3.interpolateRdBu)
-      .domain([-expected * 1.5, 0, expected * 1.5]);
+      .domain([-expected * 2.5, 0, expected * 2.5]);
 
-    const cellW = (size - 2 * pad) / bins;
-    const cellH = (size - 2 * pad) / bins;
+    const cell = (size - 2 * pad) / bins;
 
     hSvg.selectAll("rect")
       .data(grid)
       .enter()
       .append("rect")
-      .attr("x", (_, i) => pad + (i % bins) * cellW)
-      .attr("y", (_, i) => pad + (bins - 1 - Math.floor(i / bins)) * cellH)
-      .attr("width", cellW - 1)
-      .attr("height", cellH - 1)
+      .attr("x", (_, i) => pad + (i % bins) * cell)
+      .attr("y", (_, i) => size - pad - (Math.floor(i / bins) + 1) * cell)
+      .attr("width", cell - 0.5)
+      .attr("height", cell - 0.5)
+      .attr("fill", COLORS.bg)
+      .transition()
+      .duration(1000)
+      .delay((_, i) => i * 2)
       .attr("fill", d => colorScale(d - expected))
-      .attr("rx", 2);
-
-    hSvg.append("text").attr("x", size / 2).attr("y", pad / 2).attr("text-anchor", "middle").attr("fill", "white").attr("font-size", "10").attr("font-weight", "bold").attr("letter-spacing", "0.1em").text("RESIDUAL HEATMAP (JOINT - MARGINAL)");
+      .attr("rx", 1);
 
   }, [data]);
 
   return (
-    <div className="hd-viz-container">
-      <div className="hd-viz-header flex-col md:flex-row items-start md:items-center justify-between p-6 gap-4">
-        <div>
-          <h4 className="text-white font-bold tracking-widest uppercase text-sm">The Dependency Engine</h4>
-          <p className="text-xs text-slate-500 font-mono mt-1">Topology: {GEN_LABELS[type]}</p>
+    <div className="hd-viz-container hd-glass-panel">
+      <div className="flex flex-col md:flex-row border-b border-white/5 divide-y md:divide-y-0 md:divide-x divide-white/5">
+        <div className="p-6 flex-1 flex items-center gap-4 border-b md:border-b-0 border-white/5">
+          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center animate-pulse">
+            <Activity className="text-cyan-400 w-6 h-6" />
+          </div>
+          <div>
+            <div className="hd-instrument-label mb-1">Signal Processing</div>
+            <h4 className="text-white font-black text-lg uppercase tracking-tighter">Dependency Lab v2.0</h4>
+          </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {Object.keys(GENERATORS).map(s => (
+        <div className="p-6 flex gap-2 overflow-x-auto no-scrollbar bg-black/20">
+          {(Object.keys(GENERATORS) as (keyof typeof GENERATORS)[]).map(s => (
             <button 
               key={s} 
-              onClick={() => setType(s as any)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${type === s ? "bg-cyan-500/20 border-cyan-500 text-cyan-400" : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}
+              onClick={() => setType(s)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap border ${type === s ? "bg-cyan-400 text-black border-cyan-400" : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}
             >
               {GEN_LABELS[s]}
             </button>
@@ -392,40 +405,66 @@ export function DependencyLab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-        <div className="space-y-6">
-          <div className="aspect-square bg-black/40 rounded-3xl border border-white/5 overflow-hidden relative">
-            <svg ref={scatterRef} className="w-full h-full" />
-            <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-mono text-cyan-400">RANK SPACE SCATTER</div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-              <div className="text-[10px] text-slate-500 uppercase font-black mb-1">Pearson r</div>
-              <div className="text-2xl font-mono font-bold text-blue-400">{stats.pearson.toFixed(3)}</div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-white/5">
+        <div className="bg-[#020204] p-8 md:p-12 space-y-8 border-b lg:border-b-0 lg:border-r border-white/5">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="hd-instrument-label mb-2">Workspace A</div>
+              <h5 className="text-white font-bold text-xl uppercase tracking-tight italic text-balance">Linear Projection</h5>
             </div>
-            <div className="bg-cyan-500/5 p-4 rounded-2xl border border-cyan-500/20">
-              <div className="text-[10px] text-cyan-500/60 uppercase font-black mb-1">Hoeffding D</div>
-              <div className="text-2xl font-mono font-bold text-cyan-400">{stats.hoeffding.toFixed(3)}</div>
+            <div className="text-right">
+              <div className="hd-instrument-label mb-1">Pearson Correlation</div>
+              <div className={`text-3xl font-mono font-black ${Math.abs(stats.pearson) > 0.5 ? "text-blue-400" : "text-slate-700"}`}>
+                {stats.pearson.toFixed(3)}
+              </div>
+            </div>
+          </div>
+          <div className="aspect-square hd-glass-panel rounded-[2rem] p-4 relative group">
+            <svg ref={scatterRef} className="w-full h-full" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+               <div className="bg-black/80 backdrop-blur-xl px-4 py-2 rounded-full border border-cyan-500/30 text-[10px] text-cyan-400 font-mono tracking-widest uppercase">Rank Space Mapping</div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="aspect-square bg-black/40 rounded-3xl border border-white/5 overflow-hidden relative">
-            <svg ref={heatRef} className="w-full h-full" />
-            <div className="absolute bottom-4 right-4 flex gap-2 items-center">
-               <div className="w-2 h-2 rounded-full bg-[#b2182b]" />
-               <span className="text-[8px] text-slate-500 uppercase font-bold">Excess</span>
-               <div className="w-2 h-2 rounded-full bg-[#2166ac]" />
-               <span className="text-[8px] text-slate-500 uppercase font-bold">Deficit</span>
+        <div className="bg-[#020204] p-8 md:p-12 space-y-8">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="hd-instrument-label mb-2">Workspace B</div>
+              <h5 className="text-white font-bold text-xl uppercase tracking-tight italic text-balance">Topological Density</h5>
+            </div>
+            <div className="text-right">
+              <div className="hd-instrument-label mb-1 text-cyan-400">Hoeffding Dependency</div>
+              <div className={`text-3xl font-mono font-black ${stats.hoeffding > 0.1 ? "text-cyan-400" : "text-slate-700"} drop-shadow-[0_0_20px_rgba(34,211,238,0.3)]`}>
+                {stats.hoeffding.toFixed(3)}
+              </div>
             </div>
           </div>
-          <div className="bg-slate-900/40 p-6 rounded-3xl border border-white/10">
-            <h5 className="text-white text-xs font-bold uppercase mb-3">Pedagogical Insight</h5>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Hoeffding&apos;s D is essentially summing the &quot;energy&quot; in the residual heatmap. If the data were independent, the heatmap would be flat (grey). Notice how the <strong>Ring</strong> structure creates intense pockets of excess and deficit, even while Pearson (which only sees straight lines) averages out to zero.
-            </p>
+          <div className="aspect-square hd-glass-panel rounded-[2rem] p-4 relative overflow-hidden group">
+            <svg ref={heatRef} className="w-full h-full" />
+            {/* Heatmap Legend Overlay */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-black/60 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+               <div className="flex items-center gap-2">
+                 <div className="w-3 h-3 rounded-full bg-[#b2182b] shadow-[0_0_10px_rgba(178,24,43,0.5)]" />
+                 <span className="text-[9px] text-white font-black uppercase tracking-tighter">Excess</span>
+               </div>
+               <div className="w-px h-3 bg-white/10" />
+               <div className="flex items-center gap-2">
+                 <div className="w-3 h-3 rounded-full bg-[#2166ac] shadow-[0_0_10px_rgba(33,102,172,0.5)]" />
+                 <span className="text-[9px] text-white font-black uppercase tracking-tighter">Deficit</span>
+               </div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <div className="p-8 bg-black/40 border-t border-white/5">
+        <div className="flex items-start gap-4 max-w-3xl">
+          <Zap className="text-amber-400 shrink-0 w-5 h-5 mt-1" />
+          <p className="text-sm text-slate-400 leading-relaxed italic font-medium">
+            <strong className="text-white not-italic font-black uppercase mr-2">Technician&apos;s Note:</strong>
+            Hoeffding&apos;s D identifies dependency by integrating the &quot;energy&quot; within the residual heatmap. Pearson (Workspace A) only sees the average slope. If you select <span className="text-cyan-400 font-bold uppercase">Ring</span>, Pearson reports zero because the line averages out, but Workspace B shows intense pockets of structure.
+          </p>
         </div>
       </div>
     </div>
@@ -437,57 +476,85 @@ export function DependencyLab() {
 // ============================================
 
 export function OutlierCrusher() {
-  const [withRanking, setWithRanking] = useState(false);
+  const [mode, setMode] = useState<"raw" | "ranked">("raw");
   const points = useMemo(() => [
     { x: 10, y: 12 }, { x: 12, y: 15 }, { x: 11, y: 11 }, { x: 13, y: 14 },
     { x: 100, y: 100 }
   ], []);
 
-  const ranks = useMemo(() => getRanks(points.map(pt => pt.x)), [points]);
+  const ranks = useMemo(() => getRanks(points.map(p => p.x)), [points]);
 
   return (
-    <div className="hd-viz-container overflow-hidden">
-      <div className="hd-viz-header px-8 py-6 bg-amber-500/5 border-b border-amber-500/10 flex items-center justify-between">
+    <div className="hd-viz-container hd-glass-panel">
+      <div className="flex justify-between items-center p-8 border-b border-white/5">
         <div>
-          <h4 className="text-amber-400 font-bold tracking-widest uppercase text-sm">The Outlier Crusher</h4>
-          <p className="text-[10px] text-amber-500/60 font-mono mt-1 uppercase">Robustness Test</p>
+          <div className="hd-instrument-label mb-1">Stress Test</div>
+          <h4 className="text-white font-black text-lg uppercase tracking-tight italic">Magnitude Sanitization</h4>
         </div>
-        <button 
-          onClick={() => setWithRanking(!withRanking)}
-          className="hd-btn-action !bg-amber-500 !px-6"
-        >
-          {withRanking ? "Show Raw Scale" : "Apply Ranking"}
-        </button>
+        <div className="flex p-1 bg-white/5 rounded-2xl border border-white/10">
+          {(["raw", "ranked"] as const).map(m => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${mode === m ? "bg-amber-500 text-black shadow-lg" : "text-slate-500 hover:text-white"}`}
+            >
+              {m} View
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="p-12 flex flex-col items-center justify-center min-h-[300px] relative">
-        <div className="flex gap-8 items-end h-40">
+      
+      <div className="p-12 md:p-20 flex justify-center items-end h-[400px] gap-4 md:gap-12 relative">
+        <AnimatePresence mode="popLayout">
           {points.map((p, i) => {
-            const val = withRanking ? ranks[i] : p.x;
-            const height = withRanking ? (val / 5) * 100 : (val / 100) * 150;
+            const val = mode === "ranked" ? ranks[i] : p.x;
+            const h = mode === "ranked" ? (val / 5) * 200 : (val / 100) * 250;
+            const isOutlier = p.x > 50;
+            
             return (
-              <div key={i} className="flex flex-col items-center gap-4">
-                <motion.div 
-                  layout
-                  className={`w-12 rounded-xl transition-colors duration-500 ${p.x > 50 ? "bg-red-500 shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-cyan-500"}`}
-                  animate={{ height }}
+              <motion.div
+                key={i}
+                layout
+                className="flex flex-col items-center gap-6"
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ 
+                    height: h, 
+                    backgroundColor: isOutlier ? (mode === "raw" ? COLORS.red : COLORS.emerald) : COLORS.cyan,
+                    boxShadow: isOutlier && mode === "raw" ? "0 0 40px rgba(239,68,68,0.4)" : "none"
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="w-12 md:w-16 rounded-2xl md:rounded-[1.5rem]"
                 />
-                <span className="text-[10px] font-mono text-slate-500">{withRanking ? `Rank ${val}` : p.x}</span>
-              </div>
+                <motion.span 
+                  animate={{ opacity: 1 }}
+                  className="text-xs font-mono font-black text-slate-500"
+                >
+                  {mode === "ranked" ? `Rank ${val}` : p.x}
+                </motion.span>
+              </motion.div>
             );
           })}
+        </AnimatePresence>
+
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
+           <div className="text-[12rem] font-black tracking-tighter uppercase leading-none">{mode}</div>
         </div>
-        <div className="mt-12 text-center max-w-lg h-10">
-          <AnimatePresence mode="wait">
-            {!withRanking ? (
-              <motion.p key="raw" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-sm text-red-400 font-bold uppercase tracking-tighter">
-                The outlier (100) dominates the variance, making the other 4 points invisible!
-              </motion.p>
-            ) : (
-              <motion.p key="ranked" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-sm text-emerald-400 font-bold uppercase tracking-tighter">
-                Ranked: The outlier is just &quot;Position 5&quot;. Its destructive magnitude is gone.
-              </motion.p>
-            )}
-          </AnimatePresence>
+      </div>
+
+      <div className="p-10 bg-amber-500/5 border-t border-amber-500/10 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="flex gap-4">
+          <Compass className="text-amber-400 shrink-0 mt-1" />
+          <p className="text-xs text-slate-400 leading-relaxed text-pretty">
+            In <strong className="text-white uppercase tracking-widest font-black text-balance">Raw View</strong>, the outlier at 100 consumes 90% of the vertical space. To a linear correlation, the other 4 points effectively vanish into noise.
+          </p>
+        </div>
+        <div className="flex gap-4">
+          <ShieldCheck className="text-emerald-400 shrink-0 mt-1" />
+          <p className="text-xs text-slate-400 leading-relaxed text-pretty">
+            In <strong className="text-white uppercase tracking-widest font-black text-balance">Ranked View</strong>, the outlier is just &quot;Position 5&quot;. Magnitude is neutralized, and the intrinsic relationship between the remaining points is preserved.
+          </p>
         </div>
       </div>
     </div>
@@ -500,63 +567,67 @@ export function OutlierCrusher() {
 
 export function RankingVisualizer() {
   const [items, setItems] = useState(() => [
-    { id: 1, val: 12 },
-    { id: 2, val: 45 },
-    { id: 3, val: 23 },
-    { id: 4, val: 89 },
-    { id: 5, val: 45 },
-    { id: 6, val: 34 },
+    { id: "1", val: 12 },
+    { id: "2", val: 45 },
+    { id: "3", val: 23 },
+    { id: "4", val: 89 },
+    { id: "5", val: 45 },
+    { id: "6", val: 34 },
   ]);
 
   const ranks = useMemo(() => getRanks(items.map(i => i.val)), [items]);
 
   const addVal = () => {
     if (items.length >= 10) return;
-    setItems([...items, { id: Math.random(), val: Math.floor(Math.random() * 100) }]);
+    setItems([...items, { id: Math.random().toString(), val: Math.floor(Math.random() * 100) }]);
   };
 
-  const removeVal = (id: number) => {
+  const removeVal = (id: string) => {
+    if (items.length <= 2) return;
     setItems(items.filter((i) => i.id !== id));
   };
 
   return (
-    <div className="hd-viz-container">
-       <div className="hd-viz-header justify-between p-6">
-        <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
-          <span className="w-2 h-2 bg-purple-400 rounded-full" />
-          Interactive: Value to Rank
-        </h4>
-        <button onClick={addVal} className="hd-btn-action !px-6">Add Item</button>
+    <div className="hd-viz-container hd-glass-panel">
+       <div className="hd-viz-header p-8 flex items-center justify-between">
+        <div>
+          <div className="hd-instrument-label mb-1">Data Pipeline</div>
+          <h4 className="text-white font-black text-lg uppercase tracking-tighter italic">Linear Compression</h4>
+        </div>
+        <button onClick={addVal} className="hd-btn-action !px-10 !bg-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]">Inject Data</button>
       </div>
-      <div className="p-8 md:p-12 overflow-x-auto scrollbar-thin">
-        <div className="flex gap-4 min-w-max">
+      <div className="p-12 md:p-20 overflow-x-auto no-scrollbar">
+        <div className="flex gap-6 min-w-max items-center">
           <AnimatePresence mode="popLayout">
             {items.map((item, i) => (
               <motion.div
                 key={item.id}
                 layout
-                initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                className="flex flex-col items-center gap-4"
+                initial={{ opacity: 0, scale: 0.5, x: -20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.2, y: 40 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="flex flex-col items-center gap-6"
               >
                 <div
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl border-2 border-white/10 bg-white/5 flex items-center justify-center text-xl md:text-2xl font-black text-white cursor-pointer hover:border-red-500/50 hover:bg-red-500/10 transition-all group relative"
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-[2.5rem] hd-glass-panel flex items-center justify-center text-2xl md:text-3xl font-black text-white cursor-pointer hover:border-red-500/50 transition-all group relative hd-glow-cyan"
                   onClick={() => removeVal(item.id)}
                 >
-                  {item.val}
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                  <span className="group-hover:opacity-20 transition-opacity">{item.val}</span>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MousePointer2 className="w-6 h-6 text-red-500" />
                   </div>
                 </div>
 
-                <div className="w-px h-8 bg-gradient-to-b from-white/20 to-transparent" />
+                <motion.div 
+                  className="w-px h-12 bg-gradient-to-b from-cyan-500 to-purple-500"
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                />
 
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl border-2 border-cyan-500/30 bg-cyan-500/10 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.1)]">
-                   <div className="text-[10px] text-cyan-400/60 uppercase font-black tracking-widest mb-1">Rank</div>
-                   <div className="text-xl md:text-2xl font-mono font-black text-cyan-400">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-[2.5rem] hd-glass-panel border-purple-500/30 bg-purple-500/10 flex flex-col items-center justify-center hd-glow-purple">
+                   <div className="hd-instrument-label text-purple-400 opacity-100 scale-75 mb-1">Rank</div>
+                   <div className="text-2xl md:text-3xl font-mono font-black text-purple-400">
                     {ranks[i]}
                    </div>
                 </div>
@@ -565,15 +636,20 @@ export function RankingVisualizer() {
           </AnimatePresence>
         </div>
       </div>
-      <div className="p-6 bg-white/[0.02] border-t border-white/5 text-sm text-slate-500 leading-relaxed">
-        Ranks compress the data into a uniform distribution. Notice how <strong>ties</strong> (like the two 45s above) receive the average of their ranks.
+      <div className="p-8 bg-black/40 border-t border-white/5">
+         <div className="flex gap-4">
+            <Info className="text-slate-500 shrink-0 w-5 h-5 mt-1" />
+            <p className="text-xs text-slate-500 leading-relaxed font-medium italic text-pretty">
+              Hover/Tap a node to excise it from the pipeline. Ranking ensures that the <strong className="text-white uppercase tracking-widest font-black not-italic text-balance">relative ordinality</strong> remains static even if the numeric values are wildly disparate. This is the cornerstone of non-parametric robustness.
+            </p>
+         </div>
       </div>
     </div>
   );
 }
 
 // ============================================
-// 5. LIVE CODE
+// 5. LIVE CODE (TypeScript Runtime)
 // ============================================
 
 export function CodePlayground() {
@@ -587,46 +663,97 @@ export function CodePlayground() {
       const y = [125, 145, 160, 156, 190, 150, 165, 250, 250, 250];
       setResult(calculateHoeffdingD(x, y));
       setIsLoading(false);
-    }, 800);
+    }, 1200);
   };
 
-  return (
-    <div className="hd-viz-container overflow-hidden">
-      <div className="hd-viz-header p-6 justify-between">
-        <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
-          <span className="w-2 h-2 bg-amber-400 rounded-full" />
-          Live TypeScript Runtime
-        </h4>
-        <button onClick={runCode} disabled={isLoading} className="hd-btn-action !bg-amber-500 !px-8">{isLoading ? "Running..." : "Execute TS"}</button>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="p-6 bg-black font-mono text-[10px] text-slate-500 overflow-x-auto border-r border-white/5 h-[400px] scrollbar-thin">
-<pre>{`// Observed Joint vs Expected Independent
-function computeD(x, y) {
-  const R = getRanks(x);
-  const S = getRanks(y);
+  const codeStr = `/**
+ * Hoeffding's D Core Implementation
+ * @param {Array<number>} x Observed sequence
+ * @param {Array<number>} y Observed sequence
+ * @returns {number} Dependency metric [-0.5, 1.0]
+ */
+function computeHoeffdingD(x, y) {
+  const R = rankdata(x); // Mean rank transformation
+  const S = rankdata(y);
   const n = x.length;
 
-  // Q counts the "lower-left" neighbors
-  const Q = x.map((_, i) => 1 + count(j => 
-    R[j] < R[i] && S[j] < S[i]
-  ));
+  // Compute Q: Weighted concordance matrix
+  const Q = x.map((_, i) => 
+    1 + countNeighbors(j => R[j] < R[i] && S[j] < S[i])
+  );
 
-  // The D terms quantify the residual energy
-  let D1 = sum(i => (Q[i]-1)*(Q[i]-2));
-  let D2 = sum(i => (R[i]-1)*(R[i]-2)*(S[i]-1)*(S[i]-2));
-  let D3 = sum(i => (R[i]-2)*(S[i]-2)*(Q[i]-1));
+  // Derive D-components through triple summation
+  const D1 = sum(i => (Q[i]-1)*(Q[i]-2));
+  const D2 = sum(i => (R[i]-1)*(R[i]-2)*(S[i]-1)*(S[i]-2));
+  const D3 = sum(i => (R[i]-2)*(S[i]-2)*(Q[i]-1));
 
+  // Final normalization by combinatorial factor
   return 30 * ((n-2)*(n-3)*D1 + D2 - 2*(n-2)*D3) / 
          (n*(n-1)*(n-2)*(n-3)*(n-4));
-}`}</pre>
+}
+
+/** Helper: Mean Rank Transformation */
+function rankdata(arr) {
+  const sorted = arr.map((v, i) => ({ v, i })).sort((a,b) => a.v - b.v);
+  const ranks = new Array(arr.length);
+  let i = 0;
+  while (i < arr.length) {
+    let j = i;
+    while (j < arr.length && sorted[j].v === sorted[i].v) j++;
+    const rank = (i + 1 + j) / 2;
+    for (let k = i; k < j; k++) ranks[sorted[k].i] = rank;
+    i = j;
+  }
+  return ranks;
+}`;
+
+  return (
+    <div className="hd-viz-container hd-glass-panel">
+      <div className="hd-viz-header p-8 flex items-center justify-between">
+        <div>
+          <div className="hd-instrument-label mb-1">Runtime Environment</div>
+          <h4 className="text-white font-black text-lg uppercase tracking-tighter italic">TypeScript Kernel</h4>
         </div>
-        <div className="p-8 bg-[#020204] flex flex-col items-center justify-center text-center">
-          <div className="text-[10px] uppercase font-black text-slate-700 tracking-[0.5em] mb-8">System Console</div>
-          <motion.div animate={{ scale: result ? 1.1 : 1 }} className={`text-5xl font-mono font-black ${result ? "text-amber-400" : "text-slate-900"}`}>
-            {result ? result.toFixed(6) : "0.000000"}
-          </motion.div>
-          {result && <div className="mt-4 text-[10px] text-slate-500 uppercase tracking-widest font-bold">Calculation Complete</div>}
+        <button 
+          onClick={runCode} 
+          disabled={isLoading} 
+          className="hd-btn-action !bg-amber-500 !px-12 transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(245,158,11,0.2)]"
+        >
+          {isLoading ? "Compiling..." : "Execute Logic"}
+        </button>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-white/5 bg-black/40">
+        <div className="p-8 font-mono text-[11px] leading-relaxed text-slate-500 overflow-x-auto h-[450px] scrollbar-thin">
+          <pre>{codeStr}</pre>
+        </div>
+        <div className="p-12 md:p-20 flex flex-col items-center justify-center text-center">
+          <div className="hd-instrument-label mb-12 tracking-[0.5em]">Diagnostic Output</div>
+          <AnimatePresence mode="wait">
+            {!result ? (
+              <motion.div 
+                key="idle"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="flex flex-col items-center"
+              >
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-white/10 animate-spin flex items-center justify-center">
+                   <Settings2 className="text-white/10 w-8 h-8" />
+                </div>
+                <span className="mt-8 text-slate-700 font-mono text-xs uppercase tracking-widest">System Ready</span>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="done"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="space-y-4"
+              >
+                <div className="text-6xl md:text-8xl font-mono font-black text-amber-400 drop-shadow-[0_0_40px_rgba(245,158,11,0.4)]">
+                  {result.toFixed(6)}
+                </div>
+                <div className="text-[10px] text-amber-500/60 font-black uppercase tracking-widest font-mono">Metric Verification Passed</div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

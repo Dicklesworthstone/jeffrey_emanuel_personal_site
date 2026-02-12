@@ -4,13 +4,14 @@ import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, 
-  ChevronRight, RotateCcw, Layers, Microscope, LayoutTemplate 
+  ChevronRight, RotateCcw, Layers, Microscope, LayoutTemplate, MousePointer2
 } from "lucide-react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, extend } from "@react-three/fiber";
 import { 
   Float, PerspectiveCamera, Stars, MeshTransmissionMaterial, 
   Text, Html, Trail, CameraControls, Environment, Grid
 } from "@react-three/drei";
+import { EffectComposer, Bloom, Noise, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 
 // ============================================================
@@ -156,15 +157,7 @@ function ManifoldMesh({ level }: { level: number }) {
     meshRef.current.rotation.y = t * 0.15;
 
     // Animate planes based on level
-    // 0 -> planes far away
-    // 6 -> planes close to center (small intersection)
     planes.forEach((plane, i) => {
-      // Calculate target constant (distance from origin)
-      // Level 0: 2.5 (no clip)
-      // Level 1: moves one plane in
-      // ...
-      // Level 6: all planes in tight at 0.4
-      
       const isActive = i < level;
       const targetDist = isActive ? 0.4 + Math.sin(t + i)*0.05 : 3.0;
       
@@ -189,7 +182,7 @@ function ManifoldMesh({ level }: { level: number }) {
           chromaticAberration={0.1}
           color="#f59e0b"
           clippingPlanes={planes}
-          clipIntersection={false} // We want the intersection of the volume and the valid space
+          clipIntersection={false} 
         />
       </mesh>
 
@@ -206,9 +199,6 @@ function PlaneVisualizer({ plane, isActive, index }: { plane: THREE.Plane; isAct
   
   useFrame(() => {
     if (!meshRef.current) return;
-    // Position mesh at plane location
-    // Plane equation: normal . point + constant = 0
-    // Closest point to origin is -normal * constant
     const pos = plane.normal.clone().multiplyScalar(-plane.constant);
     meshRef.current.position.copy(pos);
     meshRef.current.lookAt(pos.clone().add(plane.normal));
@@ -217,18 +207,20 @@ function PlaneVisualizer({ plane, isActive, index }: { plane: THREE.Plane; isAct
   return (
     <mesh ref={meshRef} visible={true}>
       <planeGeometry args={[4, 4]} />
+      {/* Emissive material for Bloom effect */}
       <meshBasicMaterial 
         color="#f43f5e" 
         transparent 
-        opacity={isActive ? 0.1 : 0} 
+        opacity={isActive ? 0.15 : 0} 
         side={THREE.DoubleSide}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
+        toneMapped={false}
       />
       {isActive && (
         <lineSegments>
           <edgesGeometry args={[new THREE.PlaneGeometry(4, 4)]} />
-          <lineBasicMaterial color="#f43f5e" opacity={0.4} transparent />
+          <lineBasicMaterial color="#f43f5e" opacity={0.8} transparent toneMapped={false} />
         </lineSegments>
       )}
     </mesh>
@@ -267,25 +259,40 @@ export function ConstraintViz() {
             <ambientLight intensity={0.5} />
             <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
             <pointLight position={[-10, -10, -10]} intensity={0.5} color="#f43f5e" />
+            <Environment preset="city" />
             
             <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
               <ManifoldMesh level={level} />
             </Float>
             
             <EffectGlitch trigger={level >= 5} />
+            
+            <EffectComposer enableNormalPass={false}>
+              <Bloom luminanceThreshold={0.5} mipmapBlur intensity={1.5} radius={0.6} />
+              <Noise opacity={0.05} />
+              <Vignette eskil={false} offset={0.1} darkness={1.1} />
+            </EffectComposer>
+            
+            <CameraControls minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} />
           </Canvas>
 
           {/* HUD Overlay */}
-          <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between">
+          <div className="absolute inset-0 pointer-events-none p-4 md:p-6 flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <div className="h-px w-12 bg-amber-500/50" />
-                <span className="text-[10px] font-mono text-amber-500/50 uppercase tracking-tighter">Hyperplane Analysis</span>
+                <div className="h-px w-8 md:w-12 bg-amber-500/50" />
+                <span className="text-[9px] md:text-[10px] font-mono text-amber-500/50 uppercase tracking-tighter">Hyperplane Analysis</span>
+              </div>
+              
+              {/* Mobile Interaction Hint */}
+              <div className="md:hidden flex items-center gap-1 text-white/20">
+                <MousePointer2 className="w-3 h-3" />
+                <span className="text-[9px] uppercase tracking-widest">Drag</span>
               </div>
             </div>
 
             <div className="space-y-1">
-              <div className="text-[10px] font-mono text-slate-600 uppercase tracking-widest mb-2">Active Cuts</div>
+              <div className="text-[9px] md:text-[10px] font-mono text-slate-600 uppercase tracking-widest mb-2">Active Cuts</div>
               <AnimatePresence>
                 {level === 0 ? (
                   <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-slate-500 italic text-xs">&gt; Unconstrained...</motion.div>
@@ -295,9 +302,9 @@ export function ConstraintViz() {
                       key={label}
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      className="flex items-center gap-2 text-xs font-mono text-rose-400"
+                      className="flex items-center gap-2 text-[10px] md:text-xs font-mono text-rose-400"
                     >
-                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-sm" />
+                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-sm shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                       {label}
                     </motion.div>
                   ))
@@ -322,14 +329,14 @@ export function ConstraintViz() {
             <button
               onClick={() => setLevel(l => Math.min(l + 1, 6))}
               disabled={level >= 6}
-              className="op-btn-action flex items-center gap-2 px-6"
+              className="op-btn-action flex items-center justify-center gap-2 px-6 flex-grow md:flex-grow-0"
             >
               <Minimize2 className="w-3 h-3" /> SLICE
             </button>
             <button
               onClick={() => setLevel(0)}
               disabled={level === 0}
-              className="op-btn-secondary w-10 flex items-center justify-center"
+              className="op-btn-secondary w-12 flex items-center justify-center flex-grow md:flex-grow-0"
               aria-label="Reset"
             >
               <RotateCcw className="w-3 h-3" />
@@ -423,6 +430,7 @@ function HologramMesh({ specificity }: { specificity: number }) {
           uOpacity: { value: 0.5 },
           uColor: { value: new THREE.Color("#f59e0b") }
         }}
+        toneMapped={false} // Important for bloom
       />
     </mesh>
   );
@@ -467,17 +475,23 @@ export function QualityCurveViz() {
               <HologramMesh specificity={specificity} />
             </Float>
             <EffectGlitch trigger={zone === "over"} />
+            
+            <EffectComposer enableNormalPass={false}>
+              <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.2} radius={0.5} />
+              <Noise opacity={0.1} />
+              <Vignette eskil={false} offset={0.1} darkness={1.1} />
+            </EffectComposer>
           </Canvas>
 
           {/* Overlay Stats */}
-          <div className="absolute top-6 left-6 font-mono text-xs space-y-1">
+          <div className="absolute top-6 left-6 font-mono text-[10px] md:text-xs space-y-1">
             <div className="text-slate-500">SIGNAL_INTEGRITY</div>
             <div className={`text-xl font-bold ${labels[zone].color}`}>
               {Math.round((zone === "sweet" ? 1 : zone === "vague" ? specificity/0.3 : (1-specificity)/0.35) * 100)}%
             </div>
           </div>
 
-          <div className="absolute top-6 right-6 font-mono text-xs text-right space-y-1">
+          <div className="absolute top-6 right-6 font-mono text-[10px] md:text-xs text-right space-y-1">
             <div className="text-slate-500">MODE</div>
             <div className={`text-lg font-bold tracking-widest ${labels[zone].color}`}>
               {labels[zone].text}
@@ -485,7 +499,7 @@ export function QualityCurveViz() {
           </div>
           
           {/* Central Message */}
-          <div className="absolute bottom-20 left-0 right-0 flex justify-center pointer-events-none">
+          <div className="absolute bottom-20 left-0 right-0 flex justify-center pointer-events-none px-4 text-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={zone}
@@ -494,7 +508,7 @@ export function QualityCurveViz() {
                 exit={{ opacity: 0, y: -20 }}
                 className="bg-black/60 backdrop-blur-md px-6 py-3 rounded-full border border-white/10"
               >
-                <span className={`text-sm font-medium ${labels[zone].color}`}>
+                <span className={`text-xs md:text-sm font-medium ${labels[zone].color}`}>
                   {labels[zone].desc}
                 </span>
               </motion.div>
@@ -504,7 +518,7 @@ export function QualityCurveViz() {
 
         {/* Synth Knob Control (Slider) */}
         <div className="mt-8 px-4">
-          <div className="relative h-12 flex items-center">
+          <div className="relative h-12 flex items-center touch-none">
             {/* Track */}
             <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full overflow-hidden">
               <div className="absolute left-0 top-0 bottom-0 w-[30%] bg-amber-500/20" />
@@ -531,7 +545,7 @@ export function QualityCurveViz() {
             />
           </div>
           
-          <div className="flex justify-between text-[10px] font-mono text-slate-500 uppercase mt-2">
+          <div className="flex justify-between text-[9px] md:text-[10px] font-mono text-slate-500 uppercase mt-2">
             <span>Vague</span>
             <span>Specific</span>
             <span>Overfit</span>
@@ -571,16 +585,17 @@ function NodeNetwork({ mode }: { mode: "plan" | "execute" }) {
           metalness={0.5}
           transmission={0.9}
           thickness={2}
+          toneMapped={false}
         />
         {/* Internal Clockwork (Visible when close) */}
         <group scale={0.5}>
            <mesh rotation-z={Math.PI/2}>
              <torusGeometry args={[1.2, 0.1, 16, 32]} />
-             <meshStandardMaterial color="white" emissive="white" emissiveIntensity={2} />
+             <meshStandardMaterial color="white" emissive="white" emissiveIntensity={4} toneMapped={false} />
            </mesh>
            <mesh rotation-x={Math.PI/2}>
              <torusGeometry args={[0.8, 0.1, 16, 32]} />
-             <meshStandardMaterial color="white" />
+             <meshStandardMaterial color="white" toneMapped={false} />
            </mesh>
         </group>
       </mesh>
@@ -616,12 +631,12 @@ function ConnectionLine({ start, end, opacity }: { start: THREE.Vector3, end: TH
       lineRef.current.geometry.setFromPoints([start, end]);
     }
   }, [start, end]);
-  return (
-    <primitive object={new THREE.Line()} ref={lineRef}>
-      <bufferGeometry />
-      <lineBasicMaterial color="white" transparent opacity={opacity} />
-    </primitive>
-  );
+  const lineObj = useMemo(() => {
+    const geometry = new THREE.BufferGeometry();
+    const material = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity });
+    return new THREE.Line(geometry, material);
+  }, [opacity]);
+  return <primitive ref={lineRef} object={lineObj} />;
 }
 
 export function PlanExecuteViz() {
@@ -672,6 +687,12 @@ export function PlanExecuteViz() {
               sectionColor="#1e293b" 
               fadeDistance={15} 
             />
+            
+            <EffectComposer enableNormalPass={false}>
+              <Bloom luminanceThreshold={0.5} mipmapBlur intensity={1.0} radius={0.4} />
+              <Noise opacity={0.05} />
+              <Vignette eskil={false} offset={0.1} darkness={1.1} />
+            </EffectComposer>
           </Canvas>
 
           {/* Mode Switcher HUD */}
