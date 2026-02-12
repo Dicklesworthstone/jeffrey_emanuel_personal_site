@@ -21,9 +21,11 @@ import {
   ChevronRight,
   ChevronLeft,
   MousePointer2,
-  Terminal
+  Terminal,
+  Layers
 } from "lucide-react";
 import * as THREE from "three";
+import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 
 const COLORS = {
   bg: "#020204",
@@ -65,7 +67,7 @@ export function BakeryHero() {
       const scene = new THREE.Scene();
       const isMobile = window.innerWidth < 768;
       const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 2000);
-      camera.position.set(0, 0, isMobile ? 120 : 100);
+      camera.position.set(0, 0, isMobile ? 140 : 100);
 
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(container.clientWidth, container.clientHeight);
@@ -73,7 +75,7 @@ export function BakeryHero() {
       container.appendChild(renderer.domElement);
 
       // Starfield background
-      const starCount = isMobile ? 1000 : 3000;
+      const starCount = isMobile ? 800 : 3000;
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(starCount * 3);
       for (let i = 0; i < starCount; i++) {
@@ -82,7 +84,7 @@ export function BakeryHero() {
         starPos[i * 3 + 2] = (Math.random() - 0.5) * 1000;
       }
       starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
-      const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 0.3 });
+      const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 0.2 });
       const stars = new THREE.Points(starGeo, starMat);
       scene.add(stars);
       disposables.push(starGeo, starMat);
@@ -91,7 +93,7 @@ export function BakeryHero() {
       const group = new THREE.Group();
       scene.add(group);
 
-      const ticketCount = isMobile ? 30 : 60;
+      const ticketCount = isMobile ? 20 : 60;
       const tickets: THREE.Mesh[] = [];
 
       for (let i = 0; i < ticketCount; i++) {
@@ -99,17 +101,17 @@ export function BakeryHero() {
         const mat = new THREE.MeshBasicMaterial({ 
           color: i % 10 === 0 ? COLORS.cyan : i % 5 === 0 ? COLORS.amber : COLORS.rose,
           transparent: true,
-          opacity: 0.3,
+          opacity: 0.25,
           wireframe: true
         });
         const ticket = new THREE.Mesh(geo, mat);
         disposables.push(geo, mat);
 
-        const angle = (i / ticketCount) * Math.PI * 2 * 6;
-        const radius = (isMobile ? 15 : 25) + (i * 0.8);
+        const angle = (i / ticketCount) * Math.PI * 2 * (isMobile ? 4 : 6);
+        const radius = (isMobile ? 12 : 25) + (i * 0.8);
         ticket.position.set(
           Math.cos(angle) * radius,
-          (i - ticketCount / 2) * 3,
+          (i - ticketCount / 2) * (isMobile ? 4 : 3),
           Math.sin(angle) * radius
         );
         ticket.rotation.y = angle;
@@ -118,12 +120,12 @@ export function BakeryHero() {
       }
 
       // Central Logical Core
-      const coreGeo = new THREE.OctahedronGeometry(isMobile ? 10 : 15, 2);
+      const coreGeo = new THREE.OctahedronGeometry(isMobile ? 8 : 15, 2);
       const coreMat = new THREE.MeshBasicMaterial({ 
         color: COLORS.amber, 
         wireframe: true,
         transparent: true,
-        opacity: 0.15
+        opacity: 0.1
       });
       const core = new THREE.Mesh(coreGeo, coreMat);
       scene.add(core);
@@ -133,18 +135,18 @@ export function BakeryHero() {
         if (!isMounted) return;
         animationId = requestAnimationFrame(animate);
         
-        group.rotation.y += 0.001;
-        core.rotation.y -= 0.003;
-        core.rotation.x += 0.002;
+        group.rotation.y += 0.0008;
+        core.rotation.y -= 0.002;
+        core.rotation.x += 0.001;
         
         // Parallax effect
-        camera.position.x += (mouse.x * 20 - camera.position.x) * 0.05;
-        camera.position.y += (-mouse.y * 20 - camera.position.y) * 0.05;
+        camera.position.x += (mouse.x * 15 - camera.position.x) * 0.05;
+        camera.position.y += (-mouse.y * 15 - camera.position.y) * 0.05;
         camera.lookAt(0, 0, 0);
 
         tickets.forEach((t, i) => {
-          t.position.y += Math.sin(Date.now() * 0.0005 + i) * 0.05;
-          t.rotation.z += 0.005;
+          t.position.y += Math.sin(Date.now() * 0.0004 + i) * 0.04;
+          t.rotation.z += 0.004;
         });
 
         renderer?.render(scene, camera);
@@ -154,7 +156,9 @@ export function BakeryHero() {
 
       handleResize = () => {
         if (!container || !renderer || !camera) return;
+        const isMob = window.innerWidth < 768;
         camera.aspect = container.clientWidth / container.clientHeight;
+        camera.position.z = isMob ? 140 : 100;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
       };
@@ -186,28 +190,22 @@ export function BakeryHero() {
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full h-full min-h-[500px] md:min-h-[600px] relative cursor-none">
+    <div ref={containerRef} className="w-full h-full min-h-[450px] md:min-h-[600px] relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] pointer-events-none z-10" />
       
-      {/* HUD Elements for Desktop */}
-      <div className="absolute inset-0 hidden md:block pointer-events-none z-20">
-         <div className="absolute top-1/4 left-12 w-32 h-px bg-white/10" />
-         <div className="absolute top-1/4 left-12 p-2 font-mono text-[8px] text-white/20 uppercase">Substrate Density: High</div>
-         <div className="absolute bottom-1/4 right-12 w-32 h-px bg-white/10" />
-         <div className="absolute bottom-1/4 right-12 p-2 font-mono text-[8px] text-white/20 uppercase text-right">Synchronization: Fair</div>
-      </div>
-
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20 pointer-events-none w-[90%]">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20 pointer-events-none w-[90%] max-w-lg">
          <motion.div 
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
-           className="px-8 py-4 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-3xl shadow-[0_0_80px_rgba(245,158,11,0.15)]"
+           className="px-6 py-4 md:px-8 md:py-5 rounded-[2rem] bg-white/[0.03] border border-white/10 backdrop-blur-3xl shadow-[0_0_100px_rgba(245,158,11,0.1)]"
          >
-            <div className="flex flex-col items-center gap-2">
-               <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
-               <p className="text-[10px] md:text-[11px] font-mono text-amber-400 uppercase tracking-[0.5em] mb-1">Bakery Substrate</p>
-               <div className="h-px w-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-               <p className="text-xs md:text-sm font-bold text-white/80">Decentralized Temporal Logic</p>
+            <div className="flex flex-col items-center gap-3">
+               <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                  <span className="text-[10px] md:text-[11px] font-mono text-amber-400 uppercase tracking-[0.4em]">Substrate v2.0</span>
+               </div>
+               <div className="h-px w-16 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+               <p className="text-sm md:text-base font-bold text-white/90 tracking-tight">Decentralized Temporal Logic</p>
             </div>
          </motion.div>
       </div>
@@ -222,6 +220,7 @@ export function BakeryHero() {
 
 export function DoorwayRaceViz() {
   const [progress, setProgress] = useState(0);
+  const { lightTap } = useHapticFeedback();
   
   const steps = [
     {
@@ -261,7 +260,6 @@ export function DoorwayRaceViz() {
     }
   ];
 
-  // Simple interpolation logic for the scrubber
   const currentStep = useMemo(() => {
     let best = steps[0];
     for (const s of steps) {
@@ -272,41 +270,50 @@ export function DoorwayRaceViz() {
 
   return (
     <div className="ba-viz-container">
-      <div className="p-8 md:p-12 relative overflow-hidden bg-gradient-to-b from-white/[0.02] to-transparent">
-        <div className="flex flex-col lg:flex-row gap-12 relative z-10">
-          <div className="lg:w-1/3 space-y-8">
-            <div className="space-y-4">
+      <div className="p-6 md:p-12 relative overflow-hidden bg-gradient-to-b from-white/[0.02] to-transparent">
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-12 relative z-10">
+          <div className="lg:w-1/3 space-y-6 md:space-y-8">
+            <div className="space-y-3 md:space-y-4">
                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-mono text-amber-400 uppercase tracking-widest">
                   Temporal Scrubber
                </div>
-               <h3 className="text-3xl font-bold text-white tracking-tight leading-none min-h-[4rem] flex items-center">
+               <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight min-h-[3rem] md:min-h-[4rem] flex items-center">
                  {currentStep.title}
                </h3>
-               <p className="text-slate-400 leading-relaxed text-lg min-h-[6rem]">
+               <p className="text-slate-400 leading-relaxed text-sm md:text-lg min-h-[4rem] md:min-h-[6rem]">
                  {currentStep.desc}
                </p>
             </div>
 
-            <div className="space-y-4 pt-8 border-t border-white/5">
+            <div className="space-y-4 pt-6 md:pt-8 border-t border-white/5">
                <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 uppercase tracking-[0.2em]">
-                  <span>Timeline</span>
-                  <span>{Math.round(progress * 100)}%</span>
+                  <span>Timeline Scrubber</span>
+                  <span className="text-white tabular-nums">{Math.round(progress * 100)}%</span>
                </div>
-               <input 
-                 type="range" min="0" max="1" step="0.01" 
-                 value={progress}
-                 onChange={(e) => setProgress(parseFloat(e.target.value))}
-                 className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-amber-500"
-               />
+               <div className="relative h-10 flex items-center">
+                  <input 
+                    type="range" min="0" max="1" step="0.01" 
+                    value={progress}
+                    onChange={(e) => {
+                      setProgress(parseFloat(e.target.value));
+                      lightTap();
+                    }}
+                    className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400"
+                  />
+               </div>
                <div className="flex justify-between px-1">
                   {steps.map((s, i) => (
-                    <div key={i} className={`w-1 h-1 rounded-full ${progress >= s.t ? 'bg-amber-500' : 'bg-white/10'}`} />
+                    <button 
+                      key={i} 
+                      onClick={() => { setProgress(s.t); lightTap(); }}
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-300 hover:scale-125 ${progress >= s.t ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]' : 'bg-white/10'}`} 
+                    />
                   ))}
                </div>
             </div>
           </div>
 
-          <div className="lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+          <div className="lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 items-start">
              <LayoutGroup>
                 <TemporalCard label="NODE 0" data={currentStep.a} id={0} />
                 <TemporalCard label="NODE 1" data={currentStep.b} id={1} />
@@ -322,34 +329,38 @@ function TemporalCard({ label, data, id }: any) {
   return (
     <motion.div 
       layout
-      className="p-8 rounded-[2rem] bg-black/40 border-2 transition-colors duration-500 relative overflow-hidden group"
-      style={{ borderColor: `${data.color}33` }}
+      className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-black/40 border-2 transition-all duration-500 relative overflow-hidden group w-full"
+      style={{ borderColor: `${data.color}33`, boxShadow: `0 0 40px ${data.color}05` }}
     >
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none" 
            style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
       
-      <div className="relative z-10 flex flex-col gap-8">
+      <div className="relative z-10 flex flex-col gap-6 md:gap-8">
          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl text-white shadow-2xl transition-colors duration-500" 
+            <div className="flex items-center gap-3 md:gap-4">
+               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center font-black text-lg md:text-xl text-white shadow-2xl transition-colors duration-500" 
                     style={{ backgroundColor: data.color }}>
                   {id}
                </div>
                <div>
-                  <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-0.5">{label}</p>
-                  <p className="text-sm font-bold text-white transition-colors duration-500" style={{ color: data.color }}>{data.state}</p>
+                  <p className="text-[9px] md:text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-0.5">{label}</p>
+                  <p className="text-xs md:text-sm font-bold text-white transition-colors duration-500 uppercase tracking-tighter" style={{ color: data.color }}>{data.state}</p>
                </div>
             </div>
-            {data.state === 'CRITICAL' && <Lock className="w-5 h-5 text-emerald-400 animate-pulse" />}
+            {data.state === 'CRITICAL' && (
+              <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                <Lock className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
+              </motion.div>
+            )}
          </div>
 
-         <div className="space-y-6">
+         <div className="space-y-5 md:space-y-6">
             <div className="space-y-2">
-               <div className="flex justify-between text-[10px] font-mono text-slate-500 uppercase">
+               <div className="flex justify-between text-[9px] md:text-[10px] font-mono text-slate-500 uppercase tracking-widest">
                   <span>Logic Guard</span>
-                  <span className={data.choosing ? 'text-cyan-400' : 'text-slate-700'}>{data.choosing ? 'TRUE' : 'FALSE'}</span>
+                  <span className={data.choosing ? 'text-cyan-400' : 'text-slate-700'}>{data.choosing ? 'ACTIVE' : 'READY'}</span>
                </div>
-               <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+               <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={false}
                     animate={{ width: data.choosing ? '100%' : '0%', backgroundColor: data.color }}
@@ -358,14 +369,14 @@ function TemporalCard({ label, data, id }: any) {
                </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 text-center">
-                  <p className="text-[9px] text-slate-600 uppercase mb-1">Ticket</p>
-                  <p className="text-3xl font-black text-white">{data.val || '—'}</p>
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+               <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
+                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-widest">Ticket</p>
+                  <p className="text-xl md:text-3xl font-black text-white">{data.val || '—'}</p>
                </div>
-               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 text-center">
-                  <p className="text-[9px] text-slate-600 uppercase mb-1">Priority</p>
-                  <p className="text-3xl font-black text-white/20 group-hover:text-white/40 transition-colors">#{id}</p>
+               <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
+                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-widest">Priority</p>
+                  <p className="text-xl md:text-3xl font-black text-white/20 group-hover:text-white/40 transition-colors">#{id}</p>
                </div>
             </div>
          </div>
@@ -388,10 +399,13 @@ export function ProcessNexus() {
   const [radius, setRadius] = useState(240);
   const isMountedRef = useRef(true);
   const processesRef = useRef<any[]>([]);
+  const { lightTap, mediumTap } = useHapticFeedback();
 
   useEffect(() => {
     const handleResize = () => {
-      setRadius(Math.min(window.innerWidth * 0.32, 260));
+      const isMob = window.innerWidth < 768;
+      // On mobile we use a smaller radius and nodes to prevent overflow
+      setRadius(isMob ? Math.min(window.innerWidth * 0.35, 140) : Math.min(window.innerWidth * 0.32, 260));
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -422,6 +436,7 @@ export function ProcessNexus() {
 
   const runCycle = async (id: number) => {
     if (!isMountedRef.current || processesRef.current[id]?.state !== 'IDLE') return;
+    mediumTap();
 
     // Phase 1: Choosing (The Doorway)
     updateProcess(id, { state: 'CHOOSING', choosing: true });
@@ -437,7 +452,8 @@ export function ProcessNexus() {
       if (!isMountedRef.current) return;
       
       setTargetId(j);
-      await new Promise(r => setTimeout(r, 600)); // Simulate sequential check
+      lightTap();
+      await new Promise(r => setTimeout(r, window.innerWidth < 768 ? 400 : 600)); 
     }
     setCheckingId(null);
     setTargetId(null);
@@ -447,6 +463,7 @@ export function ProcessNexus() {
     // Phase 3: Critical Section Entry
     updateProcess(id, { state: 'CRITICAL' });
     setActiveId(id);
+    mediumTap();
     await new Promise(r => setTimeout(r, 4000));
     
     if (!isMountedRef.current) return;
@@ -454,36 +471,37 @@ export function ProcessNexus() {
     // Phase 4: Release
     setActiveId(null);
     updateProcess(id, { state: 'IDLE', number: 0 });
+    lightTap();
   };
 
   return (
-    <div className="ba-viz-container h-[550px] md:h-[750px] flex items-center justify-center p-0 overflow-hidden">
+    <div className="ba-viz-container h-[500px] md:h-[750px] flex items-center justify-center p-0 overflow-hidden relative">
       <div className="absolute inset-0 bg-[#050507] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08)_0%,transparent_70%)]" />
       
       {/* Central Logical Hub */}
-      <div className="relative z-10 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
-         <div className={`absolute inset-0 rounded-full blur-[60px] md:blur-[100px] transition-all duration-1000 ${activeId !== null ? 'bg-emerald-500/20 scale-150' : 'bg-blue-500/5 scale-100'}`} />
+      <div className="relative z-10 w-40 h-40 md:w-64 md:h-64 flex items-center justify-center">
+         <div className={`absolute inset-0 rounded-full blur-[40px] md:blur-[100px] transition-all duration-1000 ${activeId !== null ? 'bg-emerald-500/20 scale-125 md:scale-150' : 'bg-blue-500/5 scale-100'}`} />
          
-         <div className={`w-32 h-32 md:w-48 md:h-48 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-1000 ${activeId !== null ? 'border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_60px_rgba(16,185,129,0.1)]' : 'border-white/5 bg-white/[0.02]'}`}>
+         <div className={`w-28 h-28 md:w-48 md:h-48 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-1000 ${activeId !== null ? 'border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_60px_rgba(16,185,129,0.1)]' : 'border-white/5 bg-white/[0.02]'}`}>
             <AnimatePresence mode="wait">
               {activeId !== null ? (
                 <motion.div key="lock" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
-                  <div className="relative mb-4">
-                     <Lock className="w-10 h-10 md:w-14 md:h-14 text-emerald-400" />
+                  <div className="relative mb-2 md:mb-4">
+                     <Lock className="w-8 h-8 md:w-14 md:h-14 text-emerald-400" />
                      <motion.div 
                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.2, 0.5] }}
                        transition={{ duration: 2, repeat: Infinity }}
                        className="absolute inset-0 bg-emerald-400 rounded-full blur-xl"
                      />
                   </div>
-                  <p className="text-[10px] font-mono text-emerald-500 uppercase tracking-[0.3em]">Exclusive Lock</p>
-                  <p className="text-lg font-black text-white mt-1">NODE {activeId}</p>
+                  <p className="text-[8px] md:text-[10px] font-mono text-emerald-500 uppercase tracking-[0.2em] md:tracking-[0.3em]">Exclusive Lock</p>
+                  <p className="text-sm md:text-lg font-black text-white mt-0.5 md:mt-1">P{activeId} ACTIVE</p>
                 </motion.div>
               ) : (
                 <motion.div key="unlock" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center opacity-40">
-                  <Unlock className="w-10 h-10 md:w-14 md:h-14 text-slate-600 mb-4" />
-                  <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em]">Consensus Open</p>
+                  <Unlock className="w-8 h-8 md:w-14 md:h-14 text-slate-600 mb-2 md:mb-4" />
+                  <p className="text-[8px] md:text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em]">Open Consensus</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -503,21 +521,20 @@ export function ProcessNexus() {
           <div key={i} className="absolute transition-all duration-1000 z-20" style={{ transform: `translate(${x}px, ${y}px)` }}>
             <motion.button
               onClick={() => runCycle(i)}
-              disabled={p.state !== 'IDLE'}
-              whileHover={p.state === 'IDLE' ? { scale: 1.1 } : {}}
-              className={`w-20 h-20 md:w-28 md:h-28 rounded-[2rem] border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-700 ${
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className={`w-16 h-16 md:w-28 md:h-28 rounded-2xl md:rounded-[2rem] border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-700 ${
                 p.state === 'CRITICAL' ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_50px_rgba(16,185,129,0.3)]' :
                 p.state === 'WAITING' ? 'border-amber-500 bg-amber-500/5 shadow-[0_0_30px_rgba(245,158,11,0.15)]' :
                 p.state === 'CHOOSING' ? 'border-blue-500 bg-blue-500/5' :
-                'border-white/5 bg-white/[0.03] hover:border-white/20 disabled:cursor-not-allowed'
-              }`}
+                'border-white/5 bg-white/[0.03] hover:border-white/20'
+              } ${isTarget ? 'ring-4 ring-blue-400/30 border-blue-400' : ''}`}
             >
-              <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
-              <span className="text-[9px] font-mono text-slate-500 uppercase mb-1">P{i}</span>
-              <span className="text-2xl font-black text-white">{p.number || '—'}</span>
+              <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+              <span className="text-[8px] md:text-[9px] font-mono text-slate-500 uppercase mb-0.5 md:mb-1">P{i}</span>
+              <span className="text-lg md:text-2xl font-black text-white tabular-nums">{p.number || '—'}</span>
               
-              {/* State HUD mini */}
-              {p.choosing && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]" />}
+              {p.choosing && <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 w-1 md:w-1.5 h-1 md:h-1.5 bg-blue-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]" />}
             </motion.button>
 
             {/* Connection beam using SVG */}
@@ -525,7 +542,7 @@ export function ProcessNexus() {
                <div className="absolute top-1/2 left-1/2 pointer-events-none overflow-visible -z-10">
                   <svg width="600" height="600" className="absolute -left-300 -top-300 pointer-events-none overflow-visible">
                      <defs>
-                        <filter id="glow">
+                        <filter id="nexus-glow">
                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
                            <feMerge>
                               <feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/>
@@ -535,13 +552,13 @@ export function ProcessNexus() {
                      <motion.line
                        initial={{ pathLength: 0, opacity: 0 }}
                        animate={{ pathLength: 1, opacity: 0.6 }}
-                       x1="0" y1="0"
-                       x2={Math.cos((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2 - angle) * radius}
-                       y2={Math.sin((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2 - angle) * radius}
+                       x1="300" y1="300"
+                       x2={300 + Math.cos((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2 - angle) * radius}
+                       y2={300 + Math.sin((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2 - angle) * radius}
                        stroke={COLORS.amber}
                        strokeWidth="2"
                        strokeDasharray="8 8"
-                       filter="url(#glow)"
+                       filter="url(#nexus-glow)"
                      />
                   </svg>
                </div>
@@ -550,18 +567,18 @@ export function ProcessNexus() {
         );
       })}
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 px-8 py-3 rounded-full bg-black/40 border border-white/10 backdrop-blur-3xl shadow-2xl">
-         <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-widest">Doorway</span>
+      <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 md:gap-6 px-6 md:px-8 py-2 md:py-3 rounded-full bg-black/40 border border-white/10 backdrop-blur-3xl shadow-2xl">
+         <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            <span className="text-[8px] md:text-[10px] text-slate-400 uppercase font-mono tracking-widest">Doorway</span>
          </div>
-         <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-amber-500" />
-            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-widest">Queueing</span>
+         <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            <span className="text-[8px] md:text-[10px] text-slate-400 uppercase font-mono tracking-widest">Queue</span>
          </div>
-         <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-            <span className="text-[10px] text-slate-400 uppercase font-mono tracking-widest">Active</span>
+         <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+            <span className="text-[8px] md:text-[10px] text-slate-400 uppercase font-mono tracking-widest">Critical</span>
          </div>
       </div>
     </div>
@@ -576,7 +593,7 @@ export function ProcessNexus() {
 export function MemoryResilienceViz() {
   const [noise, setNoise] = useState(0);
   const [intensity, setNoiseIntensity] = useState(0.4);
-  const [activeTab, setActiveTab] = useState<'SIGNAL' | 'MEMORY'>('SIGNAL');
+  const { lightTap } = useHapticFeedback();
   
   useEffect(() => {
     const interval = setInterval(() => {
@@ -586,60 +603,61 @@ export function MemoryResilienceViz() {
   }, []);
 
   return (
-    <div className="ba-viz-container p-8 md:p-12 relative">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-        <div>
-          <div className="flex items-center gap-4 mb-8">
-             <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shadow-inner">
-                <ShieldAlert className="w-6 h-6 text-rose-500" />
+    <div className="ba-viz-container p-6 md:p-12 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-rose-500/[0.03] to-cyan-500/[0.03] pointer-events-none" />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
+        <div className="order-2 lg:order-1">
+          <div className="flex items-center gap-4 mb-6 md:mb-8">
+             <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shadow-inner">
+                <ShieldAlert className="w-5 h-5 md:w-6 md:h-6 text-rose-500" />
              </div>
              <div>
-                <h4 className="text-2xl font-bold text-white tracking-tight">Logical vs. Physical Isolation</h4>
-                <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Hardware Stress Diagnosis</p>
+                <h4 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-none mb-1 md:mb-2">Logical Resilience</h4>
+                <p className="text-[9px] md:text-[10px] font-mono text-slate-500 uppercase tracking-widest">Hardware Reliability Diagnosis</p>
              </div>
           </div>
 
-          <p className="text-slate-400 leading-relaxed text-lg mb-8">
+          <p className="text-slate-400 leading-relaxed text-base md:text-lg mb-6 md:mb-8">
             Lamport realized that hardware isn&rsquo;t perfect. If two processes access memory at the same instant, the data 
-            doesn&rsquo;t just &ldquo;wait&rdquo;&mdash;it physically blurs. The Bakery Algorithm is designed to thrive 
-            in this chaos.
+            physically blurs. The Bakery Algorithm is designed to thrive in this chaos.
           </p>
           
-          <div className="space-y-4">
-             <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all group">
-                <div className="flex justify-between items-center mb-3">
-                   <div className="flex items-center gap-3">
-                      <Activity className="w-4 h-4 text-amber-400" />
-                      <span className="text-xs font-bold text-white uppercase tracking-widest">Bus Contention</span>
+          <div className="space-y-3 md:space-y-4">
+             <div className="p-4 md:p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
+                <div className="flex justify-between items-center mb-2 md:mb-3">
+                   <div className="flex items-center gap-2 md:gap-3">
+                      <Activity className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" />
+                      <span className="text-[10px] md:text-xs font-bold text-white uppercase tracking-widest">Bus Contention</span>
                    </div>
-                   <span className="text-[10px] font-mono text-rose-500 animate-pulse">CRITICAL</span>
+                   <span className="text-[8px] md:text-[10px] font-mono text-rose-500 animate-pulse font-bold tracking-widest">CRITICAL_OVERLOAD</span>
                 </div>
-                <p className="text-sm text-slate-400 leading-relaxed">
+                <p className="text-xs md:text-sm text-slate-400 leading-relaxed">
                   A &ldquo;torn read&rdquo; happens when a process reads <code className="text-amber-300">0xFFFF</code> while the bus is 
-                  halfway through writing <code className="text-emerald-400">0x0001</code>. Result: undefined garbage.
+                  halfway through writing <code className="text-emerald-400">0x0001</code>.
                 </p>
              </div>
              
-             <div className="p-5 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10">
-                <div className="flex items-center gap-3 mb-3">
-                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                   <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Bakery Stabilizer</span>
+             <div className="p-4 md:p-5 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 shadow-inner shadow-emerald-500/5">
+                <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                   <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
+                   <span className="text-[10px] md:text-xs font-bold text-emerald-400 uppercase tracking-widest">Consensus Stabilizer</span>
                 </div>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  By checking the <code>choosing</code> flag first, every process essentially &ldquo;polls the voltage&rdquo; 
+                <p className="text-xs md:text-sm text-slate-400 leading-relaxed">
+                  Checking the <code>choosing</code> guard first essentially &ldquo;polls the voltage&rdquo; 
                   until the signal stabilizes. Logic wins where hardware fails.
                 </p>
              </div>
           </div>
         </div>
 
-        <div className="relative group">
+        <div className="order-1 lg:order-2 relative w-full max-w-sm mx-auto lg:max-w-none">
            {/* Terminal Monitor */}
-           <div className="relative aspect-[4/3] w-full bg-[#08080a] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+           <div className="relative aspect-[4/3] w-full bg-[#08080a] rounded-[1.5rem] md:rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col">
+              <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-white/5 bg-white/[0.02]">
                  <div className="flex items-center gap-2">
                     <Terminal className="w-3 h-3 text-slate-500" />
-                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Logic Diagnostic v4.2</span>
+                    <span className="text-[8px] md:text-[9px] font-mono text-slate-500 uppercase tracking-widest">Logic Diagnostic v4.2.0</span>
                  </div>
                  <div className="flex gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
@@ -648,54 +666,51 @@ export function MemoryResilienceViz() {
                  </div>
               </div>
 
-              <div className="flex-1 p-8 flex flex-col justify-between font-mono">
-                 <div className="space-y-4">
-                    <div className="flex justify-between items-end text-[10px]">
-                       <span className="text-slate-500">SIGNAL_INTEGRITY</span>
+              <div className="flex-1 p-6 md:p-8 flex flex-col justify-between font-mono relative">
+                 <div className="space-y-3 md:space-y-4 relative z-10">
+                    <div className="flex justify-between items-end text-[9px] md:text-[10px]">
+                       <span className="text-slate-500 tracking-tighter">SIGNAL_INTEGRITY_INDEX</span>
                        <span className={intensity > 0.7 ? 'text-rose-500' : 'text-emerald-500'}>{Math.round((1 - intensity) * 100)}%</span>
                     </div>
-                    <div className="h-1 bg-white/5 rounded-full overflow-hidden relative">
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden relative shadow-inner">
                        <motion.div 
                          animate={{ x: ["-100%", "100%"] }}
                          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                        />
-                       <div className="h-full bg-amber-500/40" style={{ width: `${(1-intensity)*100}%` }} />
+                       <div className="h-full bg-gradient-to-r from-amber-500/20 to-amber-500/60 transition-all duration-300" style={{ width: `${(1-intensity)*100}%` }} />
                     </div>
                  </div>
 
-                 <div className="relative py-8 text-center overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center text-[10rem] font-black text-white/[0.02] select-none scale-150">
+                 <div className="relative py-6 md:py-8 text-center overflow-hidden flex flex-col items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center text-[5rem] md:text-[10rem] font-black text-white/[0.02] select-none pointer-events-none tabular-nums">
                        {Math.floor(noise * 99)}
                     </div>
                     
-                    <div className="relative">
+                    <div className="relative scale-75 md:scale-100">
                        <motion.div 
-                         animate={{ 
-                           opacity: [1, 0.8, 1],
-                           scale: [1, 1.02, 1]
-                         }}
+                         animate={{ opacity: [1, 0.8, 1], scale: [1, 1.02, 1] }}
                          transition={{ duration: 0.1, repeat: Infinity }}
-                         className="text-8xl font-black text-white tracking-tighter" 
+                         className="text-7xl md:text-8xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl" 
                          style={{ 
                            filter: `blur(${noise * 8 * intensity}px)`, 
                            transform: `translateX(${(noise - 0.5) * 20 * intensity}px) skew(${(noise - 0.5) * 15 * intensity}deg)` 
                          }}>
                          42
                        </motion.div>
-                       <div className="absolute inset-0 text-8xl font-black text-rose-500/10" 
+                       <div className="absolute inset-0 text-7xl md:text-8xl font-black text-rose-500/10 pointer-events-none tabular-nums" 
                             style={{ transform: `translate(${(noise - 0.5) * 40 * intensity}px, 2px)` }}>
                           ??
                        </div>
                     </div>
                  </div>
 
-                 <div className="flex justify-between text-[9px] text-slate-600">
+                 <div className="flex justify-between text-[8px] md:text-[9px] text-slate-600 relative z-10">
                     <span className="flex items-center gap-2">
                        <span className="w-1 h-1 rounded-full bg-amber-500 animate-ping" />
                        SAMPLING_BUS_0xBA...
                     </span>
-                    <span className="text-amber-500/50">TORN_READ_DETECTED</span>
+                    <span className="text-amber-500/50 uppercase tracking-widest font-bold">Torn Read Detected</span>
                  </div>
               </div>
 
@@ -703,20 +718,23 @@ export function MemoryResilienceViz() {
               <motion.div 
                 animate={{ top: ["-5%", "105%"] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                className="absolute left-0 w-full h-px bg-cyan-400/30 shadow-[0_0_30px_rgba(34,211,238,0.8)] z-30 pointer-events-none"
+                className="absolute left-0 w-full h-px bg-cyan-400/40 shadow-[0_0_20px_rgba(34,211,238,0.6)] z-30 pointer-events-none"
               />
            </div>
            
            {/* Precision Control Slider */}
-           <div className="mt-10 px-6 py-4 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-md">
-              <div className="flex justify-between text-[10px] font-mono text-slate-500 uppercase mb-3">
+           <div className="mt-6 md:mt-10 px-5 md:px-6 py-4 md:py-5 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-md shadow-xl group">
+              <div className="flex justify-between text-[9px] md:text-[10px] font-mono text-slate-500 uppercase mb-3 tracking-widest">
                  <span>Inject Hardware Noise</span>
-                 <span className="text-white font-bold">{Math.round(intensity * 100)}%</span>
+                 <span className="text-white font-black tabular-nums">{Math.round(intensity * 100)}%</span>
               </div>
               <input 
                 type="range" min="0" max="1" step="0.01" value={intensity}
-                onChange={(e) => setNoiseIntensity(parseFloat(e.target.value))}
-                className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400 transition-colors"
+                onChange={(e) => {
+                  setNoiseIntensity(parseFloat(e.target.value));
+                  lightTap();
+                }}
+                className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400 transition-all duration-200"
               />
            </div>
         </div>

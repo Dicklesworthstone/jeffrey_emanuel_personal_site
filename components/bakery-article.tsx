@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
 import {
   Crimson_Pro,
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
-import { 
-  ShieldCheck, 
-  Cpu, 
+import {
+  ShieldCheck,
+  Cpu,
   Zap,
   Timer,
   Lock,
@@ -148,20 +149,24 @@ export function BakeryArticle() {
 
       {/* ========== HERO ========== */}
       <section data-section="hero" className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 scale-110 md:scale-100">
           <BakeryHero />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
-          <div className="text-center pt-56 md:pt-40 relative z-20">
+          <div className="text-center pt-64 md:pt-40 relative z-20">
             <div className="inline-flex flex-wrap items-center justify-center gap-4 mb-10 md:mb-12">
-               <div className="inline-flex items-center gap-3 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
+               <motion.div 
+                 initial={{ opacity: 0, scale: 0.95 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 className="inline-flex items-center gap-3 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl"
+               >
                  <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
                  Distributed Systems / Leslie Lamport
-               </div>
+               </motion.div>
                
-               <div className="hidden md:flex items-center gap-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+               <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest bg-black/20 px-3 py-1 rounded-full border border-white/5">
                   <Clock className="w-3 h-3" />
                   {readingTime.text}
                   <span className="mx-2 h-1 w-1 rounded-full bg-slate-700" />
@@ -169,13 +174,13 @@ export function BakeryArticle() {
                </div>
             </div>
 
-            <h1 className="ba-display-title mb-6 text-white text-balance">
+            <h1 className="ba-display-title mb-6 text-white text-balance leading-[0.9] md:leading-[0.85]">
               The Bakery{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">
                 Algorithm.
               </span>
             </h1>
-            <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-12 font-light">
+            <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-2xl mx-auto leading-tight mt-12 font-light">
               <T k="mutual-exclusion" theme="cyan">Mutual exclusion</T> without atomic hardware primitives. A masterclass in 
               <span className="text-white font-medium italic"> fair concurrency </span> 
               designed by the pioneer of distributed computing.
@@ -183,15 +188,18 @@ export function BakeryArticle() {
           </div>
         </EC>
 
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 1 }}
           className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
           style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
-            Scroll to Explore
+          <span className="text-[10px] uppercase tracking-[0.5em] text-white/30 font-bold">
+            Scroll to Discover
           </span>
-          <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
-        </div>
+          <div className="w-px h-16 bg-gradient-to-b from-white/20 via-white/5 to-transparent shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
+        </motion.div>
       </section>
 
       {/* ========== INTRO ========== */}
