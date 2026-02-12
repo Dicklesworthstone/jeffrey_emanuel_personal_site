@@ -709,7 +709,7 @@ function rankdata(arr) {
 
   return (
     <div className="hd-viz-container hd-glass-panel">
-      <div className="hd-viz-header p-8 flex items-center justify-between">
+      <div className="hd-viz-header p-4 md:p-8 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="hd-instrument-label mb-1">Runtime Environment</div>
           <h4 className="text-white font-black text-lg uppercase tracking-tighter italic">TypeScript Kernel</h4>
@@ -717,7 +717,7 @@ function rankdata(arr) {
         <button 
           onClick={runCode} 
           disabled={isLoading} 
-          className="hd-btn-action !bg-amber-500 !px-12 transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(245,158,11,0.2)]"
+          className="hd-btn-action !bg-amber-500 !px-4 md:!px-12 transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(245,158,11,0.2)]"
         >
           {isLoading ? "Compiling..." : "Execute Logic"}
         </button>

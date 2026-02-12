@@ -285,8 +285,8 @@ export function MatrixViz() {
           <button onClick={reset} className="rq-btn-secondary">Reset</button>
         </div>
       </div>
-      <div className="flex-1 p-6 md:p-10 flex flex-col xl:flex-row gap-10 xl:gap-20 items-start xl:items-center overflow-hidden">
-        <div className="font-mono text-sm leading-relaxed overflow-x-auto w-full xl:w-auto xl:min-w-[450px] min-h-[200px] md:min-h-[300px] pb-4 scrollbar-thin scrollbar-thumb-white/10">
+      <div className="flex-1 p-6 md:p-10 flex flex-col xl:flex-row gap-10 xl:gap-14 items-start overflow-hidden">
+        <div className="font-mono text-sm leading-relaxed overflow-x-auto w-full xl:flex-1 xl:min-w-0 min-h-[200px] md:min-h-[300px] pb-4 scrollbar-thin scrollbar-thumb-white/10">
           {rows.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 md:py-36 opacity-20 border-2 border-dashed border-white/5 rounded-3xl w-full">
               <div className="text-sm font-mono uppercase tracking-[0.5em] font-black text-slate-500">
@@ -314,7 +314,7 @@ export function MatrixViz() {
                         );
                       })}
                     </div>
-                    <div className="flex flex-col gap-0.5 min-w-[120px] md:min-w-[150px] shrink-0">
+                    <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="text-[9px] md:text-[10px] font-mono text-slate-500 font-black uppercase tracking-[0.3em]">
                         Packet {rIdx + 1}
                       </span>
