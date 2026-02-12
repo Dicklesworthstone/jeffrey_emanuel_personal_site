@@ -84,21 +84,23 @@ export function FactorHero() {
         <RiskLandscape />
         <ScanningBeam />
         <Float speed={1.5} rotationIntensity={0.4} floatIntensity={0.4}>
-           <group position={[0, 5, 0]}>
+           <group position={[0, 10, 0]}>
               {[
-                { name: "MOMENTUM", pos: [-45, 10, 0], color: COLORS.cyan },
-                { name: "VALUE", pos: [45, -5, 15], color: COLORS.amber },
-                { name: "GROWTH", pos: [0, 20, -25], color: COLORS.emerald },
-                { name: "SIZE", pos: [-25, -15, 35], color: COLORS.purple },
+                { name: "MOMENTUM", pos: [-55, 15, -10], color: COLORS.cyan },
+                { name: "VALUE", pos: [55, -5, 20], color: COLORS.amber },
+                { name: "GROWTH", pos: [10, 25, -30], color: COLORS.emerald },
+                { name: "SIZE", pos: [-35, -20, 45], color: COLORS.purple },
               ].map((f, i) => (
                 <Text
                   key={i}
                   position={f.pos as any}
-                  fontSize={3.5}
+                  fontSize={4}
                   color={f.color}
                   anchorX="center"
                   anchorY="middle"
-                  font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hjw.woff"
+                  fontStyle="italic"
+                  outlineWidth={0.2}
+                  outlineColor="#000000"
                 >
                   {f.name}
                 </Text>
@@ -455,16 +457,32 @@ export function LiveRegression() {
   const [activeTab, setActiveTab] = useState<"code" | "console" | "visual">("code");
   const [isExecuting, setIsExecuting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const runCode = () => {
-    setIsExecuting(true); setActiveTab("console"); setProgress(0);
-    const interval = setInterval(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setIsExecuting(true); 
+    setActiveTab("console"); 
+    setProgress(0);
+    
+    intervalRef.current = setInterval(() => {
       setProgress(p => {
-        if (p >= 100) { clearInterval(interval); setIsExecuting(false); setActiveTab("visual"); return 100; }
+        if (p >= 100) { 
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          setIsExecuting(false); 
+          setActiveTab("visual"); 
+          return 100; 
+        }
         return p + 10;
       });
     }, 80);
   };
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   return (
     <div className="barra-viz-container !bg-[#050508] border-emerald-500/20 overflow-hidden min-h-[450px]">
