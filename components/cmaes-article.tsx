@@ -14,6 +14,7 @@ import katex from "katex";
 import { CMAESJargon } from "./cmaes-jargon";
 import { CMAESMathTooltip } from "./cmaes-math-tooltip";
 import { GranularMath } from "./granular-math";
+import { getScrollMetrics } from "@/lib/utils";
 
 // Dynamic import visualizations (no SSR)
 const HeroCMAES = dynamic(
@@ -109,10 +110,11 @@ export function CMAESArticle() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      if (total > 0) setScrollProgress(window.scrollY / total);
+      const { progress } = getScrollMetrics();
+      setScrollProgress(progress);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -120,9 +122,20 @@ export function CMAESArticle() {
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
+    const readyClass = "cmaes-reveal-ready";
+    root.classList.add(readyClass);
+
     const targets = root.querySelectorAll(
       ":scope > section:not(:first-child), :scope > article"
     );
+
+    if (typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.classList.add("rq-visible"));
+      return () => {
+        root.classList.remove(readyClass);
+      };
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -138,7 +151,10 @@ export function CMAESArticle() {
       el.classList.add("rq-fade-section");
       observer.observe(el);
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.classList.remove(readyClass);
+    };
   }, []);
 
   return (

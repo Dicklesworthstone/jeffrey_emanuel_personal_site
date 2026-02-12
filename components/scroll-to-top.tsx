@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { getScrollMetrics } from "@/lib/utils";
 
 const CIRCLE_RADIUS = 20;
 const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
@@ -15,10 +16,9 @@ export default function ScrollToTop() {
   const prefersReducedMotion = useReducedMotion();
 
   const handleScroll = useCallback(() => {
-    const scrollY = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    setIsVisible(scrollY > 400);
-    setProgress(maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0);
+    const { scrollTop, progress: scrollProgress } = getScrollMetrics();
+    setIsVisible(scrollTop > 400);
+    setProgress(scrollProgress);
   }, []);
 
   useEffect(() => {

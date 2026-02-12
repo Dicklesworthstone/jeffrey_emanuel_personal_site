@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useLayoutEffect, type ElementRef } from "react";
+import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, 
@@ -134,7 +134,8 @@ const SLICE_LABELS = [
 
 function ManifoldMesh({ level }: { level: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.Material>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const materialRef = useRef<any>(null);
   
   // Define clipping planes
   const planes = useMemo(() => {

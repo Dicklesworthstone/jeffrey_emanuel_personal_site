@@ -15,6 +15,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { MathTooltip, type TooltipVariant } from "./math-tooltip";
 import { getHoeffdingMath } from "@/lib/hoeffding-math";
+import { getScrollMetrics } from "@/lib/utils";
 
 // Dynamic import visualizations
 const HoeffdingHero = dynamic(
@@ -99,10 +100,11 @@ export function HoeffdingArticle() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      if (total > 0) setScrollProgress(window.scrollY / total);
+      const { progress } = getScrollMetrics();
+      setScrollProgress(progress);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -110,7 +112,18 @@ export function HoeffdingArticle() {
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
+    const readyClass = "hd-reveal-ready";
+    root.classList.add(readyClass);
+
     const targets = root.querySelectorAll(":scope > section, :scope > article");
+
+    if (typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.classList.add("hd-visible"));
+      return () => {
+        root.classList.remove(readyClass);
+      };
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -125,7 +138,10 @@ export function HoeffdingArticle() {
       el.classList.add("hd-fade-section");
       observer.observe(el);
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.classList.remove(readyClass);
+    };
   }, []);
 
   return (
