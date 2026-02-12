@@ -1,0 +1,12 @@
+# Ephemeral/diagnostic files
+screenshots_for_diagnostics/
+screenshots/
+.plan.md
+
+# Development artifacts
+playwright-report/
+test-results/
+docs/lighthouse-*.json
+
+# Large build artifacts
+tsconfig.tsbuildinfo
