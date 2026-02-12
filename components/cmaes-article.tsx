@@ -235,7 +235,7 @@ export function CMAESArticle() {
             Consider an unknown function <M t="f:\mathbb{R}^n \to \mathbb{R}" /> that requires minimization. The algorithm is initialized with the dimension <M t="n" />, an initial parameter guess, and a starting step scale.
           </p>
           <p>The process then repeats through four primary phases:</p>
-          <ol className="space-y-6 text-slate-300 my-10">
+          <ol className="space-y-6 text-slate-200 my-10 text-[clamp(1.35rem,2.8vw,1.875rem)] leading-[1.65]">
             <li className="flex gap-4">
               <span className="text-amber-500 font-mono font-bold">1.</span>
               <div>
@@ -376,14 +376,14 @@ export function CMAESArticle() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
             <div className="rq-insight-card !m-0 border-amber-500/20 p-8">
-              <h4 className="text-white font-bold mb-3">Translation & Rotation</h4>
-              <p className="text-sm text-slate-400 mb-0">
+              <h4 className="text-white text-xl md:text-2xl font-bold mb-3">Translation & Rotation</h4>
+              <p className="text-base md:text-xl text-slate-300 leading-relaxed mb-0">
                 Rotating the search space or shifting the starting point does not alter the algorithm&rsquo;s trajectory. It is independent of the axis orientation.
               </p>
             </div>
             <div className="rq-insight-card !m-0 border-orange-500/20 p-8">
-              <h4 className="text-white font-bold mb-3">Rank-Based Scaling</h4>
-              <p className="text-sm text-slate-400 mb-0">
+              <h4 className="text-white text-xl md:text-2xl font-bold mb-3">Rank-Based Scaling</h4>
+              <p className="text-base md:text-xl text-slate-300 leading-relaxed mb-0">
                 Because selection relies solely on the <strong>rank</strong> of samples, the algorithm is invariant to monotonic transforms of the objective. Optimizing <M t="f(x)" /> yields identical results to optimizing <M t="\log(f(x))" />.
               </p>
             </div>
@@ -570,45 +570,115 @@ export function CMAESArticle() {
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             Technical Addendum
           </h2>
-          <p className="text-slate-400 italic mb-10">
+          <p className="text-slate-300 italic text-base md:text-xl leading-relaxed mb-10">
             Notes derived from Nikolaus Hansen&rsquo;s 2024 tutorial.
           </p>
-          
-          <div className="space-y-10 text-slate-300">
-            <div>
-              <h4 className="text-white font-bold mb-3"><J t="multivariate-normal">The Search Distribution</J></h4>
-              <p className="text-sm leading-relaxed">
-                Optimization is conducted over a probability distribution <M t="\theta = (m, \sigma, C)" />, rather than directly in the parameter space.
+
+          <div className="grid grid-cols-1 gap-8 text-slate-200 my-12">
+            <div className="rq-insight-card !m-0 border-amber-500/20 p-6 md:p-8">
+              <h4 className="text-white text-xl md:text-2xl font-bold mb-4">
+                <J t="multivariate-normal">The Search Distribution</J>
+              </h4>
+              <p className="text-base md:text-xl leading-relaxed text-slate-200 mb-5">
+                CMA-ES does not &ldquo;push a single point downhill.&rdquo; It updates a full search distribution, where
+                <span className="text-white"> the center </span>is <M t="m" />, the
+                <span className="text-white"> exploration scale </span>is <M t="\sigma" />, and the
+                <span className="text-white"> geometry/orientation </span>is <M t="C" />.
               </p>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold mb-3"><J t="ranking">Invariance Properties</J></h4>
-              <p className="text-sm leading-relaxed text-pretty">
-                The algorithm is designed for rank-based invariance, ensuring consistent behavior under strictly increasing transforms of the objective function and rigid linear transforms of the search space.
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+                  <div className="text-sm md:text-base font-black uppercase tracking-wider text-amber-300 mb-1">Center</div>
+                  <div className="text-base md:text-lg text-white font-mono">m</div>
+                </div>
+                <div className="rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3">
+                  <div className="text-sm md:text-base font-black uppercase tracking-wider text-orange-300 mb-1">Scale</div>
+                  <div className="text-base md:text-lg text-white font-mono">σ</div>
+                </div>
+                <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+                  <div className="text-sm md:text-base font-black uppercase tracking-wider text-red-300 mb-1">Shape</div>
+                  <div className="text-base md:text-lg text-white font-mono">C</div>
+                </div>
+              </div>
+              <p className="text-base md:text-lg leading-relaxed text-slate-300 mb-5">
+                Formally, optimization proceeds over <M t="\theta = (m, \sigma, C)" />, not directly over a single parameter vector.
               </p>
+              <div className="rounded-2xl border border-white/10 bg-black/40 p-4 md:p-5">
+                <div className="text-sm md:text-base font-black uppercase tracking-[0.12em] text-slate-400 mb-3">Visualization: Mean + Scale + Orientation</div>
+                <div className="relative h-24 rounded-xl border border-white/10 bg-gradient-to-r from-white/[0.02] via-amber-500/[0.04] to-white/[0.02] overflow-hidden">
+                  <div className="absolute left-1/2 top-1/2 h-16 w-20 -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-red-400/60 rotate-[-22deg]" />
+                  <div className="absolute left-1/2 top-1/2 h-12 w-28 -translate-x-1/2 -translate-y-1/2 rounded-[999px] border-2 border-orange-400/75" />
+                  <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300 shadow-[0_0_16px_rgba(245,158,11,0.8)]" />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <h4 className="text-white font-bold mb-3"><J t="step-size">Adaptive Step-size Control</J></h4>
-              <p className="text-sm leading-relaxed">
-                Cumulative Step-size Adaptation (CSA) increases the step scale when the evolution path indicates consistent directional progress.
+            <div className="rq-insight-card !m-0 border-orange-500/20 p-6 md:p-8">
+              <h4 className="text-white text-xl md:text-2xl font-bold mb-4">
+                <J t="ranking">Invariance Properties</J>
+              </h4>
+              <p className="text-base md:text-xl leading-relaxed text-slate-200 mb-5">
+                Selection depends on <strong>rank</strong>, not raw magnitude. That means monotonic transforms preserve decisions, and rigid linear transforms of coordinates preserve behavior.
               </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                  <div className="text-sm md:text-base font-black uppercase tracking-[0.12em] text-slate-500 mb-2">Original Objective</div>
+                  <div className="text-base md:text-lg font-mono text-slate-200">f(x): [10, 4, 2]</div>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                  <div className="text-sm md:text-base font-black uppercase tracking-[0.12em] text-slate-500 mb-2">Monotonic Transform</div>
+                  <div className="text-base md:text-lg font-mono text-slate-200">log(f(x)): [2.30, 1.39, 0.69]</div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
+                <div className="text-base md:text-lg leading-relaxed text-emerald-200">
+                  Rank order is unchanged, so the same candidates are selected.
+                </div>
+              </div>
             </div>
 
-            <div className="bg-black/50 border border-white/5 rounded-2xl p-4 md:p-10 flex justify-center overflow-x-auto">
-              <GranularMath 
-                parts={[
-                  { tex: "p_\\sigma", key: "evolution-path", color: "purple" },
-                  { tex: "=", key: "operator", color: "slate" },
-                  { tex: "(1 - c_s)", key: "learning-rate-cs", color: "blue" },
-                  { tex: "p_\\sigma", key: "evolution-path", color: "purple" },
-                  { tex: "+", key: "operator", color: "slate" },
-                  { tex: "\\sqrt{c_s(2-c_s)\\mu_{eff}}", key: "selection-mass", color: "emerald" },
-                  { tex: "C^{-1/2}", key: "whitening", color: "red" },
-                  { tex: "\\frac{m_{new} - m_{old}}{\\sigma}", key: "mean-shift", color: "amber" },
-                ]}
-              />
+            <div className="rq-insight-card !m-0 border-red-500/20 p-6 md:p-8">
+              <h4 className="text-white text-xl md:text-2xl font-bold mb-4">
+                <J t="step-size">Adaptive Step-size Control (CSA)</J>
+              </h4>
+              <p className="text-base md:text-xl leading-relaxed text-slate-200 mb-5">
+                CSA tracks whether successive updates keep moving coherently in one direction. If the path is unusually long, the algorithm increases <M t="\sigma" />; if motion zig-zags, it contracts <M t="\sigma" />.
+              </p>
+
+              <div className="rounded-2xl border border-white/10 bg-black/50 p-4 md:p-6 mb-5 overflow-x-auto">
+                <GranularMath
+                  className="text-lg md:text-2xl"
+                  parts={[
+                    { tex: "p_\\sigma", key: "evolution-path", color: "purple" },
+                    { tex: "=", key: "operator", color: "slate" },
+                    { tex: "(1 - c_s)", key: "learning-rate-cs", color: "blue" },
+                    { tex: "p_\\sigma", key: "evolution-path", color: "purple" },
+                    { tex: "+", key: "operator", color: "slate" },
+                    { tex: "\\sqrt{c_s(2-c_s)\\mu_{eff}}", key: "selection-mass", color: "emerald" },
+                    { tex: "C^{-1/2}", key: "whitening", color: "red" },
+                    { tex: "\\frac{m_{new} - m_{old}}{\\sigma}", key: "mean-shift", color: "amber" },
+                  ]}
+                />
+                <p className="text-sm md:text-base text-slate-400 mt-4 mb-0">
+                  Read it as: new path = decayed memory + whitened normalized mean shift.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
+                  <div className="text-sm md:text-base font-black uppercase tracking-[0.12em] text-emerald-300 mb-2">Path Longer Than Expected</div>
+                  <div className="text-base md:text-lg font-bold text-white mb-2">Increase σ</div>
+                  <div className="h-2 rounded-full bg-black/40 overflow-hidden">
+                    <div className="h-full w-4/5 bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
+                  </div>
+                </div>
+                <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-4">
+                  <div className="text-sm md:text-base font-black uppercase tracking-[0.12em] text-amber-300 mb-2">Path Short / Zig-Zagging</div>
+                  <div className="text-base md:text-lg font-bold text-white mb-2">Decrease σ</div>
+                  <div className="h-2 rounded-full bg-black/40 overflow-hidden">
+                    <div className="h-full w-1/3 bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.6)]" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </EC>
