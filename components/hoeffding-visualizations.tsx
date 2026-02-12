@@ -261,7 +261,7 @@ export function HoeffdingHero() {
         res?.renderer?.dispose();
         res?.geometry?.dispose();
         res?.material?.dispose();
-      } else {
+      } else if (res) {
         api = res;
       }
     });
