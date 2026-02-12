@@ -435,19 +435,16 @@ export function BakeryArticle() {
     for (let j = 0; j < this.numProcesses; j++) {
       // Wait while process j is picking its ticket
       `}
-<T k="wait-loop-1" theme="cyan"><span className="text-blue-400 hover:text-blue-300 transition-colors cursor-help">while (this.entering[j]) { /* busy wait */ }</span></T>
+<T k="wait-loop-1" theme="cyan"><span className="text-blue-400 hover:text-blue-300 transition-colors cursor-help">while (this.entering[j]) {"{"} /* busy wait */ {"}"}</span></T>
 {`
 
       // Wait while process j has a higher priority
-      <T k="wait-loop-2">
-        <span className="text-rose-400 hover:text-rose-300 transition-colors cursor-help">while (this.tickets[j] !== 0 &&</span>
-      </T>
-      {" "}
-      <T k="lexicographical-order" theme="cyan">
-        <span className="text-orange-400 hover:text-orange-300 transition-colors cursor-help">(this.tickets[j], j) < (this.tickets[i], i)</span>
-      </T>
-      {`) { 
-        /* busy wait */ 
+      `}
+<T k="wait-loop-2"><span className="text-rose-400 hover:text-rose-300 transition-colors cursor-help">while (this.tickets[j] !== 0 &&</span></T>
+{" "}
+<T k="lexicographical-order" theme="cyan"><span className="text-orange-400 hover:text-orange-300 transition-colors cursor-help">(this.tickets[j], j) {"<"} (this.tickets[i], i)</span></T>
+{`) {
+        /* busy wait */
       }
     }
   }
