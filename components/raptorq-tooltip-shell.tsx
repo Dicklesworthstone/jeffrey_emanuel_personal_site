@@ -31,6 +31,8 @@ interface TooltipShellProps {
   className?: string;
   /** Optional: aria-label for accessibility */
   ariaLabel?: string;
+  /** Optional: accent color for the tooltip border/theme */
+  accentColor?: string;
 }
 
 /**
@@ -43,6 +45,7 @@ export function TooltipShell({
   title,
   className,
   ariaLabel,
+  accentColor,
 }: TooltipShellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -57,6 +60,38 @@ export function TooltipShell({
   const prefersReducedMotion = useReducedMotion();
 
   const canUsePortal = typeof document !== "undefined";
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current || isMobile) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const offsetWidth = triggerRef.current.offsetWidth;
+    const position: "top" | "bottom" = rect.top < 240 ? "bottom" : "top";
+    
+    // Center tooltip on trigger but keep within screen bounds
+    const tooltipWidth = 320;
+    let left = rect.left + offsetWidth / 2 - tooltipWidth / 2;
+    left = Math.max(16, Math.min(left, window.innerWidth - tooltipWidth - 16));
+
+    const verticalStyle =
+      position === "top"
+        ? { bottom: window.innerHeight - rect.top + 12 }
+        : { top: rect.bottom + 12 };
+
+    setTooltipLayout({ position, style: { left, ...verticalStyle } });
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isOpen && !isMobile) {
+      window.addEventListener("scroll", updatePosition, { passive: true });
+      window.addEventListener("resize", updatePosition);
+      updatePosition();
+    }
+    return () => {
+      window.removeEventListener("scroll", updatePosition);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [isOpen, isMobile, updatePosition]);
 
   useEffect(() => {
     return () => {
@@ -75,28 +110,14 @@ export function TooltipShell({
   }, []);
 
   useLayoutEffect(() => {
-    if (!isOpen || !triggerRef.current || isMobile) return;
-
-    const rect = triggerRef.current.getBoundingClientRect();
-    const offsetWidth = triggerRef.current.offsetWidth;
-    const position: "top" | "bottom" = rect.top < 200 ? "bottom" : "top";
-    const left = Math.min(
-      Math.max(16, rect.left - 140 + offsetWidth / 2),
-      Math.max(16, window.innerWidth - 336)
-    );
-    const verticalStyle =
-      position === "top"
-        ? { bottom: window.innerHeight - rect.top + 8 }
-        : { top: rect.bottom + 8 };
-
-    setTooltipLayout({ position, style: { left, ...verticalStyle } });
-  }, [isOpen, isMobile]);
+    if (isOpen) updatePosition();
+  }, [isOpen, updatePosition]);
 
   const handleMouseEnter = useCallback(() => {
     if (isMobile) return;
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
-    openTimeoutRef.current = setTimeout(() => setIsOpen(true), 300);
+    openTimeoutRef.current = setTimeout(() => setIsOpen(true), 250);
   }, [isMobile]);
 
   const handleMouseLeave = useCallback(() => {
@@ -136,7 +157,10 @@ export function TooltipShell({
         onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={className}
+        className={cn(
+          "appearance-none bg-transparent border-none p-0 m-0 text-inherit font-inherit text-left cursor-help inline-block align-baseline",
+          className
+        )}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
       >
@@ -179,14 +203,19 @@ export function TooltipShell({
                     : { type: "spring", stiffness: 400, damping: 30 }
                 }
                 className={cn(
-                  "fixed z-50 w-80 max-w-[calc(100vw-2rem)]",
+                  "fixed z-[10000] w-80 max-w-[calc(100vw-2rem)]",
                   "rounded-xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl",
-                  "before:absolute before:inset-x-0 before:h-1 before:rounded-t-xl before:bg-gradient-to-r before:from-cyan-400/50 before:via-purple-500/50 before:to-cyan-400/50",
+                  "before:absolute before:inset-x-0 before:h-1 before:rounded-t-xl",
                   tooltipLayout.position === "top"
                     ? "before:top-0"
                     : "before:bottom-0 before:rounded-t-none before:rounded-b-xl"
                 )}
-                style={tooltipLayout.style}
+                style={{
+                  ...tooltipLayout.style,
+                  // Use inline style for dynamic theme color if provided
+                  borderTopColor: tooltipLayout.position === "bottom" ? accentColor : undefined,
+                  borderBottomColor: tooltipLayout.position === "top" ? accentColor : undefined,
+                }}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 onBlur={(e: React.FocusEvent) => {
@@ -207,6 +236,18 @@ export function TooltipShell({
                   );
                 }}
               >
+                {/* Visual Top Bar */}
+                <div 
+                  className={cn(
+                    "absolute inset-x-0 h-1 rounded-t-xl",
+                    tooltipLayout.position === "top" ? "top-0" : "bottom-0 rounded-t-none rounded-b-xl"
+                  )}
+                  style={{ 
+                    background: accentColor 
+                      ? `linear-gradient(to right, ${accentColor}80, ${accentColor}, ${accentColor}80)` 
+                      : "linear-gradient(to right, #22d3ee80, #a855f780, #22d3ee80)" 
+                  }}
+                />
                 {tooltipContent}
               </motion.div>
             )}

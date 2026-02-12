@@ -31,10 +31,17 @@ interface TooltipShellProps {
   className?: string;
   /** Optional: aria-label for accessibility */
   ariaLabel?: string;
+  /** Optional: color theme (default: cyan) */
+  variant?: "cyan" | "purple" | "emerald" | "amber" | "orange" | "rose" | "blue";
+  /** Optional: accent color for dynamic theme */
+  accentColor?: string;
+  /** Optional: class name for the portal wrapper to preserve scoped styles */
+  portalClassName?: string;
 }
 
 /**
- * A reusable shell for tooltips (desktop) and bottom sheets (mobile).
+ * A robust, reusable shell for tooltips (desktop) and bottom sheets (mobile).
+ * Standardized across all articles to prevent "UI traps" and layout inconsistencies.
  */
 export function TooltipShell({
   children,
@@ -43,6 +50,9 @@ export function TooltipShell({
   title,
   className,
   ariaLabel,
+  variant = "cyan",
+  accentColor,
+  portalClassName,
 }: TooltipShellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -50,6 +60,7 @@ export function TooltipShell({
     position: "top" | "bottom";
     style: CSSProperties;
   }>({ position: "top", style: {} });
+  
   const triggerRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -57,6 +68,38 @@ export function TooltipShell({
   const prefersReducedMotion = useReducedMotion();
 
   const canUsePortal = typeof document !== "undefined";
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current || isMobile) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const offsetWidth = triggerRef.current.offsetWidth;
+    const position: "top" | "bottom" = rect.top < 240 ? "bottom" : "top";
+    
+    // Center tooltip on trigger but keep within screen bounds
+    const tooltipWidth = 320;
+    let left = rect.left + offsetWidth / 2 - tooltipWidth / 2;
+    left = Math.max(16, Math.min(left, window.innerWidth - tooltipWidth - 16));
+
+    const verticalStyle =
+      position === "top"
+        ? { bottom: window.innerHeight - rect.top + 12 }
+        : { top: rect.bottom + 12 };
+
+    setTooltipLayout({ position, style: { left, ...verticalStyle } });
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isOpen && !isMobile) {
+      window.addEventListener("scroll", updatePosition, { passive: true });
+      window.addEventListener("resize", updatePosition);
+      updatePosition();
+    }
+    return () => {
+      window.removeEventListener("scroll", updatePosition);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [isOpen, isMobile, updatePosition]);
 
   useEffect(() => {
     return () => {
@@ -75,28 +118,14 @@ export function TooltipShell({
   }, []);
 
   useLayoutEffect(() => {
-    if (!isOpen || !triggerRef.current || isMobile) return;
-
-    const rect = triggerRef.current.getBoundingClientRect();
-    const offsetWidth = triggerRef.current.offsetWidth;
-    const position: "top" | "bottom" = rect.top < 200 ? "bottom" : "top";
-    const left = Math.min(
-      Math.max(16, rect.left - 140 + offsetWidth / 2),
-      Math.max(16, window.innerWidth - 336)
-    );
-    const verticalStyle =
-      position === "top"
-        ? { bottom: window.innerHeight - rect.top + 8 }
-        : { top: rect.bottom + 8 };
-
-    setTooltipLayout({ position, style: { left, ...verticalStyle } });
-  }, [isOpen, isMobile]);
+    if (isOpen) updatePosition();
+  }, [isOpen, updatePosition]);
 
   const handleMouseEnter = useCallback(() => {
     if (isMobile) return;
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
-    openTimeoutRef.current = setTimeout(() => setIsOpen(true), 300);
+    openTimeoutRef.current = setTimeout(() => setIsOpen(true), 250);
   }, [isMobile]);
 
   const handleMouseLeave = useCallback(() => {
@@ -123,8 +152,25 @@ export function TooltipShell({
     [isMobile]
   );
 
-  const handleClick = useCallback(() => setIsOpen(true), []);
+  const handleClick = useCallback(() => {
+    if (isMobile) {
+      setIsOpen(true);
+    }
+  }, [isMobile]);
+
   const handleClose = useCallback(() => setIsOpen(false), []);
+
+  const variantStyles = {
+    cyan: "#22d3ee",
+    purple: "#a855f7",
+    emerald: "#10b981",
+    amber: "#f59e0b",
+    orange: "#f97316",
+    rose: "#f43f5e",
+    blue: "#3b82f6",
+  };
+
+  const themeColor = accentColor || variantStyles[variant];
 
   return (
     <>
@@ -136,7 +182,10 @@ export function TooltipShell({
         onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={className}
+        className={cn(
+          "appearance-none bg-transparent border-none p-0 m-0 text-inherit font-inherit text-left cursor-help inline focus:outline-none",
+          className
+        )}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
       >
@@ -179,12 +228,9 @@ export function TooltipShell({
                     : { type: "spring", stiffness: 400, damping: 30 }
                 }
                 className={cn(
-                  "fixed z-50 w-80 max-w-[calc(100vw-2rem)]",
-                  "rounded-xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl",
-                  "before:absolute before:inset-x-0 before:h-1 before:rounded-t-xl before:bg-gradient-to-r before:from-cyan-400/50 before:via-purple-500/50 before:to-cyan-400/50",
-                  tooltipLayout.position === "top"
-                    ? "before:top-0"
-                    : "before:bottom-0 before:rounded-t-none before:rounded-b-xl"
+                  "fixed z-[10000] w-80 max-w-[calc(100vw-2rem)]",
+                  "rounded-2xl border border-white/10 bg-slate-900/95 p-5 shadow-2xl backdrop-blur-2xl",
+                  portalClassName
                 )}
                 style={tooltipLayout.style}
                 onMouseEnter={handleMouseEnter}
@@ -207,6 +253,16 @@ export function TooltipShell({
                   );
                 }}
               >
+                {/* Theme Bar */}
+                <div 
+                  className={cn(
+                    "absolute inset-x-0 h-1",
+                    tooltipLayout.position === "top" ? "top-0 rounded-t-2xl" : "bottom-0 rounded-b-2xl"
+                  )}
+                  style={{ 
+                    background: `linear-gradient(to right, ${themeColor}40, ${themeColor}, ${themeColor}40)` 
+                  }}
+                />
                 {tooltipContent}
               </motion.div>
             )}
@@ -221,7 +277,9 @@ export function TooltipShell({
           onClose={handleClose}
           title={title}
         >
-          {sheetContent}
+          <div className={cn("pb-4", portalClassName)}>
+            {sheetContent}
+          </div>
         </BottomSheet>
       )}
     </>
