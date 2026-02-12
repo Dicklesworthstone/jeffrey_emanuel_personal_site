@@ -67,7 +67,11 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
     (id: string) => {
       const element = document.getElementById(id);
       if (element) {
-        const offset = 120; // Account for fixed header
+        const headerElement = document.querySelector("header");
+        const headerHeight = headerElement
+          ? headerElement.getBoundingClientRect().height
+          : 88;
+        const offset = headerHeight + 12;
         const top = element.getBoundingClientRect().top + window.scrollY - offset;
         window.scrollTo({
           top,
