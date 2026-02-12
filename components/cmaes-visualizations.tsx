@@ -7,14 +7,10 @@ import {
   OrbitControls, 
   PerspectiveCamera, 
   Float, 
-  MeshDistortMaterial, 
   MeshTransmissionMaterial,
-  Environment,
-  Text,
-  Line
+  Environment
 } from "@react-three/drei";
 import * as d3 from "d3";
-import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
 
 const COLORS = {
@@ -29,8 +25,39 @@ const COLORS = {
   purple: "#a855f7",
 };
 
+// Lazy-init helper using IntersectionObserver
+function useIntersectionInit(callback: () => (() => void) | void) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
+  const cleanupRef = useRef<(() => void) | void>(undefined);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !initialized.current) {
+          initialized.current = true;
+          cleanupRef.current = callback();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      cleanupRef.current?.();
+    };
+  }, [callback]);
+
+  return containerRef;
+}
+
 // ============================================
-// 0. ENHANCED CMA-ES ENGINE
+// 0. ROBUST ENHANCED CMA-ES ENGINE
 // ============================================
 
 class ProCMAES {
@@ -52,8 +79,7 @@ class ProCMAES {
   chiN: number;
   generation: number;
   
-  // Metadata for Viz
-  lastSamples: { x: number[], f: number, rank: number, isElite: boolean }[] = [];
+  // Cache for viz performance
   lastB: number[][] = [];
   lastD: number[] = [];
 
@@ -84,16 +110,20 @@ class ProCMAES {
     this.ps = new Array(dim).fill(0);
     this.chiN = Math.sqrt(dim) * (1 - 1 / (4 * dim) + 1 / (21 * dim**2));
     
+    this.syncEigen();
+  }
+
+  private syncEigen() {
     const [B, D] = this.eigen();
     this.lastB = B;
     this.lastD = D;
   }
 
   sample(): number[][] {
-    const [B, D] = this.eigen();
-    this.lastB = B;
-    this.lastD = D;
     const samples: number[][] = [];
+    const B = this.lastB;
+    const D = this.lastD;
+    
     for (let i = 0; i < this.lambda; i++) {
       const z = Array.from({ length: this.dim }, () => this.randn());
       const dz = z.map((zi, j) => zi * D[j]);
@@ -113,14 +143,6 @@ class ProCMAES {
     const indices = Array.from({ length: this.lambda }, (_, i) => i);
     indices.sort((a, b) => fitnesses[a] - fitnesses[b]);
 
-    // Store metadata for viz
-    this.lastSamples = indices.map((idx, rank) => ({
-      x: samples[idx],
-      f: fitnesses[idx],
-      rank,
-      isElite: rank < this.mu
-    }));
-
     const oldMean = [...this.mean];
     const bestIndices = indices.slice(0, this.mu);
     
@@ -133,9 +155,10 @@ class ProCMAES {
       }
     }
 
-    const [B, D] = this.eigen();
-    const invD = D.map(d => 1 / (d || 1e-10));
+    const B = this.lastB;
+    const invD = this.lastD.map(d => 1 / (d || 1e-10));
     
+    // Step in mean space
     const diff = this.mean.map((m, i) => (m - oldMean[i]) / (this.sigma || 1e-10));
     const Bt_diff = new Array(this.dim).fill(0);
     for (let i = 0; i < this.dim; i++) {
@@ -146,21 +169,30 @@ class ProCMAES {
     const zw = Bt_diff.map((v, i) => v * invD[i]);
     const y_w = diff;
 
+    // Update ps (conjugate evolution path)
     const cs_sqrt = Math.sqrt(this.cs * (2 - this.cs) * this.mueff);
     for (let i = 0; i < this.dim; i++) {
       this.ps[i] = (1 - this.cs) * this.ps[i] + cs_sqrt * zw[i];
     }
 
+    // Update sigma
     const psLen = Math.sqrt(this.ps.reduce((a, b) => a + b**2, 0));
     this.sigma *= Math.exp((this.cs / this.damps) * (psLen / this.chiN - 1));
+    this.sigma = Math.min(Math.max(this.sigma, 1e-12), 1e6); // Safety clamp
 
+    // Update pc (evolution path)
     const hsig = psLen / Math.sqrt(1 - (1 - this.cs)**(2 * this.generation)) / this.chiN < 1.4 + 2 / (this.dim + 1) ? 1 : 0;
     const cc_sqrt = Math.sqrt(this.cc * (2 - this.cc) * this.mueff);
     for (let i = 0; i < this.dim; i++) {
       this.pc[i] = (1 - this.cc) * this.pc[i] + hsig * cc_sqrt * y_w[i];
     }
 
-    const c1_update = this.c1 * (1 - (1 - hsig) * this.cc * (2 - this.cc));
+    // Corrected Covariance update
+    const hsig_delta = (1 - hsig) * this.cc * (2 - this.cc);
+    const c1_coeff = this.c1;
+    const cmu_coeff = this.cmu;
+    const decay_coeff = 1 - c1_coeff - cmu_coeff;
+
     for (let i = 0; i < this.dim; i++) {
       for (let j = 0; j < this.dim; j++) {
         let rankMu = 0;
@@ -170,15 +202,23 @@ class ProCMAES {
           const yk_j = (samples[idx][j] - oldMean[j]) / (this.sigma || 1e-10);
           rankMu += this.weights[k] * yk_i * yk_j;
         }
-        this.C[i][j] = (1 - this.c1 - this.cmu) * this.C[i][j] + this.c1 * (this.pc[i] * this.pc[j] + c1_update * this.C[i][j]) + this.cmu * rankMu;
+        
+        this.C[i][j] = decay_coeff * this.C[i][j] + 
+                       c1_coeff * (this.pc[i] * this.pc[j] + hsig_delta * this.C[i][j]) + 
+                       cmu_coeff * rankMu;
       }
     }
 
+    // Stability: Ensure symmetry and add tiny regularization
     for (let i = 0; i < this.dim; i++) {
-      for (let j = 0; j < i; j++) {
-        this.C[i][j] = this.C[j][i] = (this.C[i][j] + this.C[j][i]) / 2;
+      for (let j = 0; j <= i; j++) {
+        const val = (this.C[i][j] + this.C[j][i]) / 2;
+        this.C[i][j] = this.C[j][i] = val;
+        if (i === j) this.C[i][i] += 1e-16;
       }
     }
+    
+    this.syncEigen();
   }
 
   eigen(): [number[][], number[]] {
@@ -203,7 +243,7 @@ class ProCMAES {
       const diff = D_mat[q][q] - D_mat[p][p];
       let t;
       if (Math.abs(D_mat[p][q]) < Math.abs(diff) * eps) {
-        t = D_mat[p][q] / diff;
+        t = D_mat[p][q] / (diff || 1e-20);
       } else {
         const phi = diff / (2 * D_mat[p][q]);
         t = 1 / (Math.abs(phi) + Math.sqrt(1 + phi * phi));
@@ -260,13 +300,11 @@ function DistributionCloud() {
   
   const count = useMemo(() => capabilities.tier === "low" ? 300 : 800, [capabilities.tier]);
   const positions = useMemo(() => new Float32Array(count * 3), [count]);
-  const opacities = useMemo(() => new Float32Array(count), [count]);
 
   useFrame((state) => {
     if (!meshRef.current || !pointsRef.current) return;
     const t = state.clock.getElapsedTime();
     
-    // Animate the "Cigar" adaptation
     const scaleX = 1 + 0.8 * Math.sin(t * 0.4);
     const scaleY = 1 + 0.4 * Math.cos(t * 0.6);
     const scaleZ = 0.5 + 0.2 * Math.sin(t * 0.8);
@@ -275,20 +313,15 @@ function DistributionCloud() {
     meshRef.current.rotation.y = t * 0.2;
     meshRef.current.rotation.z = Math.sin(t * 0.1) * 0.5;
 
-    // Particles representing "sampling"
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      // Oscillating distance from center
       const r = (2 + Math.sin(t + i * 0.5) * 0.5) * 5;
       const phi = Math.acos(2 * ((i * 1.618) % 1) - 1);
       const theta = 2 * Math.PI * ((i * 2.718) % 1);
       
-      // Transform by the "Learned Covariance"
       positions[i3] = r * Math.sin(phi) * Math.cos(theta) * scaleX;
       positions[i3 + 1] = r * Math.sin(phi) * Math.sin(theta) * scaleY;
       positions[i3 + 2] = r * Math.cos(phi) * scaleZ;
-      
-      opacities[i] = 0.2 + 0.8 * Math.pow(Math.sin(t * 2 + i), 2);
     }
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
@@ -346,7 +379,7 @@ export function HeroCMAES() {
 }
 
 // ============================================
-// 2. INTERACTIVE WALKTHROUGH: THE 4 STEPS
+// 2. INTERACTIVE WALKTHROUGH
 // ============================================
 
 const STEPS = [
@@ -358,20 +391,19 @@ const STEPS = [
 
 export function SelectionWalkthrough() {
   const [stepIdx, setStepIdx] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
   
   const solver = useMemo(() => new ProCMAES(2, [0, 0], 2), []);
   const [data, setData] = useState<any>(null);
 
-  const objective = (x: number[]) => {
+  const objective = useCallback((x: number[]) => {
     const x_rot = x[0] * Math.cos(0.4) - x[1] * Math.sin(0.4);
     const y_rot = x[0] * Math.sin(0.4) + x[1] * Math.cos(0.4);
-    return x_rot**2 + (y_rot / 4)**2; // Narrow valley
-  };
+    return x_rot**2 + (y_rot / 4)**2;
+  }, []);
 
   const nextStep = useCallback(() => {
     if (stepIdx === 0) {
-      // Sample
       const samples = solver.sample();
       const fitnesses = samples.map(objective);
       const indices = Array.from({ length: solver.lambda }, (_, i) => i);
@@ -385,7 +417,6 @@ export function SelectionWalkthrough() {
           isElite: rank < solver.mu
         })),
         oldMean: [...solver.mean],
-        oldC: solver.C.map(r => [...r]),
         oldB: solver.lastB.map(r => [...r]),
         oldD: [...solver.lastD]
       });
@@ -395,23 +426,23 @@ export function SelectionWalkthrough() {
     } else if (stepIdx === 2) {
       setStepIdx(3);
     } else {
-      // Apply update and reset to sample
       const fitnesses = data.samples.map((s: any) => s.f);
       const rawSamples = data.samples.map((s: any) => s.x);
       solver.update(rawSamples, fitnesses);
       setStepIdx(0);
       setData(null);
     }
-  }, [stepIdx, data, solver]);
+  }, [stepIdx, data, solver, objective]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const svg = d3.select(containerRef.current).select("svg");
-    svg.selectAll(".content").remove();
+    if (!chartContainerRef.current) return;
+    const container = d3.select(chartContainerRef.current);
+    container.selectAll("svg").remove();
     
-    const w = containerRef.current.clientWidth;
+    const w = chartContainerRef.current.clientWidth;
     const h = 400;
-    const g = svg.append("g").attr("class", "content");
+    const svg = container.append("svg").attr("width", w).attr("height", h);
+    const g = svg.append("g");
     
     const x = d3.scaleLinear().domain([-8, 8]).range([0, w]);
     const y = d3.scaleLinear().domain([-8, 8]).range([h, 0]);
@@ -427,18 +458,16 @@ export function SelectionWalkthrough() {
     g.selectAll("path.contour")
       .data(contours(grid))
       .enter().append("path")
-      .attr("class", "contour")
       .attr("d", d3.geoPath(d3.geoIdentity().scale(w / 40)))
       .attr("fill", "none")
       .attr("stroke", "rgba(255,255,255,0.05)");
 
     if (data) {
-      // Draw Ellipse
       const [B, D] = stepIdx >= 3 ? solver.eigen() : [data.oldB, data.oldD];
       const currentMean = stepIdx >= 2 ? solver.mean : data.oldMean;
       const angle = Math.atan2(B[1][0], B[0][0]) * 180 / Math.PI;
       
-      const ellipse = g.append("ellipse")
+      g.append("ellipse")
         .attr("cx", x(currentMean[0]))
         .attr("cy", y(currentMean[1]))
         .attr("rx", (D[0] * solver.sigma) * (w / 16))
@@ -450,11 +479,9 @@ export function SelectionWalkthrough() {
         .attr("stroke-dasharray", stepIdx >= 3 ? "none" : "4,4")
         .style("opacity", 0.6);
 
-      // Draw Samples
-      const points = g.selectAll("circle.sample")
+      g.selectAll("circle.sample")
         .data(data.samples)
         .enter().append("circle")
-        .attr("class", "sample")
         .attr("cx", (d: any) => x(d.x[0]))
         .attr("cy", (d: any) => y(d.x[1]))
         .attr("r", (d: any) => d.isElite ? 5 : 3)
@@ -468,7 +495,6 @@ export function SelectionWalkthrough() {
           return 0.6;
         });
 
-      // Mean shift line
       if (stepIdx >= 2) {
         g.append("line")
           .attr("x1", x(data.oldMean[0]))
@@ -476,11 +502,9 @@ export function SelectionWalkthrough() {
           .attr("x2", x(solver.mean[0]))
           .attr("y2", y(solver.mean[1]))
           .attr("stroke", COLORS.amber)
-          .attr("stroke-width", 2)
-          .attr("marker-end", "url(#arrow)");
+          .attr("stroke-width", 2);
       }
     } else {
-      // Just show mean if no data
       g.append("circle")
         .attr("cx", x(solver.mean[0]))
         .attr("cy", y(solver.mean[1]))
@@ -488,8 +512,7 @@ export function SelectionWalkthrough() {
         .attr("fill", COLORS.amber)
         .attr("stroke", "white");
     }
-
-  }, [data, stepIdx, solver]);
+  }, [data, stepIdx, solver, objective]);
 
   return (
     <div className="rq-viz-container">
@@ -519,35 +542,26 @@ export function SelectionWalkthrough() {
         ))}
       </div>
 
-      <div ref={containerRef} className="relative w-full h-[400px] bg-black/40 overflow-hidden">
-        <svg width="100%" height="400">
-          <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill={COLORS.amber} />
-            </marker>
-          </defs>
-        </svg>
-      </div>
+      <div ref={chartContainerRef} className="relative w-full h-[400px] bg-black/40 overflow-hidden" />
     </div>
   );
 }
 
 // ============================================
-// 3. ILL-CONDITIONED VALLEY: CMA vs GRADIENT
+// 3. COMPARISON VIZ
 // ============================================
 
 export function ComparisonViz() {
   const chartRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<"cma" | "gd">("cma");
   const [isRunning, setIsRunning] = useState(false);
-  const [history, setHistory] = useState<{x: number[], type: string}[]>([]);
+  const [history, setHistory] = useState<{x: number[]}[]>([]);
 
-  const objective = (x: number[]) => {
-    // A rotated, extremely narrow valley (The "Cigar" function)
+  const objective = useCallback((x: number[]) => {
     const x_rot = x[0] * Math.cos(0.5) - x[1] * Math.sin(0.5);
     const y_rot = x[0] * Math.sin(0.5) + x[1] * Math.cos(0.5);
     return x_rot**2 + (y_rot * 10)**2;
-  };
+  }, []);
 
   const run = useCallback(async () => {
     setIsRunning(true);
@@ -556,36 +570,34 @@ export function ComparisonViz() {
     
     if (active === "cma") {
       const solver = new ProCMAES(2, start, 0.5);
-      const h: any[] = [{ x: [...start], type: "mean" }];
+      const h = [{ x: [...start] }];
       for (let i = 0; i < 40; i++) {
         const samples = solver.sample();
         const fitnesses = samples.map(objective);
         solver.update(samples, fitnesses);
-        h.push({ x: [...solver.mean], type: "mean" });
+        h.push({ x: [...solver.mean] });
         setHistory([...h]);
         if (Math.min(...fitnesses) < 1e-4) break;
         await new Promise(r => setTimeout(r, 50));
       }
     } else {
-      // Gradient Descent with constant learning rate
       let cur = [...start];
-      const h: any[] = [{ x: [...cur], type: "mean" }];
+      const h = [{ x: [...cur] }];
       const lr = 0.005;
       for (let i = 0; i < 100; i++) {
-        // Approximate gradient
         const eps = 1e-5;
         const gx = (objective([cur[0] + eps, cur[1]]) - objective([cur[0] - eps, cur[1]])) / (2 * eps);
         const gy = (objective([cur[0], cur[1] + eps]) - objective([cur[0], cur[1] - eps])) / (2 * eps);
         cur[0] -= lr * gx;
         cur[1] -= lr * gy;
-        h.push({ x: [...cur], type: "mean" });
+        h.push({ x: [...cur] });
         setHistory([...h]);
         if (objective(cur) < 1e-4) break;
         await new Promise(r => setTimeout(r, 20));
       }
     }
     setIsRunning(false);
-  }, [active]);
+  }, [active, objective]);
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -597,7 +609,6 @@ export function ComparisonViz() {
     const x = d3.scaleLinear().domain([-5, 5]).range([0, w]);
     const y = d3.scaleLinear().domain([-5, 5]).range([h, 0]);
 
-    // Contours
     const grid = new Array(40 * 40);
     for (let i = 0; i < 40; i++) {
       for (let j = 0; j < 40; j++) {
@@ -612,7 +623,6 @@ export function ComparisonViz() {
       .attr("fill", "none")
       .attr("stroke", "rgba(255,255,255,0.08)");
 
-    // Path
     if (history.length > 0) {
       const line = d3.line<any>().x(d => x(d.x[0])).y(d => y(d.x[1]));
       svg.append("path")
@@ -628,7 +638,7 @@ export function ComparisonViz() {
         .attr("r", 5)
         .attr("fill", "white");
     }
-  }, [history, active]);
+  }, [history, active, objective]);
 
   return (
     <div className="rq-viz-container overflow-hidden">
@@ -662,7 +672,7 @@ export function ComparisonViz() {
 }
 
 // ============================================
-// 4. BENCHMARK RUNNER (POLISHED)
+// 4. BENCHMARK RUNNER
 // ============================================
 
 const BENCHMARKS = {
@@ -703,11 +713,9 @@ export function BenchmarkRunner() {
       const best = Math.min(...fitnesses);
       solver.update(samples, fitnesses);
       
-      const res = { gen: i, best, sigma: solver.sigma };
-      history.push(res);
+      history.push({ gen: i, best, sigma: solver.sigma });
       setResults([...history]);
       
-      // Update UI state for matrix snippet
       if (i % 2 === 0) {
         setCurrentC(solver.C.slice(0, 3).map(r => r.slice(0, 3)));
       }

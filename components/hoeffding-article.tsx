@@ -2,7 +2,7 @@
 
 import "katex/dist/katex.min.css";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import dynamic from "next/dynamic";
 import {
   Crimson_Pro,
@@ -52,8 +52,8 @@ const bricolageGrotesque = Bricolage_Grotesque({
   display: "swap",
 });
 
-// KaTeX helpers
-function M({ t }: { t: string }) {
+// Memoized KaTeX helpers to prevent re-renders on scroll
+const M = memo(function M({ t }: { t: string }) {
   const html = katex.renderToString(t, {
     throwOnError: false,
     displayMode: false,
@@ -64,9 +64,9 @@ function M({ t }: { t: string }) {
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
-}
+});
 
-function MBlock({ t }: { t: string }) {
+const MBlock = memo(function MBlock({ t }: { t: string }) {
   const html = katex.renderToString(t, {
     throwOnError: false,
     displayMode: true,
@@ -77,7 +77,7 @@ function MBlock({ t }: { t: string }) {
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
-}
+});
 
 // Section divider
 function Divider() {

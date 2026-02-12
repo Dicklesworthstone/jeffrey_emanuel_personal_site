@@ -92,6 +92,14 @@ const GENERATORS = {
   }),
 };
 
+const GEN_LABELS: Record<string, string> = {
+  linear: "Linear",
+  ring: "Ring",
+  x_shape: "X-Shape",
+  random: "Random",
+  sinusoidal: "Wave",
+};
+
 // ============================================
 // 1. TOPOLOGICAL HERO (Three.js Morphing)
 // ============================================
@@ -123,9 +131,12 @@ export function HoeffdingHero() {
     let camera: import("three").PerspectiveCamera;
     let points: import("three").Points;
     let animationId: number;
+    let mounted = true;
 
     const init = async () => {
       const THREE = await import("three");
+      if (!mounted) return;
+
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
       camera.position.z = 40;
@@ -145,13 +156,9 @@ export function HoeffdingHero() {
       const color2 = new THREE.Color(COLORS.purple);
 
       for (let i = 0; i < count; i++) {
-        const x = (Math.random() - 0.5) * 60;
-        const y = (Math.random() - 0.5) * 60;
-        const z = (Math.random() - 0.5) * 20;
-        posArray[i * 3] = x;
-        posArray[i * 3 + 1] = y;
-        posArray[i * 3 + 2] = z;
-
+        posArray[i * 3] = (Math.random() - 0.5) * 60;
+        posArray[i * 3 + 1] = (Math.random() - 0.5) * 60;
+        posArray[i * 3 + 2] = (Math.random() - 0.5) * 20;
         const mix = color1.clone().lerp(color2, Math.random());
         colorArray[i * 3] = mix.r;
         colorArray[i * 3 + 1] = mix.g;
@@ -184,6 +191,7 @@ export function HoeffdingHero() {
 
       let lastUsedShape = "";
       const animate = () => {
+        if (!mounted) return;
         animationId = requestAnimationFrame(animate);
         
         if (shapeRef.current !== lastUsedShape) {
@@ -207,21 +215,29 @@ export function HoeffdingHero() {
 
       animate();
 
-      return { renderer, geometry, material };
+      return { renderer, geometry, material, camera };
     };
 
     let cleanupApi: any;
-    init().then(res => cleanupApi = res);
+    init().then(res => {
+      if (mounted) cleanupApi = res;
+      else {
+        res?.renderer?.dispose();
+        res?.geometry?.dispose();
+        res?.material?.dispose();
+      }
+    });
 
     const onResize = () => {
-      if (!renderer || !container) return;
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      if (!cleanupApi?.renderer || !container) return;
+      cleanupApi.camera.aspect = container.clientWidth / container.clientHeight;
+      cleanupApi.camera.updateProjectionMatrix();
+      cleanupApi.renderer.setSize(container.clientWidth, container.clientHeight);
     };
     window.addEventListener("resize", onResize);
 
     return () => {
+      mounted = false;
       window.removeEventListener("resize", onResize);
       cancelAnimationFrame(animationId);
       cleanupApi?.renderer?.dispose();
@@ -259,11 +275,12 @@ export function DependencyLab() {
   const heatRef = useRef<SVGSVGElement>(null);
 
   const stats = useMemo(() => {
+    if (!data.length) return { hoeffding: 0, pearson: 0 };
     const xs = data.map(d => d.x);
     const ys = data.map(d => d.y);
     return {
       hoeffding: calculateHoeffdingD(xs, ys),
-      pearson: d3.deviation(xs) ? d3.corr(xs, ys) : 0
+      pearson: d3.deviation(xs) ? d3.corr(xs, ys) || 0 : 0
     };
   }, [data]);
 
@@ -277,18 +294,19 @@ export function DependencyLab() {
     const rx = getRanks(data.map(d => d.x));
     const ry = getRanks(data.map(d => d.y));
 
-    // SCATTER PLOT
+    // Responsive sizing
     const sSvg = d3.select(scatterRef.current);
     sSvg.selectAll("*").remove();
-    const sW = scatterRef.current?.clientWidth || 400;
-    const sH = scatterRef.current?.clientHeight || 400;
     const pad = 40;
+    const size = 400; // Internal coordinate system
 
-    const xS = d3.scaleLinear().domain([0, n]).range([pad, sW - pad]);
-    const yS = d3.scaleLinear().domain([0, n]).range([sH - pad, pad]);
+    sSvg.attr("viewBox", `0 0 ${size} ${size}`);
 
-    sSvg.append("g").attr("transform", `translate(0,${sH - pad})`).call(d3.axisBottom(xS).ticks(5)).attr("class", "opacity-20 text-white");
-    sSvg.append("g").attr("transform", `translate(${pad},0)`).call(d3.axisLeft(yS).ticks(5)).attr("class", "opacity-20 text-white");
+    const xS = d3.scaleLinear().domain([0, n]).range([pad, size - pad]);
+    const yS = d3.scaleLinear().domain([0, n]).range([size - pad, pad]);
+
+    sSvg.append("g").attr("transform", `translate(0,${size - pad})`).call(d3.axisBottom(xS).ticks(5).tickSize(0).tickPadding(10)).attr("class", "opacity-20 text-white font-mono text-[8px]");
+    sSvg.append("g").attr("transform", `translate(${pad},0)`).call(d3.axisLeft(yS).ticks(5).tickSize(0).tickPadding(10)).attr("class", "opacity-20 text-white font-mono text-[8px]");
 
     sSvg.selectAll("circle")
       .data(data)
@@ -303,8 +321,7 @@ export function DependencyLab() {
     // HEATMAP
     const hSvg = d3.select(heatRef.current);
     hSvg.selectAll("*").remove();
-    const hW = heatRef.current?.clientWidth || 400;
-    const hH = heatRef.current?.clientHeight || 400;
+    hSvg.attr("viewBox", `0 0 ${size} ${size}`);
     
     const bins = 15;
     const binSize = n / bins;
@@ -320,8 +337,8 @@ export function DependencyLab() {
     const colorScale = d3.scaleDiverging(d3.interpolateRdBu)
       .domain([-expected * 1.5, 0, expected * 1.5]);
 
-    const cellW = (hW - 2 * pad) / bins;
-    const cellH = (hH - 2 * pad) / bins;
+    const cellW = (size - 2 * pad) / bins;
+    const cellH = (size - 2 * pad) / bins;
 
     hSvg.selectAll("rect")
       .data(grid)
@@ -334,7 +351,7 @@ export function DependencyLab() {
       .attr("fill", d => colorScale(d - expected))
       .attr("rx", 2);
 
-    hSvg.append("text").attr("x", hW / 2).attr("y", pad / 2).attr("text-anchor", "middle").attr("fill", "white").attr("font-size", "10").attr("font-weight", "bold").text("RESIDUAL HEATMAP (JOINT - MARGINAL)");
+    hSvg.append("text").attr("x", size / 2).attr("y", pad / 2).attr("text-anchor", "middle").attr("fill", "white").attr("font-size", "10").attr("font-weight", "bold").attr("letter-spacing", "0.1em").text("RESIDUAL HEATMAP (JOINT - MARGINAL)");
 
   }, [data]);
 
@@ -343,16 +360,16 @@ export function DependencyLab() {
       <div className="hd-viz-header flex-col md:flex-row items-start md:items-center justify-between p-6 gap-4">
         <div>
           <h4 className="text-white font-bold tracking-widest uppercase text-sm">The Dependency Engine</h4>
-          <p className="text-xs text-slate-500 font-mono mt-1">Topology: {type.replace("_", " ")}</p>
+          <p className="text-xs text-slate-500 font-mono mt-1">Topology: {GEN_LABELS[type]}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {Object.keys(GENERATORS).map(s => (
             <button 
               key={s} 
               onClick={() => setType(s as any)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${type === s ? "bg-cyan-500/20 border-cyan-500 text-cyan-400" : "bg-white/5 border-white/10 text-slate-400"}`}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${type === s ? "bg-cyan-500/20 border-cyan-500 text-cyan-400" : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}
             >
-              {s.split("_")[0]}
+              {GEN_LABELS[s]}
             </button>
           ))}
         </div>

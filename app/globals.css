@@ -2248,6 +2248,14 @@ select:focus-visible {
   transform: translateY(0);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .cmaes-scope .rq-fade-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @media (max-width: 640px) {
   .cmaes-scope .rq-drop-cap::first-letter {
     font-size: 3.25rem;
