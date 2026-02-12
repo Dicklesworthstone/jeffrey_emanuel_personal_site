@@ -140,6 +140,8 @@ export function BarraArticle() {
   return (
     <div
       ref={articleRef}
+      role="main"
+      id="main-content"
       className={`barra-scope barra-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -150,7 +152,7 @@ export function BarraArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
+      <section data-section="hero" className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
         <FactorHero />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
@@ -185,7 +187,7 @@ export function BarraArticle() {
       </section>
 
       {/* ========== THE BIRTH OF AN INDUSTRY STANDARD ========== */}
-      <article>
+      <article data-section="intro">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white text-center">
             The Birth of an Industry Standard
@@ -226,7 +228,7 @@ export function BarraArticle() {
       <Divider />
 
       {/* ========== WHERE DO RETURNS COME FROM ========== */}
-      <section>
+      <section data-section="returns">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white">
             Where Do Returns Actually Come From?
@@ -252,7 +254,7 @@ export function BarraArticle() {
       <Divider />
 
       {/* ========== THE MATHEMATICAL ARCHITECTURE ========== */}
-      <section>
+      <section data-section="math">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white">
             The Mathematical Architecture
@@ -288,7 +290,7 @@ export function BarraArticle() {
       <Divider />
 
       {/* ========== LIFE INSIDE A POD ========== */}
-      <section>
+      <section data-section="pod-life">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white">
             Life Inside a Pod: The Daily Workflow
@@ -319,7 +321,7 @@ export function BarraArticle() {
       <Divider />
 
       {/* ========== THE MULTI-STRATEGY ECOSYSTEM ========== */}
-      <section>
+      <section data-section="ecosystem">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white">
             The Multi-Strategy Ecosystem
@@ -351,7 +353,7 @@ export function BarraArticle() {
       <Divider />
 
       {/* ========== STYLE FACTORS DECODED ========== */}
-      <section>
+      <section data-section="factors">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white text-center">
             The Factors Decoded
@@ -360,33 +362,33 @@ export function BarraArticle() {
             When you see &ldquo;ZS&rdquo; on a risk screen, it means <J t="z-score"><strong>Z-Score</strong></J>: the factor has been standardized to have mean zero and unit standard deviation.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <div className="barra-insight-card !my-0 !bg-blue-500/5 hover:!bg-blue-500/10 transition-colors group cursor-default">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+             <div className="barra-insight-card !my-0 !bg-blue-500/5 hover:!bg-blue-500/10 transition-colors group cursor-default flex flex-col h-full">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0">
                    <BarChart3 className="w-6 h-6 text-blue-400" />
                 </div>
-                <h3 className="text-white font-bold text-xl mb-4">RESVOL</h3>
-                <p className="text-sm text-slate-400 leading-relaxed mb-0">
+                <h3 className="text-white font-bold text-xl mb-4 shrink-0">RESVOL</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                   <J t="idiosyncratic-risk">Residual Volatility</J> captures moves beyond market beta. Combines GARCH estimates and price ranges to flag stock-specific blow-up risk.
                 </p>
              </div>
 
-             <div className="barra-insight-card !my-0 !bg-amber-500/5 hover:!bg-amber-500/10 transition-colors group cursor-default">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+             <div className="barra-insight-card !my-0 !bg-amber-500/5 hover:!bg-amber-500/10 transition-colors group cursor-default flex flex-col h-full">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0">
                    <TrendingUp className="w-6 h-6 text-amber-400" />
                 </div>
-                <h3 className="text-white font-bold text-xl mb-4">MOM11M</h3>
-                <p className="text-sm text-slate-400 leading-relaxed mb-0">
+                <h3 className="text-white font-bold text-xl mb-4 shrink-0">MOM11M</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                   Classic <J t="momentum">Medium-term Momentum</J>. Uses a critical one-month skip to avoid reversal effects, identifying persistent performance trends.
                 </p>
              </div>
 
-             <div className="barra-insight-card !my-0 !bg-cyan-500/5 hover:!bg-cyan-500/10 transition-colors group cursor-default">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+             <div className="barra-insight-card !my-0 !bg-cyan-500/5 hover:!bg-cyan-500/10 transition-colors group cursor-default flex flex-col h-full">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0">
                    <Layers className="w-6 h-6 text-cyan-400" />
                 </div>
-                <h3 className="text-white font-bold text-xl mb-4">SIZE</h3>
-                <p className="text-sm text-slate-400 leading-relaxed mb-0">
+                <h3 className="text-white font-bold text-xl mb-4 shrink-0">SIZE</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                   Log-transformed market cap. Prevents mega-caps from overwhelming the model while capturing the structural risk difference between giants and mid-caps.
                 </p>
              </div>
@@ -411,7 +413,7 @@ export function BarraArticle() {
       <Divider />
 
       {/* ========== COMMON FAILURE MODES ========== */}
-      <section>
+      <section data-section="failures">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white">
             Common Failure Modes
@@ -443,7 +445,7 @@ export function BarraArticle() {
       </section>
 
       {/* ========== THE FUTURE ========== */}
-      <section className="pb-32">
+      <section data-section="future" className="pb-32">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white">
             The Future of Risk
