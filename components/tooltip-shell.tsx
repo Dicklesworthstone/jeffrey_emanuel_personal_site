@@ -110,7 +110,9 @@ export function TooltipShell({
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+      const narrowViewport = window.matchMedia("(max-width: 900px)").matches;
+      const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+      setIsMobile(narrowViewport || coarsePointer);
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -122,20 +124,29 @@ export function TooltipShell({
   }, [isOpen, updatePosition]);
 
   const handleMouseEnter = useCallback(() => {
-    if (isMobile) return;
+    const touchEnvironment =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (isMobile || touchEnvironment) return;
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
     openTimeoutRef.current = setTimeout(() => setIsOpen(true), 250);
   }, [isMobile]);
 
   const handleMouseLeave = useCallback(() => {
-    if (isMobile) return;
+    const touchEnvironment =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (isMobile || touchEnvironment) return;
     if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
     closeTimeoutRef.current = setTimeout(() => setIsOpen(false), 150);
   }, [isMobile]);
 
   const handleFocus = useCallback(() => {
-    if (isMobile) return;
+    const touchEnvironment =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (isMobile || touchEnvironment) return;
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
     setIsOpen(true);
@@ -143,7 +154,10 @@ export function TooltipShell({
 
   const handleBlur = useCallback(
     (e: React.FocusEvent) => {
-      if (isMobile) return;
+      const touchEnvironment =
+        typeof window !== "undefined" &&
+        window.matchMedia("(hover: none), (pointer: coarse)").matches;
+      if (isMobile || touchEnvironment) return;
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
       const relatedTarget = e.relatedTarget as Node | null;
       if (relatedTarget && tooltipRef.current?.contains(relatedTarget)) return;
@@ -153,7 +167,10 @@ export function TooltipShell({
   );
 
   const handleClick = useCallback(() => {
-    if (isMobile) {
+    const touchEnvironment =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (isMobile || touchEnvironment) {
       setIsOpen(true);
     }
   }, [isMobile]);
