@@ -16,7 +16,7 @@ import * as d3 from "d3";
 import { motion } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
 import { cn } from "@/lib/utils";
-import { Play, RotateCcw, ChevronRight, Activity, Cpu, Box, Zap, Target, Flame, TrendingUp } from "lucide-react";
+import { Play, RotateCcw, ChevronRight, Activity, Cpu, Box, Zap, Target } from "lucide-react";
 
 const COLORS = {
   bg: "#020204",
@@ -164,7 +164,7 @@ class ProCMAES {
     const hsig_delta = (1 - hsig) * this.cc * (2 - this.cc);
     const decay_coeff = 1 - this.c1 - this.cmu;
     for (let i = 0; i < this.dim; i++) {
-      for (let j = 0; j <= i; j++) {
+      for (let j = 0; j < this.dim; j++) {
         let rankMu = 0;
         for (let k = 0; k < this.mu; k++) {
           const idx = bestIndices[k];
@@ -843,8 +843,8 @@ export function NoiseRobustnessViz() {
               disabled={isRunning}
               className="w-full rq-btn-action !bg-emerald-500 !text-black flex items-center justify-center gap-2 !shadow-none !py-3"
             >
-              <Flame className="w-4 h-4" />
-              {isRunning ? "Running" : "Run New Strategy"}
+              <Play className="w-4 h-4 fill-current" />
+              Play Simulation
             </button>
           </div>
         </div>
@@ -923,7 +923,7 @@ export function RestartViz() {
             disabled={isRunning}
             className="w-full rq-btn-action !bg-purple-500 !text-white flex items-center justify-center gap-2 !shadow-none !py-3"
           >
-            <TrendingUp className="w-4 h-4" />
+            <Play className="w-4 h-4 fill-current" />
             {isRunning ? "Optimizing..." : "Execute IPOP-CMA-ES"}
           </button>
         </div>
