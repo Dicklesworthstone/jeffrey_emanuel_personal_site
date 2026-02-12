@@ -848,6 +848,7 @@ select:focus-visible {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* INTERACTIVE ARTICLE SCOPES START - Validated by scripts/validate-interactive-article-scopes.ts */
 /*
   ========================================
   HOEFFDING ARTICLE - ADVANCED POLISH
@@ -2439,3 +2440,5 @@ select:focus-visible {
     min-width: 0;
   }
 }
+
+/* INTERACTIVE ARTICLE SCOPES END - Validated by scripts/validate-interactive-article-scopes.ts */
