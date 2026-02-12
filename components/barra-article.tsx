@@ -141,7 +141,6 @@ export function BarraArticle() {
     <div
       ref={articleRef}
       role="main"
-      id="main-content"
       className={`barra-scope barra-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -445,7 +444,7 @@ export function BarraArticle() {
       </section>
 
       {/* ========== THE FUTURE ========== */}
-      <section data-section="future" className="pb-32">
+      <section data-section="future" className="pb-10 md:pb-16">
         <EC>
           <h2 className="barra-section-title mb-8 mt-16 text-white">
             The Future of Risk
@@ -465,8 +464,6 @@ export function BarraArticle() {
         </EC>
       </section>
 
-      {/* Footer spacing */}
-      <div className="h-32" />
     </div>
   );
 }

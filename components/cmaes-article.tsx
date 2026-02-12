@@ -607,7 +607,6 @@ export function CMAESArticle() {
         <RotateCcw className="w-6 h-6" />
       </button>
 
-      <div className="h-48" />
     </div>
   );
 }

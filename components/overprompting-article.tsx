@@ -113,7 +113,6 @@ export function OverpromptingArticle() {
     <div
       ref={articleRef}
       role="main"
-      id="main-content"
       className={`overprompting-scope op-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -408,7 +407,7 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== NARRATIVE PART 5 ========== */}
-      <section data-section="part-5" className="pb-24">
+      <section data-section="part-5" className="pb-10 md:pb-14">
         <EC>
           <p>
             {"If you squint, you will also see a connection to my other big advice for working with brownfield projects that already have a ton of code (and also my approach to porting)."}
@@ -431,8 +430,6 @@ export function OverpromptingArticle() {
         </EC>
       </section>
 
-      {/* Footer spacing */}
-      <div className="h-32" />
     </div>
   );
 }

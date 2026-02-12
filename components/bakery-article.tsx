@@ -138,7 +138,6 @@ export function BakeryArticle() {
     <div
       ref={articleRef}
       role="main"
-      id="main-content"
       className={`bakery-scope ba-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -181,7 +180,7 @@ export function BakeryArticle() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-2xl mx-auto leading-tight mt-12 font-light">
-              <T k="mutual-exclusion" theme="cyan">Mutual exclusion</T> without atomic hardware primitives. A masterclass in 
+              <T k="mutual-exclusion" theme="cyan">Mutual exclusion</T>{" "}without atomic hardware primitives. A masterclass in{" "}
               <span className="text-white font-medium italic"> fair concurrency </span> 
               designed by the pioneer of distributed computing.
             </p>
@@ -220,10 +219,10 @@ export function BakeryArticle() {
           </p>
           <p>
             What makes it truly legendary is that it achieves <strong>mutual exclusion</strong> 
-            without requiring any special atomic hardware instructions like 
-            <code>Compare-and-Swap</code> or <code>Test-and-Set</code>. 
-            It assumes nothing more than simple reads and writes to memory, 
-            even when those operations themselves are <T k="non-atomicity" theme="cyan">not atomic</T>.
+            {" "}without requiring any special atomic hardware instructions like{" "}
+            <code>Compare-and-Swap</code>{" "}or{" "}<code>Test-and-Set</code>. 
+            It assumes nothing more than simple reads and writes to memory, even when those operations themselves are{" "}
+            <T k="non-atomicity" theme="cyan">not atomic</T>.
           </p>
 
           <div className="ba-insight-card group">
@@ -443,7 +442,7 @@ export function BakeryArticle() {
     for (let j = 0; j < this.numProcesses; j++) {
       // Wait while process j is picking its ticket
       `}
-<T k="wait-loop-1" theme="cyan"><span className="text-blue-400 hover:text-blue-300 transition-colors cursor-help">while (this.entering[j]) {"{"} /* busy wait */ {"}"}</span></T>
+<T k="wait-loop-1" theme="cyan"><span className="text-blue-400 hover:text-blue-300 transition-colors cursor-help">while (this.entering[j]) {/* busy wait */}</span></T>
 {`
 
       // Wait while process j has a higher priority
@@ -467,7 +466,7 @@ export function BakeryArticle() {
       </section>
 
       {/* ========== KEY TAKEAWAYS ========== */}
-      <section data-section="takeaways" className="pb-24">
+      <section data-section="takeaways" className="pb-10 md:pb-14">
         <EC>
           <div className="rounded-3xl p-8 md:p-12 border border-white/10 bg-white/[0.02] relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -514,7 +513,6 @@ export function BakeryArticle() {
         </EC>
       </section>
 
-      <div className="h-32" />
     </div>
   );
 }

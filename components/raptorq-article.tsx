@@ -169,7 +169,6 @@ export function RaptorQArticle() {
     <div
       ref={articleRef}
       role="main"
-      id="main-content"
       className={`raptorq-scope rq-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -1219,8 +1218,6 @@ y = XOR(C[i] for i in indices)`}
         </EC>
       </section>
 
-      {/* Footer spacing */}
-      <div className="h-32" />
     </div>
   );
 }
