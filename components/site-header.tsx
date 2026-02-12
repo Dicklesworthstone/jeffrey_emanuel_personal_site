@@ -40,13 +40,12 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
 
   const { scrollY } = useScroll();
   
-  // Smoothly interpolate header styles based on scroll position
-  // Starts at 0, fully "scrolled" at 40px — Apple-style liquid glass
-  const headerOpacity = useTransform(scrollY, [0, 40], [0, 0.85]);
-  const headerBlurValue = useTransform(scrollY, [0, 40], [0, 20]);
-  const headerSaturateValue = useTransform(scrollY, [0, 40], [1, 1.8]);
-  const headerPaddingValue = useTransform(scrollY, [0, 40], [20, 12]);
-  const headerBorderOpacity = useTransform(scrollY, [0, 40], [0, 0.15]);
+  // Keep an always-visible frosted header to prevent text overlap on article pages.
+  const headerOpacity = useTransform(scrollY, [0, 40], [0.82, 0.9]);
+  const headerBlurValue = useTransform(scrollY, [0, 40], [16, 24]);
+  const headerSaturateValue = useTransform(scrollY, [0, 40], [1.25, 1.8]);
+  const headerPaddingValue = useTransform(scrollY, [0, 40], [12, 8]);
+  const headerBorderOpacity = useTransform(scrollY, [0, 40], [0.18, 0.24]);
   
   // Spring-smoothed values for buttery performance
   const smoothOpacity = useSpring(headerOpacity, { stiffness: 300, damping: 30 });
@@ -55,7 +54,11 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const smoothPadding = useSpring(headerPaddingValue, { stiffness: 300, damping: 30 });
   const smoothBorderOpacity = useSpring(headerBorderOpacity, { stiffness: 300, damping: 30 });
 
-  const headerPadding = useTransform(smoothPadding, (v) => `${v}px`);
+  const headerPaddingTop = useTransform(
+    smoothPadding,
+    (v) => `calc(${v}px + env(safe-area-inset-top, 0px))`
+  );
+  const headerPaddingBottom = useTransform(smoothPadding, (v) => `${v}px`);
   
   // Combine filters for backdrop - using more robust direct string interpolation if needed, 
   // but useTransform with array is generally supported.
@@ -89,8 +92,8 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
       <motion.header
         className="fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-300"
         style={{
-          paddingTop: headerPadding,
-          paddingBottom: headerPadding,
+          paddingTop: headerPaddingTop,
+          paddingBottom: headerPaddingBottom,
           backgroundColor: useTransform(smoothOpacity, (v) => `rgba(2, 6, 23, ${v})`),
           backdropFilter: headerBackdrop,
           WebkitBackdropFilter: headerBackdrop,
