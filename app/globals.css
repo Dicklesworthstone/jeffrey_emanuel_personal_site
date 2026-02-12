@@ -812,6 +812,225 @@ select:focus-visible {
 
 /*
   ========================================
+  HOEFFDING ARTICLE - SCOPED STYLES
+  ========================================
+*/
+
+.hoeffding-scope {
+  --hd-bg: #020204;
+  --hd-text: #f8fafc;
+  --hd-cyan: #22d3ee;
+  --hd-purple: #a855f7;
+  --hd-emerald: #10b981;
+  font-family: var(--font-crimson), Georgia, "Times New Roman", serif;
+}
+
+.hoeffding-scope .hd-display-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.hoeffding-scope .hd-section-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 8rem;
+  margin-bottom: 4rem;
+  color: white;
+}
+
+.hoeffding-scope .hd-section-title::before {
+  content: "";
+  width: 0.375rem;
+  height: 2rem;
+  background-color: var(--hd-cyan);
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.hoeffding-scope .hd-drop-cap::first-letter {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--hd-cyan);
+  float: left;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+.hoeffding-scope .hd-callout {
+  border-left: 4px solid rgba(168, 85, 247, 0.5);
+  padding-left: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  font-style: italic;
+  font-size: 1.75rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+  background: linear-gradient(to right, rgba(168, 85, 247, 0.05), transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.hoeffding-scope .hd-viz-container {
+  width: 100%;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08080a;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 100px -20px rgba(34, 211, 238, 0.05);
+}
+
+.hoeffding-scope .hd-viz-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+}
+
+.hoeffding-scope .hd-btn-action {
+  padding: 0.625rem 1.25rem;
+  background: var(--hd-cyan);
+  color: black;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.hoeffding-scope .hd-btn-action:hover {
+  background: #67e8f9;
+  transform: scale(1.05);
+}
+
+.hoeffding-scope .hd-btn-secondary {
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.hoeffding-scope .hd-insight-card {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+.hoeffding-scope .hd-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, #22d3ee, #a855f7);
+  z-index: 50;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.hoeffding-scope.hd-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+  font-size: 1.625rem;
+  line-height: 1.85;
+  color: #f1f5f9;
+  margin-bottom: 2.25rem;
+  margin-top: 0;
+  max-width: 72ch;
+  text-wrap: pretty;
+  letter-spacing: -0.015em;
+  font-weight: 450;
+}
+
+.hoeffding-scope.hd-body strong {
+  color: white;
+  font-weight: 900;
+}
+
+.hoeffding-scope.hd-body code {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  color: #22d3ee;
+  background: rgba(8, 145, 178, 0.15);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+.hoeffding-scope .hd-math-inline .katex {
+  font-size: 1.25em;
+  color: rgba(216, 180, 254, 0.9);
+}
+
+.hoeffding-scope .hd-math-block {
+  text-align: center;
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+}
+
+.hoeffding-scope .hd-math-block .katex {
+  font-size: 1.5em;
+  color: var(--hd-cyan);
+}
+
+.hoeffding-scope .hd-fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hoeffding-scope .hd-fade-section.hd-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/*
+  ========================================
   RAPTORQ ARTICLE - SCOPED STYLES
   All styles scoped under .raptorq-scope
   to avoid leaking to the rest of the site.
@@ -1543,3 +1762,681 @@ select:focus-visible {
     transform: translateX(0);
   }
 }
+
+/* Custom scrollbar for visualizations */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/*
+  ========================================
+  BAKERY ALGORITHM ARTICLE - SCOPED STYLES
+  All styles scoped under .bakery-scope
+  to avoid leaking to the rest of the site.
+  ========================================
+*/
+
+.bakery-scope {
+  --ba-bg: #020204;
+  --ba-text: #f8fafc;
+  --ba-muted: #64748b;
+  --ba-amber: #f59e0b;
+  --ba-orange: #f97316;
+  --ba-rose: #f43f5e;
+  font-family: var(--font-crimson), Georgia, "Times New Roman", serif;
+}
+
+/* Display title */
+.bakery-scope .ba-display-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* Section titles */
+.bakery-scope .ba-section-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 8rem;
+  margin-bottom: 4rem;
+  color: white;
+}
+
+.bakery-scope .ba-section-title::before {
+  content: "";
+  width: 0.375rem;
+  height: 2rem;
+  background-color: var(--ba-amber);
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Drop cap */
+.bakery-scope .ba-drop-cap::first-letter {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--ba-amber);
+  float: left;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+/* Callout blockquote */
+.bakery-scope .ba-callout {
+  border-left: 4px solid rgba(245, 158, 11, 0.5);
+  padding-left: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  font-style: italic;
+  font-size: 1.75rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.05), transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+/* Insight card */
+.bakery-scope .ba-insight-card {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .bakery-scope .ba-insight-card {
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+  }
+}
+
+/* Scroll progress bar */
+.bakery-scope .ba-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, #f59e0b, #f97316, #f43f5e);
+  z-index: 50;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Editorial paragraph styling */
+.bakery-scope.ba-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+  font-size: 1.625rem;
+  line-height: 1.85;
+  color: #f1f5f9;
+  margin-bottom: 2.25rem;
+  margin-top: 0;
+  max-width: 72ch;
+  text-wrap: pretty;
+  letter-spacing: -0.015em;
+  font-weight: 450;
+}
+
+.bakery-scope.ba-body p:not(.text-sm):not(.text-base):not(.text-xl) + p:not(.text-sm):not(.text-base):not(.text-xl) {
+  margin-top: 2.25rem;
+}
+
+.bakery-scope.ba-body strong {
+  color: white;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.bakery-scope.ba-body code {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Section reveal on scroll */
+.bakery-scope .ba-fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+  ========================================
+  CMA-ES ARTICLE - SCOPED STYLES
+  All styles scoped under .cmaes-scope
+  to avoid leaking to the rest of the site.
+  ========================================
+*/
+
+.cmaes-scope {
+  --rq-bg: #020204;
+  --rq-text: #f8fafc;
+  --rq-muted: #64748b;
+  --rq-cyan: #f59e0b; /* Using amber as the primary accent */
+  --rq-purple: #f97316; /* Using orange as the secondary accent */
+  font-family: var(--font-crimson), Georgia, "Times New Roman", serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss03", "cv05", "tnum";
+}
+
+/* Display title */
+.cmaes-scope .rq-display-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* Section titles */
+.cmaes-scope .rq-section-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 8rem;
+  margin-bottom: 4rem;
+  color: white;
+}
+
+.cmaes-scope .rq-section-title::before {
+  content: "";
+  width: 0.375rem;
+  height: 2rem;
+  background-color: var(--rq-cyan);
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Drop cap */
+.cmaes-scope .rq-drop-cap::first-letter {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--rq-cyan);
+  float: left;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+/* Callout blockquote */
+.cmaes-scope .rq-callout {
+  border-left: 4px solid rgba(245, 158, 11, 0.5);
+  padding-left: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  font-style: italic;
+  font-size: 1.75rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.05), transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+/* Viz containers and headers */
+.cmaes-scope .rq-viz-container {
+  width: 100%;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08080a;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 100px -20px rgba(245, 158, 11, 0.05);
+}
+
+.cmaes-scope .rq-viz-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+}
+
+@media (min-width: 768px) {
+  .cmaes-scope .rq-viz-header {
+    padding: 2rem;
+  }
+}
+
+/* Buttons */
+.cmaes-scope .rq-btn-action {
+  padding: 0.625rem 1.25rem;
+  background: var(--rq-cyan);
+  color: black;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.cmaes-scope .rq-btn-action:hover {
+  background: #fbbf24;
+  transform: scale(1.05);
+}
+
+.cmaes-scope .rq-btn-secondary {
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.cmaes-scope .rq-btn-secondary:hover {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Data grid cells for matrix viz */
+.cmaes-scope .rq-data-grid-cell {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 0.75rem;
+  transition: all 0.5s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .cmaes-scope .rq-data-grid-cell {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+.cmaes-scope .rq-cell-1 {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+}
+
+.cmaes-scope .rq-cell-0 {
+  background: rgba(255, 255, 255, 0.05);
+  color: #334155;
+}
+
+/* Insight card */
+.cmaes-scope .rq-insight-card {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .cmaes-scope .rq-insight-card {
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+  }
+}
+
+/* Scroll progress bar */
+.cmaes-scope .rq-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, #f59e0b, #f97316, #ef4444);
+  z-index: 50;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Editorial paragraph styling */
+.cmaes-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+  font-size: 1.625rem;
+  line-height: 1.85;
+  color: #f1f5f9;
+  margin-bottom: 2.25rem;
+  margin-top: 0;
+  max-width: 72ch;
+  text-wrap: pretty;
+  letter-spacing: -0.015em;
+  font-weight: 450;
+}
+
+.cmaes-scope.rq-body strong {
+  color: white;
+  font-weight: 900;
+}
+
+.cmaes-scope.rq-body code {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Math styling */
+.cmaes-scope .rq-math-inline .katex {
+  font-size: 1.25em;
+  color: rgba(251, 191, 36, 0.9);
+}
+
+.cmaes-scope .rq-math-block {
+  text-align: center;
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+}
+
+.cmaes-scope .rq-math-block .katex {
+  font-size: 1.5em;
+  color: #f59e0b;
+}
+
+/* Section reveal on scroll */
+.cmaes-scope .rq-fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cmaes-scope .rq-fade-section.rq-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .cmaes-scope .rq-drop-cap::first-letter {
+    font-size: 3.25rem;
+    margin-right: 0.5rem;
+  }
+
+  .cmaes-scope .rq-callout {
+    font-size: 1.15rem;
+    padding-left: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cmaes-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+    font-size: 1.375rem;
+    line-height: 1.85;
+    margin-bottom: 3rem;
+  }
+
+  .cmaes-scope .rq-progress-bar {
+    top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/*
+  ========================================
+  BARRA FACTOR MODEL ARTICLE - SCOPED STYLES
+  All styles scoped under .barra-scope
+  ========================================
+*/
+
+.barra-scope {
+  --barra-bg: #020204;
+  --barra-text: #f8fafc;
+  --barra-emerald: #10b981;
+  --barra-cyan: #22d3ee;
+  --barra-blue: #3b82f6;
+  font-family: var(--font-crimson), Georgia, "Times New Roman", serif;
+}
+
+.barra-scope .barra-display-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.barra-scope .barra-section-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 8rem;
+  margin-bottom: 4rem;
+  color: white;
+}
+
+.barra-scope .barra-section-title::before {
+  content: "";
+  width: 0.375rem;
+  height: 2rem;
+  background-color: var(--barra-emerald);
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.barra-scope .barra-drop-cap::first-letter {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--barra-emerald);
+  float: left;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+.barra-scope .barra-callout {
+  border-left: 4px solid rgba(16, 185, 129, 0.5);
+  padding-left: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  font-style: italic;
+  font-size: 1.75rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.barra-scope .barra-viz-container {
+  width: 100%;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08080a;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 100px -20px rgba(16, 185, 129, 0.05);
+}
+
+.barra-scope .barra-viz-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+}
+
+.barra-scope .barra-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, #10b981, #22d3ee, #3b82f6);
+  z-index: 50;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.barra-scope.barra-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+  font-size: 1.625rem;
+  line-height: 1.85;
+  color: #f1f5f9;
+  margin-bottom: 2.25rem;
+  margin-top: 0;
+  max-width: 72ch;
+  text-wrap: pretty;
+  letter-spacing: -0.015em;
+  font-weight: 450;
+}
+
+.barra-scope .barra-math-block {
+  text-align: center;
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+}
+
+.barra-scope .barra-math-inline .katex {
+  font-size: 1.2em;
+  color: #22d3ee;
+}
+
+.barra-scope .barra-math-block .katex {
+  font-size: 1.5em;
+  color: #10b981;
+}
+
+.barra-scope .barra-insight-card {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+.barra-scope .barra-fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.barra-scope .barra-fade-section.barra-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .barra-scope .barra-viz-container {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+  }
+
+  .barra-scope .barra-drop-cap::first-letter {
+    font-size: 3.25rem;
+  }
+
+  .barra-scope.barra-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+    font-size: 1.375rem;
+    line-height: 1.85;
+  }
+}
+

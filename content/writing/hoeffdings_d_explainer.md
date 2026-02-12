@@ -1,10 +1,11 @@
 ---
-title: "Hoeffding's D Explained"
+title: "My Favorite Statistical Measure: Hoeffding's D"
 date: "2025-11-22"
 excerpt: "Standard correlation misses non-linear relationships. This guide explains Hoeffding's D, a powerful non-parametric measure that detects complex dependencies where Pearson and Spearman fail."
 category: "Statistics"
 author: "Jeffrey Emanuel"
 source: "GitHub"
+featured: true
 ---
 
 ![Illustration](https://raw.githubusercontent.com/Dicklesworthstone/hoeffdings_d_explainer/main/hoeffd_illustration.webp)
