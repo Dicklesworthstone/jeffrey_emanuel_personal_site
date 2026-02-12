@@ -3,10 +3,10 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import {
-  OrbitControls,
-  PerspectiveCamera,
-  Float,
+import { 
+  OrbitControls, 
+  PerspectiveCamera, 
+  Float, 
   MeshTransmissionMaterial,
   Environment,
   Text,
@@ -372,7 +372,8 @@ export function SelectionWalkthrough() {
       const y = d3.scaleLinear().domain([-8, 8]).range([h, 0]);
       const grid = new Array(40 * 40);
       for (let i = 0; i < 40; i++) for (let j = 0; j < 40; j++) grid[i * 40 + j] = objective([-8 + (j/39)*16, -8 + (i/39)*16]);
-      g.selectAll("path.contour").data(d3.contours().size([40, 40])(grid)).enter().append("path")
+      const contours = d3.contours().size([40, 40]);
+      g.selectAll("path.contour").data(contours(grid)).enter().append("path")
         .attr("d", d3.geoPath(d3.geoIdentity().scale(w / 40))).attr("fill", "none")
         .attr("stroke", "rgba(255,255,255,0.04)").attr("stroke-width", 1);
       if (data) {
@@ -466,10 +467,10 @@ function Landscape({ objective }: { objective: (x: number, y: number) => number 
   );
 }
 
-function PathLine({ points, color }: { points: number[][], color: string }) {
+function PathLine({ points, color, objective }: { points: number[][], color: string, objective: (x: number, y: number) => number }) {
   const linePoints = useMemo(() => 
-    points.map(p => new THREE.Vector3(p[0], p[1], 0.1 + (p[0]**2 + (p[1] * 10)**2) * 0.01)),
-  [points]);
+    points.map(p => new THREE.Vector3(p[0], p[1], 0.1 + objective(p[0], p[1]) * 0.1)),
+  [points, objective]);
   return <Line points={linePoints} color={color} lineWidth={3} transparent opacity={0.8} />;
 }
 
@@ -491,7 +492,7 @@ export function ComparisonViz() {
       const h = [[...start]];
       for (let i = 0; i < 40; i++) {
         const samples = solver.sample();
-        solver.update(samples, samples.map(s => x_rot(s[0], s[1])**2 + (y_rot(s[0], s[1]) * 10)**2));
+        solver.update(samples, samples.map(s => objective(s[0], s[1])));
         h.push([...solver.mean]); setHistory([...h]);
         if (i > 5 && solver.sigma < 1e-4) break;
         await new Promise(r => setTimeout(r, 50));
@@ -510,8 +511,13 @@ export function ComparisonViz() {
     setIsRunning(false);
   }, [active, objective]);
 
-  function x_rot(x: number, y: number) { return x * Math.cos(0.5) - y * Math.sin(0.5); }
-  function y_rot(x: number, y: number) { return x * Math.sin(0.5) + y * Math.cos(0.5); }
+  useEffect(() => {
+    const render = () => {
+      // Logic for resize or other needs if any
+    };
+    window.addEventListener("resize", render);
+    return () => window.removeEventListener("resize", render);
+  }, []);
 
   return (
     <div className="rq-viz-container !p-0">
@@ -551,7 +557,7 @@ export function ComparisonViz() {
             <PresentationControls speed={1.5} global zoom={0.8} polar={[-0.1, Math.PI / 4]}>
               <group position={[0, -1, 0]}>
                 <Landscape objective={objective} />
-                <PathLine points={history} color={active === "cma" ? COLORS.amber : COLORS.blue} />
+                <PathLine points={history} color={active === "cma" ? COLORS.amber : COLORS.blue} objective={objective} />
               </group>
             </PresentationControls>
             <Environment preset="night" />
@@ -661,9 +667,9 @@ export function BenchmarkRunner() {
           <div className="space-y-6">
             <div className="text-xs font-black uppercase text-slate-500 tracking-widest">Internal State Snapshot</div>
             <div className="grid grid-cols-3 gap-3">
-              {(currentC.length > 0 ? currentC : Array(3).fill(new Array(3).fill(0))).map((row: number[], i) =>
-                row.map((val: number, j) => (
-                  <div key={`${i}-${j}`} className={cn("h-12 flex items-center justify-center font-mono text-xs rounded-xl border transition-all duration-700 shadow-sm", 
+              {(currentC.length > 0 ? currentC : Array(3).fill(new Array(3).fill(0))).map((row: number[], i: number) =>
+                row.map((val: number, j: number) => (
+                  <div key={`${i}-${j}`} className={cn("h-12 flex items-center justify-center font-mono text-xs rounded-xl border transition-all duration-500 shadow-sm", 
                     Math.abs(val) > 0.1 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-white/5 text-slate-700 border-transparent")}>
                     {val.toFixed(2)}
                   </div>
@@ -777,14 +783,12 @@ export function NoiseRobustnessViz() {
 // ============================================
 
 export function RestartViz() {
-  const chartRef = useRef<HTMLDivElement>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [generation, setGeneration] = useState(0);
   const [popSize, setPopSize] = useState(6);
   const [bestVal, setBestVal] = useState(10);
 
   const objective = useCallback((x: number[]) => {
-    // Rastrigin-like multimodal landscape
     return 10 + x.reduce((a, b) => a + b*b - 10 * Math.cos(2 * Math.PI * b), 0);
   }, []);
 
@@ -792,6 +796,7 @@ export function RestartViz() {
     setIsRunning(true);
     let currentPopSize = 6;
     setPopSize(currentPopSize);
+    setGeneration(0);
     
     for (let restart = 0; restart < 3; restart++) {
       const solver = new ProCMAES(2, [4, 4], 1.0);
@@ -809,7 +814,6 @@ export function RestartViz() {
       }
       
       if (bestVal < 1e-6) break;
-      // Increase population for next restart (IPOP)
       currentPopSize *= 2;
       setPopSize(currentPopSize);
     }
@@ -872,4 +876,3 @@ export function RestartViz() {
     </div>
   );
 }
-
