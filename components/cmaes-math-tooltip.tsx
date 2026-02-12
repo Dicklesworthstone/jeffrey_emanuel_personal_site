@@ -4,7 +4,7 @@ import { type ReactNode } from "react";
 import { Sigma } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getJargon, type JargonTerm } from "@/lib/cmaes-jargon";
-import { TooltipShell } from "./raptorq-tooltip-shell";
+import { TooltipShell } from "./tooltip-shell";
 
 interface CMAESMathTooltipProps {
   /** The math key to look up in the dictionary */
@@ -30,6 +30,7 @@ export function CMAESMathTooltip({ mathKey, children, className }: CMAESMathTool
     <TooltipShell
       title={mathData.term}
       ariaLabel={`Explain math: ${mathData.term}`}
+      variant="amber"
       className={cn(
         "relative inline-block cursor-help transition-all duration-200 group/math",
         "hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-lg",

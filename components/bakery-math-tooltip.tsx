@@ -37,8 +37,8 @@ export function BakeryMathTooltip({ mathKey, children, className, theme = "amber
     <TooltipShell
       title={mathData.term}
       ariaLabel={`Explain: ${mathData.term}`}
+      variant={theme === "amber" ? "amber" : "cyan"}
       className={cn(
-        "relative inline-block cursor-help transition-all duration-200 group/math rounded-lg px-1",
         "hover:bg-white/5",
         className
       )}

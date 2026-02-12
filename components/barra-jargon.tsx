@@ -1,7 +1,7 @@
 "use client";
 
 import { Info, HelpCircle } from "lucide-react";
-import { TooltipShell } from "./raptorq-tooltip-shell";
+import { TooltipShell } from "./tooltip-shell";
 import { cn } from "@/lib/utils";
 
 const JARGON: Record<string, { title: string; def: string }> = {
@@ -80,6 +80,8 @@ export function BarraJargon({ term, children }: { term: string; children?: React
     <TooltipShell
       title={info.title}
       ariaLabel={`Explain term: ${info.title}`}
+      variant="emerald"
+      portalClassName="barra-scope"
       className={cn(
         "relative inline-block cursor-help transition-all duration-200 group/jargon",
         "underline decoration-emerald-500/30 decoration-2 underline-offset-4 rounded-md hover:text-emerald-400"

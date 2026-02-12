@@ -4,7 +4,7 @@ import { type ReactNode } from "react";
 import { Sigma } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHoeffdingMath, type MathTerm } from "@/lib/hoeffding-math";
-import { TooltipShell } from "./raptorq-tooltip-shell";
+import { TooltipShell } from "./tooltip-shell";
 
 interface HoeffdingMathTooltipProps {
   /** The math key to look up in the dictionary */
@@ -32,6 +32,8 @@ export function HoeffdingMathTooltip({ mathKey, children, className, color, simp
     <TooltipShell
       title={mathData.term}
       ariaLabel={`Explain: ${mathData.term}`}
+      variant="purple"
+      portalClassName="hoeffding-scope"
       className={cn(
         "relative inline-block cursor-help transition-all duration-300 group/math",
         "hover:scale-[1.05] focus:outline-none rounded-lg p-0.5",

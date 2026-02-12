@@ -30,6 +30,8 @@ export function RaptorQMathTooltip({ mathKey, children, className }: RaptorQMath
     <TooltipShell
       title={mathData.term}
       ariaLabel={`Explain math: ${mathData.term}`}
+      variant="cyan"
+      portalClassName="raptorq-scope"
       className={cn(
         "relative inline-block cursor-help transition-all duration-200 group/math",
         "hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-lg px-1",

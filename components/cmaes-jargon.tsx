@@ -4,7 +4,7 @@ import { type ReactNode } from "react";
 import { Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getJargon, type JargonTerm } from "@/lib/cmaes-jargon";
-import { TooltipShell } from "./raptorq-tooltip-shell";
+import { TooltipShell } from "./tooltip-shell";
 
 interface CMAESJargonProps {
   /** The term key to look up in the dictionary */
@@ -34,6 +34,8 @@ export function CMAESJargon({ term, children, className }: CMAESJargonProps) {
     <TooltipShell
       title={jargonData.term}
       ariaLabel={`Learn about ${jargonData.term}`}
+      variant="amber"
+      portalClassName="cmaes-scope"
       className={cn(
         "relative inline cursor-help text-left font-medium",
         "decoration-[1.5px] underline underline-offset-[3px]",
