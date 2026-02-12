@@ -13,7 +13,7 @@ import {
 import katex from "katex";
 import { Zap, AlertTriangle, CheckCircle2 } from "lucide-react";
 import illustration from "@/assets/overprompting_post_illustration.webp";
-import { OverpromptingMathTooltip } from "./overprompting-math-tooltip";
+import { MathTooltip } from "./math-tooltip";
 import { getJargon } from "@/lib/overprompting-jargon";
 
 // Dynamic import visualizations (no SSR — they use browser APIs / refs)
@@ -71,7 +71,7 @@ function M({ t, explanation }: { t: string; explanation?: string }) {
   );
 
   if (explanation) {
-    return <OverpromptingMathTooltip mathKey={explanation}>{content}</OverpromptingMathTooltip>;
+    return <MathTooltip term={getJargon(explanation)} variant="amber" mode="math">{content}</MathTooltip>;
   }
   return content;
 }
@@ -89,7 +89,7 @@ function MBlock({ t, explanation }: { t: string; explanation?: string }) {
   );
 
   if (explanation) {
-    return <OverpromptingMathTooltip mathKey={explanation}>{content}</OverpromptingMathTooltip>;
+    return <MathTooltip term={getJargon(explanation)} variant="amber" mode="math">{content}</MathTooltip>;
   }
   return content;
 }
@@ -100,11 +100,9 @@ function J({ t, children }: { t: string; children?: React.ReactNode }) {
   if (!termData) return <>{children}</>;
   
   return (
-    <OverpromptingMathTooltip mathKey={t}>
-      <span className="cursor-help border-b border-dotted border-amber-500/50 hover:border-amber-500 hover:text-amber-200 transition-colors">
-        {children || termData.term}
-      </span>
-    </OverpromptingMathTooltip>
+    <MathTooltip term={termData} variant="amber" mode="text">
+      {children || termData.term}
+    </MathTooltip>
   );
 }
 

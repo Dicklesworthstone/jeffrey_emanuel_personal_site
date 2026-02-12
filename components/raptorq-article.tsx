@@ -11,7 +11,8 @@ import {
 } from "next/font/google";
 import katex from "katex";
 import { RaptorQJargon } from "./raptorq-jargon";
-import { RaptorQMathTooltip } from "./raptorq-math-tooltip";
+import { MathTooltip } from "./math-tooltip";
+import { getJargon } from "@/lib/raptorq-jargon";
 
 // Dynamic import visualizations (no SSR - they use browser APIs)
 const HeroParticles = dynamic(
@@ -71,7 +72,7 @@ function M({ t, explanation }: { t: string; explanation?: string }) {
   );
 
   if (explanation) {
-    return <RaptorQMathTooltip mathKey={explanation}>{content}</RaptorQMathTooltip>;
+    return <MathTooltip term={getJargon(explanation)} variant="purple">{content}</MathTooltip>;
   }
   return content;
 }
@@ -89,7 +90,7 @@ function MBlock({ t, explanation }: { t: string; explanation?: string }) {
   );
 
   if (explanation) {
-    return <RaptorQMathTooltip mathKey={explanation}>{content}</RaptorQMathTooltip>;
+    return <MathTooltip term={getJargon(explanation)} variant="purple">{content}</MathTooltip>;
   }
   return content;
 }
@@ -102,7 +103,14 @@ function J({
   t: string;
   children?: React.ReactNode;
 }) {
-  return <RaptorQJargon term={t}>{children}</RaptorQJargon>;
+  const termData = getJargon(t);
+  if (!termData) return <>{children}</>;
+
+  return (
+    <MathTooltip term={termData} variant="purple">
+      <RaptorQJargon term={t}>{children}</RaptorQJargon>
+    </MathTooltip>
+  );
 }
 
 // Section divider
