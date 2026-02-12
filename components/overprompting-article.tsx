@@ -10,6 +10,7 @@ import {
 } from "next/font/google";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import illustration from "@/assets/overprompting_post_illustration.webp";
+import { getScrollMetrics } from "@/lib/utils";
 
 // Dynamic import visualizations (no SSR — they use browser APIs / refs)
 const ConstraintViz = dynamic(
@@ -76,11 +77,11 @@ export function OverpromptingArticle() {
   // Scroll progress bar
   useEffect(() => {
     const handleScroll = () => {
-      const total =
-        document.documentElement.scrollHeight - window.innerHeight;
-      if (total > 0) setScrollProgress(window.scrollY / total);
+      const { progress } = getScrollMetrics();
+      setScrollProgress(progress);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -88,9 +89,20 @@ export function OverpromptingArticle() {
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
+    const readyClass = "op-reveal-ready";
+    root.classList.add(readyClass);
+
     const targets = root.querySelectorAll(
       ":scope > section:not(:first-child), :scope > article, [data-section]"
     );
+
+    if (typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.classList.add("op-visible"));
+      return () => {
+        root.classList.remove(readyClass);
+      };
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -106,7 +118,10 @@ export function OverpromptingArticle() {
       el.classList.add("op-fade-section");
       observer.observe(el);
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.classList.remove(readyClass);
+    };
   }, []);
 
   return (

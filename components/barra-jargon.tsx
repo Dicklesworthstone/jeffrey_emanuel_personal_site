@@ -94,7 +94,7 @@ export function BarraJargon({ term, children }: { term: string; children?: React
   );
 }
 
-function JargonTooltipContent({ info }: { info: any }) {
+function JargonTooltipContent({ info }: { info: { title: string; def: string } }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 border-b border-white/5 pb-2">
@@ -110,7 +110,7 @@ function JargonTooltipContent({ info }: { info: any }) {
   );
 }
 
-function JargonSheetContent({ info }: { info: any }) {
+function JargonSheetContent({ info }: { info: { title: string; def: string } }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">

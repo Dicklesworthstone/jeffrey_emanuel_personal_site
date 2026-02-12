@@ -29,3 +29,49 @@ export function formatDate(dateString: string): string {
     timeZone: "UTC", // Force UTC display
   }).format(date);
 }
+
+/**
+ * Cross-browser scroll metrics for mobile/desktop.
+ * Some engines report scroll state on body, others on documentElement/scroller.
+ */
+export function getScrollMetrics() {
+  if (typeof window === "undefined") {
+    return {
+      scrollTop: 0,
+      maxScroll: 0,
+      progress: 0,
+    };
+  }
+
+  const docEl = document.documentElement;
+  const body = document.body;
+  const scroller = document.scrollingElement as HTMLElement | null;
+
+  const scrollTop = Math.max(
+    window.scrollY || 0,
+    scroller?.scrollTop || 0,
+    docEl.scrollTop || 0,
+    body.scrollTop || 0
+  );
+
+  const scrollHeight = Math.max(
+    scroller?.scrollHeight || 0,
+    docEl.scrollHeight || 0,
+    body.scrollHeight || 0
+  );
+
+  const clientHeight = Math.max(
+    window.innerHeight || 0,
+    scroller?.clientHeight || 0,
+    docEl.clientHeight || 0
+  );
+
+  const maxScroll = Math.max(scrollHeight - clientHeight, 0);
+  const progress = maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0;
+
+  return {
+    scrollTop,
+    maxScroll,
+    progress,
+  };
+}

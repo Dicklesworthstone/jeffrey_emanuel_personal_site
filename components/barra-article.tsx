@@ -12,6 +12,7 @@ import {
 import katex from "katex";
 import { Briefcase, Shield, BarChart3, TrendingUp, TrendingDown, Layers, Zap, AlertCircle } from "lucide-react";
 import { BarraJargon } from "./barra-jargon";
+import { getScrollMetrics } from "@/lib/utils";
 
 // Dynamic import visualizations (no SSR - they use browser APIs)
 const FactorHero = dynamic(
@@ -105,10 +106,11 @@ export function BarraArticle() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      if (total > 0) setScrollProgress(window.scrollY / total);
+      const { progress } = getScrollMetrics();
+      setScrollProgress(progress);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -116,9 +118,20 @@ export function BarraArticle() {
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
+    const readyClass = "barra-reveal-ready";
+    root.classList.add(readyClass);
+
     const targets = root.querySelectorAll(
       ":scope > section:not(:first-child), :scope > article"
     );
+
+    if (typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.classList.add("barra-visible"));
+      return () => {
+        root.classList.remove(readyClass);
+      };
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -134,7 +147,10 @@ export function BarraArticle() {
       el.classList.add("barra-fade-section");
       observer.observe(el);
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.classList.remove(readyClass);
+    };
   }, []);
 
   return (

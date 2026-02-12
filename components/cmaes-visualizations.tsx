@@ -33,6 +33,31 @@ const COLORS = {
   purple: "#a855f7",
 };
 
+interface SelectionSample {
+  x: number[];
+  f: number;
+  rank: number;
+  isElite: boolean;
+}
+
+interface SelectionData {
+  samples: SelectionSample[];
+  oldMean: number[];
+  oldB: number[][];
+  oldD: number[];
+}
+
+interface BenchmarkPoint {
+  gen: number;
+  best: number;
+  sigma: number;
+}
+
+interface NoisePoint {
+  gen: number;
+  val: number;
+}
+
 // ============================================
 // 0. ENGINE (Stability & Precision)
 // ============================================
@@ -243,6 +268,7 @@ function LiquidGlassDistribution() {
   useFrame((state) => {
     if (!meshRef.current || !pointsRef.current) return;
     const t = state.clock.getElapsedTime();
+    const positionArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
     const scaleX = 1 + 0.6 * Math.sin(t * 0.4);
     const scaleY = 1 + 0.3 * Math.cos(t * 0.6);
     const scaleZ = 0.4 + 0.2 * Math.sin(t * 0.8);
@@ -254,9 +280,9 @@ function LiquidGlassDistribution() {
       const r = (2 + Math.sin(t * 0.5 + i * 0.1) * 0.3) * 6;
       const phi = Math.acos(2 * ((i * 1.618) % 1) - 1);
       const theta = 2 * Math.PI * ((i * 2.718) % 1);
-      positions[i3] = r * Math.sin(phi) * Math.cos(theta) * scaleX;
-      positions[i3 + 1] = r * Math.sin(phi) * Math.sin(theta) * scaleY;
-      positions[i3 + 2] = r * Math.cos(phi) * scaleZ;
+      positionArray[i3] = r * Math.sin(phi) * Math.cos(theta) * scaleX;
+      positionArray[i3 + 1] = r * Math.sin(phi) * Math.sin(theta) * scaleY;
+      positionArray[i3 + 2] = r * Math.cos(phi) * scaleZ;
     }
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
@@ -329,7 +355,7 @@ export function SelectionWalkthrough() {
   const [stepIdx, setStepIdx] = useState(0);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const solver = useMemo(() => new ProCMAES(2, [0, 0], 2), []);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<SelectionData | null>(null);
 
   const objective = useCallback((x: number[]) => {
     const x_rot = x[0] * Math.cos(0.4) - x[1] * Math.sin(0.4);
@@ -353,7 +379,8 @@ export function SelectionWalkthrough() {
     } else if (stepIdx === 1) setStepIdx(2);
     else if (stepIdx === 2) setStepIdx(3);
     else {
-      solver.update(data.samples.map((s: any) => s.x), data.samples.map((s: any) => s.f));
+      if (!data) return;
+      solver.update(data.samples.map((s) => s.x), data.samples.map((s) => s.f));
       setStepIdx(0);
       setData(null);
     }
@@ -386,10 +413,10 @@ export function SelectionWalkthrough() {
           .attr("fill", "rgba(245, 158, 11, 0.05)").attr("stroke", stepIdx >= 3 ? COLORS.amber : COLORS.slate)
           .attr("stroke-width", 2).attr("stroke-dasharray", stepIdx >= 3 ? "none" : "4,4");
         g.selectAll("circle.sample").data(data.samples).enter().append("circle")
-          .attr("cx", (d: any) => x(d.x[0])).attr("cy", (d: any) => y(d.x[1]))
-          .attr("r", (d: any) => d.isElite ? 6 : 3.5).attr("fill", (d: any) => stepIdx === 0 ? COLORS.blue : (d.isElite ? COLORS.emerald : COLORS.red))
-          .style("opacity", (d: any) => stepIdx === 1 ? 1 : (stepIdx >= 2 ? (d.isElite ? 1 : 0.1) : 0.6))
-          .style("filter", (d: any) => d.isElite ? `drop-shadow(0 0 10px ${COLORS.emerald})` : "none");
+          .attr("cx", (d: SelectionSample) => x(d.x[0])).attr("cy", (d: SelectionSample) => y(d.x[1]))
+          .attr("r", (d: SelectionSample) => d.isElite ? 6 : 3.5).attr("fill", (d: SelectionSample) => stepIdx === 0 ? COLORS.blue : (d.isElite ? COLORS.emerald : COLORS.red))
+          .style("opacity", (d: SelectionSample) => stepIdx === 1 ? 1 : (stepIdx >= 2 ? (d.isElite ? 1 : 0.1) : 0.6))
+          .style("filter", (d: SelectionSample) => d.isElite ? `drop-shadow(0 0 10px ${COLORS.emerald})` : "none");
         if (stepIdx >= 2) g.append("line").attr("x1", x(data.oldMean[0])).attr("y1", y(data.oldMean[1])).attr("x2", x(solver.mean[0])).attr("y2", y(solver.mean[1])).attr("stroke", "#fff").attr("stroke-width", 2);
       } else {
         g.append("circle").attr("cx", x(solver.mean[0])).attr("cy", y(solver.mean[1])).attr("r", 8).attr("fill", COLORS.amber).style("filter", `drop-shadow(0 0 15px ${COLORS.amber})`);
@@ -508,7 +535,9 @@ export function ComparisonViz() {
         await new Promise(r => setTimeout(r, 50));
       }
     } else {
-      let cur = [...start]; const h = [[...cur]]; const lr = 0.005;
+      const cur = [...start];
+      const h = [[...cur]];
+      const lr = 0.005;
       for (let i = 0; i < 100; i++) {
         const eps = 1e-5;
         const gx = (objective(cur[0] + eps, cur[1]) - objective(cur[0] - eps, cur[1])) / (2 * eps);
@@ -551,8 +580,8 @@ export function ComparisonViz() {
       <div className="flex flex-col lg:flex-row">
         <div className="lg:w-1/3 p-6 md:p-10 border-r border-white/5 bg-white/[0.01]">
           <p className="text-base text-slate-300 leading-relaxed italic mb-10">
-            In a <strong>narrow, rotated valley</strong>, standard Gradient Descent often oscillates wildly because its steps aren't aligned with the curvature. 
-            <span className="text-amber-400 font-bold block mt-4 px-4 py-3 bg-amber-500/5 border border-amber-500/10 rounded-xl not-italic">CMA-ES learns the valley's very shape, stretching its distribution to glide straight to the global minimum.</span>
+            In a <strong>narrow, rotated valley</strong>, standard Gradient Descent often oscillates wildly because its steps aren&apos;t aligned with the curvature. 
+            <span className="text-amber-400 font-bold block mt-4 px-4 py-3 bg-amber-500/5 border border-amber-500/10 rounded-xl not-italic">CMA-ES learns the valley&apos;s very shape, stretching its distribution to glide straight to the global minimum.</span>
           </p>
           <button onClick={run} disabled={isRunning} className="w-full rq-btn-action !py-4 flex items-center justify-center gap-3 group">
             {isRunning ? "Running Analysis..." : "Execute Simulation"}
@@ -606,14 +635,14 @@ export function BenchmarkRunner() {
   const chartRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<keyof typeof BENCHMARKS>("Rastrigin");
   const [dim, setDim] = useState(8);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<BenchmarkPoint[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [currentC, setCurrentC] = useState<number[][]>([]);
 
   const run = useCallback(async () => {
     setIsRunning(true);
     const solver = new ProCMAES(dim, new Array(dim).fill(3), 1.0);
-    const h: any[] = [];
+    const h: BenchmarkPoint[] = [];
     for (let i = 0; i < 100; i++) {
       const samples = solver.sample();
       const fitnesses = samples.map(BENCHMARKS[selected]);
@@ -637,8 +666,8 @@ export function BenchmarkRunner() {
       const y = d3.scaleLog().domain([1e-10, 100]).range([h - 50, 30]);
       svg.append("g").attr("transform", `translate(0, ${h - 50})`).call(d3.axisBottom(x).ticks(5)).attr("color", "#222");
       svg.append("g").attr("transform", `translate(70, 0)`).call(d3.axisLeft(y).ticks(5, "~e")).attr("color", "#222");
-      svg.append("path").datum(results).attr("fill", "none").attr("stroke", COLORS.amber).attr("stroke-width", 3).attr("d", d3.line<any>().x(d => x(d.gen)).y(d => y(Math.max(1e-10, d.best))));
-      svg.append("path").datum(results).attr("fill", "none").attr("stroke", COLORS.purple).attr("stroke-width", 1.5).attr("stroke-dasharray", "4,2").attr("d", d3.line<any>().x(d => x(d.gen)).y(d => y(Math.max(1e-10, d.sigma))));
+      svg.append("path").datum(results).attr("fill", "none").attr("stroke", COLORS.amber).attr("stroke-width", 3).attr("d", d3.line<BenchmarkPoint>().x(d => x(d.gen)).y(d => y(Math.max(1e-10, d.best))));
+      svg.append("path").datum(results).attr("fill", "none").attr("stroke", COLORS.purple).attr("stroke-width", 1.5).attr("stroke-dasharray", "4,2").attr("d", d3.line<BenchmarkPoint>().x(d => x(d.gen)).y(d => y(Math.max(1e-10, d.sigma))));
     };
     render(); window.addEventListener("resize", render);
     return () => window.removeEventListener("resize", render);
@@ -657,7 +686,7 @@ export function BenchmarkRunner() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 bg-white/5 p-2.5 rounded-2xl border border-white/10 w-full md:w-auto md:ml-auto">
-          <select value={selected} onChange={e => setSelected(e.target.value as any)} className="bg-transparent border-none text-[12px] font-black uppercase text-white outline-none px-3 md:px-6 min-w-[9rem]">
+          <select value={selected} onChange={e => setSelected(e.target.value as keyof typeof BENCHMARKS)} className="bg-transparent border-none text-[12px] font-black uppercase text-white outline-none px-3 md:px-6 min-w-[9rem]">
             {Object.keys(BENCHMARKS).map(b => <option key={b} value={b}>{b}</option>)}
           </select>
           <button onClick={run} disabled={isRunning} className="rq-btn-action !shadow-none !py-3.5 !px-4 md:!px-8 w-full sm:w-auto">Execute Optimization</button>
@@ -715,7 +744,7 @@ export function NoiseRobustnessViz() {
   const chartRef = useRef<HTMLDivElement>(null);
   const [noiseLevel, setNoiseLevel] = useState(0.2);
   const [isRunning, setIsRunning] = useState(false);
-  const [history, setHistory] = useState<{gen: number, val: number}[]>([]);
+  const [history, setHistory] = useState<NoisePoint[]>([]);
 
   const objective = useCallback((x: number[]) => {
     const base = x.reduce((a, b) => a + b*b, 0);
@@ -726,7 +755,7 @@ export function NoiseRobustnessViz() {
     setIsRunning(true);
     setHistory([]);
     const solver = new ProCMAES(2, [3, 3], 1.0);
-    const h: any[] = [];
+    const h: NoisePoint[] = [];
     for (let i = 0; i < 50; i++) {
       const samples = solver.sample();
       const fitnesses = samples.map(objective);
@@ -737,7 +766,7 @@ export function NoiseRobustnessViz() {
       await new Promise(r => setTimeout(r, 30));
     }
     setIsRunning(false);
-  }, [noiseLevel, objective]);
+  }, [objective]);
 
   useEffect(() => {
     if (!chartRef.current || history.length === 0) return;
@@ -753,7 +782,7 @@ export function NoiseRobustnessViz() {
       svg.append("g").attr("transform", `translate(0, ${h - 40})`).call(d3.axisBottom(x).ticks(5)).attr("color", "#444");
       svg.append("g").attr("transform", `translate(50, 0)`).call(d3.axisLeft(y).ticks(5, "~e")).attr("color", "#444");
 
-      svg.append("path").datum(history).attr("fill", "none").attr("stroke", COLORS.emerald).attr("stroke-width", 2).attr("d", d3.line<any>().x(d => x(d.gen)).y(d => y(d.val)));
+      svg.append("path").datum(history).attr("fill", "none").attr("stroke", COLORS.emerald).attr("stroke-width", 2).attr("d", d3.line<NoisePoint>().x(d => x(d.gen)).y(d => y(d.val)));
     };
     render();
     window.addEventListener("resize", render);

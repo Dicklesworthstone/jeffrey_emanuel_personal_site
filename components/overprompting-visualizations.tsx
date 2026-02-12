@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useMemo, useLayoutEffect, type ElementRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, 
@@ -134,7 +134,7 @@ const SLICE_LABELS = [
 
 function ManifoldMesh({ level }: { level: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<any>(null);
+  const materialRef = useRef<THREE.Material>(null);
   
   // Define clipping planes
   const planes = useMemo(() => {
@@ -379,7 +379,7 @@ function HologramMesh({ specificity }: { specificity: number }) {
     
     let distortion = 0;
     let opacity = 0.3;
-    let color = new THREE.Color("#f59e0b"); // Default Amber
+    const color = new THREE.Color("#f59e0b"); // Default Amber
     
     if (specificity < 0.3) {
       // Vague State

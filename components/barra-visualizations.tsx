@@ -28,6 +28,18 @@ function deterministicUnit(seed: number) {
   return x - Math.floor(x);
 }
 
+interface HeroFactorLabel {
+  name: string;
+  pos: [number, number, number];
+  color: string;
+}
+
+interface FactorContribution {
+  name: string;
+  val: number;
+  color: string;
+}
+
 // ============================================
 // 1. RISK TOPOGRAPHY (Hero)
 // ============================================
@@ -83,6 +95,13 @@ function ScanningBeam() {
 }
 
 export function FactorHero() {
+  const heroLabels: HeroFactorLabel[] = [
+    { name: "MOMENTUM", pos: [-55, 15, -10], color: COLORS.cyan },
+    { name: "VALUE", pos: [55, -5, 20], color: COLORS.amber },
+    { name: "GROWTH", pos: [10, 25, -30], color: COLORS.emerald },
+    { name: "SIZE", pos: [-35, -20, 45], color: COLORS.purple },
+  ];
+
   return (
     <div className="absolute inset-0 z-0 opacity-60">
       <Canvas camera={{ position: [0, 30, 90], fov: 45 }}>
@@ -92,15 +111,10 @@ export function FactorHero() {
         <ScanningBeam />
         <Float speed={1.5} rotationIntensity={0.4} floatIntensity={0.4}>
            <group position={[0, 10, 0]}>
-              {[
-                { name: "MOMENTUM", pos: [-55, 15, -10], color: COLORS.cyan },
-                { name: "VALUE", pos: [55, -5, 20], color: COLORS.amber },
-                { name: "GROWTH", pos: [10, 25, -30], color: COLORS.emerald },
-                { name: "SIZE", pos: [-35, -20, 45], color: COLORS.purple },
-              ].map((f, i) => (
+              {heroLabels.map((f, i) => (
                 <Text
                   key={i}
-                  position={f.pos as any}
+                  position={f.pos}
                   fontSize={4}
                   color={f.color}
                   anchorX="center"
@@ -137,7 +151,7 @@ function ForensicCore() {
   );
 }
 
-function PrismSplinter({ factor, index }: { factor: any, index: number }) {
+function PrismSplinter({ factor, index }: { factor: FactorContribution; index: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const points = useMemo(() => new Float32Array([0, 0, 0, 15, 0, 0]), []);
   
@@ -355,7 +369,7 @@ export function PodSimulator() {
 // ============================================
 // 4. FACTOR COSMOS (Correlation)
 // ============================================
-function FactorPlanet({ name, color, index, active, onSelect }: { name: string, color: string, index: number, active: boolean, onSelect: any }) {
+function FactorPlanet({ name, color, index, active, onSelect }: { name: string, color: string, index: number, active: boolean, onSelect: () => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const angle = (index / 6) * Math.PI * 2;
   

@@ -13,6 +13,7 @@ import katex from "katex";
 import { RaptorQJargon } from "./raptorq-jargon";
 import { MathTooltip } from "./math-tooltip";
 import { getJargon } from "@/lib/raptorq-jargon";
+import { getScrollMetrics } from "@/lib/utils";
 
 // Dynamic import visualizations (no SSR - they use browser APIs)
 const HeroParticles = dynamic(
@@ -133,10 +134,11 @@ export function RaptorQArticle() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      if (total > 0) setScrollProgress(window.scrollY / total);
+      const { progress } = getScrollMetrics();
+      setScrollProgress(progress);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -144,9 +146,20 @@ export function RaptorQArticle() {
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
+    const readyClass = "rq-reveal-ready";
+    root.classList.add(readyClass);
+
     const targets = root.querySelectorAll(
       ":scope > section:not(:first-child), :scope > article, [data-section]"
     );
+
+    if (typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.classList.add("rq-visible"));
+      return () => {
+        root.classList.remove(readyClass);
+      };
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -162,7 +175,10 @@ export function RaptorQArticle() {
       el.classList.add("rq-fade-section");
       observer.observe(el);
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.classList.remove(readyClass);
+    };
   }, []);
 
   return (

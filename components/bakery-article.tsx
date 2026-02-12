@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Crimson_Pro,
   JetBrains_Mono,
@@ -19,7 +19,7 @@ import {
   Clock
 } from "lucide-react";
 import { calculateReadingTime } from "@/lib/reading-time";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getScrollMetrics } from "@/lib/utils";
 import { BakeryMathTooltip } from "./bakery-math-tooltip";
 
 // Dynamic import visualizations
@@ -103,19 +103,31 @@ export function BakeryArticle() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      if (total > 0) setScrollProgress(window.scrollY / total);
+      const { progress } = getScrollMetrics();
+      setScrollProgress(progress);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
+    const readyClass = "ba-reveal-ready";
+    root.classList.add(readyClass);
+
     const targets = root.querySelectorAll(
       ":scope > section:not(:first-child), :scope > article, [data-section]"
     );
+
+    if (typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.classList.add("ba-visible"));
+      return () => {
+        root.classList.remove(readyClass);
+      };
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -131,7 +143,10 @@ export function BakeryArticle() {
       el.classList.add("ba-fade-section");
       observer.observe(el);
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.classList.remove(readyClass);
+    };
   }, []);
 
   return (
