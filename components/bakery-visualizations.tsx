@@ -553,8 +553,8 @@ export function ProcessNexus() {
                        initial={{ pathLength: 0, opacity: 0 }}
                        animate={{ pathLength: 1, opacity: 0.6 }}
                        x1="300" y1="300"
-                       x2={300 + Math.cos((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2 - angle) * radius}
-                       y2={300 + Math.sin((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2 - angle) * radius}
+                       x2={300 + (Math.cos((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2) * radius) - x}
+                       y2={300 + (Math.sin((targetId / numProcesses) * Math.PI * 2 - Math.PI / 2) * radius) - y}
                        stroke={COLORS.amber}
                        strokeWidth="2"
                        strokeDasharray="8 8"

@@ -160,6 +160,12 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "The center of the search distribution, representing the current best guess for the optimal solution.",
     analogy: "The base camp for the scouts."
   },
+  "mean-shift": {
+    term: "m_new - m_old",
+    short: "Mean Shift",
+    long: "The movement of the distribution center in one generation. It represents the collective discovery of the elite population.",
+    analogy: "The vector from the old base camp to the new one."
+  },
   "sigma-sq": {
     term: "\u03c3\u00b2",
     short: "Variance Scale",

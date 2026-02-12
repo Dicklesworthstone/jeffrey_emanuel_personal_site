@@ -12,7 +12,8 @@ import {
 import { RotateCcw, Activity, Cpu, Box } from "lucide-react";
 import katex from "katex";
 import { CMAESJargon } from "./cmaes-jargon";
-import { CMAESMathTooltip } from "./cmaes-math-tooltip";
+import { MathTooltip } from "./math-tooltip";
+import { getJargon } from "@/lib/cmaes-jargon";
 import { GranularMath } from "./granular-math";
 
 // Dynamic import visualizations (no SSR)
@@ -73,7 +74,7 @@ function M({ t, explanation }: { t: string; explanation?: string }) {
   );
 
   if (explanation) {
-    return <CMAESMathTooltip mathKey={explanation}>{content}</CMAESMathTooltip>;
+    return <MathTooltip term={getJargon(explanation)} variant="orange">{content}</MathTooltip>;
   }
   return content;
 }
@@ -91,7 +92,7 @@ function MBlock({ t, explanation }: { t: string; explanation?: string }) {
   );
 
   if (explanation) {
-    return <CMAESMathTooltip mathKey={explanation}>{content}</CMAESMathTooltip>;
+    return <MathTooltip term={getJargon(explanation)} variant="orange">{content}</MathTooltip>;
   }
   return content;
 }
@@ -104,7 +105,14 @@ function J({
   t: string;
   children?: React.ReactNode;
 }) {
-  return <CMAESJargon term={t}>{children}</CMAESJargon>;
+  const termData = getJargon(t);
+  if (!termData) return <>{children}</>;
+
+  return (
+    <MathTooltip term={termData} variant="orange" mode="text">
+      {children || termData.term}
+    </MathTooltip>
+  );
 }
 
 // Section divider
