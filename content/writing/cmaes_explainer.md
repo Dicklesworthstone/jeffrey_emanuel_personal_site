@@ -5,6 +5,8 @@ excerpt: "An interactive deep dive into the Covariance Matrix Adaptation Evoluti
 category: "Algorithms"
 author: "Jeffrey Emanuel"
 source: "GitHub"
+featured: true
+gradient: "from-amber-500/20 via-orange-500/20 to-red-500/20"
 ---
 
 # My Favorite Black‑Box Optimizer: CMA‑ES
