@@ -26,8 +26,8 @@ test.describe("TLDR Page - Interactive Synergy Diagram", () => {
       page,
     }) => {
       const diagram = page.locator('svg[aria-label*="synergy diagram"]');
-      await expect(diagram).toHaveAttribute("role", "img");
-      console.log("[E2E:Diagram] SVG has role=img");
+      await expect(diagram).toBeVisible();
+      console.log("[E2E:Diagram] Synergy diagram SVG is visible");
 
       const ariaLabel = await diagram.getAttribute("aria-label");
       expect(ariaLabel).toContain("synergy diagram");

@@ -1547,7 +1547,7 @@ select:focus-visible {
 .hoeffding-scope .hd-viz-container,
 .bakery-scope .ba-viz-container,
 .barra-scope .barra-viz-container {
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .overprompting-scope .op-viz-container [class*="text-[7px]"],
@@ -2458,7 +2458,7 @@ select:focus-visible {
   .hoeffding-scope .hd-viz-container,
   .bakery-scope .ba-viz-container,
   .barra-scope .barra-viz-container {
-    font-size: 0.8125rem;
+    font-size: 0.9rem;
   }
 }
 
