@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Minimize2, 
-  ChevronRight, RotateCcw, Layers, Microscope, LayoutTemplate, MousePointer2
+  Minimize2, RotateCcw, Layers, Microscope, LayoutTemplate, MousePointer2
 } from "lucide-react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { 
