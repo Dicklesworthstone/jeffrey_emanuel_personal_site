@@ -6,16 +6,12 @@ import {
   Zap, AlertTriangle, CheckCircle2, Info, Target, Minimize2, Maximize2, 
   ChevronRight, RotateCcw, Layers, Microscope, LayoutTemplate 
 } from "lucide-react";
-import { Canvas, useFrame, extend, ReactThreeFiber } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { 
   Float, PerspectiveCamera, Stars, MeshTransmissionMaterial, 
   Text, Html, Trail, CameraControls, Environment, Grid
 } from "@react-three/drei";
 import * as THREE from "three";
-import { geometry } from "maath";
-
-// Extend maath geometry for rounded box if needed, or use standard
-extend(geometry);
 
 // ============================================================
 // SHARED UTILS & SHADERS
@@ -605,7 +601,7 @@ function NodeNetwork({ mode }: { mode: "plan" | "execute" }) {
               />
             </mesh>
             {/* Connection Line */}
-            <Line start={new THREE.Vector3(...(pos as [number, number, number]))} end={new THREE.Vector3(0,0,0)} opacity={mode === "plan" ? 0.2 : 0} />
+            <ConnectionLine start={new THREE.Vector3(...(pos as [number, number, number]))} end={new THREE.Vector3(0,0,0)} opacity={mode === "plan" ? 0.2 : 0} />
           </group>
         ))}
       </group>
@@ -613,18 +609,18 @@ function NodeNetwork({ mode }: { mode: "plan" | "execute" }) {
   );
 }
 
-function Line({ start, end, opacity }: { start: THREE.Vector3, end: THREE.Vector3, opacity: number }) {
-  const ref = useRef<THREE.Line>(null);
+function ConnectionLine({ start, end, opacity }: { start: THREE.Vector3, end: THREE.Vector3, opacity: number }) {
+  const lineRef = useRef<THREE.Line>(null);
   useLayoutEffect(() => {
-    if (ref.current) {
-      ref.current.geometry.setFromPoints([start, end]);
+    if (lineRef.current) {
+      lineRef.current.geometry.setFromPoints([start, end]);
     }
   }, [start, end]);
   return (
-    <line ref={ref}>
+    <primitive object={new THREE.Line()} ref={lineRef}>
       <bufferGeometry />
       <lineBasicMaterial color="white" transparent opacity={opacity} />
-    </line>
+    </primitive>
   );
 }
 

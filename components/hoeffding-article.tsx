@@ -281,7 +281,7 @@ export function HoeffdingArticle() {
                     </div>
                     <span className="text-white font-bold text-sm">Computational Cost</span>
                   </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">Evaluating quadruples ($n \text{ choose } 4$) is expensive. For $N=5{,}000$, we evaluate ~6.2 billion combinations.</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">Evaluating quadruples (<em>n</em> choose 4) is expensive. For <em>N</em>=5,000, we evaluate ~6.2 billion combinations.</p>
                </div>
             </div>
           </div>

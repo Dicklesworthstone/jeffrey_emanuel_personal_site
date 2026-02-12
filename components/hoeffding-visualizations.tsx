@@ -64,6 +64,23 @@ function calculateHoeffdingD(x: number[], y: number[]) {
   return 30 * ((n - 2) * (n - 3) * D1 + D2 - 2 * (n - 2) * D3) / (n * (n - 1) * (n - 2) * (n - 3) * (n - 4));
 }
 
+function pearsonCorrelation(x: number[], y: number[]): number {
+  const n = x.length;
+  if (n === 0) return 0;
+  const meanX = d3.mean(x) || 0;
+  const meanY = d3.mean(y) || 0;
+  let num = 0, denX = 0, denY = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = x[i] - meanX;
+    const dy = y[i] - meanY;
+    num += dx * dy;
+    denX += dx * dx;
+    denY += dy * dy;
+  }
+  const den = Math.sqrt(denX * denY);
+  return den === 0 ? 0 : num / den;
+}
+
 // ============================================
 // DATA GENERATORS
 // ============================================
@@ -280,7 +297,7 @@ export function DependencyLab() {
     const ys = data.map(d => d.y);
     return {
       hoeffding: calculateHoeffdingD(xs, ys),
-      pearson: d3.deviation(xs) ? d3.corr(xs, ys) || 0 : 0
+      pearson: d3.deviation(xs) ? pearsonCorrelation(xs, ys) : 0
     };
   }, [data]);
 

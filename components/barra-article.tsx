@@ -10,7 +10,7 @@ import {
   Bricolage_Grotesque,
 } from "next/font/google";
 import katex from "katex";
-import { Briefcase, Shield, BarChart3, TrendingUp, Layers, Zap, AlertCircle } from "lucide-react";
+import { Briefcase, Shield, BarChart3, TrendingUp, TrendingDown, Layers, Zap, AlertCircle } from "lucide-react";
 import { BarraJargon } from "./barra-jargon";
 
 // Dynamic import visualizations (no SSR - they use browser APIs)

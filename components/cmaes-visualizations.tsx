@@ -223,7 +223,7 @@ class ProCMAES {
 
   eigen(): [number[][], number[]] {
     const n = this.dim;
-    const B = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+    const B: number[][] = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
     const D_mat = this.C.map(row => [...row]);
     const maxIters = 100;
     const eps = 1e-15;
@@ -347,7 +347,7 @@ function DistributionCloud() {
       </mesh>
       <points ref={pointsRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         </bufferGeometry>
         <pointsMaterial
           size={0.1}
@@ -783,8 +783,8 @@ export function BenchmarkRunner() {
           <div className="bg-black/40 border border-white/5 rounded-xl p-4">
             <div className="text-[9px] uppercase tracking-widest font-black text-slate-500 mb-3">Covariance Snippet (Top 3x3)</div>
             <div className="grid grid-cols-3 gap-1.5">
-              {(currentC.length > 0 ? currentC : Array(3).fill(new Array(3).fill(0))).map((row, i) => 
-                row.map((val, j) => (
+              {(currentC.length > 0 ? currentC : [[0,0,0],[0,0,0],[0,0,0]]).map((row, i) =>
+                row.map((val: number, j) => (
                   <div key={`${i}-${j}`} className={`h-8 flex items-center justify-center font-mono text-[8px] rounded-lg transition-all duration-300 ${Math.abs(val) > 0.1 ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-white/5 text-slate-600 border border-transparent"}`}>
                     {val.toFixed(2)}
                   </div>
