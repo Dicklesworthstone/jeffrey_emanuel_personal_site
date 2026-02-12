@@ -40,14 +40,14 @@ export function RaptorQMathTooltip({ mathKey, children, className }: RaptorQMath
       tooltipContent={<MathTooltipContent math={mathData} />}
       sheetContent={<MathSheetContent math={mathData} />}
     >
-      <div className="relative">
+      <span className="relative inline-block">
         {children}
-        <div className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
-          <div className="flex h-3 w-3 items-center justify-center rounded-full bg-purple-500 shadow-lg">
+        <span className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
+          <span className="flex h-3 w-3 items-center justify-center rounded-full bg-purple-500 shadow-lg">
             <Sigma className="h-2 w-2 text-white" />
-          </div>
-        </div>
-      </div>
+          </span>
+        </span>
+      </span>
     </TooltipShell>
   );
 }

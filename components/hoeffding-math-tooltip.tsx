@@ -41,7 +41,7 @@ export function HoeffdingMathTooltip({ mathKey, children, className, color, simp
       tooltipContent={<MathTooltipContent math={mathData} activeColor={activeColor} />}
       sheetContent={<MathSheetContent math={mathData} activeColor={activeColor} />}
     >
-      <div className="relative inline-flex items-center gap-1.5 px-1">
+      <span className="relative inline-flex items-center gap-1.5 px-1">
         <span 
           className="transition-all duration-300 font-bold"
           style={{ 
@@ -58,11 +58,11 @@ export function HoeffdingMathTooltip({ mathKey, children, className, color, simp
           />
         )}
         {/* Animated underline */}
-        <div 
+        <span 
           className="absolute -bottom-1 left-0 h-0.5 w-full scale-x-0 group-hover/math:scale-x-100 transition-transform duration-500 origin-left"
           style={{ backgroundColor: activeColor }}
         />
-      </div>
+      </span>
     </TooltipShell>
   );
 }

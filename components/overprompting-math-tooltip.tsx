@@ -40,14 +40,14 @@ export function OverpromptingMathTooltip({ mathKey, children, className }: Overp
       tooltipContent={<MathTooltipContent math={mathData} />}
       sheetContent={<MathSheetContent math={mathData} />}
     >
-      <div className="relative">
+      <span className="relative inline-block">
         {children}
-        <div className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
-          <div className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 shadow-lg">
+        <span className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
+          <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 shadow-lg">
             <Sigma className="h-2 w-2 text-white" />
-          </div>
-        </div>
-      </div>
+          </span>
+        </span>
+      </span>
     </TooltipShell>
   );
 }

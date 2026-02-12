@@ -45,17 +45,17 @@ export function BakeryMathTooltip({ mathKey, children, className, theme = "amber
       tooltipContent={<MathTooltipContent math={mathData} theme={theme} />}
       sheetContent={<MathSheetContent math={mathData} theme={theme} />}
     >
-      <div className="relative">
+      <span className="relative inline-block">
         {children}
-        <div className="absolute -right-2 -top-2 opacity-0 group-hover/math:opacity-100 transition-opacity">
-          <div className={cn(
+        <span className="absolute -right-2 -top-2 opacity-0 group-hover/math:opacity-100 transition-opacity">
+          <span className={cn(
             "flex h-4 w-4 items-center justify-center rounded-full shadow-lg",
             theme === "amber" ? "bg-amber-500" : "bg-cyan-500"
           )}>
             <Info className="h-2.5 w-2.5 text-black" />
-          </div>
-        </div>
-      </div>
+          </span>
+        </span>
+      </span>
     </TooltipShell>
   );
 }
