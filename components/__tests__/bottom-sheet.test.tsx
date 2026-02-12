@@ -66,7 +66,9 @@ describe("BottomSheet", () => {
     it("applies maxHeight style", () => {
       render(<BottomSheet {...defaultProps} maxHeight={75} />);
       const dialog = screen.getByTestId("bottom-sheet");
-      expect(dialog).toHaveStyle({ maxHeight: "75vh" });
+      expect(dialog).toHaveStyle({
+        maxHeight: "min(75dvh, var(--mobile-viewport-height, 75vh))",
+      });
     });
 
     it("applies contentClassName to content area", () => {

@@ -100,7 +100,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   return (
     <section
       data-section
-      className="relative min-h-[95vh] w-full overflow-hidden bg-[#020617]"
+      className="relative min-h-[min(95dvh,95vh)] w-full overflow-hidden bg-[#020617]"
     >
       <GlowOrbits />
       

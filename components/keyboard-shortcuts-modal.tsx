@@ -123,7 +123,7 @@ export default function KeyboardShortcutsModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-4 top-[10%] z-[101] mx-auto max-w-lg sm:inset-x-auto"
+            className="fixed inset-x-4 top-[max(4rem,7dvh)] z-[101] mx-auto max-w-lg sm:inset-x-auto"
             role="dialog"
             aria-modal="true"
             aria-labelledby="shortcuts-title"

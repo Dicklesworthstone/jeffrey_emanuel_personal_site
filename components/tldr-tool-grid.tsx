@@ -443,10 +443,10 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
       <AnimatePresence>
         {compareMode && compareIds.size > 0 && (
           <motion.div
-            initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+            initial={reducedMotion ? {} : { opacity: 0, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reducedMotion ? {} : { opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 rounded-full border border-violet-500/30 bg-slate-900/95 px-5 py-3 shadow-2xl shadow-violet-500/10 backdrop-blur-lg"
+            className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 rounded-full border border-violet-500/30 bg-slate-900/95 px-5 py-3 shadow-2xl shadow-violet-500/10 backdrop-blur-lg"
           >
             <span className="text-sm font-medium text-white">
               {compareIds.size} of 3 selected

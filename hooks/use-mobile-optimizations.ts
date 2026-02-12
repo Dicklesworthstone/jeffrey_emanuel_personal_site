@@ -295,29 +295,48 @@ export function useMobileOptimizations() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (!isMobile) return;
 
+    const updateViewportMetrics = () => {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const viewportWidth = window.visualViewport?.width || window.innerWidth;
+      document.documentElement.style.setProperty("--mobile-viewport-height", `${Math.round(viewportHeight)}px`);
+      document.documentElement.style.setProperty("--mobile-viewport-width", `${Math.round(viewportWidth)}px`);
+    };
+
     // NOTE: Removed preventBounce touchmove handler as it was blocking scroll
     // CSS overscroll-behavior-y: none on body already handles iOS bounce
+
+    updateViewportMetrics();
+
+    const handleViewportResize = () => {
+      updateViewportMetrics();
+    };
 
     // Add orientation change listener for better UX
     let orientationTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleOrientationChange = () => {
-      // Trigger resize to recalculate viewport and fix any layout issues
-      // Small delay to ensure orientation change is complete
       if (orientationTimeout) clearTimeout(orientationTimeout);
       orientationTimeout = setTimeout(() => {
-        window.dispatchEvent(new Event("resize"));
+        updateViewportMetrics();
       }, 100);
     };
 
+    window.addEventListener("resize", handleViewportResize);
+    window.visualViewport?.addEventListener("resize", handleViewportResize);
+    window.visualViewport?.addEventListener("scroll", handleViewportResize);
     window.addEventListener("orientationchange", handleOrientationChange);
 
     // Cleanup
     return () => {
+      window.removeEventListener("resize", handleViewportResize);
+      window.visualViewport?.removeEventListener("resize", handleViewportResize);
+      window.visualViewport?.removeEventListener("scroll", handleViewportResize);
       window.removeEventListener("orientationchange", handleOrientationChange);
       if (orientationTimeout) {
         clearTimeout(orientationTimeout);
         orientationTimeout = null;
       }
+      document.documentElement.style.removeProperty("--mobile-viewport-height");
+      document.documentElement.style.removeProperty("--mobile-viewport-width");
     };
   }, []);
 }

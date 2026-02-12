@@ -24,7 +24,7 @@ function HeroSection() {
   return (
     <section
       ref={ref}
-      className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 py-20"
+      className="relative flex min-h-[min(90dvh,90vh)] flex-col items-center justify-center overflow-hidden px-4 py-20"
       aria-label="The $600B Drop"
     >
       {/* Animated gradient background */}

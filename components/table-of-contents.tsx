@@ -105,7 +105,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
   return (
     <>
       {/* Mobile/Tablet: Floating toggle button */}
-      <div className="fixed bottom-24 right-4 z-40 xl:hidden">
+      <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 z-40 xl:hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
@@ -147,7 +147,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="fixed bottom-40 right-4 z-40 w-72 rounded-2xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl xl:hidden"
+              className="fixed bottom-[calc(3rem+env(safe-area-inset-bottom))] right-4 z-40 w-72 rounded-2xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl xl:hidden"
             >
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
@@ -160,7 +160,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <nav className="max-h-[50vh] overflow-y-auto">
+              <nav className="max-h-[min(50dvh,var(--mobile-viewport-height,50vh))] overflow-y-auto">
                 <ul className="space-y-1">
                   {headings.map((heading) => (
                     <li key={heading.id}>
@@ -186,7 +186,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
       </AnimatePresence>
 
       {/* Desktop: Sidebar TOC */}
-      <aside className="hidden xl:block fixed top-32 right-8 w-64 max-h-[calc(100vh-160px)] overflow-y-auto">
+      <aside className="hidden xl:block fixed top-32 right-8 w-64 max-h-[min(calc(100vh-160px),calc(100dvh-160px))] overflow-y-auto">
         <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5 backdrop-blur-md">
           <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
             <List className="h-4 w-4" />

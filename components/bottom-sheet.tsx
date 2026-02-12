@@ -134,6 +134,9 @@ export default function BottomSheet({
     }
   }, [closeOnBackdrop, onClose]);
 
+  const sheetMaxHeight = `min(${maxHeight}dvh, var(--mobile-viewport-height, ${maxHeight}vh))`;
+  const contentMaxHeight = `calc(${sheetMaxHeight} - ${title ? 80 : 60}px)`;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -168,7 +171,7 @@ export default function BottomSheet({
             onDragEnd={handleDragEnd}
             onAnimationComplete={() => onOpenComplete?.()}
             className="fixed inset-x-0 bottom-0 z-50 overflow-hidden rounded-t-3xl border-t border-slate-700/80 bg-slate-950 shadow-2xl md:hidden flex flex-col"
-            style={{ maxHeight: `${maxHeight}vh` }}
+            style={{ maxHeight: sheetMaxHeight }}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? titleId : undefined}
@@ -222,7 +225,7 @@ export default function BottomSheet({
                 contentClassName
               )}
               style={{
-                maxHeight: `calc(${maxHeight}vh - ${title ? 80 : 60}px)`,
+                maxHeight: contentMaxHeight,
               }}
               data-testid="sheet-content"
             >
