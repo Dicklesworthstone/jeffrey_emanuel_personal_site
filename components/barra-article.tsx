@@ -157,7 +157,7 @@ export function BarraArticle() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
-          <div className="text-center pt-32 relative z-20">
+          <div className="text-center pt-48 md:pt-32 relative z-20">
             <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-emerald-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               Quantitative Finance / Risk Architecture
@@ -170,7 +170,7 @@ export function BarraArticle() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-12 font-light">
-              An insider&rsquo;s look at how &ldquo;smart&rdquo; risk models like Barra define the multi-manager hedge fund industry&mdash;and the hidden risks they create.
+              An insider&rsquo;s look at how &ldquo;smart&rdquo; risk models like Barra define the multi-manager hedge fund industry, and the hidden risks they create.
             </p>
           </div>
         </EC>
@@ -336,7 +336,7 @@ export function BarraArticle() {
           <PodSimulator />
 
           <p className="mt-12">
-            A 5% gross loss on 6x leverage is a 30% loss on LP capital. This is why firms are infamous for the <strong>&ldquo;shoulder tap&rdquo;</strong>&mdash;slashing a pod&rsquo;s capital overnight during a drawdown.
+            A 5% gross loss on 6x leverage is a 30% loss on LP capital. This is why firms are infamous for the <strong>&ldquo;shoulder tap,&rdquo;</strong> slashing a pod&rsquo;s capital overnight during a drawdown.
           </p>
           <div className="barra-insight-card group my-12">
              <h4 className="text-white font-bold mb-4 flex items-center gap-3">

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { HelpCircle } from "lucide-react";
+import { Info, HelpCircle } from "lucide-react";
+import { TooltipShell } from "./raptorq-tooltip-shell";
+import { cn } from "@/lib/utils";
 
 const JARGON: Record<string, { title: string; def: string }> = {
   "alpha": {
@@ -60,44 +60,73 @@ const JARGON: Record<string, { title: string; def: string }> = {
   "size": {
     title: "Size Factor",
     def: "The observation that smaller companies tend to behave differently than mega-caps, often captured via the log of market capitalization."
+  },
+  "volatility": {
+    title: "Volatility",
+    def: "The degree of variation of a trading price series over time as measured by the standard deviation of returns."
+  },
+  "vol": {
+    title: "Volatility",
+    def: "The degree of variation of a trading price series over time as measured by the standard deviation of returns."
   }
 };
 
 export function BarraJargon({ term, children }: { term: string; children?: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
   const info = JARGON[term.toLowerCase()];
 
   if (!info) return <>{children || term}</>;
 
   return (
-    <span className="relative inline-block group">
-      <button
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
-        className="underline decoration-emerald-500/30 decoration-2 underline-offset-4 cursor-help hover:text-emerald-400 transition-colors"
-      >
-        {children || term}
-      </button>
+    <TooltipShell
+      title={info.title}
+      ariaLabel={`Explain term: ${info.title}`}
+      className={cn(
+        "relative inline-block cursor-help transition-all duration-200 group/jargon",
+        "underline decoration-emerald-500/30 decoration-2 underline-offset-4 rounded-md hover:text-emerald-400"
+      )}
+      tooltipContent={<JargonTooltipContent info={info} />}
+      sheetContent={<JargonSheetContent info={info} />}
+    >
+      {children || term}
+    </TooltipShell>
+  );
+}
+
+function JargonTooltipContent({ info }: { info: any }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-400/20 text-emerald-400">
+          <HelpCircle className="h-3.5 w-3.5" />
+        </div>
+        <span className="font-bold text-white tracking-tight uppercase text-[10px]">{info.title}</span>
+      </div>
+      <p className="text-xs leading-relaxed text-slate-300 font-serif italic">
+        {info.def}
+      </p>
+    </div>
+  );
+}
+
+function JargonSheetContent({ info }: { info: any }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400/20 to-cyan-500/20 shadow-xl border border-emerald-500/20">
+          <Info className="h-7 w-7 text-emerald-400" />
+        </div>
+        <div>
+          <h3 className="text-2xl font-black text-white tracking-tight uppercase">{info.title}</h3>
+          <p className="text-xs font-black text-emerald-400 uppercase tracking-[0.2em] mt-1">Financial Glossary</p>
+        </div>
+      </div>
       
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 5, scale: 0.95 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-4 bg-slate-900 border border-emerald-500/20 rounded-2xl shadow-2xl z-50 pointer-events-none backdrop-blur-xl"
-          >
-            <div className="flex items-center gap-2 mb-2 text-emerald-400">
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-black uppercase tracking-widest">{info.title}</span>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed font-serif italic">
-              {info.def}
-            </p>
-            <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-900" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </span>
+      <div className="space-y-4">
+        <div className="p-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 shadow-inner">
+          <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-3">Definition</h4>
+          <p className="text-lg leading-relaxed text-slate-200 font-serif italic">{info.def}</p>
+        </div>
+      </div>
+    </div>
   );
 }

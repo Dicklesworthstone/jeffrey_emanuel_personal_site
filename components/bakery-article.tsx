@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { calculateReadingTime } from "@/lib/reading-time";
 import { formatDate } from "@/lib/utils";
+import { BakeryMathTooltip } from "./bakery-math-tooltip";
 
 // Dynamic import visualizations
 const BakeryHero = dynamic(
@@ -68,6 +69,13 @@ function EC({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
+}
+
+/**
+ * Shorthand for math/jargon tooltips
+ */
+function T({ k, children, theme = "amber" }: { k: string; children: React.ReactNode; theme?: "amber" | "cyan" }) {
+  return <BakeryMathTooltip mathKey={k} theme={theme}>{children}</BakeryMathTooltip>;
 }
 
 export function BakeryArticle() {
@@ -128,6 +136,8 @@ export function BakeryArticle() {
   return (
     <div
       ref={articleRef}
+      role="main"
+      id="main-content"
       className={`bakery-scope ba-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -137,14 +147,14 @@ export function BakeryArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
+      <section data-section="hero" className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
         <div className="absolute inset-0 z-0">
           <BakeryHero />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
-          <div className="text-center pt-32 relative z-20">
+          <div className="text-center pt-56 md:pt-40 relative z-20">
             <div className="inline-flex flex-wrap items-center justify-center gap-4 mb-10 md:mb-12">
                <div className="inline-flex items-center gap-3 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
                  <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
@@ -159,15 +169,14 @@ export function BakeryArticle() {
                </div>
             </div>
 
-            <h1 className="ba-display-title mb-6 text-white">
-              The Bakery
-              <br />
+            <h1 className="ba-display-title mb-6 text-white text-balance">
+              The Bakery{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">
                 Algorithm.
               </span>
             </h1>
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-12 font-light">
-              Mutual exclusion without atomic hardware primitives. A masterclass in 
+              <T k="mutual-exclusion" theme="cyan">Mutual exclusion</T> without atomic hardware primitives. A masterclass in 
               <span className="text-white font-medium italic"> fair concurrency </span> 
               designed by the pioneer of distributed computing.
             </p>
@@ -178,7 +187,7 @@ export function BakeryArticle() {
           className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
           style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
@@ -186,12 +195,12 @@ export function BakeryArticle() {
       </section>
 
       {/* ========== INTRO ========== */}
-      <article>
+      <article data-section="intro">
         <EC>
           <p className="ba-drop-cap">
             The Bakery Algorithm was invented by Leslie Lamport in 1974. 
             It&rsquo;s a locking mechanism used in concurrent programming to prevent 
-            multiple processes from entering their critical sections simultaneously, 
+            multiple processes from entering their <T k="critical-section">critical sections</T> simultaneously, 
             which could cause data corruption or inconsistencies.
           </p>
           <p>
@@ -206,7 +215,7 @@ export function BakeryArticle() {
             without requiring any special atomic hardware instructions like 
             <code>Compare-and-Swap</code> or <code>Test-and-Set</code>. 
             It assumes nothing more than simple reads and writes to memory, 
-            even when those operations themselves are not atomic.
+            even when those operations themselves are <T k="non-atomicity" theme="cyan">not atomic</T>.
           </p>
 
           <div className="ba-insight-card group">
@@ -215,11 +224,11 @@ export function BakeryArticle() {
                 <ShieldCheck className="w-8 h-8 text-amber-400" />
                 The First Correct Solution
               </h3>
-              <p className="text-slate-400 text-base md:text-lg mb-0 leading-relaxed">
+              <p className="text-slate-400 text-base md:text-lg mb-0 leading-relaxed font-serif italic">
                 In the early 1970s, the <strong>Mutual Exclusion Problem</strong> was 
                 THE foundational challenge in concurrency research. While others 
                 proposed solutions that relied on hardware tricks, Lamport proved 
-                it could be solved through pure logic. The Bakery Algorithm was the 
+                it could be <T k="non-atomicity">solved through pure logic</T>. The Bakery Algorithm was the 
                 first correct published solution that didn&rsquo;t assume atomic 
                 hardware primitives.
               </p>
@@ -231,7 +240,7 @@ export function BakeryArticle() {
       <Divider />
 
       {/* ========== HOW IT WORKS ========== */}
-      <section>
+      <section data-section="how-it-works">
         <EC>
           <h2 className="ba-section-title mb-8 mt-16 text-white">
             How It Works
@@ -241,7 +250,7 @@ export function BakeryArticle() {
             wishes to access a shared resource:
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-12 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-12 mb-16 items-stretch">
             {[
               {
                 title: "Number Assignment",
@@ -264,14 +273,14 @@ export function BakeryArticle() {
                 text: "After finishing, the process sets its number to zero, allowing the next person in line to proceed."
               }
             ].map((item, i) => (
-              <div key={i} className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-amber-500/30 group">
-                <div className="mb-4 p-3 bg-white/5 rounded-xl w-fit group-hover:bg-amber-500/10 transition-colors">
+              <div key={i} className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-amber-500/30 group flex flex-col h-full">
+                <div className="mb-4 p-3 bg-white/5 rounded-xl w-fit group-hover:bg-amber-500/10 transition-colors shrink-0">
                   {item.icon}
                 </div>
-                <h4 className="text-white font-bold mb-3 text-lg md:text-xl group-hover:text-amber-400 transition-colors">
+                <h4 className="text-white font-bold mb-3 text-lg md:text-xl group-hover:text-amber-400 transition-colors shrink-0">
                   {item.title}
                 </h4>
-                <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light">
+                <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light flex-1">
                   {item.text}
                 </p>
               </div>
@@ -283,7 +292,7 @@ export function BakeryArticle() {
       <Divider />
 
       {/* ========== TIE BREAKING ========== */}
-      <section>
+      <section data-section="tie-breaker">
         <EC>
           <h2 className="ba-section-title mb-8 mt-16 text-white">
             The Tie-Breaker
@@ -295,7 +304,7 @@ export function BakeryArticle() {
             the current max, they might both take number 6.
           </p>
           <p>
-            Lamport solves this by introducing a <strong>total ordering</strong> 
+            Lamport solves this by introducing a <T k="total-ordering" theme="cyan">total ordering</T> 
             using the process IDs. If numbers are equal, the lower ID wins. 
             This ensures that no two processes ever have the same priority.
           </p>
@@ -307,7 +316,7 @@ export function BakeryArticle() {
       <Divider />
 
       {/* ========== LIVE DEMO ========== */}
-      <section>
+      <section data-section="viz-nexus">
         <EC>
           <h2 className="ba-section-title mb-8 mt-16 text-white">
             The Process Nexus
@@ -327,7 +336,7 @@ export function BakeryArticle() {
             indefinitely. Because numbers are assigned sequentially, every 
             process that enters the queue is guaranteed to reach the front 
             in a finite number of steps. This property is known as 
-            <strong>freedom from starvation</strong>.
+            <T k="freedom-from-starvation">freedom from starvation</T>.
           </p>
         </EC>
       </section>
@@ -335,7 +344,7 @@ export function BakeryArticle() {
       <Divider />
 
       {/* ========== NON-ATOMICITY ========== */}
-      <section>
+      <section data-section="atomicity">
         <EC>
           <h2 className="ba-section-title mb-8 mt-16 text-white">
             The Magic of Non-Atomicity
@@ -359,28 +368,28 @@ export function BakeryArticle() {
             In most synchronization algorithms, updating a flag or counter 
             must be atomic. If one process is halfway through writing a 
             value when another process reads it, the second process might 
-            see a &quot;torn&quot; or garbage value, leading to a crash 
+            see a <T k="non-atomicity" theme="cyan">&quot;torn&quot; or garbage value</T>, leading to a crash 
             or a security breach.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-             <div className="p-6 bg-rose-500/5 border border-rose-500/10 rounded-2xl">
-                <h4 className="text-rose-400 font-bold mb-3 flex items-center gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12 items-stretch">
+             <div className="p-6 bg-rose-500/5 border border-rose-500/10 rounded-2xl flex flex-col h-full group hover:bg-rose-500/10 transition-colors">
+                <h4 className="text-rose-400 font-bold mb-3 flex items-center gap-2 shrink-0">
                    <AlertTriangle className="w-4 h-4" />
                    Traditional Risk
                 </h4>
-                <p className="text-sm text-slate-400 leading-relaxed">
+                <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                    Relying on atomicity means if the hardware fails to lock 
                    the bus during a write, the entire mutual exclusion 
                    guarantee collapses.
                 </p>
              </div>
-             <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                <h4 className="text-emerald-400 font-bold mb-3 flex items-center gap-2">
+             <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex flex-col h-full group hover:bg-emerald-500/10 transition-colors">
+                <h4 className="text-emerald-400 font-bold mb-3 flex items-center gap-2 shrink-0">
                    <ShieldCheck className="w-4 h-4" />
                    Bakery Resilience
                 </h4>
-                <p className="text-sm text-slate-400 leading-relaxed">
+                <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                    Because the algorithm uses a loop to check other processes, 
                    an inconsistent view only results in a process waiting 
                    slightly longer&mdash;it never lets two processes into the 
@@ -394,42 +403,50 @@ export function BakeryArticle() {
       <Divider />
 
       {/* ========== THE CODE ========== */}
-      <section>
+      <section data-section="code">
         <EC>
           <h2 className="ba-section-title mb-8 mt-16 text-white">
             The Implementation
           </h2>
           <p>
-            Here is the core logic of the algorithm in TypeScript. While 
-            modern languages provide higher-level primitives, understanding 
-            the Bakery logic is essential for anyone interested in how 
-            distributed systems actually reach consensus.
+            Here is the core logic of the algorithm in TypeScript. Hover over the colorized 
+            lines to see the deep logic behind each step.
           </p>
 
-          <div className="bg-black/50 border border-white/5 rounded-2xl p-4 md:p-8 my-12 font-mono text-sm overflow-x-auto">
-            <pre className="text-slate-300 leading-relaxed">
+          <div className="bg-[#08080a] border border-white/5 rounded-[2rem] p-6 md:p-10 my-12 font-mono text-sm overflow-x-auto shadow-2xl relative">
+            <pre className="text-slate-400 leading-relaxed">
 {`class BakeryLock {
   entering: boolean[];
   tickets: number[];
 
   lock(i: number) {
     // 1. Take a ticket
-    this.entering[i] = true;
-    this.tickets[i] = Math.max(...this.tickets) + 1;
-    this.entering[i] = false;
+    `}
+<T k="choosing-array" theme="cyan"><span className="text-emerald-400 hover:text-emerald-300 transition-colors cursor-help">this.entering[i] = true;</span></T>
+{`
+    `}
+<T k="max-plus-one"><span className="text-amber-400 hover:text-amber-300 transition-colors cursor-help">this.tickets[i] = Math.max(...this.tickets) + 1;</span></T>
+{`
+    `}
+<span className="text-emerald-400">this.entering[i] = false;</span>
+{`
 
     // 2. Wait for your turn
     for (let j = 0; j < this.numProcesses; j++) {
       // Wait while process j is picking its ticket
-      while (this.entering[j]) { /* busy wait */ }
+      `}
+<T k="wait-loop-1" theme="cyan"><span className="text-blue-400 hover:text-blue-300 transition-colors cursor-help">while (this.entering[j]) { /* busy wait */ }</span></T>
+{`
 
-      // Wait while process j has a smaller ticket,
-      // or same ticket but smaller process ID
-      while (
-        this.tickets[j] !== 0 && 
-        (this.tickets[j] < this.tickets[i] || 
-        (this.tickets[j] === this.tickets[i] && j < i))
-      ) { 
+      // Wait while process j has a higher priority
+      <T k="wait-loop-2">
+        <span className="text-rose-400 hover:text-rose-300 transition-colors cursor-help">while (this.tickets[j] !== 0 &&</span>
+      </T>
+      {" "}
+      <T k="lexicographical-order" theme="cyan">
+        <span className="text-orange-400 hover:text-orange-300 transition-colors cursor-help">(this.tickets[j], j) < (this.tickets[i], i)</span>
+      </T>
+      {`) { 
         /* busy wait */ 
       }
     }
@@ -445,7 +462,7 @@ export function BakeryArticle() {
       </section>
 
       {/* ========== KEY TAKEAWAYS ========== */}
-      <section className="pb-24">
+      <section data-section="takeaways" className="pb-24">
         <EC>
           <div className="rounded-3xl p-8 md:p-12 border border-white/10 bg-white/[0.02] relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5">

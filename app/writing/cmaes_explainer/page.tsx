@@ -5,10 +5,10 @@ import SiteFooter from "@/components/site-footer";
 
 export const metadata: Metadata = {
   title: "The Incredible Magic of CMA-ES | Jeffrey Emanuel",
-  description: "An interactive deep dive into the Covariance Matrix Adaptation Evolution Strategy—the gold standard for black-box optimization.",
+  description: "A visual, interactive explanation of CMA-ES, the gold standard for black-box optimization.",
   openGraph: {
     title: "The Incredible Magic of CMA-ES",
-    description: "An interactive deep dive into the Covariance Matrix Adaptation Evolution Strategy.",
+    description: "A visual, interactive explanation of CMA-ES for black-box optimization.",
     type: "article",
     url: "https://www.jeffreyemanuel.com/writing/cmaes_explainer",
     images: [

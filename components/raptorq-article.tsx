@@ -107,7 +107,7 @@ function J({
 
 // Section divider
 function Divider() {
-  return <div className="w-full h-px my-12 md:my-16 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />;
+  return <div data-section className="w-full h-px my-12 md:my-16 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />;
 }
 
 // Editorial container
@@ -137,7 +137,7 @@ export function RaptorQArticle() {
     const root = articleRef.current;
     if (!root) return;
     const targets = root.querySelectorAll(
-      ":scope > section:not(:first-child), :scope > article"
+      ":scope > section:not(:first-child), :scope > article, [data-section]"
     );
     const observer = new IntersectionObserver(
       (entries) => {
@@ -160,6 +160,8 @@ export function RaptorQArticle() {
   return (
     <div
       ref={articleRef}
+      role="main"
+      id="main-content"
       className={`raptorq-scope rq-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -170,17 +172,17 @@ export function RaptorQArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
+      <section data-section="hero" className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
         <HeroParticles />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
-          <div className="text-center pt-32 relative z-20">
+          <div className="text-center pt-48 md:pt-32 relative z-20">
             <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
               Protocol Intelligence / RFC 6330
             </div>
-            <h1 className="rq-display-title mb-6 text-white">
+            <h1 className="rq-display-title mb-6 text-white text-balance">
               The Black Magic of
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 drop-shadow-[0_0_30px_rgba(34,211,238,0.3)]">
@@ -200,7 +202,7 @@ export function RaptorQArticle() {
           className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
           style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
@@ -208,7 +210,7 @@ export function RaptorQArticle() {
       </section>
 
       {/* ========== INTRO ========== */}
-      <article>
+      <article data-section="intro">
         <EC>
           <p className="rq-drop-cap">
             I have to admit that I find the existence of{" "}
@@ -251,7 +253,7 @@ export function RaptorQArticle() {
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">
                 How Good Is It, Really?
               </h3>
-              <p className="text-slate-400 text-base md:text-lg mb-0 leading-relaxed">
+              <p className="text-slate-400 text-base md:text-lg mb-0 leading-relaxed font-serif italic">
                 This is all codified in <strong>RaptorQ (RFC 6330)</strong>.
                 The RFC actually has a SHALL-level decoder requirement: if you
                 receive encoding symbols whose IDs are chosen uniformly at random,
@@ -279,7 +281,7 @@ export function RaptorQArticle() {
       <Divider />
 
       {/* ========== WHAT YOU MAY ALREADY KNOW ========== */}
-      <section>
+      <section data-section="pre-knowledge">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             What You May Already Know
@@ -303,23 +305,23 @@ export function RaptorQArticle() {
             symbols. Zero overhead. Mathematically optimal.
           </p>
           <p>So why isn&rsquo;t this the end of the story? Two problems:</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-12 mb-16">
-            <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-cyan-500/30 group">
-              <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-cyan-400 transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-12 mb-16 items-stretch">
+            <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-cyan-500/30 group flex flex-col h-full">
+              <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-cyan-400 transition-colors shrink-0">
                 You must choose <M t="R" /> in advance
               </h4>
-              <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light">
+              <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light flex-1">
                 Reed-Solomon is <strong>fixed-rate</strong>. You pick your
                 redundancy budget before you send anything. If the channel is
                 worse than expected, you&rsquo;re dead. If it&rsquo;s better, you wasted
                 bandwidth.
               </p>
             </div>
-            <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-purple-500/30 group">
-              <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-purple-400 transition-colors">
+            <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-purple-500/30 group flex flex-col h-full">
+              <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-purple-400 transition-colors shrink-0">
                 It gets slow at scale
               </h4>
-              <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light">
+              <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light flex-1">
                 Reed-Solomon encoding and decoding cost grows with block size.
                 Standard implementations are <M t="O(n \cdot K)" explanation="complexity-quadratic" /> for encoding
                 and <M t="O(K^2)" explanation="complexity-quadratic" /> for decoding.
@@ -345,7 +347,7 @@ export function RaptorQArticle() {
       <Divider />
 
       {/* ========== PACKETS ARE EQUATIONS ========== */}
-      <section>
+      <section data-section="equations">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             Packets Are Equations
@@ -409,7 +411,7 @@ export function RaptorQArticle() {
       <Divider />
 
       {/* ========== WHAT RAPTORQ PROMISES ========== */}
-      <section>
+      <section data-section="promises">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             What RaptorQ Promises
@@ -420,25 +422,25 @@ export function RaptorQArticle() {
             <strong><J t="systematic-encoding">systematic</J></strong>, and{" "}
             <strong>near-<J t="mds">MDS</J></strong>.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-            <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors">
-              <h4 className="text-white font-bold mb-3 text-lg">Rateless</h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 items-stretch">
+            <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full">
+              <h4 className="text-white font-bold mb-3 text-lg shrink-0">Rateless</h4>
+              <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                 The sender can generate as many repair packets as needed. No
                 fixed <M t="n" />. No negotiation loop.
               </p>
             </div>
-            <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors">
-              <h4 className="text-white font-bold mb-3 text-lg">Systematic</h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-0">
+            <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full">
+              <h4 className="text-white font-bold mb-3 text-lg shrink-0">Systematic</h4>
+              <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                 The original data symbols are part of the encoding stream. In the
                 common case of low loss, the receiver just gets the source symbols
                 and never runs a decoder.
               </p>
             </div>
-            <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors">
-              <h4 className="text-white font-bold mb-3 text-lg">Near-MDS</h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-0">
+            <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full">
+              <h4 className="text-white font-bold mb-3 text-lg shrink-0">Near-MDS</h4>
+              <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                 It behaves almost like an optimal erasure code: you need only
                 slightly more than the block size. The RFC pins down a steep
                 reliability curve: <M t="\le 1\%" /> failure at <M t="K'" />,{" "}
@@ -451,7 +453,7 @@ export function RaptorQArticle() {
       </section>
 
       {/* ========== COUPON COLLECTOR ========== */}
-      <section>
+      <section data-section="coupon">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             The Coupon Collector&rsquo;s Tax
@@ -461,10 +463,10 @@ export function RaptorQArticle() {
             this 50 years ago? It&rsquo;s called <strong>Random Linear Network Coding</strong>,
             and it works perfectly. But there is a catch:
           </p>
-          <p className="text-xl md:text-2xl font-bold text-center text-white my-10 md:my-14 leading-tight">
+          <p className="text-xl md:text-2xl font-bold text-center text-white my-10 md:my-14 leading-tight text-balance">
             Dense equations = solvable but slow.
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400 font-black">
               Sparse equations = fast but broken.
             </span>
           </p>
@@ -519,7 +521,7 @@ export function RaptorQArticle() {
       <Divider />
 
       {/* ========== LT CODES ========== */}
-      <section>
+      <section data-section="lt-codes">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             LT Codes: The Ripple
@@ -584,7 +586,7 @@ export function RaptorQArticle() {
       </section>
 
       {/* ========== THE ONE CLEVER IDEA ========== */}
-      <section>
+      <section data-section="clever-idea">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             The One Clever Idea
@@ -593,10 +595,10 @@ export function RaptorQArticle() {
             This is the part I find most interesting. The idea is simple once you
             see it:
           </p>
-          <p className="text-lg md:text-xl font-bold text-center text-white my-12 md:my-16 leading-tight">
+          <p className="text-lg md:text-xl font-bold text-center text-white my-12 md:my-16 leading-tight text-balance">
             Don&rsquo;t make the fountain code perfect.
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-black">
               Let it be sloppy. Clean up with a second code.
             </span>
           </p>
@@ -661,7 +663,7 @@ export function RaptorQArticle() {
       <Divider />
 
       {/* ========== INTERMEDIATE SYMBOLS ========== */}
-      <section>
+      <section data-section="intermediates">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             What&rsquo;s Actually Being Solved
@@ -715,7 +717,7 @@ export function RaptorQArticle() {
       <Divider />
 
       {/* ========== TOY WALKTHROUGH ========== */}
-      <section>
+      <section data-section="walkthrough">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             Walkthrough: A Toy Decode
@@ -737,7 +739,7 @@ export function RaptorQArticle() {
       </section>
 
       {/* ========== PEELING & INACTIVATION ========== */}
-      <section>
+      <section data-section="peeling">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             Peeling &amp; Inactivation
@@ -828,7 +830,7 @@ export function RaptorQArticle() {
       <Divider />
 
       {/* ========== ENGINEERING TRICKS ========== */}
-      <section>
+      <section data-section="engineering">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             The Engineering Tricks
@@ -838,22 +840,22 @@ export function RaptorQArticle() {
             inactivation for stalls. The reason it works in production is the{" "}
             <em>engineering</em> around those ideas.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-12">
-            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-12 items-stretch">
+            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
+              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 <J t="systematic-encoding">Systematic Encoding</J>
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 The first <M t="K" /> encoding symbols are the source symbols
                 themselves. If the channel is clean, the receiver doesn&rsquo;t decode
                 at all.
               </p>
             </div>
-            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl">
+            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
+              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 One Integer of Metadata
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 A repair packet carries an{" "}
                 <strong>
                   <J t="esi">Encoding Symbol ID</J>
@@ -863,22 +865,22 @@ export function RaptorQArticle() {
                 Broadcast-friendly, coordination-free.
               </p>
             </div>
-            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl">
+            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
+              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 Padding to <M t="K'" />
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 RFC 6330 quietly pads your block from <M t="K" /> to{" "}
                 <M t="K'" /> using a lookup table, adding padding symbols that
                 are never transmitted. This lets encoder and decoder reuse fixed
                 parameters and keeps behavior interoperable.
               </p>
             </div>
-            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl">
+            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
+              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 A Degree Table, Not Pure Randomness
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 RFC 6330 hardcodes a degree distribution heavily weighted toward
                 low degrees (2 and 3 dominate). The expected LT degree is about{" "}
                 <strong>4.8</strong>. With permanently-inactivated symbols, each
@@ -886,11 +888,11 @@ export function RaptorQArticle() {
                 average: constant work per packet.
               </p>
             </div>
-            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors md:col-span-2">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl">
+            <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors md:col-span-2 group">
+              <h4 className="text-white font-bold mb-4 text-lg md:text-xl group-hover:text-cyan-400 transition-colors">
                 Permanent Inactivation
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed mb-0">
                 RaptorQ pre-selects a small set of intermediate symbols (the PI
                 symbols) to be treated as inactivated from the start. The count
                 scales as roughly <M t="\sqrt{'{K}'}" />: for{" "}
@@ -925,7 +927,7 @@ y = XOR(C[i] for i in indices)`}
       <Divider />
 
       {/* ========== WHY +2 CHANGES EVERYTHING ========== */}
-      <section>
+      <section data-section="plus-two">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             Why +2 Packets Changes Everything
@@ -943,37 +945,37 @@ y = XOR(C[i] for i in indices)`}
           </p>
           <MBlock t="P(\text{full rank}) = \prod_{j=1}^{K} \left(1 - q^{-j}\right)" explanation="full-rank-probability" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
-            <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 md:p-6">
-              <h4 className="text-red-300 font-bold mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10 items-stretch">
+            <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 md:p-6 flex flex-col h-full">
+              <h4 className="text-red-300 font-bold mb-3 shrink-0">
                 Over <J t="gf2">GF(2)</J>{" "}
-                <span className="text-xs font-mono text-red-400">(pure XOR)</span>
+                <span className="text-xs font-mono text-red-400 font-normal">(pure XOR)</span>
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-2">
+              <p className="text-sm text-slate-400 leading-relaxed mb-4 flex-1">
                 The product converges to about{" "}
-                <strong className="text-red-300">0.289</strong>. That&rsquo;s a ~71%
+                <strong className="text-red-300 font-black">0.289</strong>. That&rsquo;s a ~71%
                 chance of failure with exactly <M t="K" /> random binary
                 equations.
               </p>
-              <p className="text-xs text-slate-500 mb-0">
+              <p className="text-xs text-slate-500 mb-0 font-mono tracking-tighter shrink-0 border-t border-red-500/10 pt-3">
                 <M t="K" /> rows: ~29% success · <M t="K+1" />: ~57% ·{" "}
                 <M t="K+2" />: ~78%
               </p>
             </div>
-            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 md:p-6">
-              <h4 className="text-emerald-300 font-bold mb-3">
+            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 md:p-6 flex flex-col h-full">
+              <h4 className="text-emerald-300 font-bold mb-3 shrink-0">
                 Over <J t="gf256">GF(256)</J>{" "}
-                <span className="text-xs font-mono text-emerald-400">
+                <span className="text-xs font-mono text-emerald-400 font-normal">
                   (byte arithmetic)
                 </span>
               </h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-2">
+              <p className="text-sm text-slate-400 leading-relaxed mb-4 flex-1">
                 The product converges to about{" "}
-                <strong className="text-emerald-300">0.996</strong>. Nearly full
+                <strong className="text-emerald-300 font-black">0.996</strong>. Nearly full
                 rank with exactly <M t="K" /> rows. And each extra row crushes
                 failure probability by a factor of <M t="\sim 1/256" />.
               </p>
-              <p className="text-xs text-slate-500 mb-0">
+              <p className="text-xs text-slate-500 mb-0 font-mono tracking-tighter shrink-0 border-t border-emerald-500/10 pt-3">
                 <M t="K" /> rows: ~99.6% · <M t="K+1" />: ~99.998% ·{" "}
                 <M t="K+2" />: ~99.99999%
               </p>
@@ -1014,7 +1016,7 @@ y = XOR(C[i] for i in indices)`}
       <Divider />
 
       {/* ========== HOW WE GOT HERE ========== */}
-      <section>
+      <section data-section="history">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             How We Got Here
@@ -1052,10 +1054,10 @@ y = XOR(C[i] for i in indices)`}
               },
             ].map((item) => (
               <div key={item.date}>
-                <div className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">
+                <div className="text-xs text-slate-500 uppercase tracking-widest font-black mb-2">
                   {item.date} · {item.title}
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed mb-0">
+                <p className="text-slate-300 text-sm leading-relaxed mb-0 font-light">
                   {item.text}
                 </p>
               </div>
@@ -1067,7 +1069,7 @@ y = XOR(C[i] for i in indices)`}
       <Divider />
 
       {/* ========== CRYPTOGRAPHIC COUSIN ========== */}
-      <section>
+      <section data-section="crypto-cousin">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             The Cryptographic Cousin
@@ -1114,7 +1116,7 @@ y = XOR(C[i] for i in indices)`}
               <br />
               Share 5: <M t="f(5) = 42 + 35 + 75 = 152" />
             </div>
-            <p className="text-slate-400 text-sm leading-relaxed mb-0">
+            <p className="text-slate-400 text-sm leading-relaxed mb-0 font-serif italic">
               To reconstruct the secret, any 3 people pool their shares and use{" "}
               <strong>Lagrange interpolation</strong> to recover the unique
               degree-2 polynomial. The secret is <M t="f(0) = 42" />.
@@ -1128,7 +1130,7 @@ y = XOR(C[i] for i in indices)`}
             Both Shamir and RaptorQ are solving the same abstract problem with
             the same mathematical tools:
           </p>
-          <ul className="list-disc list-inside space-y-3 text-slate-300 ml-4 mb-10 text-base leading-relaxed">
+          <ul className="list-disc list-inside space-y-3 text-slate-300 ml-4 mb-10 text-base leading-relaxed font-light">
             <li>
               <strong>Linear algebra over finite fields.</strong> Both generate
               redundant linear measurements of unknown data.
@@ -1149,33 +1151,14 @@ y = XOR(C[i] for i in indices)`}
             </li>
           </ul>
 
-          {/* Comparison table */}
-          <div className="overflow-x-auto my-12 -mx-4 md:mx-0">
-            <table className="min-w-[600px] w-full text-sm text-slate-300 border border-white/10 rounded-2xl overflow-hidden">
-              <thead className="bg-white/5 text-slate-400 uppercase tracking-widest text-[10px]">
-                <tr>
-                  <th className="text-left p-3 md:p-4">Property</th>
-                  <th className="text-left p-3 md:p-4">Shamir&rsquo;s Secret Sharing</th>
-                  <th className="text-left p-3 md:p-4">RaptorQ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {[
-                  ["Threshold", "Exact: K shares, always", "Probabilistic: K + \u03b5, almost always"],
-                  ["Matrix type", "Dense Vandermonde (guaranteed rank)", "Sparse + precode (rank w/ high prob.)"],
-                  ["Security", "K\u20131 shares reveal nothing", "No secrecy (matrix is public)"],
-                  ["Decode speed", "O(K\u00b2) (interpolation)", "O(K) (peeling + small dense core)"],
-                  ["Coordination", "Must know which shares you have", "Self-identifying (ESI in each packet)"],
-                  ["Design goal", "Certainty + secrecy", "Speed + adaptivity"],
-                ].map(([prop, shamir, raptor]) => (
-                  <tr key={prop} className="hover:bg-white/[0.02]">
-                    <td className="p-3 md:p-4 font-semibold text-white">{prop}</td>
-                    <td className="p-3 md:p-4">{shamir}</td>
-                    <td className="p-3 md:p-4">{raptor}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="flex flex-wrap gap-3 mb-12">
+             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 w-full mb-2">Related Terms:</div>
+             <J t="mds">
+                <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/10 transition-colors">Maximum Distance Separable</span>
+             </J>
+             <J t="shamirs-secret-sharing">
+                <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/10 transition-colors">Secret Sharing</span>
+             </J>
           </div>
 
           <div className="rq-callout">
@@ -1191,20 +1174,20 @@ y = XOR(C[i] for i in indices)`}
       <Divider />
 
       {/* ========== COMPARISON TABLE ========== */}
-      <section>
+      <section data-section="comparison">
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
             RaptorQ vs. The Alternatives
           </h2>
           <p>It helps to see RaptorQ in context.</p>
-          <div className="overflow-x-auto my-12 -mx-4 md:mx-0">
+          <div className="overflow-x-auto my-12 -mx-4 md:mx-0 custom-scrollbar">
             <table className="min-w-[600px] w-full text-sm text-slate-300 border border-white/10 rounded-2xl overflow-hidden">
               <thead className="bg-white/5 text-slate-400 uppercase tracking-widest text-[10px]">
                 <tr>
-                  <th className="text-left p-3 md:p-4">Scheme</th>
-                  <th className="text-left p-3 md:p-4">Overhead</th>
-                  <th className="text-left p-3 md:p-4">Speed</th>
-                  <th className="text-left p-3 md:p-4">Notes</th>
+                  <th className="text-left p-3 md:p-4 font-black">Scheme</th>
+                  <th className="text-left p-3 md:p-4 font-black">Overhead</th>
+                  <th className="text-left p-3 md:p-4 font-black">Speed</th>
+                  <th className="text-left p-3 md:p-4 font-black">Notes</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -1215,11 +1198,11 @@ y = XOR(C[i] for i in indices)`}
                   ["Raptor", "O(1)", "O(K)", "Precode trick eliminates log tax."],
                   ["RaptorQ (RFC 6330)", "+2 symbols", "O(K)", "Production-grade. GF(256) insurance. Near-MDS at finite K."],
                 ].map(([scheme, overhead, speed, notes]) => (
-                  <tr key={scheme} className="hover:bg-white/[0.02]">
-                    <td className="p-3 md:p-4 font-semibold text-white">{scheme}</td>
+                  <tr key={scheme} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="p-3 md:p-4 font-bold text-white">{scheme}</td>
                     <td className="p-3 md:p-4 font-mono text-cyan-400">{overhead}</td>
                     <td className="p-3 md:p-4 font-mono">{speed}</td>
-                    <td className="p-3 md:p-4">{notes}</td>
+                    <td className="p-3 md:p-4 text-slate-400 font-light italic">{notes}</td>
                   </tr>
                 ))}
               </tbody>

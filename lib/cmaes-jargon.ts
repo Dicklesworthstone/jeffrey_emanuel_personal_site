@@ -64,6 +64,11 @@ const JARGON_DB: Record<string, JargonTerm> = {
     analogy: "Walking directly toward a destination on a map while accounting for the fact that the terrain might be steeper in some directions than others.",
     related: ["information-geometry", "fisher-information"]
   },
+  "operator": {
+    term: "Mathematical Operator",
+    short: "Defines the relationship between terms",
+    long: "Symbols like =, +, and \u223c that describe how the different components of the algorithm interact to update the search distribution."
+  },
   "objective-function": {
     term: "Objective Function",
     short: "The goal to be minimized",
@@ -87,6 +92,105 @@ const JARGON_DB: Record<string, JargonTerm> = {
     why: "This makes the algorithm invariant to any strictly increasing transformation of the objective function, adding a layer of robustness.",
     analogy: "Awarding medals based on who finished 1st, 2nd, and 3rd, regardless of whether the winner was 1 second ahead or 10 minutes ahead.",
     related: ["cma-es", "invariance"]
+  },
+  "invariance": {
+    term: "Invariance",
+    short: "Robustness to transformation",
+    long: "The property where an algorithm's behavior remains identical even if the problem is rotated, scaled, or its values are transformed by a monotonic function.",
+    why: "It means the algorithm doesn't require the user to perfectly scale or orient their parameters before starting.",
+    analogy: "A compass that works perfectly whether you're standing on your feet, your head, or spinning in circles."
+  },
+  "ill-conditioning": {
+    term: "Ill-conditioning",
+    short: "Extreme sensitivity differences",
+    long: "A state where some parameters are much more sensitive than others (e.g., changing x by 0.01 matters as much as changing y by 100).",
+    why: "Most optimizers fail here; CMA-ES handles it by stretching its search ellipsoid to match these differing scales.",
+    analogy: "Trying to find the bottom of a canyon that is 10 miles long but only 2 feet wide."
+  },
+  "ipop-cma-es": {
+    term: "IPOP-CMA-ES",
+    short: "Restart with Increasing Population",
+    long: "A strategy where the algorithm is restarted with a larger population size whenever it gets stuck.",
+    why: "It allows the algorithm to transition from a local search to a global search, eventually finding the global minimum of complex, multimodal functions.",
+    analogy: "If a small group of scouts gets trapped in a local valley, send out a much larger army to search the entire mountain range."
+  },
+  "stochastic-optimization": {
+    term: "Stochastic Optimization",
+    short: "Handling 'noisy' feedback",
+    long: "Optimization where the objective function returns slightly different values for the same input due to randomness.",
+    why: "Real-world simulations are often noisy; CMA-ES's population-based averaging naturally filters out this noise.",
+    analogy: "Finding the highest point on a sand dune while a windstorm is constantly shifting the grains."
+  },
+  "zero-order": {
+    term: "Zero-Order Optimization",
+    short: "Using only function values",
+    long: "Algorithms that only require the output f(x) for a given input x, with no knowledge of the function's internal derivative.",
+    why: "Essential for black-box systems like simulators where you cannot 'see inside' to compute a gradient.",
+    analogy: "Tuning a guitar by ear rather than using a tuner that tells you exactly how many Hz you are off."
+  },
+  "first-order": {
+    term: "First-Order Optimization",
+    short: "Using gradient information",
+    long: "Algorithms like Gradient Descent that use the first derivative (the gradient) to move directly toward the minimum.",
+    why: "If a meaningful gradient exists, first-order methods are usually orders of magnitude faster and more precise.",
+    analogy: "Having a GPS that tells you the exact direction to the destination, vs. walking around and seeing if you're getting warmer or colder."
+  },
+  // GRANULAR PARTS FOR EQUATIONS
+  "candidate-point": {
+    term: "x_i",
+    short: "Candidate Solution",
+    long: "A specific point in the parameter space being evaluated in the current generation.",
+    analogy: "One of the 'scouts' sent out to explore the landscape."
+  },
+  "sampling-op": {
+    term: "\u223c",
+    short: "Sampled From",
+    long: "Indicates that the variable on the left is drawn randomly from the distribution on the right.",
+    analogy: "Throwing dice to decide where to land."
+  },
+  "normal-symbol": {
+    term: "\u2110",
+    short: "Normal Distribution",
+    long: "The Gaussian bell curve distribution.",
+    analogy: "The 'shape' of the cloud of scouts."
+  },
+  "mean-vector": {
+    term: "m",
+    short: "Distribution Mean",
+    long: "The center of the search distribution, representing the current best guess for the optimal solution.",
+    analogy: "The base camp for the scouts."
+  },
+  "sigma-sq": {
+    term: "\u03c3\u00b2",
+    short: "Variance Scale",
+    long: "The square of the step-size, providing the global scaling factor for the search.",
+    analogy: "The overall 'reach' or 'zoom level' of the exploration."
+  },
+  "evolution-path": {
+    term: "p_\u03c3",
+    short: "Evolution Path",
+    long: "A time-weighted moving average of the steps taken by the distribution mean.",
+    why: "It tracks momentum and correlation between steps to decide when to increase or decrease the global step-size.",
+    analogy: "The smoothed trail left by the base camp as it moves."
+  },
+  "learning-rate-cs": {
+    term: "c_s",
+    short: "Step-size Learning Rate",
+    long: "Controls how quickly the evolution path (and thus the step-size) adapts to new information.",
+    analogy: "How much weight we give to the latest scouts' discovery vs. historical knowledge."
+  },
+  "selection-mass": {
+    term: "\u03bc_eff",
+    short: "Selection Mass",
+    long: "The effective number of samples used to update the distribution, accounting for the weights assigned to each.",
+    analogy: "The strength of the 'voting block' among the elite scouts."
+  },
+  "whitening": {
+    term: "C^{-1/2}",
+    short: "Whitening Transform",
+    long: "The inverse square root of the covariance matrix, used to normalize the step into a spherical coordinate system.",
+    why: "This allows the algorithm to measure 'distance' in a way that is independent of the current search ellipsoid's orientation.",
+    analogy: "Squashing the cigar-shaped cloud back into a sphere so we can see the 'true' direction of progress."
   }
 };
 

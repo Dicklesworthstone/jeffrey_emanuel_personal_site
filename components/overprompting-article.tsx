@@ -1,16 +1,20 @@
 "use client";
 
+import "katex/dist/katex.min.css";
+
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Crimson_Pro,
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
+import katex from "katex";
 import { Zap, AlertTriangle, CheckCircle2 } from "lucide-react";
 import illustration from "@/assets/overprompting_post_illustration.webp";
+import { OverpromptingMathTooltip } from "./overprompting-math-tooltip";
+import { getJargon } from "@/lib/overprompting-jargon";
 
 // Dynamic import visualizations (no SSR — they use browser APIs / refs)
 const ConstraintViz = dynamic(
@@ -53,10 +57,61 @@ const bricolageGrotesque = Bricolage_Grotesque({
   display: "swap",
 });
 
+// KaTeX helpers
+function M({ t, explanation }: { t: string; explanation?: string }) {
+  const html = katex.renderToString(t, {
+    throwOnError: false,
+    displayMode: false,
+  });
+  const content = (
+    <span
+      className="op-math-inline"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+
+  if (explanation) {
+    return <OverpromptingMathTooltip mathKey={explanation}>{content}</OverpromptingMathTooltip>;
+  }
+  return content;
+}
+
+function MBlock({ t, explanation }: { t: string; explanation?: string }) {
+  const html = katex.renderToString(t, {
+    throwOnError: false,
+    displayMode: true,
+  });
+  const content = (
+    <div
+      className="op-math-block"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+
+  if (explanation) {
+    return <OverpromptingMathTooltip mathKey={explanation}>{content}</OverpromptingMathTooltip>;
+  }
+  return content;
+}
+
+// Shorthand for jargon
+function J({ t, children }: { t: string; children?: React.ReactNode }) {
+  const termData = getJargon(t);
+  if (!termData) return <>{children}</>;
+  
+  return (
+    <OverpromptingMathTooltip mathKey={t}>
+      <span className="cursor-help border-b border-dotted border-amber-500/50 hover:border-amber-500 hover:text-amber-200 transition-colors">
+        {children || termData.term}
+      </span>
+    </OverpromptingMathTooltip>
+  );
+}
+
 // Section divider
 function Divider() {
   return (
-    <div className="w-full h-px my-12 md:my-16 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+    <div data-section className="w-full h-px my-12 md:my-16 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
   );
 }
 
@@ -90,7 +145,7 @@ export function OverpromptingArticle() {
     const root = articleRef.current;
     if (!root) return;
     const targets = root.querySelectorAll(
-      ":scope > section:not(:first-child), :scope > article"
+      ":scope > section:not(:first-child), :scope > article, [data-section]"
     );
     const observer = new IntersectionObserver(
       (entries) => {
@@ -113,6 +168,8 @@ export function OverpromptingArticle() {
   return (
     <div
       ref={articleRef}
+      role="main"
+      id="main-content"
       className={`overprompting-scope op-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
@@ -123,7 +180,7 @@ export function OverpromptingArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
+      <section data-section="hero" className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
         {/* Warm ambient glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full pointer-events-none"
@@ -134,7 +191,7 @@ export function OverpromptingArticle() {
         />
 
         <EC>
-          <div className="text-center pt-24 md:pt-32 relative z-20">
+          <div className="text-center pt-48 md:pt-32 relative z-20">
             {/* Badge */}
             <div className="inline-flex items-center gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
@@ -142,7 +199,7 @@ export function OverpromptingArticle() {
             </div>
 
             {/* Title */}
-            <h1 className="op-display-title mb-6 text-white">
+            <h1 className="op-display-title mb-6 text-white text-balance">
               The Overprompting
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">
@@ -183,7 +240,7 @@ export function OverpromptingArticle() {
           className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
           style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
@@ -191,7 +248,7 @@ export function OverpromptingArticle() {
       </section>
 
       {/* ========== THE IMAGE GENERATION PARADOX ========== */}
-      <article>
+      <article data-section="paradox">
         <EC>
           <p className="op-drop-cap">
             I&rsquo;ve mentioned this before, but I think it&rsquo;s so revealing and
@@ -258,7 +315,7 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== CONSTRAINT VISUALIZATION ========== */}
-      <section>
+      <section data-section="viz-constraints">
         <EC>
           <div className="op-viz-container">
             <ConstraintViz />
@@ -266,10 +323,42 @@ export function OverpromptingArticle() {
         </EC>
       </section>
 
+      {/* ========== THE MATHEMATICS OF CONSTRAINT ========== */}
+      <section>
+        <EC>
+          <h2 className="op-section-title mb-8 mt-16 text-white">
+            The Mathematics of Constraint
+          </h2>
+          <p>
+            We can formalize this intuition. Imagine the total <J t="search-space">search space</J> of the
+            model as a high-dimensional volume <M t="V_{total}" />. Every prompt
+            constraint <M t="c_i" /> acts as a <J t="constraint-hyperplane">hyperplane</J> that slices this
+            volume.
+          </p>
+          <p>
+            If each constraint has a &quot;restrictiveness&quot; factor <M t="p_i" /> (where <M t="0 < p_i < 1" /> represents
+            the fraction of the space removed), the remaining volume <M t="V_{valid}" /> after <M t="N" /> constraints is:
+          </p>
+          
+          <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 my-8 overflow-x-auto">
+            <MBlock 
+              t="V_{valid} = V_{total} \cdot \prod_{i=1}^{N} (1 - p_i)" 
+              explanation="search-volume"
+            />
+          </div>
+
+          <p>
+            As <M t="N" /> increases, <M t="V_{valid}" /> shrinks exponentially. When <M t="V_{valid} \to 0" />, the system
+            becomes <J t="overconstrained">overconstrained</J>. The model, forced to find a solution in an empty set,
+            begins to <J t="hallucination">hallucinate</J> artifacts to artificially satisfy the conflicting rules.
+          </p>
+        </EC>
+      </section>
+
       <Divider />
 
       {/* ========== EVERY WORD MATTERS ========== */}
-      <section>
+      <section data-section="attention">
         <EC>
           <h2 className="op-section-title mb-8 mt-16 text-white">
             Every Word Matters
@@ -283,7 +372,7 @@ export function OverpromptingArticle() {
 
           <p>
             In fact, every single word in your prompt is &ldquo;attended to&rdquo; by the
-            model and has an impact on the specific activation states that occur
+            model and has an impact on the specific <J t="activations">activation states</J> that occur
             in its &ldquo;brain.&rdquo;
           </p>
 
@@ -309,7 +398,7 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== THE CHEF AND THE PARTY PLANNER ========== */}
-      <section>
+      <section data-section="analogy">
         <EC>
           <h2 className="op-section-title mb-8 mt-16 text-white">
             The Chef and the Party Planner
@@ -366,10 +455,8 @@ export function OverpromptingArticle() {
                             </span>
                          </div>
                          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
-                               initial={false}
-                               animate={{ width: chefMode === "trusting" ? "100%" : "15%" }}
-                               className={`h-full ${chefMode === "trusting" ? "bg-emerald-500" : "bg-rose-500"}`}
+                            <div 
+                               className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-full" : "bg-rose-500 w-[15%]"}`}
                             />
                          </div>
                       </div>
@@ -382,22 +469,20 @@ export function OverpromptingArticle() {
                             </span>
                          </div>
                          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
-                               initial={false}
-                               animate={{ width: chefMode === "trusting" ? "95%" : "40%" }}
-                               className={`h-full ${chefMode === "trusting" ? "bg-emerald-500" : "bg-rose-500"}`}
+                            <div 
+                               className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-[95%]" : "bg-rose-500 w-[40%]"}`}
                             />
                          </div>
                       </div>
                    </div>
 
-                   <div className="p-6 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md relative overflow-hidden">
+                   <div className="p-6 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md relative overflow-hidden min-h-[140px] flex flex-col justify-center">
                       <div className="absolute top-0 right-0 p-4 opacity-10">
                          {chefMode === "trusting" ? <CheckCircle2 className="w-12 h-12 text-emerald-400" /> : <AlertTriangle className="w-12 h-12 text-rose-400" />}
                       </div>
                       <p className="text-sm text-slate-300 leading-relaxed italic relative z-10">
                          {chefMode === "trusting" 
-                           ? "“I trust your expertise. We want a vegetable-forward summer experience. Surprize us.”"
+                           ? "“I trust your expertise. We want a vegetable-forward summer experience. Surprise us.”"
                            : "“Use the 2024 vintage oil, no nuts, keep it under 400 calories, and make sure the plating is symmetrical.”"}
                       </p>
                       <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
@@ -416,7 +501,7 @@ export function OverpromptingArticle() {
             every time you add another one of your rules, you are restricting
             and circumscribing what they can do. You are{" "}
             <strong>
-              dramatically narrowing and constraining their search space
+              dramatically narrowing and constraining their <J t="search-space">search space</J>
             </strong>{" "}
             and impeding their creative process, because now they keep bumping
             against your rules.
@@ -449,22 +534,39 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== QUALITY CURVE VISUALIZATION ========== */}
-      <section>
+      <section data-section="viz-quality">
         <EC>
           <div className="op-viz-container">
             <QualityCurveViz />
           </div>
+          
+          <p className="mt-8">
+            Mathematically, we can model the relationship between <M t="s" /> (specificity) and
+            <M t="Q" /> (quality) as a modified Gaussian function centered on an optimal specificity <M t="\mu" />:
+          </p>
+          
+          <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 my-8 overflow-x-auto">
+            <MBlock 
+              t="Q(s) \approx e^{-\frac{(s - \mu)^2}{2\sigma^2}}" 
+              explanation="gaussian-quality"
+            />
+          </div>
+          
+          <p>
+            When <M t="s < \mu" /> (too vague), the model&rsquo;s <J t="entropy-loss">entropy</J> is too high; it drifts into noise.
+            When <M t="s > \mu" /> (overconstrained), the valid intersection of constraints vanishes, and quality drops precipitously.
+          </p>
         </EC>
       </section>
 
       <Divider />
 
       {/* ========== THE LESSON ========== */}
-      <section>
+      <section data-section="lesson">
         <EC>
           <div className="op-insight-card group">
             <div className="relative z-10">
-              <p className="!mb-0">
+              <p className="!mb-0 font-serif text-lg leading-relaxed">
                 The chef is the model, and you are the annoying party planner.
                 Every time you try to tell the model exactly what to do and how,
                 just understand that, although you might end up with something
@@ -483,7 +585,7 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== FROM IMAGES TO CODE ========== */}
-      <section>
+      <section data-section="code">
         <EC>
           <h2 className="op-section-title mb-8 mt-16 text-white">
             From Images to Code
@@ -531,9 +633,7 @@ export function OverpromptingArticle() {
               want to go in the opposite direction and get very detailed and
               specific so that you can turn the plan into such detailed marching
               orders that even a dumber agent could still probably implement
-              them well (but of course, you don&rsquo;t use a dumb agent, you use a
-              very smart agent that is super overpowered for the task so that
-              they do a phenomenal job).
+              them well.
             </p>
           </div>
         </EC>
@@ -542,7 +642,7 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== PLAN/EXECUTE VISUALIZATION ========== */}
-      <section>
+      <section data-section="viz-plan">
         <EC>
           <div className="op-viz-container">
             <PlanExecuteViz />
@@ -553,7 +653,7 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== THE BROWNFIELD CONNECTION ========== */}
-      <section>
+      <section data-section="brownfield">
         <EC>
           <h2 className="op-section-title mb-8 mt-16 text-white">
             The Brownfield Connection
@@ -603,7 +703,7 @@ export function OverpromptingArticle() {
 
           <div className="op-insight-card group">
             <div className="relative z-10">
-              <p className="!mb-0">
+              <p className="!mb-0 font-serif italic text-lg text-slate-300">
                 And by the way, you can always wait until after the chef has
                 come up with the plan and then say at the end &ldquo;Oh, Martin has
                 nut allergies so let&rsquo;s change that one thing.&rdquo; That might annoy
@@ -618,7 +718,7 @@ export function OverpromptingArticle() {
       <Divider />
 
       {/* ========== KEY TAKEAWAYS ========== */}
-      <section className="pb-24">
+      <section data-section="takeaways" className="pb-24">
         <EC>
           <div className="rounded-3xl p-8 md:p-12 border border-white/10 bg-white/[0.02] relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -628,36 +728,36 @@ export function OverpromptingArticle() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight">Key Takeaways</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-              <div className="space-y-4">
-                <h3 className="text-amber-400 font-mono text-xs uppercase tracking-widest">The Problem</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3 text-slate-300">
+              <div className="space-y-4 flex flex-col h-full">
+                <h3 className="text-amber-400 font-mono text-xs uppercase tracking-widest shrink-0">The Problem</h3>
+                <ul className="space-y-3 flex-1">
+                  <li className="flex items-start gap-3 text-slate-300 text-sm">
                     <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                     <span>Every constraint restricts the model&rsquo;s creative search space.</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-300">
+                  <li className="flex items-start gap-3 text-slate-300 text-sm">
                     <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                     <span>Detailed instructions often lead to &ldquo;face-in-hole&rdquo; outputs with no artistry.</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-300">
+                  <li className="flex items-start gap-3 text-slate-300 text-sm">
                     <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                     <span>The more you tell a model <em>how</em> to do something, the less it focuses on the <em>goal</em>.</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="space-y-4">
-                <h3 className="text-emerald-400 font-mono text-xs uppercase tracking-widest">The Solution</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3 text-slate-300">
+              <div className="space-y-4 flex flex-col h-full">
+                <h3 className="text-emerald-400 font-mono text-xs uppercase tracking-widest shrink-0">The Solution</h3>
+                <ul className="space-y-3 flex-1">
+                  <li className="flex items-start gap-3 text-slate-300 text-sm">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                     <span><strong>Phase 1:</strong> Be open and intent-focused during planning.</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-300">
+                  <li className="flex items-start gap-3 text-slate-300 text-sm">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                     <span><strong>Phase 2:</strong> Be extremely precise once the plan is set.</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-300">
+                  <li className="flex items-start gap-3 text-slate-300 text-sm">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                     <span>Trust the model&rsquo;s latent space to find the best implementation path.</span>
                   </li>

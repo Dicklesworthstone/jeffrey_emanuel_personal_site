@@ -2164,13 +2164,15 @@ export const writingHighlights: WritingItem[] = [
     date: "2025-03-18",
   },
   {
-    title: "Hoeffding's D Explained",
+    title: "My Favorite Statistical Measure: Hoeffding's D",
     href: "/writing/hoeffdings_d_explainer",
-    source: "GitHub",
+    source: "Blog",
     category: "Statistics",
     blurb:
       "Standard correlation misses non-linear relationships. This guide explains Hoeffding's D, a powerful non-parametric measure that detects complex dependencies where Pearson and Spearman fail.",
     date: "2025-11-22",
+    featured: true,
+    gradient: "from-cyan-500/20 via-blue-500/20 to-purple-500/20",
   },
   {
     title: "Lamport's Bakery Algorithm",
