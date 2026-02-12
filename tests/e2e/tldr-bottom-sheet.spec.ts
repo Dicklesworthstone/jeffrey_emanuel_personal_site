@@ -10,10 +10,11 @@ import { test, expect, devices } from "@playwright/test";
  * Run with: bunx playwright test tests/e2e/tldr-bottom-sheet.spec.ts
  */
 
-test.describe("TLDR Page - Mobile Bottom Sheet", () => {
-  // Use mobile viewport for all tests in this describe block
-  test.use({ ...devices["Pixel 5"] });
+// Use mobile viewport for this test file.
+// Must be set at file scope to avoid forcing a new worker per nested describe.
+test.use(devices["Pixel 5"]);
 
+test.describe("TLDR Page - Mobile Bottom Sheet", () => {
   test.beforeEach(async ({ page }) => {
     console.log("[E2E:Sheet] Navigating to /tldr on mobile viewport");
     await page.goto("/tldr");
@@ -109,7 +110,9 @@ test.describe("TLDR Page - Mobile Bottom Sheet", () => {
       await showDetailsBtn.tap();
       await page.waitForTimeout(500);
 
-      const sheetContent = page.locator('[data-testid="sheet-content"]');
+      const sheet = page.locator('[data-testid="bottom-sheet"]');
+
+      const sheetContent = sheet.locator('[data-testid="sheet-content"]');
       await expect(sheetContent).toBeVisible();
 
       // Should contain tool detail sections
@@ -232,7 +235,7 @@ test.describe("TLDR Page - Mobile Bottom Sheet", () => {
       await expect(sheet).toBeVisible();
 
       // Tap the backdrop (area above the sheet)
-      const backdrop = page.locator('[aria-hidden="true"]').first();
+      const backdrop = page.locator('[data-testid="bottom-sheet-backdrop"]');
       await backdrop.tap({ position: { x: 50, y: 50 }, force: true });
       await page.waitForTimeout(500);
 
@@ -336,7 +339,7 @@ test.describe("TLDR Page - Mobile Bottom Sheet", () => {
   });
 
   test.describe("Desktop Behavior", () => {
-    test.use({ viewport: { width: 1280, height: 800 } });
+    test.use({ viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false });
 
     test("should NOT show bottom sheet on desktop viewport", async ({
       page,

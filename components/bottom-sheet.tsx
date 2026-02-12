@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   motion,
   AnimatePresence,
@@ -57,6 +58,7 @@ export default function BottomSheet({
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragControls = useDragControls();
   const prefersReducedMotion = useReducedMotion();
+  const canUsePortal = typeof document !== "undefined";
 
   // Lock body scroll when open
   useBodyScrollLock(isOpen);
@@ -137,108 +139,123 @@ export default function BottomSheet({
   const sheetMaxHeight = `min(${maxHeight}dvh, var(--mobile-viewport-height, ${maxHeight}vh))`;
   const contentMaxHeight = `calc(${sheetMaxHeight} - ${title ? 80 : 60}px)`;
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm md:hidden"
-            onClick={handleBackdropClick}
-            onTouchStart={mediumTap}
-            aria-hidden="true"
-          />
+  const sheetLayer = (
+    <>
+      {/* Backdrop */}
+      <motion.div
+        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
+        className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm md:hidden"
+        data-testid="bottom-sheet-backdrop"
+        onClick={handleBackdropClick}
+        onTouchStart={mediumTap}
+        aria-hidden="true"
+      />
 
-          {/* Bottom Sheet */}
-          <motion.div
-            ref={sheetRef}
-            initial={prefersReducedMotion ? { y: 0 } : { y: "100%" }}
-            animate={{ y: 0 }}
-            exit={prefersReducedMotion ? { y: 0, opacity: 0 } : { y: "100%" }}
-            transition={
-              prefersReducedMotion
-                ? { duration: 0 }
-                : { type: "spring", stiffness: 400, damping: 40 }
-            }
-            drag="y"
-            dragControls={dragControls}
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.5 }}
-            onDragEnd={handleDragEnd}
-            onAnimationComplete={() => onOpenComplete?.()}
-            className="fixed inset-x-0 bottom-0 z-50 overflow-hidden rounded-t-3xl border-t border-slate-700/80 bg-slate-950 shadow-2xl md:hidden flex flex-col"
-            style={{ maxHeight: sheetMaxHeight }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={title ? titleId : undefined}
-            data-testid="bottom-sheet"
+      {/* Bottom Sheet */}
+      <motion.div
+        ref={sheetRef}
+        initial={prefersReducedMotion ? { y: 0 } : { y: "100%" }}
+        animate={{ y: 0 }}
+        exit={prefersReducedMotion ? { y: 0, opacity: 0 } : { y: "100%" }}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 400, damping: 40 }
+        }
+        drag="y"
+        dragControls={dragControls}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.5 }}
+        onDragEnd={handleDragEnd}
+        onPointerDown={(event) => {
+          const target = event.target as HTMLElement;
+          const isContentInteraction = target.closest('[data-testid="sheet-content"]');
+
+          if (!isContentInteraction) {
+            dragControls.start(event);
+          }
+        }}
+        onAnimationComplete={() => onOpenComplete?.()}
+        className="fixed inset-x-0 bottom-0 z-50 overflow-hidden rounded-t-3xl border-t border-slate-700/80 bg-slate-950 shadow-2xl md:hidden flex flex-col"
+        style={{ maxHeight: sheetMaxHeight }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        data-testid="bottom-sheet"
+      >
+        {/* Drag handle */}
+        {showDragHandle && (
+          <div
+            className="flex justify-center py-3 cursor-grab active:cursor-grabbing"
+            onPointerDown={(e) => dragControls.start(e)}
+            data-testid="drag-handle"
           >
-            {/* Drag handle */}
-            {showDragHandle && (
-              <div
-                className="flex justify-center py-3 cursor-grab active:cursor-grabbing"
-                onPointerDown={(e) => dragControls.start(e)}
-                data-testid="drag-handle"
-              >
-                <div className="h-1 w-12 rounded-full bg-slate-700" />
-              </div>
-            )}
+            <div className="h-1 w-12 rounded-full bg-slate-700" />
+          </div>
+        )}
 
-            {/* Header */}
-            {title && (
-              <div className="flex items-center justify-between border-b border-slate-800/80 px-4 pb-3 sm:px-6 sm:pb-4">
-                <h2 id={titleId} className="text-base font-semibold text-slate-50 sm:text-lg">
-                  {title}
-                </h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  onTouchStart={mediumTap}
-                  className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
-                  aria-label="Close"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            )}
-
-            {/* Close button when no title */}
-            {!title && (
-              <button
-                type="button"
-                onClick={onClose}
-                onTouchStart={mediumTap}
-                className="absolute top-4 right-4 z-10 rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
-                aria-label="Close"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-
-            {/* Content */}
-            <div
-              className={cn(
-                "flex-1 overflow-y-auto overscroll-contain p-6",
-                !title && "pt-4",
-                contentClassName
-              )}
-              style={{
-                maxHeight: contentMaxHeight,
-              }}
-              data-testid="sheet-content"
+        {/* Header */}
+        {title && (
+          <div className="flex items-center justify-between border-b border-slate-800/80 px-4 pb-3 sm:px-6 sm:pb-4">
+            <h2 id={titleId} className="text-base font-semibold text-slate-50 sm:text-lg">
+              {title}
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              onTouchStart={mediumTap}
+              className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+              aria-label="Close"
             >
-              {children}
-            </div>
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        )}
 
-            {/* iOS safe area padding */}
-            <div className="pb-[env(safe-area-inset-bottom)]" />
-          </motion.div>
-        </>
-      )}
+        {/* Close button when no title */}
+        {!title && (
+          <button
+            type="button"
+            onClick={onClose}
+            onTouchStart={mediumTap}
+            className="absolute top-4 right-4 z-10 rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
+
+        {/* Content */}
+        <div
+          className={cn(
+            "flex-1 overflow-y-auto overscroll-contain p-6",
+            !title && "pt-4",
+            contentClassName
+          )}
+          style={{
+            maxHeight: contentMaxHeight,
+          }}
+          data-testid="sheet-content"
+        >
+          {children}
+        </div>
+
+        {/* iOS safe area padding */}
+        <div className="pb-[env(safe-area-inset-bottom)]" />
+      </motion.div>
+    </>
+  );
+
+  // If we are in a browser context, render modal layers in a portal to avoid
+  // being clipped by transformed or fixed ancestors.
+  const modal = (
+    <AnimatePresence>
+      {isOpen ? sheetLayer : null}
     </AnimatePresence>
   );
+
+  return canUsePortal ? createPortal(modal, document.body) : modal;
 }

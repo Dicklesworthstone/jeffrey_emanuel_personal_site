@@ -107,15 +107,15 @@ describe("BottomSheet", () => {
 
     it("calls onClose when backdrop is clicked", () => {
       render(<BottomSheet {...defaultProps} />);
-      // The backdrop is the element with aria-hidden="true" that covers the screen
-      const backdrop = document.querySelector('[aria-hidden="true"]');
+      // The backdrop is the dedicated overlay layer.
+      const backdrop = screen.getByTestId("bottom-sheet-backdrop");
       if (backdrop) fireEvent.click(backdrop);
       expect(defaultProps.onClose).toHaveBeenCalledOnce();
     });
 
     it("does not call onClose on backdrop click when closeOnBackdrop is false", () => {
       render(<BottomSheet {...defaultProps} closeOnBackdrop={false} />);
-      const backdrop = document.querySelector('[aria-hidden="true"]');
+      const backdrop = screen.getByTestId("bottom-sheet-backdrop");
       if (backdrop) fireEvent.click(backdrop);
       expect(defaultProps.onClose).not.toHaveBeenCalled();
     });
