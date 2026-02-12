@@ -10,7 +10,7 @@ import {
   Bricolage_Grotesque,
 } from "next/font/google";
 import katex from "katex";
-import { Info, Calculator, BarChart3, Database, Layers, ShieldCheck } from "lucide-react";
+import { Info, Calculator, ShieldCheck, Layers } from "lucide-react";
 
 // Dynamic import visualizations
 const HoeffdingHero = dynamic(
@@ -152,7 +152,7 @@ export function HoeffdingArticle() {
           <div className="text-center pt-32 relative z-20">
             <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-              Statistical Topology / Dependency Lab
+              Statistical Topology / Dependency Engine
             </div>
             <h1 className="hd-display-title mb-6 text-white text-balance">
               My Favorite Statistical Measure:
@@ -162,8 +162,8 @@ export function HoeffdingArticle() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-12 font-light">
-              Pearson misses curves. Spearman misses cycles. 
-              Hoeffding&apos;s D captures the <strong>latent geometry</strong> of any dependency.
+              Standard correlation misses non-linear dependencies. 
+              Hoeffding&apos;s D captures the <strong>latent geometry</strong> where others are blind.
             </p>
           </div>
         </EC>
@@ -186,7 +186,7 @@ export function HoeffdingArticle() {
             Suppose you have two sequences of numbers. You want to know if they are related. In most settings, we have no clue <em>a priori</em> what the nature of that relationship might be. Are they linear? Cyclical? Sinusoidal? 
           </p>
           <p>
-            Standard correlation measures—Pearson and Spearman—make assumptions. They look for straight lines or monotonic trends. If your data forms a ring or an &quot;X&quot; shape, these measures will often report <strong>zero correlation</strong>, even though the dependency is obvious to any human eye.
+            Standard correlation measures—Pearson and Spearman—make massive assumptions. They look for straight lines or monotonic trends. If your data forms a ring or an &quot;X&quot; shape, these measures will often report <strong>zero correlation</strong>, even though the dependency is obvious to any human eye.
           </p>
 
           <div className="hd-insight-card group">

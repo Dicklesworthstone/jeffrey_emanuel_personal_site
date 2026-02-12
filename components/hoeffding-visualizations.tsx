@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as d3 from "d3";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
 
 const COLORS = {
@@ -100,11 +100,16 @@ export function HoeffdingHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { capabilities } = useDeviceCapabilities();
   const [currentShape, setCurrentShape] = useState<keyof typeof GENERATORS>("linear");
+  const shapeRef = useRef(currentShape);
 
   useEffect(() => {
     const shapes: (keyof typeof GENERATORS)[] = ["linear", "ring", "x_shape", "sinusoidal"];
     const interval = setInterval(() => {
-      setCurrentShape(prev => shapes[(shapes.indexOf(prev) + 1) % shapes.length]);
+      setCurrentShape(prev => {
+        const next = shapes[(shapes.indexOf(prev) + 1) % shapes.length];
+        shapeRef.current = next;
+        return next;
+      });
     }, 4000);
     return () => clearInterval(interval);
   }, []);
@@ -177,14 +182,20 @@ export function HoeffdingHero() {
         }
       };
 
+      let lastUsedShape = "";
       const animate = () => {
         animationId = requestAnimationFrame(animate);
+        
+        if (shapeRef.current !== lastUsedShape) {
+          updateTargets(shapeRef.current);
+          lastUsedShape = shapeRef.current;
+        }
+
         const positions = points.geometry.attributes.position.array as Float32Array;
         const time = Date.now() * 0.001;
 
         for (let i = 0; i < count * 3; i++) {
           positions[i] += (targetPosArray[i] - positions[i]) * 0.05;
-          // Add some organic jitter
           positions[i] += Math.sin(time + i) * 0.02;
         }
         points.geometry.attributes.position.needsUpdate = true;
@@ -194,14 +205,13 @@ export function HoeffdingHero() {
         renderer.render(scene, camera);
       };
 
-      updateTargets(currentShape);
       animate();
 
-      return { updateTargets, renderer, scene, geometry, material };
+      return { renderer, geometry, material };
     };
 
-    let api: any;
-    init().then(res => api = res);
+    let cleanupApi: any;
+    init().then(res => cleanupApi = res);
 
     const onResize = () => {
       if (!renderer || !container) return;
@@ -214,32 +224,20 @@ export function HoeffdingHero() {
     return () => {
       window.removeEventListener("resize", onResize);
       cancelAnimationFrame(animationId);
-      api?.renderer?.dispose();
-      api?.geometry?.dispose();
-      api?.material?.dispose();
-      if (api?.renderer?.domElement && container.contains(api.renderer.domElement)) {
-        container.removeChild(api.renderer.domElement);
+      cleanupApi?.renderer?.dispose();
+      cleanupApi?.geometry?.dispose();
+      cleanupApi?.material?.dispose();
+      if (cleanupApi?.renderer?.domElement && container.contains(cleanupApi.renderer.domElement)) {
+        container.removeChild(cleanupApi.renderer.domElement);
       }
     };
   }, [capabilities.tier]);
-
-  // Update targets when shape state changes
-  const lastShape = useRef(currentShape);
-  useEffect(() => {
-    if (currentShape !== lastShape.current) {
-      // Logic handled inside Three.js loop via closure or shared ref if I had exposed it better, 
-      // but let's re-run the target update manually if needed.
-      // For now, the Three.js block above would need a way to see this. 
-      // I'll use a hacky event-based update or just accept the one-time init for this high-level hero.
-      // Refactoring slightly to use a ref for shape.
-    }
-  }, [currentShape]);
 
   return (
     <div className="absolute inset-0 z-0">
       <div ref={containerRef} className="w-full h-full opacity-60" />
       <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex gap-4 z-20">
-        {(Object.keys(GENERATORS) as (keyof typeof GENERATORS)[]).map(s => (
+        {(["linear", "ring", "x_shape", "sinusoidal"] as const).map(s => (
           <div 
             key={s} 
             className={`w-2 h-2 rounded-full transition-all duration-1000 ${currentShape === s ? "bg-cyan-400 w-8" : "bg-white/20"}`} 
@@ -251,7 +249,7 @@ export function HoeffdingHero() {
 }
 
 // ============================================
-// 2. THE DEPENDENCY LAB (Brilliant Pedagogical Hit)
+// 2. THE DEPENDENCY LAB
 // ============================================
 
 export function DependencyLab() {
@@ -279,7 +277,7 @@ export function DependencyLab() {
     const rx = getRanks(data.map(d => d.x));
     const ry = getRanks(data.map(d => d.y));
 
-    // 1. SCATTER PLOT (Rank Space)
+    // SCATTER PLOT
     const sSvg = d3.select(scatterRef.current);
     sSvg.selectAll("*").remove();
     const sW = scatterRef.current?.clientWidth || 400;
@@ -302,7 +300,7 @@ export function DependencyLab() {
       .attr("fill", COLORS.cyan)
       .attr("opacity", 0.5);
 
-    // 2. HEATMAP (Observed vs Product of Marginals)
+    // HEATMAP
     const hSvg = d3.select(heatRef.current);
     hSvg.selectAll("*").remove();
     const hW = heatRef.current?.clientWidth || 400;
@@ -312,17 +310,15 @@ export function DependencyLab() {
     const binSize = n / bins;
     const grid = Array.from({ length: bins * bins }, () => 0);
     
-    // Count Observed
     for (let i = 0; i < n; i++) {
       const bx = Math.min(bins - 1, Math.floor(rx[i] / binSize));
       const by = Math.min(bins - 1, Math.floor(ry[i] / binSize));
       grid[by * bins + bx]++;
     }
 
-    // Expected under independence is uniform in rank space: n / (bins*bins)
     const expected = n / (bins * bins);
     const colorScale = d3.scaleDiverging(d3.interpolateRdBu)
-      .domain([-expected, 0, expected]);
+      .domain([-expected * 1.5, 0, expected * 1.5]);
 
     const cellW = (hW - 2 * pad) / bins;
     const cellH = (hH - 2 * pad) / bins;
@@ -332,13 +328,13 @@ export function DependencyLab() {
       .enter()
       .append("rect")
       .attr("x", (_, i) => pad + (i % bins) * cellW)
-      .attr("y", (_, i) => pad + Math.floor(i / bins) * cellH)
+      .attr("y", (_, i) => pad + (bins - 1 - Math.floor(i / bins)) * cellH)
       .attr("width", cellW - 1)
       .attr("height", cellH - 1)
       .attr("fill", d => colorScale(d - expected))
       .attr("rx", 2);
 
-    hSvg.append("text").attr("x", hW / 2).attr("y", pad / 2).attr("text-anchor", "middle").attr("fill", "white").attr("font-size", "10").text("RESIDUAL HEATMAP (JOINT - MARGINAL)");
+    hSvg.append("text").attr("x", hW / 2).attr("y", pad / 2).attr("text-anchor", "middle").attr("fill", "white").attr("font-size", "10").attr("font-weight", "bold").text("RESIDUAL HEATMAP (JOINT - MARGINAL)");
 
   }, [data]);
 
@@ -384,16 +380,16 @@ export function DependencyLab() {
           <div className="aspect-square bg-black/40 rounded-3xl border border-white/5 overflow-hidden relative">
             <svg ref={heatRef} className="w-full h-full" />
             <div className="absolute bottom-4 right-4 flex gap-2 items-center">
-               <div className="w-2 h-2 rounded-full bg-red-500" />
-               <span className="text-[8px] text-slate-500 uppercase font-bold">Concentration</span>
-               <div className="w-2 h-2 rounded-full bg-blue-500" />
-               <span className="text-[8px] text-slate-500 uppercase font-bold">Depletion</span>
+               <div className="w-2 h-2 rounded-full bg-[#b2182b]" />
+               <span className="text-[8px] text-slate-500 uppercase font-bold">Excess</span>
+               <div className="w-2 h-2 rounded-full bg-[#2166ac]" />
+               <span className="text-[8px] text-slate-500 uppercase font-bold">Deficit</span>
             </div>
           </div>
           <div className="bg-slate-900/40 p-6 rounded-3xl border border-white/10">
             <h5 className="text-white text-xs font-bold uppercase mb-3">Pedagogical Insight</h5>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Hoeffding&apos;s D is essentially summing the &quot;energy&quot; in the residual heatmap. If the data were independent, the heatmap would be flat (grey). Notice how the <strong>Ring</strong> structure creates intense pockets of red and blue, even while Pearson (which only sees straight lines) averages out to zero.
+              Hoeffding&apos;s D is essentially summing the &quot;energy&quot; in the residual heatmap. If the data were independent, the heatmap would be flat (grey). Notice how the <strong>Ring</strong> structure creates intense pockets of excess and deficit, even while Pearson (which only sees straight lines) averages out to zero.
             </p>
           </div>
         </div>
@@ -410,16 +406,19 @@ export function OutlierCrusher() {
   const [withRanking, setWithRanking] = useState(false);
   const points = useMemo(() => [
     { x: 10, y: 12 }, { x: 12, y: 15 }, { x: 11, y: 11 }, { x: 13, y: 14 },
-    { x: 100, y: 100 } // THE MONSTER OUTLIER
+    { x: 100, y: 100 }
   ], []);
 
   return (
     <div className="hd-viz-container overflow-hidden">
-      <div className="hd-viz-header px-8 py-6 bg-amber-500/5 border-b border-amber-500/10">
-        <h4 className="text-amber-400 font-bold tracking-widest uppercase text-sm">The Outlier Crusher</h4>
+      <div className="hd-viz-header px-8 py-6 bg-amber-500/5 border-b border-amber-500/10 flex items-center justify-between">
+        <div>
+          <h4 className="text-amber-400 font-bold tracking-widest uppercase text-sm">The Outlier Crusher</h4>
+          <p className="text-[10px] text-amber-500/60 font-mono mt-1 uppercase">Robustness Test</p>
+        </div>
         <button 
           onClick={() => setWithRanking(!withRanking)}
-          className="hd-btn-action !bg-amber-500"
+          className="hd-btn-action !bg-amber-500 !px-6"
         >
           {withRanking ? "Show Raw Scale" : "Apply Ranking"}
         </button>
@@ -427,7 +426,8 @@ export function OutlierCrusher() {
       <div className="p-12 flex flex-col items-center justify-center min-h-[300px] relative">
         <div className="flex gap-8 items-end h-40">
           {points.map((p, i) => {
-            const val = withRanking ? getRanks(points.map(pt => pt.x))[i] : p.x;
+            const ranks = getRanks(points.map(pt => pt.x));
+            const val = withRanking ? ranks[i] : p.x;
             const height = withRanking ? (val / 5) * 100 : (val / 100) * 150;
             return (
               <div key={i} className="flex flex-col items-center gap-4">
@@ -441,14 +441,14 @@ export function OutlierCrusher() {
             );
           })}
         </div>
-        <div className="mt-12 text-center max-w-lg">
+        <div className="mt-12 text-center max-w-lg h-10">
           <AnimatePresence mode="wait">
             {!withRanking ? (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-red-400 font-bold uppercase tracking-tighter">
+              <motion.p key="raw" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-sm text-red-400 font-bold uppercase tracking-tighter">
                 The outlier (100) dominates the variance, making the other 4 points invisible!
               </motion.p>
             ) : (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-emerald-400 font-bold uppercase tracking-tighter">
+              <motion.p key="ranked" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-sm text-emerald-400 font-bold uppercase tracking-tighter">
                 Ranked: The outlier is just &quot;Position 5&quot;. Its destructive magnitude is gone.
               </motion.p>
             )}
@@ -460,24 +460,24 @@ export function OutlierCrusher() {
 }
 
 // ============================================
-// 4. RANKING WATERFALL (D3)
+// 4. RANKING WATERFALL
 // ============================================
 
 export function RankingVisualizer() {
   const [items, setItems] = useState(() => [
-    { id: Math.random(), val: 12 },
-    { id: Math.random(), val: 45 },
-    { id: Math.random(), val: 23 },
-    { id: Math.random(), val: 89 },
-    { id: Math.random(), val: 45 },
-    { id: Math.random(), val: 34 },
+    { id: 1, val: 12 },
+    { id: 2, val: 45 },
+    { id: 3, val: 23 },
+    { id: 4, val: 89 },
+    { id: 5, val: 45 },
+    { id: 6, val: 34 },
   ]);
 
   const ranks = useMemo(() => getRanks(items.map(i => i.val)), [items]);
 
   const addVal = () => {
     if (items.length >= 10) return;
-    setItems([...items, { id: Math.random(), val: Math.floor(Math.random() * 100) }]);
+    setItems([...items, { id: Date.now(), val: Math.floor(Math.random() * 100) }]);
   };
 
   const removeVal = (id: number) => {
@@ -486,14 +486,14 @@ export function RankingVisualizer() {
 
   return (
     <div className="hd-viz-container">
-       <div className="hd-viz-header">
+       <div className="hd-viz-header justify-between p-6">
         <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
           <span className="w-2 h-2 bg-purple-400 rounded-full" />
-          Interactive: From Values to Ranks
+          Interactive: Value to Rank
         </h4>
-        <button onClick={addVal} className="hd-btn-action">Add Value</button>
+        <button onClick={addVal} className="hd-btn-action !px-6">Add Item</button>
       </div>
-      <div className="p-8 md:p-12 overflow-x-auto scrollbar-thin scrollbar-thumb-white/10">
+      <div className="p-8 md:p-12 overflow-x-auto scrollbar-thin">
         <div className="flex gap-4 min-w-max">
           <AnimatePresence mode="popLayout">
             {items.map((item, i) => (
@@ -531,14 +531,14 @@ export function RankingVisualizer() {
         </div>
       </div>
       <div className="p-6 bg-white/[0.02] border-t border-white/5 text-sm text-slate-500 leading-relaxed">
-        Ranks ignore the absolute scale of numbers. If we have ties (like 45 above), they both get the average of the ranks they would have occupied. This makes the measure <strong>robust to outliers</strong>.
+        Ranks compress the data into a uniform distribution. Notice how <strong>ties</strong> (like the two 45s above) receive the average of their ranks.
       </div>
     </div>
   );
 }
 
 // ============================================
-// 5. LIVE CODE (Optimized display)
+// 5. LIVE CODE
 // ============================================
 
 export function CodePlayground() {
@@ -557,41 +557,41 @@ export function CodePlayground() {
 
   return (
     <div className="hd-viz-container overflow-hidden">
-      <div className="hd-viz-header">
+      <div className="hd-viz-header p-6 justify-between">
         <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
           <span className="w-2 h-2 bg-amber-400 rounded-full" />
-          Live Executing Logic
+          Live TypeScript Runtime
         </h4>
-        <button onClick={runCode} disabled={isLoading} className="hd-btn-action !bg-amber-500">{isLoading ? "Running..." : "Run TS Code"}</button>
+        <button onClick={runCode} disabled={isLoading} className="hd-btn-action !bg-amber-500 !px-8">{isLoading ? "Running..." : "Execute TS"}</button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2">
         <div className="p-6 bg-black font-mono text-[10px] text-slate-500 overflow-x-auto border-r border-white/5 h-[400px] scrollbar-thin">
-<pre>{`function calculateHoeffdingD(x, y) {
+<pre>{`// Observed Joint vs Expected Independent
+function computeD(x, y) {
   const R = getRanks(x);
   const S = getRanks(y);
   const n = x.length;
 
-  // 1. Compute Q (The Dependency Count)
-  const Q = x.map((_, i) => {
-    return 1 + count(j => R[j] < R[i] && S[j] < S[i]);
-  });
+  // Q counts the "lower-left" neighbors
+  const Q = x.map((_, i) => 1 + count(j => 
+    R[j] < R[i] && S[j] < S[i]
+  ));
 
-  // 2. Sum intermediate components
+  // The D terms quantify the residual energy
   let D1 = sum(i => (Q[i]-1)*(Q[i]-2));
   let D2 = sum(i => (R[i]-1)*(R[i]-2)*(S[i]-1)*(S[i]-2));
   let D3 = sum(i => (R[i]-2)*(S[i]-2)*(Q[i]-1));
 
-  // 3. Apply normalization
   return 30 * ((n-2)*(n-3)*D1 + D2 - 2*(n-2)*D3) / 
          (n*(n-1)*(n-2)*(n-3)*(n-4));
 }`}</pre>
         </div>
         <div className="p-8 bg-[#020204] flex flex-col items-center justify-center text-center">
-          <div className="text-[10px] uppercase font-black text-slate-700 tracking-[0.5em] mb-8">Console Output</div>
-          <motion.div animate={{ scale: result ? 1.1 : 1 }} className={`text-5xl font-mono font-black ${result ? "text-amber-400 shadow-amber-500/20" : "text-slate-900"}`}>
+          <div className="text-[10px] uppercase font-black text-slate-700 tracking-[0.5em] mb-8">System Console</div>
+          <motion.div animate={{ scale: result ? 1.1 : 1 }} className={`text-5xl font-mono font-black ${result ? "text-amber-400" : "text-slate-900"}`}>
             {result ? result.toFixed(6) : "0.000000"}
           </motion.div>
-          {result && <div className="mt-4 text-[10px] text-slate-500 uppercase tracking-widest font-bold">Dependency Score Computed</div>}
+          {result && <div className="mt-4 text-[10px] text-slate-500 uppercase tracking-widest font-bold">Calculation Complete</div>}
         </div>
       </div>
     </div>
