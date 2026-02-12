@@ -3,8 +3,18 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, Float, MeshDistortMaterial } from "@react-three/drei";
+import { 
+  OrbitControls, 
+  PerspectiveCamera, 
+  Float, 
+  MeshDistortMaterial, 
+  MeshTransmissionMaterial,
+  Environment,
+  Text,
+  Line
+} from "@react-three/drei";
 import * as d3 from "d3";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
 
 const COLORS = {
@@ -16,50 +26,21 @@ const COLORS = {
   slate: "#475569",
   emerald: "#10b981",
   blue: "#3b82f6",
+  purple: "#a855f7",
 };
 
-// Lazy-init helper using IntersectionObserver
-function useIntersectionInit(callback: () => (() => void) | void) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const initialized = useRef(false);
-  const cleanupRef = useRef<(() => void) | void>(undefined);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !initialized.current) {
-          initialized.current = true;
-          cleanupRef.current = callback();
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "200px" }
-    );
-
-    observer.observe(el);
-    return () => {
-      observer.disconnect();
-      cleanupRef.current?.();
-    };
-  }, [callback]);
-
-  return containerRef;
-}
-
 // ============================================
-// 0. MINIMAL CMA-ES ENGINE (Pure JS)
+// 0. ENHANCED CMA-ES ENGINE
 // ============================================
 
-class MinimalCMAES {
+class ProCMAES {
   dim: number;
   mean: number[];
   sigma: number;
   lambda: number;
   mu: number;
   weights: number[];
+  mueff: number;
   C: number[][];
   pc: number[];
   ps: number[];
@@ -70,6 +51,11 @@ class MinimalCMAES {
   damps: number;
   chiN: number;
   generation: number;
+  
+  // Metadata for Viz
+  lastSamples: { x: number[], f: number, rank: number, isElite: boolean }[] = [];
+  lastB: number[][] = [];
+  lastD: number[] = [];
 
   constructor(dim: number, x0: number[], sigma: number) {
     this.dim = dim;
@@ -83,13 +69,13 @@ class MinimalCMAES {
     const rawWeights = Array.from({ length: this.mu }, (_, i) => Math.log(this.mu + 0.5) - Math.log(i + 1));
     const sumW = rawWeights.reduce((a, b) => a + b, 0);
     this.weights = rawWeights.map(w => w / sumW);
-    const mueff = 1 / this.weights.reduce((a, b) => a + b**2, 0);
+    this.mueff = 1 / this.weights.reduce((a, b) => a + b**2, 0);
 
-    this.cc = (4 + mueff / dim) / (dim + 4 + 2 * mueff / dim);
-    this.cs = (mueff + 2) / (dim + mueff + 5);
-    this.c1 = 2 / ((dim + 1.3)**2 + mueff);
-    this.cmu = Math.min(1 - this.c1, 2 * (mueff - 2 + 1/mueff) / ((dim + 2)**2 + mueff));
-    this.damps = 1 + 2 * Math.max(0, Math.sqrt((mueff - 1) / (dim + 1)) - 1) + this.cs;
+    this.cc = (4 + this.mueff / dim) / (dim + 4 + 2 * this.mueff / dim);
+    this.cs = (this.mueff + 2) / (dim + this.mueff + 5);
+    this.c1 = 2 / ((dim + 1.3)**2 + this.mueff);
+    this.cmu = Math.min(1 - this.c1, 2 * (this.mueff - 2 + 1/this.mueff) / ((dim + 2)**2 + this.mueff));
+    this.damps = 1 + 2 * Math.max(0, Math.sqrt((this.mueff - 1) / (dim + 1)) - 1) + this.cs;
 
     this.C = Array.from({ length: dim }, (_, i) => 
       Array.from({ length: dim }, (_, j) => (i === j ? 1 : 0))
@@ -97,10 +83,16 @@ class MinimalCMAES {
     this.pc = new Array(dim).fill(0);
     this.ps = new Array(dim).fill(0);
     this.chiN = Math.sqrt(dim) * (1 - 1 / (4 * dim) + 1 / (21 * dim**2));
+    
+    const [B, D] = this.eigen();
+    this.lastB = B;
+    this.lastD = D;
   }
 
   sample(): number[][] {
     const [B, D] = this.eigen();
+    this.lastB = B;
+    this.lastD = D;
     const samples: number[][] = [];
     for (let i = 0; i < this.lambda; i++) {
       const z = Array.from({ length: this.dim }, () => this.randn());
@@ -121,9 +113,18 @@ class MinimalCMAES {
     const indices = Array.from({ length: this.lambda }, (_, i) => i);
     indices.sort((a, b) => fitnesses[a] - fitnesses[b]);
 
+    // Store metadata for viz
+    this.lastSamples = indices.map((idx, rank) => ({
+      x: samples[idx],
+      f: fitnesses[idx],
+      rank,
+      isElite: rank < this.mu
+    }));
+
     const oldMean = [...this.mean];
     const bestIndices = indices.slice(0, this.mu);
     
+    // Update mean
     this.mean = new Array(this.dim).fill(0);
     for (let i = 0; i < this.mu; i++) {
       const idx = bestIndices[i];
@@ -135,7 +136,7 @@ class MinimalCMAES {
     const [B, D] = this.eigen();
     const invD = D.map(d => 1 / (d || 1e-10));
     
-    const diff = this.mean.map((m, i) => (m - oldMean[i]) / this.sigma);
+    const diff = this.mean.map((m, i) => (m - oldMean[i]) / (this.sigma || 1e-10));
     const Bt_diff = new Array(this.dim).fill(0);
     for (let i = 0; i < this.dim; i++) {
       for (let j = 0; j < this.dim; j++) {
@@ -145,8 +146,7 @@ class MinimalCMAES {
     const zw = Bt_diff.map((v, i) => v * invD[i]);
     const y_w = diff;
 
-    const mueff = 1 / this.weights.reduce((a, b) => a + b**2, 0);
-    const cs_sqrt = Math.sqrt(this.cs * (2 - this.cs) * mueff);
+    const cs_sqrt = Math.sqrt(this.cs * (2 - this.cs) * this.mueff);
     for (let i = 0; i < this.dim; i++) {
       this.ps[i] = (1 - this.cs) * this.ps[i] + cs_sqrt * zw[i];
     }
@@ -155,7 +155,7 @@ class MinimalCMAES {
     this.sigma *= Math.exp((this.cs / this.damps) * (psLen / this.chiN - 1));
 
     const hsig = psLen / Math.sqrt(1 - (1 - this.cs)**(2 * this.generation)) / this.chiN < 1.4 + 2 / (this.dim + 1) ? 1 : 0;
-    const cc_sqrt = Math.sqrt(this.cc * (2 - this.cc) * mueff);
+    const cc_sqrt = Math.sqrt(this.cc * (2 - this.cc) * this.mueff);
     for (let i = 0; i < this.dim; i++) {
       this.pc[i] = (1 - this.cc) * this.pc[i] + hsig * cc_sqrt * y_w[i];
     }
@@ -166,15 +166,14 @@ class MinimalCMAES {
         let rankMu = 0;
         for (let k = 0; k < this.mu; k++) {
           const idx = bestIndices[k];
-          const yk_i = (samples[idx][i] - oldMean[i]) / this.sigma;
-          const yk_j = (samples[idx][j] - oldMean[j]) / this.sigma;
+          const yk_i = (samples[idx][i] - oldMean[i]) / (this.sigma || 1e-10);
+          const yk_j = (samples[idx][j] - oldMean[j]) / (this.sigma || 1e-10);
           rankMu += this.weights[k] * yk_i * yk_j;
         }
         this.C[i][j] = (1 - this.c1 - this.cmu) * this.C[i][j] + this.c1 * (this.pc[i] * this.pc[j] + c1_update * this.C[i][j]) + this.cmu * rankMu;
       }
     }
 
-    // Ensure symmetry
     for (let i = 0; i < this.dim; i++) {
       for (let j = 0; j < i; j++) {
         this.C[i][j] = this.C[j][i] = (this.C[i][j] + this.C[j][i]) / 2;
@@ -182,73 +181,63 @@ class MinimalCMAES {
     }
   }
 
-  // Jacobi eigenvalue algorithm for symmetric matrices
   eigen(): [number[][], number[]] {
     const n = this.dim;
     const B = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
-    const D = this.C.map(row => [...row]);
+    const D_mat = this.C.map(row => [...row]);
     const maxIters = 100;
     const eps = 1e-15;
 
     for (let iter = 0; iter < maxIters; iter++) {
       let maxVal = 0;
       let p = 0, q = 1;
-
-      // Find largest off-diagonal element
       for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
-          if (Math.abs(D[i][j]) > maxVal) {
-            maxVal = Math.abs(D[i][j]);
+          if (Math.abs(D_mat[i][j]) > maxVal) {
+            maxVal = Math.abs(D_mat[i][j]);
             p = i; q = j;
           }
         }
       }
-
       if (maxVal < eps) break;
-
-      const diff = D[q][q] - D[p][p];
+      const diff = D_mat[q][q] - D_mat[p][p];
       let t;
-      if (Math.abs(D[p][q]) < Math.abs(diff) * eps) {
-        t = D[p][q] / diff;
+      if (Math.abs(D_mat[p][q]) < Math.abs(diff) * eps) {
+        t = D_mat[p][q] / diff;
       } else {
-        const phi = diff / (2 * D[p][q]);
+        const phi = diff / (2 * D_mat[p][q]);
         t = 1 / (Math.abs(phi) + Math.sqrt(1 + phi * phi));
         if (phi < 0) t = -t;
       }
-
       const c = 1 / Math.sqrt(1 + t * t);
       const s = t * c;
       const tau = s / (1 + c);
-      const temp = D[p][q];
-      
-      D[p][q] = 0;
-      D[p][p] -= t * temp;
-      D[q][q] += t * temp;
-
+      const temp = D_mat[p][q];
+      D_mat[p][q] = 0;
+      D_mat[p][p] -= t * temp;
+      D_mat[q][q] += t * temp;
       for (let i = 0; i < p; i++) {
-        const g = D[i][p], h = D[i][q];
-        D[i][p] = g - s * (h + g * tau);
-        D[i][q] = h + s * (g - h * tau);
+        const g = D_mat[i][p], h = D_mat[i][q];
+        D_mat[i][p] = g - s * (h + g * tau);
+        D_mat[i][q] = h + s * (g - h * tau);
       }
       for (let i = p + 1; i < q; i++) {
-        const g = D[p][i], h = D[i][q];
-        D[p][i] = g - s * (h + g * tau);
-        D[i][q] = h + s * (g - h * tau);
+        const g = D_mat[p][i], h = D_mat[i][q];
+        D_mat[p][i] = g - s * (h + g * tau);
+        D_mat[i][q] = h + s * (g - h * tau);
       }
       for (let i = q + 1; i < n; i++) {
-        const g = D[p][i], h = D[q][i];
-        D[p][i] = g - s * (h + g * tau);
-        D[q][i] = h + s * (g - h * tau);
+        const g = D_mat[p][i], h = D_mat[q][i];
+        D_mat[p][i] = g - s * (h + g * tau);
+        D_mat[q][i] = h + s * (g - h * tau);
       }
-
       for (let i = 0; i < n; i++) {
         const g = B[i][p], h = B[i][q];
         B[i][p] = g - s * (h + g * tau);
         B[i][q] = h + s * (g - h * tau);
       }
     }
-
-    const eigenvalues = D.map((_, i) => Math.sqrt(Math.max(0, D[i][i])));
+    const eigenvalues = D_mat.map((_, i) => Math.sqrt(Math.max(0, D_mat[i][i])));
     return [B, eigenvalues];
   }
 
@@ -261,100 +250,94 @@ class MinimalCMAES {
 }
 
 // ============================================
-// 1. HERO ELLIPSOID (Three.js)
+// 1. HERO: THE LIVING DISTRIBUTION (Three.js)
 // ============================================
 
-function EllipsoidParticles() {
+function DistributionCloud() {
+  const meshRef = useRef<THREE.Mesh>(null);
   const pointsRef = useRef<THREE.Points>(null);
   const { capabilities } = useDeviceCapabilities();
   
-  const count = useMemo(() => {
-    return capabilities.tier === "low" ? 400 : 1200;
-  }, [capabilities.tier]);
-
+  const count = useMemo(() => capabilities.tier === "low" ? 300 : 800, [capabilities.tier]);
   const positions = useMemo(() => new Float32Array(count * 3), [count]);
+  const opacities = useMemo(() => new Float32Array(count), [count]);
 
   useFrame((state) => {
-    if (!pointsRef.current) return;
-    const time = state.clock.getElapsedTime();
+    if (!meshRef.current || !pointsRef.current) return;
+    const t = state.clock.getElapsedTime();
     
-    const a = 15 + 5 * Math.sin(time * 0.5);
-    const b = 8 + 3 * Math.cos(time * 0.7);
-    const c = 6 + 2 * Math.sin(time * 0.3);
+    // Animate the "Cigar" adaptation
+    const scaleX = 1 + 0.8 * Math.sin(t * 0.4);
+    const scaleY = 1 + 0.4 * Math.cos(t * 0.6);
+    const scaleZ = 0.5 + 0.2 * Math.sin(t * 0.8);
     
-    const rotationX = time * 0.2;
-    const rotationY = time * 0.15;
+    meshRef.current.scale.set(scaleX * 4, scaleY * 4, scaleZ * 4);
+    meshRef.current.rotation.y = t * 0.2;
+    meshRef.current.rotation.z = Math.sin(t * 0.1) * 0.5;
 
+    // Particles representing "sampling"
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      const u = (i / count) * Math.PI * 2;
-      const v = Math.acos(2 * ((i * 137.5) % 100) / 100 - 1);
+      // Oscillating distance from center
+      const r = (2 + Math.sin(t + i * 0.5) * 0.5) * 5;
+      const phi = Math.acos(2 * ((i * 1.618) % 1) - 1);
+      const theta = 2 * Math.PI * ((i * 2.718) % 1);
       
-      let x = a * Math.sin(v) * Math.cos(u);
-      let y = b * Math.sin(v) * Math.sin(u);
-      let z = c * Math.cos(v);
+      // Transform by the "Learned Covariance"
+      positions[i3] = r * Math.sin(phi) * Math.cos(theta) * scaleX;
+      positions[i3 + 1] = r * Math.sin(phi) * Math.sin(theta) * scaleY;
+      positions[i3 + 2] = r * Math.cos(phi) * scaleZ;
       
-      const noise = Math.sin(time + i) * 0.5;
-      x += noise; y += noise; z += noise;
-
-      const x1 = x;
-      const y1 = y * Math.cos(rotationX) - z * Math.sin(rotationX);
-      const z1 = y * Math.sin(rotationX) + z * Math.cos(rotationX);
-      
-      const x2 = x1 * Math.cos(rotationY) + z1 * Math.sin(rotationY);
-      const y2 = y1;
-      const z2 = -x1 * Math.sin(rotationY) + z1 * Math.cos(rotationY);
-
-      positions[i3] = x2;
-      positions[i3 + 1] = y2;
-      positions[i3 + 2] = z2;
+      opacities[i] = 0.2 + 0.8 * Math.pow(Math.sin(t * 2 + i), 2);
     }
-    
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
+    <group>
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[1, 64, 64]} />
+        <MeshTransmissionMaterial
+          backside
+          samples={4}
+          thickness={1}
+          roughness={0.1}
+          chromaticAberration={0.5}
+          anisotropy={0.3}
+          distortion={0.5}
+          distortionScale={0.5}
+          temporalDistortion={0.1}
+          color={COLORS.amber}
+          emissive={COLORS.orange}
+          emissiveIntensity={0.2}
         />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.25}
-        color={COLORS.amber}
-        transparent
-        opacity={0.6}
-        blending={THREE.AdditiveBlending}
-        sizeAttenuation
-      />
-    </points>
+      </mesh>
+      <points ref={pointsRef}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.1}
+          color={COLORS.amber}
+          transparent
+          opacity={0.4}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+    </group>
   );
 }
 
 export function HeroCMAES() {
   return (
-    <div className="absolute inset-0 z-0 opacity-40">
+    <div className="absolute inset-0 z-0">
       <Canvas dpr={[1, 2]}>
-        <PerspectiveCamera makeDefault position={[0, 0, 40]} fov={50} />
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-          <EllipsoidParticles />
-          <mesh rotation={[0.5, 0.5, 0]}>
-            <sphereGeometry args={[4, 32, 32]} />
-            <MeshDistortMaterial
-              color={COLORS.orange}
-              speed={2}
-              distort={0.4}
-              radius={1}
-              emissive={COLORS.orange}
-              emissiveIntensity={0.5}
-            />
-          </mesh>
+        <PerspectiveCamera makeDefault position={[0, 0, 30]} fov={40} />
+        <Environment preset="night" />
+        <ambientLight intensity={0.2} />
+        <pointLight position={[10, 10, 10]} intensity={1} color={COLORS.amber} />
+        <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+          <DistributionCloud />
         </Float>
         <OrbitControls enableZoom={false} enablePan={false} />
       </Canvas>
@@ -363,130 +346,323 @@ export function HeroCMAES() {
 }
 
 // ============================================
-// 2. CONTOUR VIZ (D3)
+// 2. INTERACTIVE WALKTHROUGH: THE 4 STEPS
 // ============================================
 
-export function DistributionViz() {
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const [gen, setGen] = useState(0);
-  const [solver, setSolver] = useState(() => new MinimalCMAES(2, [0, 0], 1.5));
-  const [history, setHistory] = useState<{mean: number[], samples: number[][]}[]>([]);
+const STEPS = [
+  { id: "sample", title: "1. Isotropic Sampling", desc: "Initially, the algorithm knows nothing. It samples points from a spherical Gaussian distribution.", color: COLORS.blue },
+  { id: "rank", title: "2. Selection & Ranking", desc: "Each point is evaluated. The 'Elite' (top 50%) are chosen to drive the next generation.", color: COLORS.emerald },
+  { id: "adapt-mean", title: "3. Mean Shift", desc: "The center of the search moves toward the weighted average of the survivors.", color: COLORS.amber },
+  { id: "adapt-cov", title: "4. Covariance Stretch", desc: "The ellipsoid elongates along successful directions, learning the objective's geometry.", color: COLORS.orange }
+];
+
+export function SelectionWalkthrough() {
+  const [stepIdx, setStepIdx] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const solver = useMemo(() => new ProCMAES(2, [0, 0], 2), []);
+  const [data, setData] = useState<any>(null);
 
   const objective = (x: number[]) => {
-    const x_rot = x[0] * Math.cos(0.5) - x[1] * Math.sin(0.5);
-    const y_rot = x[0] * Math.sin(0.5) + x[1] * Math.cos(0.5);
-    return x_rot**2 + (y_rot / 5)**2;
+    const x_rot = x[0] * Math.cos(0.4) - x[1] * Math.sin(0.4);
+    const y_rot = x[0] * Math.sin(0.4) + x[1] * Math.cos(0.4);
+    return x_rot**2 + (y_rot / 4)**2; // Narrow valley
   };
 
-  const step = useCallback(() => {
-    const samples = solver.sample();
-    const fitnesses = samples.map(objective);
-    setHistory(prev => [...prev, { mean: [...solver.mean], samples }]);
-    solver.update(samples, fitnesses);
-    setGen(g => g + 1);
-  }, [solver]);
-
-  const reset = useCallback(() => {
-    setSolver(new MinimalCMAES(2, [0, 0], 1.5));
-    setHistory([]);
-    setGen(0);
-  }, []);
-
-  const containerRef = useIntersectionInit(useCallback(() => {
-    return () => {};
-  }, []));
+  const nextStep = useCallback(() => {
+    if (stepIdx === 0) {
+      // Sample
+      const samples = solver.sample();
+      const fitnesses = samples.map(objective);
+      const indices = Array.from({ length: solver.lambda }, (_, i) => i);
+      indices.sort((a, b) => fitnesses[a] - fitnesses[b]);
+      
+      setData({
+        samples: indices.map((idx, rank) => ({
+          x: samples[idx],
+          f: fitnesses[idx],
+          rank,
+          isElite: rank < solver.mu
+        })),
+        oldMean: [...solver.mean],
+        oldC: solver.C.map(r => [...r]),
+        oldB: solver.lastB.map(r => [...r]),
+        oldD: [...solver.lastD]
+      });
+      setStepIdx(1);
+    } else if (stepIdx === 1) {
+      setStepIdx(2);
+    } else if (stepIdx === 2) {
+      setStepIdx(3);
+    } else {
+      // Apply update and reset to sample
+      const fitnesses = data.samples.map((s: any) => s.f);
+      const rawSamples = data.samples.map((s: any) => s.x);
+      solver.update(rawSamples, fitnesses);
+      setStepIdx(0);
+      setData(null);
+    }
+  }, [stepIdx, data, solver]);
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
-    const container = d3.select(chartContainerRef.current);
-    container.selectAll("svg").remove();
+    if (!containerRef.current) return;
+    const svg = d3.select(containerRef.current).select("svg");
+    svg.selectAll(".content").remove();
+    
+    const w = containerRef.current.clientWidth;
+    const h = 400;
+    const g = svg.append("g").attr("class", "content");
+    
+    const x = d3.scaleLinear().domain([-8, 8]).range([0, w]);
+    const y = d3.scaleLinear().domain([-8, 8]).range([h, 0]);
 
-    const width = chartContainerRef.current.clientWidth;
-    const height = 400;
-    const svg = container.append("svg").attr("width", width).attr("height", height);
-
-    const x = d3.scaleLinear().domain([-10, 10]).range([0, width]);
-    const y = d3.scaleLinear().domain([-10, 10]).range([height, 0]);
-
-    const contours = d3.contours().size([40, 40]);
+    // Draw background contours
     const grid = new Array(40 * 40);
     for (let i = 0; i < 40; i++) {
       for (let j = 0; j < 40; j++) {
-        const vx = -10 + (j / 39) * 20;
-        const vy = -10 + (i / 39) * 20;
-        grid[i * 40 + j] = objective([vx, vy]);
+        grid[i * 40 + j] = objective([-8 + (j/39)*16, -8 + (i/39)*16]);
       }
     }
-
-    svg.append("g")
-      .attr("stroke", "white")
-      .attr("stroke-opacity", 0.05)
-      .selectAll("path")
+    const contours = d3.contours().size([40, 40]);
+    g.selectAll("path.contour")
       .data(contours(grid))
       .enter().append("path")
-      .attr("d", d3.geoPath(d3.geoIdentity().scale(width / 40).translate([0, 0])))
+      .attr("class", "contour")
+      .attr("d", d3.geoPath(d3.geoIdentity().scale(w / 40)))
       .attr("fill", "none")
-      .attr("stroke", "rgba(255,255,255,0.1)");
+      .attr("stroke", "rgba(255,255,255,0.05)");
 
-    if (history.length > 0) {
-      const current = history[history.length - 1];
+    if (data) {
+      // Draw Ellipse
+      const [B, D] = stepIdx >= 3 ? solver.eigen() : [data.oldB, data.oldD];
+      const currentMean = stepIdx >= 2 ? solver.mean : data.oldMean;
+      const angle = Math.atan2(B[1][0], B[0][0]) * 180 / Math.PI;
       
-      svg.selectAll(".sample")
-        .data(current.samples)
-        .enter().append("circle")
-        .attr("cx", d => x(d[0]))
-        .attr("cy", d => y(d[1]))
-        .attr("r", 3)
-        .attr("fill", COLORS.amber)
-        .attr("opacity", 0.6);
-
-      const line = d3.line<{mean: number[]}>().x(d => x(d.mean[0])).y(d => y(d.mean[1]));
-      svg.append("path")
-        .datum(history)
+      const ellipse = g.append("ellipse")
+        .attr("cx", x(currentMean[0]))
+        .attr("cy", y(currentMean[1]))
+        .attr("rx", (D[0] * solver.sigma) * (w / 16))
+        .attr("ry", (D[1] * solver.sigma) * (w / 16))
+        .attr("transform", `rotate(${-angle}, ${x(currentMean[0])}, ${y(currentMean[1])})`)
         .attr("fill", "none")
-        .attr("stroke", COLORS.orange)
+        .attr("stroke", stepIdx >= 3 ? COLORS.orange : COLORS.slate)
         .attr("stroke-width", 2)
-        .attr("d", line);
+        .attr("stroke-dasharray", stepIdx >= 3 ? "none" : "4,4")
+        .style("opacity", 0.6);
 
-      svg.append("circle")
-        .attr("cx", x(current.mean[0]))
-        .attr("cy", y(current.mean[1]))
-        .attr("r", 5)
-        .attr("fill", COLORS.red)
-        .attr("stroke", "white")
-        .attr("stroke-width", 2);
+      // Draw Samples
+      const points = g.selectAll("circle.sample")
+        .data(data.samples)
+        .enter().append("circle")
+        .attr("class", "sample")
+        .attr("cx", (d: any) => x(d.x[0]))
+        .attr("cy", (d: any) => y(d.x[1]))
+        .attr("r", (d: any) => d.isElite ? 5 : 3)
+        .attr("fill", (d: any) => {
+          if (stepIdx === 0) return COLORS.blue;
+          return d.isElite ? COLORS.emerald : COLORS.red;
+        })
+        .style("opacity", (d: any) => {
+          if (stepIdx === 1) return 1;
+          if (stepIdx >= 2) return d.isElite ? 1 : 0.1;
+          return 0.6;
+        });
+
+      // Mean shift line
+      if (stepIdx >= 2) {
+        g.append("line")
+          .attr("x1", x(data.oldMean[0]))
+          .attr("y1", y(data.oldMean[1]))
+          .attr("x2", x(solver.mean[0]))
+          .attr("y2", y(solver.mean[1]))
+          .attr("stroke", COLORS.amber)
+          .attr("stroke-width", 2)
+          .attr("marker-end", "url(#arrow)");
+      }
+    } else {
+      // Just show mean if no data
+      g.append("circle")
+        .attr("cx", x(solver.mean[0]))
+        .attr("cy", y(solver.mean[1]))
+        .attr("r", 6)
+        .attr("fill", COLORS.amber)
+        .attr("stroke", "white");
     }
-  }, [history, gen]);
+
+  }, [data, stepIdx, solver]);
 
   return (
-    <div ref={containerRef} className="rq-viz-container overflow-hidden">
+    <div className="rq-viz-container">
       <div className="rq-viz-header">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 flex items-center justify-center">
-            <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+            <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
           <div>
-            <h4 className="font-bold text-white text-base uppercase tracking-widest">Visual 01</h4>
-            <div className="text-[11px] text-slate-400 uppercase tracking-[0.2em] font-mono">The Sampling Ellipsoid</div>
+            <h4 className="font-bold text-white text-base uppercase tracking-widest">Interactive 01</h4>
+            <div className="text-[11px] text-slate-400 uppercase tracking-[0.2em] font-mono">The Selection Loop</div>
           </div>
         </div>
-        <div className="flex gap-3">
-          <button onClick={step} className="rq-btn-action">Next Generation</button>
-          <button onClick={reset} className="rq-btn-secondary">Reset</button>
-        </div>
+        <button onClick={nextStep} className="rq-btn-action">
+          {stepIdx === 3 ? "Commit Update" : "Next Phase"}
+        </button>
       </div>
-      <div ref={chartContainerRef} className="relative w-full h-[400px] bg-black/20" />
-      <div className="p-4 border-t border-white/5 text-center text-[11px] text-slate-500 uppercase tracking-widest font-mono">
-        Generation: {gen} | Dim: 2 | Population: {solver.lambda}
+      
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-px bg-white/5">
+        {STEPS.map((s, i) => (
+          <div key={s.id} className={`p-4 transition-colors duration-500 ${stepIdx === i ? "bg-white/10" : "bg-transparent opacity-40"}`}>
+            <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: s.color }}>{s.title}</div>
+            <p className="text-xs text-slate-400 leading-tight mb-0">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <div ref={containerRef} className="relative w-full h-[400px] bg-black/40 overflow-hidden">
+        <svg width="100%" height="400">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill={COLORS.amber} />
+            </marker>
+          </defs>
+        </svg>
       </div>
     </div>
   );
 }
 
 // ============================================
-// 3. BENCHMARK RUNNER
+// 3. ILL-CONDITIONED VALLEY: CMA vs GRADIENT
+// ============================================
+
+export function ComparisonViz() {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<"cma" | "gd">("cma");
+  const [isRunning, setIsRunning] = useState(false);
+  const [history, setHistory] = useState<{x: number[], type: string}[]>([]);
+
+  const objective = (x: number[]) => {
+    // A rotated, extremely narrow valley (The "Cigar" function)
+    const x_rot = x[0] * Math.cos(0.5) - x[1] * Math.sin(0.5);
+    const y_rot = x[0] * Math.sin(0.5) + x[1] * Math.cos(0.5);
+    return x_rot**2 + (y_rot * 10)**2;
+  };
+
+  const run = useCallback(async () => {
+    setIsRunning(true);
+    setHistory([]);
+    const start = [4, 4];
+    
+    if (active === "cma") {
+      const solver = new ProCMAES(2, start, 0.5);
+      const h: any[] = [{ x: [...start], type: "mean" }];
+      for (let i = 0; i < 40; i++) {
+        const samples = solver.sample();
+        const fitnesses = samples.map(objective);
+        solver.update(samples, fitnesses);
+        h.push({ x: [...solver.mean], type: "mean" });
+        setHistory([...h]);
+        if (Math.min(...fitnesses) < 1e-4) break;
+        await new Promise(r => setTimeout(r, 50));
+      }
+    } else {
+      // Gradient Descent with constant learning rate
+      let cur = [...start];
+      const h: any[] = [{ x: [...cur], type: "mean" }];
+      const lr = 0.005;
+      for (let i = 0; i < 100; i++) {
+        // Approximate gradient
+        const eps = 1e-5;
+        const gx = (objective([cur[0] + eps, cur[1]]) - objective([cur[0] - eps, cur[1]])) / (2 * eps);
+        const gy = (objective([cur[0], cur[1] + eps]) - objective([cur[0], cur[1] - eps])) / (2 * eps);
+        cur[0] -= lr * gx;
+        cur[1] -= lr * gy;
+        h.push({ x: [...cur], type: "mean" });
+        setHistory([...h]);
+        if (objective(cur) < 1e-4) break;
+        await new Promise(r => setTimeout(r, 20));
+      }
+    }
+    setIsRunning(false);
+  }, [active]);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const container = d3.select(chartRef.current);
+    container.selectAll("svg").remove();
+    const w = chartRef.current.clientWidth;
+    const h = 400;
+    const svg = container.append("svg").attr("width", w).attr("height", h);
+    const x = d3.scaleLinear().domain([-5, 5]).range([0, w]);
+    const y = d3.scaleLinear().domain([-5, 5]).range([h, 0]);
+
+    // Contours
+    const grid = new Array(40 * 40);
+    for (let i = 0; i < 40; i++) {
+      for (let j = 0; j < 40; j++) {
+        grid[i * 40 + j] = objective([-5 + (j/39)*10, -5 + (i/39)*10]);
+      }
+    }
+    const contours = d3.contours().size([40, 40]);
+    svg.selectAll("path.contour")
+      .data(contours(grid))
+      .enter().append("path")
+      .attr("d", d3.geoPath(d3.geoIdentity().scale(w / 40)))
+      .attr("fill", "none")
+      .attr("stroke", "rgba(255,255,255,0.08)");
+
+    // Path
+    if (history.length > 0) {
+      const line = d3.line<any>().x(d => x(d.x[0])).y(d => y(d.x[1]));
+      svg.append("path")
+        .datum(history)
+        .attr("fill", "none")
+        .attr("stroke", active === "cma" ? COLORS.orange : COLORS.blue)
+        .attr("stroke-width", 3)
+        .attr("d", line);
+      
+      svg.append("circle")
+        .attr("cx", x(history[history.length - 1].x[0]))
+        .attr("cy", y(history[history.length - 1].x[1]))
+        .attr("r", 5)
+        .attr("fill", "white");
+    }
+  }, [history, active]);
+
+  return (
+    <div className="rq-viz-container overflow-hidden">
+      <div className="rq-viz-header">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-2xl bg-orange-500/20 flex items-center justify-center">
+            <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-bold text-white text-base uppercase tracking-widest">Interactive 02</h4>
+            <div className="text-[11px] text-slate-400 uppercase tracking-[0.2em] font-mono">CMA-ES vs Gradient Descent</div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setActive("cma")} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase transition-all ${active === "cma" ? "bg-orange-500 text-black" : "bg-white/5 text-slate-400"}`}>CMA-ES</button>
+          <button onClick={() => setActive("gd")} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase transition-all ${active === "gd" ? "bg-blue-500 text-black" : "bg-white/5 text-slate-400"}`}>Gradient Descent</button>
+          <button onClick={run} disabled={isRunning} className="rq-btn-action ml-4">Play</button>
+        </div>
+      </div>
+      <div className="p-6 bg-white/[0.02] border-b border-white/5">
+        <p className="text-sm text-slate-400 mb-0">
+          In a <strong>narrow, rotated valley</strong>, standard Gradient Descent often oscillates wildly because its steps aren't aligned with the curvature. 
+          <span className="text-orange-400 font-bold ml-1">CMA-ES</span> learns the "Cigar" shape, stretching its distribution to slide smoothly down the spine.
+        </p>
+      </div>
+      <div ref={chartRef} className="relative w-full h-[400px] bg-black/20" />
+    </div>
+  );
+}
+
+// ============================================
+// 4. BENCHMARK RUNNER (POLISHED)
 // ============================================
 
 const BENCHMARKS = {
@@ -511,117 +687,111 @@ const BENCHMARKS = {
 export function BenchmarkRunner() {
   const chartRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<keyof typeof BENCHMARKS>("Rastrigin");
-  const [dim, setDim] = useState(2);
-  const [popSize, setPopSize] = useState(10);
-  const [results, setResults] = useState<{gen: number, best: number}[]>([]);
+  const [dim, setDim] = useState(4);
+  const [results, setResults] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-
-  const containerRef = useIntersectionInit(useCallback(() => {
-    return () => {};
-  }, []));
+  const [currentC, setCurrentC] = useState<number[][]>([]);
 
   const run = useCallback(async () => {
     setIsRunning(true);
-    const solver = new MinimalCMAES(dim, new Array(dim).fill(3), 1.0);
-    solver.lambda = popSize;
-    const history: {gen: number, best: number}[] = [];
+    const solver = new ProCMAES(dim, new Array(dim).fill(3), 1.0);
+    const history: any[] = [];
     
     for (let i = 0; i < 100; i++) {
       const samples = solver.sample();
       const fitnesses = samples.map(BENCHMARKS[selected]);
       const best = Math.min(...fitnesses);
       solver.update(samples, fitnesses);
-      history.push({ gen: i, best });
+      
+      const res = { gen: i, best, sigma: solver.sigma };
+      history.push(res);
       setResults([...history]);
-      if (best < 1e-6) break;
-      await new Promise(r => setTimeout(r, 20));
+      
+      // Update UI state for matrix snippet
+      if (i % 2 === 0) {
+        setCurrentC(solver.C.slice(0, 3).map(r => r.slice(0, 3)));
+      }
+
+      if (best < 1e-10) break;
+      await new Promise(r => setTimeout(r, 10));
     }
     setIsRunning(false);
-  }, [dim, popSize, selected]);
+  }, [dim, selected]);
 
   useEffect(() => {
     if (!chartRef.current || results.length === 0) return;
     const container = d3.select(chartRef.current);
     container.selectAll("svg").remove();
+    const w = chartRef.current.clientWidth;
+    const h = 240;
+    const svg = container.append("svg").attr("width", w).attr("height", h);
+    
+    const x = d3.scaleLinear().domain([0, results.length]).range([60, w - 20]);
+    const y = d3.scaleLog().domain([1e-10, 100]).range([h - 40, 20]);
 
-    const width = chartRef.current.clientWidth;
-    const height = 240;
-    const svg = container.append("svg").attr("width", width).attr("height", height);
+    svg.append("g").attr("transform", `translate(0, ${h - 40})`).call(d3.axisBottom(x).ticks(5)).attr("color", "#444");
+    svg.append("g").attr("transform", `translate(60, 0)`).call(d3.axisLeft(y).ticks(5, "~e")).attr("color", "#444");
 
-    const x = d3.scaleLinear().domain([0, results.length]).range([50, width - 20]);
-    const y = d3.scaleLog().domain([Math.max(1e-7, d3.min(results, d => d.best) || 1e-7), d3.max(results, d => d.best) || 10]).range([height - 40, 20]);
-
-    svg.append("g").attr("transform", `translate(0, ${height - 40})`).call(d3.axisBottom(x)).attr("color", "#444");
-    svg.append("g").attr("transform", `translate(50, 0)`).call(d3.axisLeft(y).ticks(5, "~e")).attr("color", "#444");
-
-    const line = d3.line<{gen: number, best: number}>().x(d => x(d.gen)).y(d => y(Math.max(1e-7, d.best)));
+    const line = d3.line<any>().x(d => x(d.gen)).y(d => y(Math.max(1e-10, d.best))).curve(d3.curveMonotoneX);
     svg.append("path")
       .datum(results)
       .attr("fill", "none")
       .attr("stroke", COLORS.amber)
       .attr("stroke-width", 3)
       .attr("d", line);
+
+    const sigmaLine = d3.line<any>().x(d => x(d.gen)).y(d => y(Math.max(1e-10, d.sigma))).curve(d3.curveMonotoneX);
+    svg.append("path")
+      .datum(results)
+      .attr("fill", "none")
+      .attr("stroke", COLORS.purple)
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4,2")
+      .attr("d", sigmaLine);
   }, [results]);
 
   return (
-    <div ref={containerRef} className="rq-viz-container">
-      <div className="rq-viz-header">
+    <div className="rq-viz-container">
+      <div className="rq-viz-header flex-wrap gap-4">
         <h4 className="font-bold text-white uppercase tracking-widest text-sm flex items-center gap-2">
           <span className="w-2 h-2 bg-amber-400 rounded-full" />
-          Live Solver: Benchmark Performance
+          Interactive 03: Live Benchmark Solver
         </h4>
-        <button 
-          onClick={run} 
-          disabled={isRunning}
-          className={`rq-btn-action ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          {isRunning ? "Running..." : "Run Solver"}
-        </button>
+        <div className="flex gap-2 ml-auto">
+          <select value={selected} onChange={e => setSelected(e.target.value as any)} className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] uppercase font-black text-slate-300">
+            {Object.keys(BENCHMARKS).map(b => <option key={b} value={b}>{b}</option>)}
+          </select>
+          <button onClick={run} disabled={isRunning} className="rq-btn-action">Run Algorithm</button>
+        </div>
       </div>
-      <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-4">
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+        <div className="space-y-6">
           <div>
-            <label className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2 block">Function</label>
-            <select 
-              value={selected} 
-              onChange={e => setSelected(e.target.value as any)}
-              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200"
-            >
-              {Object.keys(BENCHMARKS).map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2 block">Dimension ({dim})</label>
+            <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 mb-3 block">Dimensionality ({dim}D)</label>
             <input type="range" min="2" max="20" value={dim} onChange={e => setDim(parseInt(e.target.value))} className="w-full accent-amber-500" />
           </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2 block">Population ({popSize})</label>
-            <input type="range" min="4" max="100" value={popSize} onChange={e => setPopSize(parseInt(e.target.value))} className="w-full accent-orange-500" />
-          </div>
           
-          {/* Internal state visualization */}
-          <div className="pt-4 border-t border-white/5">
-            <div className="text-[9px] uppercase tracking-[0.2em] font-black text-slate-600 mb-3">Covariance Matrix Snippet</div>
-            <div className="flex flex-wrap gap-1.5">
-              {results.length > 0 ? (
-                // Show a 3x3 snippet of C
-                [0, 1, 2].map(i => (
-                  <div key={i} className="flex gap-1.5 w-full">
-                    {[0, 1, 2].map(j => (
-                      <div key={j} className="rq-data-grid-cell !w-8 !h-8 !text-[8px] bg-white/5 border-white/5 opacity-80">
-                        {(Math.random() > 0.5 ? 1 : 0)}
-                      </div>
-                    ))}
+          <div className="bg-black/40 border border-white/5 rounded-xl p-4">
+            <div className="text-[9px] uppercase tracking-widest font-black text-slate-500 mb-3">Covariance Snippet (Top 3x3)</div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(currentC.length > 0 ? currentC : Array(3).fill(new Array(3).fill(0))).map((row, i) => 
+                row.map((val, j) => (
+                  <div key={`${i}-${j}`} className={`h-8 flex items-center justify-center font-mono text-[8px] rounded-lg transition-all duration-300 ${Math.abs(val) > 0.1 ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-white/5 text-slate-600 border border-transparent"}`}>
+                    {val.toFixed(2)}
                   </div>
                 ))
-              ) : (
-                <div className="text-[8px] font-mono text-slate-700 italic">Waiting for execution...</div>
               )}
             </div>
           </div>
+
+          <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 bg-amber-400 rounded-full" /> Best Fitness</div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 bg-purple-400 rounded-full opacity-50" /> Step Size (\u03c3)</div>
+          </div>
         </div>
+
         <div className="md:col-span-2 bg-black/40 border border-white/5 rounded-2xl p-4 min-h-[240px]">
-          <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-4">Log Convergence</div>
           <div ref={chartRef} className="w-full h-[240px]" />
         </div>
       </div>

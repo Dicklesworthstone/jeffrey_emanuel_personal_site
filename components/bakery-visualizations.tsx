@@ -13,7 +13,11 @@ import {
   Users,
   Lock,
   Unlock,
-  Timer
+  Timer,
+  Cpu,
+  ShieldAlert,
+  Fingerprint,
+  Activity
 } from "lucide-react";
 import * as THREE from "three";
 
@@ -30,8 +34,8 @@ const COLORS = {
 };
 
 // ============================================================
-// 1. BAKERY HERO (Three.js)
-// Shows an abstract representation of processes queuing
+// 1. CHRONOS QUEUE HERO (Three.js)
+// Cinematic visualization of decentralized ordering
 // ============================================================
 
 export function BakeryHero() {
@@ -43,116 +47,88 @@ export function BakeryHero() {
 
     let animationId: number;
     let renderer: THREE.WebGLRenderer;
-    let geometries: THREE.BufferGeometry[] = [];
-    let materials: THREE.Material[] = [];
     let isMounted = true;
-    let currentHandleResize: () => void;
 
     const init = async () => {
-      try {
-        const THREE = await import("three");
-        if (!isMounted || !container) return;
+      const THREE = await import("three");
+      if (!isMounted || !container) return;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(
-          75,
-          container.clientWidth / container.clientHeight,
-          0.1,
-          1000
-        );
-        camera.position.z = 50;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 20, 60);
+      camera.lookAt(0, 0, 0);
 
-        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
 
-        const count = 200;
-        const geometry = new THREE.BufferGeometry();
-        geometries.push(geometry);
-        
-        const positions = new Float32Array(count * 3);
-        const colors = new Float32Array(count * 3);
-        const sizes = new Float32Array(count);
+      // Create a "Vortex" of tickets
+      const group = new THREE.Group();
+      scene.add(group);
 
-        const colorA = new THREE.Color(COLORS.amber);
-        const colorB = new THREE.Color(COLORS.rose);
+      const ticketCount = 40;
+      const tickets: THREE.Mesh[] = [];
 
-        for (let i = 0; i < count; i++) {
-          positions[i * 3] = (Math.random() - 0.5) * 100;
-          positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-          positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
-
-          const mixedColor = colorA.clone().lerp(colorB, Math.random());
-          colors[i * 3] = mixedColor.r;
-          colors[i * 3 + 1] = mixedColor.g;
-          colors[i * 3 + 2] = mixedColor.b;
-
-          sizes[i] = Math.random() * 2 + 1;
-        }
-
-        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-        geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
-
-        const material = new THREE.PointsMaterial({
-          size: 1.5,
-          vertexColors: true,
+      for (let i = 0; i < ticketCount; i++) {
+        const geo = new THREE.BoxGeometry(2, 3, 0.1);
+        const mat = new THREE.MeshBasicMaterial({ 
+          color: i % 5 === 0 ? COLORS.amber : COLORS.rose,
           transparent: true,
-          opacity: 0.6,
-          blending: THREE.AdditiveBlending,
+          opacity: 0.4,
+          wireframe: true
         });
-        materials.push(material);
-
-        const points = new THREE.Points(geometry, material);
-        scene.add(points);
-
-        const lineMaterial = new THREE.LineBasicMaterial({ 
-          color: COLORS.amber, 
-          transparent: true, 
-          opacity: 0.1 
-        });
-        materials.push(lineMaterial);
+        const ticket = new THREE.Mesh(geo, mat);
         
-        for (let i = 0; i < 5; i++) {
-          const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(-100, (i - 2) * 20, 0),
-            new THREE.Vector3(100, (i - 2) * 20, 0),
-          ]);
-          geometries.push(lineGeometry);
-          const line = new THREE.Line(lineGeometry, lineMaterial);
-          scene.add(line);
-        }
-
-        const animate = () => {
-          if (!isMounted) return;
-          animationId = requestAnimationFrame(animate);
-          points.rotation.y += 0.001;
-          points.rotation.x += 0.0005;
-
-          const posAttr = geometry.attributes.position;
-          const arr = posAttr.array as Float32Array;
-          for (let i = 0; i < count; i++) {
-            arr[i * 3] += 0.1;
-            if (arr[i * 3] > 50) arr[i * 3] = -50;
-          }
-          posAttr.needsUpdate = true;
-
-          renderer.render(scene, camera);
-        };
-
-        animate();
-
-        currentHandleResize = () => {
-          if (!container || !renderer || !camera) return;
-          camera.aspect = container.clientWidth / container.clientHeight;
-          camera.updateProjectionMatrix();
-          renderer.setSize(container.clientWidth, container.clientHeight);
-        };
-        window.addEventListener("resize", currentHandleResize);
-      } catch (e) {
-        console.error("BakeryHero init failed", e);
+        // Random spiral positioning
+        const angle = (i / ticketCount) * Math.PI * 2 * 4;
+        const radius = 10 + (i * 0.5);
+        ticket.position.set(
+          Math.cos(angle) * radius,
+          (i - ticketCount / 2) * 2,
+          Math.sin(angle) * radius
+        );
+        ticket.rotation.y = angle;
+        group.add(ticket);
+        tickets.push(ticket);
       }
+
+      // Central core of "Consensus"
+      const coreGeo = new THREE.IcosahedronGeometry(8, 1);
+      const coreMat = new THREE.MeshBasicMaterial({ 
+        color: COLORS.amber, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.2
+      });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      scene.add(core);
+
+      const animate = () => {
+        if (!isMounted) return;
+        animationId = requestAnimationFrame(animate);
+        
+        group.rotation.y += 0.002;
+        core.rotation.y -= 0.005;
+        core.rotation.x += 0.003;
+
+        tickets.forEach((t, i) => {
+          t.position.y += Math.sin(Date.now() * 0.001 + i) * 0.02;
+          t.rotation.z += 0.01;
+        });
+
+        renderer.render(scene, camera);
+      };
+
+      animate();
+
+      const handleResize = () => {
+        if (!container || !renderer || !camera) return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      };
+      window.addEventListener("resize", handleResize);
     };
 
     init();
@@ -160,12 +136,9 @@ export function BakeryHero() {
     return () => {
       isMounted = false;
       cancelAnimationFrame(animationId);
-      if (currentHandleResize) window.removeEventListener("resize", currentHandleResize);
-      geometries.forEach(g => g.dispose());
-      materials.forEach(m => m.dispose());
       if (renderer) {
         renderer.dispose();
-        if (container && container.contains(renderer.domElement)) {
+        if (container.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement);
         }
       }
@@ -173,406 +146,358 @@ export function BakeryHero() {
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full h-full min-h-[400px] relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/20 to-[#020204] pointer-events-none" />
+    <div ref={containerRef} className="w-full h-full min-h-[500px] relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/40 to-[#020204] pointer-events-none z-10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20 pointer-events-none">
+         <motion.div 
+           initial={{ opacity: 0, scale: 0.9 }}
+           animate={{ opacity: 1, scale: 1 }}
+           className="px-6 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 backdrop-blur-3xl"
+         >
+            <p className="text-[10px] font-mono text-amber-400 uppercase tracking-[0.4em]">Decentralized Consensus Engine</p>
+         </motion.div>
+      </div>
     </div>
   );
 }
 
 // ============================================================
-// 2. BAKERY LIVE DEMO (TypeScript Implementation)
-// Real-time execution of the algorithm
+// 2. THE DOORWAY VISUALIZER
+// Explains the race condition and choosing[i] logic
 // ============================================================
 
-type ProcessState = "IDLE" | "CHOOSING" | "WAITING" | "CRITICAL";
+export function DoorwayRaceViz() {
+  const [step, setStep] = useState(0);
+  
+  const steps = [
+    {
+      title: "The Parallel Intent",
+      desc: "Process A and B both decide to enter. They haven't set their 'choosing' flag yet.",
+      a: { state: 'IDLE', val: 0, choosing: false },
+      b: { state: 'IDLE', val: 0, choosing: false },
+    },
+    {
+      title: "The Doorway Entry",
+      desc: "Crucial: They set 'choosing = true'. This warns others: 'I am currently picking a number.'",
+      a: { state: 'CHOOSING', val: 0, choosing: true },
+      b: { state: 'CHOOSING', val: 0, choosing: true },
+    },
+    {
+      title: "The Race Result",
+      desc: "Because of concurrency, they both read 'Max=5' and both take '6'. A collision!",
+      a: { state: 'WAITING', val: 6, choosing: false },
+      b: { state: 'WAITING', val: 6, choosing: false },
+    },
+    {
+      title: "Process ID Resolution",
+      desc: "The algorithm checks: (6, ID:A) vs (6, ID:B). Since A < B, Process A enters first.",
+      a: { state: 'CRITICAL', val: 6, choosing: false },
+      b: { state: 'WAITING', val: 6, choosing: false },
+    }
+  ];
 
-interface Process {
-  id: number;
-  state: ProcessState;
-  number: number;
-  choosing: boolean;
-  progress: number; // 0-100 for waiting/choosing
+  const curr = steps[step];
+
+  return (
+    <div className="my-16 p-1 bg-gradient-to-br from-amber-500/20 to-rose-500/20 rounded-[2.5rem] overflow-hidden">
+      <div className="bg-[#08080a] rounded-[2.4rem] p-8 md:p-12 relative overflow-hidden">
+        {/* Decorative Grid */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+             style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+
+        <div className="relative z-10 flex flex-col lg:flex-row gap-12">
+          <div className="lg:w-1/3 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-mono text-amber-400 uppercase tracking-widest">
+               Step {step + 1} of 4
+            </div>
+            <h3 className="text-3xl font-bold text-white tracking-tight leading-none">{curr.title}</h3>
+            <p className="text-slate-400 leading-relaxed text-lg">{curr.desc}</p>
+            
+            <div className="flex gap-2 pt-4">
+              {steps.map((_, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setStep(i)}
+                  className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= step ? 'bg-amber-500' : 'bg-white/10'}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6">
+             <ProcessCard label="Process A" id={0} data={curr.a} color={COLORS.amber} />
+             <ProcessCard label="Process B" id={1} data={curr.b} color={COLORS.rose} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export function BakeryLiveDemo() {
-  const [numProcesses, setNumProcesses] = useState(5);
-  const [processes, setProcesses] = useState<Process[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [criticalSectionOccupiedBy, setCriticalSectionOccupiedBy] = useState<number | null>(null);
-  const [logs, setLogs] = useState<{msg: string, type: 'info' | 'success' | 'warn'}[]>([]);
+function ProcessCard({ label, id, data, color }: any) {
+  return (
+    <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/10 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-4 opacity-10">
+         <Fingerprint className="w-12 h-12" style={{ color }} />
+      </div>
+      
+      <div className="flex items-center gap-4 mb-6">
+         <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-lg" style={{ backgroundColor: color }}>
+            {id}
+         </div>
+         <div>
+            <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">{label}</p>
+            <p className="text-sm font-bold text-white">{data.state}</p>
+         </div>
+      </div>
+
+      <div className="space-y-4">
+         <div className="flex justify-between items-end">
+            <span className="text-xs text-slate-500 font-mono">Choosing Flag</span>
+            <span className={`text-xs font-bold font-mono ${data.choosing ? 'text-emerald-400' : 'text-slate-600'}`}>
+               {data.choosing ? 'TRUE' : 'FALSE'}
+            </span>
+         </div>
+         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <motion.div 
+              initial={false}
+              animate={{ width: data.choosing ? '100%' : '0%', backgroundColor: color }}
+              className="h-full"
+            />
+         </div>
+
+         <div className="pt-4 flex justify-between items-center">
+            <div className="text-center flex-1">
+               <p className="text-[9px] text-slate-500 uppercase mb-1">Ticket</p>
+               <p className="text-3xl font-black text-white">{data.val === 0 ? '—' : data.val}</p>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center flex-1">
+               <p className="text-[9px] text-slate-500 uppercase mb-1">ID</p>
+               <p className="text-3xl font-black text-white">{id}</p>
+            </div>
+         </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 3. PROCESS NEXUS (Radial Simulation)
+// High-energy visualization of mutual exclusion
+// ============================================================
+
+export function ProcessNexus() {
+  const [numProcesses] = useState(6);
+  const [processes, setProcesses] = useState<any[]>([]);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [checkingId, setCheckingId] = useState<number | null>(null);
+  const [targetId, setTargetId] = useState<number | null>(null);
   const isMountedRef = useRef(true);
 
-  // Ref for latest processes to avoid stale closures in interval
-  const processesRef = useRef<Process[]>([]);
   useEffect(() => {
-    processesRef.current = processes;
-  }, [processes]);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  // Initialize processes
-  useEffect(() => {
-    const p = Array.from({ length: numProcesses }, (_, i) => ({
+    setProcesses(Array.from({ length: numProcesses }, (_, i) => ({
       id: i,
-      state: "IDLE" as ProcessState,
+      state: 'IDLE',
       number: 0,
-      choosing: false,
-      progress: 0,
-    }));
-    setProcesses(p);
+      choosing: false
+    })));
+    return () => { isMountedRef.current = false; };
   }, [numProcesses]);
 
-  const addLog = (msg: string, type: 'info' | 'success' | 'warn' = 'info') => {
-    if (!isMountedRef.current) return;
-    setLogs(prev => [{ msg, type }, ...prev].slice(0, 5));
-  };
-
-  const updateProcess = (id: number, updates: Partial<Process>) => {
+  const updateProcess = (id: number, updates: any) => {
     if (!isMountedRef.current) return;
     setProcesses(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
-  const simulateProcess = async (id: number) => {
-    if (!isMountedRef.current) return;
+  const runCycle = async (id: number) => {
+    if (processes[id]?.state !== 'IDLE') return;
 
-    // 1. Choosing a number
-    updateProcess(id, { state: "CHOOSING", choosing: true, progress: 0 });
-    addLog(`Process ${id} is choosing a number...`);
+    // 1. Choosing
+    updateProcess(id, { state: 'CHOOSING', choosing: true });
+    await new Promise(r => setTimeout(r, 1000));
     
-    // Simulate non-atomic read of all numbers
-    for (let i = 0; i <= 100; i += 20) {
+    const maxNum = Math.max(...processes.map(p => p.number)) + 1;
+    updateProcess(id, { state: 'WAITING', number: maxNum, choosing: false });
+
+    // 2. Checking Others
+    setCheckingId(id);
+    for (let j = 0; j < numProcesses; j++) {
+      if (id === j) continue;
       if (!isMountedRef.current) return;
-      updateProcess(id, { progress: i });
-      await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+      
+      setTargetId(j);
+      // Simulate the loop checks
+      await new Promise(r => setTimeout(r, 400));
     }
+    setCheckingId(null);
+    setTargetId(null);
 
-    if (!isMountedRef.current) return;
-
-    // Use ref to get truly latest state for number calculation
-    const maxNum = Math.max(...processesRef.current.map(p => p.number));
-    const myNum = maxNum + 1;
-
-    setProcesses(prev => prev.map(p => p.id === id ? { 
-      ...p, 
-      number: myNum, 
-      choosing: false, 
-      state: "WAITING" as ProcessState, 
-      progress: 0 
-    } : p));
+    // 3. Enter
+    updateProcess(id, { state: 'CRITICAL' });
+    setActiveId(id);
+    await new Promise(r => setTimeout(r, 3000));
     
-    addLog(`Process ${id} took number ${myNum}`, 'info');
-
-    // 2. Waiting turn
-    let turnReady = false;
-    while (turnReady === false) {
-      if (!isMountedRef.current) return;
-
-      const currentProcesses = processesRef.current;
-      const myProcess = currentProcesses.find(p => p.id === id)!;
-      let conflict = false;
-
-      for (const other of currentProcesses) {
-        if (other.id === id) continue;
-        
-        // Wait if other is choosing
-        if (other.choosing) {
-          conflict = true;
-          break;
-        }
-
-        // Wait if other has a smaller number, or same number but smaller ID
-        if (other.number !== 0) {
-          if (other.number < myProcess.number || (other.number === myProcess.number && other.id < id)) {
-            conflict = true;
-            break;
-          }
-        }
-      }
-
-      if (!conflict) {
-        turnReady = true;
-      } else {
-        await new Promise(r => setTimeout(r, 400));
-      }
-    }
-
-    if (!isMountedRef.current) return;
-
-    // 3. Enter Critical Section
-    updateProcess(id, { state: "CRITICAL", progress: 100 });
-    setCriticalSectionOccupiedBy(id);
-    addLog(`Process ${id} entered Critical Section!`, 'success');
-    
-    await new Promise(r => setTimeout(r, 2000 + Math.random() * 1000));
-
-    if (!isMountedRef.current) return;
-
     // 4. Exit
-    setCriticalSectionOccupiedBy(null);
-    updateProcess(id, { state: "IDLE", number: 0, progress: 0 });
-    addLog(`Process ${id} exited Critical Section.`, 'info');
+    setActiveId(null);
+    updateProcess(id, { state: 'IDLE', number: 0 });
   };
-
-  const triggerProcess = (id: number) => {
-    // Check ref instead of state to avoid stale closure if called rapidly
-    if (processesRef.current[id].state === "IDLE") {
-      simulateProcess(id);
-    }
-  };
-
-  useEffect(() => {
-    if (!isRunning) return;
-    const timer = setInterval(() => {
-      const idleProcesses = processesRef.current.filter(p => p.state === "IDLE");
-      if (idleProcesses.length > 0 && Math.random() > 0.7) {
-        const p = idleProcesses[Math.floor(Math.random() * idleProcesses.length)];
-        simulateProcess(p.id);
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isRunning]);
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden backdrop-blur-sm">
-      <div className="p-6 md:p-8 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Timer className="w-5 h-5 text-amber-400" />
-            Bakery Live Simulator
-          </h3>
-          <p className="text-xs text-slate-400 font-mono uppercase tracking-widest mt-1">
-            Visualizing RFC-level Determinism in JS
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsRunning(!isRunning)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-tighter transition-all ${isRunning ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}
-          >
-            {isRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-            {isRunning ? 'Stop Auto' : 'Start Auto'}
-          </button>
-          <button 
-            onClick={() => {
-              setProcesses(processes.map(p => ({ ...p, state: "IDLE", number: 0, choosing: false, progress: 0 })));
-              setCriticalSectionOccupiedBy(null);
-              setLogs([]);
-            }}
-            className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-400 transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
+    <div className="my-12 relative h-[600px] w-full flex items-center justify-center bg-black/40 rounded-[3rem] border border-white/5 overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)]" />
+      
+      {/* Central Critical Section */}
+      <div className="relative z-10 w-48 h-48 rounded-full flex items-center justify-center">
+         <div className={`absolute inset-0 rounded-full blur-3xl transition-all duration-1000 ${activeId !== null ? 'bg-emerald-500/20 scale-150' : 'bg-white/5 scale-100'}`} />
+         <div className={`w-32 h-32 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-500 ${activeId !== null ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 bg-white/5'}`}>
+            <Lock className={`w-8 h-8 mb-2 transition-colors ${activeId !== null ? 'text-emerald-400 animate-pulse' : 'text-slate-700'}`} />
+            <p className="text-[10px] font-mono text-slate-500 uppercase tracking-tighter">Critical Zone</p>
+            {activeId !== null && (
+              <motion.p 
+                initial={{ opacity: 0, y: 5 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs font-bold text-emerald-400 mt-1"
+              >
+                PROCESS {activeId} ACTIVE
+              </motion.p>
+            )}
+         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
-        {/* Processes List */}
-        <div className="lg:col-span-2 p-6 md:p-8 space-y-4">
-          {processes.map((p) => (
-            <div 
-              key={p.id}
-              className={`relative group p-4 rounded-2xl border transition-all duration-500 ${
-                p.state === 'CRITICAL' ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]' :
-                p.state === 'WAITING' ? 'bg-amber-500/5 border-amber-500/20' :
-                p.state === 'CHOOSING' ? 'bg-blue-500/5 border-blue-500/20' :
-                'bg-white/[0.02] border-white/5'
+      {/* Process Ring */}
+      {processes.map((p, i) => {
+        const angle = (i / numProcesses) * Math.PI * 2 - Math.PI / 2;
+        const radius = 220;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+
+        return (
+          <div 
+            key={i}
+            className="absolute transition-all duration-1000"
+            style={{ transform: `translate(${x}px, ${y}px)` }}
+          >
+            <motion.button
+              onClick={() => runCycle(i)}
+              whileHover={{ scale: 1.1 }}
+              className={`w-20 h-20 rounded-2xl border-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 ${
+                p.state === 'CRITICAL' ? 'border-emerald-500 bg-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.3)]' :
+                p.state === 'WAITING' ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.2)]' :
+                p.state === 'CHOOSING' ? 'border-blue-500 bg-blue-500/10' :
+                'border-white/10 bg-white/5 hover:border-white/30'
               }`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono text-xs font-bold ${
-                    p.state === 'CRITICAL' ? 'bg-emerald-500 text-white' :
-                    p.state === 'WAITING' ? 'bg-amber-500 text-white' :
-                    p.state === 'CHOOSING' ? 'bg-blue-500 text-white' :
-                    'bg-white/10 text-slate-400'
-                  }`}>
-                    P{p.id}
-                  </div>
-                  <div>
-                    <span className="text-xs font-mono uppercase tracking-widest text-slate-500">Status</span>
-                    <p className={`text-sm font-bold ${
-                       p.state === 'CRITICAL' ? 'text-emerald-400' :
-                       p.state === 'WAITING' ? 'text-amber-400' :
-                       p.state === 'CHOOSING' ? 'text-blue-400' :
-                       'text-slate-400'
-                    }`}>
-                      {p.state}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs font-mono uppercase tracking-widest text-slate-500">Ticket</span>
-                  <p className="text-xl font-black text-white leading-none mt-1">
-                    {p.number === 0 ? "—" : `#${p.number}`}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={false}
-                    animate={{ 
-                      width: `${p.progress}%`,
-                      backgroundColor: p.state === 'CRITICAL' ? COLORS.emerald : p.state === 'WAITING' ? COLORS.amber : COLORS.blue
-                    }}
-                    className="h-full"
-                  />
-                </div>
-                {p.state === 'IDLE' && (
-                  <button 
-                    onClick={() => triggerProcess(p.id)}
-                    className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-all"
-                  >
-                    Request
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Info & Logs */}
-        <div className="p-6 md:p-8 space-y-8 bg-black/20">
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-4">Critical Section</h4>
-            <div className={`h-24 rounded-2xl border flex flex-col items-center justify-center transition-all duration-500 ${
-              criticalSectionOccupiedBy !== null ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-white/5 border-white/5 opacity-50'
-            }`}>
-              {criticalSectionOccupiedBy !== null ? (
-                <>
-                  <Lock className="w-6 h-6 text-emerald-500 mb-2 animate-pulse" />
-                  <p className="text-xs font-bold text-emerald-400">P{criticalSectionOccupiedBy} is working</p>
-                </>
-              ) : (
-                <>
-                  <Unlock className="w-6 h-6 text-slate-600 mb-2" />
-                  <p className="text-xs font-bold text-slate-600">Available</p>
-                </>
+              <span className="text-[10px] font-mono text-slate-500 uppercase mb-1">P{i}</span>
+              <span className="text-xl font-black text-white">{p.number || '—'}</span>
+              
+              {/* Pulse check indicator */}
+              {checkingId === i && (
+                <div className="absolute inset-0 border-4 border-amber-400 rounded-2xl animate-ping opacity-20" />
               )}
-            </div>
-          </div>
+            </motion.button>
 
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-4">Event Log</h4>
-            <div className="space-y-3">
-              <AnimatePresence mode="popLayout">
-                {logs.map((log, i) => (
-                  <motion.div 
-                    key={log.msg + i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className={`text-[11px] leading-relaxed p-2 rounded-lg border ${
-                      log.type === 'success' ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-400' :
-                      log.type === 'warn' ? 'bg-rose-500/5 border-rose-500/10 text-rose-400' :
-                      'bg-white/5 border-white/5 text-slate-400'
-                    }`}
-                  >
-                    {log.msg}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
+            {/* Connection line to center when checking */}
+            {(checkingId === i || targetId === i) && (
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                  <div className={`w-1 h-1 rounded-full animate-pulse ${checkingId === i ? 'bg-amber-400' : 'bg-blue-400'}`} />
+               </div>
+            )}
           </div>
-        </div>
+        );
+      })}
+
+      {/* Interaction Prompts */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6">
+         <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-white/5 border border-white/20" />
+            <span className="text-[10px] text-slate-500 uppercase font-mono">Idle</span>
+         </div>
+         <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-amber-500" />
+            <span className="text-[10px] text-slate-500 uppercase font-mono">Queueing</span>
+         </div>
+         <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+            <span className="text-[10px] text-slate-500 uppercase font-mono">In Core</span>
+         </div>
       </div>
     </div>
   );
 }
 
 // ============================================================
-// 3. TIE BREAKER VISUALIZATION
-// Explains (Number, ID) < (Number, ID)
+// 4. MEMORY RESILIENCE LENS
+// Shows "Torn Reads" and logic safety
 // ============================================================
 
-export function TieBreakerViz() {
-  const [val1, setVal1] = useState({ num: 5, id: 2 });
-  const [val2, setVal2] = useState({ num: 5, id: 4 });
-
-  const isSmaller = (v1: {num: number, id: number}, v2: {num: number, id: number}) => {
-    if (v1.num < v2.num) return true;
-    if (v1.num === v2.num && v1.id < v2.id) return true;
-    return false;
-  };
-
-  const result = isSmaller(val1, val2);
+export function MemoryResilienceViz() {
+  const [noise, setNoise] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNoise(Math.random());
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="my-12 p-8 bg-white/[0.02] border border-white/10 rounded-[2rem] relative overflow-hidden group">
-      <div className="absolute top-0 right-0 p-8 opacity-5">
-        <Users className="w-24 h-24 text-blue-400" />
-      </div>
-
-      <div className="relative z-10">
-        <h4 className="text-xl font-bold text-white mb-2">Lexicographical Tie-Breaking</h4>
-        <p className="text-sm text-slate-400 mb-8 max-w-xl">
-          When two processes take the same number simultaneously, the algorithm breaks the tie using their unique Process IDs.
-        </p>
-
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-          {/* Process 1 */}
-          <div className="space-y-4 text-center">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Process A</div>
-            <div className="flex gap-2">
-              <div className="space-y-1">
-                <button onClick={() => setVal1(v => ({ ...v, num: Math.max(1, v.num - 1) }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">-</button>
-                <div className="w-16 h-16 bg-blue-500/20 border-2 border-blue-500/40 rounded-xl flex items-center justify-center text-2xl font-black text-white">{val1.num}</div>
-                <button onClick={() => setVal1(v => ({ ...v, num: v.num + 1 }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">+</button>
-                <div className="text-[9px] font-mono text-slate-500 uppercase">Number</div>
-              </div>
-              <div className="space-y-1">
-                <button onClick={() => setVal1(v => ({ ...v, id: Math.max(0, v.id - 1) }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">-</button>
-                <div className="w-16 h-16 bg-slate-800 border-2 border-white/10 rounded-xl flex items-center justify-center text-2xl font-black text-white">{val1.id}</div>
-                <button onClick={() => setVal1(v => ({ ...v, id: v.id + 1 }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">+</button>
-                <div className="text-[9px] font-mono text-slate-500 uppercase">ID</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="text-4xl font-black text-white mb-2">{result ? "<" : ">"}</div>
-            <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500">
-               Comparison
-            </div>
-          </div>
-
-          {/* Process 2 */}
-          <div className="space-y-4 text-center">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Process B</div>
-            <div className="flex gap-2">
-              <div className="space-y-1">
-                <button onClick={() => setVal2(v => ({ ...v, num: Math.max(1, v.num - 1) }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">-</button>
-                <div className="w-16 h-16 bg-blue-500/20 border-2 border-blue-500/40 rounded-xl flex items-center justify-center text-2xl font-black text-white">{val2.num}</div>
-                <button onClick={() => setVal2(v => ({ ...v, num: v.num + 1 }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">+</button>
-                <div className="text-[9px] font-mono text-slate-500 uppercase">Number</div>
-              </div>
-              <div className="space-y-1">
-                <button onClick={() => setVal2(v => ({ ...v, id: Math.max(0, v.id - 1) }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">-</button>
-                <div className="w-16 h-16 bg-slate-800 border-2 border-white/10 rounded-xl flex items-center justify-center text-2xl font-black text-white">{val2.id}</div>
-                <button onClick={() => setVal2(v => ({ ...v, id: v.id + 1 }))} className="w-8 h-8 bg-white/5 rounded border border-white/10 text-white">+</button>
-                <div className="text-[9px] font-mono text-slate-500 uppercase">ID</div>
-              </div>
-            </div>
+    <div className="my-12 p-8 bg-white/[0.02] border border-white/10 rounded-[2rem] relative overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-rose-500" />
+            Non-Atomic Resilience
+          </h4>
+          <p className="text-sm text-slate-400 leading-relaxed mb-6">
+            In standard systems, a &ldquo;torn read&rdquo; (reading a value while it is being written) 
+            causes total failure. Lamport&rsquo;s algorithm turns this hardware weakness into 
+            software strength.
+          </p>
+          <div className="space-y-3">
+             <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                <Activity className="w-4 h-4 text-amber-400 shrink-0 mt-1" />
+                <p className="text-[11px] text-slate-300">A process might read a garbage value like &ldquo;7&rdquo; when it was actually &ldquo;12&rdquo;.</p>
+             </div>
+             <div className="flex items-start gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
+                <p className="text-[11px] text-slate-300">The <code>choosing</code> loop forces the reader to wait until the write stabilizes.</p>
+             </div>
           </div>
         </div>
 
-        <div className="mt-12 p-4 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md">
-           <div className="flex items-start gap-3">
-              <Info className="w-4 h-4 text-blue-400 mt-0.5" />
-              <p className="text-xs text-slate-400 leading-relaxed">
-                 Logic: <code className="text-blue-300 font-mono">(numA, idA) &lt; (numB, idB)</code> is true if 
-                 <code className="text-white"> numA &lt; numB </code> OR if 
-                 <code className="text-white"> numA == numB </code> AND <code className="text-white"> idA &lt; idB </code>.
-                 This ensures a total ordering even when numbers are identical.
-              </p>
+        <div className="relative aspect-square max-w-[300px] mx-auto">
+           {/* Visual representation of a glitching memory register */}
+           <div className="absolute inset-0 flex flex-col justify-between p-4 bg-black/60 rounded-2xl border border-white/10 font-mono overflow-hidden">
+              <div className="flex justify-between items-center text-[10px] text-slate-500">
+                 <span>SHARED_MEM_0x4F</span>
+                 <span className="text-amber-500">WRITING...</span>
+              </div>
+              
+              <div className="relative py-8 text-center">
+                 {/* Glitching numbers */}
+                 <div className="text-6xl font-black text-white tracking-tighter opacity-20">
+                    {Math.floor(Math.random() * 100)}
+                 </div>
+                 <div className="absolute inset-0 flex items-center justify-center text-6xl font-black text-white" 
+                      style={{ filter: `blur(${noise * 4}px)`, transform: `translateX(${(noise - 0.5) * 10}px)` }}>
+                    42
+                 </div>
+              </div>
+
+              <div className="space-y-1">
+                 <div className="h-1 bg-amber-500/40 rounded-full w-full" />
+                 <div className="h-1 bg-amber-500/20 rounded-full w-[60%]" />
+              </div>
            </div>
+           
+           {/* Holographic scanner */}
+           <motion.div 
+             animate={{ y: [0, 280, 0] }}
+             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+             className="absolute top-0 left-0 w-full h-1 bg-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.5)] z-20"
+           />
         </div>
       </div>
     </div>

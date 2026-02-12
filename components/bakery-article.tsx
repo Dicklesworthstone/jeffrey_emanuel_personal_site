@@ -26,12 +26,20 @@ const BakeryHero = dynamic(
   () => import("./bakery-visualizations").then((m) => ({ default: m.BakeryHero })),
   { ssr: false }
 );
-const BakeryLiveDemo = dynamic(
-  () => import("./bakery-visualizations").then((m) => ({ default: m.BakeryLiveDemo })),
+const ProcessNexus = dynamic(
+  () => import("./bakery-visualizations").then((m) => ({ default: m.ProcessNexus })),
   { ssr: false }
 );
 const TieBreakerViz = dynamic(
   () => import("./bakery-visualizations").then((m) => ({ default: m.TieBreakerViz })),
+  { ssr: false }
+);
+const DoorwayRaceViz = dynamic(
+  () => import("./bakery-visualizations").then((m) => ({ default: m.DoorwayRaceViz })),
+  { ssr: false }
+);
+const MemoryResilienceViz = dynamic(
+  () => import("./bakery-visualizations").then((m) => ({ default: m.MemoryResilienceViz })),
   { ssr: false }
 );
 
@@ -300,7 +308,7 @@ export function BakeryArticle() {
             This ensures that no two processes ever have the same priority.
           </p>
 
-          <TieBreakerViz />
+          <DoorwayRaceViz />
         </EC>
       </section>
 
@@ -310,17 +318,16 @@ export function BakeryArticle() {
       <section>
         <EC>
           <h2 className="ba-section-title mb-8 mt-16 text-white">
-            Live Execution
+            The Process Nexus
           </h2>
           <p>
-            Below is a live-executing implementation of the Bakery Algorithm. 
-            Each process is running its own loop, trying to enter the critical 
-            section. You can see the &quot;Doorway&quot; (choosing phase), the 
-            waiting phase, and the mutual exclusion in action.
+            Below is a live-executing implementation of the Bakery Algorithm arranged 
+            in a <strong>radial communication ring</strong>. You can click any process 
+            node to trigger its entry request.
           </p>
           
           <div className="my-12">
-            <BakeryLiveDemo />
+            <ProcessNexus />
           </div>
 
           <p>
@@ -353,6 +360,8 @@ export function BakeryArticle() {
              that is being written yields any value whatsoever.&quot; 
              &mdash; Leslie Lamport
           </div>
+
+          <MemoryResilienceViz />
 
           <p>
             In most synchronization algorithms, updating a flag or counter 
@@ -389,6 +398,114 @@ export function BakeryArticle() {
           </div>
         </EC>
       </section>
+
+      <Divider />
+
+      {/* ========== THE CODE ========== */}
+      <section>
+        <EC>
+          <h2 className="ba-section-title mb-8 mt-16 text-white">
+            The Implementation
+          </h2>
+          <p>
+            Here is the core logic of the algorithm in TypeScript. While 
+            modern languages provide higher-level primitives, understanding 
+            the Bakery logic is essential for anyone interested in how 
+            distributed systems actually reach consensus.
+          </p>
+
+          <div className="bg-black/50 border border-white/5 rounded-2xl p-4 md:p-8 my-12 font-mono text-sm overflow-x-auto">
+            <pre className="text-slate-300 leading-relaxed">
+{`class BakeryLock {
+  entering: boolean[];
+  tickets: number[];
+
+  lock(i: number) {
+    // 1. Take a ticket
+    this.entering[i] = true;
+    this.tickets[i] = Math.max(...this.tickets) + 1;
+    this.entering[i] = false;
+
+    // 2. Wait for your turn
+    for (let j = 0; j < this.numProcesses; j++) {
+      // Wait while process j is picking its ticket
+      while (this.entering[j]) { /* busy wait */ }
+
+      // Wait while process j has a smaller ticket,
+      // or same ticket but smaller process ID
+      while (
+        this.tickets[j] !== 0 && 
+        (this.tickets[j] < this.tickets[i] || 
+        (this.tickets[j] === this.tickets[i] && j < i))
+      ) { 
+        /* busy wait */ 
+      }
+    }
+  }
+
+  unlock(i: number) {
+    this.tickets[i] = 0;
+  }
+}`}
+            </pre>
+          </div>
+        </EC>
+      </section>
+
+      {/* ========== KEY TAKEAWAYS ========== */}
+      <section className="pb-24">
+        <EC>
+          <div className="rounded-3xl p-8 md:p-12 border border-white/10 bg-white/[0.02] relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <Cpu className="w-32 h-32 text-amber-400" />
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight">Key Takeaways</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+              <div className="space-y-4">
+                <h3 className="text-amber-400 font-mono text-xs uppercase tracking-widest">Hardware Agnostic</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  The Bakery Algorithm doesn&rsquo;t need atomic operations. 
+                  It works on the simplest shared-memory hardware imaginable.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-emerald-400 font-mono text-xs uppercase tracking-widest">Perfect Fairness</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  First-come, first-served (FCFS) logic ensures no process 
+                  is ever starved, provided every process eventually leaves 
+                  the critical section.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-blue-400 font-mono text-xs uppercase tracking-widest">Total Ordering</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Tie-breaking via Process IDs ensures a strict hierarchy 
+                  that resolves any race condition during number assignment.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-rose-400 font-mono text-xs uppercase tracking-widest">Busy Waiting</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  The main drawback is CPU usage during the wait phase, 
+                  making it more suitable for low-latency or dedicated hardware.
+                </p>
+              </div>
+            </div>
+          </div>
+        </EC>
+      </section>
+
+      {/* Footer spacing */}
+      <div className="h-32" />
+    </div>
+  );
+}
+
 
       <Divider />
 

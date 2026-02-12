@@ -18,8 +18,12 @@ const HeroCMAES = dynamic(
   () => import("./cmaes-visualizations").then((m) => ({ default: m.HeroCMAES })),
   { ssr: false }
 );
-const DistributionViz = dynamic(
-  () => import("./cmaes-visualizations").then((m) => ({ default: m.DistributionViz })),
+const SelectionWalkthrough = dynamic(
+  () => import("./cmaes-visualizations").then((m) => ({ default: m.SelectionWalkthrough })),
+  { ssr: false }
+);
+const ComparisonViz = dynamic(
+  () => import("./cmaes-visualizations").then((m) => ({ default: m.ComparisonViz })),
   { ssr: false }
 );
 const BenchmarkRunner = dynamic(
@@ -247,17 +251,33 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
-            Visualizing the Adaptation
+            Visualizing the Loop
           </h2>
           <p className="mb-12">
-            Early on, samples are spread out, the covariance is mostly spherical, and the algorithm is &quot;groping in the dark.&quot; As evidence accumulates about which directions lead to better values, the ellipsoid tilts, stretches, and shrinks, zooming in on promising regions.
+            CMA-ES operates in a generational cycle. It's not just moving a point; it's <strong>evolving a belief</strong> about the landscape. Walk through the four key phases of a single generation below.
           </p>
           
-          <DistributionViz />
+          <SelectionWalkthrough />
 
           <p className="mt-12">
             The crucial thing is: <strong>CMA-ES only needs function evaluations.</strong> It never asks you for gradients, Jacobians, or any structural information about your model or simulator. That makes it an excellent default whenever evaluations are expensive or the landscape is ugly.
           </p>
+        </EC>
+      </section>
+
+      <Divider />
+
+      {/* ========== COMPARISON ========== */}
+      <section>
+        <EC>
+          <h2 className="rq-section-title mb-8 mt-16 text-white">
+            The Advantage of Adaptation
+          </h2>
+          <p className="mb-12">
+            Standard gradient descent is like a person walking down a hill by only looking at their feet. If the hill is a long, narrow, twisted valley, they'll bounce off the walls (oscillate). CMA-ES looks at the <strong>geometry of the valley itself</strong>.
+          </p>
+          
+          <ComparisonViz />
         </EC>
       </section>
 
