@@ -265,7 +265,7 @@ export function ConstraintViz() {
 
       <div className="px-4 md:px-6 py-6 md:py-8">
         <div className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
-          <Canvas shadows camera={{ position: [0, 0, 5], fov: 45 }}>
+          <Canvas shadows gl={{ localClippingEnabled: true }} camera={{ position: [0, 0, 5], fov: 45 }}>
             <color attach="background" args={['#050508']} />
             <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade />
             <ambientLight intensity={0.5} />
