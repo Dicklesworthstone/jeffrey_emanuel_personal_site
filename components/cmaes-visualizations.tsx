@@ -468,9 +468,19 @@ function Landscape({ objective }: { objective: (x: number, y: number) => number 
 }
 
 function PathLine({ points, color, objective }: { points: number[][], color: string, objective: (x: number, y: number) => number }) {
-  const linePoints = useMemo(() => 
-    points.map(p => new THREE.Vector3(p[0], p[1], 0.1 + objective(p[0], p[1]) * 0.1)),
-  [points, objective]);
+  const linePoints = useMemo(
+    () =>
+      points
+        .filter((p) => p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1]))
+        .map((p) => new THREE.Vector3(p[0], p[1], 0.1 + objective(p[0], p[1]) * 0.1)),
+    [points, objective]
+  );
+
+  // drei/Line requires at least two points; otherwise it can throw in LineGeometry.setPositions.
+  if (linePoints.length < 2) {
+    return null;
+  }
+
   return <Line points={linePoints} color={color} lineWidth={3} transparent opacity={0.8} />;
 }
 
