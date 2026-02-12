@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion, useSpring, useReducedMotion, useMotionValue } from "framer-motion";
+import { getScrollMetrics } from "@/lib/utils";
 
 /**
  * Reading progress indicator that shows scroll progress through an article.
@@ -22,7 +23,8 @@ export default function ArticleProgress() {
       if (!article) return null;
 
       const rect = article.getBoundingClientRect();
-      const top = rect.top + window.scrollY;
+      const { scrollTop } = getScrollMetrics();
+      const top = rect.top + scrollTop;
       const end = top + rect.height - window.innerHeight;
       metricsRef.current = { start: top, end };
       return article;
@@ -39,7 +41,7 @@ export default function ArticleProgress() {
 
       const currentProgress = Math.min(
         1,
-        Math.max(0, (window.scrollY - start) / scrollRange)
+        Math.max(0, (getScrollMetrics().scrollTop - start) / scrollRange)
       );
 
       progress.set(currentProgress);

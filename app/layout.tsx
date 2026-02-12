@@ -72,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const gaId = process.env.NEXT_PUBLIC_GA_ID || "";
 
   return (
-    <html lang="en" className="h-full scroll-smooth bg-slate-950 text-slate-100" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth bg-slate-950 text-slate-100" suppressHydrationWarning>
       <head>
         {/* Preconnect to external domains for faster resource loading */}
         {/* Google Analytics - preconnect with crossorigin for faster script loading */}
