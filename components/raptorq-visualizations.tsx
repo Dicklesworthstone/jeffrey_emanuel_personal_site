@@ -730,7 +730,7 @@ export function PeelingViz() {
                   dy="0.35em"
                   textAnchor="middle"
                   fill={COLORS.white}
-                  fontSize="10"
+                  fontSize="12"
                   fontWeight="900"
                 >
                   {n.deg}
@@ -776,7 +776,7 @@ export function PrecodeViz() {
         .attr("y", -20)
         .attr("fill", "#94a3b8") // Slate-400 for better contrast
         .attr("text-anchor", "middle")
-        .attr("font-size", "12") // Increased from 10
+        .attr("font-size", "14")
         .attr("font-weight", "900")
         .attr("letter-spacing", "0.2em")
         .text((d) => d);

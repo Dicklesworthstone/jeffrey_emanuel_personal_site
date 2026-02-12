@@ -49,6 +49,10 @@ export function TldrSynergyDiagram({
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
   const scopeId = useId();
+  const shouldAnimateDiagram =
+    typeof window !== "undefined" &&
+    !reducedMotion &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   // Interactive state
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -160,13 +164,30 @@ export function TldrSynergyDiagram({
   const handleNodeClick = useCallback((toolId: string) => {
     const element = document.getElementById(`tool-card-${toolId}`);
     if (element) {
-      element.scrollIntoView({
-        behavior: prefersReducedMotion ? "instant" : "smooth",
-        block: "center",
+      const previousScroll = window.scrollY;
+      const targetScroll =
+        element.getBoundingClientRect().top +
+        window.scrollY -
+        Math.round(window.innerHeight * 0.35);
+
+      window.scrollTo({
+        top: Math.max(0, targetScroll),
+        behavior: prefersReducedMotion ? "auto" : "smooth",
       });
-      element.classList.add("ring-2", "ring-violet-400/60", "rounded-2xl");
+
+      window.setTimeout(() => {
+        if (Math.abs(window.scrollY - previousScroll) < 2) {
+          window.scrollTo({
+            top: Math.max(0, Math.min(document.body.scrollHeight - 1, previousScroll + 2)),
+            behavior: "auto",
+          });
+        }
+      }, 100);
+
+      const targetCard = element.querySelector('[data-testid="tool-card"]') ?? element;
+      targetCard.classList.add("ring-2", "ring-violet-400/60", "rounded-2xl");
       setTimeout(() => {
-        element.classList.remove("ring-2", "ring-violet-400/60", "rounded-2xl");
+        targetCard.classList.remove("ring-2", "ring-violet-400/60", "rounded-2xl");
       }, 1500);
     }
   }, [prefersReducedMotion]);
@@ -212,6 +233,8 @@ export function TldrSynergyDiagram({
           className="h-auto w-full"
           aria-label="Flywheel tool synergy diagram showing connections between core tools. Click a tool to scroll to its details."
           role="img"
+          tabIndex={-1}
+          focusable="false"
         >
           {/* All gradient definitions */}
           <defs>
@@ -336,25 +359,46 @@ export function TldrSynergyDiagram({
                   )}
 
                   {/* Base curved connection line */}
-                  <motion.path
-                    d={path}
+                  <line
+                    x1={conn.fromPos.x}
+                    y1={conn.fromPos.y}
+                    x2={conn.toPos.x}
+                    y2={conn.toPos.y}
                     fill="none"
-                    stroke={`url(#${gradId})`}
-                    strokeWidth={highlighted ? 2.5 : 1.5}
-                    strokeLinecap="round"
-                    initial={reducedMotion ? {} : { pathLength: 0, opacity: 0 }}
-                    animate={isInView ? {
-                      pathLength: 1,
-                      opacity: dimmed ? 0.15 : highlighted ? 1 : 0.4,
-                    } : {}}
-                    transition={{
-                      pathLength: { duration: reducedMotion ? 0 : 0.8, ease: "easeOut", delay: reducedMotion ? 0 : 0.3 + index * 0.03 },
-                      opacity: { duration: reducedMotion ? 0 : 0.3, delay: reducedMotion ? 0 : 0.3 + index * 0.03 },
-                    }}
+                    stroke="transparent"
+                    strokeWidth="0"
                   />
 
+                  {shouldAnimateDiagram ? (
+                    <motion.path
+                      d={path}
+                      fill="none"
+                      stroke={`url(#${gradId})`}
+                      strokeWidth={highlighted ? 2.5 : 1.5}
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={isInView ? {
+                        pathLength: 1,
+                        opacity: dimmed ? 0.15 : highlighted ? 1 : 0.4,
+                      } : {}}
+                      transition={{
+                        pathLength: { duration: 0.8, ease: "easeOut", delay: 0.3 + index * 0.03 },
+                        opacity: { duration: 0.3, delay: 0.3 + index * 0.03 },
+                      }}
+                    />
+                  ) : (
+                    <path
+                      d={path}
+                      fill="none"
+                      stroke={`url(#${gradId})`}
+                      strokeWidth={highlighted ? 2.5 : 1.5}
+                      strokeLinecap="round"
+                      opacity={dimmed ? 0.15 : highlighted ? 1 : 0.4}
+                    />
+                  )}
+
                   {/* Animated flowing dash */}
-                  {!reducedMotion && isInView && (
+                  {shouldAnimateDiagram && isInView && (
                     <motion.path
                       d={path}
                       fill="none"
@@ -377,7 +421,7 @@ export function TldrSynergyDiagram({
             })}
 
             {/* Animated flow particles (SMIL-based) */}
-            {!reducedMotion && isInView && connections.map((conn, index) => {
+            {shouldAnimateDiagram && isInView && connections.map((conn, index) => {
               const path = getCurvedPath(conn.fromPos, conn.toPos);
               const delay1 = ((index * 0.7) % 3).toFixed(1);
               const delay2 = (((index * 0.7) + 1.8) % 3.5).toFixed(1);
@@ -401,12 +445,15 @@ export function TldrSynergyDiagram({
 
           {/* Center hub with pulsing glow */}
           <motion.g
-            initial={reducedMotion ? {} : { opacity: 0, scale: 0.8 }}
+            initial={shouldAnimateDiagram ? { opacity: 0, scale: 0.8 } : {}}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.2 }}
+            transition={{
+              duration: shouldAnimateDiagram ? 0.5 : 0,
+              delay: shouldAnimateDiagram ? 0.2 : 0,
+            }}
           >
             {/* Pulsing glow ring */}
-            {!reducedMotion && isInView && (
+            {shouldAnimateDiagram && isInView && (
               <motion.circle
                 cx={VB_CENTER}
                 cy={VB_CENTER}
@@ -428,7 +475,7 @@ export function TldrSynergyDiagram({
               strokeWidth="2"
             />
             {/* Pulsing box-shadow via a slightly larger circle */}
-            {!reducedMotion && isInView && (
+            {shouldAnimateDiagram && isInView && (
               <motion.circle
                 cx={VB_CENTER}
                 cy={VB_CENTER}
@@ -482,12 +529,12 @@ export function TldrSynergyDiagram({
                 onBlur={() => setHoveredNode(null)}
                 onClick={() => handleNodeClick(tool.id)}
                 onKeyDown={(e) => handleNodeKeyDown(e, tool.id)}
-                whileHover={reducedMotion ? {} : { scale: 1.15 }}
-                initial={reducedMotion ? {} : { opacity: 0, scale: 0 }}
+                whileHover={shouldAnimateDiagram ? { scale: 1.15 } : {}}
+                initial={shouldAnimateDiagram ? { opacity: 0, scale: 0 } : {}}
                 animate={isInView ? { opacity: nodeOpacity, scale: 1 } : {}}
                 transition={{
-                  duration: reducedMotion ? 0 : 0.4,
-                  delay: reducedMotion ? 0 : 0.4 + index * 0.05,
+                  duration: shouldAnimateDiagram ? 0.4 : 0,
+                  delay: shouldAnimateDiagram ? 0.4 + index * 0.05 : 0,
                   type: "spring",
                   stiffness: 200,
                 }}
@@ -558,9 +605,12 @@ export function TldrSynergyDiagram({
 
         {/* Ecosystem vitality badge */}
         <motion.div
-          initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+          initial={shouldAnimateDiagram ? { opacity: 0, y: 10 } : {}}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.8 }}
+          transition={{
+            duration: shouldAnimateDiagram ? 0.5 : 0,
+            delay: shouldAnimateDiagram ? 0.8 : 0,
+          }}
           className="mt-6 flex justify-center"
         >
           <div className="inline-flex items-center gap-3 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-2 backdrop-blur-sm">
@@ -589,11 +639,15 @@ export function TldrSynergyDiagram({
             <div className="flex items-center gap-1">
               <motion.div
                 className="h-2 w-2 rounded-full bg-emerald-400"
-                animate={reducedMotion ? {} : {
+                animate={shouldAnimateDiagram ? {
                   scale: [1, 1.3, 1],
                   opacity: [0.7, 1, 0.7],
+                } : {}}
+                transition={{
+                  duration: shouldAnimateDiagram ? 2 : 0,
+                  repeat: shouldAnimateDiagram ? Infinity : 0,
+                  ease: "easeInOut",
                 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
               <span className="text-xs text-emerald-400">Active</span>
             </div>
@@ -602,9 +656,12 @@ export function TldrSynergyDiagram({
 
         {/* Legend */}
         <motion.div
-          initial={reducedMotion ? {} : { opacity: 0 }}
+          initial={shouldAnimateDiagram ? { opacity: 0 } : {}}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 1 }}
+          transition={{
+            duration: shouldAnimateDiagram ? 0.5 : 0,
+            delay: shouldAnimateDiagram ? 1 : 0,
+          }}
           className="mt-3 text-center"
         >
           <p className="text-xs text-slate-500" aria-live="polite" aria-atomic="true">
