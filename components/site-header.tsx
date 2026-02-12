@@ -92,7 +92,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   return (
     <>
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-300"
+        className="fixed top-0 left-0 right-0 z-[90] border-b transition-colors duration-300"
         style={{
           paddingTop: headerPaddingTop,
           paddingBottom: headerPaddingBottom,
@@ -174,6 +174,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
           {/* Mobile Menu Toggle & Search */}
           <div className="flex items-center gap-4 md:hidden">
             <button
+              type="button"
               onClick={() => {
                 setOpen(false);
                 onOpenCommandPalette?.();
@@ -184,7 +185,8 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               <Search className="h-5 w-5" />
             </button>
             <button
-              className="relative z-50 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-all active:scale-95"
+              type="button"
+              className="relative z-[95] inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-all active:scale-95"
               onClick={() => setOpen((v) => !v)}
               onTouchStart={lightTap}
               aria-label={open ? "Close navigation menu" : "Open navigation menu"}
@@ -218,6 +220,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             animate={{ opacity: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
+            onClick={() => setOpen(false)}
             className="fixed inset-0 z-[70] flex flex-col bg-slate-950/98 backdrop-blur-lg md:hidden overflow-y-auto will-change-[opacity]"
             style={{ transform: "translateZ(0)" }}
             role="dialog"
@@ -228,8 +231,24 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             <div className="absolute inset-0 pointer-events-none opacity-20" 
                  style={{ backgroundImage: `url("${NOISE_SVG_DATA_URI}")` }} 
             />
+
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setOpen(false);
+              }}
+              onTouchStart={mediumTap}
+              className="absolute right-4 top-[max(0.75rem,calc(0.75rem+env(safe-area-inset-top,0px))] z-[90] flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-slate-200 transition-all"
+              aria-label="Close navigation menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
             
-            <nav className="relative flex flex-1 flex-col justify-center px-8">
+            <nav
+              className="relative flex flex-1 flex-col justify-center px-8"
+              onClick={(event) => event.stopPropagation()}
+            >
               <motion.div
                 className="flex flex-col gap-8"
                 initial="hidden"

@@ -6,6 +6,8 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
 let lockCount = 0;
 let originalStyle:
   | {
+      htmlOverflow: string;
+      htmlPaddingRight: string;
       overflow: string;
       position: string;
       top: string;
@@ -29,6 +31,9 @@ export function useBodyScrollLock(isLocked: boolean) {
     if (!isLocked) return undefined;
     if (typeof window === "undefined") return undefined;
 
+    const body = document.body;
+    const documentElement = document.documentElement;
+
     if (lockCount === 0) {
       // Measure scrollbar width
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -37,31 +42,36 @@ export function useBodyScrollLock(isLocked: boolean) {
 
       // Store original styles
       originalStyle = {
-        overflow: document.body.style.overflow,
-        position: document.body.style.position,
-        top: document.body.style.top,
-        left: document.body.style.left,
-        right: document.body.style.right,
-        width: document.body.style.width,
-        paddingRight: document.body.style.paddingRight,
-        overscrollBehaviorY: document.body.style.overscrollBehaviorY,
-        overflowY: document.body.style.overflowY,
+        htmlOverflow: documentElement.style.overflow,
+        htmlPaddingRight: documentElement.style.paddingRight,
+        overflow: body.style.overflow,
+        position: body.style.position,
+        top: body.style.top,
+        left: body.style.left,
+        right: body.style.right,
+        width: body.style.width,
+        paddingRight: body.style.paddingRight,
+        overscrollBehaviorY: body.style.overscrollBehaviorY,
+        overflowY: body.style.overflowY,
       };
 
       // Prevent body scrolling while keeping the current position stable.
       // position: fixed with a stored top offset is the most reliable approach on iOS.
-      document.body.style.overflow = "hidden";
-      document.body.style.overflowY = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${bodyScrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.width = "100%";
-      document.body.style.overscrollBehaviorY = "none";
+      body.style.overflow = "hidden";
+      body.style.overflowY = "hidden";
+      body.style.position = "fixed";
+      body.style.top = `-${bodyScrollY}px`;
+      body.style.left = "0";
+      body.style.right = "0";
+      body.style.width = "100%";
+      body.style.overscrollBehaviorY = "none";
+
+      documentElement.style.overflow = "hidden";
 
       // Add padding to body to replace scrollbar.
       if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
+        body.style.paddingRight = `${scrollbarWidth}px`;
+        documentElement.style.paddingRight = `${scrollbarWidth}px`;
       }
 
       // Set global CSS variable for other fixed elements (like header) to use
@@ -74,19 +84,28 @@ export function useBodyScrollLock(isLocked: boolean) {
       lockCount = Math.max(0, lockCount - 1);
       if (lockCount === 0 && originalStyle) {
         // Restore styles
-        document.body.style.overflow = originalStyle.overflow;
-        document.body.style.overflowY = originalStyle.overflowY;
-        document.body.style.position = originalStyle.position;
-        document.body.style.top = originalStyle.top;
-        document.body.style.left = originalStyle.left;
-        document.body.style.right = originalStyle.right;
-        document.body.style.width = originalStyle.width;
-        document.body.style.paddingRight = originalStyle.paddingRight;
-        document.body.style.overscrollBehaviorY = originalStyle.overscrollBehaviorY;
+        const body = document.body;
+        const documentElement = document.documentElement;
+        const scrollY = originalScrollY;
+
+        body.style.overflow = originalStyle.overflow;
+        body.style.overflowY = originalStyle.overflowY;
+        body.style.position = originalStyle.position;
+        body.style.top = originalStyle.top;
+        body.style.left = originalStyle.left;
+        body.style.right = originalStyle.right;
+        body.style.width = originalStyle.width;
+        body.style.paddingRight = originalStyle.paddingRight;
+        body.style.overscrollBehaviorY = originalStyle.overscrollBehaviorY;
+
+        documentElement.style.overflow = originalStyle.htmlOverflow;
+        documentElement.style.paddingRight = originalStyle.htmlPaddingRight;
         originalStyle = null;
         document.documentElement.style.removeProperty("--scrollbar-width");
 
-        window.scrollTo(0, originalScrollY);
+        requestAnimationFrame(() => {
+          window.scrollTo(0, scrollY);
+        });
       }
     };
   }, [isLocked]);
