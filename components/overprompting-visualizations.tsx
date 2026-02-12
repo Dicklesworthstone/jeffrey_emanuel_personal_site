@@ -325,18 +325,20 @@ export function ConstraintViz() {
               />
             </div>
           </div>
-          <div className="flex gap-2 w-full md:w-auto shrink-0">
-            <button
-              onClick={() => setLevel(l => Math.min(l + 1, 6))}
-              disabled={level >= 6}
-              className="op-btn-action flex items-center justify-center gap-2 px-6 flex-grow md:flex-grow-0"
+        <div className="flex gap-2 w-full md:w-auto shrink-0">
+          <button
+            type="button"
+            onClick={() => setLevel(l => Math.min(l + 1, 6))}
+            disabled={level >= 6}
+            className="op-btn-action flex items-center justify-center gap-2 px-6 flex-grow md:flex-grow-0"
             >
               <Minimize2 className="w-3 h-3" /> SLICE
             </button>
-            <button
-              onClick={() => setLevel(0)}
-              disabled={level === 0}
-              className="op-btn-secondary w-12 flex items-center justify-center flex-grow md:flex-grow-0"
+          <button
+            type="button"
+            onClick={() => setLevel(0)}
+            disabled={level === 0}
+            className="op-btn-secondary w-12 flex items-center justify-center flex-grow md:flex-grow-0"
               aria-label="Reset"
             >
               <RotateCcw className="w-3 h-3" />
@@ -696,10 +698,11 @@ export function PlanExecuteViz() {
           </Canvas>
 
           {/* Mode Switcher HUD */}
-          <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 pointer-events-none">
-            <button
-              onClick={() => setMode("plan")}
-              className={`pointer-events-auto px-6 py-3 rounded-xl border flex items-center gap-2 transition-all duration-500 ${
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 pointer-events-none">
+          <button
+            type="button"
+            onClick={() => setMode("plan")}
+            className={`pointer-events-auto px-6 py-3 rounded-xl border flex items-center gap-2 transition-all duration-500 ${
                 mode === "plan" 
                   ? "bg-amber-500 text-white border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]" 
                   : "bg-black/40 text-slate-400 border-white/10 hover:bg-white/5"
@@ -709,9 +712,10 @@ export function PlanExecuteViz() {
               <span className="text-xs font-bold uppercase tracking-widest">Plan (Macro)</span>
             </button>
             
-            <button
-              onClick={() => setMode("execute")}
-              className={`pointer-events-auto px-6 py-3 rounded-xl border flex items-center gap-2 transition-all duration-500 ${
+          <button
+            type="button"
+            onClick={() => setMode("execute")}
+            className={`pointer-events-auto px-6 py-3 rounded-xl border flex items-center gap-2 transition-all duration-500 ${
                 mode === "execute" 
                   ? "bg-rose-500 text-white border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.3)]" 
                   : "bg-black/40 text-slate-400 border-white/10 hover:bg-white/5"

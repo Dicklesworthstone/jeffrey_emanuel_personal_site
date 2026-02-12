@@ -291,12 +291,14 @@ export function OverpromptingArticle() {
 
                 <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 backdrop-blur-md">
                   <button
+                    type="button"
                     onClick={() => setChefMode("annoying")}
                     className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "annoying" ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" : "text-slate-500 hover:text-slate-300"}`}
                   >
                     Annoying Planner
                   </button>
                   <button
+                    type="button"
                     onClick={() => setChefMode("trusting")}
                     className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "trusting" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-slate-300"}`}
                   >
