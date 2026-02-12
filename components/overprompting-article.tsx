@@ -1,7 +1,5 @@
 "use client";
 
-import "katex/dist/katex.min.css";
-
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -10,11 +8,8 @@ import {
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
-import katex from "katex";
-import { Zap, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import illustration from "@/assets/overprompting_post_illustration.webp";
-import { MathTooltip } from "./math-tooltip";
-import { getJargon } from "@/lib/overprompting-jargon";
 
 // Dynamic import visualizations (no SSR — they use browser APIs / refs)
 const ConstraintViz = dynamic(
@@ -56,55 +51,6 @@ const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-bricolage",
   display: "swap",
 });
-
-// KaTeX helpers
-function M({ t, explanation }: { t: string; explanation?: string }) {
-  const html = katex.renderToString(t, {
-    throwOnError: false,
-    displayMode: false,
-  });
-  const content = (
-    <span
-      className="op-math-inline"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  );
-
-  if (explanation) {
-    return <MathTooltip term={getJargon(explanation)} variant="amber" mode="math">{content}</MathTooltip>;
-  }
-  return content;
-}
-
-function MBlock({ t, explanation }: { t: string; explanation?: string }) {
-  const html = katex.renderToString(t, {
-    throwOnError: false,
-    displayMode: true,
-  });
-  const content = (
-    <div
-      className="op-math-block"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  );
-
-  if (explanation) {
-    return <MathTooltip term={getJargon(explanation)} variant="amber" mode="math">{content}</MathTooltip>;
-  }
-  return content;
-}
-
-// Shorthand for jargon
-function J({ t, children }: { t: string; children?: React.ReactNode }) {
-  const termData = getJargon(t);
-  if (!termData) return <>{children}</>;
-  
-  return (
-    <MathTooltip term={termData} variant="amber" mode="text">
-      {children || termData.term}
-    </MathTooltip>
-  );
-}
 
 // Section divider
 function Divider() {
@@ -245,67 +191,32 @@ export function OverpromptingArticle() {
         </div>
       </section>
 
-      {/* ========== THE IMAGE GENERATION PARADOX ========== */}
-      <article data-section="paradox">
+      {/* ========== NARRATIVE PART 1 ========== */}
+      <article data-section="part-1">
         <EC>
           <p className="op-drop-cap">
-            I&rsquo;ve mentioned this before, but I think it&rsquo;s so revealing and
-            important to understand that I want to convey it again:
+            {"I've mentioned this before, but I think it's so revealing and important to understand that I want to convey it again:"}
           </p>
-
           <p>
-            Suppose you have two images of different people and you want Nano
-            Banana to take the clothing and pose and orientation of the first
-            image but make it look like the face of the second image so that
-            it&rsquo;s perfectly recognizable.
+            {"Suppose you have two images of different people and you want Nano Banana to take the clothing and pose and orientation of the first image but make it look like the face of the second image so that it's perfectly recognizable."}
           </p>
-
           <p>
-            The obvious way to do this, and the conventional wisdom for a long
-            time, was to make some big, detailed prompt that specifies exactly
-            what you want to happen and even include a bunch of things to look
-            out for to prevent known failure modes.
+            {"The obvious way to do this, and the conventional wisdom for a long time, was to make some big, detailed prompt that specifies exactly what you want to happen and even include a bunch of things to look out for to prevent known failure modes."}
           </p>
-
           <p>
-            You might have some phrases about making sure that the generated
-            image looks &ldquo;just like&rdquo; the person in the second image, or that the
-            &ldquo;facial likeness must be instantly recognizable&rdquo; or some other
-            formulation.
+            {'You might have some phrases about making sure that the generated image looks "just like" the person in the second image, or that the "facial likeness must be instantly recognizable" or some other formulation.'}
           </p>
-
           <p>
-            Or conversely, you might specify that the pose and clothing and
-            orientation of the generated image must match that of the first
-            image.
+            {"Or conversely, you might specify that the pose and clothing and orientation of the generated image must match that of the first image."}
           </p>
-
           <p>
-            And perhaps early testing taught you that there are some failure
-            modes you had to watch out for. As an example, you might include in
-            your prompt that, if the person in the first image has a beard, but
-            the person in the second image doesn&rsquo;t have a beard, that the
-            generated image should definitely not have a beard.
+            {"And perhaps early testing taught you that there are some failure modes you had to watch out for. As an example, you might include in your prompt that, if the person in the first image has a beard, but the person in the second image doesn't have a beard, that the generated image should definitely not have a beard."}
           </p>
-
           <p>
-            All these things sound reasonable, do they not? And here&rsquo;s the weird
-            thing:{" "}
-            <strong>
-              the more stuff like that you include in the prompt, the worse it
-              will work!
-            </strong>{" "}
-            Now, in this example, it might &ldquo;work&rdquo; insofar as it will be a
-            picture of the person dressed as the other person, but it will look
-            comically bad like one of those &ldquo;face-in-hole&rdquo; apps from 2010. Why?
+            {'All these things sound reasonable, do they not? And here\'s the weird thing: the more stuff like that you include in the prompt, the worse it will work! Now, in this example, it might "work" insofar as it will be a picture of the person dressed as the other person, but it will look comically bad like one of those "face-in-hole" apps from 2010. Why?'}
           </p>
-
           <p>
-            What&rsquo;s even stranger is that giving a very short and schematic
-            prompt asking what you want, like &ldquo;make the person in the second pic
-            so they&rsquo;re dressed like the person in the first pic&rdquo; might result in
-            a much more pleasing and realistic image, even if you might need to
-            generate it a couple times to get it just right. Again, why?
+            {'What\'s even stranger is that giving a very short and schematic prompt asking what you want, like "make the person in the second pic so they\'re dressed like the person in the first pic" might result in a much more pleasing and realistic image, even if you might need to generate it a couple times to get it just right. Again, why?'}
           </p>
         </EC>
       </article>
@@ -321,210 +232,127 @@ export function OverpromptingArticle() {
         </EC>
       </section>
 
-      {/* ========== THE MATHEMATICS OF CONSTRAINT ========== */}
-      <section>
-        <EC>
-          <h2 className="op-section-title mb-8 mt-16 text-white">
-            The Mathematics of Constraint
-          </h2>
-          <p>
-            We can formalize this intuition. Imagine the total <J t="search-space">search space</J> of the
-            model as a high-dimensional volume <M t="V_{total}" />. Every prompt
-            constraint <M t="c_i" /> acts as a <J t="constraint-hyperplane">hyperplane</J> that slices this
-            volume.
-          </p>
-          <p>
-            If each constraint has a &quot;restrictiveness&quot; factor <M t="p_i" /> (where <M t="0 < p_i < 1" /> represents
-            the fraction of the space removed), the remaining volume <M t="V_{valid}" /> after <M t="N" /> constraints is:
-          </p>
-          
-          <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 my-8 overflow-x-auto">
-            <MBlock 
-              t="V_{valid} = V_{total} \cdot \prod_{i=1}^{N} (1 - p_i)" 
-              explanation="search-volume"
-            />
-          </div>
+      <Divider />
 
+      {/* ========== NARRATIVE PART 2 ========== */}
+      <section data-section="part-2">
+        <EC>
           <p>
-            As <M t="N" /> increases, <M t="V_{valid}" /> shrinks exponentially. When <M t="V_{valid} \to 0" />, the system
-            becomes <J t="overconstrained">overconstrained</J>. The model, forced to find a solution in an empty set,
-            begins to <J t="hallucination">hallucinate</J> artifacts to artificially satisfy the conflicting rules.
+            {"The answer is that these models are already trained so much to give good results out of the box. But they're also designed to be very helpful, attentive, and accommodating to every part of your request."}
+          </p>
+          <p>
+            {'In fact, every single word in your prompt is "attended to" by the model and has an impact on the specific activation states that occur in its "brain."'}
+          </p>
+          <p>
+            {"Because this activation weight space is so incomprehensibly vast, you'd be amazed at just how different those activations can be as a result of what might seem to be a minor change in the wording of a prompt."}
+          </p>
+          <p>
+            {'Incidentally, this is why things like my "fresh eyes" code review prompt can be so shockingly effective if you\'re not used to that sort of thing: it\'s because they\'re tapping into some very deep thing in the model\'s brain that changes the way it operates, like toggling a create/critique mode gestalt switch.'}
           </p>
         </EC>
       </section>
 
       <Divider />
 
-      {/* ========== EVERY WORD MATTERS ========== */}
-      <section data-section="attention">
+      {/* ========== NARRATIVE PART 3 ========== */}
+      <section data-section="part-3">
         <EC>
-          <h2 className="op-section-title mb-8 mt-16 text-white">
-            Every Word Matters
-          </h2>
-
           <p>
-            The answer is that these models are already trained so much to give
-            good results out of the box. But they&rsquo;re also designed to be very
-            helpful, attentive, and accommodating to every part of your request.
+            {"An analogy here is especially informative. Suppose you want to hire a famous and talented chef to prepare a special meal for your party. Great, surely it will be a wonderful meal, right?"}
           </p>
-
           <p>
-            In fact, every single word in your prompt is &ldquo;attended to&rdquo; by the
-            model and has an impact on the specific <J t="activations">activation states</J> that occur
-            in its &ldquo;brain.&rdquo;
-          </p>
-
-          <p>
-            Because this activation weight space is so incomprehensibly vast,
-            you&rsquo;d be amazed at just how different those activations can be as a
-            result of what might seem to be a minor change in the wording of a
-            prompt.
-          </p>
-
-          <div className="op-callout">
-            <p className="!mb-0">
-              Incidentally, this is why things like my &ldquo;fresh eyes&rdquo; code review
-              prompt can be so shockingly effective if you&rsquo;re not used to that
-              sort of thing: it&rsquo;s because they&rsquo;re tapping into some very deep
-              thing in the model&rsquo;s brain that changes the way it operates, like
-              toggling a create/critique mode gestalt switch.
-            </p>
-          </div>
-        </EC>
-      </section>
-
-      <Divider />
-
-      {/* ========== THE CHEF AND THE PARTY PLANNER ========== */}
-      <section data-section="analogy">
-        <EC>
-          <h2 className="op-section-title mb-8 mt-16 text-white">
-            The Chef and the Party Planner
-          </h2>
-
-          <p>
-            An analogy here is especially informative. Suppose you want to hire
-            a famous and talented chef to prepare a special meal for your party.
-            Great, surely it will be a wonderful meal, right?
-          </p>
-
-          <p>
-            But then you start giving all these additional requests and tweaks
-            to the chef: &ldquo;Martin has nut allergies. Oh and Lucy loves duck, be
-            sure to include that. Oh, and our apple trees are ripe, wouldn&rsquo;t it
-            be so great to use those, too.&rdquo; And on and on, you give more rules
-            and requirements and constraints.
+            {"But then you start giving all these additional requests and tweaks to the chef: \"Martin has nut allergies. Oh and Lucy loves duck, be sure to include that. Oh, and our apple trees are ripe, wouldn't it be so great to use those, too.\" And on and on, you give more rules and requirements and constraints."}
           </p>
 
           {/* Interactive Chef Widget */}
           <div className="my-12 p-1 bg-white/5 rounded-[2rem] border border-white/10 overflow-hidden relative group">
-             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-rose-500/5 opacity-50" />
-             
-             <div className="relative z-10 p-6 md:p-8">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-                   <div>
-                      <h4 className="text-xl font-bold text-white mb-1">Kitchen Simulator</h4>
-                      <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">Cognitive Load Analysis</p>
-                   </div>
-                   
-                   <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 backdrop-blur-md">
-                      <button 
-                        onClick={() => setChefMode("annoying")}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "annoying" ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" : "text-slate-500 hover:text-slate-300"}`}
-                      >
-                        Annoying Planner
-                      </button>
-                      <button 
-                        onClick={() => setChefMode("trusting")}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "trusting" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-slate-300"}`}
-                      >
-                        Trusting Client
-                      </button>
-                   </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-rose-500/5 opacity-50" />
+
+            <div className="relative z-10 p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                <div>
+                  <h4 className="text-xl font-bold text-white mb-1">Kitchen Simulator</h4>
+                  <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">Cognitive Load Analysis</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                   <div className="space-y-6">
-                      <div className="space-y-2">
-                         <div className="flex justify-between text-[10px] font-mono uppercase">
-                            <span className="text-slate-400">Creative Flow</span>
-                            <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
-                               {chefMode === "trusting" ? "Unobstructed" : "Blocked"}
-                            </span>
-                         </div>
-                         <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                               className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-full" : "bg-rose-500 w-[15%]"}`}
-                            />
-                         </div>
-                      </div>
-
-                      <div className="space-y-2">
-                         <div className="flex justify-between text-[10px] font-mono uppercase">
-                            <span className="text-slate-400">Output Artistry</span>
-                            <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
-                               {chefMode === "trusting" ? "Michelin Star" : "Diner Food"}
-                            </span>
-                         </div>
-                         <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                               className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-[95%]" : "bg-rose-500 w-[40%]"}`}
-                            />
-                         </div>
-                      </div>
-                   </div>
-
-                   <div className="p-6 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md relative overflow-hidden min-h-[140px] flex flex-col justify-center">
-                      <div className="absolute top-0 right-0 p-4 opacity-10">
-                         {chefMode === "trusting" ? <CheckCircle2 className="w-12 h-12 text-emerald-400" /> : <AlertTriangle className="w-12 h-12 text-rose-400" />}
-                      </div>
-                      <p className="text-sm text-slate-300 leading-relaxed italic relative z-10">
-                         {chefMode === "trusting" 
-                           ? "“I trust your expertise. We want a vegetable-forward summer experience. Surprise us.”"
-                           : "“Use the 2024 vintage oil, no nuts, keep it under 400 calories, and make sure the plating is symmetrical.”"}
-                      </p>
-                      <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
-                         <div className={`w-2 h-2 rounded-full ${chefMode === "trusting" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
-                         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-                            {chefMode === "trusting" ? "Chef is in the zone" : "Chef is frustrated"}
-                         </span>
-                      </div>
-                   </div>
+                <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 backdrop-blur-md">
+                  <button
+                    onClick={() => setChefMode("annoying")}
+                    className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "annoying" ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" : "text-slate-500 hover:text-slate-300"}`}
+                  >
+                    Annoying Planner
+                  </button>
+                  <button
+                    onClick={() => setChefMode("trusting")}
+                    className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "trusting" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-slate-300"}`}
+                  >
+                    Trusting Client
+                  </button>
                 </div>
-             </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-mono uppercase">
+                      <span className="text-slate-400">Creative Flow</span>
+                      <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
+                        {chefMode === "trusting" ? "Unobstructed" : "Blocked"}
+                      </span>
+                    </div>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-full" : "bg-rose-500 w-[15%]"}`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-mono uppercase">
+                      <span className="text-slate-400">Output Artistry</span>
+                      <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
+                        {chefMode === "trusting" ? "Michelin Star" : "Diner Food"}
+                      </span>
+                    </div>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-[95%]" : "bg-rose-500 w-[40%]"}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md relative overflow-hidden min-h-[140px] flex flex-col justify-center">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    {chefMode === "trusting" ? <CheckCircle2 className="w-12 h-12 text-emerald-400" /> : <AlertTriangle className="w-12 h-12 text-rose-400" />}
+                  </div>
+                  <p className="text-sm text-slate-300 leading-relaxed italic relative z-10">
+                    {chefMode === "trusting"
+                      ? "“I trust your expertise. We want a vegetable-forward summer experience. Surprise us.”"
+                      : "“Use the 2024 vintage oil, no nuts, keep it under 400 calories, and make sure the plating is symmetrical.”"}
+                  </p>
+                  <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${chefMode === "trusting" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
+                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                      {chefMode === "trusting" ? "Chef is in the zone" : "Chef is frustrated"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <p>
-            The chef wants to be helpful (assume you&rsquo;re paying them a lot), but
-            every time you add another one of your rules, you are restricting
-            and circumscribing what they can do. You are{" "}
-            <strong>
-              dramatically narrowing and constraining their <J t="search-space">search space</J>
-            </strong>{" "}
-            and impeding their creative process, because now they keep bumping
-            against your rules.
+            {"The chef wants to be helpful (assume you're paying them a lot), but every time you add another one of your rules, you are restricting and circumscribing what they can do. You are dramatically narrowing and constraining their search space and impeding their creative process, because now they keep bumping against your rules."}
           </p>
-
           <p>
-            Instead of focusing on what they know best, which is creating
-            incredible dishes and meal experiences, they are forced to waste
-            their cognitive energy on dancing around these constraints.
+            {"Instead of focusing on what they know best, which is creating incredible dishes and meal experiences, they are forced to waste their cognitive energy on dancing around these constraints."}
           </p>
-
           <p>
-            If you foist enough of them on the chef, it becomes like those
-            scenes in heist movies where they have all the laser beam motion
-            detectors and you need to dance around them like some kind of ninja
-            acrobat just to get through the other side. Now, if the chef is good
-            enough, will you still end up with a pretty good meal for your
-            guests? Sure, probably.
+            {"If you foist enough of them on the chef, it becomes like those scenes in heist movies where they have all the laser beam motion detectors and you need to dance around them like some kind of ninja acrobat just to get through the other side. Now, if the chef is good enough, will you still end up with a pretty good meal for your guests? Sure, probably."}
           </p>
-
           <p>
-            But will it be close to as good as it could have been if you let the
-            chef make all the decisions themselves with maybe just some basic,
-            high-level guidance (e.g., &ldquo;less seafood, lots of veggies&rdquo;)?
-            Almost certainly not.
+            {'But will it be close to as good as it could have been if you let the chef make all the decisions themselves with maybe just some basic, high-level guidance (e.g., "less seafood, lots of veggies")? Almost certainly not.'}
           </p>
         </EC>
       </section>
@@ -537,103 +365,32 @@ export function OverpromptingArticle() {
           <div className="op-viz-container">
             <QualityCurveViz />
           </div>
-          
-          <p className="mt-8">
-            Mathematically, we can model the relationship between <M t="s" /> (specificity) and
-            <M t="Q" /> (quality) as a modified Gaussian function centered on an optimal specificity <M t="\mu" />:
-          </p>
-          
-          <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 my-8 overflow-x-auto">
-            <MBlock 
-              t="Q(s) \approx e^{-\frac{(s - \mu)^2}{2\sigma^2}}" 
-              explanation="gaussian-quality"
-            />
-          </div>
-          
-          <p>
-            When <M t="s < \mu" /> (too vague), the model&rsquo;s <J t="entropy-loss">entropy</J> is too high; it drifts into noise.
-            When <M t="s > \mu" /> (overconstrained), the valid intersection of constraints vanishes, and quality drops precipitously.
-          </p>
         </EC>
       </section>
 
       <Divider />
 
-      {/* ========== THE LESSON ========== */}
-      <section data-section="lesson">
+      {/* ========== NARRATIVE PART 4 ========== */}
+      <section data-section="part-4">
         <EC>
-          <div className="op-insight-card group">
-            <div className="relative z-10">
-              <p className="!mb-0 font-serif text-lg leading-relaxed">
-                The chef is the model, and you are the annoying party planner.
-                Every time you try to tell the model exactly what to do and how,
-                just understand that, although you might end up with something
-                that on the surface conforms with all your requirements, it will
-                be the equivalent of that &ldquo;face-in-hole&rdquo; photo that
-                &ldquo;technically&rdquo; looks like the person but also looks
-                2-dimensional and like a bad Photoshop attempt:{" "}
-                <strong>no artistry</strong>, and not likely to fool anyone about
-                it being natural or real.
-              </p>
-            </div>
-          </div>
-        </EC>
-      </section>
-
-      <Divider />
-
-      {/* ========== FROM IMAGES TO CODE ========== */}
-      <section data-section="code">
-        <EC>
-          <h2 className="op-section-title mb-8 mt-16 text-white">
-            From Images to Code
-          </h2>
-
           <p>
-            This applies just as much to using these models to generate code.
-            The more you tell them what to do and how, the worse the results
-            will be. That&rsquo;s why you should try to focus your prompting on your
-            goals, the purpose of the project, the desired end state, the
-            features and functionality you&rsquo;d like to have (but not in such
-            extreme specificity: again focus on the purpose of the feature, the
-            intent of it, what it&rsquo;s supposed to help the user do, etc.).
+            {'The chef is the model, and you are the annoying party planner. Every time you try to tell the model exactly what to do and how, just understand that, although you might end up with something that on the surface conforms with all your requirements, it will be the equivalent of that "face-in-hole" photo that "technically" looks like the person but also looks 2-dimensional and like a bad Photoshop attempt: no artistry, and not likely to fool anyone about it being natural or real.'}
           </p>
-
           <p>
-            The models are now smart enough that, once they understand the
-            high-level goals, they can do a better job planning than you can, at
-            least if the goal is to get a plan that other models/agents are
-            going to implement.
+            {"This applies just as much to using these models to generate code. The more you tell them what to do and how, the worse the results will be. That's why you should try to focus your prompting on your goals, the purpose of the project, the desired end state, the features and functionality you'd like to have (but not in such extreme specificity: again focus on the purpose of the feature, the intent of it, what it's supposed to help the user do, etc.)."}
           </p>
-
           <p>
-            Note that what I&rsquo;m saying here really applies more to the planning
-            stages. Once you have a plan, you can make it quite elaborate in an
-            iterative way, and I usually do.
+            {"The models are now smart enough that, once they understand the high-level goals, they can do a better job planning than you can, at least if the goal is to get a plan that other models/agents are going to implement."}
           </p>
-
           <p>
-            And then I turn those plans into extremely detailed beads (epics,
-            tasks, subtasks, etc) so that the agents that are actually
-            implementing the stuff don&rsquo;t need to understand the big picture and
-            can focus instead on their narrow task, much like a short-order cook
-            in a diner can focus on the ticket in front of them and just make a
-            good pastrami sandwich without worrying about how to bake a pie or
-            whether the people at table 3 have been waiting too long for a water
-            refill.
+            {"Note that what I'm saying here really applies more to the planning stages. Once you have a plan, you can make it quite elaborate in an iterative way, and I usually do."}
           </p>
-
-          <div className="op-callout">
-            <p className="!mb-0">
-              So, in short: when coming up with your plan, don&rsquo;t be too
-              prescriptive to give the model flexibility so that you get the
-              best possible plan. But once you&rsquo;ve figured out what to do, you
-              want to go in the opposite direction and get very detailed and
-              specific so that you can turn the plan into such detailed marching
-              orders that even a dumber agent could still probably implement
-              them well.
-            </p>
-          </div>
+          <p>
+            {"And then I turn those plans into extremely detailed beads (epics, tasks, subtasks, etc) so that the agents that are actually implementing the stuff don't need to understand the big picture and can focus instead on their narrow task, much like a short-order cook in a diner can focus on the ticket in front of them and just make a good pastrami sandwich without worrying about how to bake a pie or whether the people at table 3 have been waiting too long for a water refill."}
+          </p>
+          <p>
+            {"So, in short: when coming up with your plan, don't be too prescriptive to give the model flexibility so that you get the best possible plan. But once you've figured out what to do, you want to go in the opposite direction and get very detailed and specific so that you can turn the plan into such detailed marching orders that even a dumber agent could still probably implement them well (but of course, you don't use a dumb agent, you use a very smart agent that is super overpowered for the task so that they do a phenomenal job)."}
+          </p>
         </EC>
       </section>
 
@@ -650,119 +407,27 @@ export function OverpromptingArticle() {
 
       <Divider />
 
-      {/* ========== THE BROWNFIELD CONNECTION ========== */}
-      <section data-section="brownfield">
+      {/* ========== NARRATIVE PART 5 ========== */}
+      <section data-section="part-5" className="pb-24">
         <EC>
-          <h2 className="op-section-title mb-8 mt-16 text-white">
-            The Brownfield Connection
-          </h2>
-
           <p>
-            If you squint, you will also see a connection to my other big advice
-            for working with brownfield projects that already have a ton of code
-            (and also my approach to porting).
+            {"If you squint, you will also see a connection to my other big advice for working with brownfield projects that already have a ton of code (and also my approach to porting)."}
           </p>
-
           <p>
-            That advice is that you first need to transform the big existing
-            codebase into a much shorter specification document that details
-            just the interfaces and the behaviors, but none of the internal
-            implementation details.
+            {"That advice is that you first need to transform the big existing codebase into a much shorter specification document that details just the interfaces and the behaviors, but none of the internal implementation details."}
           </p>
-
           <p>
-            This lets you compress the important parts down into something that
-            can easily fit within the model&rsquo;s context window, where it can think
-            about everything all at once: the full totality of the project and
-            what you&rsquo;re trying to do, without getting weighed down by all the
-            minutiae (which wouldn&rsquo;t even fit in its context anyway, so that it
-            would be forced to look through the equivalent of a very zoomed-in
-            camera lens from far away, scanning just a tiny portion of the scene
-            at a time).
+            {"This lets you compress the important parts down into something that can easily fit within the model's context window, where it can think about everything all at once: the full totality of the project and what you're trying to do, without getting weighed down by all the minutiae (which wouldn't even fit in its context anyway, so that it would be forced to look through the equivalent of a very zoomed-in camera lens from far away, scanning just a tiny portion of the scene at a time)."}
           </p>
-
           <p>
-            Although there are obvious differences here, the core concept is
-            really analogous: that you want to{" "}
-            <strong>
-              get out of the way of the model as much as possible
-            </strong>{" "}
-            so it has more degrees of freedom to explore and solve your problem
-            without having to waste its cognitive powers on dumb, irrelevant
-            details. In the case of coming up with a plan, those would be like
-            the details about all the ingredients you want to use.
+            {"Although there are obvious differences here, the core concept is really analogous: that you want to get out of the way of the model as much as possible so it has more degrees of freedom to explore and solve your problem without having to waste its cognitive powers on dumb, irrelevant details. In the case of coming up with a plan, those would be like the details about all the ingredients you want to use."}
           </p>
-
           <p>
-            In the case of a brownfield development project, those details are
-            all the irrelevant internal implementation details of all of the
-            code files.
+            {"In the case of a brownfield development project, those details are all the irrelevant internal implementation details of all of the code files."}
           </p>
-
-          <div className="op-insight-card group">
-            <div className="relative z-10">
-              <p className="!mb-0 font-serif italic text-lg text-slate-300">
-                And by the way, you can always wait until after the chef has
-                come up with the plan and then say at the end &ldquo;Oh, Martin has
-                nut allergies so let&rsquo;s change that one thing.&rdquo; That might annoy
-                the chef, but you&rsquo;ll still end up with a very good meal.
-                Something to keep in mind.
-              </p>
-            </div>
-          </div>
-        </EC>
-      </section>
-
-      <Divider />
-
-      {/* ========== KEY TAKEAWAYS ========== */}
-      <section data-section="takeaways" className="pb-24">
-        <EC>
-          <div className="rounded-3xl p-8 md:p-12 border border-white/10 bg-white/[0.02] relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5">
-              <Zap className="w-32 h-32 text-amber-400" />
-            </div>
-            
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight">Key Takeaways</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-              <div className="space-y-4 flex flex-col h-full">
-                <h3 className="text-amber-400 font-mono text-xs uppercase tracking-widest shrink-0">The Problem</h3>
-                <ul className="space-y-3 flex-1">
-                  <li className="flex items-start gap-3 text-slate-300 text-sm">
-                    <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
-                    <span>Every constraint restricts the model&rsquo;s creative search space.</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-slate-300 text-sm">
-                    <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
-                    <span>Detailed instructions often lead to &ldquo;face-in-hole&rdquo; outputs with no artistry.</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-slate-300 text-sm">
-                    <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
-                    <span>The more you tell a model <em>how</em> to do something, the less it focuses on the <em>goal</em>.</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="space-y-4 flex flex-col h-full">
-                <h3 className="text-emerald-400 font-mono text-xs uppercase tracking-widest shrink-0">The Solution</h3>
-                <ul className="space-y-3 flex-1">
-                  <li className="flex items-start gap-3 text-slate-300 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>Phase 1:</strong> Be open and intent-focused during planning.</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-slate-300 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>Phase 2:</strong> Be extremely precise once the plan is set.</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-slate-300 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>Trust the model&rsquo;s latent space to find the best implementation path.</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <p>
+            {'And by the way, you can always wait until after the chef has come up with the plan and then say at the end "Oh, Martin has nut allergies so let\'s change that one thing." That might annoy the chef, but you\'ll still end up with a very good meal. Something to keep in mind.'}
+          </p>
         </EC>
       </section>
 
