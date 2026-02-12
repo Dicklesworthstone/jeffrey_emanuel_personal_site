@@ -2,15 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Crimson_Pro,
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
-import {
-  ShieldCheck,
-  Cpu,
+import { 
+  ShieldCheck, 
+  Cpu, 
   Zap,
   Timer,
   Lock,
@@ -148,14 +148,14 @@ export function BakeryArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section data-section="hero" className="min-h-screen flex flex-col justify-center relative overflow-hidden pb-20">
+      <section data-section="hero" className="min-h-screen flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
         <div className="absolute inset-0 z-0 scale-110 md:scale-100">
           <BakeryHero />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
-          <div className="text-center pt-64 md:pt-40 relative z-20">
+          <div className="text-center relative z-20">
             <div className="inline-flex flex-wrap items-center justify-center gap-4 mb-10 md:mb-12">
                <motion.div 
                  initial={{ opacity: 0, scale: 0.95 }}
@@ -174,7 +174,7 @@ export function BakeryArticle() {
                </div>
             </div>
 
-            <h1 className="ba-display-title mb-6 text-white text-balance leading-[0.9] md:leading-[0.85]">
+            <h1 className="ba-display-title mb-6 text-white text-balance !leading-[1.1] md:!leading-[0.85]">
               The Bakery{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">
                 Algorithm.
