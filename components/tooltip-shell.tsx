@@ -61,7 +61,7 @@ export function TooltipShell({
     style: CSSProperties;
   }>({ position: "top", style: {} });
   
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -175,6 +175,23 @@ export function TooltipShell({
     }
   }, [isMobile]);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        const touchEnvironment =
+          typeof window !== "undefined" &&
+          window.matchMedia("(hover: none), (pointer: coarse)").matches;
+        if (isMobile || touchEnvironment) {
+          setIsOpen(true);
+        } else {
+          setIsOpen((prev) => !prev);
+        }
+      }
+    },
+    [isMobile]
+  );
+
   const handleClose = useCallback(() => setIsOpen(false), []);
 
   const variantStyles = {
@@ -191,23 +208,25 @@ export function TooltipShell({
 
   return (
     <>
-      <button
+      <span
         ref={triggerRef}
-        type="button"
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         className={cn(
           "appearance-none bg-transparent border-none p-0 m-0 text-inherit font-inherit text-left cursor-help inline focus:outline-none",
           className
         )}
+        role="button"
+        tabIndex={0}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
       >
         {children}
-      </button>
+      </span>
 
       {/* Desktop Tooltip */}
       {canUsePortal &&
@@ -288,17 +307,19 @@ export function TooltipShell({
         )}
 
       {/* Mobile Bottom Sheet */}
-      {canUsePortal && (
-        <BottomSheet
-          isOpen={isOpen && isMobile}
-          onClose={handleClose}
-          title={title}
-        >
-          <div className={cn("pb-4", portalClassName)}>
-            {sheetContent}
-          </div>
-        </BottomSheet>
-      )}
+      {canUsePortal &&
+        createPortal(
+          <BottomSheet
+            isOpen={isOpen && isMobile}
+            onClose={handleClose}
+            title={title}
+          >
+            <div className={cn("pb-4", portalClassName)}>
+              {sheetContent}
+            </div>
+          </BottomSheet>,
+          document.body
+        )}
     </>
   );
 }

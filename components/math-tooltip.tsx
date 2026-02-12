@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, type ComponentType, type SVGProps } from "react";
 import { Sigma, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { JargonTerm } from "@/lib/jargon-types";
@@ -118,6 +118,9 @@ const VARIANT_STYLES = {
   },
 };
 
+type TooltipStyles = (typeof VARIANT_STYLES)[TooltipVariant];
+type TooltipIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
 /**
  * Canonical Tooltip Component.
  * Unified implementation for all interactive articles.
@@ -149,21 +152,21 @@ export function MathTooltip({ term, children, variant = "cyan", mode = "math", s
       tooltipContent={<MathTooltipContent term={term} styles={styles} Icon={Icon} />}
       sheetContent={<MathSheetContent term={term} styles={styles} Icon={Icon} />}
     >
-      <div className={mode === "math" ? "relative" : ""}>
+      <span className={mode === "math" ? "relative inline-block" : "inline"}>
         {children}
         {mode === "math" && !simple && (
-          <div className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
-            <div className={cn("flex h-3.5 w-3.5 items-center justify-center rounded-full shadow-lg border border-white/10", styles.iconBg)}>
+          <span className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
+            <span className={cn("flex h-3.5 w-3.5 items-center justify-center rounded-full shadow-lg border border-white/10", styles.iconBg)}>
               <Icon className={cn("h-2 w-2", styles.iconText)} />
-            </div>
-          </div>
+            </span>
+          </span>
         )}
-      </div>
+      </span>
     </TooltipShell>
   );
 }
 
-function MathTooltipContent({ term, styles, Icon }: { term: JargonTerm; styles: any; Icon: any }) {
+function MathTooltipContent({ term, styles, Icon }: { term: JargonTerm; styles: TooltipStyles; Icon: TooltipIcon }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 border-b border-white/5 pb-2">
@@ -190,7 +193,7 @@ function MathTooltipContent({ term, styles, Icon }: { term: JargonTerm; styles: 
   );
 }
 
-function MathSheetContent({ term, styles, Icon }: { term: JargonTerm; styles: any; Icon: any }) {
+function MathSheetContent({ term, styles, Icon }: { term: JargonTerm; styles: TooltipStyles; Icon: TooltipIcon }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
