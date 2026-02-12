@@ -426,6 +426,8 @@ export function OutlierCrusher() {
     { x: 100, y: 100 }
   ], []);
 
+  const ranks = useMemo(() => getRanks(points.map(pt => pt.x)), [points]);
+
   return (
     <div className="hd-viz-container overflow-hidden">
       <div className="hd-viz-header px-8 py-6 bg-amber-500/5 border-b border-amber-500/10 flex items-center justify-between">
@@ -443,7 +445,6 @@ export function OutlierCrusher() {
       <div className="p-12 flex flex-col items-center justify-center min-h-[300px] relative">
         <div className="flex gap-8 items-end h-40">
           {points.map((p, i) => {
-            const ranks = getRanks(points.map(pt => pt.x));
             const val = withRanking ? ranks[i] : p.x;
             const height = withRanking ? (val / 5) * 100 : (val / 100) * 150;
             return (
@@ -494,7 +495,7 @@ export function RankingVisualizer() {
 
   const addVal = () => {
     if (items.length >= 10) return;
-    setItems([...items, { id: Date.now(), val: Math.floor(Math.random() * 100) }]);
+    setItems([...items, { id: Math.random(), val: Math.floor(Math.random() * 100) }]);
   };
 
   const removeVal = (id: number) => {
