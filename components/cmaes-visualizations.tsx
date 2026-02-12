@@ -356,6 +356,9 @@ export function SelectionWalkthrough() {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const solver = useMemo(() => new ProCMAES(2, [0, 0], 2), []);
   const [data, setData] = useState<SelectionData | null>(null);
+  const completedLoops = solver.generation;
+  const currentLoop = solver.generation + 1;
+  const currentPhase = stepIdx + 1;
 
   const objective = useCallback((x: number[]) => {
     const x_rot = x[0] * Math.cos(0.4) - x[1] * Math.sin(0.4);
@@ -437,10 +440,17 @@ export function SelectionWalkthrough() {
           <div>
             <h4 className="text-2xl font-black text-white tracking-tighter">Loop Discovery</h4>
             <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black">Step-by-Step Adaptation</p>
+            <div className="mt-2 inline-flex items-center gap-3 rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-amber-300">
+              <span>Loop {currentLoop}</span>
+              <span className="text-amber-500/70">|</span>
+              <span>Completed {completedLoops}</span>
+              <span className="text-amber-500/70">|</span>
+              <span>Phase {currentPhase}/4</span>
+            </div>
           </div>
         </div>
         <button onClick={nextStep} className="rq-btn-action !py-3.5 !px-4 md:!px-10 flex items-center gap-3 group md:ml-auto">
-          {stepIdx === 3 ? "Reset Sequence" : "Next Phase"}
+          {stepIdx === 3 ? `Complete Loop ${currentLoop}` : "Next Phase"}
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
@@ -870,14 +880,14 @@ export function RestartViz() {
           <p className="text-xs text-slate-400 leading-relaxed mb-6">
             Complex landscapes have many &quot;traps&quot; (local minima). CMA-ES handles this with <strong>IPOP</strong>: if it gets stuck, it restarts with a larger, more exploratory population.
           </p>
-          <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-3 mb-6">
-            <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-500">
-              <span>Current Population</span>
-              <span className="text-purple-400">λ = {popSize}</span>
+          <div className="p-5 rounded-xl bg-black/40 border border-white/5 space-y-4 mb-6">
+            <div className="flex justify-between items-center text-slate-400">
+              <span className="text-xs md:text-sm font-black uppercase tracking-[0.18em]">Current Population</span>
+              <span className="text-base md:text-xl font-mono font-bold text-purple-300">λ = {popSize}</span>
             </div>
-            <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-500">
-              <span>Best Objective</span>
-              <span className="text-white font-mono">{bestVal.toFixed(4)}</span>
+            <div className="flex justify-between items-center text-slate-400">
+              <span className="text-xs md:text-sm font-black uppercase tracking-[0.18em]">Best Objective</span>
+              <span className="text-base md:text-xl font-mono font-bold text-white">{bestVal.toFixed(4)}</span>
             </div>
           </div>
           <button onClick={run} disabled={isRunning} className="w-full rq-btn-action !bg-purple-500 !text-white flex items-center justify-center gap-2 !shadow-none !py-3">

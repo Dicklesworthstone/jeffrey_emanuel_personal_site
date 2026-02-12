@@ -6,7 +6,7 @@ import SectionShell from "@/components/section-shell";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-[80vh] flex-col items-center justify-center">
+    <div className="flex min-h-[min(80dvh,80vh)] flex-col items-center justify-center">
       <SectionShell
         title="Page not found"
         eyebrow="404 Error"

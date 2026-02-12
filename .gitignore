@@ -65,3 +65,11 @@ test-results/
 
 # Playwright test artifacts
 playwright-report/
+
+# Agent/compiler ephemeral files
+a.out
+.plan.md
+screenshots_for_diagnostics/
+rustc-ice-*.txt
+reports/
+.agent-mail.yaml
