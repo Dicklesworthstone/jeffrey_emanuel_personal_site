@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 // Known issues that are acceptable or planned for future fixes
@@ -7,11 +7,17 @@ const KNOWN_ISSUE_RULES = [
   "color-contrast", // Dark theme contrast - design decision, meets APCA standards
 ];
 
+async function openTldrReadyForScan(page: Page) {
+  await page.goto("/tldr");
+  const hero = page.locator("#tldr-hero");
+  await hero.waitFor({ state: "visible", timeout: 15000 });
+}
+
 test.describe("TL;DR Page Accessibility", () => {
   test.describe("Full Page Scans", () => {
     test("should have no WCAG 2.1 AA violations on initial load", async ({ page }) => {
       console.log('[A11Y] Running full page accessibility scan');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       // Wait for all animations to settle
       await page.waitForTimeout(1000);
@@ -40,7 +46,7 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("should have no violations with expanded tool card", async ({ page }) => {
       console.log('[A11Y] Testing with expanded card');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       // Wait for page to settle
       await page.waitForTimeout(500);
@@ -55,7 +61,7 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("should have no violations in search state", async ({ page }) => {
       console.log('[A11Y] Testing search state accessibility');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       // Activate search
       const searchInput = page.getByPlaceholder(/search/i);
@@ -76,10 +82,10 @@ test.describe("TL;DR Page Accessibility", () => {
   test.describe("Component-Level Scans", () => {
     test("should have no violations in hero section", async ({ page }) => {
       console.log('[A11Y] Scanning hero section');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       const hero = page.locator('#tldr-hero');
-      await hero.waitFor();
+      await hero.waitFor({ state: "visible", timeout: 12000 });
 
       const results = await new AxeBuilder({ page })
         .include('#tldr-hero')
@@ -93,10 +99,10 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("should have no violations in synergy diagram", async ({ page }) => {
       console.log('[A11Y] Scanning synergy diagram');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       const diagram = page.locator('svg[aria-label*="synergy"]');
-      await diagram.waitFor();
+      await diagram.waitFor({ state: "visible", timeout: 12000 });
 
       const results = await new AxeBuilder({ page })
         .include('svg[aria-label*="synergy"]')
@@ -110,10 +116,10 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("should have no violations in tool cards", async ({ page }) => {
       console.log('[A11Y] Scanning tool cards');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       const cards = page.locator('[data-testid="tool-card"]');
-      await cards.first().waitFor();
+      await cards.first().waitFor({ state: "visible", timeout: 12000 });
 
       const results = await new AxeBuilder({ page })
         .include('[data-testid="tool-card"]')
@@ -127,11 +133,11 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("should have no violations in footer CTA", async ({ page }) => {
       console.log('[A11Y] Scanning footer CTA');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       await page.getByRole('heading', { name: /get started/i }).scrollIntoViewIfNeeded();
       const cta = page.locator('#get-started');
-      await cta.waitFor();
+      await cta.waitFor({ state: "visible", timeout: 12000 });
 
       const results = await new AxeBuilder({ page })
         .include('#get-started')
@@ -149,7 +155,7 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("should have no violations on mobile viewport", async ({ page }) => {
       console.log('[A11Y] Testing mobile accessibility');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa'])
@@ -163,7 +169,7 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test.skip("should have no violations with bottom sheet open", async ({ page }) => {
       console.log('[A11Y] Testing bottom sheet accessibility');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
       
       // Tap a node in the flywheel visualization to open the sheet
       // Use accessible name (aria-label)
@@ -184,7 +190,7 @@ test.describe("TL;DR Page Accessibility", () => {
   test.describe("Specific Rule Checks", () => {
     test("all images should have alt text", async ({ page }) => {
       console.log('[A11Y] Checking image alt text');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
       
       const results = await new AxeBuilder({ page })
         .withRules(['image-alt'])
@@ -195,7 +201,7 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("all form controls should have labels", async ({ page }) => {
       console.log('[A11Y] Checking form labels');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
       
       const results = await new AxeBuilder({ page })
         .withRules(['label', 'label-title-only'])
@@ -206,7 +212,7 @@ test.describe("TL;DR Page Accessibility", () => {
 
     test("color contrast should meet WCAG AA", async ({ page }) => {
       console.log('[A11Y] Checking color contrast');
-      await page.goto("/tldr");
+      await openTldrReadyForScan(page);
 
       const results = await new AxeBuilder({ page })
         .withRules(['color-contrast'])

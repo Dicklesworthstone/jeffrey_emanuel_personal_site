@@ -147,8 +147,8 @@ export default async function Image() {
               </defs>
 
               {/* Collapsing Rings */}
-              <circle cx="50" cy="50" r="45" stroke="url(#opGrad)" strokeWidth="0.5" strokeDasharray="2 4" opacity="0.3" />
-              <circle cx="50" cy="50" r="35" stroke="url(#opGrad)" strokeWidth="1" strokeDasharray="4 2" opacity="0.5" />
+              <circle cx="50" cy="50" r="45" stroke="url(#opGrad)" strokeWidth="0.5" opacity="0.3" />
+              <circle cx="50" cy="50" r="35" stroke="url(#opGrad)" strokeWidth="1" opacity="0.5" />
               <circle cx="50" cy="50" r="20" stroke="url(#opGrad)" strokeWidth="2" opacity="0.8" />
               
               {/* Central Point */}

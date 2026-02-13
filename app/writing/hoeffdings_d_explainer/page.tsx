@@ -5,7 +5,7 @@ import { HoeffdingArticle } from "@/components/hoeffding-article";
 export const metadata: Metadata = {
   title: "My Favorite Statistical Measure: Hoeffding's D | Jeffrey Emanuel",
   description:
-    "Standard correlation misses non-linear relationships. This guide explains Hoeffding's D, a powerful non-parametric measure that detects complex dependencies where Pearson and Spearman fail.",
+    "Standard correlation misses non-linear relationships. This guide explains Hoeffding's D, a powerful non-parametric measure that detects complex, non-linear dependencies where Pearson and Spearman fail.",
   alternates: {
     canonical: "/writing/hoeffdings_d_explainer",
   },

@@ -31,12 +31,16 @@ function getRanks(arr: number[]) {
   let i = 0;
   while (i < n) {
     let j = i;
-    while (j < n && sorted[j].val === sorted[i].val) j++;
+    while (j < n && Math.abs(sorted[j].val - sorted[i].val) <= 1e-12 * Math.max(1, Math.abs(sorted[j].val), Math.abs(sorted[i].val))) j++;
     const rank = (i + 1 + j) / 2;
     for (let k = i; k < j; k++) ranks[sorted[k].i] = rank;
     i = j;
   }
   return ranks;
+}
+
+function tieEqual(a: number, b: number, tol = 1e-12) {
+  return Math.abs(a - b) <= tol * Math.max(1, Math.abs(a), Math.abs(b));
 }
 
 function calculatePearson(x: number[], y: number[]) {
@@ -69,9 +73,9 @@ function calculateHoeffdingD(x: number[], y: number[]) {
     for (let j = 0; j < n; j++) {
       if (i === j) continue;
       if (R[j] < R[i] && S[j] < S[i]) lowerBoth++;
-      else if (R[j] === R[i] && S[j] === S[i]) equalBoth++;
-      else if (R[j] === R[i] && S[j] < S[i]) rEqSLow++;
-      else if (R[j] < R[i] && S[j] === S[i]) rLowSEq++;
+      else if (tieEqual(R[j], R[i]) && tieEqual(S[j], S[i])) equalBoth++;
+      else if (tieEqual(R[j], R[i]) && S[j] < S[i]) rEqSLow++;
+      else if (R[j] < R[i] && tieEqual(S[j], S[i])) rLowSEq++;
     }
     Q[i] = 1 + lowerBoth + 0.25 * equalBoth + 0.5 * rEqSLow + 0.5 * rLowSEq;
   }
