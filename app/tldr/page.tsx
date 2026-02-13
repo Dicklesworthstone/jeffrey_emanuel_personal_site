@@ -1,14 +1,24 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRef, useState, useCallback, useMemo } from "react";
 import { Copy, Check } from "lucide-react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import ErrorBoundary from "@/components/error-boundary";
 import { TldrHero } from "@/components/tldr-hero";
-import { TldrToolGrid } from "@/components/tldr-tool-grid";
 import { TldrSynergyDiagram } from "@/components/tldr-synergy-diagram";
-import { TldrSectionNav } from "@/components/tldr-section-nav";
 import { tldrFlywheelTools, tldrPageData } from "@/lib/content";
+
+// Load below-the-fold sections lazily to reduce first-paint work.
+const LazyTldrSectionNav = dynamic(() => import("@/components/tldr-section-nav"));
+const LazyTldrToolGrid = dynamic(() => import("@/components/tldr-tool-grid"), {
+  ssr: false,
+  loading: () => (
+    <div className="py-12 text-center text-xs text-slate-500">
+      Loading tools…
+    </div>
+  ),
+});
 
 // =============================================================================
 // FLYWHEEL EXPLANATION SECTION
@@ -198,7 +208,7 @@ export default function TldrPage() {
         </ErrorBoundary>
 
         {/* Sticky Section Navigation */}
-        <TldrSectionNav
+        <LazyTldrSectionNav
           sections={sectionNavItems}
           triggerElementId="tldr-hero"
         />
@@ -225,7 +235,7 @@ export default function TldrPage() {
                 </div>
               }
             >
-              <TldrToolGrid tools={tldrFlywheelTools} />
+              <LazyTldrToolGrid tools={tldrFlywheelTools} />
             </ErrorBoundary>
           </div>
         </section>
