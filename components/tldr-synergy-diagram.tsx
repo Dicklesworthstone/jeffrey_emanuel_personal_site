@@ -1,11 +1,29 @@
 "use client";
 
-import { useRef, useMemo, useState, useCallback, useId } from "react";
+import {
+  useRef,
+  useMemo,
+  useState,
+  useCallback,
+  useId,
+  useEffect,
+} from "react";
 import { useReducedMotion } from "framer-motion";
 import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getColorDefinition } from "@/lib/colors";
 import type { TldrFlywheelTool } from "@/lib/content";
+
+const DIAGRAM_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
+const DIAGRAM_HIGHLIGHT_ATTR = "data-diagram-highlighted";
+
+function getHasFinePointer() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+
+  return window.matchMedia(DIAGRAM_POINTER_QUERY).matches;
+}
 
 // =============================================================================
 // TYPES
@@ -45,16 +63,125 @@ export function TldrSynergyDiagram({
   className,
 }: TldrSynergyDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const touchHoverResetRef = useRef<number | NodeJS.Timeout | null>(null);
+  const scrollFixTimeoutRef = useRef<number | NodeJS.Timeout | null>(null);
+  const highlightTimeoutRef = useRef<number | NodeJS.Timeout | null>(null);
+  const cardHighlightRef = useRef<HTMLElement | null>(null);
+  const lastTouchActivationRef = useRef(0);
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [hasFinePointer, setHasFinePointer] = useState(getHasFinePointer);
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
   const scopeId = useId();
-  const shouldAnimateDiagram =
-    typeof window !== "undefined" &&
-    !reducedMotion &&
-    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const shouldAnimateDiagram = !reducedMotion && hasFinePointer;
 
-  // Interactive state
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const clearTouchHoverState = useCallback(() => {
+    setHoveredNode(null);
+    touchHoverResetRef.current = null;
+  }, []);
+
+  const clearCardHighlight = useCallback(() => {
+    if (!cardHighlightRef.current) {
+      return;
+    }
+
+    cardHighlightRef.current.classList.remove("ring-2", "ring-violet-400/60", "rounded-2xl");
+    cardHighlightRef.current.removeAttribute(DIAGRAM_HIGHLIGHT_ATTR);
+    cardHighlightRef.current = null;
+
+    if (highlightTimeoutRef.current) {
+      window.clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
+    }
+  }, []);
+
+  const applyNodeHighlight = useCallback(
+    (target: Element | null) => {
+      if (!target || !(target instanceof HTMLElement)) {
+        return;
+      }
+
+      clearCardHighlight();
+
+      cardHighlightRef.current = target;
+      target.classList.add("ring-2", "ring-violet-400/60", "rounded-2xl");
+      target.setAttribute(DIAGRAM_HIGHLIGHT_ATTR, "true");
+
+      highlightTimeoutRef.current = window.setTimeout(() => {
+        clearCardHighlight();
+      }, 1500);
+    },
+    [clearCardHighlight]
+  );
+
+  const handleNodeLeave = useCallback(() => {
+    setHoveredNode(null);
+  }, []);
+
+  const applyNodeTouchState = useCallback(
+    (toolId: string) => {
+      if (!hasFinePointer) {
+        setHoveredNode(toolId);
+        if (touchHoverResetRef.current) {
+          window.clearTimeout(touchHoverResetRef.current);
+        }
+        touchHoverResetRef.current = window.setTimeout(() => {
+          clearTouchHoverState();
+        }, 900);
+      }
+    },
+    [clearTouchHoverState, hasFinePointer]
+  );
+
+  const handleTouchActivate = useCallback(
+    (toolId: string) => {
+      const now = Date.now();
+      if (now - lastTouchActivationRef.current < 150) {
+        return;
+      }
+
+      lastTouchActivationRef.current = now;
+      applyNodeTouchState(toolId);
+    },
+    [applyNodeTouchState]
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(DIAGRAM_POINTER_QUERY);
+    const handleMediaChange = () => {
+      setHasFinePointer(mediaQuery.matches);
+    };
+
+    handleMediaChange();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleMediaChange);
+    } else {
+      mediaQuery.addListener(handleMediaChange);
+    }
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === "function") {
+        mediaQuery.removeEventListener("change", handleMediaChange);
+      } else {
+        mediaQuery.removeListener(handleMediaChange);
+      }
+      if (touchHoverResetRef.current) {
+        window.clearTimeout(touchHoverResetRef.current);
+      }
+      if (scrollFixTimeoutRef.current) {
+        window.clearTimeout(scrollFixTimeoutRef.current);
+      }
+      clearCardHighlight();
+      if (highlightTimeoutRef.current) {
+        window.clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, [clearCardHighlight]);
 
   // Filter to core tools only for the diagram
   const coreTools = useMemo(
@@ -159,40 +286,54 @@ export function TldrSynergyDiagram({
 
   // Click handler: scroll to the tool card
   const handleNodeClick = useCallback((toolId: string) => {
-    const element = document.getElementById(`tool-card-${toolId}`);
-    if (element) {
-      const previousScroll = window.scrollY;
-      const targetScroll =
-        element.getBoundingClientRect().top +
-        window.scrollY -
-        Math.round(window.innerHeight * 0.35);
-
-      window.scrollTo({
-        top: Math.max(0, targetScroll),
-        behavior: shouldAnimateDiagram ? "smooth" : "auto",
-      });
-
-      window.setTimeout(() => {
-        if (Math.abs(window.scrollY - previousScroll) < 2) {
-          window.scrollTo({
-            top: Math.max(0, Math.min(document.body.scrollHeight - 1, previousScroll + 2)),
-            behavior: "auto",
-          });
-        }
-      }, 100);
-
-      const targetCard = element.querySelector('[data-testid="tool-card"]') ?? element;
-      targetCard.classList.add("ring-2", "ring-violet-400/60", "rounded-2xl");
-      setTimeout(() => {
-        targetCard.classList.remove("ring-2", "ring-violet-400/60", "rounded-2xl");
-      }, 1500);
+    if (!hasFinePointer) {
+      applyNodeTouchState(toolId);
     }
-  }, [shouldAnimateDiagram]);
 
-  // Keyboard handler for nodes
+    const element = document.getElementById(`tool-card-${toolId}`);
+    if (!element) {
+      return;
+    }
+
+    const previousScroll = window.scrollY;
+    const targetScroll = Math.max(
+      0,
+      element.getBoundingClientRect().top +
+        window.scrollY -
+        Math.round(window.innerHeight * 0.35)
+    );
+
+    window.scrollTo({
+      top: targetScroll,
+      behavior: shouldAnimateDiagram ? "smooth" : "auto",
+    });
+
+    if (scrollFixTimeoutRef.current) {
+      window.clearTimeout(scrollFixTimeoutRef.current);
+    }
+    scrollFixTimeoutRef.current = window.setTimeout(() => {
+      if (Math.abs(window.scrollY - targetScroll) > 2) {
+        window.scrollTo({ top: targetScroll, behavior: "auto" });
+      } else if (window.scrollY === previousScroll) {
+        window.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: "auto",
+        });
+      }
+    }, 100);
+
+    const targetCard = element.querySelector("[data-testid=\"tool-card\"]") ?? element;
+    applyNodeHighlight(targetCard as Element);
+  }, [applyNodeTouchState, hasFinePointer, shouldAnimateDiagram, applyNodeHighlight]);
+
   const handleNodeKeyDown = useCallback(
     (e: React.KeyboardEvent, toolId: string) => {
-      if (e.key === "Enter" || e.key === " ") {
+      if (
+        e.key === "Enter" ||
+        e.key === " " ||
+        e.key === "Space" ||
+        e.key === "Spacebar"
+      ) {
         e.preventDefault();
         handleNodeClick(toolId);
       }
@@ -373,8 +514,24 @@ export function TldrSynergyDiagram({
                 role="button"
                 tabIndex={0}
                 aria-label={`${tool.shortName} - click to scroll to details`}
+                onPointerEnter={() => setHoveredNode(tool.id)}
+                onPointerMove={() => setHoveredNode(tool.id)}
+                onPointerLeave={handleNodeLeave}
                 onMouseEnter={() => setHoveredNode(tool.id)}
-                onMouseLeave={() => setHoveredNode(null)}
+                onMouseOver={() => setHoveredNode(tool.id)}
+                onMouseMove={() => setHoveredNode(tool.id)}
+                onMouseLeave={handleNodeLeave}
+                onMouseOut={handleNodeLeave}
+                onTouchStart={() => {
+                  if (!hasFinePointer) {
+                    handleTouchActivate(tool.id);
+                  }
+                }}
+                onPointerDown={() => {
+                  if (!hasFinePointer) {
+                    handleTouchActivate(tool.id);
+                  }
+                }}
                 onFocus={() => setHoveredNode(tool.id)}
                 onBlur={() => setHoveredNode(null)}
                 onClick={() => handleNodeClick(tool.id)}
@@ -386,7 +543,7 @@ export function TldrSynergyDiagram({
                   transform: isHovered ? "scale(1.05)" : "scale(1)",
                   transition:
                     shouldAnimateDiagram ? "opacity 120ms linear, transform 120ms linear" : "none",
-                  pointerEvents: shouldAnimateDiagram || hoveredNode === tool.id ? "auto" : "auto",
+                  pointerEvents: "auto",
                 }}
               >
                 {/* Glow behind node on hover */}

@@ -270,7 +270,6 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
           { name: "keyFeatures", weight: 0.8 },
         ],
         threshold: 0.3,
-        includeMatches: true,
         ignoreLocation: true,
       }),
     [tools]

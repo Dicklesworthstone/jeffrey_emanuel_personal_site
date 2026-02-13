@@ -383,11 +383,11 @@ function TemporalCard({ label, data, id }: { label: string; data: TemporalProces
             <div className="grid grid-cols-2 gap-3 md:gap-4">
                <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
                   <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-tight">Ticket</p>
-                  <p className="text-xl md:text-3xl font-black text-white">{data.val || '—'}</p>
+                  <p className="text-base md:text-xl font-black text-white">{data.val ?? '—'}</p>
                </div>
                <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
                   <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-tight">Priority</p>
-                  <p className="text-xl md:text-3xl font-black text-white/20 group-hover:text-white/40 transition-colors">#{id}</p>
+                  <p className="text-base md:text-xl font-black text-white/20 group-hover:text-white/40 transition-colors">#{id}</p>
                </div>
             </div>
          </div>
@@ -544,7 +544,7 @@ export function ProcessNexus() {
             >
               <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
               <span className="text-[8px] md:text-[9px] font-mono text-slate-500 uppercase mb-0.5 md:mb-1">P{i}</span>
-              <span className="text-lg md:text-2xl font-black text-white tabular-nums">{p.number || '—'}</span>
+              <span className="text-lg md:text-2xl font-black text-white tabular-nums">{p.number ?? '—'}</span>
               
               {p.choosing && <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 w-1 md:w-1.5 h-1 md:h-1.5 bg-blue-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]" />}
             </motion.button>
