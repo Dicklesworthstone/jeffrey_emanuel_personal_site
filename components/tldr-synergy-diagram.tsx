@@ -66,7 +66,7 @@ export function TldrSynergyDiagram({
   const touchHoverResetRef = useRef<number | NodeJS.Timeout | null>(null);
   const scrollFixTimeoutRef = useRef<number | NodeJS.Timeout | null>(null);
   const highlightTimeoutRef = useRef<number | NodeJS.Timeout | null>(null);
-  const cardHighlightRef = useRef<HTMLElement | null>(null);
+  const cardHighlightRefs = useRef<HTMLElement[]>([]);
   const lastTouchActivationRef = useRef(0);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [hasFinePointer, setHasFinePointer] = useState(getHasFinePointer);
@@ -81,13 +81,11 @@ export function TldrSynergyDiagram({
   }, []);
 
   const clearCardHighlight = useCallback(() => {
-    if (!cardHighlightRef.current) {
-      return;
-    }
-
-    cardHighlightRef.current.classList.remove("ring-2", "ring-violet-400/60", "rounded-2xl");
-    cardHighlightRef.current.removeAttribute(DIAGRAM_HIGHLIGHT_ATTR);
-    cardHighlightRef.current = null;
+    cardHighlightRefs.current.forEach((el) => {
+      el.classList.remove("ring-2", "ring-violet-400/60", "rounded-2xl");
+      el.removeAttribute(DIAGRAM_HIGHLIGHT_ATTR);
+    });
+    cardHighlightRefs.current = [];
 
     if (highlightTimeoutRef.current) {
       window.clearTimeout(highlightTimeoutRef.current);
@@ -103,9 +101,18 @@ export function TldrSynergyDiagram({
 
       clearCardHighlight();
 
-      cardHighlightRef.current = target;
-      target.classList.add("ring-2", "ring-violet-400/60", "rounded-2xl");
-      target.setAttribute(DIAGRAM_HIGHLIGHT_ATTR, "true");
+      const highlightTargets: HTMLElement[] = [target];
+      const cardContainer = target.closest('[id^="tool-card-"]');
+      if (cardContainer instanceof HTMLElement && cardContainer !== target) {
+        highlightTargets.push(cardContainer);
+      }
+
+      cardHighlightRefs.current = highlightTargets;
+
+      highlightTargets.forEach((el) => {
+        el.classList.add("ring-2", "ring-violet-400/60", "rounded-2xl");
+        el.setAttribute(DIAGRAM_HIGHLIGHT_ATTR, "true");
+      });
 
       highlightTimeoutRef.current = window.setTimeout(() => {
         clearCardHighlight();
@@ -518,10 +525,8 @@ export function TldrSynergyDiagram({
                 onPointerMove={() => setHoveredNode(tool.id)}
                 onPointerLeave={handleNodeLeave}
                 onMouseEnter={() => setHoveredNode(tool.id)}
-                onMouseOver={() => setHoveredNode(tool.id)}
                 onMouseMove={() => setHoveredNode(tool.id)}
                 onMouseLeave={handleNodeLeave}
-                onMouseOut={handleNodeLeave}
                 onTouchStart={() => {
                   if (!hasFinePointer) {
                     handleTouchActivate(tool.id);
