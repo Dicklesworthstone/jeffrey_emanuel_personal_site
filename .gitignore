@@ -73,3 +73,9 @@ screenshots_for_diagnostics/
 rustc-ice-*.txt
 reports/
 .agent-mail.yaml
+
+# Temporary directories
+.tmp/
+
+# Debug scripts (local only)
+lcp-debug.mjs
