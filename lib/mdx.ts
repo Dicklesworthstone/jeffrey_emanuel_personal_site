@@ -31,6 +31,20 @@ function resolvePostsDirectory(): string | null {
 
 const postsDirectory = resolvePostsDirectory();
 
+function getSummaryExcerpt(data: Record<string, unknown>): string {
+  const excerpt = data.excerpt;
+  if (typeof excerpt === "string") {
+    return excerpt;
+  }
+
+  const description = data.description;
+  if (typeof description === "string") {
+    return description;
+  }
+
+  return "";
+}
+
 export type Post = {
   slug: string;
   title: string;
@@ -94,7 +108,7 @@ export const getPostBySlug = cache((slug: string) => {
     slug: realSlug,
     title: data.title || realSlug.replace(/-/g, " "),
     date: safeDate,
-    excerpt: data.excerpt || "",
+    excerpt: getSummaryExcerpt(data),
     content: content,
   };
 
@@ -146,7 +160,7 @@ export function getAllPostsMeta() {
         slug: realSlug,
         title: data.title || realSlug.replace(/-/g, " "),
         date: safeDate,
-        excerpt: data.excerpt || "",
+        excerpt: getSummaryExcerpt(data),
       } as Omit<Post, "content">);
     } catch (err) {
       console.warn(`[content] Skipping ${slug} meta: ${(err as Error).message}`);
