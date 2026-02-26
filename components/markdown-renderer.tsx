@@ -127,7 +127,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         rehypePlugins={[rehypeSlug, [rehypeKatex, { strict: false }]]}
         components={{
           code({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) {
-            const match = /language-(\w+)/.exec(className || "");
+            const match = /language-([A-Za-z0-9_+#-]+)/.exec(className || "");
             return !inline && match ? (
               <CodeBlock language={match[1]}>
                 {children}

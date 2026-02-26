@@ -3,7 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Briefcase, Workflow, ChevronDown } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
@@ -96,6 +96,21 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   }, []);
 
   const isSceneActive = shouldRenderScene && isSceneVisible;
+
+  const handlePrimaryCtaClick = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+    const { clientX, clientY, currentTarget } = event;
+
+    if (clientX !== 0 || clientY !== 0) {
+      spawnParticles({ clientX, clientY });
+      return;
+    }
+
+    const rect = currentTarget.getBoundingClientRect();
+    spawnParticles({
+      clientX: rect.left + rect.width / 2,
+      clientY: rect.top + rect.height / 2,
+    });
+  }, [spawnParticles]);
 
   return (
     <section
@@ -340,7 +355,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               <Link
                 href={heroContent.primaryCta.href}
                 onTouchStart={mediumTap}
-                onClick={spawnParticles}
+                onClick={handlePrimaryCtaClick}
                 className={cn(
                   "btn-glow-primary group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white transition-all active:scale-95",
                 )}

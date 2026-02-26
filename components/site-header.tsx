@@ -33,10 +33,12 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   // Initialize with Mac default to match SSR, update after hydration
-  const [metaKey, setMetaKey] = useState("⌘");
+  const [shortcutModifier, setShortcutModifier] = useState<"Cmd" | "Ctrl">("Cmd");
   const { lightTap, mediumTap } = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
   const resolvedPath = pathname ?? "";
+  const shortcutDisplayKey = shortcutModifier === "Cmd" ? "⌘" : "Ctrl+";
+  const shortcutAriaLabel = `Search site (${shortcutModifier}+K)`;
 
   const { scrollY } = useScroll();
   
@@ -77,7 +79,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
     
     if (!isMac) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for SSR hydration safety
-      setMetaKey("Ctrl+");
+      setShortcutModifier("Ctrl");
     }
   }, []);
 
@@ -149,7 +151,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               type="button"
               onClick={onOpenCommandPalette}
               className="group flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
-              aria-label="Search site (Cmd+K)"
+              aria-label={shortcutAriaLabel}
             >
               <Search className="h-4 w-4" />
               <span className="hidden lg:inline">Search</span>
@@ -157,7 +159,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-slate-300 lg:inline-block"
                 suppressHydrationWarning
               >
-                {metaKey}K
+                {shortcutDisplayKey}K
               </kbd>
             </button>
 

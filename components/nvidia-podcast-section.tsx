@@ -6,6 +6,30 @@ import { Headphones, Play, Clock, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nvidiaStoryData } from "@/lib/content";
 
+const ISO_DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const PODCAST_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+function formatPodcastDate(dateValue: string): string {
+  const isoDateMatch = ISO_DATE_ONLY_RE.exec(dateValue);
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    const utcDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    return PODCAST_DATE_FORMATTER.format(utcDate);
+  }
+
+  const parsedDate = new Date(dateValue);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return dateValue;
+  }
+
+  return PODCAST_DATE_FORMATTER.format(parsedDate);
+}
+
 // =============================================================================
 // SPOTIFY EMBED
 // Lazy-loaded Spotify iframe for episodes with direct Spotify URLs
@@ -140,11 +164,7 @@ function PodcastCard({ podcast, featured = false, showEmbed = false }: PodcastCa
         {/* Date */}
         {podcast.date && (
           <p className="mb-4 text-xs text-slate-500">
-            {new Date(podcast.date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            {formatPodcastDate(podcast.date)}
           </p>
         )}
 
@@ -195,7 +215,7 @@ export function NvidiaPodcastSection({
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const podcasts = nvidiaStoryData.podcasts;
+  const podcasts = nvidiaStoryData.podcasts ?? [];
   const [featuredPodcast, ...otherPodcasts] = podcasts;
 
   // Animation variants
@@ -255,13 +275,15 @@ export function NvidiaPodcastSection({
         className="grid gap-6 lg:grid-cols-2"
       >
         {/* Featured podcast - takes full width on mobile, left column on desktop */}
-        <motion.div variants={itemVariants} className="lg:row-span-2">
-          <PodcastCard
-            podcast={featuredPodcast}
-            featured
-            showEmbed={enableEmbeds}
-          />
-        </motion.div>
+        {featuredPodcast && (
+          <motion.div variants={itemVariants} className="lg:row-span-2">
+            <PodcastCard
+              podcast={featuredPodcast}
+              featured
+              showEmbed={enableEmbeds}
+            />
+          </motion.div>
+        )}
 
         {/* Other podcasts */}
         {otherPodcasts.map((podcast) => (

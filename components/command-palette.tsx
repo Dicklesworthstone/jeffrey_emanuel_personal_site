@@ -95,6 +95,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const hasPrefetchedRef = useRef(false);
+  const hasFetchedThisOpenCycleRef = useRef(false);
 
   const openExternal = useCallback((url: string) => {
     const newWindow = window.open(url, "_blank", "noopener,noreferrer");
@@ -103,9 +104,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     }
   }, []);
 
-  const loadSearchIndex = useCallback((options?: { force?: boolean }) => {
+  const loadSearchIndex = useCallback((options?: { bypassErrorGate?: boolean }) => {
     if (searchIndex.length > 0 || isLoading) return;
-    if (hasError && !options?.force) return;
+    if (hasError && !options?.bypassErrorGate) return;
     setIsLoading(true);
     fetch("/api/search")
       .then((res) => {
@@ -137,11 +138,16 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       });
   }, [searchIndex.length, isLoading, hasError]);
 
-  // Fetch search index on first open
+  // Fetch search index once per open cycle, even after a prior error.
   useEffect(() => {
-    if (isOpen) {
-      loadSearchIndex({ force: true });
+    if (!isOpen) {
+      hasFetchedThisOpenCycleRef.current = false;
+      return;
     }
+
+    if (hasFetchedThisOpenCycleRef.current) return;
+    hasFetchedThisOpenCycleRef.current = true;
+    loadSearchIndex({ bypassErrorGate: true });
   }, [isOpen, loadSearchIndex]);
 
   // Prefetch search index when the browser is idle
@@ -182,8 +188,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       });
     });
 
-    // Projects (top 15)
-    projects.slice(0, 15).forEach((project) => {
+    // Projects
+    projects.forEach((project) => {
       cmds.push({
         id: toCommandId("project", project.name),
         title: project.name,
@@ -409,6 +415,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           e.preventDefault();
           onClose();
           break;
+        default:
+          break;
       }
     },
     [filteredCommands, selectedIndex, onClose]
@@ -602,9 +610,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 </div>
                 <span className="flex items-center gap-1">
                   <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-slate-300">
-                    ?
+                    ESC
                   </kbd>
-                  <span>All shortcuts</span>
+                  <span>Close</span>
                 </span>
               </div>
             </div>

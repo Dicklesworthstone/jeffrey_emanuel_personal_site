@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -133,10 +133,9 @@ export function EndorsementShowcase({
     setCarouselIndex((i) => (i >= itemCount - 1 ? 0 : i + 1));
   }, [itemCount]);
 
-  // Keyboard navigation for carousel
-  useEffect(() => {
-    if (layout !== "carousel" && layout !== "featured") return;
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const handleCarouselKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (itemCount <= 1) return;
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         goToPrev();
@@ -144,11 +143,9 @@ export function EndorsementShowcase({
         e.preventDefault();
         goToNext();
       }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [layout, goToPrev, goToNext]);
+    },
+    [itemCount, goToPrev, goToNext]
+  );
 
   // Touch/swipe support
   const touchStartX = useRef<number | null>(null);
@@ -388,6 +385,7 @@ export function EndorsementShowcase({
           className="relative overflow-hidden"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+          onKeyDown={handleCarouselKeyDown}
           tabIndex={0}
           role="region"
           aria-label="Endorsements carousel"
@@ -498,6 +496,7 @@ export function EndorsementShowcase({
           className="relative"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+          onKeyDown={handleCarouselKeyDown}
           tabIndex={0}
           role="region"
           aria-label="More endorsements"
