@@ -1,5 +1,7 @@
 "use client";
 
+// Private implementation module for /offline route wrappers.
+// This folder is intentionally non-routable in App Router.
 import { WifiOff } from "lucide-react";
 
 export default function OfflinePage() {
@@ -8,13 +10,13 @@ export default function OfflinePage() {
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-slate-900/50 ring-1 ring-slate-800">
         <WifiOff className="h-8 w-8 text-slate-500" />
       </div>
-      
+
       <h1 className="mb-2 text-2xl font-bold text-white">
         You are offline
       </h1>
-      
+
       <p className="mb-8 max-w-md text-slate-400">
-        It looks like you&apos;ve lost your internet connection. 
+        It looks like you&apos;ve lost your internet connection.
         Please check your network and try again.
       </p>
 

@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 
+// Private implementation module for /offline/twitter-image.
 export const runtime = "edge";
 
 export const alt = "Offline - Jeffrey Emanuel";
