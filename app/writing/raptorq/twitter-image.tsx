@@ -201,7 +201,7 @@ export default async function Image() {
                 margin: 0,
                 marginBottom: 6,
                 letterSpacing: "-0.03em",
-                lineHeight: 1.1,
+                lineHeight: 1.14,
                 display: "flex",
               }}
             >
@@ -218,7 +218,7 @@ export default async function Image() {
                 margin: 0,
                 marginBottom: 20,
                 letterSpacing: "-0.03em",
-                lineHeight: 1.1,
+                lineHeight: 1.14,
                 display: "flex",
               }}
             >

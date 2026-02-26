@@ -156,6 +156,15 @@ const WRITING_SOCIAL_DATA: Record<string, Omit<WritingSocialData, "slug">> = {
   },
 };
 
+const WRITING_SOCIAL_SLUG_ALIASES: Record<string, string> = {
+  barra_factor_model_article: "barra-factor-model",
+};
+
+function normalizeWritingSocialSlug(slug: string): string {
+  const normalizedSlug = slug.trim().replace(/\.md$/i, "");
+  return WRITING_SOCIAL_SLUG_ALIASES[normalizedSlug] ?? normalizedSlug;
+}
+
 type Theme = {
   bgStart: string;
   bgMid: string;
@@ -347,7 +356,7 @@ function pickTheme(category: string, slug: string): Theme {
 }
 
 export function getWritingSocialData(slug: string): WritingSocialData {
-  const normalizedSlug = slug.trim();
+  const normalizedSlug = normalizeWritingSocialSlug(slug);
   const known = WRITING_SOCIAL_DATA[normalizedSlug];
   if (!known) {
     const resolved = normalizedSlug || "(empty)";
@@ -361,7 +370,7 @@ export function getWritingSocialData(slug: string): WritingSocialData {
 }
 
 export function hasWritingSocialData(slug: string): boolean {
-  const normalizedSlug = slug.trim();
+  const normalizedSlug = normalizeWritingSocialSlug(slug);
   return Boolean(normalizedSlug && WRITING_SOCIAL_DATA[normalizedSlug]);
 }
 
@@ -542,7 +551,7 @@ export function createArticleSocialImage(
                 display: "flex",
                 margin: 0,
                 fontSize: isTwitter ? 56 : 61,
-                lineHeight: 1.06,
+                lineHeight: 1.14,
                 letterSpacing: "-0.03em",
                 fontWeight: 850,
                 color: "#ffffff",
@@ -557,7 +566,7 @@ export function createArticleSocialImage(
                   display: "flex",
                   margin: 0,
                   fontSize: isTwitter ? 56 : 61,
-                  lineHeight: 1.06,
+                  lineHeight: 1.14,
                   letterSpacing: "-0.03em",
                   fontWeight: 850,
                   marginTop: 2,

@@ -1,35 +1,91 @@
 import { MetadataRoute } from 'next';
 import { getAllPostsMeta } from '@/lib/mdx';
-import { navItems, getProjectSlugs } from '@/lib/content';
+import { navItems, getProjectSlugs, writingHighlights } from '@/lib/content';
+
+const DEFAULT_SITE_ORIGIN = "https://jeffreyemanuel.com";
+
+const WRITING_SLUG_ALIASES: Record<string, string> = {
+  barra_factor_model_article: "barra-factor-model",
+};
+
+function getSiteOrigin(): string {
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!rawSiteUrl) return DEFAULT_SITE_ORIGIN;
+
+  try {
+    return new URL(rawSiteUrl).origin;
+  } catch {
+    return DEFAULT_SITE_ORIGIN;
+  }
+}
+
+function toAbsoluteUrl(pathname: string, origin: string): string {
+  return new URL(pathname, `${origin}/`).toString();
+}
+
+function normalizeWritingSlug(slug: string): string {
+  const normalizedSlug = slug.trim().replace(/\.md$/i, "");
+  return WRITING_SLUG_ALIASES[normalizedSlug] ?? normalizedSlug;
+}
+
+function normalizeWritingPath(pathname: string): string {
+  if (!pathname.startsWith("/writing/")) return pathname;
+  const slug = pathname.slice("/writing/".length);
+  return `/writing/${normalizeWritingSlug(slug)}`;
+}
+
+function parseDateOrNow(value: unknown): Date {
+  if (typeof value !== "string") return new Date();
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffreyemanuel.com';
+  const origin = getSiteOrigin();
 
-  // Static pages from navItems
-  // Prioritize home page higher
-  const staticPages = navItems.map((item) => ({
-    url: `${baseUrl}${item.href === '/' ? '' : item.href}`,
+  const staticPaths = new Set(navItems.map((item) => item.href));
+  staticPaths.add("/nvidia-story");
+
+  const staticPages = Array.from(staticPaths).map((href) => ({
+    url: toAbsoluteUrl(href, origin),
     lastModified: new Date(),
     changeFrequency: 'monthly' as const,
-    priority: item.href === '/' ? 1 : 0.8,
+    priority: href === '/' ? 1 : 0.8,
   }));
 
-  // Blog posts
-  const posts = getAllPostsMeta();
-  const postPages = posts.map((post) => ({
-    url: `${baseUrl}/writing/${post.slug}`,
-    lastModified: new Date(post.date as string),
+  const writingPageMap = new Map<string, Date>();
+  const upsertWritingPage = (pathname: string, dateValue: unknown) => {
+    const normalizedPath = normalizeWritingPath(pathname);
+    const nextDate = parseDateOrNow(dateValue);
+    const existingDate = writingPageMap.get(normalizedPath);
+    if (!existingDate || nextDate.getTime() > existingDate.getTime()) {
+      writingPageMap.set(normalizedPath, nextDate);
+    }
+  };
+
+  getAllPostsMeta().forEach((post) => {
+    upsertWritingPage(`/writing/${String(post.slug)}`, post.date);
+  });
+
+  writingHighlights.forEach((item) => {
+    if (item.href.startsWith("/writing/")) {
+      upsertWritingPage(item.href, item.date);
+    }
+  });
+
+  const writingPages = Array.from(writingPageMap.entries()).map(([pathname, lastModified]) => ({
+    url: toAbsoluteUrl(pathname, origin),
+    lastModified,
     changeFrequency: 'weekly' as const,
-    priority: 0.6, // Blog posts are good but main pages are structural
+    priority: 0.6,
   }));
 
-  // Project detail pages
   const projectPages = getProjectSlugs().map((slug) => ({
-    url: `${baseUrl}/projects/${slug}`,
+    url: toAbsoluteUrl(`/projects/${slug}`, origin),
     lastModified: new Date(),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
 
-  return [...staticPages, ...projectPages, ...postPages];
+  return [...staticPages, ...projectPages, ...writingPages];
 }

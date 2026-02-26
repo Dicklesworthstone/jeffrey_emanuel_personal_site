@@ -163,62 +163,67 @@ function detectCapabilities(): DeviceCapabilities {
  * Generate quality settings from device capabilities
  */
 function getQualitySettings(caps: DeviceCapabilities): QualitySettings {
-  switch (caps.tier) {
-    case "low":
-      return {
-        particleMultiplier: 0.2,
-        geometryDetail: 0.5,
-        maxDpr: 1,
-        enableShadows: false,
-        enablePostProcessing: false,
-        maxParticles: 180,
-        targetFps: 60,
-      };
-    case "medium":
-      return {
-        particleMultiplier: 0.45,
-        geometryDetail: 0.7,
-        maxDpr: 1.5,
-        enableShadows: false,
-        enablePostProcessing: false,
-        maxParticles: 500,
-        targetFps: 60,
-      };
-    case "high":
-    default:
-      return {
-        particleMultiplier: 1.0,
-        geometryDetail: 1.0,
-        maxDpr: 2,
-        enableShadows: true,
-        enablePostProcessing: true,
-        maxParticles: 2000,
-        targetFps: 60,
-      };
+  if (caps.tier === "low") {
+    return {
+      particleMultiplier: 0.2,
+      geometryDetail: 0.5,
+      maxDpr: 1,
+      enableShadows: false,
+      enablePostProcessing: false,
+      maxParticles: 180,
+      targetFps: 60,
+    };
   }
+
+  if (caps.tier === "medium") {
+    return {
+      particleMultiplier: 0.45,
+      geometryDetail: 0.7,
+      maxDpr: 1.5,
+      enableShadows: false,
+      enablePostProcessing: false,
+      maxParticles: 500,
+      targetFps: 60,
+    };
+  }
+
+  return {
+    particleMultiplier: 1.0,
+    geometryDetail: 1.0,
+    maxDpr: 2,
+    enableShadows: true,
+    enablePostProcessing: true,
+    maxParticles: 2000,
+    targetFps: 60,
+  };
 }
 
-// Default SSR-safe capabilities (used for initial render to avoid hydration mismatch)
-const defaultCapabilities: DeviceCapabilities = {
-  tier: "medium",
-  isMobile: false,
-  isSlowConnection: false,
-  hardwareConcurrency: 4,
-  devicePixelRatio: 1,
-  prefersReducedMotion: false,
-  hasLowMemory: false,
-  isLowPowerMode: false,
-  maxTextureSize: 4096,
-  supportsWebGL2: true,
-};
+function getInitialCapabilities(): DeviceCapabilities {
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  return {
+    tier: prefersReducedMotion ? "low" : "medium",
+    isMobile: false,
+    isSlowConnection: false,
+    hardwareConcurrency: 4,
+    devicePixelRatio: 1,
+    prefersReducedMotion,
+    hasLowMemory: false,
+    isLowPowerMode: false,
+    maxTextureSize: 4096,
+    supportsWebGL2: true,
+  };
+}
 
 /**
  * Hook to get device capabilities and quality settings for Three.js rendering.
  * Re-evaluates on visibility change and orientation change.
  */
 export function useDeviceCapabilities() {
-  // Initialize with SSR-safe defaults to avoid hydration mismatch
-  const [capabilities, setCapabilities] = useState<DeviceCapabilities>(defaultCapabilities);
+  // Initialize with SSR-safe defaults and honor reduced-motion immediately on client.
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities>(() => getInitialCapabilities());
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Detect actual capabilities after hydration

@@ -149,7 +149,7 @@ export default async function Image() {
                 display: "flex",
                 margin: 0,
                 fontSize: 72,
-                lineHeight: 1.02,
+                lineHeight: 1.14,
                 letterSpacing: "-0.03em",
                 fontWeight: 860,
                 color: "#f8fafc",

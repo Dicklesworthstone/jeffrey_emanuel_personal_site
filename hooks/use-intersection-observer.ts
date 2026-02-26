@@ -21,6 +21,7 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
 }: UseIntersectionObserverOptions = {}) {
   const ref = useRef<T | null>(null);
   const [isIntersecting, setIsIntersecting] = useState(initialIsIntersecting);
+  const [hasEverIntersected, setHasEverIntersected] = useState(initialIsIntersecting);
   const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
       // Fallback for older browsers: assume visible to avoid hiding content
       const timeoutId = setTimeout(() => {
         setIsIntersecting(true);
+        setHasEverIntersected(true);
         hasTriggeredRef.current = true;
       }, 0);
       return () => clearTimeout(timeoutId);
@@ -48,6 +50,7 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
         // If triggerOnce and we intersect, lock it and disconnect
         if (triggerOnce && isNowIntersecting) {
           setIsIntersecting(true);
+          setHasEverIntersected(true);
           hasTriggeredRef.current = true;
           observer.disconnect();
           return;
@@ -55,6 +58,9 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
 
         // Otherwise update standard state
         setIsIntersecting(isNowIntersecting);
+        if (isNowIntersecting) {
+          setHasEverIntersected(true);
+        }
       },
       { threshold, rootMargin }
     );
@@ -66,5 +72,5 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
     };
   }, [threshold, rootMargin, triggerOnce]);
 
-  return { ref, isIntersecting };
+  return { ref, isIntersecting, hasEverIntersected };
 }

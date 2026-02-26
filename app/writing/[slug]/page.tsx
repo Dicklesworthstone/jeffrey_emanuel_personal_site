@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getAllPostsMeta, getPostBySlug } from "@/lib/mdx";
 import MarkdownRenderer from "@/components/markdown-renderer";
 import ArticleProgress from "@/components/article-progress";
@@ -11,22 +11,45 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 
+const WRITING_ROUTE_REDIRECTS: Record<string, string> = {
+  barra_factor_model_article: "barra-factor-model",
+};
+
+const STATIC_WRITING_ROUTE_SLUGS = new Set([
+  "bakery_algorithm",
+  "barra-factor-model",
+  "cmaes_explainer",
+  "hoeffdings_d_explainer",
+]);
+
+function normalizeIncomingSlug(slug: string): string {
+  return slug.trim().replace(/\.md$/i, "");
+}
+
+function getCanonicalWritingSlug(slug: string): string {
+  const normalized = normalizeIncomingSlug(slug);
+  return WRITING_ROUTE_REDIRECTS[normalized] ?? normalized;
+}
+
 export async function generateStaticParams() {
   const posts = getAllPostsMeta();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  return posts
+    .map((post) => String(post.slug))
+    .filter((slug) => !STATIC_WRITING_ROUTE_SLUGS.has(getCanonicalWritingSlug(slug)))
+    .map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  const canonicalSlug = getCanonicalWritingSlug(slug);
+  const contentSlug = normalizeIncomingSlug(slug);
   try {
-    const post = getPostBySlug(slug);
+    const post = getPostBySlug(contentSlug);
     return {
       title: post.title,
       description: post.excerpt,
       alternates: {
-        canonical: `/writing/${slug}`,
+        canonical: `/writing/${canonicalSlug}`,
       },
     };
   } catch {
@@ -35,12 +58,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const { slug: requestedSlug } = await params;
+  const canonicalSlug = getCanonicalWritingSlug(requestedSlug);
+  const contentSlug = normalizeIncomingSlug(requestedSlug);
+
+  if (canonicalSlug !== requestedSlug) {
+    permanentRedirect(`/writing/${canonicalSlug}`);
+  }
+
   const post = (() => {
     try {
-      return getPostBySlug(slug);
+      return getPostBySlug(contentSlug);
     } catch (error) {
-      console.error("[writing] failed to load post", slug, error);
+      console.error("[writing] failed to load post", contentSlug, error);
       notFound();
     }
   })();
@@ -73,7 +103,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://jeffreyemanuel.com/writing/${slug}`,
+      "@id": `https://jeffreyemanuel.com/writing/${canonicalSlug}`,
     },
   };
 

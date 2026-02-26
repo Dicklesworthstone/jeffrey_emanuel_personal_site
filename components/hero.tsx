@@ -40,7 +40,11 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   const [shouldRenderScene, setShouldRenderScene] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const idleHandleRef = useRef<{ id: number; type: "idle" | "timeout" } | null>(null);
-  const { ref: sceneRef, isIntersecting: isSceneVisible } =
+  const {
+    ref: sceneRef,
+    isIntersecting: isSceneVisible,
+    hasEverIntersected: hasSceneEverBeenVisible,
+  } =
     useIntersectionObserver<HTMLDivElement>({
     threshold: 0.15,
     rootMargin: "200px",
@@ -59,6 +63,10 @@ export default function Hero({ stats = heroStats }: HeroProps) {
     };
 
     const scheduleEnable = () => {
+      if (prefersReducedMotion) {
+        setShouldRenderScene(false);
+        return;
+      }
       if (shouldRenderScene) return;
 
       const enable = () => {
@@ -80,7 +88,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
     return () => {
       cancelPending();
     };
-  }, [shouldRenderScene]);
+  }, [shouldRenderScene, prefersReducedMotion]);
 
   // Hide scroll indicator after user scrolls (also check initial position)
   useEffect(() => {
@@ -95,7 +103,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isSceneActive = shouldRenderScene && isSceneVisible;
+  const shouldMountScene =
+    shouldRenderScene && hasSceneEverBeenVisible && !prefersReducedMotion;
+  const isSceneActive = shouldMountScene && isSceneVisible;
 
   const handlePrimaryCtaClick = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
     const { clientX, clientY, currentTarget } = event;
@@ -398,7 +408,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
 
            <div className="h-full w-full pointer-events-none lg:pointer-events-auto">
              <ErrorBoundary fallback={<ThreeSceneFallback className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]" />}>
-               {shouldRenderScene ? (
+               {shouldMountScene ? (
                  <Suspense fallback={<ThreeSceneLoading />}>
                    <ThreeScene isActive={isSceneActive} />
                  </Suspense>

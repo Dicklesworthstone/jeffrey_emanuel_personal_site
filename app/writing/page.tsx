@@ -5,6 +5,15 @@ import { getAllPostsMeta } from "@/lib/mdx";
 import { PenSquare } from "lucide-react";
 import type { Metadata } from "next";
 
+const WRITING_HREF_ALIASES: Record<string, string> = {
+  "/writing/barra_factor_model_article": "/writing/barra-factor-model",
+};
+
+function canonicalizeWritingHref(href: string): string {
+  const normalizedHref = href.trim().replace(/\/+$/, "") || "/";
+  return WRITING_HREF_ALIASES[normalizedHref] ?? normalizedHref;
+}
+
 export const metadata: Metadata = {
   title: "Writing | Jeffrey Emanuel",
   description: "Essays, research notes, and deep dives on AI architecture, market mechanics, and software engineering.",
@@ -19,7 +28,7 @@ export default function WritingPage() {
   // Convert MDX posts to WritingItem format
   const mdxItems: WritingItem[] = allPosts.map((post) => ({
     title: post.title as string,
-    href: `/writing/${post.slug}`,
+    href: canonicalizeWritingHref(`/writing/${post.slug}`),
     source: (post.source as "YTO" | "FMD" | "GitHub") || "Blog",
     category: (post.category as string) || "Essay",
     blurb: post.excerpt as string,
@@ -35,12 +44,15 @@ export default function WritingPage() {
   // Use a map to handle duplicates by href
   const itemsByHref = new Map<string, WritingItem>();
   allItems.forEach(item => {
+    const canonicalHref = canonicalizeWritingHref(item.href);
+    const normalizedItem: WritingItem = { ...item, href: canonicalHref };
+
     // If we already have this href, merge it (manual highlights win)
-    const existing = itemsByHref.get(item.href);
+    const existing = itemsByHref.get(canonicalHref);
     if (existing) {
-      itemsByHref.set(item.href, { ...existing, ...item });
+      itemsByHref.set(canonicalHref, { ...existing, ...normalizedItem });
     } else {
-      itemsByHref.set(item.href, item);
+      itemsByHref.set(canonicalHref, normalizedItem);
     }
   });
 

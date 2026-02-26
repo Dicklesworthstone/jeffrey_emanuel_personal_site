@@ -9,6 +9,19 @@ import { GoogleAnalytics } from "@/components/analytics";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const sourceSerif = Source_Serif_4({ subsets: ["latin"], variable: "--font-serif" });
 
+function getMetadataBaseUrl(): URL {
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!rawSiteUrl) {
+    return new URL("https://jeffreyemanuel.com");
+  }
+
+  try {
+    return new URL(rawSiteUrl);
+  } catch {
+    return new URL("https://jeffreyemanuel.com");
+  }
+}
+
 // Viewport configuration for mobile optimization
 export const viewport = {
   width: "device-width",
@@ -25,7 +38,7 @@ export const viewport = {
 export const metadata: Metadata = {
   title: siteConfig.title,
   description: siteConfig.description,
-  metadataBase: new URL("https://jeffreyemanuel.com"),
+  metadataBase: getMetadataBaseUrl(),
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

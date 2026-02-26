@@ -228,7 +228,7 @@ export default async function Image() {
                 margin: 0,
                 marginBottom: 8,
                 letterSpacing: "-0.03em",
-                lineHeight: 1.05,
+                lineHeight: 1.14,
                 display: "flex",
               }}
             >

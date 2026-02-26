@@ -218,7 +218,7 @@ export default async function Image() {
                   color: "white",
                   margin: 0,
                   letterSpacing: "-0.04em",
-                  lineHeight: 1,
+                  lineHeight: 1.14,
                   display: "flex",
                 }}
               >
@@ -234,7 +234,7 @@ export default async function Image() {
                   color: "transparent",
                   margin: 0,
                   letterSpacing: "-0.04em",
-                  lineHeight: 1,
+                  lineHeight: 1.14,
                   display: "flex",
                 }}
               >

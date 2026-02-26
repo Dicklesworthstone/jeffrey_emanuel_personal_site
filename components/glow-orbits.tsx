@@ -10,7 +10,10 @@ export default function GlowOrbits() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
-    if (!rootRef.current) return;
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !rootRef.current) return;
 
     // Detect mobile device (safe inside useEffect)
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -100,7 +103,7 @@ export default function GlowOrbits() {
         mediaQuery.removeListener(handleMotionPreferenceChange);
       }
     };
-  }, []);
+  }, [isMounted]);
 
   if (!isMounted) return null;
 
