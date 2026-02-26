@@ -12,16 +12,53 @@ const KONAMI_CODE = [
   "ArrowRight",
   "ArrowLeft",
   "ArrowRight",
-  "KeyB",
-  "KeyA",
-];
+  "b",
+  "a",
+] as const;
+
+type KonamiKey = (typeof KONAMI_CODE)[number];
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement
+  ) {
+    return true;
+  }
+
+  if (target instanceof HTMLElement && target.isContentEditable) {
+    return true;
+  }
+
+  return target.closest("[contenteditable]:not([contenteditable='false'])") !== null;
+}
+
+function normalizeKonamiKey(key: string): KonamiKey | null {
+  const normalized = key.length === 1 ? key.toLowerCase() : key;
+
+  if (
+    normalized === "ArrowUp" ||
+    normalized === "ArrowDown" ||
+    normalized === "ArrowLeft" ||
+    normalized === "ArrowRight" ||
+    normalized === "a" ||
+    normalized === "b"
+  ) {
+    return normalized as KonamiKey;
+  }
+
+  return null;
+}
 
 /**
  * Hook to detect the Konami Code (↑↑↓↓←→←→BA).
  * Calls the callback when the code is entered correctly.
  */
 export function useKonamiCode(callback: () => void): void {
-  const inputRef = useRef<string[]>([]);
+  const sequenceIndexRef = useRef(0);
   const callbackRef = useRef(callback);
 
   useEffect(() => {
@@ -29,24 +66,36 @@ export function useKonamiCode(callback: () => void): void {
   }, [callback]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    // Add the key to our input array
-    inputRef.current.push(event.code);
-
-    // Keep only the last N keys (where N is the length of the Konami code)
-    if (inputRef.current.length > KONAMI_CODE.length) {
-      inputRef.current.shift();
-    }
-
-    // Check if the input matches the Konami code
+    // Ignore typing contexts and key combos so normal text input is never affected.
     if (
-      inputRef.current.length === KONAMI_CODE.length &&
-      inputRef.current.every((key, index) => key === KONAMI_CODE[index])
+      event.isComposing ||
+      event.repeat ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      event.shiftKey ||
+      isEditableTarget(event.target)
     ) {
-      // Invoke callback with null safety check
-      callbackRef.current?.();
-      // Reset the input
-      inputRef.current = [];
+      return;
     }
+
+    const key = normalizeKonamiKey(event.key);
+    if (!key) {
+      sequenceIndexRef.current = 0;
+      return;
+    }
+
+    if (key === KONAMI_CODE[sequenceIndexRef.current]) {
+      sequenceIndexRef.current += 1;
+
+      if (sequenceIndexRef.current === KONAMI_CODE.length) {
+        callbackRef.current();
+        sequenceIndexRef.current = 0;
+      }
+      return;
+    }
+
+    sequenceIndexRef.current = key === KONAMI_CODE[0] ? 1 : 0;
   }, []);
 
   useEffect(() => {

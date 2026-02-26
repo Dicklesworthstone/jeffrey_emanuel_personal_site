@@ -35,7 +35,26 @@ const defaultColors = [
 let globalCanvas: HTMLCanvasElement | null = null;
 let globalParticles: Particle[] = [];
 let animationId: number | null = null;
+let globalResizeHandler: (() => void) | null = null;
 let _activeHookCount = 0;
+
+function cleanupGlobalResources(): void {
+  if (typeof window !== "undefined" && globalResizeHandler) {
+    window.removeEventListener("resize", globalResizeHandler);
+    globalResizeHandler = null;
+  }
+
+  if (typeof window !== "undefined" && animationId !== null) {
+    window.cancelAnimationFrame(animationId);
+  }
+  animationId = null;
+  globalParticles = [];
+
+  if (globalCanvas) {
+    globalCanvas.remove();
+    globalCanvas = null;
+  }
+}
 
 /**
  * Hook that creates particle burst effects on click.
@@ -53,34 +72,39 @@ export function useClickParticles({
 
   useEffect(() => {
     _activeHookCount++;
-    
-    if (typeof window !== "undefined") {
-      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-      prefersReducedMotionRef.current = mediaQuery.matches;
-      
-      const handler = (e: MediaQueryListEvent) => {
-        prefersReducedMotionRef.current = e.matches;
-      };
-      
-      if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener("change", handler);
-      } else {
-        mediaQuery.addListener(handler);
-      }
 
+    if (typeof window === "undefined") {
       return () => {
-        _activeHookCount--;
-        if (mediaQuery.removeEventListener) {
-          mediaQuery.removeEventListener("change", handler);
-        } else {
-          mediaQuery.removeListener(handler);
-        }
-
-        // If no more hooks are active and no particles are moving, we could clean up
-        // but keeping the singleton alive is generally fine for SPAs
+        _activeHookCount = Math.max(0, _activeHookCount - 1);
       };
     }
-    return () => { _activeHookCount--; };
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    prefersReducedMotionRef.current = mediaQuery.matches;
+
+    const handler = (e: MediaQueryListEvent) => {
+      prefersReducedMotionRef.current = e.matches;
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handler);
+    } else {
+      mediaQuery.addListener(handler);
+    }
+
+    return () => {
+      _activeHookCount = Math.max(0, _activeHookCount - 1);
+
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handler);
+      } else {
+        mediaQuery.removeListener(handler);
+      }
+
+      if (_activeHookCount === 0) {
+        cleanupGlobalResources();
+      }
+    };
   }, []);
 
   const getCanvas = useCallback(() => {
@@ -103,30 +127,39 @@ export function useClickParticles({
     document.body.appendChild(canvas);
     globalCanvas = canvas;
 
-    const handleResize = () => {
-      if (globalCanvas) {
-        globalCanvas.width = window.innerWidth;
-        globalCanvas.height = window.innerHeight;
-      }
-    };
-    window.addEventListener("resize", handleResize);
+    if (!globalResizeHandler) {
+      globalResizeHandler = () => {
+        if (globalCanvas) {
+          globalCanvas.width = window.innerWidth;
+          globalCanvas.height = window.innerHeight;
+        }
+      };
+      window.addEventListener("resize", globalResizeHandler);
+    }
 
     return canvas;
   }, []);
 
   const animate = useCallback(() => {
-    if (!globalCanvas) return;
-    const ctx = globalCanvas.getContext("2d", { alpha: true });
+    const canvas = globalCanvas;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     const loop = () => {
-      if (globalParticles.length === 0) {
-        ctx.clearRect(0, 0, globalCanvas!.width, globalCanvas!.height);
+      if (!globalCanvas || globalCanvas !== canvas) {
         animationId = null;
         return;
       }
 
-      ctx.clearRect(0, 0, globalCanvas!.width, globalCanvas!.height);
+      if (globalParticles.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        animationId = null;
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       const aliveParticles: Particle[] = [];
       const gravity = 0.18;
