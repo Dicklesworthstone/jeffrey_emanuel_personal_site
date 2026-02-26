@@ -239,8 +239,8 @@ export default async function Image() {
             </defs>
 
             {/* Outer hexagon frame */}
-            <polygon
-              points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5"
+            <path
+              d="M50 5 L90 27.5 L90 72.5 L50 95 L10 72.5 L10 27.5 Z"
               stroke="url(#tMainGrad)"
               strokeWidth="2.5"
               fill="none"
@@ -248,8 +248,8 @@ export default async function Image() {
             />
 
             {/* Inner hexagon */}
-            <polygon
-              points="50,20 75,35 75,65 50,80 25,65 25,35"
+            <path
+              d="M50 20 L75 35 L75 65 L50 80 L25 65 L25 35 Z"
               stroke="#3b82f6"
               strokeWidth="1"
               fill="none"

@@ -1,6 +1,6 @@
 import { createArticleSocialImage, getWritingSocialData } from "@/lib/article-social-image";
 
-const article = getWritingSocialData("cmaes_explainer");
+const article = getWritingSocialData("barra-factor-model");
 
 export const runtime = "edge";
 

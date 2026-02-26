@@ -2,7 +2,7 @@
 // Provides offline support and intelligent caching
 
 const CACHE_NAME = "jeffrey-emanuel-v1";
-const OFFLINE_URL = "/_offline";
+const OFFLINE_URL = "/offline";
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -13,7 +13,7 @@ const PRECACHE_ASSETS = [
   "/consulting",
   "/contact",
   "/media",
-  "/_offline",
+  "/offline",
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png",

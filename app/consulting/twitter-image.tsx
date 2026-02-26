@@ -92,7 +92,7 @@ export default async function Image() {
               borderRadius: 16,
               background: "rgba(245,158,11,0.12)",
               border: "1px solid rgba(245,158,11,0.26)",
-              width: "fit-content",
+              alignSelf: "flex-start",
             }}
           >
             <span
@@ -252,8 +252,8 @@ export default async function Image() {
             </defs>
 
             {/* Outer diamond frame */}
-            <polygon
-              points="50,5 95,50 50,95 5,50"
+            <path
+              d="M50 5 L95 50 L50 95 L5 50 Z"
               stroke="url(#tConsultGrad)"
               strokeWidth="2.5"
               fill="none"
@@ -261,8 +261,8 @@ export default async function Image() {
             />
 
             {/* Inner diamond */}
-            <polygon
-              points="50,22 78,50 50,78 22,50"
+            <path
+              d="M50 22 L78 50 L50 78 L22 50 Z"
               stroke="#f59e0b"
               strokeWidth="1"
               fill="none"

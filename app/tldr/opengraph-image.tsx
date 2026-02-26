@@ -170,39 +170,46 @@ export default async function Image() {
               <circle cx="50" cy="50" r="12" fill="url(#tldrCenterGrad)" opacity="0.9" />
               <circle cx="50" cy="50" r="8" fill="rgba(255,255,255,0.2)" />
 
-              {/* Flywheel nodes - 10 tools around the circle */}
-              {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((angle, i) => {
-                const rad = (angle * Math.PI) / 180;
-                const x = 50 + 40 * Math.cos(rad);
-                const y = 50 + 40 * Math.sin(rad);
-                const colors = [
-                  "#22d3ee",
-                  "#a855f7",
-                  "#f472b6",
-                  "#22c55e",
-                  "#f59e0b",
-                  "#22d3ee",
-                  "#a855f7",
-                  "#f472b6",
-                  "#22c55e",
-                  "#f59e0b",
-                ];
-                return (
-                  <g key={i}>
-                    <line
-                      x1="50"
-                      y1="50"
-                      x2={x}
-                      y2={y}
-                      stroke={colors[i]}
-                      strokeWidth="1.5"
-                      opacity="0.5"
-                    />
-                    <circle cx={x} cy={y} r="5" fill={colors[i]} opacity="0.9" />
-                    <circle cx={x} cy={y} r="3" fill="rgba(255,255,255,0.3)" />
-                  </g>
-                );
-              })}
+              {/* Flywheel nodes - explicit positions for Satori safety */}
+              <line x1="50" y1="50" x2="90" y2="50" stroke="#22d3ee" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="90" cy="50" r="5" fill="#22d3ee" opacity="0.9" />
+              <circle cx="90" cy="50" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="82.4" y2="73.5" stroke="#a855f7" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="82.4" cy="73.5" r="5" fill="#a855f7" opacity="0.9" />
+              <circle cx="82.4" cy="73.5" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="62.4" y2="88.0" stroke="#f472b6" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="62.4" cy="88.0" r="5" fill="#f472b6" opacity="0.9" />
+              <circle cx="62.4" cy="88.0" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="37.6" y2="88.0" stroke="#22c55e" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="37.6" cy="88.0" r="5" fill="#22c55e" opacity="0.9" />
+              <circle cx="37.6" cy="88.0" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="17.6" y2="73.5" stroke="#f59e0b" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="17.6" cy="73.5" r="5" fill="#f59e0b" opacity="0.9" />
+              <circle cx="17.6" cy="73.5" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="10" y2="50" stroke="#22d3ee" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="10" cy="50" r="5" fill="#22d3ee" opacity="0.9" />
+              <circle cx="10" cy="50" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="17.6" y2="26.5" stroke="#a855f7" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="17.6" cy="26.5" r="5" fill="#a855f7" opacity="0.9" />
+              <circle cx="17.6" cy="26.5" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="37.6" y2="12.0" stroke="#f472b6" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="37.6" cy="12.0" r="5" fill="#f472b6" opacity="0.9" />
+              <circle cx="37.6" cy="12.0" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="62.4" y2="12.0" stroke="#22c55e" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="62.4" cy="12.0" r="5" fill="#22c55e" opacity="0.9" />
+              <circle cx="62.4" cy="12.0" r="3" fill="rgba(255,255,255,0.3)" />
+
+              <line x1="50" y1="50" x2="82.4" y2="26.5" stroke="#f59e0b" strokeWidth="1.5" opacity="0.5" />
+              <circle cx="82.4" cy="26.5" r="5" fill="#f59e0b" opacity="0.9" />
+              <circle cx="82.4" cy="26.5" r="3" fill="rgba(255,255,255,0.3)" />
 
               {/* Motion arrows */}
               <path d="M50 8 L54 14 L46 14 Z" fill="#22d3ee" opacity="0.7" />

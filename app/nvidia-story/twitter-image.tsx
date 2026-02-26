@@ -92,7 +92,7 @@ export default async function Image() {
               borderRadius: 16,
               background: "rgba(239,68,68,0.12)",
               border: "1px solid rgba(239,68,68,0.26)",
-              width: "fit-content",
+              alignSelf: "flex-start",
             }}
           >
             <span

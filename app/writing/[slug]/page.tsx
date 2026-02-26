@@ -28,18 +28,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       alternates: {
         canonical: `/writing/${slug}`,
       },
-      openGraph: {
-        title: post.title,
-        description: post.excerpt,
-        type: "article",
-        publishedTime: post.date,
-        authors: ["Jeffrey Emanuel"],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: post.title,
-        description: post.excerpt,
-      },
     };
   } catch {
     notFound();
@@ -48,13 +36,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  let post;
-  try {
-    post = getPostBySlug(slug);
-  } catch (e) {
-    console.error("[writing] failed to load post", slug, e);
-    notFound();
-  }
+  const post = (() => {
+    try {
+      return getPostBySlug(slug);
+    } catch (error) {
+      console.error("[writing] failed to load post", slug, error);
+      notFound();
+    }
+  })();
 
   // Calculate reading time
   const readingTime = calculateReadingTime(post.content || "");

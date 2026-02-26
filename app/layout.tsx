@@ -53,18 +53,12 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: siteConfig.title,
-    description: siteConfig.description,
-    url: "https://jeffreyemanuel.com",
     siteName: "Jeffrey Emanuel",
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@doodlestein",
     creator: "@doodlestein",
-    title: siteConfig.title,
-    description: siteConfig.description,
   },
 };
 

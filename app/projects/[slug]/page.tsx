@@ -43,9 +43,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const project = getProjectBySlug(slug);
 
   if (!project) {
-    return {
-      title: "Project Not Found | Jeffrey Emanuel",
-    };
+    notFound();
   }
 
   return {
@@ -53,16 +51,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     description: project.description,
     alternates: {
       canonical: `/projects/${slug}`,
-    },
-    openGraph: {
-      title: `${project.name} | Jeffrey Emanuel`,
-      description: project.description,
-      url: `https://jeffreyemanuel.com/projects/${slug}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${project.name} | Jeffrey Emanuel`,
-      description: project.description,
     },
   };
 }

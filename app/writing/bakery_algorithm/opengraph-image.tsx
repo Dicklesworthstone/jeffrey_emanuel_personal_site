@@ -1,6 +1,6 @@
 import { createArticleSocialImage, getWritingSocialData } from "@/lib/article-social-image";
 
-const article = getWritingSocialData("cmaes_explainer");
+const article = getWritingSocialData("bakery_algorithm");
 
 export const runtime = "edge";
 

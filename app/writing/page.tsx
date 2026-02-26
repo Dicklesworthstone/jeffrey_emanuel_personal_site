@@ -11,11 +11,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/writing",
   },
-  openGraph: {
-    title: "Writing | Jeffrey Emanuel",
-    description: "Essays, research notes, and deep dives on AI architecture, market mechanics, and software engineering.",
-    url: "https://jeffreyemanuel.com/writing",
-  },
 };
 
 export default function WritingPage() {

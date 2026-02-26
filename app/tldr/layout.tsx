@@ -7,19 +7,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/tldr",
   },
-  openGraph: {
-    title: "The Agentic Coding Flywheel - TL;DR | Jeffrey Emanuel",
-    description:
-      "14 open-source tools that work together to supercharge multi-agent AI coding workflows.",
-    url: "https://jeffreyemanuel.com/tldr",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "The Agentic Coding Flywheel - TL;DR",
-    description:
-      "14 open-source tools that work together to supercharge multi-agent AI coding workflows.",
-  },
 };
 
 export default function TldrLayout({
