@@ -1,5 +1,5 @@
 {
-  "totalUniqueStargazers": 7249,
+  "totalUniqueStargazers": 7376,
   "combinedReach": 0,
   "topStargazers": [],
   "topCompanies": [],
@@ -17,37 +17,37 @@
       "topCompanies": []
     },
     "cass_memory_system": {
-      "totalCount": 226,
+      "totalCount": 255,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ultimate_bug_scanner": {
-      "totalCount": 164,
+      "totalCount": 177,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ntm": {
-      "totalCount": 143,
+      "totalCount": 161,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "simultaneous_launch_button": {
-      "totalCount": 56,
+      "totalCount": 59,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "coding_agent_session_search": {
-      "totalCount": 457,
+      "totalCount": 527,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "claude_code_agent_farm": {
-      "totalCount": 648,
+      "totalCount": 671,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -65,19 +65,19 @@
       "topCompanies": []
     },
     "your-source-to-prompt.html": {
-      "totalCount": 737,
+      "totalCount": 745,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "bulk_transcribe_youtube_videos_from_playlist": {
-      "totalCount": 646,
+      "totalCount": 659,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "sqlalchemy_data_model_visualizer": {
-      "totalCount": 285,
+      "totalCount": 287,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -89,7 +89,7 @@
       "topCompanies": []
     },
     "mindmap-generator": {
-      "totalCount": 200,
+      "totalCount": 202,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -101,13 +101,13 @@
       "topCompanies": []
     },
     "ultimate_mcp_server": {
-      "totalCount": 139,
+      "totalCount": 140,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "fast_vector_similarity": {
-      "totalCount": 426,
+      "totalCount": 427,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -119,11 +119,11 @@
       "topCompanies": []
     },
     "model_guided_research": {
-      "totalCount": 94,
+      "totalCount": 100,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     }
   },
-  "lastUpdated": "2026-02-15T03:57:14.561Z"
+  "lastUpdated": "2026-03-01T03:57:58.223Z"
 }
