@@ -79,3 +79,6 @@ reports/
 
 # Debug scripts (local only)
 lcp-debug.mjs
+
+# Stray numeric files (agent shell output accidentally captured)
+/1
