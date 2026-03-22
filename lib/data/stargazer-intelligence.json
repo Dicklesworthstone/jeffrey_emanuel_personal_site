@@ -1,14 +1,14 @@
 {
-  "totalUniqueStargazers": 7498,
-  "combinedReach": 2023,
+  "totalUniqueStargazers": 7550,
+  "combinedReach": 2200,
   "topStargazers": [
     {
       "login": "koala73",
       "name": "Elie Habib",
       "avatarUrl": "https://avatars.githubusercontent.com/u/996596?v=4",
-      "score": 99450.7,
-      "followers": 2023,
-      "totalStars": 38159,
+      "score": 110605,
+      "followers": 2200,
+      "totalStars": 42479,
       "reposStarred": [
         "mcp_agent_mail",
         "beads_viewer"
@@ -25,9 +25,9 @@
           "login": "koala73",
           "name": "Elie Habib",
           "avatarUrl": "https://avatars.githubusercontent.com/u/996596?v=4",
-          "score": 99450.7,
-          "followers": 2023,
-          "totalStars": 38159,
+          "score": 110605,
+          "followers": 2200,
+          "totalStars": 42479,
           "reposStarred": [
             "mcp_agent_mail",
             "beads_viewer"
@@ -44,9 +44,9 @@
           "login": "koala73",
           "name": "Elie Habib",
           "avatarUrl": "https://avatars.githubusercontent.com/u/996596?v=4",
-          "score": 99450.7,
-          "followers": 2023,
-          "totalStars": 38159,
+          "score": 110605,
+          "followers": 2200,
+          "totalStars": 42479,
           "reposStarred": [
             "mcp_agent_mail",
             "beads_viewer"
@@ -56,37 +56,37 @@
       "topCompanies": []
     },
     "cass_memory_system": {
-      "totalCount": 278,
+      "totalCount": 290,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ultimate_bug_scanner": {
-      "totalCount": 197,
+      "totalCount": 203,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "ntm": {
-      "totalCount": 186,
+      "totalCount": 206,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "simultaneous_launch_button": {
-      "totalCount": 61,
+      "totalCount": 64,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "coding_agent_session_search": {
-      "totalCount": 600,
+      "totalCount": 615,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "claude_code_agent_farm": {
-      "totalCount": 693,
+      "totalCount": 717,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -104,25 +104,25 @@
       "topCompanies": []
     },
     "your-source-to-prompt.html": {
-      "totalCount": 748,
+      "totalCount": 749,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "bulk_transcribe_youtube_videos_from_playlist": {
-      "totalCount": 659,
+      "totalCount": 661,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "sqlalchemy_data_model_visualizer": {
-      "totalCount": 288,
+      "totalCount": 289,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
     },
     "visual_astar_python": {
-      "totalCount": 176,
+      "totalCount": 175,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -140,7 +140,7 @@
       "topCompanies": []
     },
     "ultimate_mcp_server": {
-      "totalCount": 143,
+      "totalCount": 145,
       "notableCount": 0,
       "topStargazers": [],
       "topCompanies": []
@@ -164,5 +164,5 @@
       "topCompanies": []
     }
   },
-  "lastUpdated": "2026-03-15T04:04:16.307Z"
+  "lastUpdated": "2026-03-22T07:30:40.383Z"
 }
