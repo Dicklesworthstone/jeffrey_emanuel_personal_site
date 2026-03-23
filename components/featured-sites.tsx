@@ -138,7 +138,12 @@ function OgLinkCard({ site, index, reducedMotion, isInView }: OgLinkCardProps) {
           "pointer-events-none absolute inset-0 rounded-xl opacity-0 ring-1 ring-inset transition-opacity duration-300 group-hover:opacity-100",
           site.id === "jeffreysprompts" && "ring-amber-500/30",
           site.id === "agent-flywheel" && "ring-violet-500/30",
-          site.id === "brennerbot" && "ring-teal-500/30"
+          site.id === "brennerbot" && "ring-teal-500/30",
+          site.id === "jeffreys-skills" && "ring-indigo-500/30",
+          site.id === "mcpagentmail" && "ring-fuchsia-500/30",
+          site.id === "frankentui" && "ring-red-500/30",
+          site.id === "frankensqlite" && "ring-blue-500/30",
+          site.id === "asupersync" && "ring-emerald-500/30"
         )}
       />
     </motion.a>

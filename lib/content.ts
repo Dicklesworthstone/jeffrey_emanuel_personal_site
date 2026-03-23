@@ -4,7 +4,7 @@ export const siteConfig = {
   name: "Jeffrey Emanuel",
   title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
   description:
-    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 14 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. Builder of the FrankenSuite — clean-room Rust reimplementations of foundational software (SQLite, Redis, NumPy, SciPy, PyTorch, and more). 170+ open-source projects with 20K+ GitHub stars.",
+    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 14 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. Builder of the FrankenSuite: clean-room Rust reimplementations of foundational software (SQLite, Redis, NumPy, SciPy, PyTorch, and more). 170+ open-source projects with 20K+ GitHub stars.",
   email: "jeffreyemanuel@gmail.com",
   location: "",
   social: {
@@ -568,9 +568,9 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "618 stars",
     href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
-    short: "Unified TUI for searching local history across Claude Code, Codex, Cursor, Gemini, and more.",
+    short: "21K+ lines of Rust. Unified TUI for searching local history across Claude Code, Codex, Cursor, Gemini, and more.",
     description:
-      "A centralized search interface for all your AI coding sessions. Indexes conversation history from Claude Code, Codex, Cursor, Gemini, ChatGPT, and Cline using Tantivy full-text search. Find that solution you generated weeks ago and prevent re-solving problems.",
+      "A centralized search interface for all your AI coding sessions, built with 21K+ lines of Rust. Indexes conversation history from Claude Code, Codex, Cursor, Gemini, ChatGPT, and Cline using Tantivy full-text search. Find that solution you generated weeks ago and prevent re-solving problems.",
     tags: ["Rust", "TUI", "Search", "DevTools", "Agents", "Flywheel"],
     size: "wide",
     slug: "cass",
@@ -593,7 +593,7 @@ export const projects: Project[] = [
   {
     name: "Claude Code Agent Farm",
     kind: "oss",
-    badge: "736 stars",
+    badge: "739 stars",
     href: "https://github.com/Dicklesworthstone/claude_code_agent_farm",
     short: "Orchestrate an army of Claude Code agents to autonomously improve codebases.",
     description:
@@ -638,7 +638,7 @@ export const projects: Project[] = [
   {
     name: "MCP Agent Mail",
     kind: "oss",
-    badge: "1,836 stars",
+    badge: "1,837 stars",
     href: "https://github.com/Dicklesworthstone/mcp_agent_mail",
     short: "Gmail for your coding agents. A coordination layer with messaging, file leases, and audit trails.",
     description:
@@ -668,9 +668,9 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "1,413 stars",
     href: "https://github.com/Dicklesworthstone/beads_viewer",
-    short: "Terminal UI for Steve Yegge's Beads system with graph analytics for agent task management.",
+    short: "20K+ lines of Go, shipped in a single day. Terminal UI for Steve Yegge's Beads system with graph analytics for agent task management.",
     description:
-      "Transforms how agents visualize task dependencies using DAG-based analysis. Features nine graph metrics (PageRank, Betweenness, HITS, Critical Path), robot protocol for AI-ready JSON output, and time-travel diffing across git revisions. Built in Go with 60fps rendering via Bubble Tea.",
+      "Transforms how agents visualize task dependencies using DAG-based analysis. Built in a single day with 20K+ lines of Go. Features nine graph metrics (PageRank, Betweenness, HITS, Critical Path), robot protocol for AI-ready JSON output, and time-travel diffing across git revisions. 60fps rendering via Bubble Tea.",
     tags: ["Go", "TUI", "Task Management", "Graph Analytics", "Agents", "Flywheel"],
     size: "wide",
     gradient: "from-emerald-500/20 via-teal-500/20 to-cyan-500/20",
@@ -888,7 +888,7 @@ export const projects: Project[] = [
   {
     name: "ACIP",
     kind: "oss",
-    badge: "316 stars",
+    badge: "317 stars",
     href: "https://github.com/Dicklesworthstone/acip",
     short: "AI Cognitive Inoculation Protocol: Defense against prompt injection.",
     description:
@@ -1046,7 +1046,7 @@ export const projects: Project[] = [
   {
     name: "Repo Updater",
     kind: "oss",
-    badge: "81 stars",
+    badge: "82 stars",
     href: "https://github.com/Dicklesworthstone/repo_updater",
     short: "Keep dozens of GitHub repos in sync with a single command.",
     description:
@@ -1091,7 +1091,7 @@ export const projects: Project[] = [
   {
     name: "Destructive Command Guard",
     kind: "oss",
-    badge: "721 stars",
+    badge: "726 stars",
     href: "https://github.com/Dicklesworthstone/destructive_command_guard",
     short: "Hook for Claude Code and Gemini CLI that blocks destructive commands.",
     description:
@@ -1143,10 +1143,12 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "43 stars",
     href: "https://github.com/Dicklesworthstone/flywheel_connectors",
-    short: "Integration adapters for external services in the Flywheel ecosystem.",
+    short: "89 production connectors with cryptographic security, WASI sandboxing, and zone-based isolation. ~1.4M lines of Rust, 58K+ tests.",
     description:
-      "Pre-built connectors for integrating external services with the Agentic Coding Flywheel. Includes adapters for cloud providers, CI/CD systems, and third-party APIs to extend Flywheel workflows.",
-    tags: ["Integrations", "Connectors", "DevOps", "Flywheel"],
+      "A secure connector protocol (FCP) and Rust platform for AI agent operations. Ships 89 connectors spanning messaging (Slack, Discord, Telegram, Signal), cloud (AWS, GCP, Azure, Kubernetes), databases (PostgreSQL, Redis, MongoDB, DuckDB), AI/ML (OpenAI, Anthropic, Pinecone, Qdrant), productivity (Notion, Jira, Linear, Figma), Google Workspace, social media, analytics (Datadog, Sentry, PostHog), and business tools (Stripe, Salesforce, HubSpot). Unlike OpenClaw's trust-the-runtime plugin model with shared-process extensions, FCP enforces security mechanically: each connector runs as an isolated binary with WASI/OS sandboxing, cryptographic capability tokens (Ed25519/COSE), zone-based encryption (ChaCha20-Poly1305), first-class revocation, hash-linked audit chains, and supply chain verification via Sigstore/in-toto.",
+    tags: ["Rust", "Integrations", "Security", "Connectors", "DevOps", "Flywheel"],
+    size: "large",
+    gradient: "from-blue-500/20 via-violet-500/20 to-purple-500/20",
   },
   {
     name: "XF",
@@ -1176,7 +1178,7 @@ export const projects: Project[] = [
     href: "https://github.com/Dicklesworthstone/frankentui",
     short: "Minimal, high-performance terminal UI kernel with 850K+ lines of Rust across 20 crates.",
     description:
-      "A kernel-level TUI foundation for Rust with a disciplined runtime, diff-based renderer, and inline-mode support that preserves scrollback while keeping UI chrome stable. Features 106 widget implementations, 46 demo screens, a layered 11-crate workspace (core → render → runtime → widgets), one-writer rule for serialized output, RAII cleanup even on panic, and snapshot/time-travel harness for deterministic testing. Project website at frankentui.com.",
+      "A kernel-level TUI foundation for Rust with a disciplined runtime, diff-based renderer, and inline-mode support that preserves scrollback while keeping UI chrome stable. Features 106 widget implementations, 46 demo screens, a layered 20-crate workspace (core → render → runtime → widgets → extras), one-writer rule for serialized output, RAII cleanup even on panic, and snapshot/time-travel harness for deterministic testing. Project website at frankentui.com.",
     tags: ["Rust", "TUI", "Terminal", "Rendering", "Systems", "FrankenSuite"],
     size: "wide",
     gradient: "from-orange-500/20 via-red-500/20 to-rose-500/20",
@@ -1187,7 +1189,7 @@ export const projects: Project[] = [
         "Deterministic buffer diff rendering pipeline (Buffer → Diff → Presenter → ANSI)",
         "One-writer rule enforcing serialized terminal output for correctness",
         "RAII cleanup via TerminalSession — terminal state restored even on panic",
-        "11-crate layered workspace: core, render, style, text, layout, runtime, widgets, extras",
+        "20-crate layered workspace: core, render, style, text, layout, runtime, widgets, extras, and more",
         "Snapshot and time-travel harness for regression testing",
         "Optional OpenTelemetry integration for runtime instrumentation",
         "JSONL evidence logs for diff strategy and resize decisions",
@@ -1224,16 +1226,6 @@ export const projects: Project[] = [
       usage: "```bash\n# Check for ready work\nbr ready --json\n\n# Create an issue\nbr create \"Fix rendering bug\" -t bug -p 1 --json\n\n# Update status\nbr update br-42 --status in_progress\n\n# Close when done\nbr close br-42 --reason \"Fixed in commit abc123\"\n```",
       relatedProjects: ["beads-viewer", "mcp-agent-mail", "cass"],
     },
-  },
-  {
-    name: "WezTerm Automata",
-    kind: "oss",
-    badge: "22 stars",
-    href: "https://github.com/Dicklesworthstone/wezterm_automata",
-    short: "Terminal hypervisor for AI agent swarms with pattern detection and event-driven workflows.",
-    description:
-      "Coordinates fleets of AI coding agents across WezTerm panes. Features real-time pane output capture, pattern-matching state detection, event-driven workflows, FTS5 full-text search, and a policy engine for safe multi-agent control. Includes a Robot Mode JSON API for programmatic orchestration.",
-    tags: ["Rust", "Terminal", "Multi-Agent", "Automation", "Flywheel"],
   },
   {
     name: "Pi Agent Rust",
@@ -1390,9 +1382,9 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "145 stars",
     href: "https://github.com/Dicklesworthstone/frankensqlite",
-    short: "Clean-room Rust reimplementation of SQLite with MVCC, concurrent writers, and RaptorQ self-healing.",
+    short: "Clean-room Rust reimplementation of SQLite with MVCC, concurrent writers, and RaptorQ self-healing. 26-crate workspace.",
     description:
-      "A from-scratch SQLite implementation in Rust with a 26-member workspace. Features MVCC page-level versioning for concurrent read/write access, information-theoretic durability via RaptorQ repair symbols, WASM support, and a C-compatible API layer. Part of the FrankenSuite of clean-room Rust reimplementations.",
+      "A from-scratch SQLite implementation in Rust with a 26-member workspace. Features MVCC page-level versioning for concurrent read/write access, information-theoretic durability via RaptorQ repair symbols, WASM support, and a C-compatible API layer. Part of the FrankenSuite of clean-room Rust reimplementations. Project website at frankensqlite.com.",
     tags: ["Rust", "Database", "SQLite", "Systems", "FrankenSuite"],
     size: "wide",
     gradient: "from-cyan-500/20 via-blue-500/20 to-indigo-500/20",
@@ -1402,10 +1394,10 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "72 stars",
     href: "https://github.com/Dicklesworthstone/frankenterm",
-    short: "Swarm-native terminal platform replacing legacy terminal workflows for AI agent fleets.",
+    short: "Swarm-native terminal platform in Rust with 120+ crates and 45K+ tests, replacing legacy workflows for AI agent fleets.",
     description:
-      "A terminal platform built from scratch in Rust with 120+ workspace crates and 45K+ tests. Designed for orchestrating fleets of 200+ concurrent AI coding agents with native multiplexing, session persistence, and deterministic rendering.",
-    tags: ["Rust", "Terminal", "Systems", "Multi-Agent", "FrankenSuite"],
+      "A swarm-native terminal platform forked from WezTerm and heavily extended with 120+ workspace crates, 482 modules, and 45K+ tests. Designed for orchestrating fleets of 200+ concurrent AI coding agents with native multiplexing, session persistence, deterministic rendering, real-time pane output capture, pattern-matching state detection, event-driven workflows, FTS5 full-text search, and a policy engine for safe multi-agent control.",
+    tags: ["Rust", "Terminal", "Systems", "Multi-Agent", "FrankenSuite", "Flywheel"],
     size: "tall",
   },
   {
@@ -1493,20 +1485,48 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "12 stars",
     href: "https://github.com/Dicklesworthstone/frankenfs",
-    short: "Memory-safe ext4/btrfs reimplementation in Rust via FUSE with MVCC and RaptorQ self-healing.",
+    short: "Memory-safe filesystem in Rust with RaptorQ fountain codes. Corrupted blocks are reconstructed mathematically, not just detected.",
     description:
-      "A memory-safe filesystem implementation in Rust with block-level MVCC, RaptorQ self-healing, and 2,146 tests. Operates via FUSE for safe userspace development. Part of the FrankenSuite.",
+      "A ground-up filesystem reimplementation in Rust with block-level MVCC for snapshot-consistent reads and information-theoretic self-healing via RaptorQ fountain codes. Unlike RAID (dedicated parity drives, catastrophic failure when too many die), RaptorQ repair symbols are distributed across the filesystem itself: any corrupted block can be reconstructed from any K' other symbols with mathematical certainty. 2,146 tests. Currently FUSE-based for userspace development, with a path toward a kernel module. The end state is a filesystem where silent data corruption is not just detected but automatically repaired — no scrub runs, no manual intervention.",
     tags: ["Rust", "Filesystem", "Systems", "FrankenSuite"],
+    size: "large",
+    gradient: "from-rose-500/20 via-pink-500/20 to-fuchsia-500/20",
   },
   {
     name: "FrankenLibC",
     kind: "oss",
     badge: "17 stars",
     href: "https://github.com/Dicklesworthstone/frankenlibc",
-    short: "Clean-room libc with Transparent Safety Membrane that interposes on glibc via LD_PRELOAD.",
+    short: "Rust-based libc that retrofits memory safety onto any C program via LD_PRELOAD. No recompilation, no source changes.",
     description:
-      "A Rust-based libc layer with a Transparent Safety Membrane (TSM) that interposes on glibc. Uses LD_PRELOAD to add memory safety checks to existing C programs without recompilation. Part of the FrankenSuite.",
+      "A Rust-based libc with a Transparent Safety Membrane (TSM) that interposes on glibc via LD_PRELOAD. Any C program on Linux gains bounds validation, use-after-free detection, and double-free prevention at every libc call boundary without touching a single line of source code, without recompilation. Roughly 70% of CVEs come from memory safety bugs in C/C++. FrankenLibC attacks that at the library level instead of requiring the multi-decade effort of rewriting everything in Rust. The scope is deliberately extreme: if it works at scale, it obsoletes a large fraction of the security tooling industry built around catching memory bugs after the fact.",
     tags: ["Rust", "C", "Systems", "Safety", "FrankenSuite"],
+    size: "large",
+    gradient: "from-red-500/20 via-rose-500/20 to-pink-500/20",
+  },
+  {
+    name: "FrankenEngine",
+    kind: "oss",
+    badge: "16 stars",
+    href: "https://github.com/Dicklesworthstone/franken_engine",
+    short: "Native Rust runtime for adversarial extension workloads. Deterministic replay, cryptographic decision receipts, fleet quarantine.",
+    description:
+      "Owns parser-to-scheduler semantics in Rust. Probabilistic guardplane with Bayesian risk updates and e-process boundaries; deterministic bit-stable replay for high-severity decisions; signed decision receipts with transparency-log proofs; fleet-scale quarantine propagation with convergence SLOs; capability-typed execution that rejects ambient authority. Serves as the execution substrate for FrankenNode. Part of the FrankenSuite.",
+    tags: ["Rust", "Runtime", "Security", "Systems", "FrankenSuite"],
+    size: "wide",
+    gradient: "from-violet-500/20 via-purple-500/20 to-indigo-500/20",
+  },
+  {
+    name: "FrankenNode",
+    kind: "oss",
+    badge: "15 stars",
+    href: "https://github.com/Dicklesworthstone/franken_node",
+    short: "Trust-native JS/TS runtime on FrankenEngine. Compatibility oracle, migration autopilot, per-extension trust cards, incident replay.",
+    description:
+      "JS/TS runtime built on FrankenEngine. Compatibility oracle runs lockstep checks across Node, Bun, and FrankenNode with divergence receipts. Migration autopilot handles audit → rewrite → validate → rollout with confidence scoring. Each extension gets a trust card (provenance, behavior risk, revocation state). High-severity incidents replay from signed bundles with counterfactual simulation. Fleet quarantine controls with convergence telemetry. JS/TS velocity with security controls Node and Bun don't have. Part of the FrankenSuite.",
+    tags: ["Rust", "JavaScript", "TypeScript", "Runtime", "Security", "FrankenSuite"],
+    size: "wide",
+    gradient: "from-amber-500/20 via-yellow-500/20 to-lime-500/20",
   },
   {
     name: "FrankenNetworkX",
@@ -1641,7 +1661,7 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Shared context across agent sessions",
       slb: "Approval requests delivered to inboxes",
     },
-    stars: 1836,
+    stars: 1837,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "mcp-agent-mail",
     features: [
@@ -1775,7 +1795,7 @@ export const flywheelTools: FlywheelTool[] = [
       slb: "Works alongside SLB for layered command safety",
       ntm: "Guards all commands in NTM-managed sessions",
     },
-    stars: 721,
+    stars: 726,
     projectSlug: "destructive-command-guard",
     features: [
       "Intercepts rm -rf, git reset --hard, etc.",
@@ -2854,7 +2874,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "RefreshCw",
     color: "from-orange-500 to-amber-600",
     category: "core",
-    stars: 81,
+    stars: 82,
     whatItDoes:
       "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
     whyItsUseful:
