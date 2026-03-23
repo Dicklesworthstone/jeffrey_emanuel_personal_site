@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { ExternalLink, Sparkles, Workflow, Microscope } from "lucide-react";
+import { ExternalLink, Sparkles, Workflow, Microscope, BookOpen, Mail, Terminal, Database, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FeaturedSite } from "@/lib/content";
 
@@ -14,6 +14,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles,
   Workflow,
   Microscope,
+  BookOpen,
+  Mail,
+  Terminal,
+  Database,
+  Zap,
 };
 
 // =============================================================================

@@ -7,7 +7,7 @@ import BentoGrid from "@/components/bento-grid";
 import FlywheelVisualization from "@/components/flywheel-visualization";
 import ErrorBoundary from "@/components/error-boundary";
 import { projects } from "@/lib/content";
-import { GitBranch, Layers, Zap, Beaker, Box, Workflow, Tag, X, Repeat } from "lucide-react";
+import { GitBranch, Layers, Zap, Beaker, Box, Workflow, Tag, X, Repeat, Puzzle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const filters = [
@@ -17,6 +17,7 @@ const filters = [
   { id: "oss", label: "Open Source", icon: GitBranch },
   { id: "rust-port", label: "Rust Ports", icon: Repeat },
   { id: "flywheel", label: "Flywheel", icon: Workflow },
+  { id: "frankensuite", label: "FrankenSuite", icon: Puzzle },
 ] as const;
 
 // Extract all unique tags and count occurrences
@@ -69,6 +70,8 @@ export default function ProjectsPage() {
       if (activeFilter !== "all") {
         if (activeFilter === "flywheel") {
           passesCategory = project.tags.includes("Flywheel");
+        } else if (activeFilter === "frankensuite") {
+          passesCategory = project.tags.includes("FrankenSuite");
         } else {
           passesCategory = project.kind === activeFilter;
         }
@@ -253,7 +256,7 @@ export default function ProjectsPage() {
           >
             GitHub profile
           </a>{" "}
-          for the full archive of 90+ repos.
+          for the full archive of 170+ repos.
         </p>
       </div>
     </SectionShell>

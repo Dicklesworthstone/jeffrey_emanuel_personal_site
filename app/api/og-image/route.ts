@@ -14,6 +14,16 @@ const ALLOWED_DOMAINS = [
   "www.agent-flywheel.com",
   "brennerbot.org",
   "www.brennerbot.org",
+  "jeffreys-skills.md",
+  "www.jeffreys-skills.md",
+  "mcpagentmail.com",
+  "www.mcpagentmail.com",
+  "frankentui.com",
+  "www.frankentui.com",
+  "frankensqlite.com",
+  "www.frankensqlite.com",
+  "asupersync.com",
+  "www.asupersync.com",
 ];
 
 export async function GET(request: NextRequest) {
