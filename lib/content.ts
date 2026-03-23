@@ -59,7 +59,7 @@ export const heroStats: Stat[] = [
   },
   {
     label: "Audience on X",
-    value: "29K+",
+    value: "41K+",
     helper: "Analysts, founders, researchers, and engineers.",
   },
 ];
