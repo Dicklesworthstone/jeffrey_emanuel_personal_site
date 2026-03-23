@@ -106,7 +106,7 @@ export const heroContent = {
     subtext: "Loved by thousands of users with 500+ GitHub stars in under a month",
   },
   body: [
-    "Using these tools and 52+ AI coding agent subscriptions (~$12K/month), I've made 85,434 GitHub contributions in the past year — the vast majority since January 2026. I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
+    "Using these tools and 52+ AI coding agent subscriptions (~$12K/month), I've made 85,434 GitHub contributions in the past year, the vast majority since January 2026. I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
     "My 170+ open-source projects span agent infrastructure, the FrankenSuite of clean-room Rust reimplementations, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
     "I also founded Lumera Network (formerly Pastel), a Cosmos L1 for storage and AI verification. I consult to PE and hedge funds on AI automation after a decade as a long/short equity analyst.",
   ],
