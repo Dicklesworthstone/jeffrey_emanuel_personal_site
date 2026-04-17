@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import {
   Crimson_Pro,
   JetBrains_Mono,
@@ -17,6 +18,7 @@ import {
   Sparkles,
   Wrench,
 } from "lucide-react";
+import illustration from "@/assets/slack_migration_post_illustration.webp";
 import { MathTooltip } from "./math-tooltip";
 import { getJargon } from "@/lib/slack-migration-jargon";
 import { getScrollMetrics } from "@/lib/utils";
@@ -366,9 +368,29 @@ export function SlackMigrationArticle() {
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
               Two paired skills. One focused weekend. Roughly a{" "}
-              <span className="text-emerald-300">99% cut</span> in ongoing cost —
+              <span className="text-emerald-300">99% cut</span> in ongoing cost,
               and your whole chat history on hardware you own.
             </p>
+
+            {/* Illustration */}
+            <div className="relative mt-12 md:mt-16 mx-auto max-w-[560px]">
+              <div
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(168,85,247,0.10) 45%, transparent 70%)",
+                  filter: "blur(40px)",
+                  transform: "scale(1.2)",
+                }}
+              />
+              <Image
+                src={illustration}
+                alt="Illustration depicting a migration from a Slack-style chat workspace to a self-hosted Mattermost server, driven by an AI agent pair"
+                className="relative z-10 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl"
+                priority
+                placeholder="blur"
+              />
+            </div>
 
             {/* Stat chips */}
             <div className="mt-10 md:mt-14 flex flex-wrap justify-center gap-3 md:gap-4">
@@ -416,7 +438,7 @@ export function SlackMigrationArticle() {
             </p>
             <MarkdownDownloadButton />
             <p className="text-[11px] md:text-xs text-slate-500 font-mono max-w-[560px] leading-relaxed">
-              The 2.5k-line source guide — paste the path into Claude Code or Codex and the agent drives the migration from there.
+              The 2.5k-line source guide. Paste the path into Claude Code or Codex and the agent drives the migration from there.
             </p>
           </div>
         </EC>
@@ -426,23 +448,31 @@ export function SlackMigrationArticle() {
       <article data-section="intro">
         <EC>
           <p className="sm-drop-cap">
-            {
-              "There is a tweet from April 2026 that I keep coming back to. It is a founder named Alex Cohen — 40 employees, paying Slack about six thousand dollars a year, just quoted twenty-one thousand a year to move onto the Business+ tier so he can get a BAA for a customer contract. A three-and-a-half-times price hike to keep using the same software he’s already using."
-            }
+            {"Every few months now, some founder posts a screenshot of Slack’s latest renewal quote and it goes viral. "}
+            <a
+              href="https://x.com/anothercohen/status/2044255819290525739"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-300 underline decoration-cyan-500/40 underline-offset-4 hover:text-cyan-200"
+            >
+              This week’s example
+            </a>
+            {" is a tweet from Alex Cohen, who runs a 40-person company. Slack’s renewal desk quoted him twenty-one thousand dollars a year to move onto the Business+ tier, up from about six thousand a year on Pro, because a customer contract now requires him to sign a BAA. Same software, same workspace, three-and-a-half times the bill. It’s the kind of quote that makes you read it twice and then go check when your own renewal is up."}
           </p>
           <p>
-            {
-              "That is the moment, more or less, when almost every growing company decides it is done with Slack. Not because the product is bad — Slack is a genuinely polished piece of software — but because the pricing is designed to make the decision for you, and because the thing you get back when you cancel is a pile of JSON files with dead links to your own attachments. You never really owned your history. You were renting it, on a meter that keeps going up."
-            }
+            {"That kind of quote is basically the moment every growing company decides it’s done with Slack. Not because the product is bad (Slack is a pretty polished piece of software), but because the pricing is designed to make the decision for you, and the thing you get back when you cancel is a pile of JSON files with dead links to your own attachments. You never really owned your history. You were renting it, on a meter that only goes up."}
           </p>
           <p>
-            {"For as long as I can remember, the reason most companies didn’t migrate off "}<J t="mattermost">Slack onto something self-hosted</J>{" was that the migration itself was a project. Someone had to write a script, chase expiring file links, rebuild per-channel membership lists, reconcile message counts, stand up a Postgres, configure Nginx with the right WebSocket upgrade, and get SMTP working well enough that password-reset emails would actually land in inboxes. Then keep it all running, every week, forever."}
+            {"Until very recently, the reason most companies didn’t actually go through with migrating off "}<J t="mattermost">Slack onto something self-hosted</J>{" was that the migration itself was a real project. Someone had to write a script, chase file links before they expired, rebuild per-channel membership lists, reconcile message counts, stand up a Postgres database, configure Nginx with the right WebSocket upgrade block, and get SMTP working well enough that password-reset emails would actually land in people’s inboxes. Then keep all of that running, every week, forever."}
           </p>
           <p>
-            {"What changed, very recently, is that a sufficiently capable coding agent — "}<J t="claude-code">Claude Code</J>{" or "}<J t="codex">Codex</J>{" — can do every single one of those things in the background while you drink coffee. Not with you writing bash. With you reading a handful of reports, clicking approve on twenty or thirty prompts spread over a week, and pasting a short English sentence when the agent is ready for the next stage."}
+            {"What changed is that coding agents got good enough to do the whole project themselves. "}<J t="claude-code">Claude Code</J>{" and "}<J t="codex">Codex</J>{" can run every one of those steps in the background while you drink your coffee. You don’t write bash scripts or SSH into servers. You read a handful of short reports, click Approve on twenty or thirty permission prompts spread out over a week, and paste a short English sentence whenever the agent is ready to move on to the next stage."}
           </p>
           <p>
-            {"The thing that actually encodes the migration is not a fragile custom script. It is a pair of "}<J t="skill">agent skills</J>{" — one for extraction, one for setup and import — each a directory of prompts, references, and scripts that the agent loads into its context and drives on your behalf. Those two skills (plus a third that runs ongoing maintenance) are the subject of this article: how they decompose the problem, how the agent drives them, and every operational detail an operator will need in front of them on cutover day."}
+            {"The actual migration isn’t a fragile custom script. It’s a pair of "}<J t="skill">agent skills</J>{" (one for extraction, one for setup and import), each of which is a directory of prompts, references, and scripts that the agent loads into its context and then drives on your behalf. Those two skills, plus a third that handles the ongoing maintenance, are what the rest of this piece walks through: how they decompose the problem, how the agent actually drives them, and every operational detail you’ll want in front of you on cutover day."}
+          </p>
+          <p>
+            {"The thing that actually got me interested in writing this up, by the way, isn’t Slack specifically. It’s the broader shape of problems like Slack: expensive enterprise software whose moat is mostly the difficulty of migrating off. Jira is one of these. Splunk is one of these. The pattern is always the same: your vendor quietly raises the price every year, you shop around, you find something plausible and open-source, you sit down and think about how much of a project it would actually be to move your data over, and you just stay and pay. Two well-designed agent skills break that pattern. The rest of this article is the Slack case in full operational detail; the pattern itself generalizes to other corners of enterprise software, and I’ll come back to it at the end."}
           </p>
 
           {/* Table of contents */}
@@ -499,7 +529,7 @@ export function SlackMigrationArticle() {
           <SectionHeader id="why-bother" eyebrow="Part 0 · Why bother" title="Why bother with any of this?" />
 
           <p>
-            {"Honest answer: to save a lot of money without losing your history. Alex Cohen’s tweet is just one data point. The pattern underneath it is universal: Slack’s Pro plan keeps you hooked with decent features, and when you grow past the point where Pro’s limits hurt — or you need a BAA, or you need to export private channels, or you want SSO, or you simply want a saner admin — the vendor hands you a quote that makes your eyes water."}
+            {"Honest answer: to save a lot of money without losing your history. Alex Cohen’s tweet is just one data point. The pattern underneath it is universal: Slack’s Pro plan keeps you hooked with decent features, and when you grow past the point where Pro’s limits hurt, or need a BAA, or need to export private channels, or want SSO, or just want a saner admin, the vendor hands you a quote that makes your eyes water."}
           </p>
           <p>
             {"Self-hosting Mattermost for the same 40-person workspace comes out to roughly $71/month for the whole stack. Against Alex’s $21,000/year Slack Business+ quote, that’s a "}
@@ -532,7 +562,7 @@ export function SlackMigrationArticle() {
               },
               {
                 reason: <strong className="text-white">Compliance without the BAA premium</strong>,
-                detail: "You're the data custodian; you sign your own BAA, DPA, SCCs. Mattermost Team Edition (free) supports SSO via OAuth/SAML with the Professional Edition upgrade at $10/user/month if needed — still well below Slack Business+.",
+                detail: "You're the data custodian; you sign your own BAA, DPA, SCCs. Mattermost Team Edition (free) supports SSO via OAuth/SAML with the Professional Edition upgrade at $10/user/month if needed, still well below Slack Business+.",
               },
               {
                 reason: <strong className="text-white">AI features, your way</strong>,
@@ -561,7 +591,7 @@ export function SlackMigrationArticle() {
 
           <Sub id="five-minute" eyebrow="The 60-second version">Read this first, even if you never run a command.</Sub>
           <p>
-            {"Slack charges $7.25–$12.50 per user per month. A 1,000-person workspace pays $87k–$150k per year, and the export you get at the end is JSON with dead links. Mattermost is open-source, self-hosted, and feels nearly identical to Slack — same channels, DMs, threads, reactions, emoji, file sharing, voice/video calls, slash commands — plus official tooling for importing Slack exports. A "}
+            {"Slack charges $7.25–$12.50 per user per month. A 1,000-person workspace pays $87k–$150k per year, and the export you get at the end is JSON with dead links. Mattermost is open-source, self-hosted, and feels nearly identical to Slack (same channels, DMs, threads, reactions, emoji, file sharing, voice/video calls, slash commands), plus official tooling for importing Slack exports. A "}
             <J t="hetzner">Hetzner</J>
             {" AX52 + Cloudflare (free) runs the whole thing for about $75/month. "}
             <strong>~99% cost reduction</strong>
@@ -570,8 +600,8 @@ export function SlackMigrationArticle() {
           <p>{"The overall flow:"}</p>
           <ol className="sm-bullet-list" style={{ listStyle: "decimal", paddingLeft: "1.5rem" }}>
             <li>You decide a few things (plan tier, domain, server size, cutover date, rollback owner).</li>
-            <li>An AI agent runs Phase 1 on your laptop — downloads Slack history, pulls every file while the link still works, resolves user emails, packages it into one zip.</li>
-            <li>The agent runs Phase 2 — SSHes into an Ubuntu server, installs Mattermost behind Cloudflare, rehearses on a throwaway copy, runs the real cutover once the fail-closed readiness gate says green.</li>
+            <li>An AI agent runs Phase 1 on your laptop: downloads Slack history, pulls every file while the link still works, resolves user emails, packages it into one zip.</li>
+            <li>The agent runs Phase 2: SSHes into an Ubuntu server, installs Mattermost behind Cloudflare, rehearses on a throwaway copy, runs the real cutover once the fail-closed readiness gate says green.</li>
             <li>Users activate their accounts at <Mono>https://chat.yourdomain.com/reset_password</Mono> with their Slack email.</li>
           </ol>
           <p>
@@ -582,7 +612,7 @@ export function SlackMigrationArticle() {
 
           <Sub id="non-technical" eyebrow="For non-technical operators">Can a non-technical person do this?</Sub>
           <p>
-            {"Yes, and it’s genuinely less work than the length of this article might suggest. The article is long because it covers the whole problem space so you have an answer for whatever you hit. In practice, "}
+            {"Yes, and it’s less work than the length of this article might suggest. The article is long because it covers the whole problem space so you have an answer for whatever you hit. In practice, "}
             <strong>most operators spend a handful of hours of actual attention spread across 1 to 2 weeks</strong>
             {", and the agent is doing the rest in the background."}
           </p>
@@ -620,7 +650,7 @@ export function SlackMigrationArticle() {
           <ul className="sm-bullet-list">
             <li>A self-hosted Mattermost 10.11+ server behind Cloudflare with Origin CA TLS and proper WebSocket upgrade.</li>
             <li>All your Slack history (public, private, DMs, group DMs, threads, reactions) imported and searchable.</li>
-            <li>File attachments either in local storage or Cloudflare R2 — preserved, not linked.</li>
+            <li>File attachments either in local storage or Cloudflare R2, preserved as bytes rather than links.</li>
             <li>Custom emoji, canvases (as sidecar HTML posts), lists (as sidecar JSON posts), and admin audit CSVs (as sidecar posts in a dedicated channel). Nothing Slack-native gets silently dropped.</li>
             <li>User accounts pre-created, matched by email. Users activate via <Mono>/reset_password</Mono> with their Slack email.</li>
             <li>A complete <J t="evidence-pack">evidence pack</J>: SHA-256 hashes of every raw ZIP, enriched ZIP, import ZIP; reconciliation reports; cutover status JSON; activation proof.</li>
@@ -661,7 +691,7 @@ export function SlackMigrationArticle() {
           <SectionHeader id="decision-tree" eyebrow="Before you start" title="Which path through this guide is for you?" />
 
           <p>
-            {"There are three supported paths. Pick one now and stay with it — they produce the exact same result, the only difference is how the skills get onto your machine and how you drive the agent."}
+            {"There are three supported paths. Pick one now and stay with it; they produce the exact same result, and the only difference is how the skills get onto your machine and how you drive the agent."}
           </p>
 
           <RefTable
@@ -739,7 +769,7 @@ export function SlackMigrationArticle() {
           </Code>
 
           <p>
-            {"If any branch surprises you, read its linked section before continuing. The skills themselves detect which path the operator is on and route accordingly — the Slack plan tier alone changes validators downstream."}
+            {"If any branch surprises you, read its linked section before continuing. The skills themselves detect which path the operator is on and route accordingly; the Slack plan tier alone changes validators downstream."}
           </p>
         </EC>
       </section>
@@ -757,7 +787,7 @@ export function SlackMigrationArticle() {
             <span className="font-mono text-sm text-purple-200">$7.25/user/month</span>
             {" for Pro and "}
             <span className="font-mono text-sm text-purple-200">$12.50/user/month</span>
-            {" for Business+. A thousand-person company is paying somewhere between ninety and a hundred and fifty thousand dollars a year just to have a chat window. A forty-person company is paying between thirty-five hundred and six thousand — modest in absolute terms, but a reliable target for the next "}
+            {" for Business+. A thousand-person company is paying somewhere between ninety and a hundred and fifty thousand dollars a year just to have a chat window. A forty-person company is paying between thirty-five hundred and six thousand, modest in absolute terms, but a reliable target for the next "}
             <J t="baa">compliance-triggered price jump</J>.
           </p>
           <p>
@@ -772,7 +802,7 @@ export function SlackMigrationArticle() {
             {", against Slack's six-figure ARR."}
           </p>
           <p>
-            {"Run the slider below. The interesting thing is less the absolute savings — which are large — than how the curve shape changes with scale. Slack compounds linearly with headcount. The Mattermost bill barely moves until you need a second box."}
+            {"Run the slider below. The absolute savings are large, but the more interesting thing is how the curve shape changes with scale. Slack compounds linearly with headcount. The Mattermost bill barely moves until you need a second box."}
           </p>
         </EC>
 
@@ -844,7 +874,7 @@ export function SlackMigrationArticle() {
             {"You do this once per laptop. The skills install themselves via Claude Code’s plugin / skills mechanism; the tooling they call (slackdump, mmetl, mmctl, etc.) is installed by a bootstrap script that ships with the skill."}
           </p>
 
-          <Sub id="day-zero" eyebrow="§1.0">Day zero — order a server and wire up SSH</Sub>
+          <Sub id="day-zero" eyebrow="§1.0">Day zero: order a server and wire up SSH</Sub>
 
           <p>
             {"Phase 2 installs Mattermost on an Ubuntu server that you rent. Order it "}
@@ -880,8 +910,8 @@ export function SlackMigrationArticle() {
 
           <Sub eyebrow="1.0.2">I don’t have a domain yet</Sub>
           <ul className="sm-bullet-list">
-            <li><strong>Cloudflare Registrar</strong> — at-cost ~$10/year for <Mono>.com</Mono>, auto-adds the zone to Cloudflare. Fastest path.</li>
-            <li><strong>Any existing registrar</strong> (GoDaddy, Namecheap, Porkbun, Route 53) — update nameservers to Cloudflare later. See §Cloudflare walkthrough.</li>
+            <li><strong>Cloudflare Registrar</strong>: at-cost ~$10/year for <Mono>.com</Mono>, auto-adds the zone to Cloudflare. Fastest path.</li>
+            <li><strong>Any existing registrar</strong> (GoDaddy, Namecheap, Porkbun, Route 53): update nameservers to Cloudflare later. See §Cloudflare walkthrough.</li>
           </ul>
           <p>
             {"Buy the domain now. DNS propagation after nameserver update takes 15 minutes to 24 hours; you want that clock running in parallel with ID-verification."}
@@ -912,7 +942,7 @@ Get-Content $HOME\\.ssh\\id_ed25519.pub`}
           <Sub eyebrow="1.0.4">First SSH login after the server is installed</Sub>
           <Code>
 {`ssh root@95.217.12.34     # replace with your real IP
-# SSH prints a host-key fingerprint — type 'yes' to record it in ~/.ssh/known_hosts
+# SSH prints a host-key fingerprint: type 'yes' to record it in ~/.ssh/known_hosts
 # you should land at root@Ubuntu-...#
 # type 'exit' to return`}
           </Code>
@@ -937,9 +967,9 @@ Get-Content $HOME\\.ssh\\id_ed25519.pub`}
 
           <Details summary={<>Sidebar: Windows-specific notes</>}>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li><strong>PowerShell, not Command Prompt</strong> — this article’s commands assume a POSIX-ish shell. On Windows, PowerShell 7+ or Git Bash.</li>
+              <li><strong>PowerShell, not Command Prompt.</strong> This article’s commands assume a POSIX-ish shell. On Windows, PowerShell 7+ or Git Bash.</li>
               <li><strong>Install Git for Windows</strong> (<Mono>git-scm.com/downloads/win</Mono>). Provides <Mono>git</Mono> plus Git Bash.</li>
-              <li><strong>Chocolatey</strong> is the Windows equivalent of Homebrew — install from <Mono>chocolatey.org/install</Mono> in an Admin PowerShell.</li>
+              <li><strong>Chocolatey</strong> is the Windows equivalent of Homebrew. Install from <Mono>chocolatey.org/install</Mono> in an Admin PowerShell.</li>
               <li><strong>WSL2</strong> is optional but convenient: <Mono>wsl --install -d Ubuntu-24.04</Mono>, then <Mono>wsl</Mono>.</li>
               <li><strong>Paths</strong>: Mac-style <Mono>~/.claude/skills/</Mono> = Windows <Mono>%USERPROFILE%\.claude\skills\</Mono>.</li>
               <li><strong>Symlinks</strong> need Admin PowerShell (<Mono>New-Item -ItemType SymbolicLink</Mono>) or Git Bash with Developer Mode.</li>
@@ -1047,7 +1077,58 @@ Get-Content $HOME\\.ssh\\id_ed25519.pub`}
               </li>
             </ul>
             <p className="mt-4 text-[12px] md:text-[13px] text-slate-400 leading-relaxed">
-              <strong className="text-amber-200">Heads up:</strong> those three URLs return a 404 unless you are signed in to a jeffreys-skills.md account with an active subscription. If you hit a 404, sign up (or log in) at <Mono>jeffreys-skills.md/dashboard</Mono> first, then reload — the same account is what the <Mono>jsm</Mono> CLI authenticates against below, so doing this step first means <Mono>jsm install</Mono> will already know who you are.
+              <strong className="text-amber-200">Heads up:</strong> those three URLs return a 404 unless you are signed in to a jeffreys-skills.md account with an active subscription. If you hit a 404, sign up (or log in) at <Mono>jeffreys-skills.md/dashboard</Mono> first and reload. It’s the same account the <Mono>jsm</Mono> CLI authenticates against below, so doing this step first means <Mono>jsm install</Mono> will already know who you are.
+            </p>
+          </div>
+
+          <div className="my-5 md:my-6 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.04] via-cyan-500/[0.04] to-emerald-500/[0.04] p-5 md:p-6 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-emerald-300">
+                What shipped in the latest release · April 2026
+              </p>
+            </div>
+
+            <div className="space-y-4 md:space-y-5">
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v2
+                  </span>
+                  <span className="ml-2 text-purple-300 font-semibold">Phase 1 · extraction</span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  7-stage <Mono>migrate.sh</Mono> with a plan-tier router that picks <em>official-export-primary</em> (Business+ / Enterprise Grid), <em>slackdump-primary</em> (Pro / Free), or <em>Grid split</em> automatically. Four non-negotiable validators run before the bundle is declared import-ready: artifact hash + layout, JSONL ordering + linkage, enrichment completeness, and raw-vs-enriched-vs-JSONL count reconciliation. The machine-readable Phase 1 → Phase 2 contract ships four files: <Mono>handoff.json</Mono>, <Mono>verification.md</Mono>, <Mono>unresolved-gaps.md</Mono>, <Mono>evidence-pack.json</Mono>. 21 scripts and 6 focused subagents (<Mono>acquisition-auditor</Mono>, <Mono>gap-hunter</Mono>, <Mono>token-exposure-redteam</Mono>, <Mono>compliance-approval-auditor</Mono>, <Mono>slack-plan-tier-router</Mono>, <Mono>reconciliation-analyst</Mono>) each emit a verdict of <span className="text-emerald-300 font-mono">ready</span>, <span className="text-rose-300 font-mono">blocked</span>, or <span className="text-amber-300 font-mono">needs-review</span>.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v2
+                  </span>
+                  <span className="ml-2 text-cyan-300 font-semibold">Phase 2 · setup &amp; import</span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  Eight <Mono>operate.sh</Mono> stages (<Mono>intake</Mono> through <Mono>live</Mono>). Opinionated stack: Ubuntu + PostgreSQL 16 (Supabase pooler or self-hosted) + Cloudflare R2 for files + Cloudflare Tunnel for origin + Nginx with the WebSocket upgrade block wired so realtime works on first try. <strong className="text-white">Staging rehearsal is mandatory</strong>; the full cutover runs against staging first, with smoke tests and an e2e pass, before anyone touches production. Seven explicit Go/No-Go gates with a <em>named</em> rollback owner sit between the rehearsal and the DNS flip: <Mono>intake-valid</Mono>, <Mono>infra-provisioned</Mono>, <Mono>stack-deployed</Mono>, <Mono>import-reconciled</Mono>, <Mono>staging-passed</Mono>, <Mono>war-room-GO</Mono>, <Mono>cutover-complete</Mono>. One red gate stops the pipeline. No improvising at 11 pm on cutover night.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v3
+                  </span>
+                  <span className="ml-2 text-emerald-300 font-semibold">Phase 3 · ongoing maintenance</span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  Eight <Mono>maintain.sh</Mono> stages that turn maintenance into code instead of tribal knowledge: <Mono>health</Mono>, <Mono>update-os</Mono>, <Mono>update-mattermost</Mono>, <Mono>db-backup</Mono>, <Mono>restore-drill</Mono>, <Mono>rotate-credentials</Mono>, <Mono>incident</Mono>, <Mono>disaster-recovery</Mono>. The quarterly restore drill is a gate, not a suggestion: <Mono>update-mattermost</Mono> <em>refuses</em> to run if the last successful drill is older than 90 days, on the grounds that a backup you have never restored from is not a backup. Credential rotation cadences are code, not tribal knowledge: Mattermost PAT on a 90-day wall clock, <Mono>mmuser</Mono> Postgres password on 180 days, SSH keys and rclone tokens annually. The rotation-audit JSON is the source of truth. Seven subagents (<Mono>health-drift-auditor</Mono>, <Mono>backup-integrity-auditor</Mono>, <Mono>version-drift-auditor</Mono>, <Mono>db-bloat-auditor</Mono>, <Mono>security-posture-auditor</Mono>, <Mono>incident-coordinator</Mono>, <Mono>maintenance-scheduler</Mono>) deliver deep second opinions on demand.
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-5 text-[11px] md:text-[12px] text-slate-500 leading-relaxed italic">
+              Each skill page linked above has the full changelog, a live visualization of the flow, and the verbatim <Mono>SKILL.md</Mono> the agent loads into its context.
             </p>
           </div>
 
@@ -1290,7 +1371,7 @@ dir %USERPROFILE%\\.claude\\skills`}
           <p>
             {"Pick "}
             <strong>AX52 at Hetzner</strong>
-            {" as the default for anything 250–1,000 users — by far the cheapest dedicated-bare-metal-with-NVMe option in that class. Put "}
+            {" as the default for anything 250–1,000 users; by far the cheapest dedicated-bare-metal-with-NVMe option in that class. Put "}
             <strong>Ubuntu 24.04 LTS</strong>
             {" on it. Ordering the server is the one step the agent cannot do for you."}
           </p>
@@ -1401,7 +1482,7 @@ powercfg /requestsoverride process powershell.exe
           <SectionHeader id="pipeline" eyebrow="The two-phase pipeline" title="Phase 1 → handoff → Phase 2." />
           <p>
             {
-              "Both skills expose an ordered list of stages. You don’t typically run them all at once. Most operators step through stage by stage and read the reports between each, because the reports are where the decisions live — what was exported, what’s on disk, whether reconciliation counts line up, whether the staging rehearsal passed. Tap any node or edge below to see what it actually does."
+              "Both skills expose an ordered list of stages. You don’t typically run them all at once. Most operators step through stage by stage and read the reports between each, because the reports are where the decisions live: what was exported, what’s on disk, whether reconciliation counts line up, whether the staging rehearsal passed. Tap any node or edge below to see what it actually does."
             }
           </p>
 
@@ -1412,7 +1493,7 @@ powercfg /requestsoverride process powershell.exe
 
         {/* PHASE 1 STAGES IN DETAIL */}
         <EC>
-          <SectionHeader id="phase-1-stages" eyebrow="Part 3 · Phase 1" title="Driving Phase 1 — extraction and transformation." />
+          <SectionHeader id="phase-1-stages" eyebrow="Part 3 · Phase 1" title="Driving Phase 1: extraction and transformation." />
           <p>
             {"The canonical Phase 1 pipeline:"}
           </p>
@@ -1459,9 +1540,9 @@ SLACK_MEMBER_CSV=""
           </p>
 
           <Sub id="p1-export" eyebrow="§3.2">Acquire the Slack export (stage: export)</Sub>
-          <p>{"Three possible paths — work out which one you’re on, then execute."}</p>
+          <p>{"Three possible paths. Work out which one you’re on, then execute."}</p>
 
-          <Sub eyebrow="3.2.1">Track A — official admin export (recommended when available)</Sub>
+          <Sub eyebrow="3.2.1">Track A: official admin export (recommended when available)</Sub>
           <p>
             {"Slack has no public API to "}
             <em>trigger</em>
@@ -1487,7 +1568,7 @@ SLACK_MEMBER_CSV=""
 └── manifest.raw.json          # names every file + its SHA256`}
           </Code>
 
-          <Sub eyebrow="3.2.2">Track B — slackdump as primary (Pro / Free, or official unavailable)</Sub>
+          <Sub eyebrow="3.2.2">Track B: slackdump as primary (Pro / Free, or official unavailable)</Sub>
           <p>
             {"Set "}
             <Mono>SLACKDUMP_PRIMARY=1</Mono>
@@ -1510,7 +1591,7 @@ SLACK_MEMBER_CSV=""
             {" later; your job now is to run the export and not pretend it sees more than it does."}
           </p>
 
-          <Sub eyebrow="3.2.3">Track C — Enterprise Grid with per-workspace export</Sub>
+          <Sub eyebrow="3.2.3">Track C: Enterprise Grid with per-workspace export</Sub>
           <p>
             {"Grid admins can request grid-wide (one giant file) or per-workspace exports. Per-workspace is cleaner. If you get a grid-level export, "}
             <Mono>split-phase1-import.py</Mono>
@@ -1550,11 +1631,11 @@ SLACK_MEMBER_CSV=""
           <Code>{`./migrate.sh enrich`}</Code>
           <p>{"What runs under the hood:"}</p>
           <ol className="list-decimal pl-6 space-y-2 text-[15px] text-slate-300 leading-relaxed">
-            <li><Mono>run-slack-advanced-exporter.sh fetch-emails</Mono> — resolves Slack user IDs to email addresses, rewriting <Mono>users.json</Mono> in place inside a copy of the ZIP. Requires <Mono>xoxp-</Mono> with <Mono>users:read.email</Mono>.</li>
-            <li><Mono>run-slack-advanced-exporter.sh fetch-attachments</Mono> — walks every message’s <Mono>files[]</Mono> and downloads bytes into <Mono>__uploads/F&lt;id&gt;/&lt;filename&gt;</Mono> inside the enriched ZIP. Requires <Mono>xoxp-</Mono> with <Mono>files:read</Mono>.</li>
-            <li><Mono>export-custom-emoji.py</Mono> — hits Slack’s <Mono>emoji.list</Mono> API, downloads every custom emoji image, writes a manifest plus an alias map.</li>
-            <li><Mono>extract-phase1-sidecars.py</Mono> — pulls canvases, lists, <Mono>integration_logs.json</Mono>, and any admin CSV / workflow JSON from <Mono>PHASE1_SIDECAR_INPUTS</Mono> or <Mono>PHASE1_WORKFLOW_INPUTS</Mono> into a sidecar bundle.</li>
-            <li><Mono>build-artifact-manifest.py</Mono> — rewrites <Mono>manifest.enriched.json</Mono> with hashes for all new artifacts.</li>
+            <li><Mono>run-slack-advanced-exporter.sh fetch-emails</Mono>: resolves Slack user IDs to email addresses, rewriting <Mono>users.json</Mono> in place inside a copy of the ZIP. Requires <Mono>xoxp-</Mono> with <Mono>users:read.email</Mono>.</li>
+            <li><Mono>run-slack-advanced-exporter.sh fetch-attachments</Mono>: walks every message’s <Mono>files[]</Mono> and downloads bytes into <Mono>__uploads/F&lt;id&gt;/&lt;filename&gt;</Mono> inside the enriched ZIP. Requires <Mono>xoxp-</Mono> with <Mono>files:read</Mono>.</li>
+            <li><Mono>export-custom-emoji.py</Mono>: hits Slack’s <Mono>emoji.list</Mono> API, downloads every custom emoji image, writes a manifest plus an alias map.</li>
+            <li><Mono>extract-phase1-sidecars.py</Mono>: pulls canvases, lists, <Mono>integration_logs.json</Mono>, and any admin CSV / workflow JSON from <Mono>PHASE1_SIDECAR_INPUTS</Mono> or <Mono>PHASE1_WORKFLOW_INPUTS</Mono> into a sidecar bundle.</li>
+            <li><Mono>build-artifact-manifest.py</Mono>: rewrites <Mono>manifest.enriched.json</Mono> with hashes for all new artifacts.</li>
           </ol>
           <p>
             {"The ordering matters. Emails before attachments because mmetl uses the email-rewritten "}
@@ -1581,10 +1662,10 @@ SLACK_MEMBER_CSV=""
             {" directory. Key flags the skill sets:"}
           </p>
           <ul className="sm-bullet-list">
-            <li><Mono>--team &quot;$MATTERMOST_TEAM_NAME&quot;</Mono> — target team name.</li>
-            <li><Mono>--default-email-domain</Mono> — only if <Mono>MMETL_DEFAULT_EMAIL_DOMAIN</Mono> is set (use when some Slack users have no email; mmetl fabricates <Mono>&lt;username&gt;@&lt;domain&gt;</Mono>).</li>
-            <li><Mono>--skip-empty-emails</Mono>, <Mono>--discard-invalid-props</Mono> — passed via <Mono>MMETL_EXTRA_FLAGS</Mono> if needed.</li>
-            <li><Mono>--attachments-dir data/bulk-export-attachments</Mono> — forces binary files into the canonical import location.</li>
+            <li><Mono>--team &quot;$MATTERMOST_TEAM_NAME&quot;</Mono>: target team name.</li>
+            <li><Mono>--default-email-domain</Mono>: only if <Mono>MMETL_DEFAULT_EMAIL_DOMAIN</Mono> is set (use when some Slack users have no email; mmetl fabricates <Mono>&lt;username&gt;@&lt;domain&gt;</Mono>).</li>
+            <li><Mono>--skip-empty-emails</Mono>, <Mono>--discard-invalid-props</Mono>: passed via <Mono>MMETL_EXTRA_FLAGS</Mono> if needed.</li>
+            <li><Mono>--attachments-dir data/bulk-export-attachments</Mono>: forces binary files into the canonical import location.</li>
           </ul>
           <p>
             <strong>Important:</strong> mmetl is Linux and macOS only. Running it on Windows corrupts the JSONL. The bootstrap script doesn’t install a Windows binary for this reason. If you’re on Windows, either use WSL or run Phase 1 on a Mac/Linux machine and SCP the result.
@@ -1621,11 +1702,11 @@ SLACK_MEMBER_CSV=""
           <Code>{`./migrate.sh verify`}</Code>
           <p>{"It runs five validators:"}</p>
           <ol className="list-decimal pl-6 space-y-2 text-[15px] text-slate-300 leading-relaxed">
-            <li><Mono>validate-phase1-artifacts.py</Mono> — hashes in <Mono>manifest.*.json</Mono> match files on disk; required artifacts (ZIP, CSV, JSONL, final ZIP) all exist.</li>
-            <li><Mono>validate-phase1-jsonl.py</Mono> — JSONL is well-ordered (version, emoji, team, channel, user, post, direct_channel, direct_post), every <Mono>thread_ts</Mono> reference is to an earlier post, every channel has at least one member, counts are non-zero.</li>
-            <li><Mono>validate-enrichment-completeness.py</Mono> — every <Mono>files[]</Mono> entry in the enriched ZIP has a downloaded binary; every user in <Mono>users.json</Mono> has an email (or a documented exception).</li>
-            <li><Mono>reconcile-phase1-counts.py</Mono> — message counts across raw ZIP, enriched ZIP, channel-audit CSV, and JSONL all agree within tolerance. Channels in the audit CSV but missing from the JSONL are reported as discrepancies with severity.</li>
-            <li><Mono>export-integration-inventory.py</Mono> — parses <Mono>integration_logs.json</Mono> and emits <Mono>integration-inventory.md</Mono>, a concrete list of bots, webhooks, and apps that must be rebuilt in Mattermost post-cutover.</li>
+            <li><Mono>validate-phase1-artifacts.py</Mono>: hashes in <Mono>manifest.*.json</Mono> match files on disk; required artifacts (ZIP, CSV, JSONL, final ZIP) all exist.</li>
+            <li><Mono>validate-phase1-jsonl.py</Mono>: JSONL is well-ordered (version, emoji, team, channel, user, post, direct_channel, direct_post), every <Mono>thread_ts</Mono> reference is to an earlier post, every channel has at least one member, counts are non-zero.</li>
+            <li><Mono>validate-enrichment-completeness.py</Mono>: every <Mono>files[]</Mono> entry in the enriched ZIP has a downloaded binary; every user in <Mono>users.json</Mono> has an email (or a documented exception).</li>
+            <li><Mono>reconcile-phase1-counts.py</Mono>: message counts across raw ZIP, enriched ZIP, channel-audit CSV, and JSONL all agree within tolerance. Channels in the audit CSV but missing from the JSONL are reported as discrepancies with severity.</li>
+            <li><Mono>export-integration-inventory.py</Mono>: parses <Mono>integration_logs.json</Mono> and emits <Mono>integration-inventory.md</Mono>, a concrete list of bots, webhooks, and apps that must be rebuilt in Mattermost post-cutover.</li>
           </ol>
           <p>
             {"Then it assembles the evidence pack ("}
@@ -1650,11 +1731,11 @@ SLACK_MEMBER_CSV=""
           <Code>{`./migrate.sh handoff`}</Code>
           <p>{"Emits the three artifacts Phase 2 needs to trust your bundle:"}</p>
           <ul className="sm-bullet-list">
-            <li><Mono>handoff.md</Mono> — human-readable summary for you and the war room.</li>
+            <li><Mono>handoff.md</Mono>: human-readable summary for you and the war room.</li>
             <li>
-              <Mono>handoff.json</Mono> — the machine-readable contract. Contains <Mono>schema_version</Mono>, <Mono>generated_at</Mono>, <Mono>workspace</Mono>, <Mono>plan_tier</Mono>, <Mono>export_basis</Mono>, <Mono>final_package.path</Mono>, <Mono>final_package.sha256</Mono>, <Mono>jsonl_path</Mono>, <Mono>manifests[]</Mono>, counts (users, channels, posts, DMs, emoji, attachments), <Mono>sidecar_channels[]</Mono>, and <Mono>known_gaps[]</Mono>.
+              <Mono>handoff.json</Mono>: the machine-readable contract. Contains <Mono>schema_version</Mono>, <Mono>generated_at</Mono>, <Mono>workspace</Mono>, <Mono>plan_tier</Mono>, <Mono>export_basis</Mono>, <Mono>final_package.path</Mono>, <Mono>final_package.sha256</Mono>, <Mono>jsonl_path</Mono>, <Mono>manifests[]</Mono>, counts (users, channels, posts, DMs, emoji, attachments), <Mono>sidecar_channels[]</Mono>, and <Mono>known_gaps[]</Mono>.
             </li>
-            <li><Mono>unresolved-gaps.md</Mono> — one entry per classified gap, each with disposition class (<Mono>native-importable</Mono> / <Mono>sidecar-only</Mono> / <Mono>manual-rebuild</Mono> / <Mono>unrecoverable</Mono>).</li>
+            <li><Mono>unresolved-gaps.md</Mono>: one entry per classified gap, each with disposition class (<Mono>native-importable</Mono> / <Mono>sidecar-only</Mono> / <Mono>manual-rebuild</Mono> / <Mono>unrecoverable</Mono>).</li>
           </ul>
           <p>
             {"The final ZIP is at "}
@@ -1665,11 +1746,54 @@ SLACK_MEMBER_CSV=""
             <Mono>handoff.json.final_package.sha256</Mono>
             {". Phase 2 refuses to import a ZIP whose hash does not match the handoff’s claimed hash, no matter how close the other metadata is."}
           </p>
+
+          <Sub eyebrow="§3.8 · zoom out">What Phase 1 actually ships: 21 scripts, 6 subagents, 4 validators</Sub>
+          <p>
+            {"The seven "}
+            <Mono>migrate.sh</Mono>
+            {" stages above are the "}
+            <em>interface</em>
+            {". Underneath, Phase 1 is a 112-file skill with 21 scripts, 6 focused subagents, and four non-negotiable validators that run before the bundle is allowed to hand off to Phase 2."}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+            <div className="rounded-xl border border-purple-500/20 bg-purple-500/[0.04] p-4 md:p-5">
+              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-purple-300 mb-3">
+                Four non-negotiable validators
+              </p>
+              <ul className="space-y-2 text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                <li><strong className="text-white">Artifact hash + layout.</strong> Every ZIP, CSV, and emoji asset lives in a quarantined tree under a SHA-256 manifest.</li>
+                <li><strong className="text-white">JSONL ordering + linkage.</strong> Strict object order (version, emoji, team, channel, user, post, direct_channel, direct_post); threads reference their parent before the parent is redefined.</li>
+                <li><strong className="text-white">Enrichment completeness.</strong> Attachment count against <Mono>url_private</Mono> count; email coverage vs users in the export.</li>
+                <li><strong className="text-white">Raw-vs-enriched-vs-JSONL count reconciliation.</strong> Three independent counts must agree or the bundle is refused.</li>
+              </ul>
+            </div>
+            <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] p-4 md:p-5">
+              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
+                Six focused subagents
+              </p>
+              <ul className="space-y-2 text-[13px] md:text-[14px] text-slate-300 leading-relaxed font-mono">
+                <li><strong className="text-cyan-200">acquisition-auditor</strong>, which proves the export actually represents the workspace.</li>
+                <li><strong className="text-cyan-200">gap-hunter</strong>, which finds features that did not migrate and classifies them.</li>
+                <li><strong className="text-cyan-200">token-exposure-redteam</strong>, which scans for leaked xoxp / xoxb / xoxc tokens in artifacts.</li>
+                <li><strong className="text-cyan-200">compliance-approval-auditor</strong>, which produces the legal-approval packet.</li>
+                <li><strong className="text-cyan-200">slack-plan-tier-router</strong>, which decides Track A vs Track B vs Track C automatically.</li>
+                <li><strong className="text-cyan-200">reconciliation-analyst</strong>, which reads raw / enriched / JSONL counts and explains any drift.</li>
+              </ul>
+              <p className="mt-3 text-[11px] text-slate-500 italic">
+                Each subagent emits a verdict of <span className="text-emerald-300 font-mono">ready</span> · <span className="text-rose-300 font-mono">blocked</span> · <span className="text-amber-300 font-mono">needs-review</span>.
+              </p>
+            </div>
+          </div>
+          <p>
+            {"The four-file handoff contract Phase 2 consumes ("}
+            <Mono>handoff.json</Mono>, <Mono>verification.md</Mono>, <Mono>unresolved-gaps.md</Mono>, <Mono>evidence-pack.json</Mono>
+            {") is built exactly when every validator passes and every subagent verdict is accounted for. No tribal knowledge crosses the phase boundary; the import phase reads structured inputs, not a README and a prayer."}
+          </p>
         </EC>
 
         {/* PHASE 2 STAGES IN DETAIL */}
         <EC>
-          <SectionHeader id="phase-2-stages" eyebrow="Part 4 · Phase 2" title="Driving Phase 2 — deploy, rehearse, cut over." />
+          <SectionHeader id="phase-2-stages" eyebrow="Part 4 · Phase 2" title="Driving Phase 2: deploy, rehearse, cut over." />
           <p>
             {"Phase 2 runs from the same workstation as Phase 1. It does not need the Phase 1 ZIP to still exist on disk as long as "}
             <Mono>HANDOFF_JSON</Mono>
@@ -1846,7 +1970,7 @@ ROLLBACK_OWNER="Jane Admin"`}
           <Sub id="p2-staging" eyebrow="§4.7">Staging rehearsal (stage: staging)</Sub>
           <Code>{`./operate.sh staging`}</Code>
           <p>
-            {"This is the single most valuable stage in Phase 2. Safety: "}
+            {"This is the most valuable stage in Phase 2. Safety: "}
             <Mono>run-staging-rehearsal.sh</Mono>
             {" refuses to run against a URL that looks like production unless "}
             <Mono>ALLOW_NON_STAGING=1</Mono>
@@ -1964,7 +2088,7 @@ ROLLBACK_OWNER="Jane Admin"`}
           <h2 className="sm-section-title mb-6 mt-4 text-white">An asymmetric bet.</h2>
           <p>
             {
-              "The single most important property of this whole migration, and the reason it is worth running even if you are a little skeptical: "
+              "The most important property of this whole migration, and the reason it’s worth running even if you are a little skeptical: "
             }
             <strong>your real Slack keeps working the entire time</strong>
             {". You never touch it until you have independently verified Mattermost is good."}
@@ -2002,15 +2126,15 @@ ROLLBACK_OWNER="Jane Admin"`}
           <h2 className="sm-section-title mb-6 mt-4 text-white">What survives the move.</h2>
           <p>
             {
-              "The question every internal stakeholder will ask — legal, HR, the people who ran Slackbot automations, the guy with four hundred saved items — is some variant of "
+              "Every internal stakeholder will ask some variant of this (legal, HR, the people who ran Slackbot automations, the guy with four hundred saved items): "
             }
             <em>“does my X survive?”</em>
             {" There are three possible answers, and the skill classifies each Slack feature into exactly one of them. "}
-            <strong>Native</strong> means it imports as first-class Mattermost data: public and private channel messages, DMs, threads, reactions, file attachments, pinned messages, channel topics, custom emoji images. <strong><J t="sidecar">Sidecar</J></strong> means the content is preserved, but as posts in a dedicated archive channel rather than as native Mattermost objects — canvases, lists, and admin audit CSVs all end up this way. <strong>Unrecoverable</strong> means the content is genuinely not in Slack’s export and cannot be migrated; the best you can do is document it in <J t="unresolved-gaps">unresolved-gaps.md</J>, which the skill generates automatically, and plan a rebuild or an acceptance.
+            <strong>Native</strong> means it imports as first-class Mattermost data: public and private channel messages, DMs, threads, reactions, file attachments, pinned messages, channel topics, custom emoji images. <strong><J t="sidecar">Sidecar</J></strong> means the content is preserved, but as posts in a dedicated archive channel rather than as native Mattermost objects. Canvases, lists, and admin audit CSVs all end up this way. <strong>Unrecoverable</strong> means the content is not in Slack’s export at all and cannot be migrated; the best you can do is document it in <J t="unresolved-gaps">unresolved-gaps.md</J>, which the skill generates automatically, and plan a rebuild or an acceptance.
           </p>
           <p>
             {
-              "The matrix below lets you filter by disposition and toggle between Business+ and Pro plans. On Business+, most things are native. On Pro, private channels and DMs downgrade because Slack's Free/Pro export simply cannot see content the export token's user is not a party to — you fall back to "
+              "The matrix below lets you filter by disposition and toggle between Business+ and Pro plans. On Business+, most things are native. On Pro, private channels and DMs downgrade because Slack's Free/Pro export cannot see content the export token's user is not a party to; you fall back to "
             }
             <J t="track-b">slackdump-primary</J>
             {" and inherit that blind spot. The honest way to handle it is to write the blind spot into "}
@@ -2024,10 +2148,10 @@ ROLLBACK_OWNER="Jane Admin"`}
 
           <p>
             {
-              "The rule the skills enforce: known-unknowns named in advance are cheaper than unknown-unknowns discovered in production. Anything that doesn't survive as native, and can't be preserved as a sidecar, gets an entry with a classification — "
+              "The rule the skills enforce: known-unknowns named in advance are cheaper than unknown-unknowns discovered in production. Anything that doesn't survive as native, and can't be preserved as a sidecar, gets an entry with one of four classifications: "
             }
             <span className="font-mono text-cyan-200">native-importable</span>, <span className="font-mono text-cyan-200">sidecar-only</span>, <span className="font-mono text-cyan-200">manual-rebuild</span>, or <span className="font-mono text-cyan-200">unrecoverable</span>
-            {" — so that when a user says at T+3 days “where are my saved items?”, you already have the answer written down and a rebuild plan."}
+            {", so that when a user says at T+3 days “where are my saved items?”, you already have the answer written down and a rebuild plan."}
           </p>
         </EC>
       </section>
@@ -2084,12 +2208,40 @@ ROLLBACK_OWNER="Jane Admin"`}
           </p>
           <p>
             {
-              "There is a closely related rule, almost comically low-tech, that the skill enforces: the rollback owner must be "
+              "The skill also enforces a closely related rule, almost comically low-tech: the rollback owner must be "
             }
             <em>a name and an email</em>
             {", populated into "}
             <span className="font-mono text-sm">ROLLBACK_OWNER</span>
             {" before the gate is allowed to pass. Not “whoever is on call.” Not a team alias. A specific human who has pre-committed to being the one who calls the abort. In practice this is usually the operator running the migration, or their CTO. The point is to remove ambiguity at the exact moment it would otherwise cost you."}
+          </p>
+
+          <Sub eyebrow="§4.9 · zoom out">The seven Go/No-Go gates, not just the ready gate</Sub>
+          <p>
+            {"The "}
+            <Mono>ready</Mono>
+            {" stage is one of "}
+            <strong>seven</strong>
+            {" explicit gates Phase 2 walks through between the Phase 1 handoff bundle and users typing into production. Every gate has a written-down pass criterion before the migration starts, and every gate can block the next one. One red gate stops the pipeline. No improvising at 11 pm on cutover night."}
+          </p>
+          <RefTable
+            cols={[
+              { key: "n", label: "#" },
+              { key: "gate", label: "Gate" },
+              { key: "pass", label: "Passes when" },
+            ]}
+            rows={[
+              { n: "1", gate: <Mono>intake-valid</Mono>, pass: <>Phase 1 bundle checksum-verified, row counts reconciled against <Mono>handoff.json</Mono>, secret-scan clean, <Mono>ROLLBACK_OWNER</Mono> named.</> },
+              { n: "2", gate: <Mono>infra-provisioned</Mono>, pass: <>Ubuntu host, PostgreSQL 16 (Supabase pooler or self-hosted), Cloudflare R2 bucket, Cloudflare Tunnel, Nginx all reachable; <Mono>doctor.sh</Mono> green.</> },
+              { n: "3", gate: <Mono>stack-deployed</Mono>, pass: <>Mattermost serving <Mono>/api/v4/system/ping</Mono>; WebSocket upgrade block live; TLS terminating at the edge; SMTP sends a test email.</> },
+              { n: "4", gate: <Mono>import-reconciled</Mono>, pass: <><Mono>mmctl</Mono> bulk-import completed; reconciliation report matches the handoff manifest for users / channels / posts / DMs.</> },
+              { n: "5", gate: <Mono>staging-passed</Mono>, pass: <>Full cutover rehearsed against a throwaway staging VPS first; smoke tests + e2e pass captured in <Mono>latest-staging.json</Mono>.</> },
+              { n: "6", gate: <Mono>war-room-GO</Mono>, pass: <>Named rollback owner acknowledges; status-page update drafted; 60-second TTL on the DNS record already set; comms kit paged.</> },
+              { n: "7", gate: <Mono>cutover-complete</Mono>, pass: <>DNS flipped; <Mono>cutover-status.*.json</Mono> records <Mono>status: success</Mono>; reconciliation second-pass green; activation announcement sent.</> },
+            ]}
+          />
+          <p>
+            {"Writing the gates down isn’t bureaucracy; it removes the 11-pm-on-cutover-night temptation to improvise. Every gate is a place the skill will cheerfully stop, file a blocked-reason, and let the operator fix the input rather than guess at what “good enough” looks like."}
           </p>
         </EC>
       </section>
@@ -2099,7 +2251,7 @@ ROLLBACK_OWNER="Jane Admin"`}
       {/* ========== MCP WORKED EXAMPLES ========== */}
       <section data-section="mcp-examples">
         <EC>
-          <SectionHeader id="mcp-examples" eyebrow="§10.8" title="MCP worked examples — what each server unlocks." />
+          <SectionHeader id="mcp-examples" eyebrow="§10.8" title="MCP worked examples: what each server unlocks." />
           <p>
             {"You installed MCP servers back in §1.5. Here is what each one actually gives the agent, with concrete prompts you can paste."}
           </p>
@@ -2143,7 +2295,7 @@ ROLLBACK_OWNER="Jane Admin"`}
           <SectionHeader id="cutover-day" eyebrow="§4.13" title="Cutover day, minute by minute." />
           <p>
             {
-              "The thing non-technical operators worry about most is the moment where the old and new systems switch. It is actually the most orchestrated, best-narrated part of the whole process, because the skill has been thinking about cutover since before it was written. Here is what it looks like on your screen."
+              "The moment non-technical operators worry about most is when the old and new systems switch. That moment is the most orchestrated, best-narrated part of the whole process, because the skill has been thinking about cutover since before it was written. Here is what it looks like on your screen."
             }
           </p>
           <p>
@@ -2151,7 +2303,7 @@ ROLLBACK_OWNER="Jane Admin"`}
               "At T minus sixty minutes, you paste a short sentence asking the agent to run "
             }
             <span className="font-mono text-emerald-200">ready</span>
-            {" one more time. The agent re-reads every report and emits a readiness score with each category graded green. At T minus fifteen, you flip Slack to read-only yourself, in a browser tab — this is a human-in-the-loop step on purpose — and post the freeze notice from the comms kit. At T equals zero, you paste: “Run Phase 2 stage "}
+            {" one more time. The agent re-reads every report and emits a readiness score with each category graded green. At T minus fifteen, you flip Slack to read-only yourself, in a browser tab (this is a human-in-the-loop step on purpose) and post the freeze notice from the comms kit. At T equals zero, you paste: “Run Phase 2 stage "}
             <span className="font-mono text-emerald-200">cutover</span>
             {" against production. Pause before any destructive step and explain it to me.”"}
           </p>
@@ -2207,7 +2359,7 @@ ROLLBACK_OWNER="Jane Admin"`}
           <ol className="list-decimal pl-6 space-y-2 text-[15px] text-slate-300 leading-relaxed">
             <li><strong>Baseline:</strong> run the full Phase 1 pipeline at T − several days. Do the Phase 2 staging rehearsal. Do <em>not</em> do production cutover yet.</li>
             <li><strong>Delta N:</strong> every few hours or daily, re-run Phase 1 against the same path (or against a new export covering only the recent range). Run <Mono>./operate.sh staging</Mono> against production; since import is idempotent, this catches new messages without duplicating old ones.</li>
-            <li><strong>Final delta:</strong> at T = 0, one last Phase 1 + Phase 2 staging run. Then <Mono>./operate.sh cutover</Mono>, which is now essentially a no-op import of any final messages.</li>
+            <li><strong>Final delta:</strong> at T = 0, one last Phase 1 + Phase 2 staging run. Then <Mono>./operate.sh cutover</Mono>, which is now a near-no-op import of any final messages.</li>
           </ol>
           <p>
             {"Phase 1 ships "}
@@ -2221,7 +2373,7 @@ ROLLBACK_OWNER="Jane Admin"`}
           <p>
             {"Here is what you’ll actually see in the Claude Code or Codex desktop app between T-1h and T+30min, assuming a 340-user workspace."}
           </p>
-          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T − 60 min — preflight readiness re-check</p>
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T − 60 min · preflight readiness re-check</p>
           <p>
             {"You paste: "}
             <em>“Run Phase 2 stage ready against production and show me the readiness score.”</em>
@@ -2235,12 +2387,12 @@ ROLLBACK_OWNER="Jane Admin"`}
             {"If any category is yellow or red, the agent stops and tells you why. Do not proceed past this point with anything red."}
           </p>
 
-          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T − 15 min — freeze Slack, post the notice</p>
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T − 15 min · freeze Slack, post the notice</p>
           <p>
             {"You do this yourself in a browser tab, not in the agent. Slack admin → Workspace settings → Permissions → Messages &amp; files → disable posting for everyone except admins. Post the T-15m comms template (see §comms kit) into #general."}
           </p>
 
-          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T = 0 — kick off the cutover</p>
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T = 0 · kick off the cutover</p>
           <p>
             {"You paste: "}
             <em>“Run Phase 2 stage cutover against production. Pause before any destructive step and explain it to me.”</em>
@@ -2257,7 +2409,7 @@ ROLLBACK_OWNER="Jane Admin"`}
               { prompt: <Mono>mmctl auth login --url https://chat.acme.com …</Mono>, what: "Authenticate as sysadmin", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>mmctl import upload … 22-GB.zip</Mono>, what: "Stream the ZIP to the server", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>mmctl import list available --json</Mono>, what: "Read back what just landed", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
-              { prompt: <Mono>mmctl import process &lt;filename&gt;</Mono>, what: "Start the import job — moment of commit", decision: <span className="text-amber-300 font-semibold">Approve (destructive)</span> },
+              { prompt: <Mono>mmctl import process &lt;filename&gt;</Mono>, what: "Start the import job (moment of commit)", decision: <span className="text-amber-300 font-semibold">Approve (destructive)</span> },
               { prompt: <Mono>{"ssh deploy@chat.acme.com 'tail -f …/mattermost.log'"}</Mono>, what: "Tail server log for the import duration", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>{`psql "$POSTGRES_DSN" -c 'SELECT COUNT(*) FROM users'`}</Mono>, what: "Count imported users", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>curl -sf https://chat.acme.com/api/v4/system/ping</Mono>, what: "Verify Mattermost still serves", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
@@ -2279,7 +2431,7 @@ ROLLBACK_OWNER="Jane Admin"`}
             {" so you can re-read them later."}
           </p>
 
-          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T + ~20 min — reconciliation + activation</p>
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T + ~20 min · reconciliation + activation</p>
           <Code>
 {`reconcile-handoff-vs-import.py: observed 337 users / 142 channels / 1284903 posts
                                  handoff 337 users / 142 channels / 1284903 posts
@@ -2290,7 +2442,7 @@ cutover-status.2026-04-22T14-31-04Z.json written
 status: success`}
           </Code>
 
-          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T + 30 min — confirm for yourself</p>
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">T + 30 min · confirm for yourself</p>
           <p>
             {"New browser tab → "}
             <Mono>https://chat.acme.com/reset_password</Mono>
@@ -2321,7 +2473,7 @@ status: success`}
 
           <Sub eyebrow="What approvals look like in the UI">In Claude Code desktop</Sub>
           <p>
-            {"Each approval is a card with: command (grey monospace) + working directory + three buttons — "}
+            {"Each approval is a card with: command (grey monospace) + working directory + three buttons: "}
             <strong>Approve once</strong>
             {", "}
             <strong>Approve for the rest of the session</strong>
@@ -2415,7 +2567,7 @@ chmod +x /home/deploy/backup-mattermost.sh
             {"Enable Mattermost metrics on port 8067, scrape with Prometheus, dashboard with Grafana (off-box, per Mattermost’s own recommendation). Add fail2ban alerts, UFW logs, and at least one “is chat.acme.com returning 200?” uptime check."}
           </p>
 
-          <Sub id="file-storage" eyebrow="§5.4">File storage — local vs Cloudflare R2</Sub>
+          <Sub id="file-storage" eyebrow="§5.4">File storage: local vs Cloudflare R2</Sub>
           <p>
             {"Default is local at "}
             <Mono>/opt/mattermost/data/</Mono>
@@ -2453,7 +2605,7 @@ chmod +x /home/deploy/backup-mattermost.sh
       {/* ========== PART 7 — OPERATOR CHECKLIST ========== */}
       <section data-section="operator-checklist">
         <EC>
-          <SectionHeader id="operator-checklist" eyebrow="Part 7" title="Operator checklist — print and keep on the desk." />
+          <SectionHeader id="operator-checklist" eyebrow="Part 7" title="Operator checklist: print and keep on the desk." />
 
           <Sub id="two-days-before" eyebrow="§7.1">Two days before</Sub>
           <ul className="sm-bullet-list">
@@ -2597,8 +2749,8 @@ chmod +x /home/deploy/backup-mattermost.sh
             {"If you need to produce evidence later (compliance, audit, or a “prove we migrated this channel” question), everything is already on disk:"}
           </p>
           <ul className="sm-bullet-list">
-            <li><Mono>workdir/artifacts/reports/evidence-pack.json</Mono> (Phase 1) — hashed manifest of everything produced, with provenance.</li>
-            <li><Mono>workdir-phase2/reports/</Mono> (Phase 2) — intake, config, live-stack, staging, smoke, reconciliation, cutover, activation, readiness. Each has JSON and MD siblings.</li>
+            <li><Mono>workdir/artifacts/reports/evidence-pack.json</Mono> (Phase 1): hashed manifest of everything produced, with provenance.</li>
+            <li><Mono>workdir-phase2/reports/</Mono> (Phase 2): intake, config, live-stack, staging, smoke, reconciliation, cutover, activation, readiness. Each has JSON and MD siblings.</li>
           </ul>
           <p>
             {"Tar them, encrypt with "}
@@ -2803,7 +2955,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
       {/* ========== 10.3 — STAGE CHEATSHEET ========== */}
       <section data-section="stage-cheatsheet">
         <EC>
-          <SectionHeader id="stage-cheatsheet" eyebrow="§10.3" title="Stage cheatsheet — outcome, proof, recovery." />
+          <SectionHeader id="stage-cheatsheet" eyebrow="§10.3" title="Stage cheatsheet: outcome, proof, recovery." />
 
           <Sub eyebrow="Phase 1">What you have after each stage</Sub>
           <RefTable
@@ -2934,10 +3086,10 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
           <p>
             {"Phase 2 ships "}
             <Mono>references/comms/USER-COMMS-KIT.md</Mono>
-            {" with longer versions of each template. Quick copy-paste versions below — edit for your voice."}
+            {" with longer versions of each template. Quick copy-paste versions below; edit for your voice."}
           </p>
 
-          <Details open summary={<>T−7d — “Heads up, we’re moving”</>}>
+          <Details open summary={<>T−7d · “Heads up, we’re moving”</>}>
             <p><strong>Subject:</strong> We’re moving from Slack to Mattermost in 7 days</p>
             <p>Hi team, quick heads-up: on <strong>[DATE]</strong> we’re migrating from Slack to a self-hosted Mattermost server at <Mono>https://chat.acme.com</Mono>. This saves us about [$X] per year and keeps our chat history on infrastructure we own.</p>
             <p>What you need to do: <strong>nothing yet</strong>. We’ll send instructions the day before and the day of.</p>
@@ -2946,7 +3098,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             <p>Questions? [help channel / ticket link]</p>
           </Details>
 
-          <Details summary={<>T−24h — freeze notice</>}>
+          <Details summary={<>T−24h · freeze notice</>}>
             <p><strong>Subject:</strong> Slack goes read-only tomorrow at 09:30</p>
             <p>Tomorrow, <strong>[DATE]</strong> at 09:30 local, Slack will be set to read-only. You’ll still be able to read everything, but not post.</p>
             <p>At 10:15 your Mattermost account will be waiting at <Mono>https://chat.acme.com/reset_password</Mono>. Enter the email you use in Slack. You’ll get a password-reset email. Set a password, log in, and you’re done.</p>
@@ -2954,11 +3106,11 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             <p>Who to ask if something goes wrong: [name, email, Slack handle for today / Mattermost handle post-cutover]</p>
           </Details>
 
-          <Details summary={<>T−15m — “Slack is now read-only”</>}>
+          <Details summary={<>T−15m · “Slack is now read-only”</>}>
             <p>#general: heads up, Slack is now read-only. Do not start new threads here. Mattermost opens for activation at 10:15 at <Mono>https://chat.acme.com/reset_password</Mono>. Use your Slack email.</p>
           </Details>
 
-          <Details summary={<>T+0 — activation</>}>
+          <Details summary={<>T+0 · activation</>}>
             <p><strong>Subject:</strong> Mattermost is live. Activate your account.</p>
             <p>Mattermost is live at <Mono>https://chat.acme.com</Mono>. To activate:</p>
             <ol className="list-decimal pl-5 space-y-1">
@@ -2971,13 +3123,13 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             <p><strong>Not migrated (recreate these yourself):</strong> Slackbot auto-replies, saved items, scheduled messages, bookmarks, custom notification rules. See [link to internal doc] for step-by-steps.</p>
           </Details>
 
-          <Details summary={<>T+24h — activation reminder</>}>
+          <Details summary={<>T+24h · activation reminder</>}>
             <p><strong>Subject:</strong> If you haven’t activated Mattermost yet…</p>
             <p>About [N]% of the team has activated. If you haven’t, take 90 seconds now: <Mono>https://chat.acme.com/reset_password</Mono>, your Slack email, done.</p>
             <p>If you never got the reset email, check spam first, then reply to this message and I’ll either resend or set a temp password for you.</p>
           </Details>
 
-          <Details summary={<>T+7d — wrap-up</>}>
+          <Details summary={<>T+7d · wrap-up</>}>
             <p><strong>Subject:</strong> One week in; Slack is going away</p>
             <p>Everything’s been running on Mattermost for a week. Today I’m:</p>
             <ol className="list-decimal pl-5 space-y-1">
@@ -2995,7 +3147,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
       {/* ========== 10.6 — LEGAL APPROVAL ========== */}
       <section data-section="legal-approval">
         <EC>
-          <SectionHeader id="legal-approval" eyebrow="§10.6" title="Legal approval gate — copy-paste email to legal / HR." />
+          <SectionHeader id="legal-approval" eyebrow="§10.6" title="Legal approval gate: copy-paste email to legal / HR." />
           <p>
             {"The Phase 1 skill’s "}
             <Mono>references/playbooks/LEGAL-APPROVAL-GATE.md</Mono>
@@ -3070,7 +3222,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
       {/* ========== 10.10 — ENTERPRISE GRID ========== */}
       <section data-section="grid-migration">
         <EC>
-          <SectionHeader id="grid-migration" eyebrow="§10.10" title="Enterprise Grid — per-workspace migration." />
+          <SectionHeader id="grid-migration" eyebrow="§10.10" title="Enterprise Grid: per-workspace migration." />
           <p>
             {"Grid admins have one extra decision: "}
             <strong>grid-wide export</strong>
@@ -3138,14 +3290,14 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             {". Fields (summarized):"}
           </p>
           <ul className="sm-bullet-list">
-            <li><Mono>schema_version</Mono> — frozen format identifier</li>
-            <li><Mono>generated_at</Mono> — UTC timestamp</li>
-            <li><Mono>workspace</Mono> — Slack workspace slug</li>
-            <li><Mono>plan_tier</Mono>, <Mono>export_basis</Mono> — legal basis for the export (from <Mono>SLACK_PLAN_TIER</Mono> plus the legal-approval memo)</li>
-            <li><Mono>manifests[]</Mono> — list of hash-anchored manifest files (raw, enriched, import-ready)</li>
-            <li><Mono>counts</Mono> — users, channels, posts, DMs, emoji, attachments, sidecars</li>
-            <li><Mono>known_gaps[]</Mono> — every documented not-migrated item with disposition class</li>
-            <li><Mono>secret_scan_findings</Mono> — <Mono>scan-and-redact-migration-secrets.py</Mono> output (should be empty or explicitly accepted)</li>
+            <li><Mono>schema_version</Mono>: frozen format identifier</li>
+            <li><Mono>generated_at</Mono>: UTC timestamp</li>
+            <li><Mono>workspace</Mono>: Slack workspace slug</li>
+            <li><Mono>plan_tier</Mono>, <Mono>export_basis</Mono>: legal basis for the export (from <Mono>SLACK_PLAN_TIER</Mono> plus the legal-approval memo)</li>
+            <li><Mono>manifests[]</Mono>: list of hash-anchored manifest files (raw, enriched, import-ready)</li>
+            <li><Mono>counts</Mono>: users, channels, posts, DMs, emoji, attachments, sidecars</li>
+            <li><Mono>known_gaps[]</Mono>: every documented not-migrated item with disposition class</li>
+            <li><Mono>secret_scan_findings</Mono>: <Mono>scan-and-redact-migration-secrets.py</Mono> output (should be empty or explicitly accepted)</li>
           </ul>
 
           <Sub eyebrow="Phase 2 cutover pack">Location + artifacts</Sub>
@@ -3155,12 +3307,12 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             {". Key artifacts:"}
           </p>
           <ul className="sm-bullet-list">
-            <li><Mono>phase2-intake-report.json</Mono> — hash match proof (Phase 1 to Phase 2)</li>
-            <li><Mono>config-validation.json</Mono> — server config drift check</li>
-            <li><Mono>live-stack.md</Mono> — TLS + WebSocket + SMTP reachability evidence</li>
-            <li><Mono>latest-staging.json</Mono> + timestamped <Mono>staging-summary.*.json</Mono> — rehearsal results, observed counts, reconciliation</li>
-            <li><Mono>cutover-readiness.json</Mono> + <Mono>readiness-score.md</Mono> — pre-cutover gate, with ROLLBACK_OWNER named</li>
-            <li><Mono>cutover/cutover-status.&lt;ts&gt;.json</Mono> + <Mono>latest-activation.json</Mono> — final import state, activation proof, reconciliation</li>
+            <li><Mono>phase2-intake-report.json</Mono>: hash match proof (Phase 1 to Phase 2)</li>
+            <li><Mono>config-validation.json</Mono>: server config drift check</li>
+            <li><Mono>live-stack.md</Mono>: TLS + WebSocket + SMTP reachability evidence</li>
+            <li><Mono>latest-staging.json</Mono> + timestamped <Mono>staging-summary.*.json</Mono>: rehearsal results, observed counts, reconciliation</li>
+            <li><Mono>cutover-readiness.json</Mono> + <Mono>readiness-score.md</Mono>: pre-cutover gate, with ROLLBACK_OWNER named</li>
+            <li><Mono>cutover/cutover-status.&lt;ts&gt;.json</Mono> + <Mono>latest-activation.json</Mono>: final import state, activation proof, reconciliation</li>
           </ul>
 
           <Sub eyebrow="What an auditor typically asks">Five common questions</Sub>
@@ -3206,7 +3358,7 @@ age -r <auditor's age public key> \\
       {/* ========== 10.12 — CREDENTIAL INVENTORY ========== */}
       <section data-section="credentials">
         <EC>
-          <SectionHeader id="credentials" eyebrow="§10.12" title="Credential inventory — what you collect and where it goes." />
+          <SectionHeader id="credentials" eyebrow="§10.12" title="Credential inventory: what you collect and where it goes." />
           <p>
             {"Over the course of a migration you will create and store roughly a dozen credentials. Collect them in a password manager (1Password, Bitwarden, Dashlane), not in a text file on your desktop, and never commit them to git. The skill’s "}
             <Mono>workdir/</Mono>
@@ -3269,7 +3421,7 @@ age -r <auditor's age public key> \\
       {/* ========== 10.13 — CLOUDFLARE WALKTHROUGH ========== */}
       <section data-section="cloudflare">
         <EC>
-          <SectionHeader id="cloudflare" eyebrow="§10.13" title="Cloudflare walkthrough — click-by-click." />
+          <SectionHeader id="cloudflare" eyebrow="§10.13" title="Cloudflare walkthrough, click-by-click." />
           <p>
             {"If you bought the domain at Cloudflare Registrar, skip step 1. Otherwise:"}
           </p>
@@ -3278,7 +3430,7 @@ age -r <auditor's age public key> \\
           <ol className="list-decimal pl-6 space-y-1.5 text-[15px] text-slate-300 leading-relaxed">
             <li>Sign up / log in at <Mono>dash.cloudflare.com</Mono>.</li>
             <li>Click <strong>+ Add a domain</strong>. Paste <Mono>yourcompany.com</Mono> (no https://, no subdomain).</li>
-            <li>Pick the <strong>Free</strong> plan. Free covers TLS, DDoS, WAF, CDN, and WebSockets — everything the migration needs. Continue.</li>
+            <li>Pick the <strong>Free</strong> plan. Free covers TLS, DDoS, WAF, CDN, and WebSockets; everything the migration needs. Continue.</li>
             <li>Cloudflare scans your current DNS and imports the records. Confirm. Continue.</li>
             <li>Cloudflare shows you two nameservers (e.g. <Mono>ada.ns.cloudflare.com</Mono>, <Mono>joel.ns.cloudflare.com</Mono>). Copy both.</li>
             <li>Go to your registrar → nameservers → swap to Cloudflare’s two. Save.</li>
@@ -3308,7 +3460,7 @@ age -r <auditor's age public key> \\
             <li>Under <strong>Zone Resources</strong>: Include → Specific zone → your domain.</li>
             <li>Leave IP filtering and TTL defaults. Continue to summary → Create Token.</li>
             <li>Cloudflare displays the token <strong>exactly once</strong>. Copy immediately. Paste into <Mono>config.env.phase2</Mono> as <Mono>CLOUDFLARE_API_TOKEN=…</Mono></li>
-            <li>The confirmation page shows a Test curl — run it; expect <Mono>&quot;status&quot;:&quot;active&quot;</Mono> JSON.</li>
+            <li>The confirmation page shows a Test curl. Run it; expect <Mono>&quot;status&quot;:&quot;active&quot;</Mono> JSON.</li>
           </ol>
 
           <Sub eyebrow="§10.13.4">What the skill does with these</Sub>
@@ -3330,7 +3482,7 @@ age -r <auditor's age public key> \\
 
           <Sub eyebrow="§10.13.5">Orange-cloud vs grey-cloud in one sentence each</Sub>
           <ul className="sm-bullet-list">
-            <li><strong>Orange-clouded (proxied):</strong> traffic intercepted by Cloudflare — TLS terminated, attacks filtered, static cached, forwarded to origin. Use for user-facing HTTP/HTTPS.</li>
+            <li><strong>Orange-clouded (proxied):</strong> traffic intercepted by Cloudflare; TLS terminated, attacks filtered, static cached, forwarded to origin. Use for user-facing HTTP/HTTPS.</li>
             <li><strong>Grey-clouded (DNS-only):</strong> Cloudflare hands back your origin IP directly. Use for UDP (Calls 8443), staging, and MX records.</li>
           </ul>
 
@@ -3383,7 +3535,7 @@ age -r <auditor's age public key> \\
                 <li>Optionally <strong>DMARC</strong> TXT at <Mono>_dmarc.acme.com</Mono> with <Mono>v=DMARC1; p=none; rua=mailto:dmarc-reports@acme.com</Mono></li>
               </ul>
             </li>
-            <li>Add each in Cloudflare → DNS → Records. Type, Name, Content exactly as shown. TTL Auto. Proxy status <strong>DNS only</strong> (grey cloud) — required for Return-Path CNAME.</li>
+            <li>Add each in Cloudflare → DNS → Records. Type, Name, Content exactly as shown. TTL Auto. Proxy status <strong>DNS only</strong> (grey cloud), required for Return-Path CNAME.</li>
             <li>Back in Postmark, Verify. Usually succeeds within 2 minutes. If fail, recheck value character-for-character (DKIM keys are easy to truncate).</li>
           </ol>
           <p>{"You want DKIM and Return-Path both verified (green checkmarks). DMARC is optional but recommended."}</p>
@@ -3392,7 +3544,7 @@ age -r <auditor's age public key> \\
           <ol className="list-decimal pl-6 space-y-1.5 text-[15px] text-slate-300 leading-relaxed">
             <li>Postmark dashboard → your server → <strong>API Tokens</strong> tab.</li>
             <li>Copy the <strong>Server Token</strong>.</li>
-            <li>Paste into <Mono>config.env.phase2</Mono> as <strong>both</strong> <Mono>SMTP_USERNAME</Mono> and <Mono>SMTP_PASSWORD</Mono>. Postmark’s SMTP expects the same token in both — Postmark convention, not a mistake.</li>
+            <li>Paste into <Mono>config.env.phase2</Mono> as <strong>both</strong> <Mono>SMTP_USERNAME</Mono> and <Mono>SMTP_PASSWORD</Mono>. Postmark’s SMTP expects the same token in both (Postmark convention, not a mistake).</li>
           </ol>
           <Code>
 {`SMTP_SERVER="smtp.postmarkapp.com"
@@ -3406,7 +3558,7 @@ SMTP_FROM_ADDRESS="noreply@acme.com"`}
           <p>
             {"From the target server (or your laptop with "}
             <Mono>swaks</Mono>
-            {" installed — "}
+            {" installed, via "}
             <Mono>brew install swaks</Mono>
             {" on Mac, "}
             <Mono>apt install swaks</Mono>
@@ -3425,7 +3577,7 @@ SMTP_FROM_ADDRESS="noreply@acme.com"`}
           <p>
             {"Expect "}
             <Mono>250 OK</Mono>
-            {" and the email in your inbox within 30 seconds. If it lands in spam, don’t panic — first emails from a new Postmark sender often do. Send 3–4 more over the next hour; deliverability improves as Postmark warms up your reputation."}
+            {" and the email in your inbox within 30 seconds. If it lands in spam, don’t panic; first emails from a new Postmark sender often do. Send 3–4 more over the next hour and deliverability improves as Postmark warms up your reputation."}
           </p>
           <p>
             {"Phase 2’s "}
@@ -3468,9 +3620,9 @@ SMTP_FROM_ADDRESS="noreply@acme.com"`}
           <ul className="sm-bullet-list">
             <li>Access to every premium skill on the site, including both <Mono>slack-migration-to-mattermost-phase-1-extraction</Mono> and <Mono>-phase-2-setup-and-import</Mono>.</li>
             <li>Automatic updates (pinnable to specific versions).</li>
-            <li>Personal cloud skill storage — push private skills with <Mono>jsm push</Mono>, pull on any signed-in machine.</li>
+            <li>Personal cloud skill storage: push private skills with <Mono>jsm push</Mono>, pull on any signed-in machine.</li>
             <li>Cross-device sync.</li>
-            <li>Hash-verified downloads — <Mono>jsm verify</Mono> catches tampering.</li>
+            <li>Hash-verified downloads; <Mono>jsm verify</Mono> catches tampering.</li>
           </ul>
 
           <Sub id="jsm-install-cli" eyebrow="§11.2">Install the jsm CLI</Sub>
@@ -3613,10 +3765,71 @@ jsm uninstall --all              # remove everything jsm installed
             <J t="weekly-sweep">weekly sweep</J>
             {" that the agent runs Saturday night and summarizes into a one-paragraph Monday-morning status you skim in sixty seconds."}
           </p>
+          <Sub id="phase3-stages" eyebrow="§12.2">The eight maintain.sh stages</Sub>
           <p>
-            {"The single piece of the maintenance skill worth pausing on, because it is the thing that turns Mattermost upgrades from a sweaty-palm activity into a background task, is the "}
-            <J t="auto-rollback">auto-rollback upgrade</J>
-            {" loop:"}
+            {"Every Phase 3 operation is a named stage of "}
+            <Mono>maintain.sh</Mono>
+            {". Each stage has an input contract, a named rollback owner, and emits a JSON artifact that the next stage reads. It’s the same "}
+            <em>fail-closed, evidence-first</em>
+            {" shape as Phase 1 and Phase 2, now operating on a one-week rather than one-weekend clock:"}
+          </p>
+
+          <RefTable
+            cols={[
+              { key: "stage", label: "Stage" },
+              { key: "does", label: "What it does" },
+              { key: "cadence", label: "Cadence" },
+            ]}
+            rows={[
+              {
+                stage: <Mono>health</Mono>,
+                does: "Single-shot probe of uptime, queue depth, p99 latency, disk headroom, TLS expiry, and Postgres vacuum state. Emits the baseline every subsequent change is measured against.",
+                cadence: "weekly",
+              },
+              {
+                stage: <Mono>update-os</Mono>,
+                does: <>Stages <Mono>unattended-upgrade</Mono>, schedules the reboot inside <Mono>REBOOT_WINDOW_*</Mono> off-hours bounds, posts a status-page message, and <strong>refuses</strong> to reboot outside the window.</>,
+                cadence: "monthly",
+              },
+              {
+                stage: <Mono>update-mattermost</Mono>,
+                does: <>Follows the ESR track, verifies DB schema compatibility, tests the new <Mono>mmctl</Mono> binary against the new server, and fails closed on plugin-breaking version skew. Auto-rollback on a 3-minute <Mono>/api/v4/system/ping</Mono> check.</>,
+                cadence: "quarterly",
+              },
+              {
+                stage: <Mono>db-backup</Mono>,
+                does: <><Mono>pg_dump</Mono> → hashed artifact → mirror to <Mono>OFFSITE_REMOTE</Mono> via rclone. Refuses to mark the backup complete until the uploaded SHA-256 matches the local dump.</>,
+                cadence: "nightly",
+              },
+              {
+                stage: <Mono>restore-drill</Mono>,
+                does: <>Spins up a scratch database, restores the most recent backup end-to-end, compares row counts against the source. <strong className="text-amber-200">Gates</strong> <Mono>update-mattermost</Mono>: the upgrade refuses to run if the last successful drill is older than 90 days.</>,
+                cadence: "quarterly (gate)",
+              },
+              {
+                stage: <Mono>rotate-credentials</Mono>,
+                does: "Walks the operator through each credential on its own wall clock. PAT 90 days, mmuser Postgres password 180 days, SSH keys yearly, rclone tokens yearly. The rotation-audit JSON is the source of truth.",
+                cadence: "per-scope",
+              },
+              {
+                stage: <Mono>incident</Mono>,
+                does: <>Opens a per-incident quarantine directory, snapshots process + network + disk state, kicks a status-page update, and links the playbook keyed to the symptom class (DB down, TLS expired, disk full, abuse). Post-mortem skeleton pre-populated.</>,
+                cadence: "on demand",
+              },
+              {
+                stage: <Mono>disaster-recovery</Mono>,
+                does: <>Restores the most recent offsite backup onto a <em>fresh</em> host and keeps the original machine offline as forensic evidence. Produces a runbook instead of a panic.</>,
+                cadence: "on DR trigger",
+              },
+            ]}
+          />
+
+          <p>
+            {"Of the eight stages, "}
+            <Mono>update-mattermost</Mono>
+            {" is the one most worth zooming into, because its "}
+            <J t="auto-rollback">auto-rollback loop</J>
+            {" is what turns Mattermost upgrades from a sweaty-palm activity into a background task:"}
           </p>
 
           <div className="sm-insight-card">
@@ -3644,7 +3857,7 @@ jsm uninstall --all              # remove everything jsm installed
 
           <p>
             {
-              "Pair the auto-rollback loop with the quarterly restore drill and you have a backup pipeline that is actually tested, not one that will let you down the exact day the host dies. That is the whole point of running your own chat server. You own the schema, the hardware, the upgrade path, and — most importantly — the knowledge that the loops you depend on have been exercised on a scratch database recently enough to be trusted."
+              "Pair the auto-rollback loop with the quarterly restore drill and you have a backup pipeline that is actually tested, not one that will let you down the exact day the host dies. That is the whole point of running your own chat server. You own the schema, the hardware, the upgrade path, and the knowledge that the loops you depend on have been exercised on a scratch database recently enough to be trusted."
             }
           </p>
 
@@ -3664,7 +3877,7 @@ jsm uninstall --all              # remove everything jsm installed
             {"), or keep it as a scheduled agent-run item."}
           </p>
 
-          <Sub id="phase3-prompts" eyebrow="§12.4">Paste-ready prompts — you don’t hand-roll the wording</Sub>
+          <Sub id="phase3-prompts" eyebrow="§12.4">Paste-ready prompts so you don’t hand-roll the wording</Sub>
           <p>
             {"The "}
             <Mono>prompts/</Mono>
@@ -3694,7 +3907,7 @@ jsm uninstall --all              # remove everything jsm installed
             ]}
           />
 
-          <Sub id="phase3-restore-drill" eyebrow="§12.6">Restore-drill — the quarterly canary</Sub>
+          <Sub id="phase3-restore-drill" eyebrow="§12.6">Restore-drill, the quarterly canary</Sub>
           <p>
             <em>If you have never restored a backup, you do not have backups. You have files.</em>
           </p>
@@ -3704,7 +3917,7 @@ jsm uninstall --all              # remove everything jsm installed
           </p>
           <ol className="list-decimal pl-6 space-y-1.5 text-[15px] text-slate-300 leading-relaxed">
             <li>Lists the off-site destination (or local <Mono>BACKUP_PATH</Mono>) and picks the newest <Mono>mm_*.sql.gz</Mono>.</li>
-            <li><Mono>DROP DATABASE / CREATE DATABASE</Mono> on <Mono>SCRATCH_DB_URL</Mono> — a separate Postgres instance provisioned specifically for drills. Never point this at prod.</li>
+            <li><Mono>DROP DATABASE / CREATE DATABASE</Mono> on <Mono>SCRATCH_DB_URL</Mono>, a separate Postgres instance provisioned specifically for drills. Never point this at prod.</li>
             <li>Streams the compressed dump through <Mono>gunzip | psql</Mono> into the scratch DB.</li>
             <li>Counts rows in <Mono>&quot;Users&quot;</Mono>, <Mono>&quot;Channels&quot;</Mono>, <Mono>&quot;Posts&quot;</Mono> (PascalCase, per Mattermost schema).</li>
             <li>Compares counts against <Mono>RESTORE_MIN_USERS</Mono>, <Mono>RESTORE_MIN_CHANNELS</Mono>, <Mono>RESTORE_MIN_POSTS</Mono>.</li>
@@ -3742,7 +3955,7 @@ jsm uninstall --all              # remove everything jsm installed
             ]}
           />
 
-          <Sub id="phase3-scenario" eyebrow="§12.8">Scenario pack — Acme Corp’s actual schedule</Sub>
+          <Sub id="phase3-scenario" eyebrow="§12.8">Scenario pack: Acme Corp’s actual schedule</Sub>
           <p>
             <Mono>assets/scenario-packs/acme-corp-weekly.yaml</Mono>
             {" is a worked schedule for a 40-user Acme Corp profile. Drop into your scheduler (cron, systemd timers, or scheduled agent runs):"}
@@ -3823,7 +4036,7 @@ upgrade:
             ]}
           />
           <p>
-            {"The trend block matters more than any single week. Look at four-week deltas for disk growth, DB size, and error-rate baseline — these are the slow-burn numbers that predict when you need to upsize the server, not acute red alerts. The "}
+            {"The trend block matters more than any single week. Look at four-week deltas for disk growth, DB size, and error-rate baseline; these are the slow-burn numbers that predict when you need to upsize the server, not acute red alerts. The "}
             <Mono>health-drift-auditor</Mono>
             {" subagent does this reading for you and flags what’s getting slowly worse. Incident post-mortems share a template too ("}
             <Mono>assets/templates/incident-status.md</Mono>
@@ -3863,10 +4076,10 @@ upgrade:
             {"The Phase 3 skill is deliberately point-in-time health probes plus scheduled tasks. It does not replace continuous observability. If you eventually need:"}
           </p>
           <ul className="sm-bullet-list">
-            <li><strong>SLO dashboards and alerting</strong> — spin up Grafana + Prometheus scraping Mattermost’s metrics port 8067.</li>
-            <li><strong>Synthetic end-to-end user checks</strong> — Uptime Robot, Better Stack, or Cronitor hitting <Mono>/api/v4/system/ping</Mono> every 5 minutes.</li>
-            <li><strong>Log aggregation</strong> — Loki or Grafana Cloud for <Mono>mattermost.log</Mono>.</li>
-            <li><strong>Incident-response runbooks</strong> — Statuspage or a markdown repo your on-call reads on their phone.</li>
+            <li><strong>SLO dashboards and alerting:</strong> spin up Grafana + Prometheus scraping Mattermost’s metrics port 8067.</li>
+            <li><strong>Synthetic end-to-end user checks:</strong> Uptime Robot, Better Stack, or Cronitor hitting <Mono>/api/v4/system/ping</Mono> every 5 minutes.</li>
+            <li><strong>Log aggregation:</strong> Loki or Grafana Cloud for <Mono>mattermost.log</Mono>.</li>
+            <li><strong>Incident-response runbooks:</strong> Statuspage or a markdown repo your on-call reads on their phone.</li>
           </ul>
           <p>
             {"All are complementary, not replacements for the Phase 3 skill’s automation of routine work. The "}
@@ -3884,12 +4097,12 @@ upgrade:
           <h2 className="sm-section-title mb-6 mt-4 text-white">A pattern, not a migration.</h2>
           <p>
             {
-              "The deeper thing worth taking away from this is not about chat software. It is about the shape of problems that become tractable when a coding agent and a well-written skill are both in the room."
+              "Zooming out, the interesting thing here isn’t about chat software. It’s about the shape of problems that get dramatically cheaper to solve when a coding agent is driving a well-written skill."
             }
           </p>
           <p>
             {
-              "A decade ago, a company that wanted to move off Slack had three options. Hire a consultant for a six-figure fixed bid. Assign an internal engineer and lose them for a month. Or stay on Slack, grumble every April, and pay the price hike. The middle option — “assign an engineer” — was the right one for a lot of companies, but it was not cheap, and every time a new platform came out the institutional knowledge from the previous migration was gone."
+              "A decade ago, a company that wanted to move off Slack had three options. Hire a consultant for a six-figure fixed bid. Assign an internal engineer and lose them for a month. Or stay on Slack, grumble every April, and pay the price hike. The middle option, “assign an engineer,” was the right one for a lot of companies, but it wasn’t cheap, and every time a new platform came out the institutional knowledge from the previous migration was gone."
             }
           </p>
           <p>
@@ -3897,17 +4110,17 @@ upgrade:
               "The agent-plus-skill pattern collapses the expense side of that decision. The senior engineer writes the skill "
             }
             <em>once</em>
-            {", against the problem as it exists today, and every subsequent user inherits the whole thing — including the edge cases that cost the first engineer two weekends to discover. The skill is version-controlled, signed, installable in a minute, and pinnable to a known-good release for a production run. It is not a custom pipeline that decays. It is infrastructure, published like a library, that any company with a Claude Code or Codex subscription can run against their own Slack."}
+            {", against the problem as it exists today, and every subsequent user inherits the whole thing, including the edge cases that cost the first engineer two weekends to discover. The skill is version-controlled, signed, installable in a minute, and pinnable to a known-good release for a production run. It doesn’t decay the way a custom pipeline does. It behaves more like infrastructure, published like a library, that any company with a Claude Code or Codex subscription can run against their own Slack."}
           </p>
           <p>
             {
-              "The pattern generalizes beyond Slack, of course. One-off infrastructure migrations — databases between providers, DNS between registrars, CI systems between vendors — are exactly the shape of problem that fits into a paired-skill architecture. Each has a sensitive extract step, a transform, a staging rehearsal, a fail-closed gate, and a cutover that needs to be "
+              "The pattern generalizes beyond Slack, of course. One-off infrastructure migrations (databases between providers, DNS between registrars, CI systems between vendors, Jira to an open-source tracker, Splunk to OpenSearch) are exactly the shape of problem that fits into a paired-skill architecture. Each has a sensitive extract step, a transform, a staging rehearsal, a fail-closed gate, and a cutover that needs to be "
             }
             <J t="asymmetric-bet">an asymmetric bet</J>
             {" by construction. Each is worth doing at most once per company, and the institutional knowledge is worth retaining forever. Each is a project a senior engineer would resent being assigned. Each is a thing an agent-driven skill, well-designed, can do in a weekend."}
           </p>
           <p>
-            {"If you are still paying Slack today, what is going to happen is that at some point in the next eighteen months the vendor will email you a new number, and it will be larger than the current one by some multiple that is too painful to ignore. When it happens, you will have two options. You can pay. Or you can open a new Claude Code session, paste one sentence, and be somewhere better by the end of the weekend."}
+            {"If you’re still paying Slack today, at some point in the next eighteen months the vendor will email you a new number, and it will be larger than the current one by some multiple that is too painful to ignore. When it happens, you have two options. You can pay. Or you can open a new Claude Code session, paste one sentence, and be somewhere better by the end of the weekend."}
           </p>
 
           {/* Operator-ready source guide CTA */}
@@ -3916,7 +4129,7 @@ upgrade:
               For operators who want to actually run this
             </p>
             <p className="text-base md:text-lg text-slate-200 leading-relaxed mb-4">
-              This post is a distilled essay. The 2,500-line source guide that drives the two skills — and that an AI agent reads before kicking off the migration — includes everything this post skips:
+              This post is a distilled essay. The 2,500-line source guide (which drives the two skills and which an AI agent reads before kicking off the migration) includes everything this post skips:
             </p>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[13px] text-slate-300 font-mono mb-6">
               {[
