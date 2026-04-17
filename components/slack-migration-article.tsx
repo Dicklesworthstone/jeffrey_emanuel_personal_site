@@ -16,7 +16,6 @@ import {
   MessagesSquare,
   Rocket,
   Sparkles,
-  Wrench,
 } from "lucide-react";
 import illustration from "@/assets/slack_migration_post_illustration.webp";
 import { MathTooltip } from "./math-tooltip";
@@ -141,14 +140,6 @@ function Divider() {
   );
 }
 
-// Code block for multi-line commands / snippets
-function Code({ children }: { children: ReactNode }) {
-  return (
-    <pre className="sm-code-block">
-      <code>{children}</code>
-    </pre>
-  );
-}
 
 // Inline monospace snippet
 function Mono({ children }: { children: ReactNode }) {
@@ -202,23 +193,6 @@ function RefTable({
   );
 }
 
-// Expandable reference section
-function Details({
-  summary,
-  children,
-  open,
-}: {
-  summary: ReactNode;
-  children: ReactNode;
-  open?: boolean;
-}) {
-  return (
-    <details className="sm-details" open={open}>
-      <summary>{summary}</summary>
-      <div className="sm-details-body">{children}</div>
-    </details>
-  );
-}
 
 // Section title helper — renders an H2 with data-anchor id for TOC jumps
 function SectionHeader({
@@ -291,8 +265,7 @@ function DecisionMatrix() {
           pill: <DecisionPill accent="purple">Track B · slackdump-primary</DecisionPill>,
           body: (
             <>
-              See <DecisionLink href="#phase-1-stages">§3</DecisionLink>. Expect
-              public channels plus the private channels and DMs your
+              Expect public channels plus the private channels and DMs your
               authenticated account is a member of. Other people’s DMs are
               invisible.
             </>
@@ -303,9 +276,8 @@ function DecisionMatrix() {
           pill: <DecisionPill accent="purple">Track A · official admin export</DecisionPill>,
           body: (
             <>
-              See <DecisionLink href="#phase-1-stages">§3</DecisionLink>. Full
-              workspace content, including private channels and every user’s
-              DMs.
+              Full workspace content, including private channels and every
+              user’s DMs.
             </>
           ),
         },
@@ -314,8 +286,6 @@ function DecisionMatrix() {
           pill: <DecisionPill accent="purple">Track C · grid split</DecisionPill>,
           body: (
             <>
-              See{" "}
-              <DecisionLink href="#grid-migration">§Grid-migration</DecisionLink>.
               Either grid-wide export plus a per-workspace split, or
               per-workspace exports.
             </>
@@ -333,9 +303,7 @@ function DecisionMatrix() {
           pill: <DecisionPill accent="emerald">recommended</DecisionPill>,
           body: (
             <>
-              Sizing in{" "}
-              <DecisionLink href="#server-sizing">§2.3</DecisionLink>. AX42
-              comfortably serves ~250 users; AX52 handles 1,000.
+              AX42 comfortably serves ~250 users; AX52 handles 1,000.
             </>
           ),
         },
@@ -366,8 +334,7 @@ function DecisionMatrix() {
           pill: <DecisionPill accent="emerald">Path A · Desktop app</DecisionPill>,
           body: (
             <>
-              See <DecisionLink href="#part-1">Part 1</DecisionLink>. Claude
-              Code or Codex desktop app plus <Mono>jsm</Mono>.
+              Claude Code or Codex desktop app plus <Mono>jsm</Mono>.
             </>
           ),
         },
@@ -566,17 +533,6 @@ function DecisionPill({
     >
       {children}
     </span>
-  );
-}
-
-function DecisionLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <a
-      href={href}
-      className="text-cyan-300 underline decoration-cyan-500/40 underline-offset-4 hover:text-cyan-200"
-    >
-      {children}
-    </a>
   );
 }
 
@@ -1288,6 +1244,7 @@ export function SlackMigrationArticle() {
         </EC>
       </section>
 
+      <Divider />
 
       {/* ========== PHASE 3 ========== */}
       <section data-section="phase-3">
@@ -1405,230 +1362,8 @@ export function SlackMigrationArticle() {
             }
           </p>
 
-          <Sub id="phase3-weekly-sweep" eyebrow="§12.3">The weekly cadence</Sub>
-          <p>{"This is the whole point: the agent runs everything, you read a one-paragraph status on Monday morning."}</p>
-          <ul className="sm-bullet-list">
-            <li><strong>Saturday night (~20 min agent runtime):</strong> paste the <Mono>weekly-sweep.md</Mono> prompt. The agent runs <Mono>health → update-os → backup → db-health</Mono> and writes a summary.</li>
-            <li><strong>Monday morning (~1 min attention):</strong> skim the summary. If anything is red, tell the agent to investigate.</li>
-            <li><strong>First Saturday of the quarter (~60 min):</strong> paste <Mono>restore-drill.md</Mono>. Agent downloads the newest backup, restores into scratch DB, confirms row counts. Failed drill = production incident.</li>
-            <li><strong>On a Mattermost security release:</strong> paste <Mono>update-mattermost.md</Mono> with the pinned version. Auto-rollback loop kicks in if the health check fails.</li>
-          </ul>
           <p>
-            {"You can automate the weekly sweep with cron on your workstation plus a webhook alert on failure (set "}
-            <Mono>ALERT_WEBHOOK_URL</Mono>
-            {" in "}
-            <Mono>config.env</Mono>
-            {"), or keep it as a scheduled agent-run item."}
-          </p>
-
-          <Sub id="phase3-prompts" eyebrow="§12.4">Paste-ready prompts so you don’t hand-roll the wording</Sub>
-          <p>
-            {"The "}
-            <Mono>prompts/</Mono>
-            {" directory is a library of agent prompts already phrased for good outcomes. Pick one, paste, done:"}
-          </p>
-          <RefTable
-            cols={[
-              { key: "file", label: "Prompt file" },
-              { key: "does", label: "What the agent does" },
-            ]}
-            rows={[
-              { file: <Mono>orient.md</Mono>, does: <>Reads <Mono>config.env</Mono>, runs doctor.sh, reports where the deployment is and what’s known</> },
-              { file: <Mono>health.md</Mono>, does: "One-shot health snapshot; posts summary" },
-              { file: <Mono>update-os.md</Mono>, does: "Applies OS patches, schedules reboot if required" },
-              { file: <Mono>update-mattermost.md</Mono>, does: "Bumps Mattermost to pinned version, verifies, auto-rolls-back on failure" },
-              { file: <Mono>backup.md</Mono>, does: "Takes pg_dump, uploads off-site, verifies hash, reports size and destination" },
-              { file: <Mono>db-health.md</Mono>, does: "Postgres sizing, bloat, connections; flags slow-burning issues" },
-              { file: <Mono>restore-drill.md</Mono>, does: "Quarterly restore-from-backup verification" },
-              { file: <Mono>schedule-reboot.md</Mono>, does: "Queues a pending reboot in the next off-hours window" },
-              { file: <Mono>weekly-sweep.md</Mono>, does: "Saturday combo (health + update-os + backup + db-health)" },
-              { file: <Mono>major-upgrade.md</Mono>, does: "Extended sequence for a major Mattermost upgrade" },
-              { file: <Mono>plugin-upgrade.md</Mono>, does: "Plugin lifecycle: compatibility check, staging, prod install" },
-              { file: <Mono>rotate-credentials.md</Mono>, does: "PAT / SSH / off-site / session-secret rotation, one scope at a time" },
-              { file: <Mono>incident-response.md</Mono>, does: "Live-incident coordinator: triage, comms cadence, timeline capture" },
-              { file: <Mono>disaster-recovery.md</Mono>, does: "Rebuild onto a fresh host from the latest backup" },
-              { file: <Mono>all.md</Mono>, does: "Meta-prompt: the agent picks which sub-prompt fits your ask" },
-            ]}
-          />
-
-          <Sub id="phase3-restore-drill" eyebrow="§12.6">Restore-drill, the quarterly canary</Sub>
-          <p>
-            <em>If you have never restored a backup, you do not have backups. You have files.</em>
-          </p>
-          <p>
-            <Mono>./maintain.sh restore-drill</Mono>
-            {" exercises the backup pipeline end to end:"}
-          </p>
-          <ol className="list-decimal pl-6 space-y-1.5 text-[15px] text-slate-300 leading-relaxed">
-            <li>Lists the off-site destination (or local <Mono>BACKUP_PATH</Mono>) and picks the newest <Mono>mm_*.sql.gz</Mono>.</li>
-            <li><Mono>DROP DATABASE / CREATE DATABASE</Mono> on <Mono>SCRATCH_DB_URL</Mono>, a separate Postgres instance provisioned specifically for drills. Never point this at prod.</li>
-            <li>Streams the compressed dump through <Mono>gunzip | psql</Mono> into the scratch DB.</li>
-            <li>Counts rows in <Mono>&quot;Users&quot;</Mono>, <Mono>&quot;Channels&quot;</Mono>, <Mono>&quot;Posts&quot;</Mono> (PascalCase, per Mattermost schema).</li>
-            <li>Compares counts against <Mono>RESTORE_MIN_USERS</Mono>, <Mono>RESTORE_MIN_CHANNELS</Mono>, <Mono>RESTORE_MIN_POSTS</Mono>.</li>
-            <li>Emits <Mono>latest-restore-drill.json</Mono> with <Mono>status: ok|failed</Mono> and counts.</li>
-          </ol>
-          <p>{"Three distinct failure modes, each with its own remediation:"}</p>
-          <ul className="sm-bullet-list">
-            <li><strong>No backup found:</strong> off-site credentials expired, or the nightly backup has been silently failing. Check <Mono>latest-backup.json</Mono> from the last week.</li>
-            <li><strong>Restore fails mid-stream:</strong> dump corrupted or scratch DB Postgres major version older than prod’s. pg_dump is forward-compatible but not backward.</li>
-            <li><strong>Row counts below minimums:</strong> backup succeeded but captured an empty or partial DB. Has happened when a failed migration left Mattermost writing to a scratch schema; the backup job dutifully captured the empty one.</li>
-          </ul>
-          <p>
-            {"Passing drill: ~45 min of agent-watched runtime per quarter on a small deployment. Failing drill is the cheapest production incident you’ll ever have, because it happens on a scratch DB instead of on the day the host dies."}
-          </p>
-
-          <Sub id="phase3-subagents" eyebrow="§12.7">Subagents for deep audits</Sub>
-          <p>
-            {"Seven focused subagents live in "}
-            <Mono>subagents/</Mono>
-            {". They are not part of the weekly sweep; you invoke them on-demand when you want a second opinion on a specific dimension. Each is already wired to the skill’s references, scripts, and config."}
-          </p>
-          <RefTable
-            cols={[
-              { key: "agent", label: "Subagent" },
-              { key: "use", label: "Use when" },
-            ]}
-            rows={[
-              { agent: <Mono>backup-integrity-auditor</Mono>, use: "You want judgement on backup completeness, SHA-256 coverage, off-site freshness, and restore-drill recency, not just stage runs" },
-              { agent: <Mono>db-bloat-auditor</Mono>, use: <>DB size climbing faster than user count can explain; looks at table bloat, vacuum status, index health, <Mono>pg_stat_user_tables</Mono></> },
-              { agent: <Mono>health-drift-auditor</Mono>, use: "Nothing is red yet, but you want to know what is slowly getting worse across the last 8 weeks of health reports" },
-              { agent: <Mono>version-drift-auditor</Mono>, use: "How far behind the recommended upgrade target you are, framed against Mattermost’s ESR policy" },
-              { agent: <Mono>security-posture-auditor</Mono>, use: "Credential rotation cadence, SSH key hygiene, fail2ban / UFW state, exposed ports" },
-              { agent: <Mono>maintenance-scheduler</Mono>, use: "Planning a maintenance window; coordinates comms, picks off-hours, writes the user-facing heads-up" },
-              { agent: <Mono>incident-coordinator</Mono>, use: "Live incident: triage playbook, comms cadence, timeline capture for the post-mortem" },
-            ]}
-          />
-
-          <Sub id="phase3-scenario" eyebrow="§12.8">Scenario pack: Acme Corp’s actual schedule</Sub>
-          <p>
-            <Mono>assets/scenario-packs/acme-corp-weekly.yaml</Mono>
-            {" is a worked schedule for a 40-user Acme Corp profile. Drop into your scheduler (cron, systemd timers, or scheduled agent runs):"}
-          </p>
-          <Code>
-{`workspace: acme-corp
-timezone: America/Los_Angeles
-operator: alex@acme.com
-
-schedule:
-  - name: nightly-backup
-    cron: "0 10 * * *"            # 10:00 UTC = 02:00-03:00 Pacific
-    command: "./maintain.sh backup"
-    log: /var/log/mm-backup.log
-
-  - name: weekly-sweep
-    cron: "0 10 * * 0"            # Sunday 10:00 UTC
-    command: "./maintain.sh weekly-sweep"
-    log: /var/log/mm-sweep.log
-
-  - name: quarterly-restore-drill
-    cron: "0 11 1-7 1,4,7,10 0"   # First Sunday of each quarter
-    command: "./maintain.sh restore-drill"
-    log: /var/log/mm-drill.log
-
-alert_webhook: https://chat.acme.com/hooks/abcdef12345
-
-thresholds:
-  disk_pct_red: 85
-  pg_conn_pct_red: 80
-  log_err_per_min_red: 10
-
-upgrade:
-  policy: esr                     # track ESR releases only
-  max_delay_patch_security: 72h
-  rollback: auto`}
-          </Code>
-          <p>
-            {"Lift the cron lines into "}
-            <Mono>crontab -e</Mono>
-            {" on the workstation that holds the agent credentials. The "}
-            <Mono>alert_webhook</Mono>
-            {" posts a red-status summary to a Mattermost channel. "}
-            <J t="esr">ESR</J>
-            {" policy is the most consequential line for small teams: ESR (Enterprise-Scale Release) means fewer, more-stable bumps instead of every minor release."}
-          </p>
-
-          <Sub id="phase3-dr" eyebrow="§12.9">Disaster-recovery drill</Sub>
-          <p>
-            {"Once a year (pick a Saturday, budget 2 hours), run a full DR simulation: order a fresh cheap Hetzner CX22, restore the latest backup into it with "}
-            <Mono>restore-drill.sh</Mono>
-            {" pointed at that host’s PG, verify it comes up as a working Mattermost. Cancel the CX22 when you’re satisfied. Tests the whole DR path without touching production and costs ~€0.10 in server-hours."}
-          </p>
-          <p>
-            {"Full playbook in "}
-            <Mono>references/DISASTER-RECOVERY.md</Mono>
-            {". The "}
-            <Mono>incident-coordinator</Mono>
-            {" subagent (§12.7) can also walk you through it live."}
-          </p>
-
-          <Sub id="phase3-report" eyebrow="§12.10">Reading the weekly report and spotting trends</Sub>
-          <p>
-            <Mono>assets/templates/maintenance-report.md</Mono>
-            {" is the shape the agent follows. The summary table looks like:"}
-          </p>
-          <RefTable
-            cols={[
-              { key: "stage", label: "Stage" },
-              { key: "result", label: "Result" },
-              { key: "notes", label: "Notes" },
-            ]}
-            rows={[
-              { stage: "health", result: <span className="text-emerald-300">green</span>, notes: "all probes green, 0 red" },
-              { stage: "update-os", result: "4 security patches, reboot required: yes", notes: "reboot scheduled for Sun 03:00 UTC" },
-              { stage: "backup", result: <span className="text-emerald-300">success</span>, notes: "1.4 GB, sha256=ab12…, off-site verified" },
-              { stage: "db-health", result: <span className="text-amber-300">yellow</span>, notes: "Posts table up 8 % week over week, vacuum last ran 14 hours ago" },
-            ]}
-          />
-          <p>
-            {"The trend block matters more than any single week. Look at four-week deltas for disk growth, DB size, and error-rate baseline; these are the slow-burn numbers that predict when you need to upsize the server, not acute red alerts. The "}
-            <Mono>health-drift-auditor</Mono>
-            {" subagent does this reading for you and flags what’s getting slowly worse. Incident post-mortems share a template too ("}
-            <Mono>assets/templates/incident-status.md</Mono>
-            {"): timeline in UTC, root cause (not symptom), what fixed it, five whys."}
-          </p>
-
-          <Sub id="phase3-rotation" eyebrow="§12.11">Credential-rotation cadence</Sub>
-          <p>
-            <Mono>./maintain.sh rotate-credentials --scope &lt;name&gt;</Mono>
-            {" rotates one thing at a time."}
-          </p>
-          <RefTable
-            cols={[
-              { key: "scope", label: "Scope" },
-              { key: "cadence", label: "Cadence" },
-              { key: "what", label: "What rotates" },
-            ]}
-            rows={[
-              { scope: <Mono>pat</Mono>, cadence: "90 days", what: <><Mono>MATTERMOST_ADMIN_TOKEN</Mono> (Mattermost PAT for the bot admin)</> },
-              { scope: <Mono>ssh</Mono>, cadence: "annually", what: <>Deploy-user SSH key used by the workstation to reach <Mono>TARGET_HOST</Mono></> },
-              { scope: <Mono>offsite</Mono>, cadence: "annually", what: <>rclone credentials for <Mono>OFFSITE_REMOTE</Mono> (R2 / Hetzner Storage Box token)</> },
-              { scope: <Mono>session-secret</Mono>, cadence: "on compromise only", what: "Mattermost session signing secret; forces all users to re-login" },
-            ]}
-          />
-          <p>
-            {"The "}
-            <Mono>security-posture-auditor</Mono>
-            {" subagent reads your "}
-            <Mono>rotation-history.json</Mono>
-            {" and tells you what’s overdue. For the rare session-secret rotation, expect a full-team re-login and a heads-up message posted 24 hours in advance (comms templates in "}
-            <Mono>references/comms/</Mono>
-            {")."}
-          </p>
-
-          <Sub id="phase3-more-tooling" eyebrow="§12.12">When to bring in more tooling</Sub>
-          <p>
-            {"The Phase 3 skill is deliberately point-in-time health probes plus scheduled tasks. It does not replace continuous observability. If you eventually need:"}
-          </p>
-          <ul className="sm-bullet-list">
-            <li><strong>SLO dashboards and alerting:</strong> spin up Grafana + Prometheus scraping Mattermost’s metrics port 8067.</li>
-            <li><strong>Synthetic end-to-end user checks:</strong> Uptime Robot, Better Stack, or Cronitor hitting <Mono>/api/v4/system/ping</Mono> every 5 minutes.</li>
-            <li><strong>Log aggregation:</strong> Loki or Grafana Cloud for <Mono>mattermost.log</Mono>.</li>
-            <li><strong>Incident-response runbooks:</strong> Statuspage or a markdown repo your on-call reads on their phone.</li>
-          </ul>
-          <p>
-            {"All are complementary, not replacements for the Phase 3 skill’s automation of routine work. The "}
-            <Mono>OBSERVABILITY-LADDER.md</Mono>
-            {" reference lays out a graduated path; each rung has a “when it is worth the complexity” criterion so you’re not adding dashboards for their own sake."}
+            {"The remaining stages, subagents, prompts library, scenario packs, weekly-cadence runbook, disaster-recovery drill, credential-rotation cadence, and “when to bring in more tooling” playbook all live inside the Phase 3 skill. See the skill page at the top of the article for the full catalog."}
           </p>
         </EC>
       </section>
