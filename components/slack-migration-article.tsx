@@ -755,6 +755,7 @@ export function SlackMigrationArticle() {
           <nav className="sm-toc" aria-label="Table of contents">
             <h3>Contents</h3>
             <ol>
+              <li><a href="#install">Install the skills</a></li>
               <li><a href="#why-bother">Why bother migrating?</a></li>
               <li><a href="#cost-math">The money math</a></li>
               <li><a href="#decision-tree">Which path through this guide</a></li>
@@ -864,6 +865,69 @@ export function SlackMigrationArticle() {
 
             <p className="mt-5 text-[11px] md:text-[12px] text-slate-500 leading-relaxed italic">
               Each skill page linked above has the full changelog, a live visualization of the flow, and the verbatim <Mono>SKILL.md</Mono> the agent loads into its context.
+            </p>
+          </div>
+        </EC>
+      </section>
+
+      <Divider />
+
+      {/* ========== INSTALL THE SKILLS ========== */}
+      <section data-section="install">
+        <EC>
+          <SectionHeader id="install" eyebrow="Install" title="Get the skills onto your laptop." />
+
+          <p>
+            {"Two recommended ways to install the three skills, depending on how you like your tooling. The jsm path is what most operators use: it verifies hashes on download, tracks installed versions locally, and handles upgrades and multi-machine sync for you."}
+          </p>
+
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-5">
+            Recommended: via jsm (Jeffrey’s Skills.md)
+          </p>
+          <Code>
+{`# macOS / Linux
+curl -fsSL https://jeffreys-skills.md/install.sh | bash
+# Windows (PowerShell as Admin)
+irm https://jeffreys-skills.md/install.ps1 | iex
+
+jsm setup                        # first-time wizard: config + skill dirs
+jsm login                        # browser → sign in with Google
+jsm install slack-migration-to-mattermost-phase-1-extraction
+jsm install slack-migration-to-mattermost-phase-2-setup-and-import
+jsm install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`}
+          </Code>
+
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">
+            Alternative: via claude plugins
+          </p>
+          <Code>
+{`claude plugins install slack-migration-to-mattermost-phase-1-extraction
+claude plugins install slack-migration-to-mattermost-phase-2-setup-and-import
+claude plugins install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`}
+          </Code>
+
+          <p>
+            {"Restart the Claude Code or Codex desktop app (or CLI session) and the skills show up in the skill picker. On first use each skill runs its own "}
+            <Mono>bootstrap-tools.sh</Mono>
+            {", which installs the underlying CLIs it needs (slackdump, mmetl, mmctl, jq, psql, etc.) via Homebrew on macOS, apt on Ubuntu / Debian / WSL, and a Chocolatey checklist on Windows. If you want the agent to drive your browser and the Mattermost admin UI directly, the skill’s "}
+            <Mono>setup-mcp.sh</Mono>
+            {" wires up the Slack, Playwright, and Mattermost "}
+            <J t="mcp">MCP</J>
+            {" servers for whichever agent CLIs you have. You do not run any of that by hand."}
+          </p>
+
+          <div className="sm-insight-card">
+            <p className="text-[11px] font-mono text-purple-300 uppercase tracking-[0.25em] mb-3">
+              Then the interface is English
+            </p>
+            <p className="text-base md:text-lg leading-relaxed text-slate-200 mb-3">
+              Once the skills are installed, you open Claude Code or Codex and say something like:
+            </p>
+            <p className="text-[14px] md:text-[15px] font-mono text-cyan-200 bg-black/40 border border-cyan-500/20 rounded-lg px-4 py-3 leading-relaxed">
+              {"“Use the slack-migration-to-mattermost-phase-1-extraction skill to run the setup stage against my Slack workspace.”"}
+            </p>
+            <p className="text-[13px] md:text-sm text-slate-400 mt-3 leading-relaxed">
+              The agent reads the skill, executes the stage, writes a report, and waits for your next sentence. Every destructive step prompts for approval. Everything else is the agent doing the thing the skill already knows how to do. The rest of this piece is mostly here so you know what the visualizations are showing and why the gates are where they are; the operational detail lives in the skills themselves, and the agent is the one who has to read it.
             </p>
           </div>
         </EC>
