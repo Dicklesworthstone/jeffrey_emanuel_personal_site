@@ -260,6 +260,326 @@ function Sub({ id, eyebrow, children }: { id?: string; eyebrow?: string; childre
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// Decision matrix: 4 question cards, each with 3 routing branches.
+// Replaces an ASCII-art tree so screen readers + mobile work nicely.
+// ─────────────────────────────────────────────────────────────
+type DecisionAccent = "purple" | "cyan" | "emerald" | "amber";
+
+type DecisionBranch = {
+  answer: ReactNode;
+  pill?: ReactNode;
+  body: ReactNode;
+};
+
+type DecisionCardData = {
+  num: string;
+  accent: DecisionAccent;
+  question: string;
+  branches: DecisionBranch[];
+};
+
+function DecisionMatrix() {
+  const cards: DecisionCardData[] = [
+    {
+      num: "1",
+      accent: "purple",
+      question: "What Slack plan are you on?",
+      branches: [
+        {
+          answer: "Free or Pro",
+          pill: <DecisionPill accent="purple">Track B · slackdump-primary</DecisionPill>,
+          body: (
+            <>
+              See <DecisionLink href="#phase-1-stages">§3</DecisionLink>. Expect
+              public channels plus the private channels and DMs your
+              authenticated account is a member of. Other people’s DMs are
+              invisible.
+            </>
+          ),
+        },
+        {
+          answer: "Business+",
+          pill: <DecisionPill accent="purple">Track A · official admin export</DecisionPill>,
+          body: (
+            <>
+              See <DecisionLink href="#phase-1-stages">§3</DecisionLink>. Full
+              workspace content, including private channels and every user’s
+              DMs.
+            </>
+          ),
+        },
+        {
+          answer: "Enterprise Grid",
+          pill: <DecisionPill accent="purple">Track C · grid split</DecisionPill>,
+          body: (
+            <>
+              See{" "}
+              <DecisionLink href="#grid-migration">§Grid-migration</DecisionLink>.
+              Either grid-wide export plus a per-workspace split, or
+              per-workspace exports.
+            </>
+          ),
+        },
+      ],
+    },
+    {
+      num: "2",
+      accent: "cyan",
+      question: "Where will Mattermost live?",
+      branches: [
+        {
+          answer: "Hetzner AX42/AX52 dedicated",
+          pill: <DecisionPill accent="emerald">recommended</DecisionPill>,
+          body: (
+            <>
+              Sizing in{" "}
+              <DecisionLink href="#server-sizing">§2.3</DecisionLink>. AX42
+              comfortably serves ~250 users; AX52 handles 1,000.
+            </>
+          ),
+        },
+        {
+          answer: "OVH Advance / Contabo VPS",
+          pill: <DecisionPill accent="cyan">cheaper</DecisionPill>,
+          body: <>Same sizing table, different vendor. Lower cost, slightly less headroom.</>,
+        },
+        {
+          answer: "Existing infra you run",
+          pill: <DecisionPill accent="cyan">BYO host</DecisionPill>,
+          body: (
+            <>
+              Supply the SSH target as <Mono>TARGET_HOST</Mono>; the skill
+              provisions on top of whatever Ubuntu box you point it at.
+            </>
+          ),
+        },
+      ],
+    },
+    {
+      num: "3",
+      accent: "emerald",
+      question: "How do you want to drive the agent?",
+      branches: [
+        {
+          answer: "Click, don’t type",
+          pill: <DecisionPill accent="emerald">Path A · Desktop app</DecisionPill>,
+          body: (
+            <>
+              See <DecisionLink href="#part-1">Part 1</DecisionLink>. Claude
+              Code or Codex desktop app plus <Mono>jsm</Mono>.
+            </>
+          ),
+        },
+        {
+          answer: "Terminal-native",
+          pill: <DecisionPill accent="emerald">Path B · CLI only</DecisionPill>,
+          body: <>Leanest install. Claude Code or Codex CLI, skills symlinked or jsm-installed.</>,
+        },
+        {
+          answer: "Multi-machine",
+          pill: <DecisionPill accent="emerald">Path C · CLI + jsm sync</DecisionPill>,
+          body: (
+            <>
+              Cross-device skill sync via <Mono>jsm sync</Mono>. Right when
+              two different laptops drive the same migration at different
+              stages.
+            </>
+          ),
+        },
+      ],
+    },
+    {
+      num: "4",
+      accent: "amber",
+      question: "Where is your Mattermost database going to live?",
+      branches: [
+        {
+          answer: "Same box as Mattermost",
+          pill: <DecisionPill accent="amber">default</DecisionPill>,
+          body: (
+            <>
+              <Mono>{"POSTGRES_DSN=postgres://…@localhost:5432"}</Mono>. Skill
+              provisions local PostgreSQL for you.
+            </>
+          ),
+        },
+        {
+          answer: "Supabase (managed)",
+          pill: <DecisionPill accent="amber">managed PG</DecisionPill>,
+          body: (
+            <>
+              Supabase <strong className="text-white">session pooler</strong>{" "}
+              on 5432. <em>Not</em> the transaction pooler on 6543 — the
+              import job needs session state.
+            </>
+          ),
+        },
+        {
+          answer: "Your own managed PG",
+          pill: <DecisionPill accent="amber">BYO DB</DecisionPill>,
+          body: (
+            <>
+              Provide the DSN; the skill is hands-off on provisioning and only
+              reads/writes to what you hand it.
+            </>
+          ),
+        },
+      ],
+    },
+  ];
+
+  return (
+    <div className="sm-decisions my-6 md:my-8 grid grid-cols-1 gap-4 md:gap-5">
+      {cards.map((c) => (
+        <DecisionCard key={c.num} data={c} />
+      ))}
+    </div>
+  );
+}
+
+const DECISION_ACCENT: Record<
+  DecisionAccent,
+  {
+    border: string;
+    bg: string;
+    text: string;
+    numBg: string;
+    rail: string;
+    pillBg: string;
+    pillBorder: string;
+    pillText: string;
+  }
+> = {
+  purple: {
+    border: "border-purple-500/25",
+    bg: "bg-purple-500/[0.04]",
+    text: "text-purple-300",
+    numBg: "bg-purple-500/15 border-purple-500/30 text-purple-200",
+    rail: "bg-purple-500/40",
+    pillBg: "bg-purple-500/12",
+    pillBorder: "border-purple-500/30",
+    pillText: "text-purple-200",
+  },
+  cyan: {
+    border: "border-cyan-500/25",
+    bg: "bg-cyan-500/[0.04]",
+    text: "text-cyan-300",
+    numBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-200",
+    rail: "bg-cyan-500/40",
+    pillBg: "bg-cyan-500/12",
+    pillBorder: "border-cyan-500/30",
+    pillText: "text-cyan-200",
+  },
+  emerald: {
+    border: "border-emerald-500/25",
+    bg: "bg-emerald-500/[0.04]",
+    text: "text-emerald-300",
+    numBg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-200",
+    rail: "bg-emerald-500/40",
+    pillBg: "bg-emerald-500/12",
+    pillBorder: "border-emerald-500/30",
+    pillText: "text-emerald-200",
+  },
+  amber: {
+    border: "border-amber-500/25",
+    bg: "bg-amber-500/[0.04]",
+    text: "text-amber-300",
+    numBg: "bg-amber-500/15 border-amber-500/30 text-amber-200",
+    rail: "bg-amber-500/40",
+    pillBg: "bg-amber-500/12",
+    pillBorder: "border-amber-500/30",
+    pillText: "text-amber-200",
+  },
+};
+
+function DecisionCard({ data }: { data: DecisionCardData }) {
+  const cls = DECISION_ACCENT[data.accent];
+  return (
+    <div
+      className={`relative rounded-2xl border ${cls.border} ${cls.bg} p-5 md:p-6 backdrop-blur-xl overflow-hidden`}
+    >
+      <div
+        aria-hidden
+        className={`absolute left-0 top-5 bottom-5 w-[3px] rounded-full ${cls.rail} opacity-70`}
+      />
+      <div className="flex items-center gap-3 mb-4 md:mb-5 pl-2">
+        <span
+          className={`inline-flex h-7 w-7 items-center justify-center rounded-lg border ${cls.numBg} font-mono text-[12px] font-bold`}
+        >
+          {data.num}
+        </span>
+        <p
+          className={`text-[11px] md:text-[12px] font-mono uppercase tracking-[0.22em] ${cls.text}`}
+        >
+          {data.question}
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 md:gap-2.5 pl-2">
+        {data.branches.map((b, i) => (
+          <DecisionBranchRow key={i} accent={data.accent} branch={b} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DecisionBranchRow({
+  accent,
+  branch,
+}: {
+  accent: DecisionAccent;
+  branch: DecisionBranch;
+}) {
+  const cls = DECISION_ACCENT[accent];
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-2 md:gap-4 items-start rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2.5 md:px-4 md:py-3">
+      <div className="flex items-center gap-2 min-w-0">
+        <span aria-hidden className={`text-[14px] ${cls.text}`}>
+          →
+        </span>
+        <span className="text-[13px] md:text-[14px] font-semibold text-slate-100 truncate">
+          {branch.answer}
+        </span>
+      </div>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        {branch.pill && <div className="flex flex-wrap gap-2">{branch.pill}</div>}
+        <div className="text-[12px] md:text-[13px] text-slate-400 leading-relaxed">
+          {branch.body}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DecisionPill({
+  accent,
+  children,
+}: {
+  accent: DecisionAccent;
+  children: ReactNode;
+}) {
+  const cls = DECISION_ACCENT[accent];
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10.5px] md:text-[11px] font-mono font-semibold ${cls.pillBg} ${cls.pillBorder} ${cls.pillText}`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function DecisionLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a
+      href={href}
+      className="text-cyan-300 underline decoration-cyan-500/40 underline-offset-4 hover:text-cyan-200"
+    >
+      {children}
+    </a>
+  );
+}
+
 export function SlackMigrationArticle() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
@@ -725,48 +1045,8 @@ export function SlackMigrationArticle() {
 
           <Sub eyebrow="Decision tree">Quick routing before you commit</Sub>
 
-          <Code>
-{`┌────────────────────────────────────────────────────────────────┐
-│ What Slack plan are you on?                                    │
-└────────────────────────────────────────────────────────────────┘
-    │
-    ├── Free or Pro ──────→ Track B (slackdump-primary). See §3.
-    │                       Expect: public + accessible private channels
-    │                       and DMs only. Other people's DMs are invisible.
-    │
-    ├── Business+ ───────→ Track A (official admin export). See §3.
-    │                       Expect: full workspace content.
-    │
-    └── Enterprise Grid ─→ Track C (grid split). See §Grid-migration.
-                            Either grid-wide export + split, or
-                            per-workspace exports.
+          <DecisionMatrix />
 
-┌────────────────────────────────────────────────────────────────┐
-│ Where will Mattermost live?                                    │
-└────────────────────────────────────────────────────────────────┘
-    │
-    ├── Hetzner AX42/AX52 dedicated (recommended) ─→ §2.3 sizing
-    ├── OVH Advance / Contabo VPS ─────────────────→ same table, cheaper
-    └── Existing infra you run ─────────────────────→ supply SSH target
-
-┌────────────────────────────────────────────────────────────────┐
-│ How do you want to drive the agent?                            │
-└────────────────────────────────────────────────────────────────┘
-    │
-    ├── Click, don't type ───→ Path A (Desktop app). See §Part 1.
-    ├── Terminal-native ────→ Path B (CLI-only).
-    └── Multi-machine ──────→ Path C (CLI + jsm for cross-device sync).
-
-┌────────────────────────────────────────────────────────────────┐
-│ Where is your Mattermost database going to live?               │
-└────────────────────────────────────────────────────────────────┘
-    │
-    ├── Same box as Mattermost (default)  →  POSTGRES_DSN=postgres://…@localhost:5432
-    │                                         Skill provisions local PG for you.
-    ├── Supabase (managed)                →  Supabase session pooler on 5432
-    │                                         (NOT the transaction pooler on 6543).
-    └── Your own managed PG               →  Provide the DSN; skill is hands-off.`}
-          </Code>
 
           <p>
             {"If any branch surprises you, read its linked section before continuing. The skills themselves detect which path the operator is on and route accordingly; the Slack plan tier alone changes validators downstream."}
