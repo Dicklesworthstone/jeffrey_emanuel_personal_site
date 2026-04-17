@@ -1006,6 +1006,51 @@ Get-Content $HOME\\.ssh\\id_ed25519.pub`}
           </div>
 
           <Sub id="install-skills" eyebrow="§1.2">Install the two skills</Sub>
+
+          <div className="my-5 md:my-6 rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-purple-500/[0.05] via-cyan-500/[0.05] to-emerald-500/[0.05] p-5 md:p-6 backdrop-blur-xl">
+            <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
+              Skill catalog pages · open in a new tab
+            </p>
+            <ul className="space-y-2.5 text-[13px] md:text-[14px] leading-relaxed">
+              <li>
+                <a
+                  href="https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-1-extraction"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-cyan-300 hover:text-cyan-200 underline decoration-cyan-500/40 underline-offset-4 break-all"
+                >
+                  jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-1-extraction
+                </a>
+                <span className="text-slate-400"> — Phase 1, the Slack-side extraction skill.</span>
+              </li>
+              <li>
+                <a
+                  href="https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-2-setup-and-import"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-cyan-300 hover:text-cyan-200 underline decoration-cyan-500/40 underline-offset-4 break-all"
+                >
+                  jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-2-setup-and-import
+                </a>
+                <span className="text-slate-400"> — Phase 2, the Mattermost-side deploy + import skill.</span>
+              </li>
+              <li>
+                <a
+                  href="https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-cyan-300 hover:text-cyan-200 underline decoration-cyan-500/40 underline-offset-4 break-all"
+                >
+                  jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance
+                </a>
+                <span className="text-slate-400"> — Phase 3, the ongoing-maintenance skill (weekly sweep, auto-rollback upgrades, restore drills).</span>
+              </li>
+            </ul>
+            <p className="mt-4 text-[12px] md:text-[13px] text-slate-400 leading-relaxed">
+              <strong className="text-amber-200">Heads up:</strong> those three URLs return a 404 unless you are signed in to a jeffreys-skills.md account with an active subscription. If you hit a 404, sign up (or log in) at <Mono>jeffreys-skills.md/dashboard</Mono> first, then reload — the same account is what the <Mono>jsm</Mono> CLI authenticates against below, so doing this step first means <Mono>jsm install</Mono> will already know who you are.
+            </p>
+          </div>
+
           <p>
             {"Three ways to install. Pick whichever matches the path you chose above."}
           </p>
