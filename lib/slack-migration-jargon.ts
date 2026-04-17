@@ -68,7 +68,7 @@ export const jargonDictionary: Record<string, JargonTerm> = {
     long: "One JSON object per line. Version line first, then emoji, team, channels, users, posts, direct_channels, direct_posts, in that strict order. Thread replies reference their parent's `thread_ts`. The import is idempotent: re-running with the same payload doesn't duplicate posts, which makes delta catch-up and interrupted-cutover recovery possible.",
     why: "Idempotence is what lets a solo operator run a production cutover without fear: if the run is interrupted at 80%, re-running the exact same command finishes the job rather than double-posting everything.",
   },
-  "fountain-code": {
+  "fail-closed-gate": {
     term: "Fail-Closed Gate",
     short: "A readiness check that defaults to blocking if any input is missing or stale.",
     long: "Phase 2's `ready` stage reads the intake report, the staging-rehearsal result, the smoke-test counts, the reconciliation diffs, and the `ROLLBACK_OWNER` env var. If any one is missing, it returns `status: blocked`. The opposite — fail-open — would assume-success in the absence of data, which is exactly the shape of a catastrophic cutover.",
