@@ -2,7 +2,8 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export const alt = "Using AI Agents and Skills to Migrate Off Slack | Jeffrey Emanuel";
+export const alt =
+  "Using AI Agents and Skills to Migrate Off Slack | Jeffrey Emanuel";
 export const size = {
   width: 1200,
   height: 600,
@@ -10,6 +11,11 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
+  // Load the hero illustration as an ArrayBuffer so Satori can embed it.
+  const illustrationData = await fetch(
+    new URL("./og-illustration.png", import.meta.url),
+  ).then((r) => r.arrayBuffer());
+
   return new ImageResponse(
     (
       <div
@@ -17,16 +23,17 @@ export default async function Image() {
           height: "100%",
           width: "100%",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           background:
-            "linear-gradient(145deg, #0a0a0c 0%, #0d0a12 35%, #0a1014 65%, #0a0a0c 100%)",
+            "linear-gradient(145deg, #07070b 0%, #0b0912 35%, #08111a 65%, #060912 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
           position: "relative",
           overflow: "hidden",
         }}
       >
+        {/* Subtle grid pattern */}
         <div
           style={{
             position: "absolute",
@@ -34,25 +41,43 @@ export default async function Image() {
             left: 0,
             right: 0,
             bottom: 0,
-            opacity: 0.03,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2306b6d4' stroke-width='0.5'%3E%3Cpath d='M0 20h40M20 0v40'/%3E%3C/g%3E%3C/svg%3E")`,
+            opacity: 0.04,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2306b6d4' stroke-width='0.5'%3E%3Cpath d='M0 21h42M21 0v42'/%3E%3C/g%3E%3C/svg%3E")`,
             display: "flex",
           }}
         />
 
+        {/* Purple orb */}
         <div
           style={{
             position: "absolute",
-            top: -200,
+            top: -180,
             left: -160,
             width: 600,
             height: 600,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(168,85,247,0.16) 0%, transparent 60%)",
+              "radial-gradient(circle, rgba(168,85,247,0.26) 0%, transparent 60%)",
             display: "flex",
           }}
         />
+
+        {/* Cyan orb */}
+        <div
+          style={{
+            position: "absolute",
+            top: 80,
+            left: 150,
+            width: 500,
+            height: 500,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(6,182,212,0.22) 0%, transparent 60%)",
+            display: "flex",
+          }}
+        />
+
+        {/* Emerald orb */}
         <div
           style={{
             position: "absolute",
@@ -62,198 +87,247 @@ export default async function Image() {
             height: 620,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(16,185,129,0.14) 0%, transparent 60%)",
+              "radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 60%)",
             display: "flex",
           }}
         />
 
+        {/* Left — Illustration */}
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            gap: 72,
+            width: 500,
+            height: 500,
+            marginLeft: 48,
+            position: "relative",
             zIndex: 10,
-            padding: "40px 80px",
-            width: "100%",
           }}
         >
           <div
             style={{
+              position: "absolute",
+              top: -22,
+              left: -22,
+              right: -22,
+              bottom: -22,
+              borderRadius: 44,
+              background:
+                "radial-gradient(circle, rgba(6,182,212,0.28) 0%, rgba(168,85,247,0.16) 45%, transparent 70%)",
+              filter: "blur(40px)",
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              width: 460,
+              height: 460,
+              borderRadius: 28,
+              border: "1px solid rgba(255,255,255,0.12)",
+              overflow: "hidden",
+              boxShadow:
+                "0 30px 80px -20px rgba(6,182,212,0.35), 0 10px 40px -10px rgba(168,85,247,0.28)",
+              position: "relative",
+            }}
+          >
+            <img
+              src={illustrationData as unknown as string}
+              alt=""
+              width={460}
+              height={460}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "flex",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Right — Text content */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            flex: 1,
+            padding: "0 64px 0 64px",
+            zIndex: 10,
+          }}
+        >
+          {/* Page label */}
+          <div
+            style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-              width: 240,
-              height: 240,
+              gap: 10,
+              marginBottom: 22,
+              padding: "8px 16px",
+              borderRadius: 20,
+              background: "rgba(6,182,212,0.12)",
+              border: "1px solid rgba(6,182,212,0.28)",
             }}
           >
             <div
               style={{
-                position: "absolute",
-                width: 240,
-                height: 240,
+                width: 7,
+                height: 7,
                 borderRadius: "50%",
-                border: "1px solid rgba(6,182,212,0.16)",
+                background: "#06b6d4",
                 display: "flex",
               }}
             />
-            <div
+            <span
               style={{
-                position: "absolute",
-                width: 160,
-                height: 160,
-                borderRadius: "50%",
-                background:
-                  "radial-gradient(circle, rgba(168,85,247,0.32) 0%, rgba(6,182,212,0.16) 50%, transparent 80%)",
-                filter: "blur(16px)",
+                fontSize: 12,
+                color: "#7dd3fc",
+                fontWeight: 700,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
                 display: "flex",
-              }}
-            />
-            <svg
-              width="240"
-              height="240"
-              viewBox="0 0 100 100"
-              fill="none"
-              style={{
-                filter: "drop-shadow(0 0 20px rgba(6,182,212,0.35))",
               }}
             >
-              <defs>
-                <linearGradient id="smtGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#a855f7" />
-                  <stop offset="50%" stopColor="#06b6d4" />
-                  <stop offset="100%" stopColor="#10b981" />
-                </linearGradient>
-              </defs>
-              <g transform="translate(14, 32)" stroke="#a855f7" strokeWidth="3" strokeLinecap="round">
-                <line x1="3" y1="10" x2="27" y2="10" />
-                <line x1="3" y1="26" x2="27" y2="26" />
-                <line x1="9" y1="4" x2="9" y2="32" />
-                <line x1="21" y1="4" x2="21" y2="32" />
-              </g>
-              <g stroke="url(#smtGrad)" strokeWidth="2.2" strokeLinecap="round" fill="none">
-                <line x1="46" y1="50" x2="64" y2="50" />
-                <polyline points="58,44 64,50 58,56" />
-              </g>
-              <g transform="translate(68, 30)" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none">
-                <path d="M 2 30 L 2 8 A 4 4 0 0 1 6 4 L 22 4 A 4 4 0 0 1 26 8 L 26 22 A 4 4 0 0 1 22 26 L 10 26 L 2 32" />
-                <circle cx="14" cy="15" r="4" fill="#10b981" stroke="none" />
-              </g>
-            </svg>
+              AI Agents · Infrastructure · Cost
+            </span>
           </div>
 
+          {/* Title */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "center",
-              maxWidth: 620,
+              marginBottom: 20,
+            }}
+          >
+            <h1
+              style={{
+                fontSize: 56,
+                fontWeight: 900,
+                color: "white",
+                margin: 0,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.08,
+                display: "flex",
+              }}
+            >
+              Using AI Agents
+            </h1>
+            <h1
+              style={{
+                fontSize: 56,
+                fontWeight: 900,
+                background:
+                  "linear-gradient(to right, #a855f7 0%, #06b6d4 55%, #10b981 100%)",
+                backgroundClip: "text",
+                color: "transparent",
+                margin: 0,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.08,
+                display: "flex",
+              }}
+            >
+              to Migrate Off Slack
+            </h1>
+          </div>
+
+          {/* Description */}
+          <p
+            style={{
+              fontSize: 20,
+              color: "#94a3b8",
+              margin: 0,
+              marginBottom: 22,
+              lineHeight: 1.5,
+              fontWeight: 400,
+              display: "flex",
+              maxWidth: 520,
+            }}
+          >
+            {
+              "Two paired skills, one focused weekend, and a ~99% cut in ongoing cost."
+            }
+          </p>
+
+          {/* Badges */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 10,
             }}
           >
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
-                marginBottom: 20,
-                padding: "8px 16px",
-                borderRadius: 20,
-                background: "rgba(6,182,212,0.1)",
-                border: "1px solid rgba(6,182,212,0.22)",
+                padding: "6px 13px",
+                borderRadius: 8,
+                background: "rgba(168,85,247,0.10)",
+                border: "1px solid rgba(168,85,247,0.28)",
               }}
             >
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#06b6d4" }} />
               <span
                 style={{
-                  fontSize: 12,
-                  color: "#06b6d4",
+                  color: "#d8b4fe",
+                  fontSize: 13,
                   fontWeight: 700,
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
                   display: "flex",
                 }}
               >
-                AI Agents / Infrastructure
+                Slack → Mattermost
               </span>
             </div>
-
-            <div style={{ display: "flex", flexDirection: "column", marginBottom: 20 }}>
-              <h1
-                style={{
-                  fontSize: 54,
-                  fontWeight: 900,
-                  color: "white",
-                  margin: 0,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1.1,
-                  display: "flex",
-                }}
-              >
-                Using AI Agents to
-              </h1>
-              <h1
-                style={{
-                  fontSize: 54,
-                  fontWeight: 900,
-                  background:
-                    "linear-gradient(to right, #a855f7, #06b6d4, #10b981)",
-                  backgroundClip: "text",
-                  color: "transparent",
-                  margin: 0,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1.1,
-                  display: "flex",
-                }}
-              >
-                Migrate Off Slack
-              </h1>
-            </div>
-
-            <p
-              style={{
-                fontSize: 20,
-                color: "#94a3b8",
-                margin: 0,
-                marginBottom: 22,
-                lineHeight: 1.5,
-                fontWeight: 400,
-                display: "flex",
-              }}
-            >
-              {"Two paired skills. One weekend. ~99% lower ongoing cost."}
-            </p>
-
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
+                padding: "6px 13px",
+                borderRadius: 8,
+                background: "rgba(6,182,212,0.10)",
+                border: "1px solid rgba(6,182,212,0.28)",
               }}
             >
-              {["Mattermost", "Claude Code / Codex", "Fail-Closed Cutover"].map((tag) => (
-                <div
-                  key={tag}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "6px 14px",
-                    borderRadius: 8,
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  <span style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600, display: "flex" }}>
-                    {tag}
-                  </span>
-                </div>
-              ))}
+              <span
+                style={{
+                  color: "#7dd3fc",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  display: "flex",
+                }}
+              >
+                Claude Code · Codex
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "6px 13px",
+                borderRadius: 8,
+                background: "rgba(16,185,129,0.10)",
+                border: "1px solid rgba(16,185,129,0.28)",
+              }}
+            >
+              <span
+                style={{
+                  color: "#6ee7b7",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  display: "flex",
+                }}
+              >
+                Fail-Closed Cutover
+              </span>
             </div>
           </div>
         </div>
 
+        {/* Bottom gradient accent */}
         <div
           style={{
             position: "absolute",
@@ -267,13 +341,15 @@ export default async function Image() {
           }}
         />
 
+        {/* Domain */}
         <div
           style={{
             position: "absolute",
             top: 28,
             right: 38,
             fontSize: 14,
-            color: "#475569",
+            color: "#64748b",
+            letterSpacing: "0.04em",
             display: "flex",
           }}
         >
@@ -283,6 +359,6 @@ export default async function Image() {
     ),
     {
       ...size,
-    }
+    },
   );
 }
