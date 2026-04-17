@@ -1,11 +1,12 @@
 # A Comprehensive Guide to Migrating From Slack to Mattermost With Claude Code / Codex
 
-This guide walks a Slack workspace admin through an end-to-end migration to a self-hosted Mattermost server, driven by two paired Claude Code / Codex skills:
+This guide walks a Slack workspace admin through an end-to-end migration to a self-hosted Mattermost server, driven by three paired Claude Code / Codex skills:
 
 - **`slack-migration-to-mattermost-phase-1-extraction`** runs on your Mac, Windows, or Linux workstation. It pulls everything out of Slack (public and private channels, DMs, files, emoji, canvases, lists, admin audit CSVs, Workflow Builder JSON) and transforms it into a hash-stamped `mattermost-bulk-import.zip` plus a machine-readable `handoff.json`.
 - **`slack-migration-to-mattermost-phase-2-setup-and-import`** runs from the same workstation over SSH to an Ubuntu server at Hetzner, OVH, or Contabo. It provisions Mattermost behind Cloudflare and Nginx, validates the Phase 1 bundle, rehearses the import on a staging target, computes a fail-closed readiness gate, and executes the production cutover with explicit rollback.
+- **`slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`** takes over once you are live. It runs weekly health sweeps, monthly OS patches, quarterly Mattermost upgrades with auto-rollback, nightly backups with SHA-256 verification, quarterly restore drills, and an incident playbook.
 
-The skills automate almost everything, but there are human decisions along the way: what date range to export, which channels to sidecar rather than import, whether to bind PostgreSQL locally or put it on Supabase, who is the rollback owner, and so on. This guide explains where each decision lives in the pipeline and how to make it.
+The skills automate almost everything, but there are human decisions along the way: what date range to export, which channels to sidecar rather than import, whether to bind PostgreSQL locally or put it on Supabase, who is the rollback owner, and so on. This guide explains where each decision lives in the pipeline and how to make it. The authoritative per-stage detail — what each script does, exactly — lives inside the skill. The agent reads the skill; the human reads this primer.
 
 The three skill catalog pages (each has the verbatim `SKILL.md` the agent loads, plus a live visualization of the flow and the changelog):
 
@@ -90,6 +91,118 @@ jsm install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
 ```
 
 Each skill ships its own `scripts/bootstrap-tools.sh`, which handles the underlying tool install (slackdump, mmetl, mmctl, psql, rsync, etc.) per platform. Run it once per skill per laptop. From there, open Claude Code or Codex in your migration working directory and ask the agent, in plain English, to drive the skill: *"Use the Phase 1 skill to run setup."*
+
+Optional but recommended: each skill also ships a `scripts/setup-mcp.sh` that registers the Slack, Playwright, and Mattermost MCP servers with whichever agent CLIs you have. The agent uses those to drive Slack's admin UI (for the export), your browser (for Cloudflare / Postmark / Hetzner click-through steps), and Mattermost's own admin API. You do not invoke any of the MCP servers yourself; you just allow the agent to when it asks.
+
+---
+
+## Decisions the agent cannot make for you
+
+Four questions you answer before the agent starts. Every one of them flows into `config.env` and gets re-validated at gate time:
+
+| # | Question | Options |
+|---|----------|---------|
+| 1 | **What Slack plan are you on?** | Free / Pro → *Track B: slackdump-primary.* Business+ → *Track A: official admin export.* Enterprise Grid → *Track C: grid-wide export + split, or per-workspace exports.* Phase 1's `slack-plan-tier-router` subagent picks routing if you have not chosen. |
+| 2 | **Where will Mattermost live?** | Hetzner AX42/AX52 dedicated (recommended — cheapest $/user headroom), OVH Advance or Contabo VPS (same sizing table, lower cost), or existing Ubuntu host you already run (supply the SSH target as `TARGET_HOST`). |
+| 3 | **How do you want to drive the agent?** | Click-driven → Claude Code or Codex **desktop app**. Terminal-native → their CLI. Multi-machine → CLI plus `jsm sync` for cross-device skill parity. |
+| 4 | **Where does the database live?** | Same box as Mattermost (default — skill provisions PostgreSQL 16 for you), Supabase managed (use the **session pooler on 5432**, *not* the transaction pooler on 6543), or your own managed Postgres (hand the skill a DSN and it stays hands-off on provisioning). |
+
+The rollback owner is a fifth decision that belongs here too: Phase 2 refuses to run `cutover` without `ROLLBACK_OWNER` set to a named human. Not a role, not "whoever is on call," not a team alias. A specific person with the authority to pull the abort trigger. In practice this is either the operator running the migration or their CTO.
+
+---
+
+## Driving the agent: the English interface
+
+Once the skills are installed, the operator interface is natural language. The skills' `operator-library.md` lists the canonical phrasings the agent recognizes; a small set gets you through the whole migration:
+
+| To do this | Paste this |
+|------------|-----------|
+| Kick off a stage | *"Use the slack-migration-to-mattermost-phase-1-extraction skill to run the `setup` stage."* |
+| Check status | *"Use the Phase 2 skill to run `ready` and show me the readiness score."* |
+| Resume an interrupted run | *"Resume the Phase 1 migration from whichever stage I was last on; read the `workdir/artifacts` tree to figure out where I am."* |
+| Ask for an audit | *"Run the `gap-hunter` subagent over the Phase 1 handoff and tell me every not-migrated feature with its disposition class."* |
+| Run the cutover | *"Run Phase 2 stage `cutover` against production. Pause before any destructive step and explain it to me before I approve."* |
+| Roll back | *"Rollback Phase 2. My confirmation phrase is `I_UNDERSTAND_THIS_RESTORES_BACKUPS` — explain what this will do before you run it."* |
+
+The agent will ask for approval before anything destructive. Approve *once* at a time during the cutover window; do not hand the agent "Approve for the session" scope. The approvals are cheap, the alternative is risky. The skill's fail-closed gate (`ready`) is what catches issues *before* you see any approval prompt; once a prompt appears, you are past the gate.
+
+---
+
+## Environment variables the agent will ask you to fill in
+
+Every migration is parameterized by a per-phase `config.env` that the agent reads on every stage. You edit this file once, at the start of Phase 1; Phase 2 picks up the relevant half via `HANDOFF_JSON`. The absolute minimum you need to provide:
+
+**Phase 1 (`config.env.phase1`):**
+
+| Variable | Example | Notes |
+|----------|---------|-------|
+| `WORKSPACE_NAME` | `acme-slack` | short identifier used in artifact paths and the archive channel prefix |
+| `SLACK_PLAN_TIER` | `business-plus` \| `pro` \| `free` \| `enterprise-grid` | drives the Track A / B / C router |
+| `SLACK_WORKSPACE_URL` | `https://acme.slack.com` | for the admin-export Playwright automation on Business+, or slackdump on Pro/Free |
+| `SLACK_ADMIN_TOKEN` | `xoxp-…` (Business+/Grid) or `xoxc-…` session token (Pro/Free) | Phase 1's `token-exposure-redteam` will scan artifacts for accidental leaks |
+| `MMETL_DEFAULT_EMAIL_DOMAIN` | `acme.com` | only if some Slack users have no email; mmetl fabricates `<username>@<domain>` for them |
+| `EXPORT_DATE_FROM` / `EXPORT_DATE_TO` | `2018-01-01` / blank | bound the export if you want partial history; leave `_TO` blank for "through now" |
+
+**Phase 2 (`config.env.phase2`):**
+
+| Variable | Example | Notes |
+|----------|---------|-------|
+| `HANDOFF_JSON` | absolute path | written by Phase 1; Phase 2 `intake` refuses to start without it |
+| `IMPORT_ZIP` | absolute path | absolute path to `mattermost-bulk-import.zip` |
+| `MATTERMOST_URL` | `https://chat.acme.com` | final public URL |
+| `TARGET_HOST` | `chat.acme.com` | SSH target; can be a plain IP on first provision |
+| `TARGET_SSH_USER` | `root` on fresh Hetzner, `deploy` afterward | the skill switches to the deploy user post-provision |
+| `DEPLOY_METHOD` | `apt` (production) \| `docker` (staging only) | Mattermost's own docs recommend APT for HA |
+| `POSTGRES_DSN` | `postgres://mmuser:...@localhost:5432/mattermost?sslmode=disable` | or Supabase session pooler (5432, not 6543) |
+| `SMTP_SERVER` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | Postmark | Mattermost sends password-reset emails on activation; if SMTP is broken, users can't log in |
+| `SMTP_TEST_EMAIL` | `admin@acme.com` | `verify-live` sends a real test email here before letting the gate pass |
+| `CLOUDFLARE_ENABLED` / `CLOUDFLARE_API_TOKEN` / `CF_ZONE_ID` | `1` / token / zone id | required if the skill renders Cloudflare DNS + Origin CA itself |
+| `ORIGIN_SERVER_IP` | `95.217.12.34` | the VPS IP Cloudflare should point at |
+| `ROLLBACK_OWNER` | `Jane Admin <jane@acme.com>` | name + email; Phase 2 `ready` refuses to pass without it |
+
+Phase 3 (`config.env.phase3`) adds `OFFSITE_REMOTE` (rclone target for backups), `SCRATCH_DB_URL` (for the quarterly restore drill), `REBOOT_WINDOW_START` / `REBOOT_WINDOW_END` (off-hours bounds the OS-patch stage will respect), and `ALERT_WEBHOOK_URL` (where the weekly-sweep posts its red-status summary). The skills ship `config.env.example` templates for all three.
+
+---
+
+## Between phases: the handoff.json contract
+
+`handoff.json` is the hash-sealed contract that Phase 1 hands to Phase 2. Phase 2 `intake` is the fail-closed boundary:
+
+- Phase 2 refuses to start if `handoff.json` is missing, malformed, or has a `final_package.sha256` that does not match the on-disk ZIP.
+- It refuses to start if `unresolved-gaps.md` is not present (the skill produces it automatically; missing it means something went wrong upstream).
+- It re-runs reconciliation on the counts in `handoff.json.counts` and emits a `phase2-intake-report.json` that becomes an input to the `ready` gate later.
+
+Contents Phase 2 reads:
+
+```text
+handoff.json
+  .schema_version
+  .generated_at
+  .workspace
+  .plan_tier                    # Track A / B / C routing carried forward
+  .export_basis                 # "official-export" | "slackdump" | "grid-split"
+  .final_package.path           # absolute path to the import ZIP
+  .final_package.sha256         # Phase 2 refuses if this does not match bytes on disk
+  .jsonl_path
+  .manifests[]                  # one entry per artifact, each with its own sha256
+  .counts.{users,channels,posts,dms,emoji,attachments}
+  .sidecar_channels[]           # channel names Phase 2 will auto-create on import
+  .known_gaps[]                 # from unresolved-gaps.md; each has a disposition class
+```
+
+You never hand-edit this. If you need to regenerate it (e.g., after re-running Phase 1 with a wider date range), re-run Phase 1 `handoff`; the skill overwrites the old one and Phase 2 picks up the new hash.
+
+---
+
+## Resume, idempotency, and rollback
+
+Three properties the skills lean on so that a mid-run hiccup does not force you to restart from zero:
+
+- **Idempotency at the stage level.** Every `./migrate.sh <stage>` and `./operate.sh <stage>` is safe to re-run. The skill reads the existing artifact tree, notices what is already done, and either short-circuits or re-derives. If a stage fails mid-way, fix the cause and re-run the same stage.
+- **Idempotent import.** Mattermost's bulk-import de-duplicates on message ID, so if the cutover import is interrupted at 80% (network flake, server OOM), re-running `cutover` finishes the job instead of double-posting everything. This is also what enables the **baseline + deltas** pattern: run the full import days in advance, then re-run with each incremental export to catch new messages right up until cutover.
+- **Rollback is explicit and slow on purpose.** If something goes wrong *after* the import job completes (data-loss smell, corrupted reconciliation), `ROLLBACK_CONFIRMATION=I_UNDERSTAND_THIS_RESTORES_BACKUPS ./operate.sh rollback` restores the DB from the pre-cutover dump. The verbatim phrase is required on purpose; rollback is not something you kick off accidentally.
+
+The agent knows all three of these. When you say "resume," it reads the latest-stage JSON files and tells you where you actually are; when you say "rollback," it refuses without the confirmation phrase.
 
 ---
 
