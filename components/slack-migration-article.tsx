@@ -722,7 +722,7 @@ export function SlackMigrationArticle() {
             </p>
             <MarkdownDownloadButton />
             <p className="text-[11px] md:text-xs text-slate-500 font-mono max-w-[560px] leading-relaxed">
-              The 2.5k-line source guide. Paste the path into Claude Code or Codex and the agent drives the migration from there.
+              The agent-readable companion to the three skills. Paste the path into Claude Code or Codex and the agent has everything it needs to drive the migration.
             </p>
           </div>
         </EC>
