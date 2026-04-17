@@ -1346,12 +1346,12 @@ Get-Content $HOME\\.ssh\\id_ed25519.pub`}
               </li>
               <li>
                 <a
-                  href="https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance"
+                  href="https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-cyan-300 hover:text-cyan-200 underline decoration-cyan-500/40 underline-offset-4 break-all"
                 >
-                  jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance
+                  jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
                 </a>
                 <span className="text-slate-400"> — Phase 3, the ongoing-maintenance skill (weekly sweep, auto-rollback upgrades, restore drills).</span>
               </li>

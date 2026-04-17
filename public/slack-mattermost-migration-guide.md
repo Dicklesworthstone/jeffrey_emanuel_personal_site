@@ -11,7 +11,7 @@ The three skill catalog pages (each has the verbatim `SKILL.md` the agent loads,
 
 - https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-1-extraction
 - https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-2-setup-and-import
-- https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance
+- https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
 
 Heads up: those URLs return a 404 unless you are signed in to a `jeffreys-skills.md` account with an active subscription. If you hit a 404, sign up (or log in) at `jeffreys-skills.md/dashboard` first and reload. That is the same account the `jsm` CLI authenticates against below, so doing this step first means `jsm install` will already know who you are.
 
@@ -2385,7 +2385,7 @@ If you want to uninstall but keep any per-skill configuration you'd written, add
 
 # Part 12: Ongoing Mattermost Maintenance (Phase 3)
 
-Phase 1 and Phase 2 got you onto Mattermost. **Phase 3** is a third skill, `slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance`, that keeps the server healthy from cutover day forward. Install it once you're live; the ongoing maintenance load is small but it's real, and the skill automates almost all of it.
+Phase 1 and Phase 2 got you onto Mattermost. **Phase 3** is a third skill, `slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`, that keeps the server healthy from cutover day forward. Install it once you're live; the ongoing maintenance load is small but it's real, and the skill automates almost all of it.
 
 ## 12.1 What the maintenance skill does
 
@@ -2428,7 +2428,7 @@ Wrapped around those stages: a library of paste-ready agent prompts (§12.4), sc
 Install via jsm like the others:
 
 ```bash
-jsm install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance
+jsm install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
 ```
 
 Copy `config.env.example` → `config.env`, fill in: `MATTERMOST_URL`, `MATTERMOST_ADMIN_TOKEN`, `TARGET_HOST`, `POSTGRES_DSN`, `BACKUP_PATH`, `OFFSITE_REMOTE` (rclone target), `SCRATCH_DB_URL` (for the restore-drill), and a `REBOOT_WINDOW_*` you will accept as downtime. The agent can walk you through filling this in from a Phase 2 `config.env` you already have. The example config is heavily annotated with working values from the Acme Corp scenario so you can see what each field actually looks like.
