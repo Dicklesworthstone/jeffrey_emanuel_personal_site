@@ -80,5 +80,14 @@ reports/
 # Debug scripts (local only)
 lcp-debug.mjs
 
+# One-shot Playwright debug scripts at repo root (screenshot capture, DOM inspection, tour recorders)
+/screenshot*.mjs
+/screenshot*.py
+/inspect*.mjs
+/inspect*.py
+
+# Claude Code per-project state (scheduled task locks, session metadata)
+.claude/
+
 # Stray numeric files (agent shell output accidentally captured)
 /1
