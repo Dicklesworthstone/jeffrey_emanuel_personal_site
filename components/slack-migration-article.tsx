@@ -1772,7 +1772,7 @@ ROLLBACK_OWNER="Jane Admin"`}
             <li><Mono>nginx -t</Mono> then <Mono>systemctl enable --now nginx</Mono> and <Mono>systemctl enable --now mattermost</Mono>.</li>
           </ol>
           <p>
-            <strong>Ubuntu 25.10 workaround:</strong> the Mattermost APT package isn&rsquo;t available there yet. Fall back with <Mono>DEPLOY_METHOD=docker</Mono> and re-run. Docker is <em>not</em> recommended for production HA (Mattermost’s own docs say so); use APT for anything that needs to scale beyond a single node.
+            <strong>Ubuntu 25.10 workaround:</strong> the Mattermost APT package isn’t available there yet. Fall back with <Mono>DEPLOY_METHOD=docker</Mono> and re-run. Docker is <em>not</em> recommended for production HA (Mattermost’s own docs say so); use APT for anything that needs to scale beyond a single node.
           </p>
 
           <Sub id="p2-verify-live" eyebrow="§4.6">Verify live stack (stage: verify-live)</Sub>
@@ -1914,7 +1914,7 @@ ROLLBACK_OWNER="Jane Admin"`}
       <Divider />
 
       {/* ========== THE ASYMMETRIC BET — CALLOUT ========== */}
-      <section data-section="asymmetric">
+      <section id="asymmetric-bet" data-section="asymmetric">
         <EC>
           <h2 className="sm-section-title mb-6 mt-4 text-white">An asymmetric bet.</h2>
           <p>
@@ -1952,7 +1952,7 @@ ROLLBACK_OWNER="Jane Admin"`}
       <Divider />
 
       {/* ========== DATA PRESERVATION ========== */}
-      <section data-section="preservation">
+      <section id="preservation" data-section="preservation">
         <EC>
           <h2 className="sm-section-title mb-6 mt-4 text-white">What survives the move.</h2>
           <p>
@@ -1990,7 +1990,7 @@ ROLLBACK_OWNER="Jane Admin"`}
       <Divider />
 
       {/* ========== THE READY GATE ========== */}
-      <section data-section="ready-gate">
+      <section id="ready-gate" data-section="ready-gate">
         <EC>
           <h2 className="sm-section-title mb-6 mt-4 text-white">The fail-closed gate.</h2>
           <p>
@@ -2150,7 +2150,7 @@ ROLLBACK_OWNER="Jane Admin"`}
               { when: <strong>T = 0</strong>, what: <><Mono>./operate.sh cutover</Mono></> },
               { when: <strong>T + cutover end</strong>, what: <>Confirm the newest <Mono>cutover-status.&lt;ts&gt;.json</Mono> has <Mono>status == &quot;success&quot;</Mono>. Send activation announcement.</> },
               { when: <strong>T + 1 h</strong>, what: <>Monitor <Mono>/opt/mattermost/logs/mattermost.log</Mono> and help desk. Watch for bounced password-reset emails, locked-out users, broken mentions.</> },
-              { when: <strong>T + 1 day</strong>, what: <>Check activation count: <Mono>mmctl user list --all --json | jq &apos;length&apos;</Mono>. Nudge stragglers.</> },
+              { when: <strong>T + 1 day</strong>, what: <>Check activation count: <Mono>{"mmctl user list --all --json | jq 'length'"}</Mono>. Nudge stragglers.</> },
               { when: <strong>T + 7 days</strong>, what: "Revoke Slack migration app tokens, delete the Slack admin app. Archive Phase 1 / Phase 2 workdirs to long-term storage as the evidence pack." },
             ]}
           />
@@ -2208,13 +2208,13 @@ ROLLBACK_OWNER="Jane Admin"`}
               { key: "decision", label: "Decision" },
             ]}
             rows={[
-              { prompt: <Mono>ssh deploy@chat.acme.com &apos;sudo systemctl status mattermost&apos;</Mono>, what: "Sanity-check Mattermost is up on target", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
+              { prompt: <Mono>{"ssh deploy@chat.acme.com 'sudo systemctl status mattermost'"}</Mono>, what: "Sanity-check Mattermost is up on target", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>mmctl auth login --url https://chat.acme.com …</Mono>, what: "Authenticate as sysadmin", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>mmctl import upload … 22-GB.zip</Mono>, what: "Stream the ZIP to the server", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>mmctl import list available --json</Mono>, what: "Read back what just landed", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>mmctl import process &lt;filename&gt;</Mono>, what: "Start the import job — moment of commit", decision: <span className="text-amber-300 font-semibold">Approve (destructive)</span> },
-              { prompt: <Mono>ssh deploy@chat.acme.com &apos;tail -f …/mattermost.log&apos;</Mono>, what: "Tail server log for the import duration", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
-              { prompt: <Mono>psql &quot;$POSTGRES_DSN&quot; -c &apos;SELECT COUNT(*) FROM users&apos;</Mono>, what: "Count imported users", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
+              { prompt: <Mono>{"ssh deploy@chat.acme.com 'tail -f …/mattermost.log'"}</Mono>, what: "Tail server log for the import duration", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
+              { prompt: <Mono>{`psql "$POSTGRES_DSN" -c 'SELECT COUNT(*) FROM users'`}</Mono>, what: "Count imported users", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
               { prompt: <Mono>curl -sf https://chat.acme.com/api/v4/system/ping</Mono>, what: "Verify Mattermost still serves", decision: <span className="text-emerald-300 font-semibold">Approve</span> },
             ]}
           />
@@ -2438,7 +2438,7 @@ chmod +x /home/deploy/backup-mattermost.sh
             <li>T − 15 min: confirm <Mono>./operate.sh ready</Mono> still green with the final handoff.</li>
             <li>T = 0: <Mono>./operate.sh cutover</Mono>. Watch the newest <Mono>workdir-phase2/reports/cutover/cutover-status.*.json</Mono>.</li>
             <li>T + cutover: send activation announcement. Watch help desk.</li>
-            <li>T + 4 h: <Mono>mmctl user list --all --json | jq &apos;length&apos;</Mono> + spot-check top channels.</li>
+            <li>T + 4 h: <Mono>{"mmctl user list --all --json | jq 'length'"}</Mono> + spot-check top channels.</li>
             <li>T + 1 day: activation reminder if &lt; 50 %.</li>
             <li>T + 7 days: revoke Slack tokens, delete migration app, archive workdirs to evidence storage.</li>
           </ul>
@@ -2474,7 +2474,7 @@ chmod +x /home/deploy/backup-mattermost.sh
                 fix: <><Mono>./scripts/bootstrap-tools.sh</Mono> again; add <Mono>$(go env GOPATH)/bin</Mono> to shell rc</>,
               },
               {
-                symptom: <><Mono>intake-official-export.py</Mono> fails with &ldquo;invalid ZIP&rdquo;</>,
+                symptom: <><Mono>intake-official-export.py</Mono> fails with “invalid ZIP”</>,
                 cause: "Download truncated or is an HTML error page",
                 fix: "Re-download from the admin-email link; verify size matches",
               },
@@ -2505,7 +2505,7 @@ chmod +x /home/deploy/backup-mattermost.sh
             ]}
             rows={[
               {
-                symptom: <><Mono>./operate.sh intake</Mono> fails &ldquo;hash mismatch&rdquo;</>,
+                symptom: <><Mono>./operate.sh intake</Mono> fails “hash mismatch”</>,
                 cause: "ZIP got re-zipped between phases",
                 fix: <>Re-copy the canonical ZIP from Phase 1’s <Mono>import-ready/</Mono></>,
               },
@@ -2540,7 +2540,7 @@ chmod +x /home/deploy/backup-mattermost.sh
                 fix: "Add the records in Cloudflare DNS per your SMTP provider’s docs",
               },
               {
-                symptom: "Cutover succeeds but users say &ldquo;I can’t see #general history&rdquo;",
+                symptom: "Cutover succeeds but users say “I can’t see #general history”",
                 cause: "They weren’t added to the channel during import",
                 fix: <><Mono>mmctl channel users add myteam general &lt;username&gt;</Mono>; investigate why their user_id wasn’t in the JSONL’s channel membership</>,
               },
@@ -2549,7 +2549,7 @@ chmod +x /home/deploy/backup-mattermost.sh
 
           <Sub id="tshoot-evidence" eyebrow="§6.3">Evidence and audit</Sub>
           <p>
-            {"If you need to produce evidence later (compliance, audit, or a &ldquo;prove we migrated this channel&rdquo; question), everything is already on disk:"}
+            {"If you need to produce evidence later (compliance, audit, or a “prove we migrated this channel” question), everything is already on disk:"}
           </p>
           <ul className="sm-bullet-list">
             <li><Mono>workdir/artifacts/reports/evidence-pack.json</Mono> (Phase 1) — hashed manifest of everything produced, with provenance.</li>
@@ -2665,7 +2665,7 @@ chmod +x /home/deploy/backup-mattermost.sh
             <li><strong>Calls:</strong> enabled; <Mono>calls.acme.com</Mono> is grey-clouded so UDP 8443 works</li>
           </ul>
 
-          <Sub eyebrow="Phase 1 config">Acme Corp&rsquo;s Phase 1 config.env</Sub>
+          <Sub eyebrow="Phase 1 config">Acme Corp’s Phase 1 config.env</Sub>
           <Code>
 {`WORKSPACE_NAME="acme-slack"
 PHASE1_WORKSPACE_ROOT="./workdir"
@@ -2687,7 +2687,7 @@ SLACK_BOT_TOKEN="xoxb-ACME-BOT-TOKEN"
 SLACK_TEAM_ID="TACMETEAM"`}
           </Code>
 
-          <Sub eyebrow="Phase 2 config">Acme Corp&rsquo;s Phase 2 config.env</Sub>
+          <Sub eyebrow="Phase 2 config">Acme Corp’s Phase 2 config.env</Sub>
           <Code>
 {`WORKSPACE_NAME="acme-slack"
 PHASE2_WORKSPACE_ROOT="./workdir-phase2"
@@ -2734,7 +2734,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             Expected reply (abridged): “doctor.sh says 14/14 required passing (100%). Tools: slackdump 3.2.0, slack-advanced-exporter 1.0.4, mmetl v2.3.0, mmctl v9.11. Disk: 420 GiB free on /. Config loaded: Track A, Acme Corp. Ready for export. Shall I proceed?”
           </p>
 
-          <Sub eyebrow="Successful cutover-status">Acme&rsquo;s production cutover</Sub>
+          <Sub eyebrow="Successful cutover-status">Acme’s production cutover</Sub>
           <Code>
 {`{
   "status": "success",
@@ -2748,7 +2748,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
 }`}
           </Code>
           <p>
-            {"Use these numbers to sanity-check your own runs; Acme&rsquo;s shape is the canonical &ldquo;this is what a healthy migration looks like.&rdquo;"}
+            {"Use these numbers to sanity-check your own runs; Acme’s shape is the canonical “this is what a healthy migration looks like.”"}
           </p>
         </EC>
       </section>
@@ -2772,13 +2772,13 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
               {
                 stage: <Mono>setup</Mono>,
                 after: <><Mono>workdir/artifacts/{`{raw,enriched,import-ready,reports}`}/</Mono> tree; config validated; tools resolved</>,
-                worked: <><Mono>doctor.sh</Mono> prints &ldquo;Health score: N/N required passing (100%)&rdquo;</>,
+                worked: <><Mono>doctor.sh</Mono> prints “Health score: N/N required passing (100%)”</>,
                 failed: <>Missing tool → re-run <Mono>bootstrap-tools.sh</Mono>; missing env → edit <Mono>config.env</Mono> and re-run</>,
               },
               {
                 stage: <Mono>export</Mono>,
                 after: <><Mono>slack-export.zip</Mono> + audit/member CSVs + <Mono>manifest.raw.json</Mono></>,
-                worked: <><Mono>jq &apos;.files | length&apos; manifest.raw.json</Mono> matches file count; every file has SHA256</>,
+                worked: <><Mono>{"jq '.files | length' manifest.raw.json"}</Mono> matches file count; every file has SHA256</>,
                 failed: "Truncated ZIP → re-download; rate-limited slackdump → retry with built-in backoff",
               },
               {
@@ -2825,7 +2825,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             rows={[
               { stage: <Mono>intake</Mono>, after: <Mono>workdir-phase2/reports/phase2-intake-report.json</Mono>, worked: "Hash match confirmed, sidecar_channels[] non-empty", failed: "Re-copy canonical ZIP from Phase 1" },
               { stage: <Mono>render-config</Mono>, after: <><Mono>rendered/config.json</Mono> + <Mono>mattermost.nginx.conf</Mono> + <Mono>config-validation.json</Mono></>, worked: <><Mono>config-validation.json.status == &quot;ready&quot;</Mono>; <Mono>MaxPostSize=16383</Mono></>, failed: <>Missing env → fix <Mono>config.env</Mono>; re-run</> },
-              { stage: <Mono>edge</Mono>, after: "Cloudflare A record proxied; origin CA cert in rendered/origin.{pem,-key.pem}", worked: <><Mono>verify-cloudflare-edge.py</Mono> green</>, failed: <>Fall back to <Mono>NGINX_ENABLE_TLS=1</Mono> with Let&rsquo;s Encrypt</> },
+              { stage: <Mono>edge</Mono>, after: "Cloudflare A record proxied; origin CA cert in rendered/origin.{pem,-key.pem}", worked: <><Mono>verify-cloudflare-edge.py</Mono> green</>, failed: <>Fall back to <Mono>NGINX_ENABLE_TLS=1</Mono> with Let’s Encrypt</> },
               { stage: <Mono>provision</Mono>, after: "UFW, fail2ban, unattended-upgrades, optional local PG on target", worked: <><Mono>systemctl status fail2ban</Mono> active; <Mono>ufw status verbose</Mono> active</>, failed: "Re-run in plan mode, eyeball script, then ssh mode" },
               { stage: <Mono>deploy</Mono>, after: "Mattermost + Nginx running, config.json in place, TLS cert installed", worked: <><Mono>/api/v4/system/ping</Mono> returns 200 via HTTPS</>, failed: <>Ubuntu 25.10 + APT fail → switch to <Mono>DEPLOY_METHOD=docker</Mono></> },
               { stage: <Mono>verify-live</Mono>, after: <><Mono>reports/live-stack.md</Mono> with ping + WS + SMTP results</>, worked: "All three probes green, 6× retries exhausted without falling back", failed: <>WS fail → re-render-config+deploy; SMTP fail → verify with swaks</> },
@@ -2892,7 +2892,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             {" with longer versions of each template. Quick copy-paste versions below — edit for your voice."}
           </p>
 
-          <Details open summary={<>T−7d — &ldquo;Heads up, we&rsquo;re moving&rdquo;</>}>
+          <Details open summary={<>T−7d — “Heads up, we’re moving”</>}>
             <p><strong>Subject:</strong> We’re moving from Slack to Mattermost in 7 days</p>
             <p>Hi team, quick heads-up: on <strong>[DATE]</strong> we’re migrating from Slack to a self-hosted Mattermost server at <Mono>https://chat.acme.com</Mono>. This saves us about [$X] per year and keeps our chat history on infrastructure we own.</p>
             <p>What you need to do: <strong>nothing yet</strong>. We’ll send instructions the day before and the day of.</p>
@@ -2909,7 +2909,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
             <p>Who to ask if something goes wrong: [name, email, Slack handle for today / Mattermost handle post-cutover]</p>
           </Details>
 
-          <Details summary={<>T−15m — &ldquo;Slack is now read-only&rdquo;</>}>
+          <Details summary={<>T−15m — “Slack is now read-only”</>}>
             <p>#general: heads up, Slack is now read-only. Do not start new threads here. Mattermost opens for activation at 10:15 at <Mono>https://chat.acme.com/reset_password</Mono>. Use your Slack email.</p>
           </Details>
 
@@ -2952,7 +2952,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
         <EC>
           <SectionHeader id="legal-approval" eyebrow="§10.6" title="Legal approval gate — copy-paste email to legal / HR." />
           <p>
-            {"The Phase 1 skill&rsquo;s "}
+            {"The Phase 1 skill’s "}
             <Mono>references/playbooks/LEGAL-APPROVAL-GATE.md</Mono>
             {" is the authoritative playbook. A starter email for impatient operators:"}
           </p>
@@ -3049,7 +3049,7 @@ SCRATCH_DB_URL="postgres://mmuser:<strong>@localhost:5432/mm_restore_drill?sslmo
 
           <Sub eyebrow="Canonical flow">Grid-wide</Sub>
           <p>
-            {"If you got a single grid-wide ZIP, use the skill&rsquo;s "}
+            {"If you got a single grid-wide ZIP, use the skill’s "}
             <Mono>split-phase1-import.py</Mono>
             {" helper before enrichment:"}
           </p>
@@ -3163,7 +3163,7 @@ age -r <auditor's age public key> \\
         <EC>
           <SectionHeader id="credentials" eyebrow="§10.12" title="Credential inventory — what you collect and where it goes." />
           <p>
-            {"Over the course of a migration you will create and store roughly a dozen credentials. Collect them in a password manager (1Password, Bitwarden, Dashlane), not in a text file on your desktop, and never commit them to git. The skill&rsquo;s "}
+            {"Over the course of a migration you will create and store roughly a dozen credentials. Collect them in a password manager (1Password, Bitwarden, Dashlane), not in a text file on your desktop, and never commit them to git. The skill’s "}
             <Mono>workdir/</Mono>
             {" and "}
             <Mono>workdir-phase2/</Mono>
@@ -3236,7 +3236,7 @@ age -r <auditor's age public key> \\
             <li>Pick the <strong>Free</strong> plan. Free covers TLS, DDoS, WAF, CDN, and WebSockets — everything the migration needs. Continue.</li>
             <li>Cloudflare scans your current DNS and imports the records. Confirm. Continue.</li>
             <li>Cloudflare shows you two nameservers (e.g. <Mono>ada.ns.cloudflare.com</Mono>, <Mono>joel.ns.cloudflare.com</Mono>). Copy both.</li>
-            <li>Go to your registrar → nameservers → swap to Cloudflare&rsquo;s two. Save.</li>
+            <li>Go to your registrar → nameservers → swap to Cloudflare’s two. Save.</li>
             <li>Wait. Pending yellow → Active green in 15–60 min (occasionally up to 24 h). Don’t proceed past this until it’s green.</li>
           </ol>
 
@@ -3253,7 +3253,7 @@ age -r <auditor's age public key> \\
           <ol className="list-decimal pl-6 space-y-1.5 text-[15px] text-slate-300 leading-relaxed">
             <li>Top-right avatar → <strong>My Profile</strong> → <strong>API Tokens</strong> → <strong>Create Token</strong>.</li>
             <li>Scroll past the templates → <strong>Create Custom Token</strong> → Get started.</li>
-            <li>Name: <Mono>slack-migration-phase-2</Mono> (any label you&rsquo;ll recognize later).</li>
+            <li>Name: <Mono>slack-migration-phase-2</Mono> (any label you’ll recognize later).</li>
             <li>Under <strong>Permissions</strong>, add:
               <ul className="list-disc pl-5 mt-1.5 space-y-1">
                 <li><Mono>Zone</Mono> → <Mono>DNS</Mono> → <Mono>Edit</Mono></li>
@@ -3274,7 +3274,7 @@ age -r <auditor's age public key> \\
           </ul>
           <p>
             <J t="cloudflare-origin-ca">Origin CA</J>
-            {" is a Cloudflare-specific concept: valid only for traffic through Cloudflare&rsquo;s proxy. Free, 15 years, no ACME renewal cron. If you prefer Let&rsquo;s Encrypt directly on origin, set "}
+            {" is a Cloudflare-specific concept: valid only for traffic through Cloudflare’s proxy. Free, 15 years, no ACME renewal cron. If you prefer Let’s Encrypt directly on origin, set "}
             <Mono>CLOUDFLARE_ENABLED=0</Mono>
             {" and supply your own cert at "}
             <Mono>NGINX_CERT_PATH</Mono>
@@ -3305,7 +3305,7 @@ age -r <auditor's age public key> \\
         <EC>
           <SectionHeader id="smtp" eyebrow="§10.14" title="SMTP (Postmark) walkthrough." />
           <p>
-            {"Mattermost sends password-reset emails to every user on activation. If SMTP is broken, users can&rsquo;t log in after cutover. This is the single most under-documented piece of the stack for non-technical operators."}
+            {"Mattermost sends password-reset emails to every user on activation. If SMTP is broken, users can’t log in after cutover. This is the single most under-documented piece of the stack for non-technical operators."}
           </p>
 
           <Sub eyebrow="§10.14.1">Why Postmark</Sub>
@@ -3324,7 +3324,7 @@ age -r <auditor's age public key> \\
             <li>Go to <Mono>postmarkapp.com</Mono> → Sign up. Use your company email.</li>
             <li>Confirm email. Log in.</li>
             <li>Pick <strong>Transactional email</strong>.</li>
-            <li>Create a <strong>server</strong> (Postmark&rsquo;s term for a sending pool). Name: <Mono>acme-chat-transactional</Mono>. Stream type: Transactional.</li>
+            <li>Create a <strong>server</strong> (Postmark’s term for a sending pool). Name: <Mono>acme-chat-transactional</Mono>. Stream type: Transactional.</li>
           </ol>
 
           <Sub eyebrow="§10.14.3">Add and verify your sending domain</Sub>
@@ -3347,7 +3347,7 @@ age -r <auditor's age public key> \\
           <ol className="list-decimal pl-6 space-y-1.5 text-[15px] text-slate-300 leading-relaxed">
             <li>Postmark dashboard → your server → <strong>API Tokens</strong> tab.</li>
             <li>Copy the <strong>Server Token</strong>.</li>
-            <li>Paste into <Mono>config.env.phase2</Mono> as <strong>both</strong> <Mono>SMTP_USERNAME</Mono> and <Mono>SMTP_PASSWORD</Mono>. Postmark&rsquo;s SMTP expects the same token in both — Postmark convention, not a mistake.</li>
+            <li>Paste into <Mono>config.env.phase2</Mono> as <strong>both</strong> <Mono>SMTP_USERNAME</Mono> and <Mono>SMTP_PASSWORD</Mono>. Postmark’s SMTP expects the same token in both — Postmark convention, not a mistake.</li>
           </ol>
           <Code>
 {`SMTP_SERVER="smtp.postmarkapp.com"
@@ -3380,22 +3380,22 @@ SMTP_FROM_ADDRESS="noreply@acme.com"`}
           <p>
             {"Expect "}
             <Mono>250 OK</Mono>
-            {" and the email in your inbox within 30 seconds. If it lands in spam, don&rsquo;t panic — first emails from a new Postmark sender often do. Send 3–4 more over the next hour; deliverability improves as Postmark warms up your reputation."}
+            {" and the email in your inbox within 30 seconds. If it lands in spam, don’t panic — first emails from a new Postmark sender often do. Send 3–4 more over the next hour; deliverability improves as Postmark warms up your reputation."}
           </p>
           <p>
-            {"Phase 2&rsquo;s "}
+            {"Phase 2’s "}
             <Mono>verify-live</Mono>
-            {" does the equivalent automatically. If it reports success but Mattermost&rsquo;s own reset-password emails fail at cutover, it&rsquo;s almost always:"}
+            {" does the equivalent automatically. If it reports success but Mattermost’s own reset-password emails fail at cutover, it’s almost always:"}
           </p>
           <ul className="sm-bullet-list">
             <li><Mono>SMTP_FROM_ADDRESS</Mono> doesn’t match the verified domain (Postmark rejects). Fix: <Mono>SMTP_FROM_ADDRESS=noreply@acme.com</Mono> where <Mono>acme.com</Mono> matches the verified signature.</li>
             <li><Mono>RequireEmailVerification=true</Mono> in Mattermost config. render-config sets this false by default; re-check if you edited the rendered file.</li>
-            <li>User&rsquo;s email provider classifies Mattermost&rsquo;s template as marketing. Mitigation: ensure DMARC is set (§10.14.3 record 3).</li>
+            <li>User’s email provider classifies Mattermost’s template as marketing. Mitigation: ensure DMARC is set (§10.14.3 record 3).</li>
           </ul>
 
           <Sub eyebrow="§10.14.6">Cost at cutover scale</Sub>
           <p>
-            {"For a 340-user activation burst you&rsquo;ll send ~340 welcome/reset emails in the first hour, plus retries over the following week (&lt;50 typically). Well within Postmark&rsquo;s 10K/month $15 plan. After activation week you&rsquo;ll send 1–5 emails/day (new hires, admin-triggered resets), so the same plan covers you indefinitely."}
+            For a 340-user activation burst you’ll send ~340 welcome/reset emails in the first hour, plus retries over the following week (&lt;50 typically). Well within Postmark’s 10K/month $15 plan. After activation week you’ll send 1–5 emails/day (new hires, admin-triggered resets), so the same plan covers you indefinitely.
           </p>
         </EC>
       </section>
@@ -3518,7 +3518,7 @@ jsm doctor --fix     # auto-repair common issues`}</Code>
 
           <Sub id="jsm-manual" eyebrow="§11.8">Manual install without jsm (zip-download fallback)</Sub>
           <p>
-            {"If jsm refuses to install and you can&rsquo;t get past it, you don&rsquo;t have to use it. The skills are directories of files; jsm just fetches, verifies a hash, and drops them in the right place."}
+            {"If jsm refuses to install and you can’t get past it, you don’t have to use it. The skills are directories of files; jsm just fetches, verifies a hash, and drops them in the right place."}
           </p>
           <ol className="list-decimal pl-6 space-y-1.5 text-[15px] text-slate-300 leading-relaxed">
             <li>Sign in at <Mono>jeffreys-skills.md/dashboard</Mono>.</li>
@@ -3619,7 +3619,7 @@ jsm uninstall --all              # remove everything jsm installed
             {"), or keep it as a scheduled agent-run item."}
           </p>
 
-          <Sub id="phase3-prompts" eyebrow="§12.4">Paste-ready prompts — you don&rsquo;t hand-roll the wording</Sub>
+          <Sub id="phase3-prompts" eyebrow="§12.4">Paste-ready prompts — you don’t hand-roll the wording</Sub>
           <p>
             {"The "}
             <Mono>prompts/</Mono>
@@ -3631,7 +3631,7 @@ jsm uninstall --all              # remove everything jsm installed
               { key: "does", label: "What the agent does" },
             ]}
             rows={[
-              { file: <Mono>orient.md</Mono>, does: <>Reads <Mono>config.env</Mono>, runs doctor.sh, reports where the deployment is and what&rsquo;s known</> },
+              { file: <Mono>orient.md</Mono>, does: <>Reads <Mono>config.env</Mono>, runs doctor.sh, reports where the deployment is and what’s known</> },
               { file: <Mono>health.md</Mono>, does: "One-shot health snapshot; posts summary" },
               { file: <Mono>update-os.md</Mono>, does: "Applies OS patches, schedules reboot if required" },
               { file: <Mono>update-mattermost.md</Mono>, does: "Bumps Mattermost to pinned version, verifies, auto-rolls-back on failure" },
@@ -3668,18 +3668,18 @@ jsm uninstall --all              # remove everything jsm installed
           <p>{"Three distinct failure modes, each with its own remediation:"}</p>
           <ul className="sm-bullet-list">
             <li><strong>No backup found:</strong> off-site credentials expired, or the nightly backup has been silently failing. Check <Mono>latest-backup.json</Mono> from the last week.</li>
-            <li><strong>Restore fails mid-stream:</strong> dump corrupted or scratch DB Postgres major version older than prod&rsquo;s. pg_dump is forward-compatible but not backward.</li>
+            <li><strong>Restore fails mid-stream:</strong> dump corrupted or scratch DB Postgres major version older than prod’s. pg_dump is forward-compatible but not backward.</li>
             <li><strong>Row counts below minimums:</strong> backup succeeded but captured an empty or partial DB. Has happened when a failed migration left Mattermost writing to a scratch schema; the backup job dutifully captured the empty one.</li>
           </ul>
           <p>
-            {"Passing drill: ~45 min of agent-watched runtime per quarter on a small deployment. Failing drill is the cheapest production incident you&rsquo;ll ever have, because it happens on a scratch DB instead of on the day the host dies."}
+            {"Passing drill: ~45 min of agent-watched runtime per quarter on a small deployment. Failing drill is the cheapest production incident you’ll ever have, because it happens on a scratch DB instead of on the day the host dies."}
           </p>
 
           <Sub id="phase3-subagents" eyebrow="§12.7">Subagents for deep audits</Sub>
           <p>
             {"Seven focused subagents live in "}
             <Mono>subagents/</Mono>
-            {". They are not part of the weekly sweep; you invoke them on-demand when you want a second opinion on a specific dimension. Each is already wired to the skill&rsquo;s references, scripts, and config."}
+            {". They are not part of the weekly sweep; you invoke them on-demand when you want a second opinion on a specific dimension. Each is already wired to the skill’s references, scripts, and config."}
           </p>
           <RefTable
             cols={[
@@ -3690,14 +3690,14 @@ jsm uninstall --all              # remove everything jsm installed
               { agent: <Mono>backup-integrity-auditor</Mono>, use: "You want judgement on backup completeness, SHA-256 coverage, off-site freshness, and restore-drill recency, not just stage runs" },
               { agent: <Mono>db-bloat-auditor</Mono>, use: <>DB size climbing faster than user count can explain; looks at table bloat, vacuum status, index health, <Mono>pg_stat_user_tables</Mono></> },
               { agent: <Mono>health-drift-auditor</Mono>, use: "Nothing is red yet, but you want to know what is slowly getting worse across the last 8 weeks of health reports" },
-              { agent: <Mono>version-drift-auditor</Mono>, use: "How far behind the recommended upgrade target you are, framed against Mattermost&rsquo;s ESR policy" },
+              { agent: <Mono>version-drift-auditor</Mono>, use: "How far behind the recommended upgrade target you are, framed against Mattermost’s ESR policy" },
               { agent: <Mono>security-posture-auditor</Mono>, use: "Credential rotation cadence, SSH key hygiene, fail2ban / UFW state, exposed ports" },
               { agent: <Mono>maintenance-scheduler</Mono>, use: "Planning a maintenance window; coordinates comms, picks off-hours, writes the user-facing heads-up" },
               { agent: <Mono>incident-coordinator</Mono>, use: "Live incident: triage playbook, comms cadence, timeline capture for the post-mortem" },
             ]}
           />
 
-          <Sub id="phase3-scenario" eyebrow="§12.8">Scenario pack — Acme Corp&rsquo;s actual schedule</Sub>
+          <Sub id="phase3-scenario" eyebrow="§12.8">Scenario pack — Acme Corp’s actual schedule</Sub>
           <p>
             <Mono>assets/scenario-packs/acme-corp-weekly.yaml</Mono>
             {" is a worked schedule for a 40-user Acme Corp profile. Drop into your scheduler (cron, systemd timers, or scheduled agent runs):"}
@@ -3749,7 +3749,7 @@ upgrade:
           <p>
             {"Once a year (pick a Saturday, budget 2 hours), run a full DR simulation: order a fresh cheap Hetzner CX22, restore the latest backup into it with "}
             <Mono>restore-drill.sh</Mono>
-            {" pointed at that host&rsquo;s PG, verify it comes up as a working Mattermost. Cancel the CX22 when you&rsquo;re satisfied. Tests the whole DR path without touching production and costs ~€0.10 in server-hours."}
+            {" pointed at that host’s PG, verify it comes up as a working Mattermost. Cancel the CX22 when you’re satisfied. Tests the whole DR path without touching production and costs ~€0.10 in server-hours."}
           </p>
           <p>
             {"Full playbook in "}
@@ -3780,7 +3780,7 @@ upgrade:
           <p>
             {"The trend block matters more than any single week. Look at four-week deltas for disk growth, DB size, and error-rate baseline — these are the slow-burn numbers that predict when you need to upsize the server, not acute red alerts. The "}
             <Mono>health-drift-auditor</Mono>
-            {" subagent does this reading for you and flags what&rsquo;s getting slowly worse. Incident post-mortems share a template too ("}
+            {" subagent does this reading for you and flags what’s getting slowly worse. Incident post-mortems share a template too ("}
             <Mono>assets/templates/incident-status.md</Mono>
             {"): timeline in UTC, root cause (not symptom), what fixed it, five whys."}
           </p>
@@ -3808,7 +3808,7 @@ upgrade:
             <Mono>security-posture-auditor</Mono>
             {" subagent reads your "}
             <Mono>rotation-history.json</Mono>
-            {" and tells you what&rsquo;s overdue. For the rare session-secret rotation, expect a full-team re-login and a heads-up message posted 24 hours in advance (comms templates in "}
+            {" and tells you what’s overdue. For the rare session-secret rotation, expect a full-team re-login and a heads-up message posted 24 hours in advance (comms templates in "}
             <Mono>references/comms/</Mono>
             {")."}
           </p>
@@ -3818,15 +3818,15 @@ upgrade:
             {"The Phase 3 skill is deliberately point-in-time health probes plus scheduled tasks. It does not replace continuous observability. If you eventually need:"}
           </p>
           <ul className="sm-bullet-list">
-            <li><strong>SLO dashboards and alerting</strong> — spin up Grafana + Prometheus scraping Mattermost&rsquo;s metrics port 8067.</li>
+            <li><strong>SLO dashboards and alerting</strong> — spin up Grafana + Prometheus scraping Mattermost’s metrics port 8067.</li>
             <li><strong>Synthetic end-to-end user checks</strong> — Uptime Robot, Better Stack, or Cronitor hitting <Mono>/api/v4/system/ping</Mono> every 5 minutes.</li>
             <li><strong>Log aggregation</strong> — Loki or Grafana Cloud for <Mono>mattermost.log</Mono>.</li>
             <li><strong>Incident-response runbooks</strong> — Statuspage or a markdown repo your on-call reads on their phone.</li>
           </ul>
           <p>
-            {"All are complementary, not replacements for the Phase 3 skill&rsquo;s automation of routine work. The "}
+            {"All are complementary, not replacements for the Phase 3 skill’s automation of routine work. The "}
             <Mono>OBSERVABILITY-LADDER.md</Mono>
-            {" reference lays out a graduated path; each rung has a &ldquo;when it is worth the complexity&rdquo; criterion so you&rsquo;re not adding dashboards for their own sake."}
+            {" reference lays out a graduated path; each rung has a “when it is worth the complexity” criterion so you’re not adding dashboards for their own sake."}
           </p>
         </EC>
       </section>
@@ -3834,7 +3834,7 @@ upgrade:
       <Divider />
 
       {/* ========== THE GENERAL PATTERN ========== */}
-      <section data-section="pattern" className="pb-10 md:pb-14">
+      <section id="pattern" data-section="pattern" className="pb-10 md:pb-14">
         <EC>
           <h2 className="sm-section-title mb-6 mt-4 text-white">A pattern, not a migration.</h2>
           <p>
