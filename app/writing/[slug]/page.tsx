@@ -20,6 +20,9 @@ const STATIC_WRITING_ROUTE_SLUGS = new Set([
   "barra-factor-model",
   "cmaes_explainer",
   "hoeffdings_d_explainer",
+  "overprompting",
+  "raptorq",
+  "slack-mattermost-migration",
 ]);
 
 function normalizeIncomingSlug(slug: string): string {

@@ -2225,6 +2225,17 @@ export const threads: ThreadItem[] = [
 
 export const writingHighlights: WritingItem[] = [
   {
+    title: "Using AI Agents and Skills to Migrate Off Slack",
+    href: "/writing/slack-mattermost-migration",
+    source: "Blog",
+    category: "AI Agents & Infrastructure",
+    blurb:
+      "Two paired Claude Code / Codex skills that move a company from Slack to self-hosted Mattermost — fail-closed readiness gate, named rollback owner, ~99% lower ongoing cost.",
+    date: "2026-04-16",
+    featured: true,
+    gradient: "from-purple-500/20 via-cyan-500/20 to-emerald-500/20",
+  },
+  {
     title: "The Overprompting Trap",
     href: "/writing/overprompting",
     source: "Blog",
