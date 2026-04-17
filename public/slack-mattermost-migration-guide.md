@@ -7,6 +7,14 @@ This guide walks a Slack workspace admin through an end-to-end migration to a se
 
 The skills automate almost everything, but there are human decisions along the way: what date range to export, which channels to sidecar rather than import, whether to bind PostgreSQL locally or put it on Supabase, who is the rollback owner, and so on. This guide explains where each decision lives in the pipeline and how to make it.
 
+The three skill catalog pages (each has the verbatim `SKILL.md` the agent loads, plus a live visualization of the flow and the changelog):
+
+- https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-1-extraction
+- https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-2-setup-and-import
+- https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintainance
+
+Heads up: those URLs return a 404 unless you are signed in to a `jeffreys-skills.md` account with an active subscription. If you hit a 404, sign up (or log in) at `jeffreys-skills.md/dashboard` first and reload. That is the same account the `jsm` CLI authenticates against below, so doing this step first means `jsm install` will already know who you are.
+
 ---
 
 ## Why bother with any of this?
@@ -71,7 +79,7 @@ You will spend most of the elapsed wall-clock time **waiting** (waiting for Slac
 
 ## Can a non-technical person do this?
 
-Yes, and it's genuinely less work than the length of this guide might suggest. The guide is long because it covers the whole problem space (edge cases, troubleshooting, compliance, every credential, every failure mode) so you have an answer for whatever you hit. In practice, **most operators spend a handful of hours of actual attention spread across 1 to 2 weeks**, and the agent is doing the rest in the background.
+Yes, and it's less work than the length of this guide might suggest. The guide is long because it covers the whole problem space (edge cases, troubleshooting, compliance, every credential, every failure mode) so you have an answer for whatever you hit. In practice, **most operators spend a handful of hours of actual attention spread across 1 to 2 weeks**, and the agent is doing the rest in the background.
 
 What you actually do:
 
@@ -84,7 +92,7 @@ What you do **not** do: write Bash, edit config files by hand, install software,
 
 ### This is an asymmetric bet
 
-The single most important fact about this whole migration: **your real Slack keeps working the entire time**. You don't touch it until you have independently verified that Mattermost is working. Specifically:
+The most important fact about this whole migration: **your real Slack keeps working the entire time**. You don't touch it until you have independently verified that Mattermost is working. Specifically:
 
 - You order a Mattermost server, the agent sets it up, imports your Slack history, and runs a full staging rehearsal on a throwaway copy. Slack is untouched.
 - You log into the new Mattermost yourself, click around, confirm your history is there, your channels look right, your DMs are readable. Still untouched.
@@ -201,7 +209,7 @@ If any branch surprises you, read the linked section before continuing.
 
 - A self-hosted Mattermost 10.11+ server behind Cloudflare with Origin CA TLS and proper WebSocket upgrade.
 - All of your Slack history (public, private, DMs, group DMs, threads, reactions) imported and searchable.
-- File attachments either in local storage or Cloudflare R2 (your choice), preserved not just linked.
+- File attachments either in local storage or Cloudflare R2 (your choice), preserved as bytes rather than links.
 - Custom emoji, canvases (as sidecar HTML posts), lists (as sidecar JSON posts), and admin audit CSVs (as sidecar posts in a dedicated channel). Nothing Slack-native gets silently dropped.
 - User accounts pre-created, matched by email. Users activate via `/reset_password` with their Slack email.
 - A complete evidence pack: SHA256 hashes of every raw ZIP, enriched ZIP, and import ZIP; reconciliation reports; cutover status JSON; activation proof.
@@ -831,6 +839,39 @@ The final ZIP is at `workdir/artifacts/import-ready/mattermost-bulk-import.zip`.
 
 You are done with Phase 1. Close the skill session if you like; all state is on disk.
 
+## 3.8 What Phase 1 actually ships: 21 scripts, 6 subagents, 4 validators
+
+The seven `migrate.sh` stages above are the *interface*. Underneath, Phase 1 is a 112-file skill with **21 scripts**, **6 focused subagents**, and **4 non-negotiable validators** that run before the bundle is allowed to hand off to Phase 2.
+
+The four validators, each one a hard block:
+
+| Validator | What it proves |
+|---|---|
+| Artifact hash + layout | Every ZIP, CSV, and emoji asset lives in a quarantined tree under a SHA-256 manifest |
+| JSONL ordering + linkage | Strict object order (version, emoji, team, channel, user, post, direct_channel, direct_post); every `thread_ts` reference points at a parent that was already emitted |
+| Enrichment completeness | Attachment count matches `url_private` count in the raw export; email coverage matches user count |
+| Raw-vs-enriched-vs-JSONL count reconciliation | Three independent counts must agree or the bundle is refused |
+
+The six subagents, each emitting a verdict of `ready` / `blocked` / `needs-review`:
+
+| Subagent | What it judges |
+|---|---|
+| `acquisition-auditor` | That the export actually represents the workspace (no silent truncation) |
+| `gap-hunter` | Features that did not migrate, each classified into a disposition class |
+| `token-exposure-redteam` | Scans artifacts for leaked `xoxp-` / `xoxb-` / `xoxc-` tokens |
+| `compliance-approval-auditor` | Produces the legal-approval packet (retention, scope, basis) |
+| `slack-plan-tier-router` | Picks Track A vs Track B vs Track C automatically from the detected plan tier |
+| `reconciliation-analyst` | Reads raw / enriched / JSONL counts and explains any drift |
+
+The Phase 1 → Phase 2 handoff contract ships exactly four files, and Phase 2 reads structured inputs (not a README and a prayer):
+
+- `handoff.json`: the machine-readable contract Phase 2 validates against
+- `verification.md`: human-readable summary of what the validators saw
+- `unresolved-gaps.md`: every classified gap with its disposition class
+- `evidence-pack.json`: hash-anchored manifest covering every artifact, with provenance
+
+These four files are generated exactly when every validator passes and every subagent verdict is accounted for. No tribal knowledge crosses the phase boundary.
+
 ---
 
 # Part 4: Driving Phase 2 (deploy, rehearse, cutover)
@@ -1010,7 +1051,7 @@ Read `live-stack.md`, the human-readable summary. Anything red here needs resolv
 
 ## 4.7 Staging rehearsal (stage: `staging`)
 
-This is the single most valuable stage in Phase 2. You do it at least once before production cutover.
+This is the most valuable stage in Phase 2. You do it at least once before production cutover.
 
 ```bash
 ./operate.sh staging
@@ -1083,6 +1124,22 @@ Runs `validate-cutover-readiness.py`, `generate-readiness-score.py`, and `genera
 
 The gate is *fail-closed*. If `ROLLBACK_OWNER` is unset or any input report is missing, it blocks. Fix the gap, re-run. This is intentional.
 
+### The seven Go/No-Go gates, not just the `ready` gate
+
+The `ready` stage is one of **seven** explicit gates Phase 2 walks through between the Phase 1 handoff bundle and users typing into production. Every gate has a written-down pass criterion before the migration starts, and any one red gate stops the pipeline. No improvising at 11 pm on cutover night.
+
+| # | Gate | Passes when |
+|---|------|-------------|
+| 1 | `intake-valid` | Phase 1 bundle checksum-verified, row counts reconciled against `handoff.json`, secret-scan clean, `ROLLBACK_OWNER` named |
+| 2 | `infra-provisioned` | Ubuntu host, PostgreSQL 16 (Supabase pooler or self-hosted), Cloudflare R2 bucket, Cloudflare Tunnel, Nginx all reachable; `doctor.sh` green |
+| 3 | `stack-deployed` | Mattermost serving `/api/v4/system/ping`; WebSocket upgrade block live; TLS terminating at the edge; SMTP sends a test email |
+| 4 | `import-reconciled` | `mmctl` bulk-import completed; reconciliation report matches the handoff manifest for users / channels / posts / DMs |
+| 5 | `staging-passed` | Full cutover rehearsed against a throwaway staging VPS first; smoke tests + e2e pass captured in `latest-staging.json` |
+| 6 | `war-room-GO` | Named rollback owner acknowledges; status-page update drafted; 60-second TTL on the DNS record already set; comms kit paged |
+| 7 | `cutover-complete` | DNS flipped; `cutover-status.*.json` records `status: success`; reconciliation second-pass green; activation announcement sent |
+
+Writing the gates down isn't bureaucracy; it removes the 11-pm-on-cutover-night temptation to improvise. Every gate is a place the skill will cheerfully stop, file a blocked-reason, and let the operator fix the input rather than guess at what "good enough" looks like.
+
 ## 4.10 Cutover (stage: `cutover`)
 
 Only run this after `ready` says green and the war room has explicitly called go.
@@ -1126,7 +1183,7 @@ For workspaces that take more than a day to export and transform, use the baseli
 
 1. **Baseline**: run the full Phase 1 pipeline at T − several days. Do the Phase 2 staging rehearsal. Do NOT do production cutover yet.
 2. **Delta N**: periodically (every few hours or once a day), re-run Phase 1 with the same source ZIP path but a different `WORKSPACE_NAME` suffix, or point it at a new export covering only the recent date range. Run `./operate.sh staging` against production; since Mattermost import is idempotent, this just catches new messages without duplicating old ones.
-3. **Final delta**: at T − 0, one last Phase 1 + Phase 2 staging run. Then `./operate.sh cutover` (which is now essentially a no-op import of any final messages).
+3. **Final delta**: at T − 0, one last Phase 1 + Phase 2 staging run. Then `./operate.sh cutover`, which is now a near-no-op import of any final messages.
 
 The Phase 1 skill has `DELTA-CADENCE-WORKFLOW.md` documenting the scheduled export setup. Business+ also supports Slack-side *scheduled recurring exports*, which are the cleanest way to get deltas; turn that on and combine with `SLACK_EXPORT_AUTOMATION=1`.
 
@@ -1533,7 +1590,7 @@ Readers should be able to answer every "will X survive?" question in 60 seconds.
 
 - **"Will threads survive?"** Yes, natively. The `thread_ts` is preserved and Phase 1's JSONL validator fails-closed if any reply points at a missing parent.
 - **"Will my custom emoji show up in Mattermost?"** Yes: names, images, and aliases. Reactions using them may or may not re-bind depending on how mmetl processed the name.
-- **"Will DMs migrate?"** On Business+, yes. On Pro, only DMs where the export token's user is a participant; other people's DMs simply aren't in Slack's export.
+- **"Will DMs migrate?"** On Business+, yes. On Pro, only DMs where the export token's user is a participant; other people's DMs aren't in Slack's export.
 - **"What about Slack Connect channels (shared with other orgs)?"** Only your organization's messages migrate. The other org's messages stay in Slack.
 - **"Do reactions survive?"** Native and standard Unicode emoji: yes. Custom emoji reactions depend on whether mmetl mapped the custom name successfully; Phase 1's reconciliation report lists any that were dropped.
 - **"Pinned messages?"** Yes.
@@ -1703,7 +1760,7 @@ Save the approving reply alongside `handoff.md` in the final evidence pack.
 
 Migrations take hours to days. Laptops sleep, SSH sessions drop, Cloudflare glitches. The safe-resume playbook for each stage:
 
-**The single most important fact:** both `./migrate.sh <stage>` and `./operate.sh <stage>` are **idempotent per stage**. Re-running a stage is always safe *unless noted below*. The skill reads the existing artifact tree, notices what's already done, and either short-circuits or re-derives.
+**The most important fact here:** both `./migrate.sh <stage>` and `./operate.sh <stage>` are **idempotent per stage**. Re-running a stage is always safe *unless noted below*. The skill reads the existing artifact tree, notices what's already done, and either short-circuits or re-derives.
 
 ### How to figure out where you are
 
@@ -1965,7 +2022,7 @@ Origin CA is a Cloudflare-specific concept: the certificate is valid only for tr
 
 ## 10.14 SMTP (Postmark) walkthrough
 
-Mattermost sends password-reset emails to every user on activation. If SMTP is broken, users cannot log in after cutover, and you've effectively done the migration for nothing. This is the single most under-documented piece of the stack for non-technical operators, so here's the full click-path using Postmark as the recommended provider.
+Mattermost sends password-reset emails to every user on activation. If SMTP is broken, users cannot log in after cutover, and you've effectively done the migration for nothing. This is the most under-documented piece of the stack for non-technical operators, so here's the full click-path using Postmark as the recommended provider.
 
 ### 10.14.1 Why Postmark
 
@@ -2332,19 +2389,39 @@ Phase 1 and Phase 2 got you onto Mattermost. **Phase 3** is a third skill, `slac
 
 ## 12.1 What the maintenance skill does
 
-Nine stages driven by one orchestrator (`./maintain.sh <stage>`), plus a `weekly-sweep` combo that chains the routine ones:
+**Eight `maintain.sh` stages** driven by one orchestrator, plus a `weekly-sweep` combo that chains the routine ones. Each stage has an input contract, a named rollback owner, and emits a JSON artifact that the next stage reads (same fail-closed, evidence-first shape as Phase 1 and Phase 2):
 
-- **`health`**: live HTTPS + WebSocket + SMTP probe, plus SSH-read disk %, Postgres connection count, log error rate, and service status. Emits a red/yellow/green JSON.
-- **`update-os`**: SSH to target, `apt update` + `unattended-upgrade` (security-only by default) + `autoremove`. Detects whether a reboot is required but does not reboot immediately.
-- **`schedule-reboot`**: if a reboot is pending, queues it via `at` on the target for the next off-hours window you configured (Sunday 03:00 UTC by default), appends a timestamped entry to `reboot-history.json`.
-- **`update-mattermost`**: pins a target Mattermost version, takes a pre-upgrade `pg_dump`, stop/apt-install/start, verifies the new version responds. On failure, auto-rolls-back to the previous version and restores the dump. Details in §12.5.
-- **`backup`**: SSH-trigger `pg_dump`, gzip, SHA-256, rotate on-host (30/12/12 daily/weekly/monthly), upload to off-site (rclone → Cloudflare R2 or Hetzner Storage Box), verify upload hash.
-- **`db-health`**: Postgres snapshot: DB size, top 20 tables, connection %, vacuum status, lock waits, longest query. Useful trend data.
-- **`restore-drill`**: the quarterly canary test. Downloads the newest off-site backup, restores into `SCRATCH_DB_URL`, runs row-count sanity checks. If this fails, your backups are broken; the skill refuses to run `update-mattermost` until it is fixed. Details in §12.6.
-- **`rotate-credentials`**: rotates the scoped secret you ask for (`--scope pat`, `--scope ssh`, `--scope offsite`, `--scope session-secret`). Details in §12.11.
-- **`disaster-recovery`**: a manual playbook (not a single command) for "the host is gone, rebuild from backups." Walks the agent through ordering a replacement, re-running Phase 2 provision + deploy, restoring from the latest backup, and swapping DNS. Details in §12.9.
+| # | Stage | What it does | Cadence |
+|---|-------|--------------|---------|
+| 1 | `health` | Live HTTPS + WebSocket + SMTP probe, plus SSH-read disk %, Postgres connection count, log error rate, and service status. Emits a red/yellow/green JSON that every subsequent change is measured against. | weekly |
+| 2 | `update-os` | SSH to target, `apt update` + `unattended-upgrade` (security-only by default) + `autoremove`. Schedules reboot inside `REBOOT_WINDOW_*` off-hours bounds; **refuses** to reboot outside the window. | monthly |
+| 3 | `update-mattermost` | Pins a target Mattermost version, takes a pre-upgrade `pg_dump`, stop/apt-install/start, verifies the new version responds. Auto-rollback on a 3-minute `/api/v4/system/ping` health check. Details in §12.5. **Gated by `restore-drill`**: refuses to run if the last successful drill is older than 90 days. | quarterly |
+| 4 | `db-backup` | SSH-trigger `pg_dump`, gzip, SHA-256, rotate on-host (30/12/12 daily/weekly/monthly), upload to off-site (rclone → Cloudflare R2 or Hetzner Storage Box). Refuses to mark the backup complete until the uploaded SHA-256 matches the local dump. | nightly |
+| 5 | `restore-drill` | The quarterly canary. Downloads the newest off-site backup, restores into `SCRATCH_DB_URL`, runs row-count sanity checks. **Gates `update-mattermost`**: the upgrade refuses to run if the last successful drill is older than 90 days, on the grounds that a backup you have never restored from is not a backup. Details in §12.6. | quarterly (gate) |
+| 6 | `rotate-credentials` | Walks the operator through each credential on its own wall clock (see cadences below). The rotation-audit JSON is the source of truth. Details in §12.11. | per-scope |
+| 7 | `incident` | Opens a per-incident quarantine directory, snapshots process + network + disk state, kicks a status-page update, and links the playbook keyed to the symptom class (DB down, TLS expired, disk full, abuse). Post-mortem skeleton pre-populated. | on demand |
+| 8 | `disaster-recovery` | Restores the most recent off-site backup onto a *fresh* host and keeps the original machine offline as forensic evidence. Produces a runbook instead of a panic. Details in §12.9. | on DR trigger |
 
-Wrapped around those stages: a library of paste-ready agent prompts (§12.4), seven focused subagents for one-off audits (§12.7), scenario packs you drop into cron (§12.8), and the operator library plus quote bank that anchor every decision to a reproducible procedure.
+**Credential-rotation cadences are code, not tribal knowledge:**
+
+| Scope | Cadence |
+|-------|---------|
+| Mattermost PAT (`MATTERMOST_ADMIN_TOKEN`) | 90 days |
+| `mmuser` Postgres password | 180 days |
+| SSH keys | annually |
+| rclone off-site tokens | annually |
+
+**Seven focused subagents** deliver deep second opinions on demand (not part of the weekly sweep):
+
+- `health-drift-auditor`: what is slowly getting worse across the last 8 weeks of health reports
+- `backup-integrity-auditor`: backup completeness, SHA-256 coverage, off-site freshness, restore-drill recency
+- `version-drift-auditor`: how far behind the recommended upgrade target you are, framed against Mattermost's ESR policy
+- `db-bloat-auditor`: table bloat, vacuum status, index health, `pg_stat_user_tables` when DB size climbs faster than user count
+- `security-posture-auditor`: credential rotation cadence, SSH key hygiene, `fail2ban` / UFW state, exposed ports
+- `incident-coordinator`: live incident triage playbook, comms cadence, timeline capture for the post-mortem
+- `maintenance-scheduler`: planning a maintenance window, coordinates comms, picks off-hours, writes the user-facing heads-up
+
+Wrapped around those stages: a library of paste-ready agent prompts (§12.4), scenario packs you drop into cron (§12.8), and the operator library plus quote bank that anchor every decision to a reproducible procedure.
 
 ## 12.2 Setup
 
