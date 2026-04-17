@@ -107,10 +107,10 @@ function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
       </div>
       <div className="relative text-left min-w-0">
         <p className="text-sm md:text-base font-bold text-white tracking-tight">
-          Download the full guide as Markdown
+          Download the operator primer as Markdown
         </p>
         <p className="text-[11px] md:text-xs text-slate-400 font-mono tracking-wide mt-0.5">
-          for feeding to an AI agent · ~185 KB · 2.5k lines
+          agent-readable handoff · pairs with the three skills
         </p>
       </div>
       <span className="relative ml-1 md:ml-2 inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/15 px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-cyan-200 shrink-0">
@@ -1473,51 +1473,6 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-mattermost-
           <p>
             {"If you’re still paying Slack today, at some point in the next eighteen months the vendor will email you a new number, and it will be larger than the current one by some multiple that is too painful to ignore. When it happens, you have two options. You can pay. Or you can open a new Claude Code session, paste one sentence, and be somewhere better by the end of the weekend."}
           </p>
-
-          {/* Operator-ready source guide CTA */}
-          <div className="my-10 md:my-12 rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-purple-500/[0.06] via-cyan-500/[0.06] to-emerald-500/[0.06] p-6 md:p-7 backdrop-blur-xl">
-            <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-2">
-              For operators who want to actually run this
-            </p>
-            <p className="text-base md:text-lg text-slate-200 leading-relaxed mb-4">
-              This post is a distilled essay. The 2,500-line source guide (which drives the two skills and which an AI agent reads before kicking off the migration) includes everything this post skips:
-            </p>
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[13px] text-slate-300 font-mono mb-6">
-              {[
-                "Day-zero server ordering & SSH setup",
-                "Bootstrap scripts (doctor.sh, bootstrap-tools.sh)",
-                "MCP worked examples (Slack, Playwright, Mattermost)",
-                "Full Phase 1 / Phase 2 config.env field tables",
-                "Stage-by-stage cheatsheet with proof & recovery",
-                "Troubleshooting index (Phase 1, Phase 2, audit)",
-                "Printable operator checklist (T−2d, T−1d, T+0, T+7d)",
-                "User-communications kit (every template, T−7d → T+7d)",
-                "Legal-approval email template",
-                "Full credential inventory & rotation cadence",
-                "Cloudflare & Postmark click-by-click walkthroughs",
-                "Enterprise Grid split workflow",
-                "Compliance & audit evidence-pack handoff",
-                "Resume-after-interrupt playbook per stage",
-                "jsm install / pin / sync / verify commands",
-                "Phase 3 maintenance: weekly sweep, restore drill, DR, subagents, scenario pack",
-              ].map((line) => (
-                <li key={line} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 shrink-0 w-3.5 h-3.5 text-cyan-400" />
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <MarkdownDownloadButton compact />
-              <p className="text-[11px] text-slate-500 font-mono leading-relaxed">
-                Paste it into Claude Code or Codex with{" "}
-                <span className="text-slate-300">
-                  “read this guide end-to-end, then plan my migration”
-                </span>{" "}
-                and the agent drives from there.
-              </p>
-            </div>
-          </div>
 
           <div className="sm-sign-off">
             <div className="flex items-center gap-3">
