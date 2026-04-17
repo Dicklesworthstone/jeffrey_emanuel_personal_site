@@ -140,6 +140,14 @@ function Divider() {
   );
 }
 
+// Code block for multi-line commands / snippets
+function Code({ children }: { children: ReactNode }) {
+  return (
+    <pre className="sm-code-block">
+      <code>{children}</code>
+    </pre>
+  );
+}
 
 // Inline monospace snippet
 function Mono({ children }: { children: ReactNode }) {
