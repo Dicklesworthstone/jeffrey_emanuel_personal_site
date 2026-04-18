@@ -810,12 +810,12 @@ export function SlackMigrationArticle() {
               </li>
               <li>
                 <a
-                  href="https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance"
+                  href="https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-maintenance"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-cyan-300 hover:text-cyan-200 underline decoration-cyan-500/40 underline-offset-4 break-all"
                 >
-                  jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
+                  jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-maintenance
                 </a>
                 <span className="text-slate-400"> — Phase 3, the ongoing-maintenance skill (weekly sweep, auto-rollback upgrades, restore drills).</span>
               </li>
@@ -902,7 +902,7 @@ jsm setup                        # first-time wizard: config + skill dirs
 jsm login                        # browser → sign in with Google
 jsm install slack-migration-to-mattermost-phase-1-extraction
 jsm install slack-migration-to-mattermost-phase-2-setup-and-import
-jsm install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`}
+jsm install slack-migration-to-mattermost-phase-3-ongoing-maintenance`}
           </Code>
 
           <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 mt-4">
@@ -911,7 +911,7 @@ jsm install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
           <Code>
 {`claude plugins install slack-migration-to-mattermost-phase-1-extraction
 claude plugins install slack-migration-to-mattermost-phase-2-setup-and-import
-claude plugins install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`}
+claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance`}
           </Code>
 
           <p>

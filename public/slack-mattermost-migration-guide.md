@@ -4,7 +4,7 @@ This guide walks a Slack workspace admin through an end-to-end migration to a se
 
 - **`slack-migration-to-mattermost-phase-1-extraction`** runs on your Mac, Windows, or Linux workstation. It pulls everything out of Slack (public and private channels, DMs, files, emoji, canvases, lists, admin audit CSVs, Workflow Builder JSON) and transforms it into a hash-stamped `mattermost-bulk-import.zip` plus a machine-readable `handoff.json`.
 - **`slack-migration-to-mattermost-phase-2-setup-and-import`** runs from the same workstation over SSH to an Ubuntu server at Hetzner, OVH, or Contabo. It provisions Mattermost behind Cloudflare and Nginx, validates the Phase 1 bundle, rehearses the import on a staging target, computes a fail-closed readiness gate, and executes the production cutover with explicit rollback.
-- **`slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`** takes over once you are live. It runs weekly health sweeps, monthly OS patches, quarterly Mattermost upgrades with auto-rollback, nightly backups with SHA-256 verification, quarterly restore drills, and an incident playbook.
+- **`slack-migration-to-mattermost-phase-3-ongoing-maintenance`** takes over once you are live. It runs weekly health sweeps, monthly OS patches, quarterly Mattermost upgrades with auto-rollback, nightly backups with SHA-256 verification, quarterly restore drills, and an incident playbook.
 
 The skills automate almost everything, but there are human decisions along the way: what date range to export, which channels to sidecar rather than import, whether to bind PostgreSQL locally or put it on Supabase, who is the rollback owner, and so on. This guide explains where each decision lives in the pipeline and how to make it. The authoritative per-stage detail — what each script does, exactly — lives inside the skill. The agent reads the skill; the human reads this primer.
 
@@ -12,7 +12,7 @@ The three skill catalog pages (each has the verbatim `SKILL.md` the agent loads,
 
 - https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-1-extraction
 - https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-2-setup-and-import
-- https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
+- https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-maintenance
 
 Heads up: those URLs return a 404 unless you are signed in to a `jeffreys-skills.md` account with an active subscription. If you hit a 404, sign up (or log in) at `jeffreys-skills.md/dashboard` first and reload. That is the same account the `jsm` CLI authenticates against below, so doing this step first means `jsm install` will already know who you are.
 
@@ -67,7 +67,7 @@ Three skills handle the full lifecycle. Each is a self-contained Claude Code / C
 
 **`slack-migration-to-mattermost-phase-2-setup-and-import`** runs from the same workstation over SSH to your Ubuntu target. It owns everything from "I have a validated bundle and a fresh Ubuntu host" to "Mattermost is live, users are activating, and the cutover evidence pack is on disk." It ships stages (intake → render-config → edge → provision → deploy → verify-live → staging → restore → ready → cutover), a fail-closed seven-gate readiness model, and an explicit rollback path gated by a verbatim confirmation phrase. Find it at `https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-2-setup-and-import`.
 
-**`slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`** takes over once you're live. It owns the weekly / monthly / quarterly cadence that keeps a self-hosted Mattermost healthy: health probes, OS and Mattermost upgrades with auto-rollback, nightly backups with SHA-256 verification, quarterly restore drills, credential rotation, and an incident playbook. The eight stages and their cadences are summarized below in "Phase 3 · 8 maintain.sh stages." Find it at `https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance`.
+**`slack-migration-to-mattermost-phase-3-ongoing-maintenance`** takes over once you're live. It owns the weekly / monthly / quarterly cadence that keeps a self-hosted Mattermost healthy: health probes, OS and Mattermost upgrades with auto-rollback, nightly backups with SHA-256 verification, quarterly restore drills, credential rotation, and an incident playbook. The eight stages and their cadences are summarized below in "Phase 3 · 8 maintain.sh stages." Find it at `https://jeffreys-skills.md/skills/slack-migration-to-mattermost-phase-3-ongoing-maintenance`.
 
 Each skill's own `SKILL.md` is the authoritative operational reference. When you're inside a stage and want to know "how does this work, exactly?", the answer is in the skill, not in this guide.
 
@@ -87,7 +87,7 @@ jsm setup                        # First-time wizard; creates config, picks skil
 jsm login                        # Opens browser → sign in with Google
 jsm install slack-migration-to-mattermost-phase-1-extraction
 jsm install slack-migration-to-mattermost-phase-2-setup-and-import
-jsm install slack-migration-to-mattermost-phase-3-ongoing-mattermost-maintenance
+jsm install slack-migration-to-mattermost-phase-3-ongoing-maintenance
 ```
 
 Each skill ships its own `scripts/bootstrap-tools.sh`, which handles the underlying tool install (slackdump, mmetl, mmctl, psql, rsync, etc.) per platform. Run it once per skill per laptop. From there, open Claude Code or Codex in your migration working directory and ask the agent, in plain English, to drive the skill: *"Use the Phase 1 skill to run setup."*
