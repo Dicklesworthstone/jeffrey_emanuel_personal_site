@@ -2231,7 +2231,7 @@ export const writingHighlights: WritingItem[] = [
     source: "Blog",
     category: "AI Agents & Law",
     blurb:
-      "A Claude Code / Codex skill that conducts a structured estate-planning intake — twelve axioms, nine phases, seventy-six jargon tooltips — and produces an attorney-ready handoff package.",
+      "A Claude Code / Codex skill that conducts a structured estate-planning intake — twelve axioms, nine phases, seventy-six jargon tooltips — and produces a structured handoff packet for attorney review.",
     date: "2026-04-19",
     featured: true,
     draft: true,

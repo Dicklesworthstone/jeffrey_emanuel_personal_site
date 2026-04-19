@@ -61,7 +61,10 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "bun dev",
+    // Turbopack has intermittently corrupted its task DB under repeated
+    // Playwright-driven dev-server spins in this repo, so keep the test lane
+    // on webpack until the underlying issue is resolved.
+    command: "bun run dev -- --webpack",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

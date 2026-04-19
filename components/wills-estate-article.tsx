@@ -314,7 +314,10 @@ export function WillsEstateArticle() {
           <div className="text-center relative z-20">
             {/* Badge */}
             <div className="inline-flex items-center gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
-              <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+              <span
+                aria-hidden="true"
+                className="w-2 h-2 bg-cyan-400 rounded-full motion-safe:animate-pulse"
+              />
               AI Agents · Estate Planning · Skills
             </div>
 
@@ -594,7 +597,10 @@ export function WillsEstateArticle() {
 
           <div className="my-5 md:my-6 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.04] via-cyan-500/[0.04] to-emerald-500/[0.04] p-5 md:p-6 backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span
+                aria-hidden="true"
+                className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400 motion-safe:animate-pulse"
+              />
               <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-emerald-300">
                 What shipped in the latest release · April 2026
               </p>

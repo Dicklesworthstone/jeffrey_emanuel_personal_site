@@ -5,9 +5,23 @@ import { useReducedMotion } from "framer-motion";
 import ErrorBoundary from "@/components/error-boundary";
 import { AlertTriangle } from "lucide-react";
 
-function VizFallback() {
+const VIZ_SKELETON_HEIGHTS = {
+  "tier-triage": "min-h-[34rem]",
+  "axiom-coherence": "min-h-[34rem]",
+  "intake-phases": "min-h-[34rem]",
+  "deliverables-tree": "min-h-[40rem]",
+  "anti-pattern-cards": "min-h-[28rem]",
+} as const;
+
+function getVizHeightClass(vizId: string) {
+  return VIZ_SKELETON_HEIGHTS[vizId as keyof typeof VIZ_SKELETON_HEIGHTS] ?? "min-h-[300px]";
+}
+
+function VizFallback({ vizId }: { vizId: string }) {
   return (
-    <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-slate-800/60 bg-slate-900/40 px-6 py-8 text-center">
+    <div
+      className={`flex ${getVizHeightClass(vizId)} items-center justify-center rounded-xl border border-slate-800/60 bg-slate-900/40 px-6 py-8 text-center`}
+    >
       <div className="flex flex-col items-center gap-3">
         <AlertTriangle className="h-5 w-5 text-amber-400/70" />
         <p className="text-sm text-slate-500">
@@ -18,14 +32,14 @@ function VizFallback() {
   );
 }
 
-function VizSkeleton() {
+function VizSkeleton({ vizId }: { vizId: string }) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className="flex min-h-[300px] items-center justify-center rounded-xl border border-slate-800/40 bg-slate-900/20 px-6 py-8"
+      className={`flex ${getVizHeightClass(vizId)} items-center justify-center rounded-xl border border-slate-800/40 bg-slate-900/20 px-6 py-8`}
     >
       <span className="sr-only">Loading visualization</span>
       <div
@@ -38,12 +52,12 @@ function VizSkeleton() {
   );
 }
 
-const fallback = <VizFallback />;
-
 function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   vizId: string,
 ) {
+  const fallback = <VizFallback vizId={vizId} />;
+
   function Wrapped(props: P) {
     return (
       <div data-viz={vizId}>
@@ -63,7 +77,7 @@ export const TierTriageViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.TierTriageViz,
       })),
-    { ssr: false, loading: () => <VizSkeleton /> },
+    { ssr: false, loading: () => <VizSkeleton vizId="tier-triage" /> },
   ),
   "tier-triage",
 );
@@ -74,7 +88,7 @@ export const AxiomCoherenceViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.AxiomCoherenceViz,
       })),
-    { ssr: false, loading: () => <VizSkeleton /> },
+    { ssr: false, loading: () => <VizSkeleton vizId="axiom-coherence" /> },
   ),
   "axiom-coherence",
 );
@@ -85,7 +99,7 @@ export const IntakePhasesViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.IntakePhasesViz,
       })),
-    { ssr: false, loading: () => <VizSkeleton /> },
+    { ssr: false, loading: () => <VizSkeleton vizId="intake-phases" /> },
   ),
   "intake-phases",
 );
@@ -96,7 +110,7 @@ export const DeliverablesTreeViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.DeliverablesTreeViz,
       })),
-    { ssr: false, loading: () => <VizSkeleton /> },
+    { ssr: false, loading: () => <VizSkeleton vizId="deliverables-tree" /> },
   ),
   "deliverables-tree",
 );
@@ -107,7 +121,7 @@ export const AntiPatternCardsViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.AntiPatternCardsViz,
       })),
-    { ssr: false, loading: () => <VizSkeleton /> },
+    { ssr: false, loading: () => <VizSkeleton vizId="anti-pattern-cards" /> },
   ),
   "anti-pattern-cards",
 );
