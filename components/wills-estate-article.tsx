@@ -611,7 +611,7 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== HOOK + COST TABLE ========== */}
-      <section id="cost" data-section="cost" className="pb-10 md:pb-14">
+      <section data-section="cost" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="cost"
@@ -690,6 +690,11 @@ export function WillsEstateArticle() {
           <nav className="sm-toc mt-10" aria-label="Table of contents">
             <p className="sm-subheading">Contents</p>
             <ol>
+              <li>
+                <a href="#cost" onClick={(event) => handleTocJump(event, "cost")}>
+                  One weekend, roughly $120, instead of $20,000
+                </a>
+              </li>
               <li>
                 <a href="#what-is-it" onClick={(event) => handleTocJump(event, "what-is-it")}>
                   What is an AI agent, and what is a skill?
