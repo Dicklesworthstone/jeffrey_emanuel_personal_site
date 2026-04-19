@@ -5,7 +5,7 @@ import { writingHighlights } from "@/lib/content";
 
 const ARTICLE_TITLE = "An AI Skill for Wills & Estate Planning";
 const ARTICLE_DESCRIPTION =
-  "A Claude Code / Codex skill that handles the expensive intake portion of estate planning — four steps to install, one weekend of work, roughly $120, and a structured document package for attorney review.";
+  "A Claude Code / Codex skill that handles the expensive intake portion of estate planning: four steps to install, one weekend of work, roughly $120, and a structured document package for attorney review.";
 const ARTICLE_CANONICAL = "/writing/wills-and-estate-planning";
 const ARTICLE_PUBLISHED_AT = "2026-04-19";
 const ARTICLE_PUBLISHED_LABEL = "April 19, 2026";
