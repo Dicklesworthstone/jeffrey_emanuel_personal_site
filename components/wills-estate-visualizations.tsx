@@ -1306,19 +1306,30 @@ export function IntakePhasesViz() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {isActive ? (
-                      <span className="rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
+                        <span className="h-1.5 w-1.5 rounded-full bg-sky-400" aria-hidden="true" />
                         In view
                       </span>
                     ) : null}
                     {isDrilled ? (
-                      <span className="rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-200">
-                        Drill open
+                      <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-200">
+                        <span className="h-1.5 w-1.5 rounded-full bg-violet-400" aria-hidden="true" />
+                        Detail
                       </span>
                     ) : null}
                   </div>
                 </button>
               );
             })}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500" aria-hidden="true">
+            <span className="inline-flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> = scroll-linked
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-violet-400" /> = detail open
+            </span>
+            <span className="hidden sm:inline">Arrow keys to navigate · Enter to drill</span>
           </div>
         </div>
 
@@ -1352,7 +1363,7 @@ export function IntakePhasesViz() {
                   <p className="mt-2 text-base font-medium italic leading-7 text-slate-50">&ldquo;{drilledPhase.question}&rdquo;</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                     <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", drilledStyles.detailAccent)}>
                       Typical artifact
@@ -3221,7 +3232,7 @@ export function PricingComparisonViz() {
           </div>
 
           <div className="rounded-[20px] border border-white/10 bg-black/20 p-4 md:p-5">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-300">
                   <span className="text-amber-200">01</span>
@@ -3277,7 +3288,7 @@ export function PricingComparisonViz() {
             <div
               role="group"
               aria-label="Common net worth presets"
-              className="mt-4 flex flex-wrap gap-2"
+              className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"
             >
               {PRICING_NET_WORTH_PRESETS.map((preset) => {
                 const active = netWorth === preset.value;
@@ -3300,7 +3311,7 @@ export function PricingComparisonViz() {
               })}
             </div>
 
-            <div className="mt-3 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.18em] text-slate-500">
+            <div className="mt-3 grid grid-cols-4 text-center text-[10px] font-mono uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.18em]">
               <span>$100K</span>
               <span>$1M</span>
               <span>$10M</span>
@@ -3309,7 +3320,7 @@ export function PricingComparisonViz() {
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-300">
                   <span className="text-cyan-200">02</span>
@@ -3410,9 +3421,17 @@ export function PricingComparisonViz() {
             </motion.p>
             <div className="grid gap-3">
               <div className="rounded-[18px] border border-amber-300/20 bg-amber-400/[0.08] p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200">
-                  Attorney consult estimate
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <BriefcaseBusiness className="h-4 w-4 text-amber-100" aria-hidden="true" />
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200">
+                      Attorney consult estimate
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-amber-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+                    Scales with complexity
+                  </span>
+                </div>
                 <motion.p
                   key={`attorney-${attorneyEstimate}`}
                   initial={prefersReducedMotion ? false : { opacity: 0.65, y: 6 }}
@@ -3430,9 +3449,17 @@ export function PricingComparisonViz() {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-[18px] border border-sky-300/20 bg-sky-400/[0.08] p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-sky-200">
-                    LegalZoom / Trust &amp; Will
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <FileCheck className="h-4 w-4 text-sky-100" aria-hidden="true" />
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-sky-200">
+                        LegalZoom / Trust &amp; Will
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-sky-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-100">
+                      Mostly flat
+                    </span>
+                  </div>
                   <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
                     $199–$499
                   </p>
@@ -3443,9 +3470,17 @@ export function PricingComparisonViz() {
                 </div>
 
                 <div className="rounded-[18px] border border-emerald-300/20 bg-emerald-400/[0.08] p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
-                    Jeffreys Skills.md
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-emerald-100" aria-hidden="true" />
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                        Jeffreys Skills.md
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-emerald-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
+                      Monthly subscription
+                    </span>
+                  </div>
                   <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
                     $20/mo
                   </p>
