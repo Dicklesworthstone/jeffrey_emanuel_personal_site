@@ -27,6 +27,7 @@ import {
   IntakePhasesViz,
   DeliverablesTreeViz,
   AntiPatternCardsViz,
+  PricingComparisonViz,
 } from "./viz-error-boundary";
 
 // Fonts — the editorial system shared across this site's long-form articles
@@ -1984,6 +1985,8 @@ jsm install wills-and-estate-planning-skill`}
             better fit than a form-based will generator, and an initial
             consultation with an estates attorney is better than either.
           </p>
+
+          <PricingComparisonViz />
         </EC>
       </section>
 

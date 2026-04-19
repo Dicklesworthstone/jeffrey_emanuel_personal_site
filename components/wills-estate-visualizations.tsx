@@ -19,6 +19,7 @@ import {
   GitFork,
   Globe,
   GitBranch,
+  HandCoins,
   House,
   Inbox,
   MapPinned,
@@ -2770,6 +2771,338 @@ export function AntiPatternCardsViz() {
               </button>
             );
           })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================================================================
+   PricingComparisonViz — interactive cost comparison widget (hgjp.41)
+   ================================================================ */
+
+type PricingComplexityChip = {
+  id: string;
+  label: string;
+};
+
+const PRICING_COMPLEXITY_CHIPS: PricingComplexityChip[] = [
+  { id: "blended-family", label: "Blended family" },
+  { id: "minor-children", label: "Minor children / dependents" },
+  { id: "business-interest", label: "Business / partnership interest" },
+  { id: "multi-state-property", label: "Vacation home / multi-state property" },
+  { id: "vulnerable-heir", label: "Vulnerable heir" },
+  { id: "non-citizen-spouse", label: "Non-citizen spouse" },
+  { id: "crypto", label: "Crypto self-custody" },
+  { id: "concentrated-stock", label: "Concentrated stock / pre-IPO" },
+];
+
+const PRICING_SLIDER_MIN = 100_000;
+const PRICING_SLIDER_MAX = 100_000_000;
+const PRICING_JSM_MONTHLY_PRICE = 20;
+const PRICING_ATTORNEY_MIN = 3_000;
+const PRICING_ATTORNEY_MAX = 40_000;
+
+function priceCalcValueFromSlider(sliderValue: number) {
+  const logMin = Math.log10(PRICING_SLIDER_MIN);
+  const logMax = Math.log10(PRICING_SLIDER_MAX);
+  const exponent = logMin + (sliderValue / 100) * (logMax - logMin);
+  const rawValue = 10 ** exponent;
+  if (rawValue < 1_000_000) return Math.round(rawValue / 5_000) * 5_000;
+  if (rawValue < 10_000_000) return Math.round(rawValue / 25_000) * 25_000;
+  return Math.round(rawValue / 100_000) * 100_000;
+}
+
+function priceCalcSliderFromValue(value: number) {
+  const logMin = Math.log10(PRICING_SLIDER_MIN);
+  const logMax = Math.log10(PRICING_SLIDER_MAX);
+  return ((Math.log10(value) - logMin) / (logMax - logMin)) * 100;
+}
+
+function clampAttorneyEstimate(value: number) {
+  return Math.min(PRICING_ATTORNEY_MAX, Math.max(PRICING_ATTORNEY_MIN, value));
+}
+
+function roundAttorneyEstimate(value: number) {
+  return Math.round(value / 250) * 250;
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatCompactCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: value >= 1_000_000 ? 1 : 0,
+  }).format(value);
+}
+
+function getNetWorthBucket(value: number) {
+  if (value < 250_000) return "100k-250k";
+  if (value < 500_000) return "250k-500k";
+  if (value < 1_000_000) return "500k-1m";
+  if (value < 3_000_000) return "1m-3m";
+  if (value < 10_000_000) return "3m-10m";
+  if (value < 30_000_000) return "10m-30m";
+  return "30m-100m";
+}
+
+function emitPricingCalcChanged(netWorth: number, numChips: number) {
+  if (typeof window === "undefined") return;
+  if (navigator.doNotTrack === "1") return;
+  const payload = {
+    net_worth_bucket: getNetWorthBucket(netWorth),
+    num_chips: numChips,
+  };
+  if (process.env.NODE_ENV !== "production") {
+    console.info("[pricing_calc_changed]", payload);
+    return;
+  }
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "pricing_calc_changed", payload);
+  }
+}
+
+export function PricingComparisonViz() {
+  const prefersReducedMotion = useReducedMotion();
+  const [sliderValue, setSliderValue] = useState(() =>
+    priceCalcSliderFromValue(1_000_000),
+  );
+  const [selectedChips, setSelectedChips] = useState<string[]>([]);
+  const hasInteractedRef = useRef(false);
+  const transition = prefersReducedMotion
+    ? { duration: 0 }
+    : { duration: 0.28, ease: "easeOut" as const };
+
+  const netWorth = useMemo(
+    () => priceCalcValueFromSlider(sliderValue),
+    [sliderValue],
+  );
+  const numChips = selectedChips.length;
+
+  const attorneyEstimate = useMemo(() => {
+    const complexityPremium = numChips * 2_000;
+    const netWorthPremium = Math.max(0, netWorth - 1_000_000) * 0.00005;
+    return roundAttorneyEstimate(
+      clampAttorneyEstimate(PRICING_ATTORNEY_MIN + netWorthPremium + complexityPremium),
+    );
+  }, [netWorth, numChips]);
+
+  const savingsVsAttorney = Math.max(0, attorneyEstimate - PRICING_JSM_MONTHLY_PRICE);
+
+  useEffect(() => {
+    if (!hasInteractedRef.current) return;
+    emitPricingCalcChanged(netWorth, numChips);
+  }, [netWorth, numChips]);
+
+  const toggleChip = (chipId: string) => {
+    hasInteractedRef.current = true;
+    setSelectedChips((current) =>
+      current.includes(chipId)
+        ? current.filter((v) => v !== chipId)
+        : [...current, chipId],
+    );
+  };
+
+  return (
+    <section
+      aria-label="Interactive pricing calculator comparing attorney, form-based, and jeffreys-skills.md costs"
+      className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-amber-300/10"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(34,211,238,0.08),transparent_38%)]" />
+      <div className="relative grid gap-6 p-5 md:grid-cols-[1.1fr_0.9fr] md:p-7">
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-100">
+              <HandCoins className="h-3.5 w-3.5" aria-hidden="true" />
+              Pricing Reality Check
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold tracking-tight text-white md:text-[2rem]">
+                See how complexity changes the economics
+              </h3>
+              <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
+                This is deliberately a rough guide. The point is the order of
+                magnitude: once you have real family complexity, the expensive
+                part of a lawyer&apos;s first meeting is usually the intake and
+                issue-spotting work.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-[20px] border border-white/10 bg-black/20 p-4 md:p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
+                  Net worth estimate
+                </p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                  {formatCompactCurrency(netWorth)}
+                </p>
+              </div>
+              <div className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold text-amber-100">
+                {getNetWorthBucket(netWorth)}
+              </div>
+            </div>
+
+            <label className="mt-5 block">
+              <span className="sr-only">
+                Estimated net worth from one hundred thousand dollars to one hundred million dollars
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={sliderValue}
+                aria-label="Estimated net worth"
+                className="sm-range w-full"
+                onChange={(event) => {
+                  hasInteractedRef.current = true;
+                  setSliderValue(Number(event.currentTarget.value));
+                }}
+              />
+            </label>
+
+            <div className="mt-3 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.18em] text-slate-500">
+              <span>$100K</span>
+              <span>$1M</span>
+              <span>$10M</span>
+              <span>$100M</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
+                  Complexity overlays
+                </p>
+                <p className="mt-1 text-sm text-slate-300">
+                  Toggle the facts that make a cheap form bundle stop being the
+                  real comparison.
+                </p>
+              </div>
+              <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-100">
+                {numChips} active
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {PRICING_COMPLEXITY_CHIPS.map((chip) => {
+                const active = selectedChips.includes(chip.id);
+                return (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => toggleChip(chip.id)}
+                    className={cn(
+                      "rounded-[16px] border px-4 py-3 text-left text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                      active
+                        ? "border-cyan-300/35 bg-cyan-400/[0.12] text-cyan-50 shadow-[0_14px_34px_rgba(34,211,238,0.12)]"
+                        : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-cyan-300/20 hover:bg-cyan-400/[0.04]",
+                    )}
+                  >
+                    <span className="block font-medium">{chip.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div
+            aria-live="polite"
+            className="rounded-[22px] border border-white/10 bg-black/20 p-4 md:p-5"
+          >
+            <div className="grid gap-3">
+              <div className="rounded-[18px] border border-amber-300/20 bg-amber-400/[0.08] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200">
+                  Attorney consult estimate
+                </p>
+                <motion.p
+                  key={`attorney-${attorneyEstimate}`}
+                  initial={prefersReducedMotion ? false : { opacity: 0.65, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={transition}
+                  className="mt-2 text-4xl font-semibold tracking-tight text-white"
+                >
+                  {formatCurrency(attorneyEstimate)}
+                </motion.p>
+                <p className="mt-2 text-sm leading-6 text-amber-50/80">
+                  Roughly modeled as a base intake + complexity premium, then
+                  soft-clamped so the widget stays in plausible territory.
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[18px] border border-sky-300/20 bg-sky-400/[0.08] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-sky-200">
+                    LegalZoom / Trust &amp; Will
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                    $199–$499
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-sky-50/80">
+                    Flat consumer-template pricing. It usually does not move
+                    with complexity, which is the whole point of the comparison.
+                  </p>
+                </div>
+
+                <div className="rounded-[18px] border border-emerald-300/20 bg-emerald-400/[0.08] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                    Jeffreys Skills.md
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                    $20/mo
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-emerald-50/80">
+                    Month-to-month. Cancel when the packet is done and your
+                    attorney handoff is organized.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <motion.div
+              key={`savings-${savingsVsAttorney}`}
+              initial={prefersReducedMotion ? false : { opacity: 0.7, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={transition}
+              className="mt-4 rounded-[18px] border border-emerald-300/25 bg-emerald-400/[0.10] p-4"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                Projected savings vs attorney consult
+              </p>
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                {formatCurrency(savingsVsAttorney)}
+              </p>
+            </motion.div>
+
+            <p className="mt-4 text-sm font-medium leading-6 text-slate-200">
+              This calculator is a rough guide, not a legal fee quote. Actual
+              attorneys quote based on actual facts. Your real skill
+              subscription is {formatCurrency(PRICING_JSM_MONTHLY_PRICE)} per
+              month; the attorney number is here so you can understand the
+              order of magnitude.
+            </p>
+
+            <p className="mt-3 text-xs leading-5 text-slate-400">
+              Sources: public consumer pricing pages for LegalZoom and Trust
+              &amp; Will, plus public estate-planning billing-rate surveys and
+              fee schedules. This widget turns those public ranges into a
+              deliberately simple comparison, not a quote.
+            </p>
+          </div>
         </div>
       </div>
     </section>

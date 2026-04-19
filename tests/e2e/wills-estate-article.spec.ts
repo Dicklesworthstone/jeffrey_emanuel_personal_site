@@ -22,6 +22,7 @@ const VIZ_IDS = [
   "intake-phases",
   "deliverables-tree",
   "anti-pattern-cards",
+  "pricing-comparison",
 ];
 const VIZ_LOAD_MARKERS: Record<(typeof VIZ_IDS)[number], RegExp> = {
   "tier-triage": /Five wealth tiers, with complexity layered on top/i,
@@ -32,6 +33,7 @@ const VIZ_LOAD_MARKERS: Record<(typeof VIZ_IDS)[number], RegExp> = {
   "deliverables-tree":
     /Forty-five artifacts, organized like a real project directory/i,
   "anti-pattern-cards": /The patterns the skill is designed to catch/i,
+  "pricing-comparison": /Pricing Reality Check/i,
 };
 
 const KNOWN_A11Y_RULES = ["color-contrast"];
@@ -259,6 +261,38 @@ test.describe("Wills & Estate Planning Article", () => {
     await expect(
       viz.getByText(/Signing a revocable trust does not fund it/i),
     ).toBeVisible();
+
+    runtime.assertClean();
+  });
+
+  test("pricing calculator responds to slider and chip interactions", async ({ page }) => {
+    const scenario = "pricing-calc";
+    const runtime = captureRuntimeErrors(page);
+
+    await visitArticle(page, scenario);
+
+    const viz = page.locator('[data-viz="pricing-comparison"]');
+    await viz.scrollIntoViewIfNeeded();
+    await expect(viz).toBeVisible({ timeout: 15_000 });
+
+    logStep(scenario, "assert default attorney estimate");
+    await expect(viz.getByText("$3,000")).toBeVisible();
+
+    logStep(scenario, "toggle complexity chip");
+    const blendedChip = viz.getByRole("button", { name: /blended family/i });
+    await blendedChip.click();
+    await expect(blendedChip).toHaveAttribute("aria-pressed", "true");
+
+    logStep(scenario, "assert estimate increases with chip");
+    await expect(viz.getByText("$5,000")).toBeVisible();
+
+    logStep(scenario, "move slider to high end");
+    const slider = viz.getByRole("slider");
+    await slider.fill("80");
+    await expect(viz.getByText(/\$[1-9]\d{0,2},\d{3}/)).toBeVisible();
+
+    logStep(scenario, "assert savings line visible");
+    await expect(viz.getByText(/projected savings/i)).toBeVisible();
 
     runtime.assertClean();
   });

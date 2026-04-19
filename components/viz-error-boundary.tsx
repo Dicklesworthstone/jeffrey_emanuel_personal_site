@@ -11,6 +11,7 @@ const VIZ_SKELETON_HEIGHTS = {
   "intake-phases": "min-h-[34rem]",
   "deliverables-tree": "min-h-[40rem]",
   "anti-pattern-cards": "min-h-[28rem]",
+  "pricing-comparison": "min-h-[32rem]",
 } as const;
 
 function getVizHeightClass(vizId: string) {
@@ -124,4 +125,15 @@ export const AntiPatternCardsViz = withErrorBoundary(
     { ssr: false, loading: () => <VizSkeleton vizId="anti-pattern-cards" /> },
   ),
   "anti-pattern-cards",
+);
+
+export const PricingComparisonViz = withErrorBoundary(
+  dynamic(
+    () =>
+      import("./wills-estate-visualizations").then((m) => ({
+        default: m.PricingComparisonViz,
+      })),
+    { ssr: false, loading: () => <VizSkeleton vizId="pricing-comparison" /> },
+  ),
+  "pricing-comparison",
 );
