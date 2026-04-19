@@ -235,6 +235,15 @@ export function WillsEstateArticle() {
   const prefersReducedMotion = useReducedMotion();
   const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+  const tocScrollTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (tocScrollTimerRef.current !== null) {
+        clearTimeout(tocScrollTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleTocJump = (
     event: ReactMouseEvent<HTMLAnchorElement>,
@@ -256,6 +265,8 @@ export function WillsEstateArticle() {
 
     event.preventDefault();
 
+    if (tocScrollTimerRef.current !== null) clearTimeout(tocScrollTimerRef.current);
+
     const scrollToAnchor = (behavior: ScrollBehavior) => {
       anchor.scrollIntoView({ behavior, block: "start" });
     };
@@ -263,14 +274,7 @@ export function WillsEstateArticle() {
     window.history.pushState(null, "", `#${id}`);
     scrollToAnchor(prefersReducedMotion ? "auto" : "smooth");
 
-    // Re-apply the anchor jump after late dynamic mounts settle so the
-    // target section stays in view even if a visualization above it expands.
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        scrollToAnchor("auto");
-      });
-    });
-    window.setTimeout(() => {
+    tocScrollTimerRef.current = window.setTimeout(() => {
       scrollToAnchor("auto");
     }, 450);
   };
