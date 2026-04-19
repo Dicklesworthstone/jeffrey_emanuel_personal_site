@@ -1212,6 +1212,17 @@ export function IntakePhasesViz() {
                 phases in order, writing artifacts as facts harden and only escalating
                 tier or specialty logic when the earlier evidence actually supports it.
               </p>
+              <div className="flex flex-wrap gap-3 pt-1">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+                  <span className="text-sky-400">9</span> phases
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+                  <span className="text-emerald-400">~85</span> min total
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+                  <span className="text-amber-400">9</span> artifacts
+                </span>
+              </div>
             </div>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
@@ -1245,8 +1256,8 @@ export function IntakePhasesViz() {
         </div>
 
         <div className="relative">
-          <div className="pointer-events-none absolute left-12 right-12 top-[2.15rem] hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent lg:block" />
-          <div role="tablist" aria-label="Intake phases" aria-orientation="horizontal" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-9">
+          <div className="pointer-events-none absolute left-12 right-12 top-[2.15rem] hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent xl:block" />
+          <div role="tablist" aria-label="Intake phases" aria-orientation="horizontal" className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9">
             {intakePhases.map((phase, index) => {
               const isFocused = index === focusedIndex;
               const isActive = index === activeIndex;
