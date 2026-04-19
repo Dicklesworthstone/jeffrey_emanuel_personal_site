@@ -2581,6 +2581,64 @@ const antiPatternIconMap: Record<string, ReactNode> = {
 
 type AntiPatternCardData = (typeof antiPatterns)[number];
 
+const antiPatternMeta: Record<
+  AntiPatternCardData["name"],
+  { theme: string; riskLabel: string }
+> = {
+  "The ex-spouse still on the 401(k)": {
+    theme: "Beneficiaries",
+    riskLabel: "Override risk",
+  },
+  "The revocable trust that owns nothing": {
+    theme: "Trust funding",
+    riskLabel: "Probate leak",
+  },
+  "The seed phrase in the will": {
+    theme: "Privacy",
+    riskLabel: "Asset theft",
+  },
+  "The springing POA the bank will not honor": {
+    theme: "Incapacity",
+    riskLabel: "Access freeze",
+  },
+  "Co-executors in a conflicted family": {
+    theme: "Family conflict",
+    riskLabel: "Deadlock risk",
+  },
+  "Minors named directly as beneficiaries": {
+    theme: "Minor heirs",
+    riskLabel: "Court control",
+  },
+  "\"Everything to my spouse, trust them with our kids\" in a blended family": {
+    theme: "Blended family",
+    riskLabel: "Disinheritance",
+  },
+  "The pet trust you forgot about": {
+    theme: "Caretaking",
+    riskLabel: "No caretaker",
+  },
+  "Form 706 portability filing skipped": {
+    theme: "Estate tax",
+    riskLabel: "Exemption loss",
+  },
+  "A will signed in the wrong formality": {
+    theme: "Execution",
+    riskLabel: "Invalid will",
+  },
+  "An outright distribution to a vulnerable heir": {
+    theme: "Vulnerable heir",
+    riskLabel: "Harm spiral",
+  },
+  "The non-citizen spouse hole": {
+    theme: "Cross-border",
+    riskLabel: "Tax shock",
+  },
+  "A plan updated a week before death": {
+    theme: "Litigation",
+    riskLabel: "Contest magnet",
+  },
+};
+
 function AntiPatternCardFront({
   pattern,
   index,
@@ -2598,6 +2656,8 @@ function AntiPatternCardFront({
   style?: React.CSSProperties;
   hidden?: boolean;
 }) {
+  const meta = antiPatternMeta[pattern.name];
+
   return (
     <div className={className} style={style} aria-hidden={hidden}>
       <div className="space-y-5">
@@ -2616,11 +2676,19 @@ function AntiPatternCardFront({
         </div>
         <div>
           <h4 className="text-xl font-semibold leading-7 tracking-tight text-white">{pattern.name}</h4>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
+              {meta.theme}
+            </span>
+            <span className="rounded-full border border-amber-300/20 bg-amber-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+              {meta.riskLabel}
+            </span>
+          </div>
           <p className="mt-3 text-[15px] leading-7 text-slate-200">{pattern.hook}</p>
         </div>
       </div>
       <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs text-slate-400">
-        <span className="max-w-[16rem] leading-5">{hintText}</span>
+        <span className="max-w-full leading-5 sm:max-w-[16rem]">{hintText}</span>
         <ArrowRight
           className="h-4 w-4 text-rose-200 motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:translate-x-1"
           aria-hidden="true"
@@ -2643,6 +2711,8 @@ function AntiPatternCardBack({
   style?: React.CSSProperties;
   hidden?: boolean;
 }) {
+  const meta = antiPatternMeta[pattern.name];
+
   return (
     <div className={className} style={style} aria-hidden={hidden}>
       <div className="flex items-start justify-between gap-3">
@@ -2664,6 +2734,14 @@ function AntiPatternCardBack({
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
             What actually goes wrong
           </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
+              {meta.theme}
+            </span>
+            <span className="rounded-full border border-amber-300/20 bg-amber-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+              {meta.riskLabel}
+            </span>
+          </div>
           <p className="mt-2 text-[15px] leading-7 text-slate-100">{pattern.explanation}</p>
         </div>
         <div className="rounded-[8px] border border-rose-300/20 bg-gradient-to-r from-rose-400/[0.12] via-rose-400/[0.06] to-transparent p-3.5 shadow-[0_12px_30px_rgba(244,63,94,0.10)]">
@@ -2825,6 +2903,9 @@ export function AntiPatternCardsViz() {
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
                   Keyboard: arrows move, Home/End jump, Space flips
                 </span>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+                  Each card shows theme + failure label for quick scanning
+                </span>
               </div>
             </div>
           </div>
@@ -2835,7 +2916,7 @@ export function AntiPatternCardsViz() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+	        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {antiPatterns.map((pattern, index) => {
             const flipped = flippedCards.includes(pattern.name);
             const icon = antiPatternIconMap[pattern.icon] ?? <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
@@ -2887,7 +2968,7 @@ export function AntiPatternCardsViz() {
                     pointerFocusRef.current = false;
                   }}
                   className={cn(
-                    "group relative min-h-[26rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                    "group relative min-h-[21.5rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f] sm:min-h-[23rem] xl:min-h-[26rem]",
                     flipped
                       ? "shadow-[0_26px_60px_rgba(244,63,94,0.16)]"
                       : "shadow-[0_18px_44px_rgba(0,0,0,0.16)]",
