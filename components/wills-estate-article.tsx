@@ -1506,6 +1506,7 @@ export function WillsEstateArticle() {
             one yourself is the{" "}
             <a
               href="#setup"
+              onClick={(event) => handleTocJump(event, "setup")}
               className="text-cyan-400 underline underline-offset-2"
             >
               twenty minutes of setup
