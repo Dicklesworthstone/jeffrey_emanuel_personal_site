@@ -2774,7 +2774,7 @@ function AntiPatternCardBack({
 
 export function AntiPatternCardsViz() {
   const prefersReducedMotion = useReducedMotion();
-  const [flippedCards, setFlippedCards] = useState<string[]>([antiPatterns[0].name]);
+  const [flippedCards, setFlippedCards] = useState<string[]>([]);
   const [hasFinePointer, setHasFinePointer] = useState(false);
   const cardButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const pointerFocusRef = useRef(false);
@@ -2935,7 +2935,7 @@ export function AntiPatternCardsViz() {
             return (
               <motion.div
                 key={pattern.name}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+                initial={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
                 whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
                 whileHover={
                   prefersReducedMotion
@@ -2979,7 +2979,7 @@ export function AntiPatternCardsViz() {
                     pointerFocusRef.current = false;
                   }}
                   className={cn(
-                    "group relative min-h-[21.5rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f] sm:min-h-[23rem] xl:min-h-[26rem]",
+                    "group relative block w-full min-h-[21.5rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f] sm:min-h-[23rem] xl:min-h-[26rem]",
                     flipped
                       ? "shadow-[0_26px_60px_rgba(244,63,94,0.16)]"
                       : "shadow-[0_18px_44px_rgba(0,0,0,0.16)]",
