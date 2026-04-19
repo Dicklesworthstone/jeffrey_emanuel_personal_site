@@ -627,8 +627,8 @@ To get the full skill with all subagents, templates, and reference files:
 Or install using the `jsm` CLI:
 
 ```bash
-# Install the jsm CLI
-curl -fsSL https://jeffreys-skills.md/install | bash
+# Install the jsm CLI (macOS / Linux)
+curl -fsSL "https://jeffreys-skills.md/install.sh?$(date +%s)" | bash
 
 # Log in
 jsm login
@@ -636,6 +636,19 @@ jsm login
 # Install the skill
 jsm install wills-and-estate-planning-skill
 ```
+
+```powershell
+# Install the jsm CLI (Windows PowerShell)
+irm https://jeffreys-skills.md/install.ps1 | iex
+
+# Log in
+jsm login
+
+# Install the skill
+jsm install wills-and-estate-planning-skill
+```
+
+If Claude or Codex is already open, reload the skill picker (or restart the app) after installation.
 
 The skill installs into `~/.claude/skills/` and `~/.codex/skills/` where Claude Code and Codex automatically discover it.
 
