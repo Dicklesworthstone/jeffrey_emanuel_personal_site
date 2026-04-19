@@ -777,6 +777,14 @@ export default function HeaderIcon3D() {
   const [mounted, setMounted] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const isMountedRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration detection for client-only 3D rendering
@@ -792,6 +800,12 @@ export default function HeaderIcon3D() {
     mq.addListener(handler);
     return () => mq.removeListener(handler);
   }, []);
+
+  const handleCanvasError = () => {
+    if (isMountedRef.current) {
+      setHasError(true);
+    }
+  };
 
   // Show static fallback if not mounted, error, or reduced motion preferred
   if (!mounted || hasError || prefersReducedMotion) {
@@ -818,7 +832,7 @@ export default function HeaderIcon3D() {
             onCreated={({ gl }) => {
               gl.setClearColor(0x000000, 0);
             }}
-            onError={() => setHasError(true)}
+            onError={handleCanvasError}
           >
             <Scene />
           </Canvas>

@@ -289,8 +289,7 @@ test.describe("Wills & Estate Planning Article", () => {
     await visitArticle(page, scenario);
 
     const viz = page.locator('[data-viz="pricing-comparison"]');
-    await viz.scrollIntoViewIfNeeded();
-    await expect(viz).toBeVisible({ timeout: 15_000 });
+    await expectVisualizationLoaded(page, "pricing-comparison");
 
     logStep(scenario, "assert default attorney estimate");
     await expect(viz.getByText("$3,000")).toBeVisible();
@@ -316,7 +315,11 @@ test.describe("Wills & Estate Planning Article", () => {
     logStep(scenario, "move slider to high end");
     await slider.evaluate((input, value) => {
       const range = input as HTMLInputElement;
-      range.value = value;
+      const valueSetter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      valueSetter?.call(range, value);
       range.dispatchEvent(new Event("input", { bubbles: true }));
       range.dispatchEvent(new Event("change", { bubbles: true }));
     }, "80");
