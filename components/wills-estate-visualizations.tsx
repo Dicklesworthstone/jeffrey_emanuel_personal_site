@@ -3160,6 +3160,7 @@ export function PricingComparisonViz() {
   const [sliderValue, setSliderValue] = useState(() =>
     priceCalcSliderFromValue(defaultNetWorth),
   );
+  const [sliderFocused, setSliderFocused] = useState(false);
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const hasInteractedRef = useRef(false);
   const transition = prefersReducedMotion
@@ -3205,6 +3206,16 @@ export function PricingComparisonViz() {
     setSliderValue(priceCalcSliderFromValue(value));
   };
 
+  const nudgeSliderValue = (delta: number) => {
+    hasInteractedRef.current = true;
+    setSliderValue((current) => Math.max(0, Math.min(100, current + delta)));
+  };
+
+  const setSliderBoundary = (boundary: "min" | "max") => {
+    hasInteractedRef.current = true;
+    setSliderValue(boundary === "min" ? 0 : 100);
+  };
+
   const resetPricingScenario = () => {
     hasInteractedRef.current = true;
     setSliderValue(priceCalcSliderFromValue(defaultNetWorth));
@@ -3237,7 +3248,14 @@ export function PricingComparisonViz() {
             </div>
           </div>
 
-          <div className="rounded-[20px] border border-white/10 bg-black/20 p-4 md:p-5">
+          <div
+            className={cn(
+              "rounded-[20px] border p-4 transition md:p-5",
+              sliderFocused
+                ? "border-cyan-300/35 bg-cyan-400/[0.06] ring-1 ring-cyan-300/20"
+                : "border-white/10 bg-black/20",
+            )}
+          >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-300">
@@ -3255,21 +3273,45 @@ export function PricingComparisonViz() {
                 </motion.p>
                 <p className="mt-1 text-sm text-slate-400">{formatCurrency(netWorth)} current estimate</p>
               </div>
-              <motion.div
-                key={`net-worth-bucket-${getNetWorthBucket(netWorth)}`}
-                initial={prefersReducedMotion ? false : { opacity: 0.7, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={transition}
-                className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold text-amber-100"
-              >
-                {getNetWorthBucket(netWorth)}
-              </motion.div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Lower estimated net worth"
+                  onClick={() => nudgeSliderValue(-4)}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-lg font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  aria-label="Raise estimated net worth"
+                  onClick={() => nudgeSliderValue(4)}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-lg font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
+                >
+                  +
+                </button>
+                <motion.div
+                  key={`net-worth-bucket-${getNetWorthBucket(netWorth)}`}
+                  initial={prefersReducedMotion ? false : { opacity: 0.7, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={transition}
+                  className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold text-amber-100"
+                >
+                  {getNetWorthBucket(netWorth)}
+                </motion.div>
+              </div>
             </div>
 
             <label className="mt-5 block">
               <span id="pricing-slider-help" className="mb-3 block text-sm text-slate-300">
                 Drag for a rough range, or use arrow keys for finer adjustments.
                 The slider is logarithmic so the low end is not compressed into a tiny slice.
+              </span>
+              <span
+                id="pricing-slider-shortcuts"
+                className="mb-3 block text-xs font-medium uppercase tracking-[0.18em] text-cyan-200/80"
+              >
+                Keyboard: arrows = fine control, Page Up / Down = faster jumps, Home / End = min / max.
               </span>
               <span className="sr-only">
                 Estimated net worth from one hundred thousand dollars to one hundred million dollars
@@ -3281,9 +3323,36 @@ export function PricingComparisonViz() {
                 step={1}
                 value={sliderValue}
                 aria-label="Estimated net worth"
-                aria-describedby="pricing-slider-help pricing-live-summary"
+                aria-describedby="pricing-slider-help pricing-slider-shortcuts pricing-live-summary"
+                aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown PageUp PageDown Home End"
                 aria-valuetext={formatCurrency(netWorth)}
                 className="sm-range w-full"
+                onFocus={() => setSliderFocused(true)}
+                onBlur={() => setSliderFocused(false)}
+                onKeyDown={(event) => {
+                  if (event.key === "PageUp") {
+                    event.preventDefault();
+                    nudgeSliderValue(10);
+                    return;
+                  }
+
+                  if (event.key === "PageDown") {
+                    event.preventDefault();
+                    nudgeSliderValue(-10);
+                    return;
+                  }
+
+                  if (event.key === "Home") {
+                    event.preventDefault();
+                    setSliderBoundary("min");
+                    return;
+                  }
+
+                  if (event.key === "End") {
+                    event.preventDefault();
+                    setSliderBoundary("max");
+                  }
+                }}
                 onChange={(event) => {
                   hasInteractedRef.current = true;
                   setSliderValue(Number(event.currentTarget.value));
