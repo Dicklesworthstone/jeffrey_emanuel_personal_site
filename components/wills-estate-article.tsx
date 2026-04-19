@@ -1102,20 +1102,26 @@ export function WillsEstateArticle() {
                 </p>
                 <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
                   <strong className="text-white">Agent:</strong> When did
-                  you last update the beneficiary form on your 401(k)?
+                  you last update the beneficiary forms on your retirement
+                  accounts?
                 </p>
                 <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
                   <strong className="text-white">You:</strong> When I
                   started the job, so... 2009? I think I put my ex-wife
-                  down at the time. That was before I met Sam.
+                  down on the IRA. That was before I met Sam.
                 </p>
                 <p className="text-sm md:text-[15px] leading-relaxed text-slate-300">
                   <strong className="text-white">Agent:</strong> That is a
-                  landmine; the plan administrator will pay your ex unless
-                  you and Sam signed a waiver naming someone else. It does
-                  not matter what your will says. We are flagging this as
-                  a first-action item in the Attorney Engagement Brief so
-                  it is the first thing your lawyer fixes.
+                  landmine. Beneficiary forms override your will for
+                  retirement accounts, and whoever is named on the form at
+                  the time of your death is who gets the money. For the
+                  IRA, it is whatever the form says, full stop. The 401(k)
+                  has some federal-law protection for your current spouse
+                  by default, but the details depend on whether Sam ever
+                  signed a spousal consent. Every retirement form needs to
+                  be re-verified; we are flagging this as a first-action
+                  item in the Attorney Engagement Brief so it is the first
+                  thing your lawyer fixes.
                 </p>
               </div>
 
@@ -1138,15 +1144,16 @@ export function WillsEstateArticle() {
                   <strong className="text-white">Agent:</strong> That is
                   the most common blended-family pattern, and the most
                   common one to go sideways. If you leave everything to
-                  her, she can later rewrite her own will and leave it
-                  all to her daughter from her first marriage; your kids
-                  end up with nothing and there is nothing they can do
-                  about it legally. The usual structure that protects
-                  everyone is a <J t="qtip">QTIP trust</J>: your wife
-                  gets income and access to principal for her whole life;
-                  whatever is left at her death goes to your kids.
-                  Should we put that on the list for your attorney to
-                  draft, or did you want something different?
+                  her outright, she can later rewrite her own will and
+                  leave it all to her daughter from her first marriage;
+                  your kids end up with nothing and have very limited
+                  recourse. The usual structure that fixes this is a{" "}
+                  <J t="qtip">QTIP trust</J>: your wife gets the income
+                  from the assets for her whole life; whatever remains at
+                  her death goes to your kids, not to whoever she names
+                  in her own will. Should we put that on the list for
+                  your attorney to draft, or did you want something
+                  different?
                 </p>
               </div>
             </div>
@@ -1211,9 +1218,9 @@ export function WillsEstateArticle() {
                 &ldquo;I found the 401(k) statement; please re-check
                 whatever you flagged about beneficiaries.&rdquo;
               </em>{" "}
-              Nothing is blocked by a single missing document. The skill
-              tracks what it is still waiting on so you can finish in
-              pieces.
+              Nothing is blocked by a single missing document; the skill
+              notes what is still unanswered and will revisit it when you
+              come back.
             </li>
             <li>
               <strong>Save the final packet in your folder.</strong> It is
@@ -1403,10 +1410,15 @@ export function WillsEstateArticle() {
                 itself: your questions, the agent&apos;s responses, and
                 whatever the agent quotes from your files while reasoning.
                 On consumer subscriptions (Claude Max, GPT Pro), transcripts
-                are retained per each provider&apos;s published policy and
-                are not used to train the models by default. If you need
-                stronger guarantees, both providers offer enterprise plans
-                with zero-retention.
+                are retained per each provider&apos;s published policy.
+                Training defaults and opt-outs differ between providers and
+                change over time; Anthropic does not train on Claude
+                Max/Pro conversations by default, while OpenAI&apos;s
+                consumer plans have historically opted users in unless you
+                turn training off in settings. Check your account&apos;s
+                privacy settings before doing sensitive work. Both
+                providers offer enterprise plans with zero-retention if
+                you need stronger guarantees.
               </p>
               <p className="mt-3">
                 For most readers planning for themselves, this is a
@@ -1428,16 +1440,16 @@ export function WillsEstateArticle() {
             </summary>
             <div className="sm-details-body">
               <p>
-                Short answer: you do not have an attorney-client
-                relationship with an AI chatbot, so there is no privilege to
-                waive in the conventional sense. At least one recent New
-                York case has held that discussing otherwise-privileged
-                legal matters with a consumer-grade AI forfeits the
-                privilege you would have had in a conversation with a human
-                lawyer. The law here is new and under-developed, and I
-                personally think it is outrageous that a human lawyer gets
-                privilege on the same conversation an AI does not; that
-                should change. Today, it has not.
+                Short answer: AI chatbots are not attorneys, so
+                conversations with them are not themselves privileged, and
+                at least one recent New York case has held that discussing
+                otherwise-privileged legal matters with a consumer-grade AI
+                can forfeit the privilege you would have had in a
+                conversation with a human lawyer on the same subject. The
+                law here is new and under-developed, and I personally
+                think it is outrageous that a human lawyer gets privilege
+                on the same conversation an AI does not; that should
+                change. Today, it has not.
               </p>
               <p className="mt-3">
                 For most readers using this skill to prepare a
