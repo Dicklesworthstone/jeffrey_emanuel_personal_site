@@ -72,7 +72,6 @@ const PRIMER_FILENAME = "WILLS_AND_ESTATE_PLANNING_PRIMER.md";
 const SKILL_PAGE_HREF =
   "https://jeffreys-skills.md/skills/wills-and-estate-planning-skill";
 const JSM_HOME_HREF = "https://jeffreys-skills.md/";
-const JSM_DASHBOARD_HREF = "https://jeffreys-skills.md/dashboard";
 const CLAUDE_DESKTOP_INSTALL_HREF =
   "https://support.anthropic.com/en/articles/10065433-installing-claude-desktop";
 const CODEX_DESKTOP_HREF = "https://openai.com/codex/";
@@ -103,8 +102,6 @@ function emitArticleEvent(name: string, props: Record<string, unknown> = {}) {
     window.gtag("event", name, payload);
   }
 }
-
-type InstallPathKey = "desktop" | "cli" | "manual";
 
 function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
   return (
@@ -156,15 +153,6 @@ function Divider() {
       data-section
       className="w-full h-px my-12 md:my-16 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent"
     />
-  );
-}
-
-// Code block for multi-line commands / snippets
-function Code({ children }: { children: ReactNode }) {
-  return (
-    <pre className="sm-code-block">
-      <code>{children}</code>
-    </pre>
   );
 }
 
@@ -270,8 +258,6 @@ function Sub({
 
 export function WillsEstateArticle() {
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [activeInstallPath, setActiveInstallPath] =
-    useState<InstallPathKey>("desktop");
   const articleRef = useRef<HTMLDivElement>(null);
   const tocScrollFrameRef = useRef<number | null>(null);
   const tocScrollTimerRef = useRef<number | null>(null);
@@ -367,12 +353,14 @@ export function WillsEstateArticle() {
         maxProgress < 0.25 ? "0-25" : maxProgress < 0.5 ? "25-50" : maxProgress < 0.75 ? "50-75" : "75-100";
       emitArticleEvent("article_scroll_depth", { scroll_depth_bucket: bucket });
     };
-    document.addEventListener("visibilitychange", () => {
+    const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") emitDepth();
-    });
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("beforeunload", emitDepth);
     return () => {
       window.removeEventListener("scroll", trackMax);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", emitDepth);
     };
   }, []);
@@ -419,7 +407,6 @@ export function WillsEstateArticle() {
   return (
     <div
       ref={articleRef}
-      role="main"
       className={`sm-scope sm-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
       onClick={(e) => {

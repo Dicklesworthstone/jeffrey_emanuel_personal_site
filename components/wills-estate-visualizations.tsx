@@ -3810,7 +3810,7 @@ export function InstallFlowViz() {
             Setup
           </div>
           <h3 className="text-2xl font-semibold tracking-tight text-white md:text-[2rem]">
-            What you need (about fifteen minutes of setup)
+            What you need (about twenty minutes of setup)
           </h3>
           <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
             Four steps, each one a few minutes. No terminal, no code, no
@@ -3941,7 +3941,7 @@ export function InstallFlowViz() {
         <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/5 px-5 py-3 text-center">
           <CheckCircle2 className="h-5 w-5 text-emerald-400" aria-hidden="true" />
           <p className="text-sm font-semibold text-white">
-            About 15 minutes. Then you&apos;re done setting up.
+            About 20 minutes. Then you&apos;re done setting up.
           </p>
           <div className="flex gap-1.5" aria-hidden="true">
             {INSTALL_STEPS.map((step) => (

@@ -30,9 +30,10 @@ const VIZ_LOAD_MARKERS: Record<(typeof VIZ_IDS)[number], RegExp> = {
     /Forty-five artifacts, organized like a real project directory/i,
   "anti-pattern-cards": /The patterns the skill is designed to catch/i,
   "pricing-comparison": /Pricing Reality Check/i,
-  "install-flow": /./,
-  "working-folder": /./,
-  stack: /./,
+  "install-flow": /What you need \(about twenty minutes of setup\)/i,
+  "working-folder":
+    /Put your real documents in one folder, point the desktop app at it/i,
+  stack: /Agent \+ Skill Stack/i,
 };
 
 const KNOWN_A11Y_RULES = ["color-contrast"];
