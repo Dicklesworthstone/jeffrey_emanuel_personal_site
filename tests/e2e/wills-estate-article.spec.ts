@@ -4,13 +4,12 @@ import AxeBuilder from "@axe-core/playwright";
 const ARTICLE_URL = "/writing/wills-and-estate-planning";
 const PRIMER_URL = "/wills-and-estate-planning-primer.md";
 const SECTION_ANCHORS = [
-  "install",
-  "who",
-  "insight",
-  "intake",
-  "produces",
-  "workflow",
-  "anti",
+  "cost",
+  "what-is-it",
+  "setup",
+  "folder",
+  "tips",
+  "showcase",
   "attorney",
   "faq",
   "pattern",
@@ -18,22 +17,20 @@ const SECTION_ANCHORS = [
 
 const VIZ_IDS = [
   "tier-triage",
-  "axiom-coherence",
-  "intake-phases",
   "deliverables-tree",
   "anti-pattern-cards",
   "pricing-comparison",
+  "install-flow",
+  "working-folder",
 ];
 const VIZ_LOAD_MARKERS: Record<(typeof VIZ_IDS)[number], RegExp> = {
   "tier-triage": /Five wealth tiers, with complexity layered on top/i,
-  "axiom-coherence":
-    /One story across every document, or a plan that quietly breaks/i,
-  "intake-phases":
-    /The nine-phase intake flow, synced to the Maya walkthrough/i,
   "deliverables-tree":
     /Forty-five artifacts, organized like a real project directory/i,
   "anti-pattern-cards": /The patterns the skill is designed to catch/i,
   "pricing-comparison": /Pricing Reality Check/i,
+  "install-flow": /./,
+  "working-folder": /./,
 };
 
 const KNOWN_A11Y_RULES = ["color-contrast"];
@@ -162,33 +159,24 @@ test.describe("Wills & Estate Planning Article", () => {
     runtime.assertClean();
   });
 
-  test("install section exposes all install paths", async ({ page }) => {
-    const scenario = "install-paths";
+  test("setup section lists the four numbered prerequisites", async ({ page }) => {
+    const scenario = "setup-steps";
     const runtime = captureRuntimeErrors(page);
 
     await visitArticle(page, scenario);
-    const installSection = page.locator('section[data-section="install"]').first();
-    await installSection.scrollIntoViewIfNeeded();
-    await expect(installSection).toBeVisible();
+    const setupSection = page.locator('section[data-section="setup"]').first();
+    await setupSection.scrollIntoViewIfNeeded();
+    await expect(setupSection).toBeVisible();
 
-    const tabButtons = installSection.getByRole("tab");
-    if ((await tabButtons.count()) > 0) {
-      for (let index = 0; index < await tabButtons.count(); index += 1) {
-        logStep(scenario, `switch install tab ${index + 1}`);
-        const tabButton = tabButtons.nth(index);
-        const controlledPanelId = await tabButton.getAttribute("aria-controls");
-        await tabButton.click();
-        await expect(tabButton).toHaveAttribute("aria-selected", "true");
-        if (controlledPanelId) {
-          await expect(installSection.locator(`#${controlledPanelId}`)).toBeVisible();
-        }
-      }
-    } else {
-      logStep(scenario, "assert static install paths");
-      await expect(installSection.getByRole("heading", { name: /In Claude or Codex Desktop/i })).toBeVisible();
-      await expect(installSection.getByRole("heading", { name: /Via the jsm CLI/i })).toBeVisible();
-      await expect(installSection.getByRole("heading", { name: /Manual ZIP fallback/i })).toBeVisible();
-    }
+    logStep(scenario, "assert four numbered steps");
+    await expect(setupSection.getByText(/1\. A frontier-model subscription/)).toBeVisible();
+    await expect(setupSection.getByText(/2\. The desktop app/)).toBeVisible();
+    await expect(setupSection.getByText(/3\. A jeffreys-skills\.md account/)).toBeVisible();
+    await expect(setupSection.getByText(/4\. Install the skill/)).toBeVisible();
+
+    logStep(scenario, "assert install-flow viz mounts in setup");
+    const installFlowViz = setupSection.locator('[data-viz="install-flow"]');
+    await expect(installFlowViz).toBeVisible({ timeout: 15_000 });
 
     runtime.assertClean();
   });
