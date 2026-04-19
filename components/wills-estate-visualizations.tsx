@@ -1226,7 +1226,7 @@ export function IntakePhasesViz() {
 
         <div className="relative">
           <div className="pointer-events-none absolute left-12 right-12 top-[2.15rem] hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent lg:block" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-9">
+          <div role="tablist" aria-label="Intake phases" aria-orientation="horizontal" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-9">
             {intakePhases.map((phase, index) => {
               const isFocused = index === focusedIndex;
               const isActive = index === activeIndex;
@@ -1240,8 +1240,11 @@ export function IntakePhasesViz() {
                     buttonRefs.current[index] = node;
                   }}
                   type="button"
+                  role="tab"
+                  aria-selected={isDrilled}
+                  aria-controls="intake-drill-panel"
+                  aria-label={`Phase ${phase.number}: ${phase.name} — ${phase.minutes}`}
                   tabIndex={isFocused ? 0 : -1}
-                  aria-pressed={isDrilled}
                   aria-current={isActive ? "step" : undefined}
                   onClick={() => {
                     setFocusedIndex(index);
@@ -1250,12 +1253,12 @@ export function IntakePhasesViz() {
                   onFocus={() => setFocusedIndex(index)}
                   onKeyDown={(event) => handleKeyDown(event, index)}
                   className={cn(
-                    "relative rounded-[22px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                    "relative min-h-[3rem] cursor-pointer rounded-[22px] border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                     isActive
-                      ? styles.activeCard
+                      ? cn(styles.activeCard, "focus-visible:ring-white/80")
                       : isDrilled
-                        ? "border-white/20 bg-white/[0.08]"
-                        : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
+                        ? "border-white/20 bg-white/[0.08] focus-visible:ring-white/60"
+                        : "border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-white/60",
                   )}
                 >
                   <div className="mb-4 flex items-center justify-between gap-2">
@@ -1290,6 +1293,9 @@ export function IntakePhasesViz() {
 
         <AnimatePresence initial={false} mode="wait">
           <motion.div
+            id="intake-drill-panel"
+            role="tabpanel"
+            aria-label={`Phase ${drilledPhase.number}: ${drilledPhase.name}`}
             key={drilledPhase.id}
             initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
