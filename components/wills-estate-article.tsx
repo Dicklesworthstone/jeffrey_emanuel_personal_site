@@ -329,7 +329,7 @@ export function WillsEstateArticle() {
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
-              One skill. Eleven axioms. A structured intake that turns a
+              One skill. Twelve axioms. A structured intake that turns a
               chaotic family situation into an attorney-ready handoff package.
             </p>
 
@@ -610,7 +610,7 @@ export function WillsEstateArticle() {
                   </span>
                 </p>
                 <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  Eleven axioms. Fourteen cognitive operators
+                  Twelve axioms. Fourteen cognitive operators
                   (Probate-Bypass, Spousal-Rights Check, Beneficiary-Title
                   Coherence, Step-Up-vs-Transfer, Liquidity-at-Death,
                   Incapacity-Transition, Lumpy-Asset Division, Cross-State
@@ -1112,7 +1112,7 @@ jsm install wills-and-estate-planning-skill`}
           </Sub>
 
           <p>
-            There are eleven axioms in the skill&apos;s kernel; I will not list
+            There are twelve axioms in the skill&apos;s kernel; I will not list
             all of them here. But three more are load-bearing and worth naming.
           </p>
 
@@ -1745,7 +1745,7 @@ jsm install wills-and-estate-planning-skill`}
 
           <p>
             The skill separates two kinds of knowledge. The evergreen
-            methodology — the kernel&apos;s eleven axioms, the cognitive
+            methodology — the kernel&apos;s twelve axioms, the cognitive
             operators, the tier-routing logic, the coordination discipline — is
             stable. Those are the parts you can trust. The volatile law —
             current thresholds, current formalities, current{" "}

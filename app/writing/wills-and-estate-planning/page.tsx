@@ -5,7 +5,7 @@ import { writingHighlights } from "@/lib/content";
 
 const ARTICLE_TITLE = "An AI Skill for Wills & Estate Planning";
 const ARTICLE_DESCRIPTION =
-  "A Claude Code / Codex skill that conducts a structured estate-planning intake — eleven axioms, nine phases, seventy-six jargon tooltips — and produces an attorney-ready handoff package.";
+  "A Claude Code / Codex skill that conducts a structured estate-planning intake — twelve axioms, nine phases, seventy-six jargon tooltips — and produces an attorney-ready handoff package.";
 const ARTICLE_CANONICAL = "/writing/wills-and-estate-planning";
 const ARTICLE_ABOUT = [
   "Estate Planning",
