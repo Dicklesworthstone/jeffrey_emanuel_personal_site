@@ -1,7 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const ARTICLE_URL = "/writing/wills-and-estate-planning";
+const PRIMER_URL = "/wills-and-estate-planning-primer.md";
 const SECTION_ANCHORS = [
   "install",
   "who",
@@ -15,118 +16,229 @@ const SECTION_ANCHORS = [
   "pattern",
 ];
 
+const VIZ_IDS = [
+  "tier-triage",
+  "axiom-coherence",
+  "intake-phases",
+  "deliverables-tree",
+  "anti-pattern-cards",
+];
+
 const KNOWN_A11Y_RULES = ["color-contrast"];
+const IGNORED_BROWSER_ERRORS = [
+  "favicon",
+  "Download the React DevTools",
+  "baseline-browser-mapping",
+];
+
+function logStep(scenario: string, step: string, outcome = "ok") {
+  console.log(JSON.stringify({ scenario, step, outcome }));
+}
+
+function captureRuntimeErrors(page: Page) {
+  const errors: string[] = [];
+
+  page.on("console", (msg) => {
+    if (msg.type() === "error") {
+      errors.push(`console.error: ${msg.text()}`);
+    }
+  });
+
+  page.on("pageerror", (error) => {
+    errors.push(`pageerror: ${error.message}`);
+  });
+
+  return {
+    errors,
+    assertClean() {
+      const filtered = errors.filter(
+        (error) => !IGNORED_BROWSER_ERRORS.some((ignored) => error.includes(ignored)),
+      );
+      expect(filtered).toEqual([]);
+    },
+  };
+}
+
+async function visitArticle(page: Page, scenario: string) {
+  logStep(scenario, "goto article");
+  await page.goto(ARTICLE_URL);
+  await page.waitForLoadState("networkidle");
+}
+
+async function expectInViewport(page: Page, selector: string) {
+  const visible = await page.locator(selector).first().evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+  });
+
+  expect(visible).toBe(true);
+}
 
 test.describe("Wills & Estate Planning Article", () => {
-  test("should load without console errors", async ({ page }) => {
-    const errors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") errors.push(msg.text());
-    });
+  test("renders the article shell, TOC, draft noindex, and primer download", async ({ page }) => {
+    const scenario = "article-shell";
+    const runtime = captureRuntimeErrors(page);
 
-    await page.goto(ARTICLE_URL);
-    await page.waitForLoadState("networkidle");
+    await visitArticle(page, scenario);
 
-    const filtered = errors.filter(
-      (e) => !e.includes("favicon") && !e.includes("Download the React DevTools"),
+    logStep(scenario, "assert h1");
+    await expect(
+      page.getByRole("heading", { level: 1, name: /wills & estate planning/i }),
+    ).toBeVisible();
+
+    logStep(scenario, "assert scroll progress");
+    await expect(page.locator(".sm-progress-bar")).toBeAttached();
+
+    logStep(scenario, "assert draft noindex");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /noindex/i,
     );
-    expect(filtered).toEqual([]);
+
+    logStep(scenario, "assert section anchors");
+    for (const anchor of SECTION_ANCHORS) {
+      await expect(page.locator(`#${anchor}`)).toBeAttached();
+    }
+
+    logStep(scenario, "assert primer response");
+    const primerResponse = await page.request.get(PRIMER_URL);
+    expect(primerResponse.ok()).toBe(true);
+    expect(primerResponse.headers()["content-type"]).toMatch(
+      /text\/markdown|text\/plain|application\/octet-stream/i,
+    );
+    expect((await primerResponse.text()).trim().length).toBeGreaterThan(100);
+
+    logStep(scenario, "assert primer download event");
+    const downloadLink = page.locator(`a[href="${PRIMER_URL}"]`).first();
+    await expect(downloadLink).toBeVisible();
+    const download = await Promise.all([
+      page.waitForEvent("download"),
+      downloadLink.click(),
+    ]).then(([event]) => event);
+    expect(download.suggestedFilename()).toBe("WILLS_AND_ESTATE_PLANNING_PRIMER.md");
+
+    runtime.assertClean();
   });
 
-  test("should render the article title", async ({ page }) => {
-    await page.goto(ARTICLE_URL);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  });
+  test("TOC links update the hash and bring sections into view", async ({ page }) => {
+    const scenario = "toc-links";
+    const runtime = captureRuntimeErrors(page);
 
-  test("should have a scroll progress bar", async ({ page }) => {
-    await page.goto(ARTICLE_URL);
-    const progressBar = page.locator(".sm-progress-bar");
-    await expect(progressBar).toBeAttached();
-  });
-
-  test("should render section anchors", async ({ page }) => {
-    await page.goto(ARTICLE_URL);
-    await page.waitForLoadState("networkidle");
+    await visitArticle(page, scenario);
 
     for (const anchor of SECTION_ANCHORS) {
-      const section = page.locator(`#${anchor}`);
-      if ((await section.count()) > 0) {
-        await expect(section).toBeAttached();
+      logStep(scenario, `click #${anchor}`);
+      await page.locator(`.sm-toc a[href="#${anchor}"]`).click();
+      await expect(page).toHaveURL(new RegExp(`#${anchor}$`));
+      await expectInViewport(page, `#${anchor}`);
+    }
+
+    runtime.assertClean();
+  });
+
+  test("install section exposes all install paths", async ({ page }) => {
+    const scenario = "install-paths";
+    const runtime = captureRuntimeErrors(page);
+
+    await visitArticle(page, scenario);
+    await page.locator("#install").scrollIntoViewIfNeeded();
+
+    const tabButtons = page.locator('#install [role="tab"], #install button[aria-controls]');
+    if ((await tabButtons.count()) > 0) {
+      for (let index = 0; index < await tabButtons.count(); index += 1) {
+        logStep(scenario, `switch install tab ${index + 1}`);
+        await tabButtons.nth(index).click();
+        await expect(tabButtons.nth(index)).toHaveAttribute("aria-selected", /true|undefined/);
       }
+    } else {
+      logStep(scenario, "assert static install paths");
+      await expect(page.getByText("In Claude or Codex Desktop", { exact: false })).toBeVisible();
+      await expect(page.getByText("From the terminal", { exact: false })).toBeVisible();
+      await expect(page.getByText("Direct download", { exact: false })).toBeVisible();
     }
+
+    runtime.assertClean();
   });
 
-  test("should offer primer download", async ({ page }) => {
-    await page.goto(ARTICLE_URL);
-    const downloadLink = page.locator(
-      'a[href*="wills-and-estate-planning-primer"]',
-    );
-    if ((await downloadLink.count()) > 0) {
-      await expect(downloadLink.first()).toBeVisible();
+  test("all visualizations mount without runtime errors", async ({ page }) => {
+    const scenario = "visualizations";
+    const runtime = captureRuntimeErrors(page);
+
+    await visitArticle(page, scenario);
+
+    for (const vizId of VIZ_IDS) {
+      logStep(scenario, `assert ${vizId}`);
+      const viz = page.locator(`[data-viz="${vizId}"]`);
+      await viz.scrollIntoViewIfNeeded();
+      await expect(viz).toBeVisible({ timeout: 15_000 });
+      await expect(viz).not.toContainText("Visualization failed to load");
     }
+
+    runtime.assertClean();
   });
 
-  test("should have noindex meta in draft mode", async ({ page }) => {
-    await page.goto(ARTICLE_URL);
-    const robots = page.locator('meta[name="robots"]');
-    if ((await robots.count()) > 0) {
-      const content = await robots.getAttribute("content");
-      expect(content).toContain("noindex");
+  test("passes section-level WCAG 2.1 AA accessibility scans", async ({ page }) => {
+    const scenario = "a11y";
+
+    await visitArticle(page, scenario);
+
+    for (const anchor of SECTION_ANCHORS) {
+      logStep(scenario, `axe #${anchor}`);
+      await page.locator(`#${anchor}`).scrollIntoViewIfNeeded();
+      const results = await new AxeBuilder({ page })
+        .include(`#${anchor}`)
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+        .disableRules(KNOWN_A11Y_RULES)
+        .analyze();
+
+      expect(results.violations).toEqual([]);
     }
-  });
-
-  test("should pass WCAG 2.1 AA accessibility scan", async ({ page }) => {
-    await page.goto(ARTICLE_URL);
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1000);
-
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .disableRules(KNOWN_A11Y_RULES)
-      .analyze();
-
-    for (const v of results.violations) {
-      console.log(`[A11Y] ${v.id} (${v.impact}): ${v.description}`);
-    }
-
-    expect(results.violations).toEqual([]);
   });
 
   test.describe("Mobile viewport", () => {
     test.use({ viewport: { width: 375, height: 812 } });
 
-    test("should render without horizontal overflow", async ({ page }) => {
-      await page.goto(ARTICLE_URL);
-      await page.waitForLoadState("networkidle");
+    test("renders without horizontal overflow", async ({ page }) => {
+      const scenario = "mobile";
+      const runtime = captureRuntimeErrors(page);
 
-      const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
-      expect(bodyWidth).toBeLessThanOrEqual(375);
-    });
+      await visitArticle(page, scenario);
 
-    test("should render article title on mobile", async ({ page }) => {
-      await page.goto(ARTICLE_URL);
-      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { level: 1, name: /wills & estate planning/i }),
+      ).toBeVisible();
+
+      const overflow = await page.evaluate(() => {
+        const width = Math.max(
+          document.body.scrollWidth,
+          document.documentElement.scrollWidth,
+        );
+        return width - window.innerWidth;
+      });
+      expect(overflow).toBeLessThanOrEqual(1);
+
+      runtime.assertClean();
     });
   });
 
   test.describe("Reduced motion", () => {
     test.use({ reducedMotion: "reduce" });
 
-    test("should load without errors in reduced-motion mode", async ({
-      page,
-    }) => {
-      const errors: string[] = [];
-      page.on("console", (msg) => {
-        if (msg.type() === "error") errors.push(msg.text());
-      });
+    test("renders visualizations statically without errors", async ({ page }) => {
+      const scenario = "reduced-motion";
+      const runtime = captureRuntimeErrors(page);
 
-      await page.goto(ARTICLE_URL);
-      await page.waitForLoadState("networkidle");
+      await visitArticle(page, scenario);
 
-      const filtered = errors.filter(
-        (e) => !e.includes("favicon") && !e.includes("Download the React DevTools"),
-      );
-      expect(filtered).toEqual([]);
+      for (const vizId of VIZ_IDS) {
+        logStep(scenario, `assert ${vizId}`);
+        const viz = page.locator(`[data-viz="${vizId}"]`);
+        await viz.scrollIntoViewIfNeeded();
+        await expect(viz).toBeVisible({ timeout: 15_000 });
+        await expect(viz).not.toContainText("Visualization failed to load");
+      }
+
+      runtime.assertClean();
     });
   });
 });

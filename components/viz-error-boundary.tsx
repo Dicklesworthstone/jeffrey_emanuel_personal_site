@@ -21,12 +21,15 @@ const fallback = <VizFallback />;
 
 function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
+  vizId: string,
 ) {
   function Wrapped(props: P) {
     return (
-      <ErrorBoundary fallback={fallback}>
-        <Component {...props} />
-      </ErrorBoundary>
+      <div data-viz={vizId}>
+        <ErrorBoundary fallback={fallback}>
+          <Component {...props} />
+        </ErrorBoundary>
+      </div>
     );
   }
   Wrapped.displayName = `Safe(${Component.displayName || Component.name || "Component"})`;
@@ -41,6 +44,7 @@ export const TierTriageViz = withErrorBoundary(
       })),
     { ssr: false },
   ),
+  "tier-triage",
 );
 
 export const AxiomCoherenceViz = withErrorBoundary(
@@ -51,6 +55,7 @@ export const AxiomCoherenceViz = withErrorBoundary(
       })),
     { ssr: false },
   ),
+  "axiom-coherence",
 );
 
 export const IntakePhasesViz = withErrorBoundary(
@@ -61,6 +66,7 @@ export const IntakePhasesViz = withErrorBoundary(
       })),
     { ssr: false },
   ),
+  "intake-phases",
 );
 
 export const DeliverablesTreeViz = withErrorBoundary(
@@ -71,6 +77,7 @@ export const DeliverablesTreeViz = withErrorBoundary(
       })),
     { ssr: false },
   ),
+  "deliverables-tree",
 );
 
 export const AntiPatternCardsViz = withErrorBoundary(
@@ -81,4 +88,5 @@ export const AntiPatternCardsViz = withErrorBoundary(
       })),
     { ssr: false },
   ),
+  "anti-pattern-cards",
 );
