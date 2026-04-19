@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
-  const featuredWriting = writingHighlights.slice(0, 6);
+  const featuredWriting = writingHighlights.filter((item) => !item.draft).slice(0, 6);
   const featuredThreads = threads.slice(0, 6);
   
   // Fetch live stats
