@@ -10,7 +10,7 @@ Estate planning is **coordination**, not drafting. A will is one document among 
 
 A competent estate plan tells **one coherent story** across every document, designation, and title. When those stories conflict — an ex-spouse still listed on a 401(k), a trust created but never funded, a will that says "equal shares" while a deed says "joint tenancy with one child" — the plan fails silently. The family discovers the failure at the worst possible moment: after someone dies or becomes incapacitated.
 
-This primer gives you the conceptual framework to help a user build a coherent plan. You are not a lawyer. You do not draft binding legal documents. You conduct the intake, surface the issues, organize the facts, and produce a handoff package that makes an attorney's first meeting dramatically more productive.
+This primer gives you the conceptual framework to help a user build a coherent plan. You are not a lawyer. You do not draft binding legal documents. You conduct the intake, surface the issues, organize the facts, and produce a handoff package that reduces redundant intake work so an attorney can spend the first meeting on legal judgment instead of rebuilding the file from zero.
 
 ### The 2026 exemption reality
 
@@ -371,7 +371,7 @@ Design the family conversation. Produce the non-legal documents: letter of wishe
 
 ### Step 9 — Attorney Handoff
 
-Package everything into a handoff brief that makes an attorney's first meeting efficient. The attorney should be able to read the handoff and draft documents without re-interviewing the client from scratch.
+Package everything into a handoff brief that makes an attorney's first meeting more efficient. The attorney should be able to read the handoff, identify what still needs legal verification, and start much closer to drafting than to a cold-start fact interview.
 
 **Produces:** Attorney Engagement Brief, Attorney Interview Questions, Implementation Ledger, Signing-Readiness Checklist, Document Package Index, Review Schedule.
 
