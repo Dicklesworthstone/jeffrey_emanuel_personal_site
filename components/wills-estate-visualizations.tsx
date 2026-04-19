@@ -1904,6 +1904,12 @@ export function DeliverablesTreeViz() {
   const [modeFilter, setModeFilter] = useState<"all" | DeliverableMode>("all");
   const [query, setQuery] = useState("");
   const [selectedPath, setSelectedPath] = useState("deliverables/if-i-die-tomorrow.md");
+  const [expandedFolders, setExpandedFolders] = useState<Record<DeliverableFolder, boolean>>({
+    intake: true,
+    analyses: true,
+    deliverables: true,
+  });
+  const treeItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.24, ease: "easeOut" as const };
 
   const normalizedQuery = query.trim().toLowerCase();
@@ -1939,6 +1945,161 @@ export function DeliverablesTreeViz() {
     leaves: filteredLeaves.filter((leaf) => leaf.folder === folder),
   })).filter((group) => group.leaves.length > 0);
   const spotlightLeaves = deliverableTreeLeaves.filter((leaf) => leaf.spotlight);
+  const visibleTreeIds = useMemo(
+    () =>
+      groupedLeaves.flatMap(({ folder, leaves }) => [
+        `folder:${folder}`,
+        ...(expandedFolders[folder]
+          ? leaves.map((leaf) => `leaf:${deliverablePath(leaf)}`)
+          : []),
+      ]),
+    [expandedFolders, groupedLeaves],
+  );
+
+  useEffect(() => {
+    if (!selectedLeaf) {
+      return;
+    }
+
+    setExpandedFolders((current) =>
+      current[selectedLeaf.folder]
+        ? current
+        : { ...current, [selectedLeaf.folder]: true },
+    );
+  }, [selectedLeaf]);
+
+  const focusTreeItem = (itemId: string) => {
+    treeItemRefs.current[itemId]?.focus();
+  };
+
+  const moveTreeFocus = (itemId: string, delta: number) => {
+    if (visibleTreeIds.length === 0) {
+      return;
+    }
+
+    const currentIndex = visibleTreeIds.indexOf(itemId);
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    const nextIndex =
+      (currentIndex + delta + visibleTreeIds.length) % visibleTreeIds.length;
+    focusTreeItem(visibleTreeIds[nextIndex]);
+  };
+
+  const setFolderExpanded = (
+    folder: DeliverableFolder,
+    nextExpanded?: boolean,
+  ) => {
+    setExpandedFolders((current) => ({
+      ...current,
+      [folder]:
+        nextExpanded === undefined ? !current[folder] : nextExpanded,
+    }));
+  };
+
+  const handleFolderKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    folder: DeliverableFolder,
+    leaves: DeliverableLeaf[],
+  ) => {
+    const itemId = `folder:${folder}`;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      moveTreeFocus(itemId, 1);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      moveTreeFocus(itemId, -1);
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      focusTreeItem(visibleTreeIds[0] ?? itemId);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      focusTreeItem(visibleTreeIds[visibleTreeIds.length - 1] ?? itemId);
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      if (!expandedFolders[folder]) {
+        setFolderExpanded(folder, true);
+        return;
+      }
+
+      const firstLeaf = leaves[0];
+      if (firstLeaf) {
+        focusTreeItem(`leaf:${deliverablePath(firstLeaf)}`);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (expandedFolders[folder]) {
+        setFolderExpanded(folder, false);
+      }
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setFolderExpanded(folder);
+    }
+  };
+
+  const handleLeafKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    path: string,
+    folder: DeliverableFolder,
+  ) => {
+    const itemId = `leaf:${path}`;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      moveTreeFocus(itemId, 1);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      moveTreeFocus(itemId, -1);
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      focusTreeItem(visibleTreeIds[0] ?? itemId);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      focusTreeItem(visibleTreeIds[visibleTreeIds.length - 1] ?? itemId);
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      focusTreeItem(`folder:${folder}`);
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setSelectedPath(path);
+    }
+  };
 
   return (
     <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-violet-300/10">
