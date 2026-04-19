@@ -71,7 +71,7 @@ function captureRuntimeErrors(page: Page) {
 
 async function visitArticle(page: Page, scenario: string) {
   logStep(scenario, "goto article");
-  await page.goto(ARTICLE_URL);
+  await page.goto(ARTICLE_URL, { timeout: 60_000 });
   await page.waitForLoadState("networkidle");
 }
 
@@ -94,6 +94,11 @@ async function expectVisualizationLoaded(page: Page, vizId: (typeof VIZ_IDS)[num
 }
 
 test.describe("Wills & Estate Planning Article", () => {
+  // Running this route fully in parallel against `bun dev` causes compilation
+  // thrash and flaky `page.goto()` timeouts on local workers.
+  test.describe.configure({ mode: "serial" });
+  test.setTimeout(60_000);
+
   test("renders the article shell, TOC, draft noindex, and primer download", async ({ page }) => {
     const scenario = "article-shell";
     const runtime = captureRuntimeErrors(page);
