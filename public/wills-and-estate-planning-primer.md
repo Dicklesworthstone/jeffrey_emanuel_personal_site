@@ -650,7 +650,7 @@ jsm install wills-and-estate-planning-skill
 
 If Claude or Codex is already open, reload the skill picker (or restart the app) after installation.
 
-The skill installs into `~/.claude/skills/` and `~/.codex/skills/` where Claude Code and Codex automatically discover it.
+The skill installs into your local agent skills directory. Common locations are `~/.claude/skills/` for Claude Code, `~/.codex/skills/` for classic Codex setups, and `~/.agents/skills/` for Codex runtimes using the newer Skills API.
 
 ---
 
