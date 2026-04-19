@@ -21,8 +21,10 @@ import {
   Compass,
   Eye,
   Feather,
+  FileImage,
   FileText,
   FileWarning,
+  FolderOpen,
   FolderTree,
   GitFork,
   Globe,
@@ -3874,6 +3876,527 @@ export function InstallFlowViz() {
               </span>
             ))}
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  WorkingFolderViz                                                   */
+/* ------------------------------------------------------------------ */
+
+type WorkingFolderInputFile = {
+  id: string;
+  name: string;
+  status: "you already have this" | "5 min to find";
+  reason: string;
+  kind: "document" | "image" | "secure";
+};
+
+type WorkingFolderOutputFolder = {
+  id: string;
+  name: string;
+  summary: string;
+  files: string[];
+};
+
+const WORKING_FOLDER_INPUT_FILES: WorkingFolderInputFile[] = [
+  {
+    id: "tax-return",
+    name: "2024-tax-return.pdf",
+    status: "you already have this",
+    reason: "It anchors the household facts, state context, and income picture the drafts need to reflect accurately.",
+    kind: "document",
+  },
+  {
+    id: "retirement",
+    name: "401k-statement.pdf",
+    status: "5 min to find",
+    reason: "The skill uses this for the beneficiary audit, one of the most common ways estate plans quietly go wrong.",
+    kind: "document",
+  },
+  {
+    id: "old-will",
+    name: "will-2011.pdf",
+    status: "you already have this",
+    reason: "An older will shows what you still want, what changed, and which stale assumptions need to be retired.",
+    kind: "document",
+  },
+  {
+    id: "insurance",
+    name: "life-insurance-policy.pdf",
+    status: "5 min to find",
+    reason: "Insurance payout details shape the liquidity plan and reveal another place where beneficiary designations matter.",
+    kind: "document",
+  },
+  {
+    id: "deed",
+    name: "deed.pdf",
+    status: "you already have this",
+    reason: "The deed tells the skill how the house is titled, which is central to probate-avoidance and trust-funding decisions.",
+    kind: "document",
+  },
+  {
+    id: "passport",
+    name: "passport.jpg",
+    status: "you already have this",
+    reason: "An ID image helps verify the exact legal name spelling that should carry through every draft and handoff note.",
+    kind: "image",
+  },
+  {
+    id: "bank-accounts",
+    name: "bank-accounts.txt",
+    status: "5 min to find",
+    reason: "A rough account list gives the attorney handoff packet a usable asset index instead of forcing someone to reconstruct it later.",
+    kind: "secure",
+  },
+  {
+    id: "crypto-wallets",
+    name: "crypto-wallets.txt",
+    status: "5 min to find",
+    reason: "Self-custody assets need explicit inventory and access notes so they do not disappear in an otherwise polished plan.",
+    kind: "secure",
+  },
+];
+
+const WORKING_FOLDER_OUTPUT_FOLDERS: WorkingFolderOutputFolder[] = [
+  {
+    id: "drafts",
+    name: "drafts/",
+    summary: "First-pass planning documents ready for attorney review.",
+    files: [
+      "will-draft.md",
+      "durable-poa-draft.md",
+      "healthcare-directive-draft.md",
+      "letter-of-wishes.md",
+    ],
+  },
+  {
+    id: "audits",
+    name: "audits/",
+    summary: "Cross-checks that surface hidden beneficiary and execution risks before you pay for legal cleanup.",
+    files: [
+      "beneficiary-audit.md",
+      "anti-pattern-scan.md",
+      "official-source-log.md",
+      "missing-info-checklist.md",
+    ],
+  },
+  {
+    id: "attorney-handoff",
+    name: "attorney-handoff/",
+    summary: "A compact packet that lets counsel review facts, questions, and readiness in one pass.",
+    files: [
+      "attorney-engagement-brief.md",
+      "questions-for-counsel.md",
+      "matter-index.md",
+      "readiness-scorecard.md",
+    ],
+  },
+];
+
+function renderWorkingFolderIcon(kind: WorkingFolderInputFile["kind"]): ReactNode {
+  if (kind === "image") {
+    return <FileImage className="h-4 w-4" aria-hidden="true" />;
+  }
+
+  if (kind === "secure") {
+    return <ShieldCheck className="h-4 w-4" aria-hidden="true" />;
+  }
+
+  return <FileText className="h-4 w-4" aria-hidden="true" />;
+}
+
+export function WorkingFolderViz() {
+  const prefersReducedMotion = useReducedMotion();
+  const [activeInputId, setActiveInputId] = useState(
+    WORKING_FOLDER_INPUT_FILES[0]?.id ?? "",
+  );
+  const [expandedOutputId, setExpandedOutputId] = useState<string | null>(
+    WORKING_FOLDER_OUTPUT_FOLDERS[0]?.id ?? null,
+  );
+
+  const activeInput =
+    WORKING_FOLDER_INPUT_FILES.find((file) => file.id === activeInputId) ??
+    WORKING_FOLDER_INPUT_FILES[0];
+
+  return (
+    <section
+      data-viz="working-folder"
+      className="overflow-hidden rounded-[32px] border border-cyan-400/20 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.15),_rgba(2,6,23,0.98)_44%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] px-4 py-6 text-white shadow-[0_24px_90px_rgba(2,8,23,0.48)] sm:px-6 sm:py-7 lg:px-8"
+      aria-label="Working folder visualization"
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-cyan-200/80">
+            Using the skill
+          </p>
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-[2rem]">
+            Put your real documents in one folder, point the desktop app at it,
+            and wait for an attorney-ready packet.
+          </h3>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300 sm:text-[15px]">
+            This is the mental model: you are not filling out a giant form. You
+            are giving the skill one working folder so it can read what already
+            exists, draft the missing pieces, and organize everything for the
+            lawyer who will finalize it.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,0.92fr)_auto_minmax(0,1fr)] xl:items-stretch">
+          <motion.div
+            role="group"
+            aria-label="Files you put in"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.24 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+            }
+            className="overflow-hidden rounded-[26px] border border-white/10 bg-slate-950/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+          >
+            <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+              <div className="flex items-center gap-1.5" aria-hidden="true">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-400/85" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-300/85" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/85" />
+              </div>
+              <div className="ml-1 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-100">
+                <FolderOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>`my-estate-plan/`</span>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5">
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    Your folder on the computer
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-400">
+                    Gather what you already have. Most of this is sitting in
+                    email, cloud storage, or a scanner app already.
+                  </p>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300">
+                  8 inputs
+                </span>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {WORKING_FOLDER_INPUT_FILES.map((file) => {
+                  const isActive = activeInputId === file.id;
+
+                  return (
+                    <button
+                      key={file.id}
+                      type="button"
+                      aria-label={`${file.name}. ${file.reason}`}
+                      aria-pressed={isActive}
+                      onMouseEnter={() => setActiveInputId(file.id)}
+                      onFocus={() => setActiveInputId(file.id)}
+                      onClick={() => setActiveInputId(file.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setActiveInputId(file.id);
+                        }
+                      }}
+                      className={cn(
+                        "flex min-h-[56px] w-full items-start gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+                        isActive
+                          ? "border-cyan-300/50 bg-cyan-400/[0.12] text-white"
+                          : "border-white/10 bg-white/[0.035] text-slate-100 hover:border-white/20 hover:bg-white/[0.06]",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border",
+                          file.kind === "secure"
+                            ? "border-emerald-300/25 bg-emerald-400/[0.12] text-emerald-200"
+                            : file.kind === "image"
+                              ? "border-fuchsia-300/25 bg-fuchsia-400/[0.12] text-fuchsia-200"
+                              : "border-sky-300/25 bg-sky-400/[0.12] text-sky-200",
+                        )}
+                      >
+                        {renderWorkingFolderIcon(file.kind)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-white">
+                          {file.name}
+                        </span>
+                        <span
+                          className={cn(
+                            "mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]",
+                            file.status === "you already have this"
+                              ? "border-emerald-300/25 bg-emerald-400/[0.10] text-emerald-100"
+                              : "border-amber-300/25 bg-amber-300/[0.10] text-amber-100",
+                          )}
+                        >
+                          {file.status}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                aria-live="polite"
+                className="mt-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.08] p-4"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200">
+                  Why the skill uses this
+                </p>
+                <p className="mt-2 text-sm font-semibold text-white">
+                  {activeInput?.name}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-200">
+                  {activeInput?.reason}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="flex items-center justify-center py-1 xl:py-0" aria-hidden="true">
+            <motion.div
+              animate={
+                prefersReducedMotion ? undefined : { x: [0, 7, 0], opacity: [0.8, 1, 0.8] }
+              }
+              transition={
+                prefersReducedMotion
+                  ? undefined
+                  : { duration: 1.7, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
+              }
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-200"
+            >
+              <span>Ask</span>
+              <ArrowRight className="h-4 w-4 rotate-90 xl:rotate-0" />
+            </motion.div>
+          </div>
+
+          <motion.div
+            role="group"
+            aria-label="Desktop app session"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.24 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }
+            }
+            className="overflow-hidden rounded-[26px] border border-white/10 bg-slate-950/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                <MonitorDown className="h-4.5 w-4.5 text-cyan-200" aria-hidden="true" />
+                <span>Desktop app session</span>
+              </div>
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.10] px-3 py-1 text-[11px] font-medium text-emerald-100">
+                reading files from `my-estate-plan/`
+              </span>
+            </div>
+
+            <div className="p-4 sm:p-5">
+              <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+                <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+                  <div className="inline-flex items-center gap-2 text-xs font-medium text-slate-300">
+                    <Sparkles className="h-3.5 w-3.5 text-cyan-200" aria-hidden="true" />
+                    Agent window
+                  </div>
+                  <span className="rounded-full border border-cyan-400/20 bg-cyan-400/[0.10] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-100">
+                    folder mode
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  <div className="mr-8 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-slate-200">
+                    I can read the documents in your working folder, organize
+                    what matters, and draft a first pass for attorney review.
+                  </div>
+
+                  <div className="ml-auto max-w-[24rem] rounded-2xl border border-cyan-300/30 bg-cyan-400/[0.14] px-4 py-3 text-sm font-medium leading-6 text-white shadow-[0_10px_30px_rgba(14,165,233,0.12)]">
+                    &quot;please use the wills-and-estate-planning skill to help
+                    me draft an estate plan&quot;
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300">
+                    What the app does
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-200">
+                    Reads the folder, spots missing facts, cross-checks
+                    beneficiary landmines, and assembles drafts plus an audit
+                    trail.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300">
+                    Why this feels simple
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-200">
+                    You are not teaching the model your life from scratch. You
+                    are letting it read the file pile you already own.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="flex items-center justify-center py-1 xl:py-0" aria-hidden="true">
+            <motion.div
+              animate={
+                prefersReducedMotion ? undefined : { x: [0, 7, 0], opacity: [0.8, 1, 0.8] }
+              }
+              transition={
+                prefersReducedMotion
+                  ? undefined
+                  : { duration: 1.7, delay: 0.12, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
+              }
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-200"
+            >
+              <span>Wait ~30 min</span>
+              <ArrowRight className="h-4 w-4 rotate-90 xl:rotate-0" />
+            </motion.div>
+          </div>
+
+          <motion.div
+            role="group"
+            aria-label="What the skill produced"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.24 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.45, delay: 0.16, ease: [0.22, 1, 0.36, 1] }
+            }
+            className="overflow-hidden rounded-[26px] border border-white/10 bg-slate-950/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+          >
+            <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+              <div className="flex items-center gap-1.5" aria-hidden="true">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-400/85" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-300/85" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/85" />
+              </div>
+              <div className="ml-1 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.10] px-3 py-1 text-xs font-medium text-emerald-100">
+                <FolderOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>`my-estate-plan/`</span>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5">
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    What comes back
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-400">
+                    Hover, tap, or focus any folder to inspect the packet before
+                    you send it to counsel.
+                  </p>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300">
+                  3 outputs
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {WORKING_FOLDER_OUTPUT_FOLDERS.map((folder) => {
+                  const isExpanded = expandedOutputId === folder.id;
+
+                  return (
+                    <div key={folder.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-2">
+                      <button
+                        type="button"
+                        aria-expanded={isExpanded}
+                        aria-controls={`working-folder-output-${folder.id}`}
+                        aria-label={`${folder.name}. ${folder.summary}`}
+                        onMouseEnter={() => setExpandedOutputId(folder.id)}
+                        onFocus={() => setExpandedOutputId(folder.id)}
+                        onClick={() => {
+                          setExpandedOutputId((current) =>
+                            current === folder.id ? null : folder.id,
+                          );
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setExpandedOutputId((current) =>
+                              current === folder.id ? null : folder.id,
+                            );
+                          }
+                        }}
+                        className={cn(
+                          "flex min-h-[56px] w-full items-center gap-3 rounded-[18px] border px-3.5 py-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+                          isExpanded
+                            ? "border-emerald-300/35 bg-emerald-400/[0.12]"
+                            : "border-white/5 bg-transparent hover:border-white/15 hover:bg-white/[0.05]",
+                        )}
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-300/25 bg-emerald-400/[0.12] text-emerald-100">
+                          <FolderOpen className="h-4.5 w-4.5" aria-hidden="true" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold text-white">
+                            {folder.name}
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-slate-300">
+                            {folder.summary}
+                          </span>
+                        </span>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-emerald-300">
+                          <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                      </button>
+
+                      <AnimatePresence initial={false}>
+                        {isExpanded ? (
+                          <motion.div
+                            id={`working-folder-output-${folder.id}`}
+                            initial={
+                              prefersReducedMotion ? false : { opacity: 0, height: 0, y: -4 }
+                            }
+                            animate={{ opacity: 1, height: "auto", y: 0 }}
+                            exit={
+                              prefersReducedMotion ? undefined : { opacity: 0, height: 0, y: -4 }
+                            }
+                            transition={
+                              prefersReducedMotion
+                                ? { duration: 0 }
+                                : { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
+                            }
+                            className="overflow-hidden px-2 pb-2 pt-3"
+                          >
+                            <div className="rounded-[18px] border border-emerald-300/20 bg-emerald-400/[0.08] p-3.5">
+                              <ul className="space-y-2">
+                                {folder.files.map((fileName) => (
+                                  <li
+                                    key={fileName}
+                                    className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-100"
+                                  >
+                                    <FileCheck className="h-4 w-4 shrink-0 text-emerald-300" aria-hidden="true" />
+                                    <span className="truncate">{fileName}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </motion.div>
+                        ) : null}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
