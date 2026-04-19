@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   AlertCircle,
@@ -1068,7 +1075,7 @@ export function IntakePhasesViz() {
   const drilledPhase = intakePhases[drilledIndex];
   const activeStyles = TIER_LADDER_STYLES[activePhase.accent];
   const drilledStyles = TIER_LADDER_STYLES[drilledPhase.accent];
-  const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.24, ease: "easeOut" as const };
+  const transition = prefersReducedMotion ? { duration: 0 } : { type: "spring" as const, stiffness: 280, damping: 28 };
 
   useEffect(() => {
     if (typeof document === "undefined" || typeof IntersectionObserver === "undefined") {
@@ -1211,15 +1218,28 @@ export function IntakePhasesViz() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
               Narrative sync
             </p>
-            <p className="mt-1 text-sm text-white">
-              {scrollSyncReady && scrollActiveIndex !== null
-                ? `Following Phase ${activePhase.number}`
-                : "Fallback to manual drill mode"}
-            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex gap-0.5" aria-hidden="true">
+                {intakePhases.map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1 w-3 rounded-full transition-colors duration-200",
+                      i === activeIndex ? "bg-sky-400" : i <= activeIndex ? "bg-sky-400/30" : "bg-white/10",
+                    )}
+                  />
+                ))}
+              </div>
+              <p className="text-sm font-medium text-white">
+                {scrollSyncReady && scrollActiveIndex !== null
+                  ? `Phase ${activePhase.number}`
+                  : "Manual mode"}
+              </p>
+            </div>
             <p className="mt-1 text-xs leading-5 text-slate-400" role="status" aria-live="polite">
               {scrollSyncReady
-                ? "As you scroll the Maya narrative, the active node highlights automatically."
-                : "If no phase markers are visible, the highlighted node follows your keyboard or click selection."}
+                ? "Scroll-linked to the Maya narrative below."
+                : "Click or arrow-key into any phase node."}
             </p>
           </div>
         </div>
@@ -1318,7 +1338,7 @@ export function IntakePhasesViz() {
                   <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", drilledStyles.detailAccent)}>
                     Opening question
                   </p>
-                  <p className="mt-2 text-sm leading-7 text-slate-100">{drilledPhase.question}</p>
+                  <p className="mt-2 text-base font-medium italic leading-7 text-slate-50">&ldquo;{drilledPhase.question}&rdquo;</p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -2635,11 +2655,31 @@ function AntiPatternCardBack({
 export function AntiPatternCardsViz() {
   const prefersReducedMotion = useReducedMotion();
   const [flippedCards, setFlippedCards] = useState<string[]>([antiPatterns[0].name]);
+  const [hasFinePointer, setHasFinePointer] = useState(false);
+  const cardButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const pointerFocusRef = useRef(false);
   const hoverOnlyRef = useRef(new Set<string>());
   const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.32, ease: "easeOut" as const };
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const syncPointerCapability = () => {
+      setHasFinePointer(mediaQuery.matches);
+    };
+
+    syncPointerCapability();
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncPointerCapability);
+      return () => mediaQuery.removeEventListener("change", syncPointerCapability);
+    }
+
+    mediaQuery.addListener(syncPointerCapability);
+    return () => mediaQuery.removeListener(syncPointerCapability);
+  }, []);
+
   const hoverFlip = (name: string) => {
+    if (!hasFinePointer) return;
     setFlippedCards((current) => {
       if (current.includes(name)) return current;
       hoverOnlyRef.current.add(name);
@@ -2656,6 +2696,9 @@ export function AntiPatternCardsViz() {
   };
 
   const toggleCard = (name: string) => {
+    if (!hasFinePointer) {
+      navigator.vibrate?.(12);
+    }
     setFlippedCards((current) => {
       const isHoverPreview = hoverOnlyRef.current.has(name);
       if (isHoverPreview) {
@@ -2668,6 +2711,56 @@ export function AntiPatternCardsViz() {
         : [...current, name];
     });
   };
+
+  const focusCardByIndex = (index: number) => {
+    cardButtonRefs.current[index]?.focus();
+  };
+
+  const handleCardKeyDown = (
+    index: number,
+    event: ReactKeyboardEvent<HTMLButtonElement>,
+  ) => {
+    const lastIndex = antiPatterns.length - 1;
+    const columns =
+      typeof window === "undefined"
+        ? 1
+        : window.innerWidth >= 1280
+          ? 4
+          : window.innerWidth >= 640
+            ? 2
+            : 1;
+
+    let nextIndex = index;
+    switch (event.key) {
+      case "ArrowRight":
+        nextIndex = Math.min(lastIndex, index + 1);
+        break;
+      case "ArrowLeft":
+        nextIndex = Math.max(0, index - 1);
+        break;
+      case "ArrowDown":
+        nextIndex = Math.min(lastIndex, index + columns);
+        break;
+      case "ArrowUp":
+        nextIndex = Math.max(0, index - columns);
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = lastIndex;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    focusCardByIndex(nextIndex);
+  };
+
+  const hintText = hasFinePointer
+    ? "Hover to preview, click to pin, or press Space"
+    : "Tap to flip, tap again to close, or press Space";
 
   return (
     <section aria-label="Anti-pattern cards: common estate planning failures" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-rose-300/10">
@@ -2687,6 +2780,19 @@ export function AntiPatternCardsViz() {
                 Flip each card to see what actually goes wrong, the worst case, and
                 which internal subagent catches the failure before the plan leaves draft mode.
               </p>
+              <div
+                id="anti-pattern-interaction-help"
+                className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-slate-400"
+              >
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+                  {hasFinePointer
+                    ? "Desktop: hover previews, click pins"
+                    : "Touch: tap flips, tap again closes"}
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+                  Keyboard: arrows move, Home/End jump, Space flips
+                </span>
+              </div>
             </div>
           </div>
 
@@ -2704,17 +2810,24 @@ export function AntiPatternCardsViz() {
             return (
               <button
                 key={pattern.name}
+                ref={(node) => {
+                  cardButtonRefs.current[index] = node;
+                }}
                 type="button"
                 aria-pressed={flipped}
+                aria-describedby={`anti-pattern-interaction-help anti-pattern-card-status-${index}`}
                 aria-label={`${flipped ? "Show front of" : "Show back of"} anti-pattern card: ${pattern.name}`}
-                onPointerDown={() => {
-                  pointerFocusRef.current = true;
+                onPointerDown={(event) => {
+                  pointerFocusRef.current = event.pointerType !== "touch";
                 }}
-                onMouseEnter={() => hoverFlip(pattern.name)}
+                onMouseEnter={() => {
+                  if (hasFinePointer) hoverFlip(pattern.name);
+                }}
                 onMouseLeave={() => {
                   pointerFocusRef.current = false;
-                  hoverUnflip(pattern.name);
+                  if (hasFinePointer) hoverUnflip(pattern.name);
                 }}
+                onKeyDown={(event) => handleCardKeyDown(index, event)}
                 onClick={() => toggleCard(pattern.name)}
                 onFocus={() => {
                   if (pointerFocusRef.current) {
@@ -2732,7 +2845,7 @@ export function AntiPatternCardsViz() {
                       pattern={pattern}
                       index={index}
                       icon={icon}
-                      hintText="Hover, tap, or press Space"
+                      hintText={hintText}
                       hidden={flipped}
                       className={cn(
                         "absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition-opacity duration-200 group-hover:border-rose-300/25",
@@ -2760,7 +2873,7 @@ export function AntiPatternCardsViz() {
                       pattern={pattern}
                       index={index}
                       icon={icon}
-                      hintText="Hover, tap, or press Space"
+                      hintText={hintText}
                       hidden={flipped}
                       className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition group-hover:border-rose-300/25"
                       style={{ backfaceVisibility: "hidden" }}
@@ -2774,6 +2887,11 @@ export function AntiPatternCardsViz() {
                     />
                   </motion.div>
                 )}
+                <span id={`anti-pattern-card-status-${index}`} className="sr-only">
+                  {flipped
+                    ? "Back of card open. Press Space to return to the front summary."
+                    : "Front of card visible. Press Space to reveal what goes wrong."}
+                </span>
               </button>
             );
           })}
