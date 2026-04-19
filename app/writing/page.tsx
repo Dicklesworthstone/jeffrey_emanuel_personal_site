@@ -39,7 +39,7 @@ export default function WritingPage() {
 
   // Combine MDX items and writing highlights to find all featured items
   // Manual highlights take precedence for duplicates
-  const allItems = [...mdxItems, ...writingHighlights];
+  const allItems = [...mdxItems, ...writingHighlights.filter((item) => !item.draft)];
   
   // Use a map to handle duplicates by href
   const itemsByHref = new Map<string, WritingItem>();

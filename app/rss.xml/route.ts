@@ -123,7 +123,7 @@ export async function GET() {
     });
   });
 
-  writingHighlights.forEach((item) => {
+  writingHighlights.filter((item) => !item.draft).forEach((item) => {
     if (item.href.startsWith("http")) {
       upsertItem({
         title: item.title,
