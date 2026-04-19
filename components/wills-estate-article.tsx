@@ -329,7 +329,7 @@ export function WillsEstateArticle() {
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
-              One skill. Twelve axioms. A structured intake that turns a
+              One skill. Eleven axioms. A structured intake that turns a
               chaotic family situation into an attorney-ready handoff package.
             </p>
 
@@ -465,15 +465,14 @@ export function WillsEstateArticle() {
           <p>
             The skill does not replace your attorney. That needs to be explicit,
             because the whole thing is designed to end at one. What it does
-            replace is the first eight to fifteen hours of billable time your
-            attorney would normally spend understanding your life before they
-            can start drafting. By the time you send them the Attorney
-            Engagement Brief the skill produces, they can go from reading to
-            drafting in a single sitting. That is where the savings come from.
-            Sullivan &amp; Cromwell&apos;s rate for an initial estates
-            consultation is a closely-guarded secret they will tell you only
-            after you make an appointment. You don&apos;t have to call them.
-            You can spend a Saturday with your agent and show up to your actual
+            can replace is a large chunk of the first fact-finding and
+            document-gathering work your attorney would normally bill for
+            before they can start drafting. By the time you send them the
+            Attorney Engagement Brief the skill produces, the conversation can
+            start much closer to drafting than to discovery. That is where much
+            of the savings can come from. Exact rates vary wildly by state and
+            firm. The point is not a guaranteed number. The point is that you
+            can spend a Saturday with your agent and show up to your actual
             lawyer&apos;s office with the packet already done.
           </p>
 
@@ -1526,8 +1525,10 @@ jsm install wills-and-estate-planning-skill`}
                 recommended, the open legal questions the skill could not
                 resolve, and the specific state-law items that need
                 verification. Hand this to your lawyer and their first
-                billable meeting shrinks from eight to fifteen hours to
-                two to three.
+                billable meeting can start in the &ldquo;here are the
+                remaining legal questions&rdquo; mode instead of the
+                &ldquo;tell me your whole life story from scratch&rdquo;
+                mode.
               </p>
             </div>
           </div>
@@ -1856,12 +1857,13 @@ jsm install wills-and-estate-planning-skill`}
           <p>
             What it does is make the lawyer&apos;s job smaller. The first
             meeting with an estates attorney for a case like Maya&apos;s is
-            normally eight to fifteen billable hours of &ldquo;let me
-            understand your life before I can draft anything.&rdquo; With the
-            skill&apos;s packet in hand, that collapses to two to three hours
-            of &ldquo;good, I can draft this, here are the three questions I
-            have for you before I start.&rdquo; The savings are real and they
-            are repeatable.
+            often many billable hours of &ldquo;let me understand your life
+            before I can draft anything.&rdquo; With the skill&apos;s packet in
+            hand, that can become a shorter, more drafting-oriented
+            conversation: &ldquo;good, I can draft this, here are the three
+            questions I have for you before I start.&rdquo; The savings can be
+            meaningful, but they depend on the lawyer, the state, and the
+            facts.
           </p>
 
           <p>
@@ -1952,7 +1954,7 @@ jsm install wills-and-estate-planning-skill`}
               {
                 dim: <strong>Where it ends</strong>,
                 them: "The document is the endpoint. If you want an attorney to review, you start over with them.",
-                us: "Every session ends at a licensed attorney in your state. Produces an Attorney Engagement Brief specifically designed to turn your first billable meeting from 8-15 hours into 2-3.",
+                us: "Every session ends at a licensed attorney in your state. Produces an Attorney Engagement Brief designed to reduce redundant intake and make the first billable meeting materially shorter.",
               },
               {
                 dim: <strong>What it costs</strong>,
@@ -2009,8 +2011,9 @@ jsm install wills-and-estate-planning-skill`}
                 Yes. For anyone with more than a trivial estate, minor
                 children, a blended family, a business, disability in the
                 family, or unusual circumstances, you want a real attorney.
-                The skill makes that attorney&apos;s first meeting take two
-                hours instead of ten. It does not replace the meeting.
+                The skill can make that attorney&apos;s first meeting
+                dramatically shorter and better prepared. It does not replace
+                the meeting.
               </p>
             </div>
           </details>
@@ -2230,10 +2233,10 @@ jsm install wills-and-estate-planning-skill`}
             That shape of problem is exactly what an agent-driven skill can
             compress. Not the judgment — the preparation. Your attorney
             still signs. Your CPA still files. Your Medicare broker still
-            enrolls you. What changes is that the preparation, which was
-            secretly most of your bill, happens on your Saturday afternoon
-            at the kitchen table with your agent, instead of in the
-            specialist&apos;s office at seven hundred dollars an hour.
+            enrolls you. What changes is that a large share of the
+            preparation can happen on your Saturday afternoon at the kitchen
+            table with your agent, instead of entirely inside the
+            specialist&apos;s intake process.
           </p>
 
           <p>
@@ -2246,15 +2249,15 @@ jsm install wills-and-estate-planning-skill`}
             still benefit from an hour of an attorney&apos;s time. A family
             with fifty million dollars and three generations to plan for
             will still need ongoing counsel for the next two decades. The
-            skill does not replace any of that. It makes the first meeting
-            useful and shortens every subsequent one.
+            skill does not replace any of that. It can make the first meeting
+            more useful and shorten some of the work that follows.
           </p>
 
           <p>
             What it gives you, if you use it well, is two things. Your
             family&apos;s affairs, organized coherently, for maybe the
             first time in your adult life. And a packet an attorney can
-            draft against in an afternoon rather than a month.
+            draft against on a much shorter timeline than a cold start.
           </p>
 
           <p>
