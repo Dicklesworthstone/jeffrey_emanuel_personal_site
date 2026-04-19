@@ -956,6 +956,14 @@ export function AxiomCoherenceViz() {
   );
 }
 
+const ACCENT_FOCUS_RINGS: Record<TierAccentKey, string> = {
+  amber: "focus-visible:ring-amber-300/70",
+  sky: "focus-visible:ring-sky-300/70",
+  emerald: "focus-visible:ring-emerald-300/70",
+  violet: "focus-visible:ring-violet-300/70",
+  rose: "focus-visible:ring-rose-300/70",
+};
+
 export function IntakePhasesViz() {
   const prefersReducedMotion = useReducedMotion();
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -1275,6 +1283,7 @@ export function IntakePhasesViz() {
               return (
                 <button
                   key={phase.id}
+                  id={`intake-tab-${phase.id}`}
                   ref={(node) => {
                     buttonRefs.current[index] = node;
                   }}
@@ -1288,16 +1297,17 @@ export function IntakePhasesViz() {
                   onClick={() => {
                     setFocusedIndex(index);
                     setDrilledIndex(index);
+                    navigator.vibrate?.(8);
                   }}
                   onFocus={() => setFocusedIndex(index)}
                   onKeyDown={(event) => handleKeyDown(event, index)}
                   className={cn(
                     "relative min-h-[3rem] cursor-pointer rounded-[22px] border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                     isActive
-                      ? cn(styles.activeCard, "focus-visible:ring-white/80")
+                      ? cn(styles.activeCard, ACCENT_FOCUS_RINGS[phase.accent])
                       : isDrilled
-                        ? "border-white/20 bg-white/[0.08] focus-visible:ring-white/60"
-                        : "border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-white/60",
+                        ? cn("border-white/20 bg-white/[0.08] hover:bg-white/[0.10]", ACCENT_FOCUS_RINGS[phase.accent])
+                        : cn("border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]", !prefersReducedMotion && "hover:scale-[1.02] active:scale-[0.98]", ACCENT_FOCUS_RINGS[phase.accent]),
                   )}
                 >
                   <div className="mb-4 flex items-center justify-between gap-2">
@@ -1337,6 +1347,7 @@ export function IntakePhasesViz() {
             <span className="inline-flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-violet-400" /> = detail open
             </span>
+            <span className="inline sm:hidden">Tap any phase to explore</span>
             <span className="hidden sm:inline">Arrow keys to navigate · Enter to drill</span>
           </div>
         </div>
@@ -1345,7 +1356,7 @@ export function IntakePhasesViz() {
           <motion.div
             id="intake-drill-panel"
             role="tabpanel"
-            aria-label={`Phase ${drilledPhase.number}: ${drilledPhase.name}`}
+            aria-labelledby={`intake-tab-${drilledPhase.id}`}
             key={drilledPhase.id}
             initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -3627,7 +3638,7 @@ const INSTALL_STEPS: InstallStep[] = [
     number: 1,
     label: "Get a frontier-model subscription",
     sub: "Claude Max ($100/mo) or GPT Pro ($200/mo). Cancel anytime.",
-    time: "~5 min",
+    time: "~7 min",
     icon: <Brain className="h-5 w-5" aria-hidden="true" />,
     accent: "cyan",
     accentBorder: "border-cyan-400/30",
@@ -3665,7 +3676,7 @@ const INSTALL_STEPS: InstallStep[] = [
     number: 2,
     label: "Install the desktop app",
     sub: "Claude Code or Codex Desktop, Mac/Windows, free. Signs in with step 1.",
-    time: "~5 min",
+    time: "~7 min",
     icon: <MonitorDown className="h-5 w-5" aria-hidden="true" />,
     accent: "violet",
     accentBorder: "border-violet-400/30",
@@ -3694,7 +3705,7 @@ const INSTALL_STEPS: InstallStep[] = [
     number: 3,
     label: "Subscribe at jeffreys-skills.md",
     sub: "$20/mo, Stripe or PayPal. Makes your account ready to install skills.",
-    time: "~3 min",
+    time: "~4 min",
     icon: <KeyRound className="h-5 w-5" aria-hidden="true" />,
     accent: "emerald",
     accentBorder: "border-emerald-400/30",
