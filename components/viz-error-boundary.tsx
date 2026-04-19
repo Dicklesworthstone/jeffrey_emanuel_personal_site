@@ -6,11 +6,11 @@ import ErrorBoundary from "@/components/error-boundary";
 import { AlertTriangle } from "lucide-react";
 
 const VIZ_SKELETON_HEIGHTS = {
-  "tier-triage": "min-h-[34rem]",
-  "axiom-coherence": "min-h-[34rem]",
-  "intake-phases": "min-h-[34rem]",
-  "deliverables-tree": "min-h-[40rem]",
-  "anti-pattern-cards": "min-h-[28rem]",
+  "tier-triage": "min-h-[46rem] md:min-h-[40rem]",
+  "axiom-coherence": "min-h-[42rem] md:min-h-[38rem]",
+  "intake-phases": "min-h-[44rem] md:min-h-[38rem]",
+  "deliverables-tree": "min-h-[48rem] md:min-h-[42rem]",
+  "anti-pattern-cards": "min-h-[32rem] md:min-h-[34rem]",
   "pricing-comparison": "min-h-[56rem] md:min-h-[44rem]",
 } as const;
 

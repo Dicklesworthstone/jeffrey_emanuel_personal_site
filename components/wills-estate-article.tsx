@@ -14,7 +14,6 @@ import {
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
-import { useReducedMotion } from "framer-motion";
 import {
   BookOpen,
   FileDown,
@@ -232,15 +231,18 @@ function Sub({
 }
 
 export function WillsEstateArticle() {
-  const prefersReducedMotion = useReducedMotion();
   const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+  const tocScrollFrameRef = useRef<number | null>(null);
   const tocScrollTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
+      if (tocScrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(tocScrollFrameRef.current);
+      }
       if (tocScrollTimerRef.current !== null) {
-        clearTimeout(tocScrollTimerRef.current);
+        window.clearTimeout(tocScrollTimerRef.current);
       }
     };
   }, []);
@@ -264,19 +266,40 @@ export function WillsEstateArticle() {
     if (!anchor) return;
 
     event.preventDefault();
-
-    if (tocScrollTimerRef.current !== null) clearTimeout(tocScrollTimerRef.current);
-
-    const scrollToAnchor = (behavior: ScrollBehavior) => {
-      anchor.scrollIntoView({ behavior, block: "start" });
-    };
+    if (tocScrollFrameRef.current !== null) {
+      window.cancelAnimationFrame(tocScrollFrameRef.current);
+      tocScrollFrameRef.current = null;
+    }
+    if (tocScrollTimerRef.current !== null) {
+      window.clearTimeout(tocScrollTimerRef.current);
+      tocScrollTimerRef.current = null;
+    }
 
     window.history.pushState(null, "", `#${id}`);
-    scrollToAnchor(prefersReducedMotion ? "auto" : "smooth");
+    anchor.scrollIntoView({ behavior: "auto", block: "start" });
 
-    tocScrollTimerRef.current = window.setTimeout(() => {
-      scrollToAnchor("auto");
-    }, 450);
+    const deadline = window.performance.now() + 2400;
+    const keepAnchorInView = () => {
+      if (!anchor.isConnected) return;
+
+      const rect = anchor.getBoundingClientRect();
+      const anchorInViewport = rect.bottom > 0 && rect.top < window.innerHeight;
+      if (!anchorInViewport) {
+        anchor.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+
+      if (window.performance.now() >= deadline) {
+        tocScrollFrameRef.current = null;
+        tocScrollTimerRef.current = null;
+        return;
+      }
+
+      tocScrollTimerRef.current = window.setTimeout(() => {
+        tocScrollFrameRef.current = window.requestAnimationFrame(keepAnchorInView);
+      }, 160);
+    };
+
+    tocScrollFrameRef.current = window.requestAnimationFrame(keepAnchorInView);
   };
 
   // Scroll progress bar
