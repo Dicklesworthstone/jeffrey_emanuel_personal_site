@@ -3147,7 +3147,7 @@ export function PricingComparisonViz() {
   const hasInteractedRef = useRef(false);
   const transition = prefersReducedMotion
     ? { duration: 0 }
-    : { duration: 0.28, ease: "easeOut" as const };
+    : { type: "spring" as const, stiffness: 190, damping: 20, mass: 0.75 };
 
   const netWorth = useMemo(
     () => priceCalcValueFromSlider(sliderValue),
@@ -3222,18 +3222,31 @@ export function PricingComparisonViz() {
 
           <div className="rounded-[20px] border border-white/10 bg-black/20 p-4 md:p-5">
             <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
-                  Net worth estimate
-                </p>
-                <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-300">
+                  <span className="text-amber-200">01</span>
+                  Set net worth
+                </div>
+                <motion.p
+                  key={`net-worth-${netWorth}`}
+                  initial={prefersReducedMotion ? false : { opacity: 0.7, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={transition}
+                  className="text-3xl font-semibold tracking-tight text-white"
+                >
                   {formatCompactCurrency(netWorth)}
-                </p>
+                </motion.p>
                 <p className="mt-1 text-sm text-slate-400">{formatCurrency(netWorth)} current estimate</p>
               </div>
-              <div className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold text-amber-100">
+              <motion.div
+                key={`net-worth-bucket-${getNetWorthBucket(netWorth)}`}
+                initial={prefersReducedMotion ? false : { opacity: 0.7, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={transition}
+                className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold text-amber-100"
+              >
                 {getNetWorthBucket(netWorth)}
-              </div>
+              </motion.div>
             </div>
 
             <label className="mt-5 block">
@@ -3298,18 +3311,25 @@ export function PricingComparisonViz() {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
-                  Complexity overlays
-                </p>
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-300">
+                  <span className="text-cyan-200">02</span>
+                  Add complexity
+                </div>
                 <p id="pricing-chip-help" className="mt-1 text-sm text-slate-300">
                   Toggle the facts that make a cheap form bundle stop being the
                   real comparison. Tap again to remove an overlay.
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-100">
+                <motion.div
+                  key={`pricing-chip-count-${numChips}`}
+                  initial={prefersReducedMotion ? false : { opacity: 0.75, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={transition}
+                  className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-100"
+                >
                   {numChips} active
-                </div>
+                </motion.div>
                 <button
                   type="button"
                   disabled={isDefaultScenario}
@@ -3376,12 +3396,18 @@ export function PricingComparisonViz() {
             id="pricing-live-summary"
             className="rounded-[22px] border border-white/10 bg-black/20 p-4 md:p-5"
           >
-            <p className="text-sm text-slate-300">
+            <motion.p
+              key={`pricing-scenario-${selectedComplexityLabels.join("|") || "base"}`}
+              initial={prefersReducedMotion ? false : { opacity: 0.72, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={transition}
+              className="text-sm text-slate-300"
+            >
               Scenario:{" "}
               {selectedComplexityLabels.length > 0
                 ? selectedComplexityLabels.join(", ")
                 : "base case with no extra overlays"}
-            </p>
+            </motion.p>
             <div className="grid gap-3">
               <div className="rounded-[18px] border border-amber-300/20 bg-amber-400/[0.08] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200">
