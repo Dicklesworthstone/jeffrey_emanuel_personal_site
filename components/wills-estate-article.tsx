@@ -1375,9 +1375,8 @@ export function WillsEstateArticle() {
             <summary>Does it work on my phone?</summary>
             <div className="sm-details-body">
               <p>
-                Not today. Claude Code Desktop and Codex Desktop are Mac,
-                Windows, and Linux. There is no mobile app. You need a
-                computer.
+                Not today. Claude Code Desktop and Codex Desktop run on Mac
+                or Windows. There is no mobile app. You need a computer.
               </p>
             </div>
           </details>
