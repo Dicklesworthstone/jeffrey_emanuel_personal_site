@@ -577,8 +577,30 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
+            Before I go further, a note for anyone who has not heard the word
+            before: a <em>skill</em> can be thought of as a bundle of
+            &ldquo;how to&rdquo; knowledge that is prepared for use by an AI
+            agent such as Claude Code or OpenAI&apos;s Codex. It combines
+            reference materials, workflows, scripts, subagents, and so on, all
+            in a way that is maximally agent-intuitive and agent-ergonomic and
+            optimized for context efficiency (at least for a well-designed
+            skill, which most are not). The agent loads the skill at the start
+            of a session and then behaves like a prepared specialist for the
+            rest of that conversation.
+          </p>
+
+          <p>
             A few months ago I posted a tax-preparation skill on my paid skills
-            site. At least five readers have since told me they saved more than
+            site,{" "}
+            <a
+              href="https://jeffreys-skills.md/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline underline-offset-2"
+            >
+              jeffreys-skills.md
+            </a>
+            . At least five readers have since told me they saved more than
             a thousand dollars on their taxes using it. One saved twenty
             thousand. That is on a twenty-dollar-a-month subscription. It got
             me thinking about which other expensive-specialist problems look
