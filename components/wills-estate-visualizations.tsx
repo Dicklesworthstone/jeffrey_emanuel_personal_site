@@ -2651,10 +2651,17 @@ export function AntiPatternCardsViz() {
   };
 
   const toggleCard = (name: string) => {
-    hoverOnlyRef.current.delete(name);
-    setFlippedCards((current) =>
-      current.includes(name) ? current.filter((item) => item !== name) : [...current, name],
-    );
+    setFlippedCards((current) => {
+      const isHoverPreview = hoverOnlyRef.current.has(name);
+      if (isHoverPreview) {
+        hoverOnlyRef.current.delete(name);
+        return current;
+      }
+
+      return current.includes(name)
+        ? current.filter((item) => item !== name)
+        : [...current, name];
+    });
   };
 
   return (

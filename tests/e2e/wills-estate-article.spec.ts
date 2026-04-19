@@ -220,11 +220,15 @@ test.describe("Wills & Estate Planning Article", () => {
       name: /anti-pattern card: the ex-spouse still on the 401\(k\)/i,
     });
     await firstCard.hover();
-    await expect(
-      viz.getByText(/ERISA retirement plans follow the beneficiary designation on file/i),
-    ).toBeVisible();
+    const firstCardBack = viz.getByText(
+      /ERISA retirement plans follow the beneficiary designation on file/i,
+    );
+    await expect(firstCardBack).toBeVisible();
+
+    await firstCard.click();
 
     await page.mouse.move(0, 0);
+    await expect(firstCardBack).toBeVisible();
 
     const secondCard = viz.getByRole("button", {
       name: /anti-pattern card: the revocable trust that owns nothing/i,
