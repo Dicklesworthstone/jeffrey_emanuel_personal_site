@@ -167,20 +167,27 @@ test.describe("Wills & Estate Planning Article", () => {
     const runtime = captureRuntimeErrors(page);
 
     await visitArticle(page, scenario);
-    await page.locator("#install").scrollIntoViewIfNeeded();
+    const installSection = page.locator('section[data-section="install"]').first();
+    await installSection.scrollIntoViewIfNeeded();
+    await expect(installSection).toBeVisible();
 
-    const tabButtons = page.locator('#install [role="tab"], #install button[aria-controls]');
+    const tabButtons = installSection.getByRole("tab");
     if ((await tabButtons.count()) > 0) {
       for (let index = 0; index < await tabButtons.count(); index += 1) {
         logStep(scenario, `switch install tab ${index + 1}`);
-        await tabButtons.nth(index).click();
-        await expect(tabButtons.nth(index)).toHaveAttribute("aria-selected", /true|undefined/);
+        const tabButton = tabButtons.nth(index);
+        const controlledPanelId = await tabButton.getAttribute("aria-controls");
+        await tabButton.click();
+        await expect(tabButton).toHaveAttribute("aria-selected", "true");
+        if (controlledPanelId) {
+          await expect(installSection.locator(`#${controlledPanelId}`)).toBeVisible();
+        }
       }
     } else {
       logStep(scenario, "assert static install paths");
-      await expect(page.getByRole("heading", { name: /In Claude or Codex Desktop/i })).toBeVisible();
-      await expect(page.getByRole("heading", { name: /From the terminal/i })).toBeVisible();
-      await expect(page.getByRole("heading", { name: /Direct download/i })).toBeVisible();
+      await expect(installSection.getByRole("heading", { name: /In Claude or Codex Desktop/i })).toBeVisible();
+      await expect(installSection.getByRole("heading", { name: /Via the jsm CLI/i })).toBeVisible();
+      await expect(installSection.getByRole("heading", { name: /Manual ZIP fallback/i })).toBeVisible();
     }
 
     runtime.assertClean();
@@ -242,6 +249,8 @@ test.describe("Wills & Estate Planning Article", () => {
     const firstCard = viz.getByRole("button", {
       name: /anti-pattern card: the ex-spouse still on the 401\(k\)/i,
     });
+    await firstCard.scrollIntoViewIfNeeded();
+    await expect(firstCard).toBeVisible();
     await firstCard.hover();
     const firstCardBack = viz.getByText(
       /ERISA retirement plans follow the beneficiary designation on file/i,
@@ -256,6 +265,8 @@ test.describe("Wills & Estate Planning Article", () => {
     const secondCard = viz.getByRole("button", {
       name: /anti-pattern card: the revocable trust that owns nothing/i,
     });
+    await secondCard.scrollIntoViewIfNeeded();
+    await expect(secondCard).toBeVisible();
     await secondCard.focus();
     await page.keyboard.press("Space");
     await expect(

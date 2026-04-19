@@ -3057,6 +3057,13 @@ const PRICING_COMPLEXITY_CHIPS: PricingComplexityChip[] = [
   { id: "concentrated-stock", label: "Concentrated stock / pre-IPO" },
 ];
 
+const PRICING_NET_WORTH_PRESETS = [
+  { label: "$250K", value: 250_000 },
+  { label: "$1M", value: 1_000_000 },
+  { label: "$5M", value: 5_000_000 },
+  { label: "$20M", value: 20_000_000 },
+] as const;
+
 const PRICING_SLIDER_MIN = 100_000;
 const PRICING_SLIDER_MAX = 100_000_000;
 const PRICING_JSM_MONTHLY_PRICE = 20;
@@ -3132,8 +3139,9 @@ function emitPricingCalcChanged(netWorth: number, numChips: number) {
 
 export function PricingComparisonViz() {
   const prefersReducedMotion = useReducedMotion();
+  const defaultNetWorth = 1_000_000;
   const [sliderValue, setSliderValue] = useState(() =>
-    priceCalcSliderFromValue(1_000_000),
+    priceCalcSliderFromValue(defaultNetWorth),
   );
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const hasInteractedRef = useRef(false);
@@ -3156,6 +3164,10 @@ export function PricingComparisonViz() {
   }, [netWorth, numChips]);
 
   const savingsVsAttorney = Math.max(0, attorneyEstimate - PRICING_JSM_MONTHLY_PRICE);
+  const selectedComplexityLabels = PRICING_COMPLEXITY_CHIPS.filter((chip) =>
+    selectedChips.includes(chip.id),
+  ).map((chip) => chip.label);
+  const isDefaultScenario = netWorth === defaultNetWorth && numChips === 0;
 
   useEffect(() => {
     if (!hasInteractedRef.current) return;
@@ -3169,6 +3181,17 @@ export function PricingComparisonViz() {
         ? current.filter((v) => v !== chipId)
         : [...current, chipId],
     );
+  };
+
+  const setNetWorthFromPreset = (value: number) => {
+    hasInteractedRef.current = true;
+    setSliderValue(priceCalcSliderFromValue(value));
+  };
+
+  const resetPricingScenario = () => {
+    hasInteractedRef.current = true;
+    setSliderValue(priceCalcSliderFromValue(defaultNetWorth));
+    setSelectedChips([]);
   };
 
   return (
@@ -3206,6 +3229,7 @@ export function PricingComparisonViz() {
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
                   {formatCompactCurrency(netWorth)}
                 </p>
+                <p className="mt-1 text-sm text-slate-400">{formatCurrency(netWorth)} current estimate</p>
               </div>
               <div className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold text-amber-100">
                 {getNetWorthBucket(netWorth)}
@@ -3213,6 +3237,10 @@ export function PricingComparisonViz() {
             </div>
 
             <label className="mt-5 block">
+              <span id="pricing-slider-help" className="mb-3 block text-sm text-slate-300">
+                Drag for a rough range, or use arrow keys for finer adjustments.
+                The slider is logarithmic so the low end is not compressed into a tiny slice.
+              </span>
               <span className="sr-only">
                 Estimated net worth from one hundred thousand dollars to one hundred million dollars
               </span>
@@ -3223,6 +3251,7 @@ export function PricingComparisonViz() {
                 step={1}
                 value={sliderValue}
                 aria-label="Estimated net worth"
+                aria-describedby="pricing-slider-help pricing-live-summary"
                 aria-valuetext={formatCurrency(netWorth)}
                 className="sm-range w-full"
                 onChange={(event) => {
@@ -3231,6 +3260,32 @@ export function PricingComparisonViz() {
                 }}
               />
             </label>
+
+            <div
+              role="group"
+              aria-label="Common net worth presets"
+              className="mt-4 flex flex-wrap gap-2"
+            >
+              {PRICING_NET_WORTH_PRESETS.map((preset) => {
+                const active = netWorth === preset.value;
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setNetWorthFromPreset(preset.value)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                      active
+                        ? "border-amber-300/35 bg-amber-400/[0.12] text-amber-100"
+                        : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-amber-300/20 hover:bg-amber-400/[0.06]",
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
 
             <div className="mt-3 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.18em] text-slate-500">
               <span>$100K</span>
@@ -3246,13 +3301,28 @@ export function PricingComparisonViz() {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
                   Complexity overlays
                 </p>
-                <p className="mt-1 text-sm text-slate-300">
+                <p id="pricing-chip-help" className="mt-1 text-sm text-slate-300">
                   Toggle the facts that make a cheap form bundle stop being the
-                  real comparison.
+                  real comparison. Tap again to remove an overlay.
                 </p>
               </div>
-              <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-100">
-                {numChips} active
+              <div className="flex items-center gap-2">
+                <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-100">
+                  {numChips} active
+                </div>
+                <button
+                  type="button"
+                  disabled={isDefaultScenario}
+                  onClick={resetPricingScenario}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-[11px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                    isDefaultScenario
+                      ? "cursor-not-allowed border-white/10 bg-white/[0.02] text-slate-500"
+                      : "border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/15 hover:bg-white/[0.08]",
+                  )}
+                >
+                  Reset
+                </button>
               </div>
             </div>
 
@@ -3264,6 +3334,7 @@ export function PricingComparisonViz() {
                     key={chip.id}
                     type="button"
                     aria-pressed={active}
+                    aria-describedby="pricing-chip-help"
                     onClick={() => toggleChip(chip.id)}
                     className={cn(
                       "rounded-[16px] border px-4 py-3 text-left text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
@@ -3272,7 +3343,26 @@ export function PricingComparisonViz() {
                         : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-cyan-300/20 hover:bg-cyan-400/[0.04]",
                     )}
                   >
-                    <span className="block font-medium">{chip.label}</span>
+                    <span className="flex items-start gap-2">
+                      <CheckCircle2
+                        className={cn(
+                          "mt-0.5 h-4 w-4 shrink-0",
+                          active ? "text-cyan-100" : "text-slate-500",
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span>
+                        <span className="block font-medium">{chip.label}</span>
+                        <span
+                          className={cn(
+                            "mt-1 block text-xs",
+                            active ? "text-cyan-100/80" : "text-slate-500",
+                          )}
+                        >
+                          {active ? "Included in this scenario" : "Tap to compare"}
+                        </span>
+                      </span>
+                    </span>
                   </button>
                 );
               })}
@@ -3283,8 +3373,15 @@ export function PricingComparisonViz() {
         <div className="space-y-4">
           <div
             aria-live="polite"
+            id="pricing-live-summary"
             className="rounded-[22px] border border-white/10 bg-black/20 p-4 md:p-5"
           >
+            <p className="text-sm text-slate-300">
+              Scenario:{" "}
+              {selectedComplexityLabels.length > 0
+                ? selectedComplexityLabels.join(", ")
+                : "base case with no extra overlays"}
+            </p>
             <div className="grid gap-3">
               <div className="rounded-[18px] border border-amber-300/20 bg-amber-400/[0.08] p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200">
