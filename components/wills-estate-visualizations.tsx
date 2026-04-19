@@ -1,20 +1,32 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowRight,
+  Baby,
   BriefcaseBusiness,
   Building2,
   CheckCircle2,
   Compass,
+  Eye,
+  Feather,
+  FileText,
+  FileWarning,
   FolderTree,
+  GitFork,
+  Globe,
   GitBranch,
   House,
+  Inbox,
   MapPinned,
   Landmark,
   Layers3,
+  Lock,
+  Shield,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Target,
@@ -27,180 +39,6 @@ import {
 
 function cn(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
-}
-
-function useViewportFlags() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const update = () => setIsMobile(mediaQuery.matches);
-
-    update();
-    mediaQuery.addEventListener("change", update);
-
-    return () => mediaQuery.removeEventListener("change", update);
-  }, []);
-
-  return { isMobile };
-}
-
-type VizShellProps = {
-  eyebrow: string;
-  title: string;
-  summary: string;
-  accent: "amber" | "emerald" | "rose" | "sky" | "violet";
-  icon: ReactNode;
-  bullets: string[];
-  stage: ReactNode;
-};
-
-const ACCENT_STYLES: Record<VizShellProps["accent"], { badge: string; panel: string; ring: string }> = {
-  amber: {
-    badge: "bg-amber-400/15 text-amber-200 border-amber-300/20",
-    panel: "from-amber-400/12 via-amber-300/5 to-transparent",
-    ring: "ring-amber-300/15",
-  },
-  emerald: {
-    badge: "bg-emerald-400/15 text-emerald-200 border-emerald-300/20",
-    panel: "from-emerald-400/12 via-emerald-300/5 to-transparent",
-    ring: "ring-emerald-300/15",
-  },
-  rose: {
-    badge: "bg-rose-400/15 text-rose-200 border-rose-300/20",
-    panel: "from-rose-400/12 via-rose-300/5 to-transparent",
-    ring: "ring-rose-300/15",
-  },
-  sky: {
-    badge: "bg-sky-400/15 text-sky-200 border-sky-300/20",
-    panel: "from-sky-400/12 via-sky-300/5 to-transparent",
-    ring: "ring-sky-300/15",
-  },
-  violet: {
-    badge: "bg-violet-400/15 text-violet-200 border-violet-300/20",
-    panel: "from-violet-400/12 via-violet-300/5 to-transparent",
-    ring: "ring-violet-300/15",
-  },
-};
-
-function VizShell({
-  eyebrow,
-  title,
-  summary,
-  accent,
-  icon,
-  bullets,
-  stage,
-}: VizShellProps) {
-  const prefersReducedMotion = useReducedMotion();
-  const { isMobile } = useViewportFlags();
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const isInView = useInView(containerRef, { once: true, margin: "-80px 0px" });
-  const [showNotesOverride, setShowNotesOverride] = useState<boolean | null>(null);
-  const showNotes = showNotesOverride ?? (prefersReducedMotion || (isInView && !isMobile));
-
-  const visibleBullets = useMemo(
-    () => (isMobile && !showNotes ? bullets.slice(0, 2) : bullets),
-    [bullets, isMobile, showNotes],
-  );
-
-  const accentStyles = ACCENT_STYLES[accent];
-
-  return (
-    <motion.div
-      ref={containerRef}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-      animate={isInView || prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.45, ease: "easeOut" }}
-      className={cn(
-        "relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1",
-        accentStyles.ring,
-      )}
-    >
-      <div className={cn("absolute inset-0 bg-gradient-to-br", accentStyles.panel)} />
-      <div className="relative grid gap-6 p-5 md:grid-cols-[minmax(0,1.1fr)_minmax(260px,0.9fr)] md:p-7">
-        <div className="space-y-5">
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em]",
-                accentStyles.badge,
-              )}
-            >
-              <span className="flex h-4 w-4 items-center justify-center">{icon}</span>
-              {eyebrow}
-            </div>
-            <span className="text-[10px] uppercase tracking-[0.24em] text-white/35">
-              Scaffold placeholder
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="max-w-xl text-2xl font-semibold tracking-tight text-white md:text-[2rem]">
-              {title}
-            </h3>
-            <p className="max-w-2xl text-sm leading-7 text-slate-300 md:text-[15px]">
-              {summary}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {visibleBullets.map((bullet) => (
-              <span
-                key={bullet}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-200"
-              >
-                {bullet}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setShowNotesOverride((value) => !(value ?? showNotes))}
-              className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-xs font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/10"
-            >
-              {showNotes ? "Hide scaffold notes" : "Show scaffold notes"}
-              <ArrowRight className={cn("h-3.5 w-3.5 transition", showNotes && "rotate-90")} />
-            </button>
-            <p className="text-xs text-slate-400">
-              Downstream beads can replace the stage panel without changing imports.
-            </p>
-          </div>
-
-          <AnimatePresence initial={false}>
-            {showNotes ? (
-              <motion.div
-                initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-black/20"
-              >
-                <div className="space-y-3 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/45">
-                    Module contract
-                  </p>
-                  <ul className="space-y-2 text-sm leading-6 text-slate-300">
-                    <li>Exports are named and stable for `next/dynamic` article imports.</li>
-                    <li>Shared motion/mobile guards already exist, so richer interactivity can land in place.</li>
-                    <li>Each scaffold has semantic copy instead of an empty box, avoiding dead-air in previews.</li>
-                  </ul>
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
-
-        <div className="relative">{stage}</div>
-      </div>
-    </motion.div>
-  );
 }
 
 type TierAccentKey = "amber" | "sky" | "emerald" | "violet" | "rose";
@@ -727,10 +565,10 @@ export function AxiomCoherenceViz() {
       accent: "amber",
       icon: <House className="h-4 w-4" aria-hidden="true" />,
       coherentNarrative: "The house deed, the trust-funding plan, and the dispositive documents all point to the same survivor and the same backup path.",
-      incoherentNarrative: "The house is jointly titled with an ex-sibling, so survivorship overrides the will and the wrong person takes the property automatically.",
+      incoherentNarrative: "The house is jointly titled with the wrong sibling, so survivorship overrides the will and the wrong person takes the property automatically.",
       subagent: "funding-checklist-generator",
       mismatch: {
-        title: "Joint tenancy with an ex-sibling",
+        title: "Joint tenancy with the wrong sibling",
         axiom: "Axiom 7",
         impact: "Titling overrides the will at death.",
       },
@@ -828,10 +666,10 @@ export function AxiomCoherenceViz() {
       accent: "rose",
       icon: <Sparkles className="h-4 w-4" aria-hidden="true" />,
       coherentNarrative: "The digital inventory points executors to email, password-manager, and crypto recovery locations without exposing any secret directly.",
-      incoherentNarrative: "The crypto wallet has no seed-phrase pointer in the digital inventory, so the asset may be practically unrecoverable even if everyone agrees who should inherit it.",
+      incoherentNarrative: "The crypto wallet and seed-location pointer were never inventoried, so the asset may be practically unrecoverable even if everyone agrees who should inherit it.",
       subagent: "anti-pattern-scanner",
       mismatch: {
-        title: "No seed-location pointer",
+        title: "Crypto seed not inventoried",
         axiom: "Axiom 0 adjacent",
         impact: "Unrecoverable digital assets do not care what the will intended.",
       },
@@ -839,8 +677,9 @@ export function AxiomCoherenceViz() {
   ];
 
   const selectedSpoke = spokes.find((spoke) => spoke.id === selectedSpokeId) ?? spokes[0];
-  const selectedStyles = TIER_LADDER_STYLES[selectedSpoke.accent];
   const isIncoherent = mode === "incoherent";
+  const selectedHasMismatch = isIncoherent && Boolean(selectedSpoke.mismatch);
+  const selectedStyles = TIER_LADDER_STYLES[selectedHasMismatch ? "rose" : selectedSpoke.accent];
 
   const setModeAndSelection = (nextMode: "coherent" | "incoherent") => {
     setMode(nextMode);
@@ -1528,65 +1367,1106 @@ export function IntakePhasesViz() {
   );
 }
 
+const DELIVERABLE_FOLDERS = ["intake", "analyses", "deliverables"] as const;
+
+type DeliverableFolder = (typeof DELIVERABLE_FOLDERS)[number];
+type DeliverableMode =
+  | "core"
+  | "new-plan"
+  | "existing-plan-audit"
+  | "life-event-delta"
+  | "urgent-bedside-signing"
+  | "executor-activation"
+  | "business-owner-succession"
+  | "uhnw-restructure"
+  | "maintenance-review";
+
+type DeliverableLeaf = {
+  folder: DeliverableFolder;
+  file: string;
+  label: string;
+  description: string;
+  snippet: string;
+  modes: DeliverableMode[];
+  owner: string;
+  spotlight?: boolean;
+};
+
+const DELIVERABLE_FOLDER_META: Record<
+  DeliverableFolder,
+  {
+    label: string;
+    title: string;
+    accent: string;
+    badge: string;
+    active: string;
+    inactive: string;
+    dependent: string;
+    detail: string;
+  }
+> = {
+  intake: {
+    label: "Intake",
+    title: "intake/",
+    accent: "text-slate-200",
+    badge: "border-white/10 bg-white/[0.06] text-slate-200",
+    active: "border-white/25 bg-white/[0.10] shadow-[0_18px_44px_rgba(148,163,184,0.12)]",
+    inactive: "border-white/10 bg-white/[0.03] hover:border-white/20",
+    dependent: "border-white/15 bg-white/[0.06]",
+    detail: "border-white/15 bg-white/[0.06]",
+  },
+  analyses: {
+    label: "Analyses",
+    title: "analyses/",
+    accent: "text-sky-200",
+    badge: "border-sky-300/20 bg-sky-400/10 text-sky-100",
+    active: "border-sky-300/35 bg-sky-400/[0.12] shadow-[0_18px_44px_rgba(14,165,233,0.16)]",
+    inactive: "border-white/10 bg-white/[0.03] hover:border-sky-300/25",
+    dependent: "border-sky-300/25 bg-sky-400/[0.08]",
+    detail: "border-sky-300/20 bg-sky-400/[0.08]",
+  },
+  deliverables: {
+    label: "Deliverables",
+    title: "deliverables/",
+    accent: "text-emerald-200",
+    badge: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
+    active: "border-emerald-300/35 bg-emerald-400/[0.12] shadow-[0_18px_44px_rgba(16,185,129,0.16)]",
+    inactive: "border-white/10 bg-white/[0.03] hover:border-emerald-300/25",
+    dependent: "border-emerald-300/25 bg-emerald-400/[0.08]",
+    detail: "border-emerald-300/20 bg-emerald-400/[0.08]",
+  },
+};
+
+const DELIVERABLE_MODE_LABELS: Record<DeliverableMode, string> = {
+  core: "Core",
+  "new-plan": "New plan",
+  "existing-plan-audit": "Existing audit",
+  "life-event-delta": "Life event",
+  "urgent-bedside-signing": "Urgent signing",
+  "executor-activation": "Executor activation",
+  "business-owner-succession": "Business owner",
+  "uhnw-restructure": "UHNW restructure",
+  "maintenance-review": "Maintenance",
+};
+
+const DELIVERABLE_MODE_FILTERS: Array<{ id: "all" | DeliverableMode; label: string }> = [
+  { id: "all", label: "All modes" },
+  { id: "core", label: "Core" },
+  { id: "new-plan", label: "New plan" },
+  { id: "existing-plan-audit", label: "Existing audit" },
+  { id: "life-event-delta", label: "Life event" },
+  { id: "urgent-bedside-signing", label: "Urgent" },
+  { id: "executor-activation", label: "Executor" },
+  { id: "business-owner-succession", label: "Business" },
+  { id: "uhnw-restructure", label: "UHNW" },
+  { id: "maintenance-review", label: "Maintenance" },
+];
+
+const deliverableTreeLeaves: DeliverableLeaf[] = [
+  {
+    folder: "intake",
+    file: "intake-record.md",
+    label: "Intake record",
+    description: "The running source of truth for household facts, goals, constraints, uploaded documents, and unresolved questions. Every later artifact points back to this record when a recommendation depends on a stated fact.",
+    snippet: "Client goal: keep Maya's home out of probate while preserving a protected remainder for Theo and Julia.",
+    modes: ["core"],
+    owner: "intake-conductor",
+  },
+  {
+    folder: "intake",
+    file: "session-NN-summary.md",
+    label: "Session summary",
+    description: "A checkpoint summary written after each work session so the plan can resume cleanly. It records what changed, what evidence arrived, and what the next pass should ask first.",
+    snippet: "Next session: verify Karl's MetLife beneficiary form and upload the 2018 trust PDF for gap analysis.",
+    modes: ["core", "maintenance-review"],
+    owner: "intake-conductor",
+  },
+  {
+    folder: "analyses",
+    file: "current-document-audit.md",
+    label: "Current document audit",
+    description: "An inventory of existing wills, trusts, POAs, healthcare directives, beneficiary forms, and deeds. It separates signed documents from drafts so stale paperwork does not masquerade as the current plan.",
+    snippet: "2018 revocable trust exists, but Schedule A is blank and the deed still lists Maya individually.",
+    modes: ["existing-plan-audit", "maintenance-review"],
+    owner: "document-organizer",
+  },
+  {
+    folder: "analyses",
+    file: "beneficiary-form-audit.md",
+    label: "Beneficiary form audit",
+    description: "A line-by-line check of retirement plans, life insurance, bank TOD/POD forms, and transfer-on-death registrations. It catches the documents that override a will before they cause a real transfer failure.",
+    snippet: "Karl 401(k): current primary beneficiary is ex-spouse; recommended update is spouse 100%, children contingent.",
+    modes: ["core", "life-event-delta", "maintenance-review"],
+    owner: "beneficiary-audit",
+  },
+  {
+    folder: "analyses",
+    file: "titling-audit.md",
+    label: "Titling audit",
+    description: "A review of how each major asset is legally titled today. It highlights joint tenancy, tenancy by the entirety, trust ownership, TOD deeds, and mismatches between title and intended distribution.",
+    snippet: "Primary residence: joint tenants with right of survivorship; does not follow dispositive split in draft will.",
+    modes: ["core", "existing-plan-audit", "life-event-delta"],
+    owner: "asset-discovery-auditor",
+  },
+  {
+    folder: "analyses",
+    file: "coherence-audit.md",
+    label: "Coherence audit",
+    description: "A cross-document consistency pass across wills, trusts, titles, beneficiary forms, POAs, letters, and tax assumptions. It asks whether the whole plan tells one enforceable story.",
+    snippet: "Mismatch: trust says equal shares, IRA form names one child outright, and letter of wishes assumes trustee control.",
+    modes: ["core"],
+    owner: "anti-pattern-scanner",
+  },
+  {
+    folder: "analyses",
+    file: "tax-exposure-analysis.md",
+    label: "Tax exposure analysis",
+    description: "A plain-English estimate of federal estate, state estate, inheritance, GST, capital-gains, and portability concerns. It flags every live-law assumption that must be verified from primary sources.",
+    snippet: "Projected federal taxable estate below 2026 exemption; state estate tax exposure remains live because domicile is uncertain.",
+    modes: ["core", "uhnw-restructure", "business-owner-succession"],
+    owner: "tax-analyzer",
+  },
+  {
+    folder: "analyses",
+    file: "liquidity-analysis.md",
+    label: "Liquidity analysis",
+    description: "A death-time cash-flow map for taxes, debts, funeral costs, buyouts, property upkeep, and executor expenses. It prevents a technically correct plan from forcing a fire sale.",
+    snippet: "Estate has $82k liquid against projected first-year obligations of $146k; bridge source required.",
+    modes: ["core", "business-owner-succession", "uhnw-restructure"],
+    owner: "implementation-ops-planner",
+  },
+  {
+    folder: "analyses",
+    file: "prior-plan-gap-analysis.md",
+    label: "Prior plan gap analysis",
+    description: "A focused delta between an old plan and the desired current plan. It identifies what can be reused, what must be revoked, and what changed because family, assets, or law moved.",
+    snippet: "Gap: 2018 plan predates second marriage, out-of-state condo, and Secure Act beneficiary rules.",
+    modes: ["existing-plan-audit", "life-event-delta", "maintenance-review"],
+    owner: "document-organizer",
+  },
+  {
+    folder: "analyses",
+    file: "decision-ledger.md",
+    label: "Decision ledger",
+    description: "A chronological record of important design choices and the facts behind them. It keeps later reviewers from guessing why the plan chose a QTIP trust, a backup fiduciary, or a funding sequence.",
+    snippet: "Decision 014: choose independent trustee for children's trust because co-trustee siblings have active conflict.",
+    modes: ["core"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "analyses",
+    file: "official-source-log.md",
+    label: "Official source log",
+    description: "The verification ledger for volatile legal claims. Federal thresholds, state execution formalities, elective-share rules, and transfer rules get a dated source entry before they influence advice.",
+    snippet: "2026-04-18 · IRS estate tax exemption page checked for federal threshold used in tax-exposure-analysis.md.",
+    modes: ["core"],
+    owner: "state-law-verifier",
+  },
+  {
+    folder: "analyses",
+    file: "red-flag-triage.md",
+    label: "Red-flag triage",
+    description: "A compact list of urgent risks that should interrupt the normal workflow. It separates true blockers from items that can wait for attorney review.",
+    snippet: "RED: unsigned healthcare proxy and no HIPAA release; incapacity scenario would leave spouse unable to coordinate care.",
+    modes: ["core", "urgent-bedside-signing", "executor-activation"],
+    owner: "anti-pattern-scanner",
+  },
+  {
+    folder: "analyses",
+    file: "document-acquisition-plan.md",
+    label: "Document acquisition plan",
+    description: "A checklist of missing statements, deeds, beneficiary screenshots, entity agreements, policies, and IDs needed to complete the plan. It turns vague homework into institution-by-institution collection tasks.",
+    snippet: "Pull latest Schwab beneficiary confirmation; upload LLC operating agreement; request recorded deed from county portal.",
+    modes: ["core", "existing-plan-audit"],
+    owner: "document-organizer",
+  },
+  {
+    folder: "analyses",
+    file: "evidence-confidence-map.md",
+    label: "Evidence confidence map",
+    description: "A confidence score for each material fact used by the plan. It marks whether a fact came from a signed document, an uploaded statement, a memory, or an unresolved assumption.",
+    snippet: "Asset value: medium confidence from client estimate; beneficiary designation: low confidence until PDF confirmation arrives.",
+    modes: ["core"],
+    owner: "multi-model-validator",
+  },
+  {
+    folder: "analyses",
+    file: "stress-test-scenarios.md",
+    label: "Stress-test scenarios",
+    description: "A set of what-if cases run against the plan before handoff. It tests simultaneous death, incapacity, remarriage, creditor pressure, contested fiduciaries, and assets discovered late.",
+    snippet: "Scenario: Maya dies first, Karl remarries within two years, and one child contests trustee discretion.",
+    modes: ["core", "executor-activation", "uhnw-restructure"],
+    owner: "multi-model-validator",
+  },
+  {
+    folder: "analyses",
+    file: "plan-coverage-matrix.md",
+    label: "Plan coverage matrix",
+    description: "The contract that proves every required topic has a corresponding artifact. The validator uses it to catch untouched starter outputs and missing overlay entries.",
+    snippet: "Axiom 3 beneficiary-title coherence: covered by beneficiary-map.md, titling-audit.md, and coherence-audit.md.",
+    modes: ["core"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "analyses",
+    file: "document-quality-triage.md",
+    label: "Document quality triage",
+    description: "A quality screen for existing documents before the skill relies on them. It flags unsigned drafts, scanned pages missing signatures, obsolete notarizations, and documents that conflict with current facts.",
+    snippet: "Healthcare directive upload lacks signature page; treat as non-operative until a complete copy is produced.",
+    modes: ["existing-plan-audit", "urgent-bedside-signing", "maintenance-review"],
+    owner: "document-organizer",
+  },
+  {
+    folder: "analyses",
+    file: "recommendation-confidence-register.md",
+    label: "Recommendation confidence register",
+    description: "A confidence score and caveat list for each recommendation the skill makes. Anything that depends on law, missing documents, or attorney judgment is marked for review.",
+    snippet: "Recommendation: TOD deed for residence · confidence medium · attorney must verify state availability and mortgage implications.",
+    modes: ["core"],
+    owner: "multi-model-validator",
+  },
+  {
+    folder: "analyses",
+    file: "fiduciary-bench-scorecard.md",
+    label: "Fiduciary bench scorecard",
+    description: "A structured evaluation of executors, trustees, agents, guardians, and backups. It scores proximity, judgment, conflict risk, logistics, age, and willingness to serve.",
+    snippet: "Primary executor: sister has high trust, medium logistics risk, low conflict risk; backup professional fiduciary recommended.",
+    modes: ["core", "life-event-delta"],
+    owner: "fiduciary-bench-builder",
+  },
+  {
+    folder: "analyses",
+    file: "litigation-risk-memo.md",
+    label: "Litigation risk memo",
+    description: "A memo naming the facts that could invite contests, family conflict, fiduciary fights, or undue-influence claims. It is especially important when the plan disinherits someone or changes near death.",
+    snippet: "Risk: late-life beneficiary change favors caregiver; mitigation requires capacity documentation and independent counsel notes.",
+    modes: ["core", "urgent-bedside-signing", "life-event-delta"],
+    owner: "litigation-defense-reviewer",
+  },
+  {
+    folder: "analyses",
+    file: "attorney-handoff-readiness.md",
+    label: "Attorney handoff readiness",
+    description: "A self-audit that grades whether counsel can draft efficiently from the packet. Red or yellow items send the workflow back to fill missing facts before the client pays attorney time.",
+    snippet: "Readiness: yellow. Missing deed copy and final guardian backup confirmation before first attorney meeting.",
+    modes: ["core"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "analyses",
+    file: "foreign-and-conflict-of-laws-review.md",
+    label: "Foreign and conflict-of-laws review",
+    description: "A jurisdictional screen for non-U.S. assets, non-citizen spouses, cross-border heirs, multiple domiciles, and conflict-of-laws traps. It routes the plan toward specialist counsel when domestic templates are not enough.",
+    snippet: "Spanish apartment and Canadian beneficiary introduce forced-heirship and tax-residency questions for counsel.",
+    modes: ["uhnw-restructure", "business-owner-succession"],
+    owner: "state-law-verifier",
+  },
+  {
+    folder: "deliverables",
+    file: "asset-inventory.md",
+    label: "Asset inventory",
+    description: "A practical inventory of assets, debts, titles, approximate values, account locations, and evidence status. It is the map everyone uses when the plan becomes operational.",
+    snippet: "Primary residence · $1.2M estimate · deed uploaded · title: Maya individually · action: trust funding review.",
+    modes: ["core"],
+    owner: "asset-discovery-auditor",
+  },
+  {
+    folder: "deliverables",
+    file: "beneficiary-map.md",
+    label: "Beneficiary map",
+    description: "A table of every beneficiary-controlled asset, current named beneficiary, intended beneficiary, and required change. It catches the quiet overrides that defeat wills and trusts.",
+    snippet: "MetLife policy · current: Karl's estate · intended: Maya 100%, children contingent · action: update form.",
+    modes: ["core", "life-event-delta", "maintenance-review"],
+    owner: "beneficiary-audit",
+    spotlight: true,
+  },
+  {
+    folder: "deliverables",
+    file: "plan-report.md",
+    label: "Plan report",
+    description: "The comprehensive explanation of the plan design in plain English. It ties facts, risks, chosen structures, excluded options, and attorney-review items into one coherent narrative.",
+    snippet: "Recommended structure: revocable trust plus pour-over will, QTIP review, updated beneficiary designations, and incapacity packet.",
+    modes: ["core"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "deliverables",
+    file: "implementation-ledger.md",
+    label: "Implementation ledger",
+    description: "The action list that turns recommendations into completed institution-level work. It tracks owner, sequence, deadline, dependency, and proof of completion.",
+    snippet: "Task 08 · retitle Vanguard brokerage to trust · owner: Maya · proof: confirmation letter upload.",
+    modes: ["core", "maintenance-review"],
+    owner: "implementation-ops-planner",
+  },
+  {
+    folder: "deliverables",
+    file: "letter-of-instruction.md",
+    label: "Letter of instruction",
+    description: "A practical letter for executors and family members that explains where to find things and who to contact. It does not replace legal documents, but it saves survivors from detective work.",
+    snippet: "Password manager emergency access is held by Karl; do not write passwords or seed phrases in this letter.",
+    modes: ["core", "executor-activation"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "deliverables",
+    file: "digital-inventory.md",
+    label: "Digital inventory",
+    description: "A safe map of digital accounts, crypto custody locations, device access, and password-manager instructions. It stores pointers, not secrets.",
+    snippet: "Crypto: hardware wallet in home safe; seed phrase pointer in sealed envelope with attorney; never paste seed phrase here.",
+    modes: ["core"],
+    owner: "anti-pattern-scanner",
+  },
+  {
+    folder: "deliverables",
+    file: "personal-property-memorandum.md",
+    label: "Personal property memorandum",
+    description: "A plain list of tangible personal property gifts and the intended recipients. It keeps sentimental items from turning into expensive family fights.",
+    snippet: "Grandmother's ring: Julia. Workshop tools: Theo. Photo albums: scan first, originals to Maya's sister.",
+    modes: ["core", "life-event-delta"],
+    owner: "conflict-prevention-planner",
+  },
+  {
+    folder: "deliverables",
+    file: "letter-of-wishes.md",
+    label: "Letter of wishes",
+    description: "A nonbinding explanation of values, hopes, trustee guidance, and family context. It helps fiduciaries exercise discretion without guessing what the client meant.",
+    snippet: "Education support should include trade school, graduate school, and gap-year programs with a concrete plan.",
+    modes: ["core"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "deliverables",
+    file: "ethical-will.md",
+    label: "Ethical will",
+    description: "A values document for family meaning rather than legal transfer. It captures messages, stories, apologies, gratitude, and principles the legal documents cannot carry.",
+    snippet: "What I hope you remember: use the money to buy freedom, education, and time with each other.",
+    modes: ["new-plan", "maintenance-review"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "deliverables",
+    file: "family-meeting-agenda.md",
+    label: "Family meeting agenda",
+    description: "A structured agenda for discussing the plan with spouse, adult children, fiduciaries, or caregivers. It keeps the meeting focused on roles, expectations, and known sensitivities.",
+    snippet: "Agenda item 3: explain why a professional trustee is backup, not a vote of no confidence in the children.",
+    modes: ["core", "life-event-delta"],
+    owner: "conflict-prevention-planner",
+  },
+  {
+    folder: "deliverables",
+    file: "conflict-prevention-plan.md",
+    label: "Conflict prevention plan",
+    description: "A targeted plan for foreseeable family disputes and fiduciary friction. It names communication rules, tie-breakers, no-contest risks, and documentation steps.",
+    snippet: "Known conflict: Theo distrusts Karl. Mitigation: independent trustee for children's share and written explanation in letter of wishes.",
+    modes: ["core", "life-event-delta", "uhnw-restructure"],
+    owner: "conflict-prevention-planner",
+  },
+  {
+    folder: "deliverables",
+    file: "if-i-die-tomorrow.md",
+    label: "If I die tomorrow",
+    description: "A one-page first-48-hours guide for a spouse, executor, or trusted family member. It says who to call, where the real documents are, and what not to do in panic.",
+    snippet: "Call first: estate attorney, CPA, life-insurance contact. Do not close accounts or distribute property before counsel reviews.",
+    modes: ["core", "executor-activation"],
+    owner: "deliverables-generator",
+    spotlight: true,
+  },
+  {
+    folder: "deliverables",
+    file: "disposition-of-remains.md",
+    label: "Disposition of remains",
+    description: "A clear record of burial, cremation, funeral, donation, memorial, and religious preferences. It reduces decision load at the worst possible moment.",
+    snippet: "Preference: cremation, no open casket, memorial at home; prepaid plot information stored with document package.",
+    modes: ["core", "urgent-bedside-signing"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "deliverables",
+    file: "executor-checklist.md",
+    label: "Executor checklist",
+    description: "A stepwise checklist for what the executor does in the first days, weeks, and months. It translates the legal role into operational tasks.",
+    snippet: "Week 1: secure residence, locate originals, order death certificates, notify attorney, preserve mail.",
+    modes: ["core", "executor-activation"],
+    owner: "implementation-ops-planner",
+  },
+  {
+    folder: "deliverables",
+    file: "attorney-interview-questions.md",
+    label: "Attorney interview questions",
+    description: "Questions to ask prospective estate-planning counsel before hiring them. They test state-specific competence, familiarity with edge cases, and willingness to work from the packet.",
+    snippet: "How do you handle beneficiary-designation conflicts with trust funding in this state?",
+    modes: ["core"],
+    owner: "deliverables-generator",
+  },
+  {
+    folder: "deliverables",
+    file: "attorney-engagement-brief.md",
+    label: "Attorney engagement brief",
+    description: "The four-page handoff memo built for counsel. It summarizes facts, goals, recommendations, open questions, and state-law items so the first meeting starts at drafting depth.",
+    snippet: "Open question for counsel: confirm QTIP design, deed transfer mechanics, and self-proving affidavit requirements.",
+    modes: ["core"],
+    owner: "deliverables-generator",
+    spotlight: true,
+  },
+  {
+    folder: "deliverables",
+    file: "document-package-index.md",
+    label: "Document package index",
+    description: "An index of every artifact, source document, and evidence file in the packet. It keeps the attorney, client, and future reviewer oriented.",
+    snippet: "01 intake-record.md · 02 asset-inventory.md · 03 beneficiary-map.md · source/deed-2021.pdf.",
+    modes: ["core"],
+    owner: "document-organizer",
+  },
+  {
+    folder: "deliverables",
+    file: "review-schedule.md",
+    label: "Review schedule",
+    description: "A maintenance calendar for annual reviews and event-triggered updates. It names what should be revisited after marriage, divorce, birth, death, relocation, business sale, or tax-law change.",
+    snippet: "Annual: beneficiary forms and account titles. Event-driven: move states, new child, sale of business, material tax change.",
+    modes: ["core", "maintenance-review"],
+    owner: "implementation-ops-planner",
+  },
+  {
+    folder: "deliverables",
+    file: "signing-readiness-checklist.md",
+    label: "Signing readiness checklist",
+    description: "A pre-execution checklist for witnesses, notaries, IDs, final names, dates, originals, copies, and state formalities. It prevents the plan from failing at the signing table.",
+    snippet: "Before signing: two disinterested witnesses present, notary booked, IDs ready, final PDFs printed single-sided.",
+    modes: ["core", "urgent-bedside-signing"],
+    owner: "execution-formalities-router",
+  },
+  {
+    folder: "deliverables",
+    file: "funding-proof-log.md",
+    label: "Funding proof log",
+    description: "A proof ledger for trust funding, beneficiary updates, title transfers, TOD registrations, and institution confirmations. It distinguishes intended work from completed work.",
+    snippet: "Schwab brokerage retitled to trust · confirmation uploaded 2026-04-18 · next review 2027-04-18.",
+    modes: ["core", "maintenance-review"],
+    owner: "funding-checklist-generator",
+  },
+  {
+    folder: "deliverables",
+    file: "institution-contact-matrix.md",
+    label: "Institution contact matrix",
+    description: "A list of banks, brokerages, insurers, custodians, benefit administrators, accountants, and advisors with contact routes. Survivors need this more than they need prose.",
+    snippet: "Fidelity 401(k): benefits portal URL, plan administrator phone, beneficiary-form request path, evidence status.",
+    modes: ["core", "executor-activation"],
+    owner: "implementation-ops-planner",
+  },
+  {
+    folder: "deliverables",
+    file: "beneficiary-change-packet.md",
+    label: "Beneficiary change packet",
+    description: "A packet of account-by-account beneficiary changes the client must request or submit. It pairs each change with the reason, intended beneficiary, and proof needed afterward.",
+    snippet: "MetLife: replace estate beneficiary with spouse primary and children contingent; upload confirmation after processing.",
+    modes: ["core", "life-event-delta", "maintenance-review"],
+    owner: "beneficiary-audit",
+  },
+  {
+    folder: "deliverables",
+    file: "business-continuity-activation.md",
+    label: "Business continuity activation",
+    description: "A business-owner packet for immediate continuity after incapacity or death. It names signing authority, payroll continuity, client notifications, buy-sell triggers, and operating-control handoff.",
+    snippet: "If owner is incapacitated: CFO can run payroll, COO can sign vendor contracts, attorney reviews buy-sell trigger.",
+    modes: ["business-owner-succession"],
+    owner: "implementation-ops-planner",
+  },
+];
+
+function deliverablePath(leaf: DeliverableLeaf) {
+  return `${leaf.folder}/${leaf.file}`;
+}
+
 export function DeliverablesTreeViz() {
+  const prefersReducedMotion = useReducedMotion();
+  const [categoryFilter, setCategoryFilter] = useState<"all" | DeliverableFolder>("all");
+  const [modeFilter, setModeFilter] = useState<"all" | DeliverableMode>("all");
+  const [query, setQuery] = useState("");
+  const [selectedPath, setSelectedPath] = useState("deliverables/if-i-die-tomorrow.md");
+  const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.24, ease: "easeOut" as const };
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredLeaves = useMemo(
+    () =>
+      deliverableTreeLeaves.filter((leaf) => {
+        const matchesCategory = categoryFilter === "all" || leaf.folder === categoryFilter;
+        const matchesMode =
+          modeFilter === "all" ||
+          leaf.modes.includes("core") ||
+          leaf.modes.includes(modeFilter);
+        const searchText = [
+          deliverablePath(leaf),
+          leaf.label,
+          leaf.description,
+          leaf.snippet,
+          leaf.owner,
+          leaf.modes.map((mode) => DELIVERABLE_MODE_LABELS[mode]).join(" "),
+        ]
+          .join(" ")
+          .toLowerCase();
+        const matchesSearch = normalizedQuery.length === 0 || searchText.includes(normalizedQuery);
+
+        return matchesCategory && matchesMode && matchesSearch;
+      }),
+    [categoryFilter, modeFilter, normalizedQuery],
+  );
+
+  const selectedLeaf = filteredLeaves.find((leaf) => deliverablePath(leaf) === selectedPath) ?? filteredLeaves[0] ?? null;
+  const selectedStyles = selectedLeaf ? DELIVERABLE_FOLDER_META[selectedLeaf.folder] : DELIVERABLE_FOLDER_META.deliverables;
+  const groupedLeaves = DELIVERABLE_FOLDERS.map((folder) => ({
+    folder,
+    leaves: filteredLeaves.filter((leaf) => leaf.folder === folder),
+  })).filter((group) => group.leaves.length > 0);
+  const spotlightLeaves = deliverableTreeLeaves.filter((leaf) => leaf.spotlight);
+
   return (
-    <VizShell
-      eyebrow="Deliverables Tree"
-      title="A placeholder tree for the 45-document output surface"
-      summary="The final version can expand into folders and leaves, but the article can already import a stable component that hints at the deliverable breadth without runtime errors."
-      accent="violet"
-      icon={<FolderTree className="h-3.5 w-3.5" />}
-      bullets={["Intake files", "Analyses", "Draft docs", "Execution checklist", "Attorney packet"]}
-      stage={
-        <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-violet-300/10">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_38%)]" />
+      <div className="relative space-y-6 p-5 md:p-7">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
-            {[
-              ["intake/", "household facts, assets, titling, beneficiary snapshots"],
-              ["analyses/", "tax exposure, risk notes, state-law verification checklist"],
-              ["deliverables/", "will, trust, incapacity packet, letters of instruction"],
-              ["handoff/", "attorney summary memo and open-questions list"],
-            ].map(([folder, detail]) => (
-              <div key={folder} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="flex items-center gap-2 text-white">
-                  <FolderTree className="h-4 w-4 text-violet-200" />
-                  <span className="font-medium">{folder}</span>
-                </div>
-                <p className="mt-1 text-xs leading-5 text-slate-400">{detail}</p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-violet-100">
+              <FolderTree className="h-3.5 w-3.5" />
+              Deliverables Tree
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold tracking-tight text-white md:text-[2rem]">
+                Forty-five artifacts, organized like a real project directory
+              </h3>
+              <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
+                Filter the packet by folder, operating mode, or text search. Every file reveals
+                its purpose, a representative snippet, and the subagent responsible for producing it.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 rounded-[8px] border border-white/10 bg-black/25 p-2 text-center">
+            {DELIVERABLE_FOLDERS.map((folder) => (
+              <div key={folder} className="rounded-[8px] bg-white/[0.04] px-3 py-2">
+                <p className={cn("text-lg font-semibold", DELIVERABLE_FOLDER_META[folder].accent)}>
+                  {deliverableTreeLeaves.filter((leaf) => leaf.folder === folder).length}
+                </p>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                  {DELIVERABLE_FOLDER_META[folder].label}
+                </p>
               </div>
             ))}
           </div>
         </div>
-      }
-    />
+
+        <div className="grid gap-4 rounded-[8px] border border-white/10 bg-black/20 p-4">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+            <label className="block">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Search artifacts
+              </span>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search files, snippets, modes, or subagents"
+                className="mt-2 w-full rounded-[8px] border border-white/10 bg-[#081525] px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-violet-300/40 focus:ring-2 focus:ring-violet-300/20"
+              />
+            </label>
+
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Category
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(["all", ...DELIVERABLE_FOLDERS] as const).map((filter) => {
+                  const active = categoryFilter === filter;
+                  const label = filter === "all" ? "All" : DELIVERABLE_FOLDER_META[filter].label;
+                  const count =
+                    filter === "all"
+                      ? deliverableTreeLeaves.length
+                      : deliverableTreeLeaves.filter((leaf) => leaf.folder === filter).length;
+
+                  return (
+                    <button
+                      key={filter}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setCategoryFilter(filter)}
+                      className={cn(
+                        "rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                        active
+                          ? "border-violet-300/35 bg-violet-400/15 text-violet-50"
+                          : "border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200",
+                      )}
+                    >
+                      {label} <span className="text-slate-500">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Operating mode
+            </p>
+            <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+              {DELIVERABLE_MODE_FILTERS.map((filter) => {
+                const active = modeFilter === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setModeFilter(filter.id)}
+                    className={cn(
+                      "shrink-0 rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                      active
+                        ? "border-emerald-300/35 bg-emerald-400/15 text-emerald-50"
+                        : "border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200",
+                    )}
+                  >
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Mode filters include core files plus artifacts triggered by the selected mode.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.78fr)]">
+          <div className="rounded-[8px] border border-white/10 bg-black/20 p-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  my-estate-plan/
+                </p>
+                <p className="mt-1 text-sm text-slate-300">
+                  Showing <span className="font-semibold text-white">{filteredLeaves.length}</span> of{" "}
+                  <span className="font-semibold text-white">{deliverableTreeLeaves.length}</span> files
+                </p>
+              </div>
+              <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
+                2 + 20 + 23 = 45
+              </div>
+            </div>
+
+            {groupedLeaves.length > 0 ? (
+              <div role="tree" aria-label="Estate planning deliverables folder tree" className="space-y-4">
+                {groupedLeaves.map(({ folder, leaves }) => {
+                  const meta = DELIVERABLE_FOLDER_META[folder];
+                  return (
+                    <div key={folder} className="rounded-[8px] border border-white/10 bg-white/[0.025] p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-white">
+                          <FolderTree className={cn("h-4 w-4", meta.accent)} />
+                          <span className="font-mono text-sm">{meta.title}</span>
+                        </div>
+                        <span className={cn("rounded-full border px-2.5 py-1 text-[10px] font-semibold", meta.badge)}>
+                          {leaves.length} shown
+                        </span>
+                      </div>
+
+                      <div role="group" className="mt-3 space-y-2 border-l border-white/10 pl-3">
+                        {leaves.map((leaf) => {
+                          const path = deliverablePath(leaf);
+                          const selected = selectedLeaf ? deliverablePath(selectedLeaf) === path : false;
+                          const modeDependent = !leaf.modes.includes("core");
+                          return (
+                            <button
+                              key={path}
+                              type="button"
+                              role="treeitem"
+                              aria-selected={selected}
+                              onClick={() => setSelectedPath(path)}
+                              className={cn(
+                                "w-full rounded-[8px] border p-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                                selected ? meta.active : modeDependent ? meta.dependent : meta.inactive,
+                              )}
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="font-mono text-sm font-semibold text-white">{leaf.file}</p>
+                                  <p className="mt-1 text-xs leading-5 text-slate-400">{leaf.label}</p>
+                                </div>
+                                {modeDependent ? (
+                                  <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100">
+                                    Mode-dependent
+                                  </span>
+                                ) : null}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-[8px] border border-white/10 bg-white/[0.03] p-6 text-center">
+                <p className="text-sm font-semibold text-white">No files match those filters.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  Clear the search or switch back to All categories and All modes.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <AnimatePresence initial={false} mode="wait">
+            {selectedLeaf ? (
+              <motion.div
+                key={deliverablePath(selectedLeaf)}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={transition}
+                className={cn("rounded-[8px] border p-5", selectedStyles.detail)}
+              >
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold", selectedStyles.badge)}>
+                    {selectedStyles.label}
+                  </span>
+                  <span className="font-mono text-sm text-slate-300">{deliverablePath(selectedLeaf)}</span>
+                </div>
+
+                <h4 className="mt-4 text-2xl font-semibold tracking-tight text-white">{selectedLeaf.label}</h4>
+                <p className="mt-3 text-sm leading-7 text-slate-200">{selectedLeaf.description}</p>
+
+                <div className="mt-5 rounded-[8px] border border-white/10 bg-black/25 p-4">
+                  <p className={cn("text-[11px] font-semibold uppercase tracking-[0.22em]", selectedStyles.accent)}>
+                    Representative snippet
+                  </p>
+                  <p className="mt-2 font-mono text-sm leading-7 text-slate-100">{selectedLeaf.snippet}</p>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[8px] border border-white/10 bg-black/20 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Producing subagent
+                    </p>
+                    <p className="mt-2 font-mono text-sm text-cyan-200">{selectedLeaf.owner}</p>
+                  </div>
+                  <div className="rounded-[8px] border border-white/10 bg-black/20 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Mode coverage
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {selectedLeaf.modes.map((mode) => (
+                        <span
+                          key={mode}
+                          className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-slate-200"
+                        >
+                          {DELIVERABLE_MODE_LABELS[mode]}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-3">
+          {spotlightLeaves.map((leaf) => {
+            const meta = DELIVERABLE_FOLDER_META[leaf.folder];
+            return (
+              <button
+                key={deliverablePath(leaf)}
+                type="button"
+                onClick={() => {
+                  setCategoryFilter("all");
+                  setModeFilter("all");
+                  setQuery("");
+                  setSelectedPath(deliverablePath(leaf));
+                }}
+                className={cn(
+                  "rounded-[8px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                  meta.inactive,
+                )}
+              >
+                <p className={cn("text-[11px] font-semibold uppercase tracking-[0.22em]", meta.accent)}>
+                  Spotlight
+                </p>
+                <p className="mt-2 font-mono text-sm font-semibold text-white">{leaf.file}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">{leaf.description}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 
+const antiPatterns = [
+  {
+    name: "The ex-spouse still on the 401(k)",
+    hook: "The will says everything to the kids. The plan administrator disagrees.",
+    explanation: "ERISA retirement plans follow the beneficiary designation on file. Your will does not override it. Plan administrators have a federal duty to pay whoever is named.",
+    worstCase: "Your grieving spouse watches $400k leave the family and go to your ex.",
+    subagent: "beneficiary-audit",
+    icon: "AlertCircle",
+  },
+  {
+    name: "The revocable trust that owns nothing",
+    hook: "A $5,000 trust document. Zero assets actually titled into it.",
+    explanation: "Signing a revocable trust does not fund it. You have to re-title every asset you want the trust to own — deed transfers, brokerage retitlings, beneficiary updates naming the trust. A pour-over will can catch what you missed, but those assets still go through probate.",
+    worstCase: "The plan your attorney wrote does nothing because the funding homework was never done.",
+    subagent: "funding-checklist-generator",
+    icon: "Inbox",
+  },
+  {
+    name: "The seed phrase in the will",
+    hook: "Wills become public record at probate. Crypto seed phrases should not.",
+    explanation: "Anyone with access to the probate filing can see the will. Seed phrases, account passwords, and two-factor backup codes written into the will expose the assets they protect the moment the will is filed.",
+    worstCase: "Your Bitcoin is drained by a diligent paralegal or a court-records scraper.",
+    subagent: "anti-pattern-scanner",
+    icon: "Eye",
+  },
+  {
+    name: "The springing POA the bank will not honor",
+    hook: "A POA that activates only after two doctors certify incapacity sounds careful. Banks hate it.",
+    explanation: "Banks and brokerages are risk-averse about 'is this person legally incapacitated' — they do not want to be sued. Many refuse to honor springing POAs even when the documentation arrives, which is precisely when you cannot push back.",
+    worstCase: "Your agent cannot pay your bills while your POA is tied up in bank-approval limbo.",
+    subagent: "anti-pattern-scanner",
+    icon: "Lock",
+  },
+  {
+    name: "Co-executors in a conflicted family",
+    hook: "Naming both adult children as co-executors so neither feels excluded is a famous bad idea.",
+    explanation: "Co-executors must agree to act. In a family with any real friction — money tension, political disagreement, old grudge — this guarantees deadlock, legal fees, and a relationship that does not recover.",
+    worstCase: "Your estate spends 18 months in partition litigation between your kids.",
+    subagent: "fiduciary-bench-builder",
+    icon: "Users",
+  },
+  {
+    name: "Minors named directly as beneficiaries",
+    hook: "Naming your 12-year-old as the beneficiary on the 529 or the life insurance.",
+    explanation: "Minors cannot receive inheritances directly. The money lands in court-supervised property management, or gets paid out to them outright the minute they hit the applicable release age. Neither outcome is what you meant.",
+    worstCase: "Your 18-year-old inherits $400k the month of their freshman year. Results vary.",
+    subagent: "beneficiary-audit",
+    icon: "Baby",
+  },
+  {
+    name: "\"Everything to my spouse, trust them with our kids\" in a blended family",
+    hook: "Your spouse can rewrite their will after you die. Your first-marriage kids are then at their discretion.",
+    explanation: "Without a protected-remainder structure — typically a QTIP trust — your surviving spouse inherits everything and can leave it entirely to their own children, their next spouse, or anyone else. Your kids from your first marriage rely on the honor system.",
+    worstCase: "The money you meant for your first-marriage children goes to your widow's second husband's kids.",
+    subagent: "overlay-resolver",
+    icon: "GitFork",
+  },
+  {
+    name: "The pet trust you forgot about",
+    hook: "Your Congo African Grey outlives you. You never named a caretaker.",
+    explanation: "Parrots live fifty-plus years. Tortoises, a hundred. Even a cat outlives a plan written at age 40. Without a pet trust with a named caretaker and a funded trustee, the animal ends up in a shelter, with a reluctant relative, or worse.",
+    worstCase: "Your beloved pet is rehomed by a county animal-services clerk.",
+    subagent: "overlay-resolver",
+    icon: "Feather",
+  },
+  {
+    name: "Form 706 portability filing skipped",
+    hook: "The surviving spouse's executor never files Form 706 after the first spouse's death.",
+    explanation: "DSUE — the deceased spouse's unused federal exemption — transfers to the surviving spouse only if Form 706 is filed, usually within 9 months of death. Skip it and you lose millions of potential exemption when the second spouse dies.",
+    worstCase: "Your family pays federal estate tax on assets that would have sheltered for free.",
+    subagent: "tax-analyzer",
+    icon: "FileText",
+  },
+  {
+    name: "A will signed in the wrong formality",
+    hook: "Two witnesses required; you had one. Notarization needed; you skipped it.",
+    explanation: "Every state has precise execution formalities — number of witnesses, whether the witnesses must be disinterested, whether a self-proving affidavit requires a notary. Miss one and the will may be invalidated in probate, sending everything to intestate succession.",
+    worstCase: "Your will is thrown out. State law, not you, decides who inherits.",
+    subagent: "execution-formalities-router",
+    icon: "FileWarning",
+  },
+  {
+    name: "An outright distribution to a vulnerable heir",
+    hook: "Your adult child is in recovery. A $400k lump sum could destabilize them.",
+    explanation: "A large inheritance to an heir with addiction, mental-health concerns, a pattern of creditor trouble, or means-tested benefit eligibility is often the worst thing you can do for them. An incentive trust with clear release triggers and a responsible trustee preserves both the money and the person.",
+    worstCase: "A child in long-term recovery relapses and does not make it.",
+    subagent: "overlay-resolver",
+    icon: "Shield",
+  },
+  {
+    name: "The non-citizen spouse hole",
+    hook: "If your spouse is not a U.S. citizen, the unlimited marital deduction does not apply. There is a $60,000 threshold instead.",
+    explanation: "A U.S. estate can pass unlimited property to a U.S.-citizen spouse tax-free. To a non-citizen spouse, only the first $60,000 passes without tax. A QDOT trust solves it — but only if you set one up. Otherwise the math is brutal.",
+    worstCase: "A surviving non-citizen spouse pays six-figure estate tax on the family home.",
+    subagent: "overlay-resolver",
+    icon: "Globe",
+  },
+  {
+    name: "A plan updated a week before death",
+    hook: "A dying patient, a new caregiver, a fresh will. Every judge has seen this case.",
+    explanation: "Updates made in the final weeks under pressure from a new beneficiary are the textbook scenario for undue-influence litigation. Even if the update was legitimate, the optics will cost the estate hundreds of thousands in litigation defense.",
+    worstCase: "The kids who were disinherited contest and win, and the 'new beneficiary' walks away with legal fees on the other side.",
+    subagent: "litigation-defense-reviewer",
+    icon: "ShieldAlert",
+  },
+]
+
+const antiPatternIconMap: Record<string, ReactNode> = {
+  AlertCircle: <AlertCircle className="h-4 w-4" aria-hidden="true" />,
+  Inbox: <Inbox className="h-4 w-4" aria-hidden="true" />,
+  Eye: <Eye className="h-4 w-4" aria-hidden="true" />,
+  Lock: <Lock className="h-4 w-4" aria-hidden="true" />,
+  Users: <Users className="h-4 w-4" aria-hidden="true" />,
+  Baby: <Baby className="h-4 w-4" aria-hidden="true" />,
+  GitFork: <GitFork className="h-4 w-4" aria-hidden="true" />,
+  Feather: <Feather className="h-4 w-4" aria-hidden="true" />,
+  FileText: <FileText className="h-4 w-4" aria-hidden="true" />,
+  FileWarning: <FileWarning className="h-4 w-4" aria-hidden="true" />,
+  Shield: <Shield className="h-4 w-4" aria-hidden="true" />,
+  Globe: <Globe className="h-4 w-4" aria-hidden="true" />,
+  ShieldAlert: <ShieldAlert className="h-4 w-4" aria-hidden="true" />,
+};
+
 export function AntiPatternCardsViz() {
+  const prefersReducedMotion = useReducedMotion();
+  const [flippedCards, setFlippedCards] = useState<string[]>([antiPatterns[0].name]);
+  const pointerFocusRef = useRef(false);
+  const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.32, ease: "easeOut" as const };
+
+  const setFlipped = (name: string, flipped: boolean) => {
+    setFlippedCards((current) => {
+      const alreadyFlipped = current.includes(name);
+      if (flipped && !alreadyFlipped) return [...current, name];
+      if (!flipped && alreadyFlipped) return current.filter((item) => item !== name);
+      return current;
+    });
+  };
+
+  const toggleCard = (name: string) => {
+    setFlippedCards((current) =>
+      current.includes(name) ? current.filter((item) => item !== name) : [...current, name],
+    );
+  };
+
   return (
-    <VizShell
-      eyebrow="Anti-Patterns"
-      title="A card grid slot for the mistakes the skill is designed to catch"
-      summary="This scaffold gives the article a working placeholder for the future flip-card grid that will call out failure modes like stale beneficiaries, broken titling, and unsigned incapacity documents."
-      accent="rose"
-      icon={<AlertTriangle className="h-3.5 w-3.5" />}
-      bullets={["Stale beneficiaries", "Joint account drift", "Unsigned docs", "Cross-state surprises"]}
-      stage={
-        <div className="grid gap-3 rounded-[24px] border border-white/10 bg-black/20 p-4 sm:grid-cols-2">
-          {[
-            "Will says one thing, beneficiary form says another",
-            "Revocable trust exists, but assets were never retitled",
-            "POA missing or rejected by the bank",
-            "Kids named, but no guardian backups",
-          ].map((item) => (
-            <div key={item} className="rounded-2xl border border-rose-300/15 bg-rose-400/[0.08] p-4">
-              <div className="flex items-start gap-3">
-                <Sparkles className="mt-0.5 h-4 w-4 text-rose-200" />
-                <p className="text-sm leading-6 text-rose-50">{item}</p>
-              </div>
+    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-rose-300/10">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.08),transparent_38%)]" />
+      <div className="relative space-y-6 p-5 md:p-7">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-rose-300/20 bg-rose-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-100">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              Anti-Patterns
             </div>
-          ))}
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold tracking-tight text-white md:text-[2rem]">
+                The patterns the skill is designed to catch
+              </h3>
+              <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
+                Flip each card to see what actually goes wrong, the worst case, and
+                which internal subagent catches the failure before the plan leaves draft mode.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-[8px] border border-white/10 bg-black/25 px-4 py-3 text-sm text-slate-300">
+            <span className="font-semibold text-white">{antiPatterns.length}</span> cards ·{" "}
+            <span className="font-semibold text-rose-100">{flippedCards.length}</span> open
+          </div>
         </div>
-      }
-    />
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {antiPatterns.map((pattern, index) => {
+            const flipped = flippedCards.includes(pattern.name);
+            const icon = antiPatternIconMap[pattern.icon] ?? <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
+
+            return (
+              <button
+                key={pattern.name}
+                type="button"
+                aria-pressed={flipped}
+                aria-label={`${flipped ? "Show front of" : "Show back of"} anti-pattern card: ${pattern.name}`}
+                onPointerDown={() => {
+                  pointerFocusRef.current = true;
+                }}
+                onClick={() => toggleCard(pattern.name)}
+                onFocus={() => {
+                  if (pointerFocusRef.current) {
+                    pointerFocusRef.current = false;
+                    return;
+                  }
+                  setFlipped(pattern.name, true);
+                }}
+                onBlur={() => {
+                  pointerFocusRef.current = false;
+                }}
+                className="group relative min-h-[26rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
+              >
+                <motion.div
+                  animate={{ rotateY: flipped ? 180 : 0 }}
+                  transition={transition}
+                  className="absolute inset-0 rounded-[8px]"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  <div
+                    className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition group-hover:border-rose-300/25"
+                    style={{ backfaceVisibility: "hidden" }}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/20 bg-rose-400/12 text-rose-100">
+                          {icon}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold leading-6 text-white">{pattern.name}</h4>
+                        <p className="mt-3 text-sm leading-7 text-slate-300">{pattern.hook}</p>
+                      </div>
+                    </div>
+                    <div className="mt-6 flex items-center justify-between gap-3 text-xs text-slate-400">
+                      <span>Tap or focus to flip</span>
+                      <ArrowRight className="h-4 w-4 text-rose-200 transition group-hover:translate-x-0.5" />
+                    </div>
+                  </div>
+
+                  <div
+                    className="absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 shadow-[0_18px_44px_rgba(244,63,94,0.12)]"
+                    style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/25 bg-black/20 text-rose-100">
+                        {icon}
+                      </span>
+                      <span className="rounded-full border border-rose-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
+                        Catch
+                      </span>
+                    </div>
+
+                    <div className="mt-5 space-y-4">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
+                          What actually goes wrong
+                        </p>
+                        <p className="mt-2 text-sm leading-7 text-slate-100">{pattern.explanation}</p>
+                      </div>
+                      <div className="rounded-[8px] border border-rose-300/15 bg-black/20 p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
+                          Worst case
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-rose-50">{pattern.worstCase}</p>
+                      </div>
+                      <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                          Catching subagent
+                        </p>
+                        <p className="mt-2 font-mono text-sm text-cyan-200">{pattern.subagent}</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }

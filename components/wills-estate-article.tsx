@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import dynamic from "next/dynamic";
 // import Image from "next/image";
 import {
   Crimson_Pro,
@@ -12,54 +11,22 @@ import {
   BookOpen,
   FileDown,
   HandCoins,
-  HeartPulse,
   Landmark,
-  ScrollText,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
-// TODO: uncomment when hero illustration lands (hgjp.2)
-// import illustration from "@/assets/wills_estate_post_illustration.webp";
 import { MathTooltip } from "./math-tooltip";
 import { getJargon } from "@/lib/wills-estate-jargon";
 import { getScrollMetrics } from "@/lib/utils";
-
-// Dynamic import visualizations (no SSR — they use browser APIs / framer-motion)
-const TierTriageViz = dynamic(
-  () =>
-    import("./wills-estate-visualizations").then((m) => ({
-      default: m.TierTriageViz,
-    })),
-  { ssr: false },
-);
-const AxiomCoherenceViz = dynamic(
-  () =>
-    import("./wills-estate-visualizations").then((m) => ({
-      default: m.AxiomCoherenceViz,
-    })),
-  { ssr: false },
-);
-const IntakePhasesViz = dynamic(
-  () =>
-    import("./wills-estate-visualizations").then((m) => ({
-      default: m.IntakePhasesViz,
-    })),
-  { ssr: false },
-);
-const DeliverablesTreeViz = dynamic(
-  () =>
-    import("./wills-estate-visualizations").then((m) => ({
-      default: m.DeliverablesTreeViz,
-    })),
-  { ssr: false },
-);
-const AntiPatternCardsViz = dynamic(
-  () =>
-    import("./wills-estate-visualizations").then((m) => ({
-      default: m.AntiPatternCardsViz,
-    })),
-  { ssr: false },
-);
+// Dynamic, SSR-disabled visualizations wrapped in an error boundary
+// so a runtime failure in any single chart falls back to a friendly
+// placeholder rather than taking down the whole article.
+import {
+  TierTriageViz,
+  AxiomCoherenceViz,
+  IntakePhasesViz,
+  DeliverablesTreeViz,
+  AntiPatternCardsViz,
+} from "./viz-error-boundary";
 
 // Fonts — the editorial system shared across this site's long-form articles
 const crimsonPro = Crimson_Pro({
@@ -255,32 +222,6 @@ function Sub({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Suppress unused-variable warnings for helpers that downstream
-// beads will use when filling in section stubs.
-// ─────────────────────────────────────────────────────────────
-void J;
-void MarkdownDownloadButton;
-void EC;
-void Divider;
-void Code;
-void Mono;
-void RefTable;
-void SectionHeader;
-void Sub;
-void TierTriageViz;
-void AxiomCoherenceViz;
-void IntakePhasesViz;
-void DeliverablesTreeViz;
-void AntiPatternCardsViz;
-void BookOpen;
-void HandCoins;
-void HeartPulse;
-void Landmark;
-void ScrollText;
-void ShieldCheck;
-void Sparkles;
-
 export function WillsEstateArticle() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
@@ -387,23 +328,75 @@ export function WillsEstateArticle() {
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
-              {/* TODO: body from hgjp.7 — subtitle, illustration, stat chips */}
               One skill. Twelve axioms. A structured intake that turns a
               chaotic family situation into an attorney-ready handoff package.
             </p>
 
-            {/* TODO: hero illustration from hgjp.2 + hgjp.7 */}
+            {/* Stat chips */}
+            <div className="mt-10 md:mt-14 flex flex-wrap justify-center gap-3 md:gap-4">
+              {[
+                {
+                  icon: BookOpen,
+                  label: "201 files · 17 subagents · 45 templates",
+                  tone: "purple" as const,
+                },
+                {
+                  icon: Landmark,
+                  label: "Tier 1 renter → Tier 5 industrialist",
+                  tone: "cyan" as const,
+                },
+                {
+                  icon: HandCoins,
+                  label: "Works at $500/mo or $500M",
+                  tone: "emerald" as const,
+                },
+              ].map(({ icon: Icon, label, tone }) => (
+                <div
+                  key={label}
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full border backdrop-blur-xl text-[11px] font-mono tracking-wide ${
+                    tone === "purple"
+                      ? "border-purple-500/20 bg-purple-500/5 text-purple-200"
+                      : tone === "cyan"
+                        ? "border-cyan-500/20 bg-cyan-500/5 text-cyan-200"
+                        : "border-emerald-500/20 bg-emerald-500/5 text-emerald-200"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                </div>
+              ))}
+            </div>
           </div>
         </EC>
+
+        {/* Scroll indicator */}
+        <div
+          className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
+          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+        >
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
+            Scroll to Explore
+          </span>
+          <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
+        </div>
       </section>
 
       <Divider />
 
       {/* ========== DOWNLOAD CTA (hgjp.8) ========== */}
-      <section data-section="download" className="pb-10 md:pb-14">
+      <section data-section="download" className="pt-4 pb-8 md:pt-6 md:pb-12">
         <EC>
-          {/* TODO: body from hgjp.8 — download-the-primer CTA section */}
-          <MarkdownDownloadButton />
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.3em] text-slate-500">
+              For readers who want to try before subscribing
+            </p>
+            <MarkdownDownloadButton />
+            <p className="text-[11px] md:text-xs text-slate-500 font-mono max-w-[560px] leading-relaxed">
+              Paste this into Claude, Codex, or ChatGPT and the agent has
+              enough to run a basic estate-planning intake — even without
+              subscribing to the full skill.
+            </p>
+          </div>
         </EC>
       </section>
 
@@ -544,8 +537,189 @@ export function WillsEstateArticle() {
       {/* ========== SKILL CATALOG CALLOUTS (hgjp.10) ========== */}
       <section data-section="catalog" className="pb-10 md:pb-14">
         <EC>
-          {/* TODO: body from hgjp.10 — jsm.md links + what shipped in latest release */}
-          <span />
+          <div className="my-5 md:my-6 rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-purple-500/[0.05] via-cyan-500/[0.05] to-emerald-500/[0.05] p-5 md:p-6 backdrop-blur-xl">
+            <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
+              Skill catalog page · opens in a new tab
+            </p>
+            <ul className="space-y-2.5 text-[13px] md:text-[14px] leading-relaxed">
+              <li>
+                <a
+                  href="https://jeffreys-skills.md/skills/wills-and-estate-planning-skill"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-cyan-300 hover:text-cyan-200 underline decoration-cyan-500/40 underline-offset-4 break-all"
+                >
+                  jeffreys-skills.md/skills/wills-and-estate-planning-skill
+                </a>
+                <span className="text-slate-400">
+                  {" "}
+                  — the full <Mono>SKILL.md</Mono>, a live visualization of
+                  the architecture, the version history, the release notes,
+                  and the &ldquo;Install in Claude or Codex Desktop&rdquo;
+                  button all live there.
+                </span>
+              </li>
+            </ul>
+            <p className="mt-4 text-[12px] md:text-[13px] text-slate-400 leading-relaxed">
+              <strong className="text-amber-200">Heads up:</strong> that URL
+              returns a 404 unless you are signed in to a jeffreys-skills.md
+              account with an active subscription. Sign up (or log in) at{" "}
+              <Mono>jeffreys-skills.md/dashboard</Mono> first. It&apos;s the
+              same account the install flow uses, so doing the sign-in step
+              now means the install button below will already know who you
+              are.
+            </p>
+          </div>
+
+          <div className="my-5 md:my-6 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.04] via-cyan-500/[0.04] to-emerald-500/[0.04] p-5 md:p-6 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-emerald-300">
+                What shipped in the latest release · April 2026
+              </p>
+            </div>
+
+            <div className="space-y-4 md:space-y-5">
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v1
+                  </span>
+                  <span className="ml-2 text-purple-300 font-semibold">
+                    the kernel
+                  </span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  Eleven axioms. Fourteen cognitive operators
+                  (Probate-Bypass, Spousal-Rights Check, Beneficiary-Title
+                  Coherence, Step-Up-vs-Transfer, Liquidity-at-Death,
+                  Incapacity-Transition, Lumpy-Asset Division, Cross-State
+                  Domicile, Vulnerable-Beneficiary Filter, Tax-Apportionment,
+                  Blended-Family QTIP, Disclaimer Window, Trust-Situs
+                  Selection, Basis-Consistency). Five wealth tiers routed by
+                  net worth with complexity overlays that bump tier
+                  regardless.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v1
+                  </span>
+                  <span className="ml-2 text-cyan-300 font-semibold">
+                    the intake engine
+                  </span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  Nine adaptive phases (Orientation → People → Assets →
+                  Beneficiary Audit → Family Dynamics → Goals → Incapacity →
+                  Jurisdiction → Wealth-Tier Routing). Eight operating modes
+                  (<Mono>new-plan</Mono>, <Mono>existing-plan-audit</Mono>,{" "}
+                  <Mono>life-event-delta</Mono>,{" "}
+                  <Mono>urgent-bedside-signing</Mono>,{" "}
+                  <Mono>executor-activation</Mono>,{" "}
+                  <Mono>business-owner-succession</Mono>,{" "}
+                  <Mono>uhnw-restructure</Mono>,{" "}
+                  <Mono>maintenance-review</Mono>). Archetype start packs for
+                  the common patterns.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v1
+                  </span>
+                  <span className="ml-2 text-emerald-300 font-semibold">
+                    the output contract
+                  </span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  Two intake files, twenty analyses, twenty-three
+                  deliverables — forty-five structured artifacts in total.
+                  The contract is enforced:{" "}
+                  <Mono>plan-validator.py</Mono> runs as a backstop that
+                  checks for untouched starter outputs and missing
+                  coverage-matrix entries.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v1
+                  </span>
+                  <span className="ml-2 text-amber-300 font-semibold">
+                    seventeen subagents
+                  </span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  <Mono>intake-conductor</Mono>,{" "}
+                  <Mono>document-organizer</Mono>,{" "}
+                  <Mono>asset-discovery-auditor</Mono>,{" "}
+                  <Mono>beneficiary-audit</Mono>,{" "}
+                  <Mono>anti-pattern-scanner</Mono>,{" "}
+                  <Mono>tax-analyzer</Mono>,{" "}
+                  <Mono>execution-formalities-router</Mono>,{" "}
+                  <Mono>state-law-verifier</Mono>,{" "}
+                  <Mono>overlay-resolver</Mono>,{" "}
+                  <Mono>fiduciary-bench-builder</Mono>,{" "}
+                  <Mono>implementation-ops-planner</Mono>,{" "}
+                  <Mono>funding-checklist-generator</Mono>,{" "}
+                  <Mono>conflict-prevention-planner</Mono>,{" "}
+                  <Mono>litigation-defense-reviewer</Mono>,{" "}
+                  <Mono>multi-model-validator</Mono>,{" "}
+                  <Mono>deliverables-generator</Mono>, and a
+                  meta-coordinator that routes between them.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v1
+                  </span>
+                  <span className="ml-2 text-purple-300 font-semibold">
+                    the reference corpus
+                  </span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  One hundred thirty-five markdown documents across
+                  methodology, intake, foundations, family structures,
+                  assets, incapacity, advanced planning, tiers, post-death,
+                  legacy and logistics, anti-patterns, states, professions,
+                  life events, situations, and execution formalities.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
+                    v1
+                  </span>
+                  <span className="ml-2 text-cyan-300 font-semibold">
+                    verification-first discipline
+                  </span>
+                </p>
+                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                  Every recommendation that depends on volatile law — 2026{" "}
+                  <J t="obbba">OBBBA</J> thresholds, state estate tax rates,
+                  execution formalities, <J t="secure-act">Secure Act</J>{" "}
+                  beneficiary rules — is checked against primary sources at
+                  session time and logged in{" "}
+                  <Mono>analyses/official-source-log.md</Mono>. Plans stay
+                  auditable.
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-5 text-[11px] md:text-[12px] text-slate-500 leading-relaxed italic">
+              The skill page linked above has the full changelog, a live
+              visualization of the flow, and the verbatim{" "}
+              <Mono>SKILL.md</Mono> the agent loads into its context.
+            </p>
+          </div>
         </EC>
       </section>
 
@@ -625,8 +799,6 @@ export function WillsEstateArticle() {
             get to pasting it, just click <strong>Generate install prompt</strong>{" "}
             again.
           </p>
-
-          {/* TODO: install screencast embed from hgjp.40 */}
 
           <Sub eyebrow="Path 2">From the terminal (power users)</Sub>
 
@@ -715,10 +887,118 @@ jsm install wills-and-estate-planning-skill`}
         <EC>
           <SectionHeader
             id="who"
-            eyebrow="Audience"
-            title="Who this is for"
+            eyebrow="Scope"
+            title="Who this is for, and who it isn't."
           />
-          {/* TODO: body from hgjp.12 — tier-triage text + TierTriageViz */}
+
+          <p>
+            Most Americans think estate planning is for rich people. It is
+            not. It is for anyone who owns anything, cares about anyone,
+            or would prefer a county court not decide what happens to
+            their children. The skill is specifically designed to scale —
+            from a twenty-six-year-old renter with a first job and a
+            401(k) through to a hundred-and-fifty-million-dollar
+            industrialist with four generations to plan for. The same
+            interview adapts to whichever tier actually fits your facts.
+          </p>
+
+          <TierTriageViz />
+
+          <p>
+            Tap a rung to see the archetype, the primary goals for that
+            tier, and the core documents it typically produces.
+            Default-selected is Tier 2, the modal American reader —
+            homeowner, retirement accounts, minor children — because that
+            is who most of you are.
+          </p>
+
+          <Sub>What bumps you up a tier, regardless of net worth</Sub>
+
+          <p>
+            Complexity sometimes matters more than net worth. The skill
+            treats each of the following as a complexity overlay that
+            increases the depth of analysis regardless of which tier the
+            raw net-worth number puts you in:
+          </p>
+
+          <ul className="list-disc pl-6 space-y-2 text-slate-300">
+            <li>
+              <J t="blended-family">Blended family</J> — stepchildren,
+              remarriage, children from prior relationships
+            </li>
+            <li>
+              A non-U.S.-citizen spouse (<J t="qdot">QDOT</J> and treaty
+              analysis territory)
+            </li>
+            <li>A privately-held business or partnership interest</li>
+            <li>
+              A disabled or vulnerable heir who may need a special-needs
+              trust
+            </li>
+            <li>Assets in multiple states or multiple countries</li>
+            <li>
+              Specialty items: firearms under the <J t="nfa">NFA</J>,{" "}
+              <J t="self-custody">self-custodied crypto</J>,
+              creator-economy royalty streams, pre-IPO stock, a
+              concentrated position in one company, a known capacity or
+              cognition concern
+            </li>
+          </ul>
+
+          <p>
+            Any one of these bumps you up a tier of depth. Two or more and
+            you are probably in the Tier 3 or 4 range regardless of what
+            your net worth says.
+          </p>
+
+          <Sub>Who this is NOT for (honest scope limits)</Sub>
+
+          <ul className="list-disc pl-6 space-y-3 text-slate-300">
+            <li>
+              <strong>Non-U.S. domiciliaries.</strong> The skill is U.S.
+              federal plus all fifty states. If you live outside the U.S.
+              and your assets are outside the U.S., this is not the right
+              tool for you yet. We can handle a U.S. citizen living abroad
+              with U.S. assets; we cannot handle a Singaporean with
+              Singaporean property and Singaporean heirs.
+            </li>
+            <li>
+              <strong>People who need a will today.</strong> The skill has
+              an <Mono>urgent-bedside-signing</Mono> mode for
+              capacity-on-the-clock situations, but for a genuinely acute
+              emergency you want a real lawyer on the phone and ideally in
+              the room. The right tool for that is your phone, not a
+              laptop.
+            </li>
+            <li>
+              <strong>
+                People who want a one-page &ldquo;just write my will&rdquo;
+                experience.
+              </strong>{" "}
+              The skill is deliberately thorough — it produces forty-five
+              artifacts — because coordination across documents is the
+              whole point. If all you want is a single cheap will, buy one
+              from LegalZoom and close the tab. You are not being served
+              by the skill&apos;s depth if depth is not what you need.
+            </li>
+          </ul>
+
+          <Sub>Who this absolutely is for</Sub>
+
+          <p>
+            Anyone with a blended family. Anyone with kids under eighteen.
+            Anyone with property in more than one state. Anyone with a
+            business, or a substantial stake in one. Anyone who has crypto
+            they self-custody. Anyone whose plan was last updated before
+            the 2026 <J t="obbba">OBBBA</J>, or before their remarriage,
+            or before their move, or before their kid was born. Anyone who
+            has been meaning to do this for the last decade and has not.
+          </p>
+
+          <p>
+            If any of those describe you, the rest of the article is for
+            you.
+          </p>
         </EC>
       </section>
 
@@ -1129,10 +1409,107 @@ jsm install wills-and-estate-planning-skill`}
         <EC>
           <SectionHeader
             id="produces"
-            eyebrow="Output"
-            title="What the skill produces"
+            eyebrow="The output"
+            title="Forty-five artifacts you walk away with."
           />
-          {/* TODO: body from hgjp.15 — deliverables section + DeliverablesTreeViz */}
+
+          <p>
+            A serious session does not leave you with a pile of loose
+            files. It produces a structured project directory —{" "}
+            <Mono>my-estate-plan/</Mono> with three subdirectories (
+            <Mono>intake/</Mono>, <Mono>analyses/</Mono>,{" "}
+            <Mono>deliverables/</Mono>) and forty-five files organized so
+            a lawyer, a spouse, or a future version of you can pick up
+            where you left off. The skill enforces the structure through a
+            coverage matrix it writes at the start of the session and
+            updates throughout;{" "}
+            <Mono>scripts/plan-validator.py</Mono> runs as a backstop that
+            flags untouched starter outputs and missing overlay entries
+            before the skill declares the session complete.
+          </p>
+
+          <p>What forty-five artifacts, concretely, look like:</p>
+
+          <DeliverablesTreeViz />
+
+          <p>
+            Click any file to see what it is and a representative snippet.
+            Filter by category — intake, analyses, deliverables — or by
+            the operating mode that triggers it.
+          </p>
+
+          <Sub>Three deliverables that deserve extra attention</Sub>
+
+          <p>
+            Of the forty-five, three are disproportionately important. Any
+            serious reader should pay extra attention to these three.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 my-6 md:my-8">
+            <div className="rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/[0.05] via-purple-500/[0.04] to-emerald-500/[0.05] p-5 backdrop-blur-xl">
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-2">
+                Spotlight · day one
+              </p>
+              <p className="font-mono text-[13px] text-cyan-200 mb-3 break-all">
+                if-i-die-tomorrow.md
+              </p>
+              <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                One page. Where every critical document lives. Who to call
+                first. A pointer to where passwords and seed phrases are
+                stored (never the passwords themselves). The name of the
+                lawyer who drafted the plan. This is the page your spouse
+                or executor actually opens in the first forty-eight hours
+                after a death. Everything else in the packet is for the
+                months after.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.05] via-cyan-500/[0.04] to-purple-500/[0.05] p-5 backdrop-blur-xl">
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-emerald-300 mb-2">
+                Spotlight · coordination
+              </p>
+              <p className="font-mono text-[13px] text-emerald-200 mb-3 break-all">
+                beneficiary-map.md
+              </p>
+              <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                Every account, every contract, every life-insurance
+                policy. Who is currently named. Who should be named. The
+                delta. This is the single artifact that catches eighty
+                percent of real-world plan failures before they happen. It
+                is also the hardest to produce by hand — you have to pull
+                up every beneficiary form across every institution — which
+                is exactly why the skill&apos;s{" "}
+                <Mono>beneficiary-audit</Mono> subagent walks you through
+                it.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-purple-500/25 bg-gradient-to-br from-purple-500/[0.05] via-cyan-500/[0.04] to-emerald-500/[0.05] p-5 backdrop-blur-xl">
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-purple-300 mb-2">
+                Spotlight · handoff
+              </p>
+              <p className="font-mono text-[13px] text-purple-200 mb-3 break-all">
+                attorney-engagement-brief.md
+              </p>
+              <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+                Four pages, structured in the way an estates attorney
+                actually wants to read a new client. Your facts, your
+                goals in your own words, the design choices the skill
+                recommended, the open legal questions the skill could not
+                resolve, and the specific state-law items that need
+                verification. Hand this to your lawyer and their first
+                billable meeting shrinks from eight to fifteen hours to
+                two to three.
+              </p>
+            </div>
+          </div>
+
+          <p>
+            The skill does not sign, witness, notarize, file, or record
+            any document. Every path ends at a licensed attorney who does.
+            The artifacts make that attorney&apos;s work smaller and their
+            billable hours more focused, not optional.
+          </p>
         </EC>
       </section>
 
@@ -1143,10 +1520,132 @@ jsm install wills-and-estate-planning-skill`}
         <EC>
           <SectionHeader
             id="workflow"
-            eyebrow="Process"
-            title="The nine-step workflow"
+            eyebrow="End-to-end"
+            title="The nine steps, in order."
           />
-          {/* TODO: body from hgjp.16 — 9-step workflow narrative */}
+
+          <p>
+            The sample session above is what the intake <em>feels</em> like
+            — a conversation. The workflow below is what the agent actually{" "}
+            <em>produces</em> in parallel with that conversation. Intake is
+            nine phases of talking; the workflow is nine steps of writing
+            artifacts to disk. They happen at the same time; the skill
+            stitches them together. By the end of phase nine, step nine is
+            also done.
+          </p>
+
+          <Sub eyebrow="Step 1">Orient</Sub>
+          <p>
+            The agent establishes why now — what triggered this session. A
+            death, a diagnosis, a move, a remarriage, a scare. It presents
+            the disclaimer. It confirms you understand this is not legal
+            advice. The orientation is short (five minutes in the intake)
+            but it sets the mode for everything that follows:{" "}
+            <Mono>new-plan</Mono>, <Mono>existing-plan-audit</Mono>,{" "}
+            <Mono>life-event-delta</Mono>,{" "}
+            <Mono>urgent-bedside-signing</Mono>,{" "}
+            <Mono>executor-activation</Mono>,{" "}
+            <Mono>business-owner-succession</Mono>,{" "}
+            <Mono>uhnw-restructure</Mono>, or{" "}
+            <Mono>maintenance-review</Mono>.
+          </p>
+
+          <Sub eyebrow="Step 2">Inventory</Sub>
+          <p>
+            People, assets, beneficiary forms. The first concrete
+            deliverables are produced here: the Asset Inventory, the
+            Beneficiary Map, the Evidence Confidence Map (which grades each
+            asset fact by how strong the evidence for it is — a statement
+            from you is weaker than a copy of the account statement; an
+            inferred value from a date-range is weaker still). This is the
+            step where the skill starts seeing the shape of your plan.
+          </p>
+
+          <Sub eyebrow="Step 3">Surface complications</Sub>
+          <p>
+            The family-dynamics phase.{" "}
+            <J t="blended-family">Blended family</J>, disabled heir,
+            creditor trouble, addiction, disinheritance, foreign
+            beneficiary, concentrated position, multi-state property,
+            domicile ambiguity. Each complication triggers a specific
+            overlay in the skill&apos;s reference library. Anything the
+            agent flags here lands in the Red Flag Triage — critical, high,
+            medium, cleanup.
+          </p>
+
+          <Sub eyebrow="Step 4">Clarify goals</Sub>
+          <p>
+            Equal versus equitable inheritance. Charitable intent. Business
+            succession. Family values you want preserved. These are
+            captured in your own words because they will become the letter
+            of wishes later, and the strongest defense against contest
+            litigation is the decedent&apos;s own voice.
+          </p>
+
+          <Sub eyebrow="Step 5">Design structure</Sub>
+          <p>
+            Apply the kernel&apos;s axioms plus the tier routing plus the
+            cognitive operators. Choose will +{" "}
+            <J t="revocable-trust">trust</J> + <J t="poa">POA</J>{" "}
+            architecture. Name executor, <J t="trustee">trustee</J>,{" "}
+            <J t="guardian">guardian</J>, healthcare agent,
+            power-of-attorney agent — with a successor for each because the
+            named primary will eventually decline, predecease, or lose
+            capacity.
+          </p>
+
+          <Sub eyebrow="Step 6">Incapacity &amp; end-of-life</Sub>
+          <p>
+            <J t="durable-poa">Durable POA</J>,{" "}
+            <J t="healthcare-proxy">healthcare POA</J>,{" "}
+            <J t="living-will">living will</J>,{" "}
+            <J t="hipaa">HIPAA authorization</J>, POLST if appropriate.{" "}
+            <J t="ulysses-clause">Ulysses clauses</J> for known cognitive
+            risks. Disposition of remains. The skill writes about half the
+            incapacity package as drafts and flags the other half — the
+            parts with state-specific forms — for attorney handoff.
+          </p>
+
+          <Sub eyebrow="Step 7">Tax &amp; domicile</Sub>
+          <p>
+            Federal exemption analysis (the <J t="obbba">OBBBA</J> $15M as
+            of 2026). State estate and inheritance tax analysis for every
+            state where you own property.{" "}
+            <J t="portability">Portability</J>.{" "}
+            <J t="step-up-basis">Step-up basis</J> planning. GST exemption
+            allocation if you&apos;re in dynasty territory.{" "}
+            <J t="domicile">Domicile</J> audit if the state is ambiguous or
+            you recently moved.
+          </p>
+
+          <Sub eyebrow="Step 8">Communication &amp; legacy</Sub>
+          <p>
+            Family meeting agenda. Letter of wishes with your exact words.
+            Ethical will. Digital-asset inventory. Conflict-prevention
+            plan. &ldquo;If I die tomorrow&rdquo; one-pager. This step is
+            the one most often skipped by human attorneys — not because
+            they don&apos;t know it matters, but because they charge for
+            drafting and don&apos;t get paid for orchestrating family
+            conversations. The skill does it automatically.
+          </p>
+
+          <Sub eyebrow="Step 9">Attorney handoff</Sub>
+          <p>
+            Comprehensive Plan Report. Attorney Engagement Brief. Attorney
+            Interview Questions. Document Package Index. Review Schedule.
+            All four hand off cleanly to the lawyer who will draft the
+            final signed documents. The handoff brief is structured so your
+            lawyer spends their first meeting drafting, not interviewing.
+          </p>
+
+          <p>
+            Intake is the conversation. Workflow is what that conversation
+            produces. The reason the skill is worth twenty dollars a month
+            is that these two run in parallel and converge at the same
+            moment, with the entire output ready to hand to a licensed
+            attorney — without you needing to know the name of a single
+            artifact in advance.
+          </p>
         </EC>
       </section>
 
@@ -1157,10 +1656,35 @@ jsm install wills-and-estate-planning-skill`}
         <EC>
           <SectionHeader
             id="anti"
-            eyebrow="Pitfalls"
-            title="The anti-patterns"
+            eyebrow="What goes wrong"
+            title="Anti-patterns: the parrot, the ex-spouse, the springing POA."
           />
-          {/* TODO: body from hgjp.17 — anti-patterns text + AntiPatternCardsViz */}
+
+          <p>
+            Most estate-plan disasters are not exotic. They are one of
+            about fifteen patterns the skill is specifically designed to
+            catch, and once you know them they are obvious in retrospect.
+            The skill runs every plan through them before it hands you
+            anything. Here are the ones most worth burning into your
+            memory.
+          </p>
+
+          <AntiPatternCardsViz />
+
+          <p>
+            Each card flips on tap or focus. Front: the pattern name plus
+            a one-line hook. Back: what actually goes wrong, the worst
+            case, and which subagent the skill uses to catch it — a small
+            bit of insider baseball for the curious reader.
+          </p>
+
+          <p>
+            The skill cannot prevent grief. It cannot change the fact that
+            someone you love will die, or that you will. What it can do
+            is make sure that on the day that matters most, none of the
+            patterns above are live in your plan, and that the people you
+            love are not the ones doing the discovering.
+          </p>
         </EC>
       </section>
 
@@ -1296,8 +1820,104 @@ jsm install wills-and-estate-planning-skill`}
       {/* ========== COMPARISON TABLE (hgjp.38) ========== */}
       <section data-section="comparison" className="pb-10 md:pb-14">
         <EC>
-          {/* TODO: body from hgjp.38 — comparison vs LegalZoom, Trust & Will, Rocket Lawyer */}
-          <span />
+          <SectionHeader
+            id="comparison"
+            eyebrow="Vs. form-based tools"
+            title="Why not just use LegalZoom?"
+          />
+
+          <p>
+            The obvious question a serious reader asks at this point is:
+            why not just use{" "}
+            <a
+              href="https://legalzoom.com"
+              className="text-cyan-400 underline underline-offset-2"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              LegalZoom
+            </a>
+            ?{" "}
+            <a
+              href="https://trustandwill.com"
+              className="text-cyan-400 underline underline-offset-2"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Trust &amp; Will
+            </a>{" "}
+            runs a full estate-plan bundle for a few hundred dollars, flat
+            rate.{" "}
+            <a
+              href="https://rocketlawyer.com"
+              className="text-cyan-400 underline underline-offset-2"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Rocket Lawyer
+            </a>{" "}
+            has a subscription. Both of them are fine for what they do.
+            They are not the same kind of thing as this skill and it is
+            worth spelling out why.
+          </p>
+
+          <RefTable
+            cols={[
+              { key: "dim", label: "Dimension" },
+              {
+                key: "them",
+                label: "LegalZoom / Trust & Will / Rocket Lawyer",
+              },
+              { key: "us", label: "wills-and-estate-planning skill" },
+            ]}
+            rows={[
+              {
+                dim: <strong>What you get</strong>,
+                them: "One document at a time from a form-based intake (a will, a trust, a POA).",
+                us: "A coordinated plan — will + trust + beneficiary audit + titling audit + POAs + digital inventory + attorney handoff packet — checked for cross-document coherence.",
+              },
+              {
+                dim: <strong>Coordination across documents</strong>,
+                them: "None. Your will is produced in isolation from your 401(k) beneficiary forms, your deeds, or your insurance.",
+                us: "The main feature. Catches the 80% of real-world plan failures — mismatched beneficiaries, trusts that were never funded, ex-spouses still on contracts — before they happen.",
+              },
+              {
+                dim: <strong>State-law accuracy</strong>,
+                them: "Static templates, often months behind actual law.",
+                us: (
+                  <>
+                    Verification-first against primary sources on every
+                    live-law check; logged in{" "}
+                    <Mono>official-source-log.md</Mono> per session.
+                  </>
+                ),
+              },
+              {
+                dim: <strong>Where it ends</strong>,
+                them: "The document is the endpoint. If you want an attorney to review, you start over with them.",
+                us: "Every session ends at a licensed attorney in your state. Produces an Attorney Engagement Brief specifically designed to turn your first billable meeting from 8-15 hours into 2-3.",
+              },
+              {
+                dim: <strong>What it costs</strong>,
+                them: "$79-499 per document, or $100-200/year for a subscription bundle.",
+                us: "$20/month, cancel anytime. Over a year, either cost is small — but the output is a different category of thing.",
+              },
+            ]}
+          />
+
+          <p>
+            If you rent, have no dependents, own no property, and just want
+            a single do-it-yourself will in case of emergency, buy a $79
+            will from LegalZoom and move on with your life. It is a better
+            use of your money than this skill. The skill earns its keep
+            the moment coordination across more than one document starts
+            to matter — the blended family, the business interest, the
+            second-state property, the vulnerable heir, the concentrated
+            stock position, the pet with a longer life expectancy than
+            yours. If any two of those describe you, the skill is a much
+            better fit than a form-based will generator, and an initial
+            consultation with an estates attorney is better than either.
+          </p>
         </EC>
       </section>
 
@@ -1308,36 +1928,288 @@ jsm install wills-and-estate-planning-skill`}
         <EC>
           <SectionHeader
             id="faq"
-            eyebrow="Questions"
-            title="FAQ"
+            eyebrow="FAQ"
+            title="Questions you are about to ask."
           />
-          {/* TODO: body from hgjp.37 — FAQ section */}
+
+          <details className="sm-details">
+            <summary>Is this legal advice?</summary>
+            <div className="sm-details-body">
+              <p>
+                No. The skill produces audit documents, drafts, and a handoff
+                packet for your attorney. Your attorney is the one who actually
+                advises you, drafts the final documents, and signs off on
+                execution. Nothing the skill produces creates an
+                attorney-client relationship with anyone.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>Do I still need an attorney?</summary>
+            <div className="sm-details-body">
+              <p>
+                Yes. For anyone with more than a trivial estate, minor
+                children, a blended family, a business, disability in the
+                family, or unusual circumstances, you want a real attorney.
+                The skill makes that attorney&apos;s first meeting take two
+                hours instead of ten. It does not replace the meeting.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>Is my data private?</summary>
+            <div className="sm-details-body">
+              <p>
+                Yes. The agent runs on your computer, reading files you
+                explicitly give it. It does not upload your financial
+                documents, your tax returns, or your family history to any
+                server. Nothing leaves your laptop except — at your
+                direction — the sanitized Attorney Engagement Brief you
+                choose to send your lawyer.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>What if I&apos;m not in the United States?</summary>
+            <div className="sm-details-body">
+              <p>
+                The skill is U.S.-only. It covers federal law plus all fifty
+                states. If you are a U.S. citizen domiciled abroad with U.S.
+                assets, it handles the cross-border overlay. If you are not
+                U.S.-domiciled, this is not the right tool for you yet.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>Will the skill work after tax law changes?</summary>
+            <div className="sm-details-body">
+              <p>
+                The skill separates evergreen methodology from volatile law.
+                Every federal threshold, state exemption, and execution
+                formality is verified against primary sources at the time of
+                use and logged in <Mono>official-source-log.md</Mono>. When
+                the 2026 <J t="obbba">OBBBA</J> rules change, the skill
+                picks up the new numbers. Old plans carry their own
+                verification trail so you can see exactly what needs
+                re-checking.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>Why a subscription instead of a one-time purchase?</summary>
+            <div className="sm-details-body">
+              <p>
+                Because the thing you are paying for — the living, verified
+                set of axioms plus the reference corpus plus the subagents
+                plus the updates when the law changes — is not a one-time
+                thing. A static PDF of estate-planning templates from three
+                years ago is a trap, not a service. Cancel anytime. The
+                artifacts you have produced stay on your computer after you
+                cancel.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>What if I only need a simple will?</summary>
+            <div className="sm-details-body">
+              <p>
+                If you rent, have no dependents, and the sum of your worldly
+                possessions is a car and a laptop,{" "}
+                <a
+                  href="https://legalzoom.com"
+                  className="text-cyan-400 underline underline-offset-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  LegalZoom
+                </a>{" "}
+                or Trust &amp; Will are probably fine for you. The skill
+                starts earning its keep once coordination across more than
+                one document matters — a blended family, a business, a
+                second state, a concentrated stock position, a child with
+                special needs, enough savings to cross any state&apos;s
+                estate-tax threshold.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>Can I share the skill with my spouse?</summary>
+            <div className="sm-details-body">
+              <p>
+                One subscription per user. Your spouse needs their own —
+                which at twenty dollars a month is a reasonable thing to
+                ask them for. Every bundle you download is watermarked with
+                your account identity, which is mostly honor-system
+                deterrence, but it is the honor system.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>What happens when I cancel?</summary>
+            <div className="sm-details-body">
+              <p>
+                You keep everything you have already produced. Your files
+                are yours. You lose access to future updates, new versions
+                of the skill, and re-downloads on a new computer. If you
+                cancel mid-planning, you can finish with the files you
+                already have locally.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>Does it work on my phone?</summary>
+            <div className="sm-details-body">
+              <p>
+                Not today. Claude Code Desktop and Codex Desktop are Mac,
+                Windows, and Linux. There is no mobile app. You need a
+                computer.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>Can my attorney see what the skill produced?</summary>
+            <div className="sm-details-body">
+              <p>
+                Yes, and they should. The Attorney Engagement Brief is
+                designed precisely for that handoff. Most attorneys who have
+                seen the output say some version of &ldquo;thank god, I
+                usually spend my whole first meeting just digging this
+                information out of clients.&rdquo;
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>What if I start, then lose interest?</summary>
+            <div className="sm-details-body">
+              <p>
+                Your partial <Mono>intake-record.md</Mono> persists. You can
+                pick up a week, three months, or a year later. The skill
+                has a <Mono>maintenance-review</Mono> mode for periodic
+                refresh after life events.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>
+              My crypto is self-custodied. You&apos;re not asking me for my
+              seed phrase, right?
+            </summary>
+            <div className="sm-details-body">
+              <p>
+                Correct. The skill never asks for your seed phrase. The
+                digital inventory template has an explicit field that says
+                &ldquo;pointer to where the seed phrase is stored — do NOT
+                write the seed phrase itself here.&rdquo; If you
+                accidentally put it in, the skill flags it and asks you to
+                move it out before continuing.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>How long does this actually take?</summary>
+            <div className="sm-details-body">
+              <p>
+                A full first pass is three to six hours, usually spread
+                across a weekend rather than done in a single sitting.
+                Updates after life events take thirty to sixty minutes. The
+                first time is the slow one; everything after is fast.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>
+              I&apos;ve never paid for something like this before. What if
+              I hate it?
+            </summary>
+            <div className="sm-details-body">
+              <p>
+                Email the support address in your account settings. Jeffrey
+                reads those emails himself and there is a cheerful refund
+                policy. You should not be stuck paying for something that
+                did not give you value.
+              </p>
+            </div>
+          </details>
         </EC>
       </section>
 
       <Divider />
 
-      {/* ========== THE GENERAL PATTERN (closing) ========== */}
+      {/* ========== THE GENERAL PATTERN (closing — hgjp.19) ========== */}
       <section id="pattern" data-section="pattern" className="pb-10 md:pb-14">
         <EC>
           <h2 className="sm-section-title mb-6 mt-4 text-white">
             A pattern, not a product.
           </h2>
-          {/* TODO: body — closing section (similar to slack article's "A pattern, not a migration") */}
+
           <p>
-            {
-              "The interesting thing here isn't about wills. It's about the shape of problems that get dramatically better when a coding agent is driving a well-written skill."
-            }
+            Estate planning is one of a small set of problems where the
+            judgment-layer professionals are plentiful and well-trained, and
+            the billable hours they charge are mostly for asking you good
+            questions and writing down your answers. Tax preparation is
+            another. Medicare plan selection. Social Security claiming
+            strategy. College financial aid optimization. Divorce financial
+            planning. Medical bill auditing. Long-term care insurance
+            purchase. In every one of these, you are paying an expert eight
+            to fifteen hours to understand your situation before they can
+            do the part only they can do.
           </p>
+
           <p>
-            {
-              "Estate planning has always had a structural inefficiency: the knowledge required to do it well is expensive, the consequences of doing it badly are invisible until someone dies, and the people who need it most — blended families, small-business owners, anyone with assets in multiple states — are exactly the people whose situations are too complex for a template."
-            }
+            That shape of problem is exactly what an agent-driven skill can
+            compress. Not the judgment — the preparation. Your attorney
+            still signs. Your CPA still files. Your Medicare broker still
+            enrolls you. What changes is that the preparation, which was
+            secretly most of your bill, happens on your Saturday afternoon
+            at the kitchen table with your agent, instead of in the
+            specialist&apos;s office at seven hundred dollars an hour.
           </p>
+
           <p>
-            {
-              "An agent-driven skill doesn't replace the attorney. It replaces the forty hours of disorganized intake, the missed beneficiary forms, the coherence gaps between documents, and the family meeting that never happens. The attorney still drafts and signs. But the attorney's first meeting starts from a structured handoff instead of a blank intake form."
-            }
+            I do not want to overclaim. None of this compresses to zero. A
+            good estates attorney or CPA is still worth their fee; you are
+            now paying them for the part that is actually them, not for the
+            part that was intake. If anything the skill makes your
+            professional relationships more efficient, not less necessary.
+            A family of modest means with a complicated situation will
+            still benefit from an hour of an attorney&apos;s time. A family
+            with fifty million dollars and three generations to plan for
+            will still need ongoing counsel for the next two decades. The
+            skill does not replace any of that. It makes the first meeting
+            useful and shortens every subsequent one.
+          </p>
+
+          <p>
+            What it gives you, if you use it well, is two things. Your
+            family&apos;s affairs, organized coherently, for maybe the
+            first time in your adult life. And a packet an attorney can
+            draft against in an afternoon rather than a month.
+          </p>
+
+          <p>
+            If you have been putting this off for a decade — and
+            statistically you probably have — the{" "}
+            <a
+              href="#install"
+              className="text-cyan-400 underline underline-offset-2"
+            >
+              ninety-second install
+            </a>{" "}
+            above is the only barrier left.
           </p>
 
           <div className="sm-sign-off">
@@ -1350,9 +2222,10 @@ jsm install wills-and-estate-planning-skill`}
                   TL;DR
                 </p>
                 <p className="text-[13px] text-slate-300">
-                  One skill. Twelve axioms. A structured intake that makes the
-                  attorney&apos;s first meeting start from a handoff, not a blank
-                  form.
+                  Two hundred files of estate-planning judgment. One
+                  conversation with your agent. Your attorney still signs.
+                  Your spouse can find the 401(k) beneficiary form. Your
+                  parrot is provided for.
                 </p>
               </div>
             </div>
