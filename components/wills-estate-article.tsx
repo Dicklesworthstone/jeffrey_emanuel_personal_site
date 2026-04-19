@@ -464,8 +464,8 @@ export function WillsEstateArticle() {
 
           <p>
             The skill does not replace your attorney. That needs to be explicit,
-            because the whole thing is designed to end at one. What it does
-            can replace is a large chunk of the first fact-finding and
+            because the whole thing is designed to end at one. What it can
+            replace is a large chunk of the first fact-finding and
             document-gathering work your attorney would normally bill for
             before they can start drafting. By the time you send them the
             Attorney Engagement Brief the skill produces, the conversation can
@@ -1419,12 +1419,12 @@ jsm install wills-and-estate-planning-skill`}
 
           <p>
             She takes the packet to a New York estates attorney her friend
-            recommends. The first meeting lasts two and a half hours. The
-            attorney, who usually quotes fifteen to twenty hours at seven
-            hundred dollars for a case like Maya&apos;s, tells her the draft
-            will be ready in six billable hours. Maya pays for four. Three
-            weeks later she and Karl sign in the attorney&apos;s office, and
-            the parrot is provided for.
+            recommends. The first meeting is shorter and more focused than the
+            cold-start intake she was bracing for. The attorney tells her the
+            packet saved a meaningful amount of discovery work and quotes a
+            narrower drafting engagement than they usually would for a case
+            like hers. Three weeks later she and Karl sign in the
+            attorney&apos;s office, and the parrot is provided for.
           </p>
         </EC>
       </section>
@@ -2224,9 +2224,9 @@ jsm install wills-and-estate-planning-skill`}
             another. Medicare plan selection. Social Security claiming
             strategy. College financial aid optimization. Divorce financial
             planning. Medical bill auditing. Long-term care insurance
-            purchase. In every one of these, you are paying an expert eight
-            to fifteen hours to understand your situation before they can
-            do the part only they can do.
+            purchase. In every one of these, you are often paying an expert
+            for a long initial intake before they can do the part only they can
+            do.
           </p>
 
           <p>
