@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 
 export const alt =
-  "An AI Skill for Wills & Estate Planning | Jeffrey Emanuel";
+  "Drafting a Serious Estate Plan on a Saturday | Jeffrey Emanuel";
 export const size = {
   width: 1200,
   height: 600,
@@ -11,6 +11,13 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
+  const illustrationData = await fetch(
+    new URL(
+      "../../../../assets/wills_estate_post_illustration.webp",
+      import.meta.url,
+    ),
+  ).then((response) => response.arrayBuffer());
+
   return new ImageResponse(
     (
       <div
@@ -18,38 +25,61 @@ export default async function Image() {
           height: "100%",
           width: "100%",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           background:
-            "linear-gradient(145deg, #07070b 0%, #060f12 35%, #071210 65%, #07070b 100%)",
+            "linear-gradient(145deg, #07070b 0%, #120b12 36%, #0a1118 68%, #06070b 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        {/* Grid pattern */}
         <div
           style={{
             position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            opacity: 0.03,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2310b981' stroke-width='0.5'%3E%3Cpath d='M0 20h40M20 0v40'/%3E%3C/g%3E%3C/svg%3E")`,
+            inset: 0,
+            opacity: 0.04,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2306b6d4' stroke-width='0.5'%3E%3Cpath d='M0 21h42M21 0v42'/%3E%3C/g%3E%3C/svg%3E")`,
             display: "flex",
           }}
         />
 
-        {/* Emerald orb */}
         <div
           style={{
             position: "absolute",
-            top: -180,
+            top: -200,
             left: -150,
-            width: 560,
-            height: 560,
+            width: 580,
+            height: 580,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(245,158,11,0.16) 0%, transparent 60%)",
+            display: "flex",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            top: 72,
+            left: 156,
+            width: 500,
+            height: 500,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(168,85,247,0.18) 0%, transparent 60%)",
+            display: "flex",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            bottom: -220,
+            right: -150,
+            width: 610,
+            height: 610,
             borderRadius: "50%",
             background:
               "radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 60%)",
@@ -57,123 +87,80 @@ export default async function Image() {
           }}
         />
 
-        {/* Teal orb */}
-        <div
-          style={{
-            position: "absolute",
-            top: 50,
-            left: 280,
-            width: 460,
-            height: 460,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(20,184,166,0.14) 0%, transparent 60%)",
-            display: "flex",
-          }}
-        />
-
-        {/* Cyan orb */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: -220,
-            right: -150,
-            width: 600,
-            height: 600,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 60%)",
-            display: "flex",
-          }}
-        />
-
-        {/* Main content */}
         <div
           style={{
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
             gap: 80,
             zIndex: 10,
             padding: "40px 80px",
             width: "100%",
           }}
         >
-          {/* Left — Document + Shield SVG */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              width: 500,
+              height: 500,
               position: "relative",
+              marginLeft: 24,
             }}
           >
             <div
               style={{
                 position: "absolute",
-                width: 300,
-                height: 300,
-                borderRadius: "50%",
-                border: "1px solid rgba(16,185,129,0.08)",
-                display: "flex",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                width: 220,
-                height: 220,
-                borderRadius: "50%",
-                border: "1px solid rgba(16,185,129,0.15)",
-                display: "flex",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                width: 160,
-                height: 160,
-                borderRadius: "50%",
+                top: -22,
+                left: -22,
+                right: -22,
+                bottom: -22,
+                borderRadius: 44,
                 background:
-                  "radial-gradient(circle, rgba(16,185,129,0.25) 0%, rgba(20,184,166,0.1) 60%, transparent 80%)",
-                filter: "blur(20px)",
+                  "radial-gradient(circle, rgba(6,182,212,0.28) 0%, rgba(168,85,247,0.16) 45%, transparent 70%)",
+                filter: "blur(40px)",
                 display: "flex",
               }}
             />
-            <svg
-              width="200"
-              height="200"
-              viewBox="0 0 100 100"
-              fill="none"
-              style={{ filter: "drop-shadow(0 0 20px rgba(16,185,129,0.4))" }}
+
+            <div
+              style={{
+                display: "flex",
+                width: 460,
+                height: 460,
+                borderRadius: 28,
+                border: "1px solid rgba(255,255,255,0.12)",
+                overflow: "hidden",
+                boxShadow:
+                  "0 30px 80px -20px rgba(6,182,212,0.35), 0 10px 40px -10px rgba(168,85,247,0.28)",
+                position: "relative",
+              }}
             >
-              <defs>
-                <linearGradient id="epGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#06b6d4" />
-                </linearGradient>
-              </defs>
-              <rect x="28" y="12" width="44" height="56" rx="4" stroke="url(#epGrad)" strokeWidth="1.5" opacity="0.7" />
-              <line x1="36" y1="26" x2="64" y2="26" stroke="url(#epGrad)" strokeWidth="1" opacity="0.5" />
-              <line x1="36" y1="34" x2="58" y2="34" stroke="url(#epGrad)" strokeWidth="1" opacity="0.4" />
-              <line x1="36" y1="42" x2="62" y2="42" stroke="url(#epGrad)" strokeWidth="1" opacity="0.4" />
-              <line x1="36" y1="50" x2="54" y2="50" stroke="url(#epGrad)" strokeWidth="1" opacity="0.3" />
-              <path d="M50 70 L50 88" stroke="url(#epGrad)" strokeWidth="1.2" opacity="0.6" />
-              <path d="M50 72 C42 72 38 78 38 84 C38 90 50 96 50 96 C50 96 62 90 62 84 C62 78 58 72 50 72" stroke="url(#epGrad)" strokeWidth="1.5" fill="rgba(16,185,129,0.08)" opacity="0.8" />
-              <circle cx="50" cy="84" r="3" fill="#10b981" opacity="0.6" />
-              <path d="M60 12 L72 12 L72 24" stroke="url(#epGrad)" strokeWidth="0.8" opacity="0.3" />
-            </svg>
+              <img
+                src={illustrationData as unknown as string}
+                alt=""
+                width={460}
+                height={460}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "flex",
+                }}
+              />
+            </div>
           </div>
 
-          {/* Right — Text */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-start",
               justifyContent: "center",
-              maxWidth: 600,
+              flex: 1,
+              maxWidth: 560,
             }}
           >
             <div
@@ -181,29 +168,43 @@ export default async function Image() {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                marginBottom: 18,
+                marginBottom: 20,
                 padding: "8px 16px",
                 borderRadius: 20,
-                background: "rgba(16,185,129,0.1)",
-                border: "1px solid rgba(16,185,129,0.2)",
+                background: "rgba(245,158,11,0.12)",
+                border: "1px solid rgba(245,158,11,0.26)",
               }}
             >
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", display: "flex" }} />
+              <div
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: "#f59e0b",
+                  display: "flex",
+                }}
+              />
               <span
                 style={{
                   fontSize: 12,
-                  color: "#6ee7b7",
+                  color: "#fdba74",
                   fontWeight: 700,
-                  letterSpacing: "0.15em",
+                  letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   display: "flex",
                 }}
               >
-                AI Agents · Estate Planning
+                Life Planning · AI Agents · Attorney Review
               </span>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", marginBottom: 20 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: 20,
+              }}
+            >
               <h1
                 style={{
                   fontSize: 52,
@@ -211,26 +212,27 @@ export default async function Image() {
                   color: "white",
                   margin: 0,
                   letterSpacing: "-0.04em",
-                  lineHeight: 1.12,
+                  lineHeight: 1.08,
                   display: "flex",
                 }}
               >
-                An AI Skill for
+                Drafting a Serious
               </h1>
               <h1
                 style={{
                   fontSize: 52,
                   fontWeight: 900,
-                  background: "linear-gradient(to right, #10b981, #14b8a6, #06b6d4)",
+                  background:
+                    "linear-gradient(to right, #f59e0b 0%, #a855f7 40%, #06b6d4 72%, #10b981 100%)",
                   backgroundClip: "text",
                   color: "transparent",
                   margin: 0,
                   letterSpacing: "-0.04em",
-                  lineHeight: 1.12,
+                  lineHeight: 1.08,
                   display: "flex",
                 }}
               >
-                Wills & Estate Planning
+                Estate Plan on a Saturday.
               </h1>
             </div>
 
@@ -243,64 +245,92 @@ export default async function Image() {
                 lineHeight: 1.5,
                 fontWeight: 400,
                 display: "flex",
+                maxWidth: 520,
               }}
             >
-              {"Twelve axioms, nine phases, seventy-six tooltips — one attorney-ready handoff."}
+              {"AI agents · paid skill · attorney signs the docs."}
             </p>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {["Claude Code", "Codex", "9-Phase Intake"].map((tag) => (
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+                marginBottom: 24,
+              }}
+            >
+              {[
+                {
+                  label: "201 files",
+                  color: "rgba(168,85,247,0.12)",
+                  border: "rgba(168,85,247,0.24)",
+                  text: "#d8b4fe",
+                },
+                {
+                  label: "17 subagents",
+                  color: "rgba(6,182,212,0.12)",
+                  border: "rgba(6,182,212,0.24)",
+                  text: "#7dd3fc",
+                },
+                {
+                  label: "45 templates",
+                  color: "rgba(16,185,129,0.12)",
+                  border: "rgba(16,185,129,0.24)",
+                  text: "#6ee7b7",
+                },
+              ].map((badge) => (
                 <div
-                  key={tag}
+                  key={badge.label}
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    padding: "6px 13px",
-                    borderRadius: 8,
-                    background: "rgba(16,185,129,0.08)",
-                    border: "1px solid rgba(16,185,129,0.2)",
+                    padding: "8px 13px",
+                    borderRadius: 999,
+                    background: badge.color,
+                    border: `1px solid ${badge.border}`,
+                    color: badge.text,
+                    fontSize: 14,
+                    fontWeight: 700,
+                    letterSpacing: "-0.01em",
                   }}
                 >
-                  <span style={{ color: "#a7f3d0", fontSize: 13, fontWeight: 600, display: "flex" }}>
-                    {tag}
-                  </span>
+                  {badge.label}
                 </div>
               ))}
             </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  background:
+                    "linear-gradient(135deg, #f59e0b 0%, #a855f7 45%, #06b6d4 100%)",
+                  display: "flex",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 16,
+                  color: "#cbd5e1",
+                  fontWeight: 500,
+                  letterSpacing: "-0.01em",
+                  display: "flex",
+                }}
+              >
+                Jeffrey Emanuel · jeffreyemanuel.com
+              </span>
+            </div>
           </div>
-        </div>
-
-        {/* Bottom gradient accent */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 4,
-            background:
-              "linear-gradient(90deg, transparent 0%, #10b981 25%, #14b8a6 50%, #06b6d4 75%, transparent 100%)",
-            display: "flex",
-          }}
-        />
-
-        {/* Domain */}
-        <div
-          style={{
-            position: "absolute",
-            top: 28,
-            right: 38,
-            fontSize: 14,
-            color: "#475569",
-            display: "flex",
-          }}
-        >
-          <span style={{ display: "flex" }}>jeffreyemanuel.com</span>
         </div>
       </div>
     ),
-    {
-      ...size,
-    },
+    size,
   );
 }
