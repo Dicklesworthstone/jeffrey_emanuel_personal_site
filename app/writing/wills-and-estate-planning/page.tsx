@@ -7,6 +7,8 @@ const ARTICLE_TITLE = "An AI Skill for Wills & Estate Planning";
 const ARTICLE_DESCRIPTION =
   "A Claude Code / Codex skill that conducts a structured estate-planning intake — twelve axioms, nine phases, seventy-seven jargon tooltips — and produces a structured handoff packet for attorney review.";
 const ARTICLE_CANONICAL = "/writing/wills-and-estate-planning";
+const ARTICLE_PUBLISHED_AT = "2026-04-19";
+const ARTICLE_PUBLISHED_LABEL = "April 19, 2026";
 const ARTICLE_ABOUT = [
   "Estate Planning",
   "Wills",
@@ -40,8 +42,8 @@ const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
   headline: ARTICLE_TITLE,
-  datePublished: "2026-04-19",
-  dateModified: "2026-04-19",
+  datePublished: ARTICLE_PUBLISHED_AT,
+  dateModified: ARTICLE_PUBLISHED_AT,
   description: ARTICLE_DESCRIPTION,
   author: {
     "@type": "Person",
@@ -67,6 +69,17 @@ export default function WillsEstatePlanningPage() {
   return (
     <>
       <JsonLd data={articleSchema} />
+      <div className="bg-[#020204] border-b border-white/6">
+        <div className="mx-auto flex max-w-[800px] flex-wrap items-center gap-x-3 gap-y-1 px-4 py-4 text-[11px] uppercase tracking-[0.24em] text-slate-400 md:px-6 md:text-[12px]">
+          <span>By Jeffrey Emanuel</span>
+          <span aria-hidden="true" className="text-slate-600">
+            /
+          </span>
+          <time dateTime={ARTICLE_PUBLISHED_AT}>
+            Published {ARTICLE_PUBLISHED_LABEL}
+          </time>
+        </div>
+      </div>
       <WillsEstateArticle />
     </>
   );
