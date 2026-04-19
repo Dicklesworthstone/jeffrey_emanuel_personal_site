@@ -730,10 +730,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== WHAT IS AN AGENT + SKILL ========== */}
-      <section data-section="what-is-it" className="pb-10 md:pb-14">
+      <section id="what-is-it" data-section="what-is-it" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="what-is-it"
+            id="what-is-it-heading"
             eyebrow="The basics"
             title="What is an AI agent, and what is a skill?"
           />
@@ -795,10 +795,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== SETUP (hgjp.11) ========== */}
-      <section data-section="setup" className="pb-10 md:pb-14">
+      <section id="setup" data-section="setup" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="setup"
+            id="setup-heading"
             eyebrow="Setup"
             title="What you need, in about twenty minutes."
           />
@@ -946,10 +946,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== WORKING FOLDER ========== */}
-      <section data-section="folder" className="pb-10 md:pb-14">
+      <section id="folder" data-section="folder" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="folder"
+            id="folder-heading"
             eyebrow="Using the skill"
             title="Make a folder, put documents in it, start the conversation."
           />
@@ -1047,10 +1047,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== TIPS ========== */}
-      <section data-section="tips" className="pb-10 md:pb-14">
+      <section id="tips" data-section="tips" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="tips"
+            id="tips-heading"
             eyebrow="Getting the most out of it"
             title="A few things that actually matter."
           />
@@ -1103,10 +1103,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== WHAT THE SKILL DOES (compressed showcase) ========== */}
-      <section data-section="showcase" className="pb-10 md:pb-14">
+      <section id="showcase" data-section="showcase" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="showcase"
+            id="showcase-heading"
             eyebrow="What you get"
             title="What the skill actually does for you."
           />
@@ -1183,10 +1183,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== VERIFICATION + ATTORNEY HANDOFF (hgjp.18) ========== */}
-      <section data-section="attorney" className="pb-10 md:pb-14">
+      <section id="attorney" data-section="attorney" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="attorney"
+            id="attorney-heading"
             eyebrow="Handing off"
             title="The attorney still signs the documents."
           />
@@ -1229,10 +1229,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== FAQ (hgjp.37) ========== */}
-      <section data-section="faq" className="pb-10 md:pb-14">
+      <section id="faq" data-section="faq" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="faq"
+            id="faq-heading"
             eyebrow="FAQ"
             title="Questions you are about to ask."
           />
