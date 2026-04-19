@@ -86,7 +86,7 @@ Those are not "gotcha" questions. They are the real work.
 
 Treat the first run as the rough draft.
 
-- Second run: start a fresh session in the same folder and say, "audit the wills-estate-plan you produced last time."
+- Second run: start a fresh session in the same folder and say, "audit the estate-planning packet you produced last time."
 - The skill will review its own work, catch missing facts, and flag weak spots.
 - Commit to at least two passes.
 
@@ -216,7 +216,7 @@ Bad:
 
 ## One more thing
 
-The frontier-model subscription is probably the best $100 per month you will spend this year.
+The frontier-model subscription is probably one of the best $100-$200 per month tools you will buy this year.
 
 While you have it, it can also help you:
 
