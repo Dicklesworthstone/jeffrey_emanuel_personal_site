@@ -598,10 +598,10 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== HOOK + COST TABLE ========== */}
-      <section data-section="cost" className="pb-10 md:pb-14">
+      <section id="cost" data-section="cost" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="cost"
+            id="cost-heading"
             eyebrow="The pitch"
             title="One weekend, roughly $120, instead of $20,000."
           />
