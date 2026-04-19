@@ -67,7 +67,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     upsertWritingPage(`/writing/${String(post.slug)}`, post.date);
   });
 
-  writingHighlights.forEach((item) => {
+  writingHighlights.filter((item) => !item.draft).forEach((item) => {
     if (item.href.startsWith("/writing/")) {
       upsertWritingPage(item.href, item.date);
     }

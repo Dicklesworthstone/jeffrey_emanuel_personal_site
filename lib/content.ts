@@ -1996,6 +1996,7 @@ export type WritingItem = {
   date: string; // ISO 8601 date string (YYYY-MM-DD)
   featured?: boolean;
   gradient?: string;
+  draft?: boolean;
 };
 
 export type MediaItem = {
@@ -2224,6 +2225,18 @@ export const threads: ThreadItem[] = [
 ];
 
 export const writingHighlights: WritingItem[] = [
+  {
+    title: "An AI Skill for Wills & Estate Planning",
+    href: "/writing/wills-and-estate-planning",
+    source: "Blog",
+    category: "AI Agents & Law",
+    blurb:
+      "A Claude Code / Codex skill that conducts a structured estate-planning intake — twelve axioms, nine phases, seventy-six jargon tooltips — and produces an attorney-ready handoff package.",
+    date: "2026-04-19",
+    featured: true,
+    draft: true,
+    gradient: "from-emerald-500/20 via-teal-500/20 to-cyan-500/20",
+  },
   {
     title: "Using AI Agents and Skills to Migrate Off Slack",
     href: "/writing/slack-mattermost-migration",

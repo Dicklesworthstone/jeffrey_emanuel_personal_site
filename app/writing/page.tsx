@@ -56,7 +56,7 @@ export default function WritingPage() {
     }
   });
 
-  const mergedItems = Array.from(itemsByHref.values());
+  const mergedItems = Array.from(itemsByHref.values()).filter((item) => !item.draft);
 
   // Get featured items
   const featured = mergedItems.filter((item) => item.featured)

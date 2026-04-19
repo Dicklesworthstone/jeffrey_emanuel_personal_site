@@ -212,7 +212,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     });
 
     // Featured Writing (Keep these as they are high priority)
-    writingHighlights.forEach((item) => {
+    writingHighlights.filter((item) => !item.draft).forEach((item) => {
       cmds.push({
         id: toCommandId("writing", item.title),
         title: item.title,
