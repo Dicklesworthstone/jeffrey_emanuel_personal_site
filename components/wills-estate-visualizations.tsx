@@ -762,13 +762,11 @@ export function AxiomCoherenceViz() {
                         }}
                         transition={transition}
                       />
-                      <motion.circle
+                      <circle
                         cx={spoke.x}
                         cy={spoke.y}
                         r={mismatched ? 2.5 : 2}
                         fill={mismatched ? "rgba(251, 113, 133, 0.95)" : "rgba(52, 211, 153, 0.9)"}
-                        animate={{ r: mismatched ? 2.6 : 2 }}
-                        transition={transition}
                       />
                     </motion.g>
                   );
