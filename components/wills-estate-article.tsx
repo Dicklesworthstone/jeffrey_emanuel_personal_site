@@ -726,7 +726,7 @@ export function WillsEstateArticle() {
       <Divider />
 
       {/* ========== INSTALL (hgjp.11) ========== */}
-      <section id="install" data-section="install" className="pb-10 md:pb-14">
+      <section data-section="install" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="install"
@@ -883,7 +883,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== WHO THIS IS FOR (hgjp.12) ========== */}
-      <section id="who" data-section="who" className="pb-10 md:pb-14">
+      <section data-section="who" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="who"
@@ -1005,7 +1005,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== CORE INSIGHT (hgjp.13) ========== */}
-      <section id="insight" data-section="insight" className="pb-10 md:pb-14">
+      <section data-section="insight" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="insight"
@@ -1143,7 +1143,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== SAMPLE SESSION / INTAKE (hgjp.14) ========== */}
-      <section id="intake" data-section="intake" className="pb-10 md:pb-14">
+      <section data-section="intake" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="intake"
@@ -1405,7 +1405,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== WHAT THE SKILL PRODUCES (hgjp.15) ========== */}
-      <section id="produces" data-section="produces" className="pb-10 md:pb-14">
+      <section data-section="produces" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="produces"
@@ -1516,7 +1516,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== 9-STEP WORKFLOW (hgjp.16) ========== */}
-      <section id="workflow" data-section="workflow" className="pb-10 md:pb-14">
+      <section data-section="workflow" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="workflow"
@@ -1652,7 +1652,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== ANTI-PATTERNS (hgjp.17) ========== */}
-      <section id="anti" data-section="anti" className="pb-10 md:pb-14">
+      <section data-section="anti" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="anti"
@@ -1691,7 +1691,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== VERIFICATION + ATTORNEY HANDOFF (hgjp.18) ========== */}
-      <section id="attorney" data-section="attorney" className="pb-10 md:pb-14">
+      <section data-section="attorney" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="attorney"
@@ -1953,7 +1953,7 @@ jsm install wills-and-estate-planning-skill`}
       <Divider />
 
       {/* ========== FAQ (hgjp.37) ========== */}
-      <section id="faq" data-section="faq" className="pb-10 md:pb-14">
+      <section data-section="faq" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
             id="faq"
