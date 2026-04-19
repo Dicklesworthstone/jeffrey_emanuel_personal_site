@@ -1946,7 +1946,7 @@ export function DeliverablesTreeViz() {
     deliverables: true,
   });
   const treeItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.24, ease: "easeOut" as const };
+  const transition = prefersReducedMotion ? { duration: 0 } : { type: "spring" as const, stiffness: 260, damping: 26 };
 
   const normalizedQuery = query.trim().toLowerCase();
   const filteredLeaves = useMemo(
