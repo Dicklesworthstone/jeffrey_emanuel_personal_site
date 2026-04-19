@@ -14,6 +14,7 @@ const VIZ_SKELETON_HEIGHTS = {
   "pricing-comparison": "min-h-[56rem] md:min-h-[44rem]",
   "install-flow": "min-h-[36rem] md:min-h-[32rem]",
   "working-folder": "min-h-[48rem] md:min-h-[44rem]",
+  stack: "min-h-[26rem] md:min-h-[24rem]",
 } as const;
 
 function getVizHeightClass(vizId: string) {
@@ -160,4 +161,15 @@ export const WorkingFolderViz = withErrorBoundary(
     { ssr: false, loading: () => <VizSkeleton vizId="working-folder" /> },
   ),
   "working-folder",
+);
+
+export const StackViz = withErrorBoundary(
+  dynamic(
+    () =>
+      import("./wills-estate-visualizations").then((m) => ({
+        default: m.StackViz,
+      })),
+    { ssr: false, loading: () => <VizSkeleton vizId="stack" /> },
+  ),
+  "stack",
 );

@@ -22,6 +22,7 @@ const VIZ_IDS = [
   "pricing-comparison",
   "install-flow",
   "working-folder",
+  "stack",
 ];
 const VIZ_LOAD_MARKERS: Record<(typeof VIZ_IDS)[number], RegExp> = {
   "tier-triage": /Five wealth tiers, with complexity layered on top/i,
@@ -31,6 +32,7 @@ const VIZ_LOAD_MARKERS: Record<(typeof VIZ_IDS)[number], RegExp> = {
   "pricing-comparison": /Pricing Reality Check/i,
   "install-flow": /./,
   "working-folder": /./,
+  stack: /./,
 };
 
 const KNOWN_A11Y_RULES = ["color-contrast"];

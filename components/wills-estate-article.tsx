@@ -34,6 +34,7 @@ import {
   PricingComparisonViz,
   InstallFlowViz,
   WorkingFolderViz,
+  StackViz,
 } from "./viz-error-boundary";
 
 // Fonts — the editorial system shared across this site's long-form articles
@@ -795,24 +796,7 @@ export function WillsEstateArticle() {
             papers.
           </p>
 
-          <div
-            data-viz="stack"
-            className="my-8 rounded-3xl border border-white/10 bg-gradient-to-br from-purple-500/[0.04] via-cyan-500/[0.04] to-emerald-500/[0.04] p-6 md:p-8 backdrop-blur-xl"
-          >
-            <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
-              The stack
-            </p>
-            <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-              <strong>Frontier model</strong> (Claude Opus, GPT-5): the
-              brain. <strong>Desktop app</strong> (Claude Code or Codex
-              Desktop): the hands — can open files, save drafts, read
-              documents you drop into a folder.{" "}
-              <strong>Skill package</strong>: the expertise — loads the
-              estate-planning methodology into the agent&apos;s context on
-              demand. <strong>Your folder</strong>: the workspace — where
-              every document the skill produces lives on your computer.
-            </p>
-          </div>
+          <StackViz />
         </EC>
       </section>
 
