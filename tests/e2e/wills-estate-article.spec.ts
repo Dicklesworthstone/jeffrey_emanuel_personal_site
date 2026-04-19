@@ -23,6 +23,16 @@ const VIZ_IDS = [
   "deliverables-tree",
   "anti-pattern-cards",
 ];
+const VIZ_LOAD_MARKERS: Record<(typeof VIZ_IDS)[number], RegExp> = {
+  "tier-triage": /Five wealth tiers, with complexity layered on top/i,
+  "axiom-coherence":
+    /One story across every document, or a plan that quietly breaks/i,
+  "intake-phases":
+    /The nine-phase intake flow, synced to the Maya walkthrough/i,
+  "deliverables-tree":
+    /Forty-five artifacts, organized like a real project directory/i,
+  "anti-pattern-cards": /The patterns the skill is designed to catch/i,
+};
 
 const KNOWN_A11Y_RULES = ["color-contrast"];
 const IGNORED_BROWSER_ERRORS = [
@@ -72,6 +82,14 @@ async function expectInViewport(page: Page, selector: string) {
   });
 
   expect(visible).toBe(true);
+}
+
+async function expectVisualizationLoaded(page: Page, vizId: (typeof VIZ_IDS)[number]) {
+  const viz = page.locator(`[data-viz="${vizId}"]`);
+  await viz.scrollIntoViewIfNeeded();
+  await expect(viz).toBeVisible({ timeout: 15_000 });
+  await expect(viz).not.toContainText("Visualization failed to load");
+  await expect(viz).toContainText(VIZ_LOAD_MARKERS[vizId], { timeout: 15_000 });
 }
 
 test.describe("Wills & Estate Planning Article", () => {
@@ -168,10 +186,7 @@ test.describe("Wills & Estate Planning Article", () => {
 
     for (const vizId of VIZ_IDS) {
       logStep(scenario, `assert ${vizId}`);
-      const viz = page.locator(`[data-viz="${vizId}"]`);
-      await viz.scrollIntoViewIfNeeded();
-      await expect(viz).toBeVisible({ timeout: 15_000 });
-      await expect(viz).not.toContainText("Visualization failed to load");
+      await expectVisualizationLoaded(page, vizId);
     }
 
     runtime.assertClean();
@@ -297,10 +312,7 @@ test.describe("Wills & Estate Planning Article", () => {
 
       for (const vizId of VIZ_IDS) {
         logStep(scenario, `assert ${vizId}`);
-        const viz = page.locator(`[data-viz="${vizId}"]`);
-        await viz.scrollIntoViewIfNeeded();
-        await expect(viz).toBeVisible({ timeout: 15_000 });
-        await expect(viz).not.toContainText("Visualization failed to load");
+        await expectVisualizationLoaded(page, vizId);
       }
 
       runtime.assertClean();
