@@ -1,5 +1,5 @@
 import { notFound, permanentRedirect } from "next/navigation";
-import { getAllPostsMeta, getPostBySlug } from "@/lib/mdx";
+import { getAllPostsMeta, getPostBySlug, isDraftPost } from "@/lib/mdx";
 import MarkdownRenderer from "@/components/markdown-renderer";
 import ArticleProgress from "@/components/article-progress";
 import TableOfContents from "@/components/table-of-contents";
@@ -54,6 +54,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       alternates: {
         canonical: `/writing/${canonicalSlug}`,
       },
+      ...(isDraftPost(post) && {
+        robots: {
+          index: false,
+          follow: false,
+        },
+      }),
     };
   } catch {
     notFound();

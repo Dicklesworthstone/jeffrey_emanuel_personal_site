@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getAllPosts } from "@/lib/mdx";
+import { getPublishedPosts } from "@/lib/mdx";
 
 export const dynamic = "force-static";
 
 export async function GET() {
-  const posts = getAllPosts();
+  const posts = getPublishedPosts();
   
   // Create a lightweight index for search
   const searchIndex = posts.map((post) => {

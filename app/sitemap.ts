@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getAllPostsMeta } from '@/lib/mdx';
+import { getPublishedPostsMeta } from '@/lib/mdx';
 import { navItems, getProjectSlugs, writingHighlights } from '@/lib/content';
 
 const DEFAULT_SITE_ORIGIN = "https://jeffreyemanuel.com";
@@ -63,7 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   };
 
-  getAllPostsMeta().forEach((post) => {
+  getPublishedPostsMeta().forEach((post) => {
     upsertWritingPage(`/writing/${String(post.slug)}`, post.date);
   });
 

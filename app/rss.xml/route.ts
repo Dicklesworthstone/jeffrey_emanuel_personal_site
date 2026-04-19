@@ -1,6 +1,6 @@
 import { Feed } from "feed";
 import { writingHighlights, siteConfig } from "@/lib/content";
-import { getAllPostsMeta } from "@/lib/mdx";
+import { getPublishedPostsMeta } from "@/lib/mdx";
 
 const DEFAULT_SITE_ORIGIN = "https://jeffreyemanuel.com";
 
@@ -105,7 +105,7 @@ export async function GET() {
     });
   };
 
-  getAllPostsMeta().forEach((post) => {
+  getPublishedPostsMeta().forEach((post) => {
     const path = normalizeWritingPath(`/writing/${String(post.slug)}`);
     const link = toAbsoluteUrl(path, origin);
     upsertItem({

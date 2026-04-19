@@ -58,8 +58,19 @@ export type Post = {
   source?: string;
   featured?: boolean;
   gradient?: string;
+  draft?: boolean;
   [key: string]: unknown;
 };
+
+export type PostMeta = Omit<Post, "content">;
+
+function isDraftPostValue(value: unknown): boolean {
+  return value === true;
+}
+
+export function isDraftPost(post: { draft?: unknown } | null | undefined): boolean {
+  return isDraftPostValue(post?.draft);
+}
 
 export function getPostSlugs() {
   if (!postsDirectory || !fs.existsSync(postsDirectory)) {
@@ -132,6 +143,10 @@ export function getAllPosts() {
   return posts.sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 
+export function getPublishedPosts() {
+  return getAllPosts().filter((post) => !isDraftPost(post));
+}
+
 /**
  * Get all posts with metadata only (no content body).
  * Optimized for listing pages to reduce memory usage and payload size.
@@ -140,7 +155,7 @@ export function getAllPostsMeta() {
   if (!postsDirectory) return [];
   
   const slugs = getPostSlugs();
-  const posts: Omit<Post, "content">[] = [];
+  const posts: PostMeta[] = [];
 
   for (const slug of slugs) {
     try {
@@ -161,11 +176,15 @@ export function getAllPostsMeta() {
         title: data.title || realSlug.replace(/-/g, " "),
         date: safeDate,
         excerpt: getSummaryExcerpt(data),
-      } as Omit<Post, "content">);
+      } as PostMeta);
     } catch (err) {
       console.warn(`[content] Skipping ${slug} meta: ${(err as Error).message}`);
     }
   }
 
   return posts.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+
+export function getPublishedPostsMeta() {
+  return getAllPostsMeta().filter((post) => !isDraftPost(post));
 }
