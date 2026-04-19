@@ -2406,7 +2406,7 @@ export function DeliverablesTreeViz() {
                   <a
                     href={DELIVERABLE_SKILL_CATALOG_HREF}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-300/30 hover:text-cyan-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
                   >
                     View in skill catalog
