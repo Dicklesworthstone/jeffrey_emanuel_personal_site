@@ -4095,7 +4095,6 @@ export function WorkingFolderViz() {
 
   return (
     <section
-      data-viz="working-folder"
       className="overflow-hidden rounded-[32px] border border-cyan-400/20 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.15),_rgba(2,6,23,0.98)_44%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] px-4 py-6 text-white shadow-[0_24px_90px_rgba(2,8,23,0.48)] sm:px-6 sm:py-7 lg:px-8"
       aria-label="Working folder visualization"
     >
@@ -4138,7 +4137,7 @@ export function WorkingFolderViz() {
               </div>
               <div className="ml-1 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-100">
                 <FolderOpen className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>`my-estate-plan/`</span>
+                <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[0.85em]">my-estate-plan/</code>
               </div>
             </div>
 
@@ -4269,7 +4268,7 @@ export function WorkingFolderViz() {
                 <span>Desktop app session</span>
               </div>
               <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.10] px-3 py-1 text-[11px] font-medium text-emerald-100">
-                reading files from `my-estate-plan/`
+                reading files from <code className="rounded bg-white/10 px-1 font-mono">my-estate-plan/</code>
               </span>
             </div>
 
@@ -4360,7 +4359,7 @@ export function WorkingFolderViz() {
               </div>
               <div className="ml-1 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.10] px-3 py-1 text-xs font-medium text-emerald-100">
                 <FolderOpen className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>`my-estate-plan/`</span>
+                <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[0.85em]">my-estate-plan/</code>
               </div>
             </div>
 
