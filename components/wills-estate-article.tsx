@@ -764,6 +764,13 @@ export function WillsEstateArticle() {
             command line, no Homebrew, no package managers, no YAML files.
           </p>
 
+          <p className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-[15px] leading-relaxed text-amber-100">
+            This skill is educational planning support, not legal advice. It
+            does not create an attorney-client relationship, and a licensed
+            estate-planning attorney in your state still needs to review and
+            sign the final documents.
+          </p>
+
           <Sub eyebrow="Path 1">
             In Claude or Codex Desktop (recommended)
           </Sub>
