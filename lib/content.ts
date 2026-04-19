@@ -2234,7 +2234,7 @@ export const writingHighlights: WritingItem[] = [
       "A Claude Code / Codex skill that handles the expensive intake portion of estate planning: four steps to install, one weekend of work, roughly $120, and a structured document package for attorney review.",
     date: "2026-04-19",
     featured: true,
-    draft: true,
+    draft: false,
     gradient: "from-emerald-500/20 via-teal-500/20 to-cyan-500/20",
   },
   {
