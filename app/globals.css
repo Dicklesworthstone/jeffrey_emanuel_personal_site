@@ -3030,21 +3030,6 @@ select:focus-visible {
   scroll-margin-top: 6rem;
 }
 
-/*
-  Reserve enough vertical space for the pricing comparison skeleton so a late
-  dynamic mount above the FAQ section is less likely to push the final TOC
-  anchor back below the fold after hash navigation.
-*/
-.sm-scope [data-viz="pricing-comparison"] [role="status"] {
-  min-height: 56rem;
-}
-
-@media (min-width: 768px) {
-  .sm-scope [data-viz="pricing-comparison"] [role="status"] {
-    min-height: 44rem;
-  }
-}
-
 /* Range slider */
 .sm-scope .sm-range {
   -webkit-appearance: none;
