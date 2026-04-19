@@ -65,7 +65,15 @@ export type Post = {
 export type PostMeta = Omit<Post, "content">;
 
 function isDraftPostValue(value: unknown): boolean {
-  return value === true;
+  if (value === true) {
+    return true;
+  }
+
+  if (typeof value === "string") {
+    return value.trim().toLowerCase() === "true";
+  }
+
+  return false;
 }
 
 export function isDraftPost(post: { draft?: unknown } | null | undefined): boolean {
@@ -120,6 +128,7 @@ export const getPostBySlug = cache((slug: string) => {
     title: data.title || realSlug.replace(/-/g, " "),
     date: safeDate,
     excerpt: getSummaryExcerpt(data),
+    draft: isDraftPostValue(data.draft),
     content: content,
   };
 
@@ -176,6 +185,7 @@ export function getAllPostsMeta() {
         title: data.title || realSlug.replace(/-/g, " "),
         date: safeDate,
         excerpt: getSummaryExcerpt(data),
+        draft: isDraftPostValue(data.draft),
       } as PostMeta);
     } catch (err) {
       console.warn(`[content] Skipping ${slug} meta: ${(err as Error).message}`);
