@@ -1462,6 +1462,27 @@ const DELIVERABLE_MODE_FILTERS: Array<{ id: "all" | DeliverableMode; label: stri
   { id: "maintenance-review", label: "Maintenance" },
 ];
 
+const DELIVERABLE_SKILL_CATALOG_HREF =
+  "https://jeffreys-skills.md/skills/wills-and-estate-planning-skill";
+
+function summarizeDeliverableModes(modes: DeliverableMode[]) {
+  const specificModes = modes.filter((mode) => mode !== "core");
+
+  if (specificModes.length === 0) {
+    return null;
+  }
+
+  const [firstMode, ...otherModes] = specificModes;
+
+  return {
+    label:
+      otherModes.length === 0
+        ? `Mode: ${DELIVERABLE_MODE_LABELS[firstMode]}`
+        : `Mode: ${DELIVERABLE_MODE_LABELS[firstMode]} +${otherModes.length}`,
+    title: specificModes.map((mode) => DELIVERABLE_MODE_LABELS[mode]).join(", "),
+  };
+}
+
 const deliverableTreeLeaves: DeliverableLeaf[] = [
   {
     folder: "intake",
