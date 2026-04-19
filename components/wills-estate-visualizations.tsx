@@ -12,8 +12,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowDown,
   ArrowRight,
   Baby,
+  BookOpen,
   Brain,
   BriefcaseBusiness,
   Building2,
@@ -4468,6 +4470,264 @@ export function WorkingFolderViz() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function StackViz() {
+  const prefersReducedMotion = useReducedMotion();
+  const [previewCardId, setPreviewCardId] = useState<"agent" | "skill" | "docs" | null>(null);
+  const [expandedCardId, setExpandedCardId] = useState<"agent" | "skill" | "docs" | null>(null);
+  const activeCardId = previewCardId ?? expandedCardId;
+  const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" as const };
+
+  const stackCards = [
+    {
+      id: "agent" as const,
+      eyebrow: "Agent",
+      title: "Frontier model",
+      helper: "The smart apprentice",
+      detail:
+        "Your $100/mo Claude Max or GPT Pro subscription. You do not need to guess perfectly; running both catches more edge cases.",
+      icon: <Brain className="h-5 w-5" aria-hidden="true" />,
+      accent: "border-sky-300/25 bg-sky-400/[0.08]",
+      badge: "border-sky-300/20 bg-sky-400/10 text-sky-100",
+      renderBody: (
+        <div className="grid gap-2">
+          {["Claude Opus", "Claude Sonnet", "GPT-5"].map((model) => (
+            <div
+              key={model}
+              className="rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100"
+            >
+              {model}
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "skill" as const,
+      eyebrow: "Skill",
+      title: "Wills & Estate Planning skill",
+      helper: "Domain expertise + workflow, pre-loaded",
+      detail:
+        "The skill carries the planning kernel, operating sequence, intake rhythm, and reference corpus so the model behaves like a prepared operator instead of a blank chatbot.",
+      icon: <BookOpen className="h-5 w-5" aria-hidden="true" />,
+      accent: "border-emerald-300/25 bg-emerald-400/[0.08]",
+      badge: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
+      renderBody: (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {[
+            { label: "Kernel", icon: <Shield className="h-4 w-4" aria-hidden="true" /> },
+            { label: "Operators", icon: <GitBranch className="h-4 w-4" aria-hidden="true" /> },
+            { label: "Intake phases", icon: <MapPinned className="h-4 w-4" aria-hidden="true" /> },
+            { label: "Reference corpus", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-emerald-100">
+                {item.icon}
+              </span>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "docs" as const,
+      eyebrow: "Your docs",
+      title: "Your working folder",
+      helper: "The stuff only you have",
+      detail:
+        "This is the private working folder the agent reads from: the statements, IDs, policies, and edge-case facts nobody else can infer for you.",
+      icon: <FolderOpen className="h-5 w-5" aria-hidden="true" />,
+      accent: "border-violet-300/25 bg-violet-400/[0.08]",
+      badge: "border-violet-300/20 bg-violet-400/10 text-violet-100",
+      renderBody: (
+        <div className="space-y-2">
+          {[
+            { label: "Tax return", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
+            { label: "401(k) statement", icon: <Landmark className="h-4 w-4" aria-hidden="true" /> },
+            { label: "Insurance policy", icon: <ShieldCheck className="h-4 w-4" aria-hidden="true" /> },
+            { label: "Passport", icon: <Globe className="h-4 w-4" aria-hidden="true" /> },
+            { label: "Crypto seed", icon: <Lock className="h-4 w-4" aria-hidden="true" /> },
+          ].map((item, index) => (
+            <div
+              key={item.label}
+              className={cn(
+                "flex items-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100",
+                index > 0 && "ml-3",
+              )}
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-violet-100">
+                {item.icon}
+              </span>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
+  const setPreview = (cardId: "agent" | "skill" | "docs") => {
+    setPreviewCardId(cardId);
+  };
+
+  const clearPreview = (cardId: "agent" | "skill" | "docs") => {
+    setPreviewCardId((current) => (current === cardId && expandedCardId !== cardId ? null : current));
+  };
+
+  const toggleExpanded = (cardId: "agent" | "skill" | "docs") => {
+    setExpandedCardId((current) => (current === cardId ? null : cardId));
+    setPreviewCardId(cardId);
+  };
+
+  return (
+    <section
+      aria-label="Agent, skill, and your documents combine into a complete estate plan package"
+      className="relative overflow-hidden rounded-[28px] border border-white/10 bg-slate-950 shadow-[0_24px_90px_rgba(0,0,0,0.28)] ring-1 ring-white/10"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.08),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_34%)]" />
+      <div className="relative space-y-6 p-5 md:p-7">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-100">
+            <Layers3 className="h-3.5 w-3.5" aria-hidden="true" />
+            Agent + Skill Stack
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-semibold tracking-tight text-white md:text-[2rem]">
+              Agent + skill + your documents become one working estate-planning stack
+            </h3>
+            <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
+              The model brings reasoning, the skill brings the domain method, and your folder brings the facts. The output is a package your attorney can review and sign.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          {stackCards.map((card, index) => {
+            const isActive = activeCardId === card.id;
+            const isExpanded = expandedCardId === card.id;
+            const isDimmed = Boolean(activeCardId) && activeCardId !== card.id;
+
+            return (
+              <div key={card.id} role="group" aria-label={`${card.eyebrow} column`} className="space-y-3">
+                <motion.button
+                  type="button"
+                  aria-label={`${card.title}. ${card.helper}`}
+                  aria-expanded={isExpanded}
+                  onMouseEnter={() => setPreview(card.id)}
+                  onMouseLeave={() => clearPreview(card.id)}
+                  onFocus={() => setPreview(card.id)}
+                  onBlur={() => clearPreview(card.id)}
+                  onClick={() => toggleExpanded(card.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleExpanded(card.id);
+                    }
+                  }}
+                  initial={false}
+                  animate={
+                    prefersReducedMotion
+                      ? undefined
+                      : {
+                          opacity: isDimmed ? 0.56 : 1,
+                        }
+                  }
+                  transition={transition}
+                  className={cn(
+                    "w-full rounded-[24px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+                    card.accent,
+                    isActive || isExpanded ? "shadow-[0_18px_44px_rgba(15,23,42,0.5)]" : "border-white/10 bg-white/[0.03]",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold", card.badge)}>
+                        {card.eyebrow}
+                      </span>
+                      <h4 className="mt-3 text-xl font-semibold text-white">{card.title}</h4>
+                      <p className="mt-2 text-sm leading-6 text-slate-300">{card.helper}</p>
+                    </div>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-white">
+                      {card.icon}
+                    </span>
+                  </div>
+
+                  <div className="mt-4">{card.renderBody}</div>
+
+                  <AnimatePresence initial={false}>
+                    {isActive || isExpanded ? (
+                      <motion.p
+                        initial={prefersReducedMotion ? false : { opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                        transition={transition}
+                        className="mt-4 rounded-2xl border border-white/10 bg-black/25 px-3 py-3 text-sm leading-6 text-slate-200"
+                      >
+                        {card.detail}
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
+                </motion.button>
+
+                {index < stackCards.length - 1 ? (
+                  <div className="flex justify-center sm:hidden">
+                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-300">
+                      <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                      feeds the package
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="relative hidden h-16 sm:block" aria-hidden="true">
+          <div className="absolute left-[16.66%] top-0 h-8 w-px -translate-x-1/2 bg-white/15" />
+          <div className="absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 bg-white/15" />
+          <div className="absolute left-[83.33%] top-0 h-8 w-px -translate-x-1/2 bg-white/15" />
+          <div className="absolute left-[16.66%] right-[16.66%] top-8 h-px bg-white/15" />
+          <div className="absolute left-1/2 top-8 h-8 w-px -translate-x-1/2 bg-white/15" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-white/[0.04] p-2 text-slate-200">
+            <ArrowDown className="h-4 w-4" aria-hidden="true" />
+          </div>
+        </div>
+
+        <div className="flex justify-center sm:hidden" aria-hidden="true">
+          <div className="rounded-full border border-white/10 bg-white/[0.04] p-2 text-slate-200">
+            <ArrowDown className="h-4 w-4" aria-hidden="true" />
+          </div>
+        </div>
+
+        <div className="rounded-[26px] border border-emerald-300/20 bg-emerald-400/[0.08] p-5 md:p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-100">Output package</p>
+              <p className="text-2xl font-semibold text-white">Complete estate plan package — ready for your attorney to sign</p>
+              <p className="max-w-3xl text-sm leading-7 text-slate-100/90">
+                Intake outputs, planning recommendations, file requests, and document-ready instructions land in one folder so counsel can review substance instead of reconstructing your facts from scratch.
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {["Working checklist", "Fact pattern summary", "Draft package", "Attorney review handoff"].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
