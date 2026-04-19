@@ -269,6 +269,23 @@ test.describe("Wills & Estate Planning Article", () => {
     const scenario = "pricing-calc";
     const runtime = captureRuntimeErrors(page);
 
+    await page.addInitScript(() => {
+      const pricingWindow = window as Window & {
+        __pricingCalcEvents?: Array<{ net_worth_bucket: string; num_chips: number }>;
+      };
+      pricingWindow.__pricingCalcEvents = [];
+
+      const originalInfo = console.info.bind(console);
+      console.info = (...args) => {
+        if (args[0] === "[pricing_calc_changed]" && args[1] && typeof args[1] === "object") {
+          pricingWindow.__pricingCalcEvents?.push(
+            args[1] as { net_worth_bucket: string; num_chips: number },
+          );
+        }
+        originalInfo(...args);
+      };
+    });
+
     await visitArticle(page, scenario);
 
     const viz = page.locator('[data-viz="pricing-comparison"]');
@@ -277,6 +294,8 @@ test.describe("Wills & Estate Planning Article", () => {
 
     logStep(scenario, "assert default attorney estimate");
     await expect(viz.getByText("$3,000")).toBeVisible();
+    const slider = viz.getByRole("slider");
+    await expect(slider).toHaveAttribute("aria-valuetext", "$1,000,000");
 
     logStep(scenario, "toggle complexity chip");
     const blendedChip = viz.getByRole("button", { name: /blended family/i });
@@ -285,14 +304,47 @@ test.describe("Wills & Estate Planning Article", () => {
 
     logStep(scenario, "assert estimate increases with chip");
     await expect(viz.getByText("$5,000")).toBeVisible();
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const pricingWindow = window as Window & {
+          __pricingCalcEvents?: Array<{ net_worth_bucket: string; num_chips: number }>;
+        };
+        return pricingWindow.__pricingCalcEvents?.length ?? 0;
+      });
+    }).toBe(1);
 
     logStep(scenario, "move slider to high end");
-    const slider = viz.getByRole("slider");
-    await slider.fill("80");
-    await expect(viz.getByText(/\$[1-9]\d{0,2},\d{3}/)).toBeVisible();
+    await slider.evaluate((input, value) => {
+      const range = input as HTMLInputElement;
+      range.value = value;
+      range.dispatchEvent(new Event("input", { bubbles: true }));
+      range.dispatchEvent(new Event("change", { bubbles: true }));
+    }, "80");
+    await expect(slider).toHaveAttribute("aria-valuetext", "$25,100,000");
+    await expect(viz.getByText("$6,250")).toBeVisible();
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const pricingWindow = window as Window & {
+          __pricingCalcEvents?: Array<{ net_worth_bucket: string; num_chips: number }>;
+        };
+        return pricingWindow.__pricingCalcEvents?.length ?? 0;
+      });
+    }).toBe(2);
 
     logStep(scenario, "assert savings line visible");
     await expect(viz.getByText(/projected savings/i)).toBeVisible();
+    const pricingEvents = await page.evaluate(() => {
+      const pricingWindow = window as Window & {
+        __pricingCalcEvents?: Array<{ net_worth_bucket: string; num_chips: number }>;
+      };
+      return pricingWindow.__pricingCalcEvents ?? [];
+    });
+    expect(pricingEvents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ net_worth_bucket: "1m-3m", num_chips: 1 }),
+        expect.objectContaining({ net_worth_bucket: "10m-30m", num_chips: 1 }),
+      ]),
+    );
 
     runtime.assertClean();
   });

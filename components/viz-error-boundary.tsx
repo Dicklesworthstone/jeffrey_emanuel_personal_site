@@ -11,7 +11,7 @@ const VIZ_SKELETON_HEIGHTS = {
   "intake-phases": "min-h-[34rem]",
   "deliverables-tree": "min-h-[40rem]",
   "anti-pattern-cards": "min-h-[28rem]",
-  "pricing-comparison": "min-h-[32rem]",
+  "pricing-comparison": "min-h-[48rem] md:min-h-[38rem]",
 } as const;
 
 function getVizHeightClass(vizId: string) {

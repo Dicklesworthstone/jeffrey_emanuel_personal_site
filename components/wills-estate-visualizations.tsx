@@ -2963,6 +2963,7 @@ export function PricingComparisonViz() {
                 step={1}
                 value={sliderValue}
                 aria-label="Estimated net worth"
+                aria-valuetext={formatCurrency(netWorth)}
                 className="sm-range w-full"
                 onChange={(event) => {
                   hasInteractedRef.current = true;
