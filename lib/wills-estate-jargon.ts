@@ -420,7 +420,13 @@ export const jargonDictionary: Record<string, JargonTerm> = {
     short: "A trust designed to legally own regulated firearms (silencers, short-barreled rifles, machine guns) and manage their transfer at death.",
     long: "National Firearms Act items require ATF approval for every transfer — including at death. A gun trust allows multiple trustees to legally possess NFA items, avoids the CLEO notification requirement for each transfer, and provides a clear succession plan. Without a trust, NFA items in a deceased person's collection may need to be surrendered if no one applies for a transfer within a reasonable time.",
     why: "Firearms planning is a specialty overlay. A gun in the home of someone with cognitive decline is a safety crisis, not just an estate-planning issue.",
-    related: ["will"],
+    related: ["will", "nfa"],
+  },
+  nfa: {
+    term: "NFA (National Firearms Act)",
+    short: "The federal law regulating silencers, short-barreled rifles, machine guns, and other restricted weapons — each transfer requires ATF approval.",
+    long: "NFA items are registered to a specific person or trust. Every transfer — including at death — requires ATF Form 4 approval, which can take months. Without a gun trust or a pre-planned transfer strategy, NFA items in a decedent's collection may need to be surrendered. State law may impose additional restrictions.",
+    related: ["nfa-gun-trust"],
   },
   "crypto-seed": {
     term: "Crypto Seed Phrase",
