@@ -77,7 +77,7 @@ function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
         className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/0 via-cyan-500/0 to-emerald-500/0 group-hover:from-purple-500/10 group-hover:via-cyan-500/10 group-hover:to-emerald-500/10 transition-all pointer-events-none"
       />
       <div className="relative flex h-11 w-11 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:bg-cyan-500/20 group-hover:border-cyan-400/40 transition-colors">
-        <FileDown className="w-5 h-5 md:w-6 md:h-6 text-cyan-300" />
+        <FileDown className="w-5 h-5 md:w-6 md:h-6 text-cyan-300" aria-hidden="true" />
       </div>
       <div className="relative text-left min-w-0">
         <p className="text-sm md:text-base font-bold text-white tracking-tight">
@@ -88,7 +88,7 @@ function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
         </p>
       </div>
       <span className="relative ml-1 md:ml-2 inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/15 px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-cyan-200 shrink-0">
-        <FileDown className="w-3 h-3" />
+        <FileDown className="w-3 h-3" aria-hidden="true" />
         .md
       </span>
     </a>
@@ -382,7 +382,7 @@ export function WillsEstateArticle() {
                         : "border-emerald-500/20 bg-emerald-500/5 text-emerald-200"
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-3.5 h-3.5" aria-hidden="true" />
                   {label}
                 </div>
               ))}
@@ -2287,7 +2287,7 @@ jsm install wills-and-estate-planning-skill`}
           <div className="sm-sign-off">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 via-cyan-500/20 to-emerald-500/20 border border-white/10">
-                <Sparkles className="w-4 h-4 text-white" />
+                <Sparkles className="w-4 h-4 text-white" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400">
