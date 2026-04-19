@@ -494,7 +494,7 @@ export function WillsEstateArticle() {
               />
               <Image
                 src={illustration}
-                alt="Warmly-lit desk scene with estate-planning documents, a laptop running an AI agent, and a parrot — evoking an estate plan drafted at home with the help of an AI skill"
+                alt="Warmly-lit desk scene with estate-planning documents, a laptop running an AI agent, and a parrot, evoking an estate plan drafted at home with the help of an AI skill"
                 className="relative z-10 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl"
                 priority
                 placeholder="blur"
@@ -562,7 +562,7 @@ export function WillsEstateArticle() {
             <MarkdownDownloadButton />
             <p className="text-[11px] md:text-xs text-slate-500 font-mono max-w-[560px] leading-relaxed">
               Paste this into Claude, Codex, or ChatGPT and the agent has
-              enough to run a basic estate-planning intake — even without
+              enough to run a basic estate-planning intake, even without
               subscribing to the full skill.
             </p>
           </div>
@@ -593,7 +593,7 @@ export function WillsEstateArticle() {
             told me they saved more than a thousand dollars on their taxes using
             it. One saved twenty thousand. That is on a twenty-dollar-a-month
             subscription. It got me thinking about which other
-            expensive-specialist problems look the same shape as tax prep —
+            expensive-specialist problems look the same shape as tax prep,
             where the billable hours you are paying for are, honestly, mostly
             good questions, patient listening, and a disciplined checklist. The
             replies kept pointing at the same one: writing a will.
@@ -606,7 +606,7 @@ export function WillsEstateArticle() {
             subagents, one hundred thirty-five reference documents covering
             federal and state law through the 2026{" "}
             <J t="obbba">OBBBA</J> exemption changes, and forty-five output
-            templates that together describe a structured project directory —
+            templates that together describe a structured project directory:
             not a will, a whole estate plan. A will is one document in it.
           </p>
 
@@ -731,10 +731,10 @@ export function WillsEstateArticle() {
                 </a>
                 <span className="text-slate-400">
                   {" "}
-                  — the full <Mono>SKILL.md</Mono>, a live visualization of
-                  the architecture, the version history, the release notes,
-                  and the &ldquo;Install in Claude or Codex Desktop&rdquo;
-                  button all live there.
+                  hosts the full <Mono>SKILL.md</Mono>, a live visualization
+                  of the architecture, the version history, the release
+                  notes, and the &ldquo;Install in Claude or Codex
+                  Desktop&rdquo; button.
                 </span>
               </li>
             </ul>
@@ -818,7 +818,7 @@ export function WillsEstateArticle() {
                 </p>
                 <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
                   Two intake files, twenty analyses, twenty-three
-                  deliverables — forty-five structured artifacts in total.
+                  deliverables, for forty-five structured artifacts in total.
                   The contract is enforced:{" "}
                   <Mono>plan-validator.py</Mono> runs as a backstop that
                   checks for untouched starter outputs and missing
@@ -884,10 +884,10 @@ export function WillsEstateArticle() {
                   </span>
                 </p>
                 <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  Every recommendation that depends on volatile law — 2026{" "}
+                  Every recommendation that depends on volatile law (2026{" "}
                   <J t="obbba">OBBBA</J> thresholds, state estate tax rates,
                   execution formalities, <J t="secure-act">Secure Act</J>{" "}
-                  beneficiary rules — is checked against primary sources at
+                  beneficiary rules) is checked against primary sources at
                   session time and logged in{" "}
                   <Mono>analyses/official-source-log.md</Mono>. Plans stay
                   auditable.
@@ -1323,7 +1323,7 @@ export function WillsEstateArticle() {
             Most Americans think estate planning is for rich people. It is
             not. It is for anyone who owns anything, cares about anyone,
             or would prefer a county court not decide what happens to
-            their children. The skill is specifically designed to scale —
+            their children. The skill is specifically designed to scale:
             from a twenty-six-year-old renter with a first job and a
             401(k) through to a hundred-and-fifty-million-dollar
             industrialist with four generations to plan for. The same
@@ -1335,8 +1335,8 @@ export function WillsEstateArticle() {
           <p>
             Tap a rung to see the archetype, the primary goals for that
             tier, and the core documents it typically produces.
-            Default-selected is Tier 2, the modal American reader —
-            homeowner, retirement accounts, minor children — because that
+            Default-selected is Tier 2, the modal American reader
+            (homeowner, retirement accounts, minor children), because that
             is who most of you are.
           </p>
 
@@ -1351,7 +1351,7 @@ export function WillsEstateArticle() {
 
           <ul className="list-disc pl-6 space-y-2 text-slate-300">
             <li>
-              <J t="blended-family">Blended family</J> — stepchildren,
+              <J t="blended-family">Blended family</J>: stepchildren,
               remarriage, children from prior relationships
             </li>
             <li>
@@ -1403,8 +1403,8 @@ export function WillsEstateArticle() {
                 People who want a one-page &ldquo;just write my will&rdquo;
                 experience.
               </strong>{" "}
-              The skill is deliberately thorough — it produces forty-five
-              artifacts — because coordination across documents is the
+              The skill is deliberately thorough, producing forty-five
+              artifacts, because coordination across documents is the
               whole point. If all you want is a single cheap will, buy one
               from LegalZoom and close the tab. You are not being served
               by the skill&apos;s depth if depth is not what you need.
@@ -1473,7 +1473,7 @@ export function WillsEstateArticle() {
             beneficiary forms on every retirement account and insurance policy,
             your deed titling on every piece of property, your durable and
             healthcare <J t="poa">POAs</J>, your letter of instruction, and
-            your digital inventory — all of them have to point at the same
+            your digital inventory. All of them have to point at the same
             people, in the same shares, under the same contingencies, under the
             same state&apos;s law. Silos produce the deepest failures, and most
             plans have silos.
@@ -1489,7 +1489,7 @@ export function WillsEstateArticle() {
             institution will ask a slightly different question. Each will accept
             a slightly different document as proof. The skill&apos;s main job
             is to make sure that the answer they get from your paperwork, and
-            the answer from the one you told at the kitchen table, line up — so
+            the answer from the one you told at the kitchen table, line up, so
             your spouse is not spending six months learning{" "}
             <J t="probate">probate</J> law at the worst possible time.
           </p>
@@ -1518,7 +1518,7 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
-            <strong>Axiom 2 — plan for incapacity first, death second.</strong>
+            <strong>Axiom 2: plan for incapacity first, death second.</strong>
             {" "}Dementia, stroke, coma, and severe mental illness affect more
             families than sudden death does, and they last longer. The default
             incapacity package is a <J t="durable-poa">durable financial
@@ -1532,14 +1532,14 @@ export function WillsEstateArticle() {
 
           <p>
             <strong>
-              Axiom 5 — under the 2026 fifteen-million exemption, basis often
+              Axiom 5: under the 2026 fifteen-million exemption, basis often
               dominates tax.
             </strong>
             {" "}Most families are below the federal estate tax threshold and
             have no good reason to gift appreciated assets out of the estate
             during their lifetime. Doing so trades the{" "}
-            <J t="step-up-basis">step-up in basis</J> at death — which is
-            free — for a transfer-tax saving the estate would not have owed in
+            <J t="step-up-basis">step-up in basis</J> at death (which is
+            free) for a transfer-tax saving the estate would not have owed in
             the first place. A surprising number of expensive estate plans
             written between 2017 and 2022 still live by the old playbook of
             aggressive lifetime gifting. Under current law, that is often
@@ -1548,7 +1548,7 @@ export function WillsEstateArticle() {
 
           <p>
             <strong>
-              Axiom 10 — communication is the actual work.
+              Axiom 10: communication is the actual work.
             </strong>
             {" "}Legal documents are the deliverable. Family conversations are
             the plan. Surprise at the reading of the will is one of the fastest
@@ -1616,7 +1616,7 @@ export function WillsEstateArticle() {
               Maya types: &ldquo;I want to update my will. We moved from
               California to New York three years ago and I never changed it.
               Also Karl and I got married two years ago and I haven&apos;t
-              fixed anything.&rdquo; The agent asks her why now, specifically —
+              fixed anything.&rdquo; The agent asks her why now, specifically:
               what triggered this, what she is worried about. She says her
               younger sister was diagnosed with early-onset Alzheimer&apos;s
               last month and it spooked her. The agent marks the session as
@@ -1636,7 +1636,7 @@ export function WillsEstateArticle() {
               Maya&apos;s sister (now relevant for{" "}
               <J t="poa">POA</J> naming). Her mother has passed; father in
               assisted living in Virginia, cognitively intact. The agent asks,
-              gently, about relationships — does Theo&apos;s recovery affect
+              gently, about relationships. Does Theo&apos;s recovery affect
               how Maya wants distributions to flow? She thinks for a long time
               and says yes, she is afraid a sudden large inheritance could
               destabilize him. She mentions that her first husband died three
@@ -1653,7 +1653,7 @@ export function WillsEstateArticle() {
               with the agent&apos;s help, section by section. The Westchester
               house is{" "}
               <J t="tenancy-by-entirety">tenancy by the entirety</J> with
-              Karl. The Palm Beach condo is in Maya&apos;s name alone —
+              Karl. The Palm Beach condo is in Maya&apos;s name alone:
               inherited, never retitled. She has a rollover IRA at Fidelity, a
               401(k) from her employer, a joint taxable brokerage with Karl, a
               529 for a nephew, and the Bitcoin in a Ledger hardware wallet.
@@ -1685,7 +1685,7 @@ export function WillsEstateArticle() {
               Every account gets one row in{" "}
               <Mono>beneficiary-form-audit.md</Mono>. Who is named now; who
               should be named; the delta. Maya&apos;s rollover IRA still names
-              her mother as primary beneficiary — her mother died four years
+              her mother as primary beneficiary. Her mother died four years
               ago, which makes the{" "}
               <J t="contingent-beneficiary">contingent</J> (her brother) the
               actual taker unless she updates. Maya is mortified. She had not
@@ -1717,8 +1717,8 @@ export function WillsEstateArticle() {
               beneficiary, because Hannah has her mother&apos;s family money
               already. The agent writes this down verbatim in Maya&apos;s own
               words, both for the Letter of Wishes and for the Litigation Risk
-              memo — because unequal treatment of step-children is one of the
-              top drivers of contested estates, and the honest explanation from
+              memo. Unequal treatment of step-children is one of the top
+              drivers of contested estates, and the honest explanation from
               the person themselves is the strongest defense.
             </p>
           </span>
@@ -1731,9 +1731,9 @@ export function WillsEstateArticle() {
               infantilized. That Julia and Hannah be treated fairly but not
               identically. That the parrot Sylvan be cared for by Theo as long
               as Theo is stable, with a pet-trust backup to a sanctuary if
-              Theo ever relapses. That the Palm Beach condo stay in the family
-              &ldquo;but not become a thing we fight about&rdquo; — the agent
-              notes this, and flags <Mono>lumpy-asset-division</Mono> for the
+              Theo ever relapses. That the Palm Beach condo stay in the family,
+              &ldquo;but not become a thing we fight about&rdquo;; the agent
+              notes this and flags <Mono>lumpy-asset-division</Mono> for the
               design phase. That Karl&apos;s business interests not be forced
               into a distress sale at the worst possible time if he dies first.
               That her father, in assisted living in Virginia, be looked after
@@ -1746,16 +1746,16 @@ export function WillsEstateArticle() {
           <span data-intake-phase="7">
             <Sub eyebrow="Phase 7">Incapacity and end-of-life (10 min)</Sub>
             <p>
-              This is the phase that was most urgent for her coming in — her
+              This is the phase that was most urgent for her coming in: her
               sister&apos;s diagnosis. The agent walks her through{" "}
               <J t="durable-poa">durable financial POA</J>,{" "}
               <J t="healthcare-proxy">healthcare POA</J>,{" "}
               <J t="living-will">living will</J>,{" "}
               <J t="hipaa">HIPAA authorization</J>. She picks Karl as primary
               agent for all of them, with her brother as successor. It asks
-              about <J t="ulysses-clause">Ulysses-clause</J> considerations —
-              advance directives that bind future her in the event of capacity
-              loss — and she chooses to add one specifying that if she ever
+              about <J t="ulysses-clause">Ulysses-clause</J> considerations
+              (advance directives that bind future her in the event of capacity
+              loss), and she chooses to add one specifying that if she ever
               develops cognitive decline similar to her sister&apos;s, her
               healthcare agent may admit her to a memory-care facility against
               her future objection. This is a heavy decision and she says so.
@@ -1810,7 +1810,7 @@ export function WillsEstateArticle() {
             Inventory. The Beneficiary Map (with the Karl-MetLife update marked
             as completed during the session). The Letter of Instruction. The
             Letter of Wishes with Maya&apos;s exact words. The Attorney
-            Engagement Brief — four pages, structured the way an estates
+            Engagement Brief: four pages, structured the way an estates
             attorney actually wants to read it, with every open legal question
             flagged. The Implementation Ledger with about thirty specific
             institution-by-institution actions. An &ldquo;If I die
@@ -1843,7 +1843,7 @@ export function WillsEstateArticle() {
 
           <p>
             A serious session does not leave you with a pile of loose
-            files. It produces a structured project directory —{" "}
+            files. It produces a structured project directory:{" "}
             <Mono>my-estate-plan/</Mono> with three subdirectories (
             <Mono>intake/</Mono>, <Mono>analyses/</Mono>,{" "}
             <Mono>deliverables/</Mono>) and forty-five files organized so
@@ -1862,7 +1862,7 @@ export function WillsEstateArticle() {
 
           <p>
             Click any file to see what it is and a representative snippet.
-            Filter by category — intake, analyses, deliverables — or by
+            Filter by category (intake, analyses, deliverables) or by
             the operating mode that triggers it.
           </p>
 
@@ -1904,8 +1904,8 @@ export function WillsEstateArticle() {
                 policy. Who is currently named. Who should be named. The
                 delta. This is the single artifact that catches eighty
                 percent of real-world plan failures before they happen. It
-                is also the hardest to produce by hand — you have to pull
-                up every beneficiary form across every institution — which
+                is also the hardest to produce by hand; you have to pull
+                up every beneficiary form across every institution, which
                 is exactly why the skill&apos;s{" "}
                 <Mono>beneficiary-audit</Mono> subagent walks you through
                 it.
@@ -1955,8 +1955,8 @@ export function WillsEstateArticle() {
           />
 
           <p>
-            The sample session above is what the intake <em>feels</em> like
-            — a conversation. The workflow below is what the agent actually{" "}
+            The sample session above is what the intake <em>feels</em> like:
+            a conversation. The workflow below is what the agent actually{" "}
             <em>produces</em> in parallel with that conversation. Intake is
             nine phases of talking; the workflow is nine steps of writing
             artifacts to disk. They happen at the same time; the skill
@@ -1966,7 +1966,7 @@ export function WillsEstateArticle() {
 
           <Sub eyebrow="Step 1">Orient</Sub>
           <p>
-            The agent establishes why now — what triggered this session. A
+            The agent establishes why now: what triggered this session. A
             death, a diagnosis, a move, a remarriage, a scare. It presents
             the disclaimer. It confirms you understand this is not legal
             advice. The orientation is short (five minutes in the intake)
@@ -1985,8 +1985,8 @@ export function WillsEstateArticle() {
             People, assets, beneficiary forms. The first concrete
             deliverables are produced here: the Asset Inventory, the
             Beneficiary Map, the Evidence Confidence Map (which grades each
-            asset fact by how strong the evidence for it is — a statement
-            from you is weaker than a copy of the account statement; an
+            asset fact by how strong the evidence for it is; a statement
+            from you is weaker than a copy of the account statement, and an
             inferred value from a date-range is weaker still). This is the
             step where the skill starts seeing the shape of your plan.
           </p>
@@ -1999,7 +1999,7 @@ export function WillsEstateArticle() {
             beneficiary, concentrated position, multi-state property,
             domicile ambiguity. Each complication triggers a specific
             overlay in the skill&apos;s reference library. Anything the
-            agent flags here lands in the Red Flag Triage — critical, high,
+            agent flags here lands in the Red Flag Triage: critical, high,
             medium, cleanup.
           </p>
 
@@ -2018,8 +2018,8 @@ export function WillsEstateArticle() {
             cognitive operators. Choose will +{" "}
             <J t="revocable-trust">trust</J> + <J t="poa">POA</J>{" "}
             architecture. Name executor, <J t="trustee">trustee</J>,{" "}
-            <J t="guardian">guardian</J>, healthcare agent,
-            power-of-attorney agent — with a successor for each because the
+            <J t="guardian">guardian</J>, healthcare agent, and
+            power-of-attorney agent, with a successor for each, because the
             named primary will eventually decline, predecease, or lose
             capacity.
           </p>
@@ -2032,8 +2032,8 @@ export function WillsEstateArticle() {
             <J t="hipaa">HIPAA authorization</J>, POLST if appropriate.{" "}
             <J t="ulysses-clause">Ulysses clauses</J> for known cognitive
             risks. Disposition of remains. The skill writes about half the
-            incapacity package as drafts and flags the other half — the
-            parts with state-specific forms — for attorney handoff.
+            incapacity package as drafts and flags the other half (the
+            parts with state-specific forms) for attorney handoff.
           </p>
 
           <Sub eyebrow="Step 7">Tax &amp; domicile</Sub>
@@ -2053,7 +2053,7 @@ export function WillsEstateArticle() {
             Family meeting agenda. Letter of wishes with your exact words.
             Ethical will. Digital-asset inventory. Conflict-prevention
             plan. &ldquo;If I die tomorrow&rdquo; one-pager. This step is
-            the one most often skipped by human attorneys — not because
+            the one most often skipped by human attorneys, not because
             they don&apos;t know it matters, but because they charge for
             drafting and don&apos;t get paid for orchestrating family
             conversations. The skill does it automatically.
@@ -2073,7 +2073,7 @@ export function WillsEstateArticle() {
             produces. The reason the skill is worth twenty dollars a month
             is that these two run in parallel and converge at the same
             moment, with the entire output ready to hand to a licensed
-            attorney — without you needing to know the name of a single
+            attorney, without you needing to know the name of a single
             artifact in advance.
           </p>
         </EC>
@@ -2104,7 +2104,7 @@ export function WillsEstateArticle() {
           <p>
             Each card flips on tap or focus. Front: the pattern name plus
             a one-line hook. Back: what actually goes wrong, the worst
-            case, and which subagent the skill uses to catch it — a small
+            case, and which subagent the skill uses to catch it. A small
             bit of insider baseball for the curious reader.
           </p>
 
@@ -2134,9 +2134,9 @@ export function WillsEstateArticle() {
             that the law is a moving target. The federal exemption changed
             materially in 2018, changed again in 2026 under the{" "}
             <J t="obbba">OBBBA</J>, and will likely change again. State estate
-            tax thresholds drift. State execution formalities — how many
+            tax thresholds drift. State execution formalities (how many
             witnesses, notarization requirements, whether the will can be
-            electronic — vary across fifty jurisdictions and some of them have
+            electronic) vary across fifty jurisdictions and some of them have
             updated their rules inside the last three years. The{" "}
             <J t="secure-act">Secure Act</J> and Secure 2.0 rewrote how
             inherited retirement accounts work.{" "}
@@ -2146,12 +2146,12 @@ export function WillsEstateArticle() {
 
           <p>
             The skill separates two kinds of knowledge. The evergreen
-            methodology — the kernel&apos;s twelve axioms, the cognitive
-            operators, the tier-routing logic, the coordination discipline — is
-            stable. Those are the parts you can trust. The volatile law —
-            current thresholds, current formalities, current{" "}
+            methodology (the kernel&apos;s twelve axioms, the cognitive
+            operators, the tier-routing logic, the coordination discipline)
+            is stable. Those are the parts you can trust. The volatile law
+            (current thresholds, current formalities, current{" "}
             <J t="portability">portability</J> mechanics, current domicile
-            rules — is handled under what the skill calls its{" "}
+            rules) is handled under what the skill calls its{" "}
             <strong>verification-first discipline</strong>. Nothing in that
             category gets treated as final until it has been checked against
             primary sources in the current session. The skill&apos;s output
@@ -2221,7 +2221,7 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
-            A set of <strong>Attorney Interview Questions</strong> — the
+            A set of <strong>Attorney Interview Questions</strong>: the
             questions you should ask your lawyer on the first call to confirm
             that they are the right fit, are familiar with your state&apos;s
             edge cases, and are not going to drop the ball on one of the
@@ -2238,7 +2238,7 @@ export function WillsEstateArticle() {
 
           <p>
             A <strong>Document Package Index</strong> listing everything the
-            attorney will need — your drafts, your supporting financial
+            attorney will need: your drafts, your supporting financial
             documents, the beneficiary forms you have confirmed, the titling
             records you have pulled. No &ldquo;I think I sent you the deed,
             didn&apos;t I?&rdquo; email chains.
@@ -2334,12 +2334,12 @@ export function WillsEstateArticle() {
               {
                 dim: <strong>What you get</strong>,
                 them: "One document at a time from a form-based intake (a will, a trust, a POA).",
-                us: "A coordinated plan — will + trust + beneficiary audit + titling audit + POAs + digital inventory + attorney handoff packet — checked for cross-document coherence.",
+                us: "A coordinated plan: will + trust + beneficiary audit + titling audit + POAs + digital inventory + attorney handoff packet, checked for cross-document coherence.",
               },
               {
                 dim: <strong>Coordination across documents</strong>,
                 them: "None. Your will is produced in isolation from your 401(k) beneficiary forms, your deeds, or your insurance.",
-                us: "The main feature. Catches the 80% of real-world plan failures — mismatched beneficiaries, trusts that were never funded, ex-spouses still on contracts — before they happen.",
+                us: "The main feature. Catches the 80% of real-world plan failures (mismatched beneficiaries, trusts that were never funded, ex-spouses still on contracts) before they happen.",
               },
               {
                 dim: <strong>State-law accuracy</strong>,
@@ -2360,7 +2360,7 @@ export function WillsEstateArticle() {
               {
                 dim: <strong>What it costs</strong>,
                 them: "$79-499 per document, or $100-200/year for a subscription bundle.",
-                us: "$20/month, cancel anytime. Over a year, either cost is small — but the output is a different category of thing.",
+                us: "$20/month, cancel anytime. Over a year, either cost is small, but the output is a different category of thing.",
               },
             ]}
           />
@@ -2371,7 +2371,7 @@ export function WillsEstateArticle() {
             will from LegalZoom and move on with your life. It is a better
             use of your money than this skill. The skill earns its keep
             the moment coordination across more than one document starts
-            to matter — the blended family, the business interest, the
+            to matter: the blended family, the business interest, the
             second-state property, the vulnerable heir, the concentrated
             stock position, the pet with a longer life expectancy than
             yours. If any two of those describe you, the skill is a much
@@ -2428,8 +2428,8 @@ export function WillsEstateArticle() {
                 Yes. The agent runs on your computer, reading files you
                 explicitly give it. It does not upload your financial
                 documents, your tax returns, or your family history to any
-                server. Nothing leaves your laptop except — at your
-                direction — the sanitized Attorney Engagement Brief you
+                server. Nothing leaves your laptop except, at your
+                direction, the sanitized Attorney Engagement Brief you
                 choose to send your lawyer.
               </p>
             </div>
@@ -2467,9 +2467,9 @@ export function WillsEstateArticle() {
             <summary>Why a subscription instead of a one-time purchase?</summary>
             <div className="sm-details-body">
               <p>
-                Because the thing you are paying for — the living, verified
+                Because the thing you are paying for (the living, verified
                 set of axioms plus the reference corpus plus the subagents
-                plus the updates when the law changes — is not a one-time
+                plus the updates when the law changes) is not a one-time
                 thing. A static PDF of estate-planning templates from three
                 years ago is a trap, not a service. Cancel anytime. The
                 artifacts you have produced stay on your computer after you
@@ -2494,7 +2494,7 @@ export function WillsEstateArticle() {
                 </a>{" "}
                 or Trust &amp; Will are probably fine for you. The skill
                 starts earning its keep once coordination across more than
-                one document matters — a blended family, a business, a
+                one document matters: a blended family, a business, a
                 second state, a concentrated stock position, a child with
                 special needs, enough savings to cross any state&apos;s
                 estate-tax threshold.
@@ -2506,7 +2506,7 @@ export function WillsEstateArticle() {
             <summary>Can I share the skill with my spouse?</summary>
             <div className="sm-details-body">
               <p>
-                One subscription per user. Your spouse needs their own —
+                One subscription per user. Your spouse needs their own,
                 which at twenty dollars a month is a reasonable thing to
                 ask them for. Every bundle you download is watermarked with
                 your account identity, which is mostly honor-system
@@ -2573,7 +2573,7 @@ export function WillsEstateArticle() {
               <p>
                 Correct. The skill never asks for your seed phrase. The
                 digital inventory template has an explicit field that says
-                &ldquo;pointer to where the seed phrase is stored — do NOT
+                &ldquo;pointer to where the seed phrase is stored; do NOT
                 write the seed phrase itself here.&rdquo; If you
                 accidentally put it in, the skill flags it and asks you to
                 move it out before continuing.
@@ -2634,7 +2634,7 @@ export function WillsEstateArticle() {
 
           <p>
             That shape of problem is exactly what an agent-driven skill can
-            compress. Not the judgment — the preparation. Your attorney
+            compress: the preparation, not the judgment. Your attorney
             still signs. Your CPA still files. Your Medicare broker still
             enrolls you. What changes is that a large share of the
             preparation can happen on your Saturday afternoon at the kitchen
@@ -2664,8 +2664,8 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
-            If you have been putting this off for a decade — and
-            statistically you probably have — the{" "}
+            If you have been putting this off for a decade (and
+            statistically you probably have), the{" "}
             <a
               href="#install"
               className="text-cyan-400 underline underline-offset-2"
