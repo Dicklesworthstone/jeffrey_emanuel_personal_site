@@ -571,128 +571,152 @@ export function WillsEstateArticle() {
 
       <Divider />
 
-      {/* ========== INTRO + TOC (hgjp.9) ========== */}
+      {/* ========== INTRO (hgjp.9) ========== */}
       <section id="intro" data-section="intro" className="pb-10 md:pb-14">
         <EC>
           <p className="sm-drop-cap">
             Almost everyone I know is eventually going to die without a serious
             plan for what happens to their money, their house, their pets, their
             data, or their kids. Some will leave handwritten notes a grieving
-            spouse cannot legally execute. Some will leave a{" "}
-            <J t="will">will</J> from 2011 that still names an ex. Some will
-            leave nothing, and a county court will decide for them. This is not
-            because they don&apos;t care. It&apos;s because estate planning is
-            expensive, emotionally heavy, and the good lawyers who do it well
-            charge five hundred dollars an hour for the parts that are basically
-            asking you careful questions and writing down your answers.
+            spouse cannot legally execute. Some will leave a will from 2011 that
+            still names an ex. Some will leave nothing, and a county court will
+            decide for them. This is not because they don&apos;t care.
+            It&apos;s because estate planning is expensive, emotionally heavy,
+            and the good lawyers who do it well charge five hundred dollars an
+            hour for the parts that are basically asking you careful questions
+            and writing down your answers.
           </p>
 
           <p>
-            A few months ago I posted a <J t="skill">skill</J> for tax
-            preparation on my paid skills site. At least five readers have since
-            told me they saved more than a thousand dollars on their taxes using
-            it. One saved twenty thousand. That is on a twenty-dollar-a-month
-            subscription. It got me thinking about which other
-            expensive-specialist problems look the same shape as tax prep,
-            where the billable hours you are paying for are, honestly, mostly
+            A few months ago I posted a tax-preparation skill on my paid skills
+            site. At least five readers have since told me they saved more than
+            a thousand dollars on their taxes using it. One saved twenty
+            thousand. That is on a twenty-dollar-a-month subscription. It got
+            me thinking about which other expensive-specialist problems look
+            the same shape as tax prep, where the billable hours are mostly
             good questions, patient listening, and a disciplined checklist. The
             replies kept pointing at the same one: writing a will.
           </p>
 
           <p>
-            So I built it, and I went a little further than I meant to. The
-            wills-and-estate-planning skill now runs to over two hundred files and
-            something like twenty-four thousand lines of text. It has seventeen
-            subagents, one hundred thirty-five reference documents covering
-            federal and state law through the 2026{" "}
-            <J t="obbba">OBBBA</J> exemption changes, and forty-five output
-            templates that together describe a structured project directory:
-            not a will, a whole estate plan. A will is one document in it.
+            So I built it. This article is the long-form explanation of what
+            the skill is, what you need to run it, and how a smart non-technical
+            reader with a Saturday afternoon can walk away with the package a
+            real estate-planning attorney actually wants to receive.
+          </p>
+        </EC>
+      </section>
+
+      <Divider />
+
+      {/* ========== HOOK + COST TABLE ========== */}
+      <section id="cost" data-section="cost" className="pb-10 md:pb-14">
+        <EC>
+          <SectionHeader
+            id="cost"
+            eyebrow="The pitch"
+            title="One weekend, roughly $120, instead of $20,000."
+          />
+
+          <p>
+            A full estate-plan consultation with a decent attorney runs
+            somewhere between fifteen and twenty-five thousand dollars for a
+            household with any real complexity. Most of those hours are not the
+            attorney drafting; they are the attorney asking you careful
+            questions, waiting for you to find documents, and writing down your
+            answers. The expensive part is the interviewing.
           </p>
 
           <p>
-            The skill does not replace your attorney. That needs to be explicit,
-            because the whole thing is designed to end at one. What it can
-            replace is a large chunk of the first fact-finding and
-            document-gathering work your attorney would normally bill for
-            before they can start drafting. By the time you send them the
-            Attorney Engagement Brief the skill produces, the conversation can
-            start much closer to drafting than to discovery. That is where much
-            of the savings can come from. Exact rates vary wildly by state and
-            firm. The point is not a guaranteed number. The point is that you
-            can spend a Saturday with your agent and show up to your actual
-            lawyer&apos;s office with the packet already organized.
+            The interviewing is the part a good agent-plus-skill can do, for
+            roughly the cost of a nice dinner, in a single weekend. Here is
+            what you actually need to buy:
+          </p>
+
+          <RefTable
+            caption="One-month cost to run the whole process"
+            cols={[
+              { key: "item", label: "What" },
+              { key: "price", label: "Price" },
+              { key: "note", label: "Notes" },
+            ]}
+            rows={[
+              {
+                item: <strong>Claude Max (5x tier)</strong>,
+                price: "$100/mo",
+                note: "Sign up at claude.ai → Settings → Upgrade. Plenty of capacity for this skill. Cancel after the month if you want.",
+              },
+              {
+                item: <strong>or GPT Pro</strong>,
+                price: "$200/mo",
+                note: "Sign up at chatgpt.com. Use instead of, or alongside, Claude Max.",
+              },
+              {
+                item: <strong>jeffreys-skills.md</strong>,
+                price: "$20/mo",
+                note: "Pay with Stripe or PayPal. Install the wills-and-estate-planning skill from the dashboard.",
+              },
+              {
+                item: <strong>Your attorney&apos;s review</strong>,
+                price: "$2-4k",
+                note: "Unavoidable and correct. They still sign the documents. The packet the skill produces makes this meeting dramatically shorter.",
+              },
+            ]}
+          />
+
+          <p>
+            Pick one of Claude Max or GPT Pro. If you have the budget, run the
+            skill through both; the two frontier models catch different things,
+            and the two second opinions are the cheapest quality insurance
+            you&apos;ll buy this year. Cancel whichever ones you don&apos;t
+            want next month. You keep every document the skill produces
+            forever.
           </p>
 
           <p>
-            The thing I had not appreciated before writing the skill is that
-            most estate-plan disasters are not drafting errors. They are
-            coordination errors between documents. A beautifully-drafted will
-            that says &ldquo;everything to my kids equally&rdquo; does exactly
-            nothing if the <J t="401k-spousal-consent">401(k)</J> still names
-            the ex-spouse, because retirement accounts pass by contract, not by
-            will. Titling, <J t="beneficiary">beneficiary</J> forms,{" "}
-            <J t="poa">POAs</J>, healthcare directives, trust funding, and the
-            digital inventory of where the{" "}
-            <J t="crypto-seed">crypto seed phrase</J> lives have to tell one
-            coherent story. If they contradict each other, whichever one has the
-            most legal weight wins, and it&apos;s usually the one you forgot to
-            update. Catching those mismatches is the skill&apos;s main job.
+            The other thing worth saying about a hundred-dollar-a-month
+            frontier-model subscription: while you have it, it will also audit
+            your tax return, review your insurance coverage, draft a business
+            plan, compare Medicare plans, explain a confusing hospital bill, or
+            pre-read a long contract before you send it to a lawyer. It is
+            among the best hundred dollars per month you will spend this year
+            even before the estate plan.
           </p>
 
-          <p>
-            This article is the long-form explanation of how the skill works,
-            who it is for, and how you install it without needing to know
-            anything about the command line. You sign into{" "}
-            <J t="jsm">jeffreys-skills.md</J>, click one button on the skill
-            page, and paste one block of text into Claude or Codex Desktop. The
-            agent does the rest. If you are already comfortable with a terminal,
-            there is a one-line command for you too. If you are not, the next
-            ninety seconds are genuinely the whole install.
-          </p>
+          <MarkdownDownloadButton />
 
           {/* TOC */}
-          <nav className="sm-toc" aria-label="Table of contents">
+          <nav className="sm-toc mt-10" aria-label="Table of contents">
             <p className="sm-subheading">Contents</p>
             <ol>
               <li>
-                <a href="#install" onClick={(event) => handleTocJump(event, "install")}>
-                  Install the skill (ninety seconds, no terminal)
+                <a href="#what-is-it" onClick={(event) => handleTocJump(event, "what-is-it")}>
+                  What is an AI agent, and what is a skill?
                 </a>
               </li>
               <li>
-                <a href="#who" onClick={(event) => handleTocJump(event, "who")}>
-                  Who this is for, and who it isn&apos;t
+                <a href="#setup" onClick={(event) => handleTocJump(event, "setup")}>
+                  What you need (twenty minutes of setup)
                 </a>
               </li>
               <li>
-                <a href="#insight" onClick={(event) => handleTocJump(event, "insight")}>
-                  Why a will alone is not the plan
+                <a href="#folder" onClick={(event) => handleTocJump(event, "folder")}>
+                  Using the skill: your working folder
                 </a>
               </li>
               <li>
-                <a href="#intake" onClick={(event) => handleTocJump(event, "intake")}>
-                  The conversation: nine phases of intake
+                <a href="#tips" onClick={(event) => handleTocJump(event, "tips")}>
+                  How to get the most out of it
                 </a>
               </li>
               <li>
-                <a href="#produces" onClick={(event) => handleTocJump(event, "produces")}>
-                  Forty-five artifacts you walk away with
-                </a>
-              </li>
-              <li>
-                <a href="#workflow" onClick={(event) => handleTocJump(event, "workflow")}>
-                  The nine steps, in order
-                </a>
-              </li>
-              <li>
-                <a href="#anti" onClick={(event) => handleTocJump(event, "anti")}>
-                  Anti-patterns: the parrot, the ex-spouse, the springing POA
+                <a href="#showcase" onClick={(event) => handleTocJump(event, "showcase")}>
+                  What the skill actually does for you
                 </a>
               </li>
               <li>
                 <a href="#attorney" onClick={(event) => handleTocJump(event, "attorney")}>
-                  Handing off to a real attorney
+                  The attorney still signs the documents
                 </a>
               </li>
               <li>
@@ -712,193 +736,81 @@ export function WillsEstateArticle() {
 
       <Divider />
 
-      {/* ========== SKILL CATALOG CALLOUTS (hgjp.10) ========== */}
-      <section data-section="catalog" className="pb-10 md:pb-14">
+      {/* ========== WHAT IS AN AGENT + SKILL ========== */}
+      <section data-section="what-is-it" className="pb-10 md:pb-14">
         <EC>
-          <div className="my-5 md:my-6 rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-purple-500/[0.05] via-cyan-500/[0.05] to-emerald-500/[0.05] p-5 md:p-6 backdrop-blur-xl">
+          <SectionHeader
+            id="what-is-it"
+            eyebrow="The basics"
+            title="What is an AI agent, and what is a skill?"
+          />
+
+          <p>
+            If you use AI products at all, you have probably chatted with
+            Claude or ChatGPT on the web. Those models are very good, and
+            they start from zero every time: fresh session, no memory, no
+            idea whether you are asking about quantum physics or your
+            divorce.
+          </p>
+
+          <p>
+            An <strong>agent</strong> is the same frontier model, but given
+            permission to do things. Open files you point it at. Organize a
+            folder on your computer. Ask you follow-up questions and
+            remember the answers across a whole conversation. It is not a
+            different kind of model; it is the same model working through a
+            problem alongside you instead of answering a one-shot question.
+          </p>
+
+          <p>
+            A <strong>skill</strong> is a package of domain knowledge and
+            workflow that sits alongside the agent and bootstraps it into
+            being an expert at exactly one thing. You can think of it as
+            hiring an apprentice lawyer who has already read a hundred
+            estate-planning textbooks, knows the standard interview
+            questions, and will not forget to ask you about the 401(k)
+            beneficiary form. When you start a session, the skill quietly
+            loads into the agent&apos;s context and says: &ldquo;for the
+            next few hours, you are an estate-planning intake specialist;
+            here is exactly how to do that job.&rdquo;
+          </p>
+
+          <p>
+            The division of labor matters. The frontier model is clever.
+            The skill is disciplined. Your job is just to answer good
+            questions honestly. The skill makes sure the agent asks the
+            right ones, cross-checks the answers, catches contradictions,
+            and produces the specific set of documents an estate-planning
+            attorney actually wants to receive.
+          </p>
+
+          <p>
+            The whole complexity lives inside the skill. You do not have to
+            understand <J t="revocable-trust">revocable trusts</J>,{" "}
+            <J t="poa">POAs</J>, or the 2026 <J t="obbba">OBBBA</J>{" "}
+            exemption to use it. You have to know the names of your family
+            members, roughly what you own, and where the important documents
+            live. The skill handles the rest, and flags anything it is
+            genuinely unsure about for the attorney who signs the final
+            papers.
+          </p>
+
+          <div
+            data-viz="stack"
+            className="my-8 rounded-3xl border border-white/10 bg-gradient-to-br from-purple-500/[0.04] via-cyan-500/[0.04] to-emerald-500/[0.04] p-6 md:p-8 backdrop-blur-xl"
+          >
             <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
-              Skill catalog page · opens in a new tab
+              The stack
             </p>
-            <ul className="space-y-2.5 text-[13px] md:text-[14px] leading-relaxed">
-              <li>
-                <a
-                  href="https://jeffreys-skills.md/skills/wills-and-estate-planning-skill"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono text-cyan-300 hover:text-cyan-200 underline decoration-cyan-500/40 underline-offset-4 break-all"
-                >
-                  jeffreys-skills.md/skills/wills-and-estate-planning-skill
-                </a>
-                <span className="text-slate-400">
-                  {" "}
-                  hosts the full <Mono>SKILL.md</Mono>, a live visualization
-                  of the architecture, the version history, the release
-                  notes, and the &ldquo;Install in Claude or Codex
-                  Desktop&rdquo; button.
-                </span>
-              </li>
-            </ul>
-            <p className="mt-4 text-[12px] md:text-[13px] text-slate-400 leading-relaxed">
-              <strong className="text-amber-200">Heads up:</strong> that URL
-              shows a page-not-found screen unless you are signed in to a
-              jeffreys-skills.md account with an active subscription. Sign up
-              (or log in) at <Mono>jeffreys-skills.md/dashboard</Mono> first.
-              It&apos;s the same account the install flow uses, so doing the
-              sign-in step now means the install button below will already
-              know who you are.
-            </p>
-          </div>
-
-          <div className="my-5 md:my-6 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.04] via-cyan-500/[0.04] to-emerald-500/[0.04] p-5 md:p-6 backdrop-blur-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                aria-hidden="true"
-                className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400 motion-safe:animate-pulse"
-              />
-              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-emerald-300">
-                What shipped in the latest release · April 2026
-              </p>
-            </div>
-
-            <div className="space-y-4 md:space-y-5">
-              <div>
-                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
-                    v1
-                  </span>
-                  <span className="ml-2 text-purple-300 font-semibold">
-                    the kernel
-                  </span>
-                </p>
-                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  Twelve axioms. Fourteen cognitive operators
-                  (Probate-Bypass, Spousal-Rights Check, Beneficiary-Title
-                  Coherence, Step-Up-vs-Transfer, Liquidity-at-Death,
-                  Incapacity-Transition, Lumpy-Asset Division, Cross-State
-                  Domicile, Vulnerable-Beneficiary Filter, Tax-Apportionment,
-                  Blended-Family QTIP, Disclaimer Window, Trust-Situs
-                  Selection, Basis-Consistency). Five wealth tiers routed by
-                  net worth with complexity overlays that bump tier
-                  regardless.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
-                    v1
-                  </span>
-                  <span className="ml-2 text-cyan-300 font-semibold">
-                    the intake engine
-                  </span>
-                </p>
-                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  Nine adaptive phases (Orientation → People → Assets →
-                  Beneficiary Audit → Family Dynamics → Goals → Incapacity →
-                  Jurisdiction → Wealth-Tier Routing). Eight operating modes
-                  (<Mono>new-plan</Mono>, <Mono>existing-plan-audit</Mono>,{" "}
-                  <Mono>life-event-delta</Mono>,{" "}
-                  <Mono>urgent-bedside-signing</Mono>,{" "}
-                  <Mono>executor-activation</Mono>,{" "}
-                  <Mono>business-owner-succession</Mono>,{" "}
-                  <Mono>uhnw-restructure</Mono>,{" "}
-                  <Mono>maintenance-review</Mono>). Archetype start packs for
-                  the common patterns.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
-                    v1
-                  </span>
-                  <span className="ml-2 text-emerald-300 font-semibold">
-                    the output contract
-                  </span>
-                </p>
-                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  Two intake files, twenty analyses, twenty-three
-                  deliverables, for forty-five structured artifacts in total.
-                  The contract is enforced:{" "}
-                  <Mono>plan-validator.py</Mono> runs as a backstop that
-                  checks for untouched starter outputs and missing
-                  coverage-matrix entries.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
-                    v1
-                  </span>
-                  <span className="ml-2 text-amber-300 font-semibold">
-                    seventeen subagents
-                  </span>
-                </p>
-                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  <Mono>intake-conductor</Mono>,{" "}
-                  <Mono>document-organizer</Mono>,{" "}
-                  <Mono>asset-discovery-auditor</Mono>,{" "}
-                  <Mono>beneficiary-audit</Mono>,{" "}
-                  <Mono>anti-pattern-scanner</Mono>,{" "}
-                  <Mono>tax-analyzer</Mono>,{" "}
-                  <Mono>execution-formalities-router</Mono>,{" "}
-                  <Mono>state-law-verifier</Mono>,{" "}
-                  <Mono>overlay-resolver</Mono>,{" "}
-                  <Mono>fiduciary-bench-builder</Mono>,{" "}
-                  <Mono>implementation-ops-planner</Mono>,{" "}
-                  <Mono>funding-checklist-generator</Mono>,{" "}
-                  <Mono>conflict-prevention-planner</Mono>,{" "}
-                  <Mono>litigation-defense-reviewer</Mono>,{" "}
-                  <Mono>multi-model-validator</Mono>,{" "}
-                  <Mono>deliverables-generator</Mono>, and a
-                  meta-coordinator that routes between them.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
-                    v1
-                  </span>
-                  <span className="ml-2 text-purple-300 font-semibold">
-                    the reference corpus
-                  </span>
-                </p>
-                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  One hundred thirty-five markdown documents across
-                  methodology, intake, foundations, family structures,
-                  assets, incapacity, advanced planning, tiers, post-death,
-                  legacy and logistics, anti-patterns, states, professions,
-                  life events, situations, and execution formalities.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[11px] md:text-[12px] font-mono mb-1.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-emerald-200">
-                    v1
-                  </span>
-                  <span className="ml-2 text-cyan-300 font-semibold">
-                    verification-first discipline
-                  </span>
-                </p>
-                <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                  Every recommendation that depends on volatile law (2026{" "}
-                  <J t="obbba">OBBBA</J> thresholds, state estate tax rates,
-                  execution formalities, <J t="secure-act">Secure Act</J>{" "}
-                  beneficiary rules) is checked against primary sources at
-                  session time and logged in{" "}
-                  <Mono>analyses/official-source-log.md</Mono>. Plans stay
-                  auditable.
-                </p>
-              </div>
-            </div>
-
-            <p className="mt-5 text-[11px] md:text-[12px] text-slate-500 leading-relaxed italic">
-              The skill page linked above has the full changelog, a live
-              visualization of the flow, and the verbatim{" "}
-              <Mono>SKILL.md</Mono> the agent loads into its context.
+            <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
+              <strong>Frontier model</strong> (Claude Opus, GPT-5): the
+              brain. <strong>Desktop app</strong> (Claude Code or Codex
+              Desktop): the hands — can open files, save drafts, read
+              documents you drop into a folder.{" "}
+              <strong>Skill package</strong>: the expertise — loads the
+              estate-planning methodology into the agent&apos;s context on
+              demand. <strong>Your folder</strong>: the workspace — where
+              every document the skill produces lives on your computer.
             </p>
           </div>
         </EC>
@@ -906,403 +818,307 @@ export function WillsEstateArticle() {
 
       <Divider />
 
-      {/* ========== INSTALL (hgjp.11) ========== */}
-      <section data-section="install" className="pb-10 md:pb-14">
+      {/* ========== SETUP (hgjp.11) ========== */}
+      <section data-section="setup" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="install"
-            eyebrow="Install"
-            title="Get the skill into your agent in 90 seconds."
+            id="setup"
+            eyebrow="Setup"
+            title="What you need, in about twenty minutes."
           />
 
-          <p>
-            If you&apos;re not a developer, Path 1 below is the only install
-            flow you need. You already have Claude or Codex Desktop installed.
-            If you still need the app, start with the official{" "}
-            <a
-              href={CLAUDE_DESKTOP_INSTALL_HREF}
-              className="text-cyan-400 underline underline-offset-2"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Claude Desktop setup page
-            </a>{" "}
-            or the{" "}
-            <a
-              href={CODEX_DESKTOP_HREF}
-              className="text-cyan-400 underline underline-offset-2"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Codex app page
-            </a>
-            . Then come back here with a paid <J t="jsm">jeffreys-skills.md</J>{" "}
-            subscription. No Homebrew. No YAML. No package-manager archaeology.
-          </p>
-
           <p className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-[15px] leading-relaxed text-amber-100">
-            This skill is educational planning support, not legal advice. It
-            does not create an attorney-client relationship, and a licensed
-            estate-planning attorney in your state still needs to review and
-            sign the final documents.
+            This skill is educational planning support, not legal advice. A
+            licensed estate-planning attorney in your state still needs to
+            review and sign the final documents. Nothing on this page creates
+            an attorney-client relationship.
           </p>
 
           <p>
-            Three routes exist because readers show up with very different
-            setups. Path 1 is the default. Path 2 is for developers who already
-            use <Mono>jsm</Mono>. Path 3 exists for restricted laptops and
-            weird environments where the agent cannot complete the download
-            itself.
+            Four things, in order. Each one takes two to five minutes.
+            Twenty minutes total, and you only pay for things you are going
+            to keep anyway.
           </p>
 
-          <div
-            className="mt-8 grid gap-3 md:grid-cols-3"
-            role="tablist"
-            aria-label="Install paths"
-          >
-            <article
-              className={`rounded-3xl border p-5 md:p-6 backdrop-blur-xl transition-all ${
-                activeInstallPath === "desktop"
-                  ? "border-cyan-400/60 bg-cyan-500/10 shadow-[0_0_28px_rgba(34,211,238,0.15)]"
-                  : "border-white/10 bg-white/[0.04]"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
-                  Path 1
-                </p>
-                <span className="rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-emerald-200">
-                  Recommended
-                </span>
-              </div>
-              <h3 className="mt-4 text-[1.15rem] font-semibold text-white">
-                In Claude or Codex Desktop
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                Click <strong>Generate install prompt</strong>, paste once,
-                approve one download, and reload skills. This is the no-terminal
-                path.
+          <ol className="mt-6 space-y-6 text-slate-300">
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">1. A frontier-model subscription.</strong>
               </p>
-              <div className="mt-5 flex flex-col gap-3">
+              <p className="mt-2 leading-relaxed">
+                Go to{" "}
                 <a
-                  href={SKILL_PAGE_HREF}
-                  className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-100 transition-colors hover:border-cyan-300 hover:bg-cyan-500/25"
+                  href="https://claude.ai"
+                  className="text-cyan-400 underline underline-offset-2"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Open the skill page
-                </a>
-                <button
-                  id="install-tab-desktop"
-                  type="button"
-                  role="tab"
-                  aria-label="In Claude or Codex Desktop"
-                  aria-selected={activeInstallPath === "desktop"}
-                  aria-controls="install-panel-desktop"
-                  tabIndex={activeInstallPath === "desktop" ? 0 : -1}
-                  onClick={() => { setActiveInstallPath("desktop"); emitArticleEvent("install_section_cta_clicked", { target: "desktop" }); }}
-                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors ${
-                    activeInstallPath === "desktop"
-                      ? "border-cyan-300/60 bg-white/10 text-white"
-                      : "border-white/10 bg-black/20 text-slate-300 hover:border-cyan-400/30 hover:text-white"
-                  }`}
+                  claude.ai
+                </a>{" "}
+                → Settings → Upgrade → Max 5x ($100/mo). Or{" "}
+                <a
+                  href="https://chatgpt.com"
+                  className="text-cyan-400 underline underline-offset-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {activeInstallPath === "desktop"
-                    ? "Showing the exact steps"
-                    : "Show the exact steps"}
-                </button>
-              </div>
-            </article>
+                  chatgpt.com
+                </a>{" "}
+                → Upgrade → Pro ($200/mo). Either works. Claude Max is the
+                cheaper starting point for this skill; pick GPT Pro if you
+                prefer OpenAI&apos;s model. Pay by card. Cancel next month
+                if you want to. No long-term contract.
+              </p>
+            </li>
 
-            <article
-              className={`rounded-3xl border p-5 md:p-6 backdrop-blur-xl transition-all ${
-                activeInstallPath === "cli"
-                  ? "border-cyan-400/60 bg-cyan-500/10 shadow-[0_0_28px_rgba(34,211,238,0.15)]"
-                  : "border-white/10 bg-white/[0.04]"
-              }`}
-            >
-              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
-                Path 2
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">2. The desktop app (free).</strong>
               </p>
-              <h3 className="mt-4 text-[1.15rem] font-semibold text-white">
-                Via the jsm CLI
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                For developers who already use <Mono>jsm</Mono>. No mystery
-                bash block here: you authenticate once, then install the skill
-                you actually want.
+              <p className="mt-2 leading-relaxed">
+                For Claude, download{" "}
+                <a
+                  href={CLAUDE_DESKTOP_INSTALL_HREF}
+                  className="text-cyan-400 underline underline-offset-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Claude Code Desktop
+                </a>{" "}
+                (Mac or Windows). For OpenAI, download{" "}
+                <a
+                  href={CODEX_DESKTOP_HREF}
+                  className="text-cyan-400 underline underline-offset-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Codex Desktop
+                </a>
+                . Sign in with the same account from step 1. This is the app
+                the agent lives in. It can open folders on your computer and
+                read the documents you drop into them.
               </p>
-              <div className="mt-5 flex flex-col gap-3">
+            </li>
+
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">3. A jeffreys-skills.md account ($20/mo).</strong>
+              </p>
+              <p className="mt-2 leading-relaxed">
+                Go to{" "}
                 <a
                   href={JSM_HOME_HREF}
-                  className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-100 transition-colors hover:border-cyan-300 hover:bg-cyan-500/25"
+                  className="text-cyan-400 underline underline-offset-2"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Install or update jsm
-                </a>
-                <button
-                  id="install-tab-cli"
-                  type="button"
-                  role="tab"
-                  aria-label="Via the jsm CLI"
-                  aria-selected={activeInstallPath === "cli"}
-                  aria-controls="install-panel-cli"
-                  tabIndex={activeInstallPath === "cli" ? 0 : -1}
-                  onClick={() => { setActiveInstallPath("cli"); emitArticleEvent("install_section_cta_clicked", { target: "cli" }); }}
-                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors ${
-                    activeInstallPath === "cli"
-                      ? "border-cyan-300/60 bg-white/10 text-white"
-                      : "border-white/10 bg-black/20 text-slate-300 hover:border-cyan-400/30 hover:text-white"
-                  }`}
-                >
-                  {activeInstallPath === "cli"
-                    ? "Showing the exact steps"
-                    : "Show the exact steps"}
-                </button>
-              </div>
-            </article>
+                  jeffreys-skills.md
+                </a>{" "}
+                → Sign up → pay with Stripe or PayPal. Same cancel-anytime
+                rules. Same &ldquo;you keep the documents&rdquo; rules.
+              </p>
+            </li>
 
-            <article
-              className={`rounded-3xl border p-5 md:p-6 backdrop-blur-xl transition-all ${
-                activeInstallPath === "manual"
-                  ? "border-cyan-400/60 bg-cyan-500/10 shadow-[0_0_28px_rgba(34,211,238,0.15)]"
-                  : "border-white/10 bg-white/[0.04]"
-              }`}
-            >
-              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
-                Path 3
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">4. Install the skill.</strong>
               </p>
-              <h3 className="mt-4 text-[1.15rem] font-semibold text-white">
-                Manual ZIP fallback
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                When the agent-paste flow is blocked by a locked-down machine or
-                browser environment, download the signed ZIP and drop it into
-                the skill directory yourself.
-              </p>
-              <div className="mt-5 flex flex-col gap-3">
+              <p className="mt-2 leading-relaxed">
+                From the jeffreys-skills.md dashboard, open the{" "}
                 <a
                   href={SKILL_PAGE_HREF}
-                  className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-100 transition-colors hover:border-cyan-300 hover:bg-cyan-500/25"
+                  className="text-cyan-400 underline underline-offset-2"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Open the ZIP download page
-                </a>
-                <button
-                  id="install-tab-manual"
-                  type="button"
-                  role="tab"
-                  aria-label="Manual ZIP fallback"
-                  aria-selected={activeInstallPath === "manual"}
-                  aria-controls="install-panel-manual"
-                  tabIndex={activeInstallPath === "manual" ? 0 : -1}
-                  onClick={() => { setActiveInstallPath("manual"); emitArticleEvent("install_section_cta_clicked", { target: "manual" }); }}
-                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors ${
-                    activeInstallPath === "manual"
-                      ? "border-cyan-300/60 bg-white/10 text-white"
-                      : "border-white/10 bg-black/20 text-slate-300 hover:border-cyan-400/30 hover:text-white"
-                  }`}
-                >
-                  {activeInstallPath === "manual"
-                    ? "Showing the exact steps"
-                    : "Show the exact steps"}
-                </button>
-              </div>
-            </article>
-          </div>
+                  wills-and-estate-planning skill
+                </a>{" "}
+                page. Click <strong>Generate install prompt</strong>. Copy
+                the block of text it gives you. Paste that block into your
+                desktop app&apos;s chat box. Press enter. The agent reads it,
+                asks you to approve one download, installs itself, and
+                reloads. Ninety seconds.
+              </p>
+            </li>
+          </ol>
 
-          <div className="mt-6">
-            <div
-              id="install-panel-desktop"
-              role="tabpanel"
-              aria-labelledby="install-tab-desktop"
-              hidden={activeInstallPath !== "desktop"}
-              className={`rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.07] via-white/[0.03] to-emerald-500/[0.06] p-5 md:p-6 ${
-                activeInstallPath === "desktop" ? "block" : "hidden"
-              }`}
-            >
-              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
-                Path 1 · in Claude or Codex Desktop
-              </p>
-              <h3 className="mt-3 text-[1.2rem] font-semibold text-white">
-                The whole flow fits in four short steps.
-              </h3>
-              <ol className="mt-5 space-y-4 text-slate-300">
-                <li>
-                  <strong>Step 1.</strong> Open{" "}
-                  <a
-                    href={SKILL_PAGE_HREF}
-                    className="text-cyan-400 underline underline-offset-2"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    jeffreys-skills.md/skills/wills-and-estate-planning-skill
-                  </a>{" "}
-                  in your browser. Make sure you are signed in. If you see a
-                  page-not-found screen, sign in at{" "}
-                  <a
-                    href={JSM_DASHBOARD_HREF}
-                    className="text-cyan-400 underline underline-offset-2"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    jeffreys-skills.md/dashboard
-                  </a>{" "}
-                  first and reload.
-                </li>
-                <li>
-                  <strong>Step 2.</strong> Find the card labeled{" "}
-                  <strong>Install in Claude or Codex Desktop</strong>. Click{" "}
-                  <strong>Generate install prompt</strong>. A textarea appears
-                  below the button with a ten-minute countdown
-                  (&ldquo;Expires in 9:58&rdquo;). Click <strong>Copy</strong>.
-                </li>
-                <li>
-                  <strong>Step 3.</strong> Open Claude Desktop or Codex
-                  Desktop, click in the chat box, paste the prompt, and hit
-                  Enter.
-                </li>
-                <li>
-                  <strong>Step 4.</strong> The agent reads the prompt, asks for
-                  permission to run one download command, and installs the skill
-                  into the right folder. Click <strong>Allow</strong>. Then
-                  reload skills. On Claude Desktop that is ⌘-Shift-P →
-                  &ldquo;Reload skills&rdquo;; on Codex Desktop, quit and
-                  reopen. The skill appears when you type <Mono>/</Mono>.
-                </li>
-              </ol>
-            </div>
-
-            <div
-              id="install-panel-cli"
-              role="tabpanel"
-              aria-labelledby="install-tab-cli"
-              hidden={activeInstallPath !== "cli"}
-              className={`rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.07] via-white/[0.03] to-emerald-500/[0.06] p-5 md:p-6 ${
-                activeInstallPath === "cli" ? "block" : "hidden"
-              }`}
-            >
-              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
-                Path 2 · via the jsm CLI
-              </p>
-              <h3 className="mt-3 text-[1.2rem] font-semibold text-white">
-                The familiar path for people who already live in the terminal.
-              </h3>
-              <ol className="mt-5 space-y-4 text-slate-300">
-                <li>
-                  <strong>Step 1.</strong> Install or update <Mono>jsm</Mono>{" "}
-                  from{" "}
-                  <a
-                    href={JSM_HOME_HREF}
-                    className="text-cyan-400 underline underline-offset-2"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    jeffreys-skills.md
-                  </a>{" "}
-                  if it is not already on the machine you use for Claude or
-                  Codex.
-                </li>
-                <li>
-                  <strong>Step 2.</strong> Run <Mono>jsm login</Mono> once so
-                  the CLI is tied to the same paid account you use on the site.
-                </li>
-                <li>
-                  <strong>Step 3.</strong> Run{" "}
-                  <Mono>jsm install wills-and-estate-planning-skill</Mono>. The
-                  CLI downloads the signed bundle, verifies it, and installs it
-                  into <Mono>~/.claude/skills/</Mono> or{" "}
-                  <Mono>~/.codex/skills/</Mono> automatically.
-                </li>
-              </ol>
-              <p className="mt-5 text-sm leading-relaxed text-slate-300">
-                If Claude&apos;s plugin channel is available in your environment,
-                that route is fine too. The important contract is the same: the
-                signed bundle still comes from <J t="jsm">jeffreys-skills.md</J>
-                .
-              </p>
-            </div>
-
-            <div
-              id="install-panel-manual"
-              role="tabpanel"
-              aria-labelledby="install-tab-manual"
-              hidden={activeInstallPath !== "manual"}
-              className={`rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.07] via-white/[0.03] to-emerald-500/[0.06] p-5 md:p-6 ${
-                activeInstallPath === "manual" ? "block" : "hidden"
-              }`}
-            >
-              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
-                Path 3 · manual ZIP fallback
-              </p>
-              <h3 className="mt-3 text-[1.2rem] font-semibold text-white">
-                Use this only when Path 1 cannot complete the download.
-              </h3>
-              <ol className="mt-5 space-y-4 text-slate-300">
-                <li>
-                  <strong>Step 1.</strong> Open the same skill page and click{" "}
-                  <strong>Download ZIP</strong>. It uses the same signed,
-                  single-use install token under the hood.
-                </li>
-                <li>
-                  <strong>Step 2.</strong> Unzip the archive and drag the
-                  resulting <Mono>wills-and-estate-planning-skill/</Mono>{" "}
-                  folder into the right skills directory:
-                  <ul className="mt-3 list-disc pl-6 space-y-2 text-slate-300">
-                    <li>
-                      macOS / Linux: <Mono>~/.claude/skills/</Mono> for Claude
-                      Desktop, <Mono>~/.codex/skills/</Mono> or{" "}
-                      <Mono>~/.agents/skills/</Mono> for Codex
-                    </li>
-                    <li>
-                      Windows: <Mono>%USERPROFILE%\.claude\skills\</Mono>,{" "}
-                      <Mono>%USERPROFILE%\.codex\skills\</Mono>, or{" "}
-                      <Mono>%USERPROFILE%\.agents\skills\</Mono>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <strong>Step 3.</strong> If you are unsure where that folder
-                  lives, use the <strong>Reveal folder</strong> helper on the
-                  install card. Then reload skills exactly as in Path 1.
-                </li>
-              </ol>
-            </div>
-          </div>
+          <InstallFlowViz />
 
           <div className="sm-insight-card mt-8">
             <p className="text-[11px] font-mono text-purple-300 uppercase tracking-[0.25em] mb-3">
-              Why this works without a terminal
+              Why it works without a terminal
             </p>
             <p className="text-base md:text-lg leading-relaxed text-slate-200">
-              The agent <em>is</em> the terminal. You never type a command
-              yourself; you approve one. The URL embedded in the generated
-              prompt is tied to your paid account and expires after roughly ten
-              minutes, so copying that prompt onto someone else&apos;s machine
-              does not give them a reusable installer.
+              The agent is the terminal. You never type a command; you
+              approve one. The install prompt the dashboard generates is
+              tied to your paid account and expires after roughly ten
+              minutes, so copying it to someone else&apos;s machine does
+              not give them a reusable installer.
             </p>
           </div>
 
-          <Sub>If something goes wrong</Sub>
+          <p className="mt-6 text-[13px] md:text-sm text-slate-400">
+            <strong>Comfortable in a terminal?</strong> You can install via
+            the <Mono>jsm</Mono> CLI instead:{" "}
+            <Mono>jsm install wills-and-estate-planning-skill</Mono> after{" "}
+            <Mono>jsm login</Mono>. Same signed bundle, same outcome.
+            Everyone else should stick with the desktop-app flow above.
+          </p>
+        </EC>
+      </section>
 
-          <ul className="list-disc pl-6 space-y-2 text-slate-300">
+      <Divider />
+
+      {/* ========== WORKING FOLDER ========== */}
+      <section data-section="folder" className="pb-10 md:pb-14">
+        <EC>
+          <SectionHeader
+            id="folder"
+            eyebrow="Using the skill"
+            title="Make a folder, put documents in it, start the conversation."
+          />
+
+          <p>
+            Once the skill is installed, the whole workflow is:
+            one folder, one conversation, as many sittings as you need.
+            The agent remembers what you told it between sessions because
+            everything it writes lands in that folder.
+          </p>
+
+          <ol className="mt-6 space-y-6 text-slate-300">
             <li>
-              <strong>The code expired before I pasted it.</strong> Go back and
-              click <strong>Generate install prompt</strong> again. They are
-              intentionally short-lived.
+              <p className="text-base md:text-lg">
+                <strong className="text-white">1. Make a new folder on your computer.</strong>
+              </p>
+              <p className="mt-2 leading-relaxed">
+                Anywhere is fine. Your desktop, your Documents folder,
+                wherever. Call it something you will recognize later.{" "}
+                <Mono>my-estate-plan</Mono> is a reasonable default. This is
+                where everything will live: your input documents, the
+                drafts the skill produces, and the final packet for your
+                attorney.
+              </p>
+            </li>
+
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">
+                  2. Drop every document that matters into the folder.
+                </strong>
+              </p>
+              <p className="mt-2 leading-relaxed">
+                Messy is fine. The skill will organize it. What you want in
+                there: last year&apos;s tax return, a statement from each
+                brokerage / 401(k) / IRA / bank account, current beneficiary
+                designations on retirement accounts and life insurance, any
+                existing will or trust (even if it is old or wrong), deeds,
+                titles, and vehicle registrations, your passport for
+                identity reference, and a short list of the bank and crypto
+                accounts you have. Do not put your{" "}
+                <J t="crypto-seed">crypto seed phrase</J> itself in the
+                folder; a pointer to where it is stored is enough.
+              </p>
+            </li>
+
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">
+                  3. Open the folder in Claude Code or Codex Desktop.
+                </strong>
+              </p>
+              <p className="mt-2 leading-relaxed">
+                Launch the desktop app. File → Open Folder → pick the folder
+                you just made. The agent is now pointed at it and can read
+                any document you drop in.
+              </p>
+            </li>
+
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">4. Start the conversation.</strong>
+              </p>
+              <p className="mt-2 leading-relaxed">
+                In the chat box, type:{" "}
+                <em>
+                  &ldquo;please use the wills-and-estate-planning skill to
+                  help me draft an estate plan&rdquo;
+                </em>{" "}
+                and press enter. The skill loads. The agent asks its first
+                question. Answer honestly.
+              </p>
+            </li>
+
+            <li>
+              <p className="text-base md:text-lg">
+                <strong className="text-white">5. Answer its questions.</strong>
+              </p>
+              <p className="mt-2 leading-relaxed">
+                It will ask about the people in your life, what you own,
+                what you owe, who is currently named on each beneficiary
+                form, what you actually want to happen, and what keeps you
+                up at night. Take breaks whenever you need to; close the
+                app and come back tomorrow if you want. The agent remembers
+                the state of the conversation because the files it is
+                writing are all in your folder.
+              </p>
+            </li>
+          </ol>
+
+          <WorkingFolderViz />
+        </EC>
+      </section>
+
+      <Divider />
+
+      {/* ========== TIPS ========== */}
+      <section data-section="tips" className="pb-10 md:pb-14">
+        <EC>
+          <SectionHeader
+            id="tips"
+            eyebrow="Getting the most out of it"
+            title="A few things that actually matter."
+          />
+
+          <p>
+            Short list. These are the tips that separate a good first pass
+            from a great attorney-ready one.
+          </p>
+
+          <ul className="list-disc pl-6 space-y-3 text-slate-300 mt-4">
+            <li>
+              <strong>Run the skill at least twice.</strong> Treat the first
+              session as the rough draft. Start a second session in the same
+              folder a day later and say &ldquo;audit the estate-planning
+              packet you produced last time.&rdquo; The skill will review
+              its own work, catch missing facts, and flag weak spots.
+              Almost everyone finds something important on the second pass.
             </li>
             <li>
-              <strong>The agent refused the download step.</strong> Click
-              &ldquo;Allow&rdquo; on the permission dialog. If you denied it by
-              mistake, ask the agent to retry.
+              <strong>If you have both Claude Max and GPT Pro, use both.</strong>{" "}
+              Open the folder in Claude Code, run through the skill there.
+              Then open the same folder in Codex Desktop and run it again.
+              The two frontier models do not overlap perfectly: Claude often
+              surfaces family-dynamics and emotional-coordination issues
+              earlier; GPT often surfaces cold tax and structural issues
+              earlier. Compare the two packets. Merge the best of each.
             </li>
             <li>
-              <strong>The skill did not appear in the picker after reload.</strong>{" "}
-              Quit and reopen the desktop app once. If it still does not show,
-              use Path 3 to confirm the folder landed in the expected skills
-              directory.
+              <strong>
+                When it asks something you don&apos;t know, say so.
+              </strong>{" "}
+              &ldquo;I don&apos;t know&rdquo; and &ldquo;I need to check
+              with my spouse&rdquo; and &ldquo;I need to look that up&rdquo;
+              are good answers. The skill will explain the question, tell
+              you why it matters, and re-ask once you have the information.
+              Pretending to be certain when you are not is how mistakes
+              get baked into estate plans.
+            </li>
+            <li>
+              <strong>Save the final packet in your folder.</strong> It is
+              yours. Email the Attorney Engagement Brief plus whichever
+              supporting documents your attorney asks for. Keep the folder
+              itself backed up somewhere sane, the same way you would keep
+              your tax returns.
             </li>
           </ul>
         </EC>
