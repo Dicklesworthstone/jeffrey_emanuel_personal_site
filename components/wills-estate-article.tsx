@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import illustration from "@/assets/wills_estate_post_illustration.webp";
 import {
@@ -8,6 +14,7 @@ import {
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
+import { useReducedMotion } from "framer-motion";
 import {
   BookOpen,
   FileDown,
@@ -225,8 +232,48 @@ function Sub({
 }
 
 export function WillsEstateArticle() {
+  const prefersReducedMotion = useReducedMotion();
   const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+
+  const handleTocJump = (
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    id: string,
+  ) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.shiftKey
+    ) {
+      return;
+    }
+
+    const anchor = document.getElementById(id);
+    if (!anchor) return;
+
+    event.preventDefault();
+
+    const scrollToAnchor = (behavior: ScrollBehavior) => {
+      anchor.scrollIntoView({ behavior, block: "start" });
+    };
+
+    window.history.pushState(null, "", `#${id}`);
+    scrollToAnchor(prefersReducedMotion ? "auto" : "smooth");
+
+    // Re-apply the anchor jump after late dynamic mounts settle so the
+    // target section stays in view even if a visualization above it expands.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        scrollToAnchor("auto");
+      });
+    });
+    window.setTimeout(() => {
+      scrollToAnchor("auto");
+    }, 450);
+  };
 
   // Scroll progress bar
   useEffect(() => {
@@ -513,44 +560,54 @@ export function WillsEstateArticle() {
             <p className="sm-subheading">Contents</p>
             <ol>
               <li>
-                <a href="#install">
+                <a href="#install" onClick={(event) => handleTocJump(event, "install")}>
                   Install the skill (ninety seconds, no terminal)
                 </a>
               </li>
               <li>
-                <a href="#who">
+                <a href="#who" onClick={(event) => handleTocJump(event, "who")}>
                   Who this is for, and who it isn&apos;t
                 </a>
               </li>
               <li>
-                <a href="#insight">Why a will alone is not the plan</a>
+                <a href="#insight" onClick={(event) => handleTocJump(event, "insight")}>
+                  Why a will alone is not the plan
+                </a>
               </li>
               <li>
-                <a href="#intake">
+                <a href="#intake" onClick={(event) => handleTocJump(event, "intake")}>
                   The conversation: nine phases of intake
                 </a>
               </li>
               <li>
-                <a href="#produces">
+                <a href="#produces" onClick={(event) => handleTocJump(event, "produces")}>
                   Forty-five artifacts you walk away with
                 </a>
               </li>
               <li>
-                <a href="#workflow">The nine steps, in order</a>
+                <a href="#workflow" onClick={(event) => handleTocJump(event, "workflow")}>
+                  The nine steps, in order
+                </a>
               </li>
               <li>
-                <a href="#anti">
+                <a href="#anti" onClick={(event) => handleTocJump(event, "anti")}>
                   Anti-patterns: the parrot, the ex-spouse, the springing POA
                 </a>
               </li>
               <li>
-                <a href="#attorney">Handing off to a real attorney</a>
+                <a href="#attorney" onClick={(event) => handleTocJump(event, "attorney")}>
+                  Handing off to a real attorney
+                </a>
               </li>
               <li>
-                <a href="#faq">Questions you are about to ask</a>
+                <a href="#faq" onClick={(event) => handleTocJump(event, "faq")}>
+                  Questions you are about to ask
+                </a>
               </li>
               <li>
-                <a href="#pattern">A pattern, not a product</a>
+                <a href="#pattern" onClick={(event) => handleTocJump(event, "pattern")}>
+                  A pattern, not a product
+                </a>
               </li>
             </ol>
           </nav>
@@ -587,12 +644,12 @@ export function WillsEstateArticle() {
             </ul>
             <p className="mt-4 text-[12px] md:text-[13px] text-slate-400 leading-relaxed">
               <strong className="text-amber-200">Heads up:</strong> that URL
-              returns a 404 unless you are signed in to a jeffreys-skills.md
-              account with an active subscription. Sign up (or log in) at{" "}
-              <Mono>jeffreys-skills.md/dashboard</Mono> first. It&apos;s the
-              same account the install flow uses, so doing the sign-in step
-              now means the install button below will already know who you
-              are.
+              shows a page-not-found screen unless you are signed in to a
+              jeffreys-skills.md account with an active subscription. Sign up
+              (or log in) at <Mono>jeffreys-skills.md/dashboard</Mono> first.
+              It&apos;s the same account the install flow uses, so doing the
+              sign-in step now means the install button below will already
+              know who you are.
             </p>
           </div>
 
@@ -797,8 +854,8 @@ export function WillsEstateArticle() {
               jeffreys-skills.md/skills/wills-and-estate-planning-skill
             </a>{" "}
             in your browser. Make sure you are signed in — the skill page
-            returns a 404 if you are not. If you see a 404, sign in at the
-            dashboard first and reload.
+            shows a page-not-found screen if you are not. If you see that
+            screen, sign in at the dashboard first and reload.
           </p>
 
           <p>
@@ -819,7 +876,7 @@ export function WillsEstateArticle() {
           <p>
             <strong>Step 4.</strong> The agent will read the prompt, show you a
             &ldquo;Would you like to allow this command?&rdquo; dialog (for the
-            download), click <strong>Allow</strong>. Thirty seconds pass. The
+            download), click <strong>Allow</strong>. After a short wait, the
             agent will tell you the skill has been installed and ask you to
             reload skills. On Claude Desktop that is ⌘-Shift-P →
             &ldquo;Reload skills&rdquo;; on Codex Desktop, quit and reopen.
