@@ -563,9 +563,10 @@ export function WillsEstateArticle() {
       <section id="intro" data-section="intro" className="pb-10 md:pb-14">
         <EC>
           <p className="sm-drop-cap">
-            Almost everyone I know is eventually going to die without a serious
-            plan for what happens to their money, their house, their pets, their
-            data, or their kids. Some will leave handwritten notes a grieving
+            A surprising number of the people I know will eventually die
+            without a serious plan for what happens to their money, their
+            house, their pets, their data, or their kids. Some will leave
+            handwritten notes a grieving
             spouse cannot legally execute. Some will leave a will from 2011 that
             still names an ex. Some will leave nothing, and a county court will
             decide for them. This is not because they don&apos;t care.
