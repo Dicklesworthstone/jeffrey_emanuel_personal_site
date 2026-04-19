@@ -330,7 +330,8 @@ export function WillsEstateArticle() {
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
               One skill. Twelve axioms. A structured intake that turns a
-              chaotic family situation into an attorney-ready handoff package.
+              chaotic family situation into a handoff packet for attorney
+              review.
             </p>
 
             {/* Illustration */}
@@ -473,7 +474,7 @@ export function WillsEstateArticle() {
             of the savings can come from. Exact rates vary wildly by state and
             firm. The point is not a guaranteed number. The point is that you
             can spend a Saturday with your agent and show up to your actual
-            lawyer&apos;s office with the packet already done.
+            lawyer&apos;s office with the packet already organized.
           </p>
 
           <p>
@@ -2011,9 +2012,9 @@ jsm install wills-and-estate-planning-skill`}
                 Yes. For anyone with more than a trivial estate, minor
                 children, a blended family, a business, disability in the
                 family, or unusual circumstances, you want a real attorney.
-                The skill can make that attorney&apos;s first meeting
-                dramatically shorter and better prepared. It does not replace
-                the meeting.
+                The skill can make that attorney&apos;s first meeting more
+                efficient and better prepared. It does not replace the
+                meeting.
               </p>
             </div>
           </details>
