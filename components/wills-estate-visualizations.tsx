@@ -3849,7 +3849,10 @@ export function InstallFlowViz() {
                     "group relative flex w-full min-h-[11rem] cursor-pointer flex-col rounded-2xl border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                     isExpanded
                       ? cn(step.accentBorder, step.accentBg, "focus-visible:ring-white/80")
-                      : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-white/60",
+                      : cn(
+                          "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] focus-visible:ring-white/60",
+                          prefersReducedMotion ? "" : "hover:scale-[1.02] active:scale-[0.98]",
+                        ),
                   )}
                 >
                   <div className="flex items-center justify-between gap-3">
