@@ -1956,18 +1956,6 @@ export function DeliverablesTreeViz() {
     [expandedFolders, groupedLeaves],
   );
 
-  useEffect(() => {
-    if (!selectedLeaf) {
-      return;
-    }
-
-    setExpandedFolders((current) =>
-      current[selectedLeaf.folder]
-        ? current
-        : { ...current, [selectedLeaf.folder]: true },
-    );
-  }, [selectedLeaf]);
-
   const focusTreeItem = (itemId: string) => {
     treeItemRefs.current[itemId]?.focus();
   };
@@ -2238,48 +2226,82 @@ export function DeliverablesTreeViz() {
                   const meta = DELIVERABLE_FOLDER_META[folder];
                   return (
                     <div key={folder} className="rounded-[8px] border border-white/10 bg-white/[0.025] p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 text-white">
-                          <FolderTree className={cn("h-4 w-4", meta.accent)} />
+                      <button
+                        type="button"
+                        role="treeitem"
+                        aria-expanded={expandedFolders[folder]}
+                        aria-level={1}
+                        aria-selected={selectedLeaf?.folder === folder}
+                        ref={(node) => {
+                          treeItemRefs.current[`folder:${folder}`] = node;
+                        }}
+                        onClick={() => setFolderExpanded(folder)}
+                        onKeyDown={(event) => handleFolderKeyDown(event, folder, leaves)}
+                        className="flex w-full items-center justify-between gap-3 rounded-[8px] border border-transparent px-2 py-1 text-left transition focus:outline-none focus-visible:border-white/15 focus-visible:ring-2 focus-visible:ring-white/60"
+                      >
+                        <div className="flex min-w-0 items-center gap-2 text-white">
+                          <ArrowRight
+                            className={cn(
+                              "h-4 w-4 shrink-0 text-slate-400",
+                              prefersReducedMotion ? "" : "transition-transform",
+                              expandedFolders[folder] ? "rotate-90" : "",
+                            )}
+                            aria-hidden="true"
+                          />
+                          <FolderTree className={cn("h-4 w-4 shrink-0", meta.accent)} />
                           <span className="font-mono text-sm">{meta.title}</span>
                         </div>
                         <span className={cn("rounded-full border px-2.5 py-1 text-[10px] font-semibold", meta.badge)}>
                           {leaves.length} shown
                         </span>
-                      </div>
+                      </button>
 
-                      <div role="group" className="mt-3 space-y-2 border-l border-white/10 pl-3">
-                        {leaves.map((leaf) => {
-                          const path = deliverablePath(leaf);
-                          const selected = selectedLeaf ? deliverablePath(selectedLeaf) === path : false;
-                          const modeDependent = !leaf.modes.includes("core");
-                          return (
-                            <button
-                              key={path}
-                              type="button"
-                              role="treeitem"
-                              aria-selected={selected}
-                              onClick={() => setSelectedPath(path)}
-                              className={cn(
-                                "w-full rounded-[8px] border p-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-                                selected ? meta.active : modeDependent ? meta.dependent : meta.inactive,
-                              )}
-                            >
-                              <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="font-mono text-sm font-semibold text-white">{leaf.file}</p>
-                                  <p className="mt-1 text-xs leading-5 text-slate-400">{leaf.label}</p>
+                      {expandedFolders[folder] ? (
+                        <div role="group" className="mt-3 space-y-2 border-l border-white/10 pl-3">
+                          {leaves.map((leaf) => {
+                            const path = deliverablePath(leaf);
+                            const selected = selectedLeaf ? deliverablePath(selectedLeaf) === path : false;
+                            const modeSummary = summarizeDeliverableModes(leaf.modes);
+                            return (
+                              <button
+                                key={path}
+                                type="button"
+                                role="treeitem"
+                                aria-level={2}
+                                aria-selected={selected}
+                                ref={(node) => {
+                                  treeItemRefs.current[`leaf:${path}`] = node;
+                                }}
+                                onClick={() => setSelectedPath(path)}
+                                onKeyDown={(event) => handleLeafKeyDown(event, path, leaf.folder)}
+                                className={cn(
+                                  "w-full rounded-[8px] border p-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                                  selected
+                                    ? meta.active
+                                    : modeSummary
+                                      ? meta.dependent
+                                      : meta.inactive,
+                                )}
+                              >
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="font-mono text-sm font-semibold text-white">{leaf.file}</p>
+                                    <p className="mt-1 text-xs leading-5 text-slate-400">{leaf.label}</p>
+                                  </div>
+                                  {modeSummary ? (
+                                    <span
+                                      title={modeSummary.title}
+                                      className="rounded-full border border-amber-300/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100"
+                                    >
+                                      {modeSummary.label}
+                                    </span>
+                                  ) : null}
                                 </div>
-                                {modeDependent ? (
-                                  <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100">
-                                    Mode-dependent
-                                  </span>
-                                ) : null}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })}
@@ -2309,6 +2331,15 @@ export function DeliverablesTreeViz() {
                     {selectedStyles.label}
                   </span>
                   <span className="font-mono text-sm text-slate-300">{deliverablePath(selectedLeaf)}</span>
+                  <a
+                    href={DELIVERABLE_SKILL_CATALOG_HREF}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-300/30 hover:text-cyan-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  >
+                    View in skill catalog
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
                 </div>
 
                 <h4 className="mt-4 text-2xl font-semibold tracking-tight text-white">{selectedLeaf.label}</h4>
@@ -2360,6 +2391,7 @@ export function DeliverablesTreeViz() {
                   setCategoryFilter("all");
                   setModeFilter("all");
                   setQuery("");
+                  setExpandedFolders((current) => ({ ...current, [leaf.folder]: true }));
                   setSelectedPath(deliverablePath(leaf));
                 }}
                 className={cn(
@@ -2504,22 +2536,122 @@ const antiPatternIconMap: Record<string, ReactNode> = {
   ShieldAlert: <ShieldAlert className="h-4 w-4" aria-hidden="true" />,
 };
 
+type AntiPatternCardData = (typeof antiPatterns)[number];
+
+function AntiPatternCardFront({
+  pattern,
+  index,
+  icon,
+  hintText,
+  className,
+  style,
+  hidden,
+}: {
+  pattern: AntiPatternCardData;
+  index: number;
+  icon: ReactNode;
+  hintText: string;
+  className: string;
+  style?: React.CSSProperties;
+  hidden?: boolean;
+}) {
+  return (
+    <div className={className} style={style} aria-hidden={hidden}>
+      <div className="space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/20 bg-rose-400/12 text-rose-100">
+            {icon}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        </div>
+        <div>
+          <h4 className="text-lg font-semibold leading-6 text-white">{pattern.name}</h4>
+          <p className="mt-3 text-sm leading-7 text-slate-300">{pattern.hook}</p>
+        </div>
+      </div>
+      <div className="mt-6 flex items-center justify-between gap-3 text-xs text-slate-400">
+        <span>{hintText}</span>
+        <ArrowRight className="h-4 w-4 text-rose-200 transition group-hover:translate-x-0.5" />
+      </div>
+    </div>
+  );
+}
+
+function AntiPatternCardBack({
+  pattern,
+  icon,
+  className,
+  style,
+  hidden,
+}: {
+  pattern: AntiPatternCardData;
+  icon: ReactNode;
+  className: string;
+  style?: React.CSSProperties;
+  hidden?: boolean;
+}) {
+  return (
+    <div className={className} style={style} aria-hidden={hidden}>
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/25 bg-black/20 text-rose-100">
+          {icon}
+        </span>
+        <span className="rounded-full border border-rose-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
+          Catch
+        </span>
+      </div>
+
+      <div className="mt-5 space-y-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
+            What actually goes wrong
+          </p>
+          <p className="mt-2 text-sm leading-7 text-slate-100">{pattern.explanation}</p>
+        </div>
+        <div className="rounded-[8px] border border-rose-300/15 bg-black/20 p-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
+            Worst case
+          </p>
+          <p className="mt-2 text-sm leading-6 text-rose-50">{pattern.worstCase}</p>
+        </div>
+        <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+            Catching subagent
+          </p>
+          <p className="mt-2 font-mono text-sm text-cyan-200">{pattern.subagent}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AntiPatternCardsViz() {
   const prefersReducedMotion = useReducedMotion();
   const [flippedCards, setFlippedCards] = useState<string[]>([antiPatterns[0].name]);
   const pointerFocusRef = useRef(false);
+  const hoverOnlyRef = useRef(new Set<string>());
   const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.32, ease: "easeOut" as const };
 
-  const setFlipped = (name: string, flipped: boolean) => {
+  const hoverFlip = (name: string) => {
     setFlippedCards((current) => {
-      const alreadyFlipped = current.includes(name);
-      if (flipped && !alreadyFlipped) return [...current, name];
-      if (!flipped && alreadyFlipped) return current.filter((item) => item !== name);
-      return current;
+      if (current.includes(name)) return current;
+      hoverOnlyRef.current.add(name);
+      return [...current, name];
     });
   };
 
+  const hoverUnflip = (name: string) => {
+    if (!hoverOnlyRef.current.has(name)) return;
+    hoverOnlyRef.current.delete(name);
+    setFlippedCards((current) =>
+      current.includes(name) ? current.filter((item) => item !== name) : current,
+    );
+  };
+
   const toggleCard = (name: string) => {
+    hoverOnlyRef.current.delete(name);
     setFlippedCards((current) =>
       current.includes(name) ? current.filter((item) => item !== name) : [...current, name],
     );
@@ -2552,7 +2684,7 @@ export function AntiPatternCardsViz() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {antiPatterns.map((pattern, index) => {
             const flipped = flippedCards.includes(pattern.name);
             const icon = antiPatternIconMap[pattern.icon] ?? <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
@@ -2566,84 +2698,70 @@ export function AntiPatternCardsViz() {
                 onPointerDown={() => {
                   pointerFocusRef.current = true;
                 }}
+                onMouseEnter={() => hoverFlip(pattern.name)}
+                onMouseLeave={() => {
+                  pointerFocusRef.current = false;
+                  hoverUnflip(pattern.name);
+                }}
                 onClick={() => toggleCard(pattern.name)}
                 onFocus={() => {
                   if (pointerFocusRef.current) {
                     pointerFocusRef.current = false;
-                    return;
                   }
-                  setFlipped(pattern.name, true);
                 }}
                 onBlur={() => {
                   pointerFocusRef.current = false;
                 }}
                 className="group relative min-h-[26rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
               >
-                <motion.div
-                  animate={{ rotateY: flipped ? 180 : 0 }}
-                  transition={transition}
-                  className="absolute inset-0 rounded-[8px]"
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <div
-                    className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition group-hover:border-rose-300/25"
-                    style={{ backfaceVisibility: "hidden" }}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/20 bg-rose-400/12 text-rose-100">
-                          {icon}
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-semibold leading-6 text-white">{pattern.name}</h4>
-                        <p className="mt-3 text-sm leading-7 text-slate-300">{pattern.hook}</p>
-                      </div>
-                    </div>
-                    <div className="mt-6 flex items-center justify-between gap-3 text-xs text-slate-400">
-                      <span>Tap or focus to flip</span>
-                      <ArrowRight className="h-4 w-4 text-rose-200 transition group-hover:translate-x-0.5" />
-                    </div>
+                {prefersReducedMotion ? (
+                  <div className="absolute inset-0 rounded-[8px]">
+                    <AntiPatternCardFront
+                      pattern={pattern}
+                      index={index}
+                      icon={icon}
+                      hintText="Hover, tap, or press Space"
+                      hidden={flipped}
+                      className={cn(
+                        "absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition-opacity duration-200 group-hover:border-rose-300/25",
+                        flipped ? "pointer-events-none opacity-0" : "opacity-100",
+                      )}
+                    />
+                    <AntiPatternCardBack
+                      pattern={pattern}
+                      icon={icon}
+                      hidden={!flipped}
+                      className={cn(
+                        "absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 shadow-[0_18px_44px_rgba(244,63,94,0.12)] transition-opacity duration-200",
+                        flipped ? "opacity-100" : "pointer-events-none opacity-0",
+                      )}
+                    />
                   </div>
-
-                  <div
-                    className="absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 shadow-[0_18px_44px_rgba(244,63,94,0.12)]"
-                    style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                ) : (
+                  <motion.div
+                    animate={{ rotateY: flipped ? 180 : 0 }}
+                    transition={transition}
+                    className="absolute inset-0 rounded-[8px]"
+                    style={{ transformStyle: "preserve-3d" }}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/25 bg-black/20 text-rose-100">
-                        {icon}
-                      </span>
-                      <span className="rounded-full border border-rose-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
-                        Catch
-                      </span>
-                    </div>
-
-                    <div className="mt-5 space-y-4">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
-                          What actually goes wrong
-                        </p>
-                        <p className="mt-2 text-sm leading-7 text-slate-100">{pattern.explanation}</p>
-                      </div>
-                      <div className="rounded-[8px] border border-rose-300/15 bg-black/20 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
-                          Worst case
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-rose-50">{pattern.worstCase}</p>
-                      </div>
-                      <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                          Catching subagent
-                        </p>
-                        <p className="mt-2 font-mono text-sm text-cyan-200">{pattern.subagent}</p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                    <AntiPatternCardFront
+                      pattern={pattern}
+                      index={index}
+                      icon={icon}
+                      hintText="Hover, tap, or press Space"
+                      hidden={flipped}
+                      className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition group-hover:border-rose-300/25"
+                      style={{ backfaceVisibility: "hidden" }}
+                    />
+                    <AntiPatternCardBack
+                      pattern={pattern}
+                      icon={icon}
+                      hidden={!flipped}
+                      className="absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 shadow-[0_18px_44px_rgba(244,63,94,0.12)]"
+                      style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                    />
+                  </motion.div>
+                )}
               </button>
             );
           })}

@@ -177,6 +177,67 @@ test.describe("Wills & Estate Planning Article", () => {
     runtime.assertClean();
   });
 
+  test("deliverables tree supports keyboard navigation and links back to the catalog", async ({ page }) => {
+    const scenario = "deliverables-tree";
+    const runtime = captureRuntimeErrors(page);
+
+    await visitArticle(page, scenario);
+
+    const viz = page.locator('[data-viz="deliverables-tree"]');
+    await viz.scrollIntoViewIfNeeded();
+
+    const analysesFolder = viz.getByRole("treeitem", { name: /analyses\//i }).first();
+    await analysesFolder.focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(viz.getByRole("treeitem", { name: /current-document-audit\.md/i })).toHaveCount(0);
+
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+
+    const firstAnalysisLeaf = viz.getByRole("treeitem", { name: /current-document-audit\.md/i });
+    await expect(firstAnalysisLeaf).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await expect(viz.getByRole("heading", { level: 4, name: /current document audit/i })).toBeVisible();
+    await expect(viz.getByRole("link", { name: /view in skill catalog/i })).toHaveAttribute(
+      "href",
+      /jeffreys-skills\.md\/skills\/wills-and-estate-planning-skill/i,
+    );
+
+    runtime.assertClean();
+  });
+
+  test("anti-pattern cards flip on hover and keyboard", async ({ page }) => {
+    const scenario = "anti-pattern-cards";
+    const runtime = captureRuntimeErrors(page);
+
+    await visitArticle(page, scenario);
+
+    const viz = page.locator('[data-viz="anti-pattern-cards"]');
+    await viz.scrollIntoViewIfNeeded();
+
+    const firstCard = viz.getByRole("button", {
+      name: /anti-pattern card: the ex-spouse still on the 401\(k\)/i,
+    });
+    await firstCard.hover();
+    await expect(
+      viz.getByText(/ERISA retirement plans follow the beneficiary designation on file/i),
+    ).toBeVisible();
+
+    await page.mouse.move(0, 0);
+
+    const secondCard = viz.getByRole("button", {
+      name: /anti-pattern card: the revocable trust that owns nothing/i,
+    });
+    await secondCard.focus();
+    await page.keyboard.press("Space");
+    await expect(
+      viz.getByText(/Signing a revocable trust does not fund it/i),
+    ).toBeVisible();
+
+    runtime.assertClean();
+  });
+
   test("passes section-level WCAG 2.1 AA accessibility scans", async ({ page }) => {
     const scenario = "a11y";
 
