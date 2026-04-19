@@ -504,7 +504,7 @@ export function WillsEstateArticle() {
                 },
                 {
                   icon: HandCoins,
-                  label: "Works at $500/mo or $500M",
+                  label: "Works at $500K or $500M",
                   tone: "emerald" as const,
                 },
               ].map(({ icon: Icon, label, tone }) => (
