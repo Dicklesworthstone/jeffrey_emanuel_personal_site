@@ -2241,6 +2241,28 @@ jsm install wills-and-estate-planning-skill`}
             above is the only barrier left.
           </p>
 
+          <p>
+            If you want the other concrete proof point for this pattern, start
+            at{" "}
+            <a
+              href="https://jeffreys-skills.md/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline underline-offset-2"
+            >
+              jeffreys-skills.md/dashboard
+            </a>{" "}
+            and then read{" "}
+            <a
+              href="/writing/tax_gpt_using_ai_for_tax_prep"
+              className="text-cyan-400 underline underline-offset-2"
+            >
+              the tax-preparation article
+            </a>
+            . Tax prep was the first place this shape of problem became obvious
+            to me; estate planning is the second.
+          </p>
+
           <div className="sm-sign-off">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 via-cyan-500/20 to-emerald-500/20 border border-white/10">
