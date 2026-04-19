@@ -2170,6 +2170,7 @@ export function DeliverablesTreeViz() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search files, snippets, modes, or subagents"
+                aria-describedby="deliverables-filter-count"
                 className="mt-2 w-full rounded-[8px] border border-white/10 bg-[#081525] px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-violet-300/40 focus:ring-2 focus:ring-violet-300/20"
               />
             </label>
@@ -2246,7 +2247,7 @@ export function DeliverablesTreeViz() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   my-estate-plan/
                 </p>
-                <p className="mt-1 text-sm text-slate-300">
+                <p id="deliverables-filter-count" className="mt-1 text-sm text-slate-300" role="status" aria-live="polite">
                   Showing <span className="font-semibold text-white">{filteredLeaves.length}</span> of{" "}
                   <span className="font-semibold text-white">{deliverableTreeLeaves.length}</span> files
                 </p>
@@ -2273,7 +2274,7 @@ export function DeliverablesTreeViz() {
                         }}
                         onClick={() => setFolderExpanded(folder)}
                         onKeyDown={(event) => handleFolderKeyDown(event, folder, leaves)}
-                        className="flex w-full items-center justify-between gap-3 rounded-[8px] border border-transparent px-2 py-1 text-left transition focus:outline-none focus-visible:border-white/15 focus-visible:ring-2 focus-visible:ring-white/60"
+                        className="flex w-full min-h-[2.75rem] cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-transparent px-2 py-2 text-left transition-all duration-150 hover:bg-white/[0.04] focus:outline-none focus-visible:border-white/15 focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
                       >
                         <div className="flex min-w-0 items-center gap-2 text-white">
                           <ArrowRight
@@ -2310,13 +2311,14 @@ export function DeliverablesTreeViz() {
                                 }}
                                 onClick={() => setSelectedPath(path)}
                                 onKeyDown={(event) => handleLeafKeyDown(event, path, leaf.folder)}
+                                aria-label={`${leaf.file} — ${leaf.label}`}
                                 className={cn(
-                                  "w-full rounded-[8px] border p-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                                  "w-full min-h-[2.75rem] cursor-pointer rounded-[8px] border p-3 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                                   selected
                                     ? meta.active
                                     : modeSummary
-                                      ? meta.dependent
-                                      : meta.inactive,
+                                      ? cn(meta.dependent, "hover:scale-[1.01] active:scale-[0.99]")
+                                      : cn(meta.inactive, "hover:scale-[1.01] active:scale-[0.99]"),
                                 )}
                               >
                                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -2430,8 +2432,9 @@ export function DeliverablesTreeViz() {
                   setExpandedFolders((current) => ({ ...current, [leaf.folder]: true }));
                   setSelectedPath(deliverablePath(leaf));
                 }}
+                aria-label={`Spotlight: ${leaf.file} — ${leaf.description}`}
                 className={cn(
-                  "rounded-[8px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                  "cursor-pointer rounded-[8px] border p-4 text-left transition-all duration-150 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                   meta.inactive,
                 )}
               >
@@ -2593,23 +2596,31 @@ function AntiPatternCardFront({
 }) {
   return (
     <div className={className} style={style} aria-hidden={hidden}>
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="flex items-start justify-between gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/20 bg-rose-400/12 text-rose-100">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-rose-300/20 bg-rose-400/12 text-rose-100 shadow-[0_10px_24px_rgba(244,63,94,0.15)]">
             {icon}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
-            {String(index + 1).padStart(2, "0")}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full border border-rose-300/20 bg-rose-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
+              Failure mode
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+          </div>
         </div>
         <div>
-          <h4 className="text-lg font-semibold leading-6 text-white">{pattern.name}</h4>
-          <p className="mt-3 text-sm leading-7 text-slate-300">{pattern.hook}</p>
+          <h4 className="text-xl font-semibold leading-7 tracking-tight text-white">{pattern.name}</h4>
+          <p className="mt-3 text-[15px] leading-7 text-slate-200">{pattern.hook}</p>
         </div>
       </div>
-      <div className="mt-6 flex items-center justify-between gap-3 text-xs text-slate-400">
-        <span>{hintText}</span>
-        <ArrowRight className="h-4 w-4 text-rose-200 transition group-hover:translate-x-0.5" aria-hidden="true" />
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs text-slate-400">
+        <span className="max-w-[16rem] leading-5">{hintText}</span>
+        <ArrowRight
+          className="h-4 w-4 text-rose-200 motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:translate-x-1"
+          aria-hidden="true"
+        />
       </div>
     </div>
   );
@@ -2631,12 +2642,17 @@ function AntiPatternCardBack({
   return (
     <div className={className} style={style} aria-hidden={hidden}>
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-rose-300/25 bg-black/20 text-rose-100">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-rose-300/25 bg-black/20 text-rose-100 shadow-[0_10px_24px_rgba(244,63,94,0.14)]">
           {icon}
         </span>
-        <span className="rounded-full border border-rose-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
-          Catch
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-rose-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
+            Catch
+          </span>
+          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
+            Mitigation path
+          </span>
+        </div>
       </div>
 
       <div className="mt-5 space-y-4">
@@ -2644,9 +2660,9 @@ function AntiPatternCardBack({
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
             What actually goes wrong
           </p>
-          <p className="mt-2 text-sm leading-7 text-slate-100">{pattern.explanation}</p>
+          <p className="mt-2 text-[15px] leading-7 text-slate-100">{pattern.explanation}</p>
         </div>
-        <div className="rounded-[8px] border border-rose-300/15 bg-black/20 p-3">
+        <div className="rounded-[8px] border border-rose-300/20 bg-gradient-to-r from-rose-400/[0.12] via-rose-400/[0.06] to-transparent p-3.5 shadow-[0_12px_30px_rgba(244,63,94,0.10)]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
             Worst case
           </p>
@@ -2670,7 +2686,9 @@ export function AntiPatternCardsViz() {
   const cardButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const pointerFocusRef = useRef(false);
   const hoverOnlyRef = useRef(new Set<string>());
-  const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.32, ease: "easeOut" as const };
+  const transition = prefersReducedMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 180, damping: 20, mass: 0.75 };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -2819,91 +2837,113 @@ export function AntiPatternCardsViz() {
             const icon = antiPatternIconMap[pattern.icon] ?? <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
 
             return (
-              <button
+              <motion.div
                 key={pattern.name}
-                ref={(node) => {
-                  cardButtonRefs.current[index] = node;
-                }}
-                type="button"
-                aria-pressed={flipped}
-                aria-describedby={`anti-pattern-interaction-help anti-pattern-card-status-${index}`}
-                aria-label={`${flipped ? "Show front of" : "Show back of"} anti-pattern card: ${pattern.name}`}
-                onPointerDown={(event) => {
-                  pointerFocusRef.current = event.pointerType !== "touch";
-                }}
-                onMouseEnter={() => {
-                  if (hasFinePointer) hoverFlip(pattern.name);
-                }}
-                onMouseLeave={() => {
-                  pointerFocusRef.current = false;
-                  if (hasFinePointer) hoverUnflip(pattern.name);
-                }}
-                onKeyDown={(event) => handleCardKeyDown(index, event)}
-                onClick={() => toggleCard(pattern.name)}
-                onFocus={() => {
-                  if (pointerFocusRef.current) {
-                    pointerFocusRef.current = false;
-                  }
-                }}
-                onBlur={() => {
-                  pointerFocusRef.current = false;
-                }}
-                className="group relative min-h-[26rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+                whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                whileHover={
+                  prefersReducedMotion
+                    ? undefined
+                    : { y: -6, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const } }
+                }
+                viewport={{ once: true, amount: 0.18 }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { duration: 0.42, delay: index * 0.03, ease: [0.22, 1, 0.36, 1] as const }
+                }
+                className="h-full"
               >
-                {prefersReducedMotion ? (
-                  <div className="absolute inset-0 rounded-[8px]">
-                    <AntiPatternCardFront
-                      pattern={pattern}
-                      index={index}
-                      icon={icon}
-                      hintText={hintText}
-                      hidden={flipped}
-                      className={cn(
-                        "absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition-opacity duration-200 group-hover:border-rose-300/25",
-                        flipped ? "pointer-events-none opacity-0" : "opacity-100",
-                      )}
-                    />
-                    <AntiPatternCardBack
-                      pattern={pattern}
-                      icon={icon}
-                      hidden={!flipped}
-                      className={cn(
-                        "absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 shadow-[0_18px_44px_rgba(244,63,94,0.12)] transition-opacity duration-200",
-                        flipped ? "opacity-100" : "pointer-events-none opacity-0",
-                      )}
-                    />
-                  </div>
-                ) : (
-                  <motion.div
-                    animate={{ rotateY: flipped ? 180 : 0 }}
-                    transition={transition}
-                    className="absolute inset-0 rounded-[8px]"
-                    style={{ transformStyle: "preserve-3d" }}
-                  >
-                    <AntiPatternCardFront
-                      pattern={pattern}
-                      index={index}
-                      icon={icon}
-                      hintText={hintText}
-                      hidden={flipped}
-                      className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition group-hover:border-rose-300/25"
-                      style={{ backfaceVisibility: "hidden" }}
-                    />
-                    <AntiPatternCardBack
-                      pattern={pattern}
-                      icon={icon}
-                      hidden={!flipped}
-                      className="absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 shadow-[0_18px_44px_rgba(244,63,94,0.12)]"
-                      style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-                    />
-                  </motion.div>
-                )}
-                <span id={`anti-pattern-card-status-${index}`} className="sr-only">
-                  {flipped
-                    ? "Back of card open. Press Space to return to the front summary."
-                    : "Front of card visible. Press Space to reveal what goes wrong."}
-                </span>
-              </button>
+                <button
+                  ref={(node) => {
+                    cardButtonRefs.current[index] = node;
+                  }}
+                  type="button"
+                  aria-pressed={flipped}
+                  aria-describedby={`anti-pattern-interaction-help anti-pattern-card-status-${index}`}
+                  aria-label={`${flipped ? "Show front of" : "Show back of"} anti-pattern card: ${pattern.name}`}
+                  onPointerDown={(event) => {
+                    pointerFocusRef.current = event.pointerType !== "touch";
+                  }}
+                  onMouseEnter={() => {
+                    if (hasFinePointer) hoverFlip(pattern.name);
+                  }}
+                  onMouseLeave={() => {
+                    pointerFocusRef.current = false;
+                    if (hasFinePointer) hoverUnflip(pattern.name);
+                  }}
+                  onKeyDown={(event) => handleCardKeyDown(index, event)}
+                  onClick={() => toggleCard(pattern.name)}
+                  onFocus={() => {
+                    if (pointerFocusRef.current) {
+                      pointerFocusRef.current = false;
+                    }
+                  }}
+                  onBlur={() => {
+                    pointerFocusRef.current = false;
+                  }}
+                  className={cn(
+                    "group relative min-h-[26rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                    flipped
+                      ? "shadow-[0_26px_60px_rgba(244,63,94,0.16)]"
+                      : "shadow-[0_18px_44px_rgba(0,0,0,0.16)]",
+                  )}
+                >
+                  {prefersReducedMotion ? (
+                    <div className="absolute inset-0 rounded-[8px]">
+                      <AntiPatternCardFront
+                        pattern={pattern}
+                        index={index}
+                        icon={icon}
+                        hintText={hintText}
+                        hidden={flipped}
+                        className={cn(
+                          "absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 transition-opacity duration-200 group-hover:border-rose-300/25",
+                          flipped ? "pointer-events-none opacity-0" : "opacity-100",
+                        )}
+                      />
+                      <AntiPatternCardBack
+                        pattern={pattern}
+                        icon={icon}
+                        hidden={!flipped}
+                        className={cn(
+                          "absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 transition-opacity duration-200",
+                          flipped ? "opacity-100" : "pointer-events-none opacity-0",
+                        )}
+                      />
+                    </div>
+                  ) : (
+                    <motion.div
+                      animate={{ rotateY: flipped ? 180 : 0 }}
+                      transition={transition}
+                      className="absolute inset-0 rounded-[8px]"
+                      style={{ transformStyle: "preserve-3d" }}
+                    >
+                      <AntiPatternCardFront
+                        pattern={pattern}
+                        index={index}
+                        icon={icon}
+                        hintText={hintText}
+                        hidden={flipped}
+                        className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 transition group-hover:border-rose-300/25"
+                        style={{ backfaceVisibility: "hidden" }}
+                      />
+                      <AntiPatternCardBack
+                        pattern={pattern}
+                        icon={icon}
+                        hidden={!flipped}
+                        className="absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5"
+                        style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                      />
+                    </motion.div>
+                  )}
+                  <span id={`anti-pattern-card-status-${index}`} className="sr-only">
+                    {flipped
+                      ? "Back of card open. Press Space to return to the front summary."
+                      : "Front of card visible. Press Space to reveal what goes wrong."}
+                  </span>
+                </button>
+              </motion.div>
             );
           })}
         </div>
