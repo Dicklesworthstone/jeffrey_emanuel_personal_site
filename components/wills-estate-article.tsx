@@ -1721,21 +1721,50 @@ jsm install wills-and-estate-planning-skill`}
             stable. Those are the parts you can trust. The volatile law —
             current thresholds, current formalities, current{" "}
             <J t="portability">portability</J> mechanics, current domicile
-            rules — has to be verified against primary sources before it gets
-            treated as final. The skill&apos;s output contract includes a file
-            called <Mono>official-source-log.md</Mono> in which every live-law
-            lookup is recorded with the source URL and the date it was checked.
-            Your attorney can audit it. Your future self, doing a plan review
-            in 2028, can see exactly which pieces of your 2026 analysis need
+            rules — is handled under what the skill calls its{" "}
+            <strong>verification-first discipline</strong>. Nothing in that
+            category gets treated as final until it has been checked against
+            primary sources in the current session. The skill&apos;s output
+            contract includes a file called{" "}
+            <Mono>official-source-log.md</Mono> in which every live-law lookup
+            is recorded with the source URL and the date it was checked. Your
+            attorney can audit it. Your future self, doing a plan review in
+            2028, can see exactly which pieces of your 2026 analysis need
             rechecking.
           </p>
 
+          <ul className="list-disc pl-6 space-y-2 text-slate-300">
+            <li>
+              Federal transfer-tax thresholds, annual exclusion amounts, and{" "}
+              <J t="portability">portability</J> mechanics
+            </li>
+            <li>
+              State estate-tax and inheritance-tax thresholds, plus domicile
+              rules for anyone with assets in more than one jurisdiction
+            </li>
+            <li>
+              Execution formalities: witness counts, notarization, self-proving
+              affidavit rules, and whether electronic wills are recognized
+            </li>
+            <li>
+              Spousal-rights questions such as elective share, community
+              property, and whether a transfer-on-death or Lady Bird deed is
+              even available in the state at issue
+            </li>
+            <li>
+              Volatile edge-case overlays such as{" "}
+              <J t="medicaid-lookback">Medicaid lookback</J> windows,
+              POLST/MOLST naming, and <J t="nfa">NFA</J> transfer rules
+            </li>
+          </ul>
+
           <p>
-            That discipline is not paranoia; it is the only defensible posture
+            That is not scrupulous overkill; it is the only defensible posture
             for an AI-driven tool in a volatile-law domain. If the skill ever
-            recommended something based on stale law and a family lost real
-            money over it, the damage would be irreparable. The discipline is
-            the alternative.
+            recommended a strategy that was correct in 2022 but wrong under the
+            current year&apos;s law, the result would not be a cute hallucination
+            bug. It would be a family losing real money, real time, or both.
+            Verification-first is the alternative.
           </p>
 
           <Sub eyebrow="The handoff">What your attorney receives</Sub>
