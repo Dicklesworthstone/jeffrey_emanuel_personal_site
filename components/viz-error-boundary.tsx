@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useReducedMotion } from "framer-motion";
 import ErrorBoundary from "@/components/error-boundary";
 import { AlertTriangle } from "lucide-react";
 
@@ -18,9 +19,21 @@ function VizFallback() {
 }
 
 function VizSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
-    <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-slate-800/40 bg-slate-900/20 px-6 py-8">
-      <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-cyan-400" />
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-[300px] items-center justify-center rounded-xl border border-slate-800/40 bg-slate-900/20 px-6 py-8"
+    >
+      <span className="sr-only">Loading visualization</span>
+      <div
+        aria-hidden="true"
+        className={`h-5 w-5 rounded-full border-2 border-slate-600 border-t-cyan-400 ${
+          prefersReducedMotion ? "" : "animate-spin"
+        }`}
+      />
     </div>
   );
 }
