@@ -2277,14 +2277,14 @@ export function DeliverablesTreeViz() {
                         className="flex w-full min-h-[2.75rem] cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-transparent px-2 py-2 text-left transition-all duration-150 hover:bg-white/[0.04] focus:outline-none focus-visible:border-white/15 focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
                       >
                         <div className="flex min-w-0 items-center gap-2 text-white">
-                          <ArrowRight
-                            className={cn(
-                              "h-4 w-4 shrink-0 text-slate-400",
-                              prefersReducedMotion ? "" : "transition-transform",
-                              expandedFolders[folder] ? "rotate-90" : "",
-                            )}
+                          <motion.span
+                            animate={{ rotate: expandedFolders[folder] ? 90 : 0 }}
+                            transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 }}
+                            className="inline-flex"
                             aria-hidden="true"
-                          />
+                          >
+                            <ArrowRight className="h-4 w-4 shrink-0 text-slate-400" />
+                          </motion.span>
                           <FolderTree className={cn("h-4 w-4 shrink-0", meta.accent)} />
                           <span className="font-mono text-sm">{meta.title}</span>
                         </div>
@@ -2380,8 +2380,8 @@ export function DeliverablesTreeViz() {
                   </a>
                 </div>
 
-                <h4 className="mt-4 text-2xl font-semibold tracking-tight text-white">{selectedLeaf.label}</h4>
-                <p className="mt-3 text-sm leading-7 text-slate-200">{selectedLeaf.description}</p>
+                <h4 className="mt-4 text-xl font-semibold tracking-tight text-white md:text-2xl">{selectedLeaf.label}</h4>
+                <p className="mt-2 text-sm leading-7 text-slate-300">{selectedLeaf.description}</p>
 
                 <div className="mt-5 rounded-[8px] border border-white/10 bg-black/25 p-4">
                   <p className={cn("text-[11px] font-semibold uppercase tracking-[0.22em]", selectedStyles.accent)}>
