@@ -17,6 +17,14 @@ function VizFallback() {
   );
 }
 
+function VizSkeleton() {
+  return (
+    <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-slate-800/40 bg-slate-900/20 px-6 py-8">
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-cyan-400" />
+    </div>
+  );
+}
+
 const fallback = <VizFallback />;
 
 function withErrorBoundary<P extends object>(
@@ -42,7 +50,7 @@ export const TierTriageViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.TierTriageViz,
       })),
-    { ssr: false },
+    { ssr: false, loading: () => <VizSkeleton /> },
   ),
   "tier-triage",
 );
@@ -53,7 +61,7 @@ export const AxiomCoherenceViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.AxiomCoherenceViz,
       })),
-    { ssr: false },
+    { ssr: false, loading: () => <VizSkeleton /> },
   ),
   "axiom-coherence",
 );
@@ -64,7 +72,7 @@ export const IntakePhasesViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.IntakePhasesViz,
       })),
-    { ssr: false },
+    { ssr: false, loading: () => <VizSkeleton /> },
   ),
   "intake-phases",
 );
@@ -75,7 +83,7 @@ export const DeliverablesTreeViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.DeliverablesTreeViz,
       })),
-    { ssr: false },
+    { ssr: false, loading: () => <VizSkeleton /> },
   ),
   "deliverables-tree",
 );
@@ -86,7 +94,7 @@ export const AntiPatternCardsViz = withErrorBoundary(
       import("./wills-estate-visualizations").then((m) => ({
         default: m.AntiPatternCardsViz,
       })),
-    { ssr: false },
+    { ssr: false, loading: () => <VizSkeleton /> },
   ),
   "anti-pattern-cards",
 );

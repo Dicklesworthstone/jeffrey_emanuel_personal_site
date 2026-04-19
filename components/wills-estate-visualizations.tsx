@@ -331,7 +331,7 @@ export function TierTriageViz() {
 
         <div className="relative">
           <div className="pointer-events-none absolute left-[10%] right-[10%] top-8 hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent md:block" />
-          <div role="list" aria-label="Wealth tier triage ladder" className="grid gap-3 md:grid-cols-5">
+          <div role="group" aria-label="Wealth tier triage ladder" className="grid gap-3 md:grid-cols-5">
             {TIER_TRIAGE_ITEMS.map((tier, index) => {
               const isSelected = index === selectedIndex;
               const isExpanded = index === expandedIndex;
@@ -378,7 +378,7 @@ export function TierTriageViz() {
 
                   <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
                     <span>{isExpanded ? "Tap again to collapse" : "Enter to expand"}</span>
-                    <ArrowRight className={cn("h-3.5 w-3.5 transition", isExpanded && "rotate-90")} />
+                    <ArrowRight className={cn("h-3.5 w-3.5 transition", isExpanded && "rotate-90")} aria-hidden="true" />
                   </div>
                 </button>
               );
@@ -460,7 +460,7 @@ export function TierTriageViz() {
               <span className={cn("rounded-full border px-3 py-1 font-medium", selectedStyles.overlayBadge)}>
                 Base: {selectedTier.tier}
               </span>
-              <ArrowRight className="h-4 w-4 text-slate-500" />
+              <ArrowRight className="h-4 w-4 text-slate-500" aria-hidden="true" />
               <span className={cn("rounded-full border px-3 py-1 font-medium", suggestedStyles.overlayBadge)}>
                 Overlay result: {suggestedTier.tier}
               </span>
@@ -2573,7 +2573,7 @@ function AntiPatternCardFront({
       </div>
       <div className="mt-6 flex items-center justify-between gap-3 text-xs text-slate-400">
         <span>{hintText}</span>
-        <ArrowRight className="h-4 w-4 text-rose-200 transition group-hover:translate-x-0.5" />
+        <ArrowRight className="h-4 w-4 text-rose-200 transition group-hover:translate-x-0.5" aria-hidden="true" />
       </div>
     </div>
   );

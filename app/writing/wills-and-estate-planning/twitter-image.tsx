@@ -13,7 +13,7 @@ export const contentType = "image/png";
 export default async function Image() {
   const illustrationData = await fetch(
     new URL(
-      "../../../../assets/wills_estate_post_illustration.webp",
+      "../../../assets/wills_estate_post_illustration.webp",
       import.meta.url,
     ),
   ).then((response) => response.arrayBuffer());

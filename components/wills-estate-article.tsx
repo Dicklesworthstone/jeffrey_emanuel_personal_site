@@ -506,7 +506,7 @@ export function WillsEstateArticle() {
 
           {/* TOC */}
           <nav className="sm-toc" aria-label="Table of contents">
-            <h3>Contents</h3>
+            <p className="sm-subheading">Contents</p>
             <ol>
               <li>
                 <a href="#install">
