@@ -2351,8 +2351,8 @@ export function DeliverablesTreeViz() {
                                   selected
                                     ? meta.active
                                     : modeSummary
-                                      ? cn(meta.dependent, "hover:scale-[1.01] active:scale-[0.99]")
-                                      : cn(meta.inactive, "hover:scale-[1.01] active:scale-[0.99]"),
+                                      ? cn(meta.dependent, !prefersReducedMotion && "hover:scale-[1.01] active:scale-[0.99]")
+                                      : cn(meta.inactive, !prefersReducedMotion && "hover:scale-[1.01] active:scale-[0.99]"),
                                 )}
                               >
                                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -2468,7 +2468,8 @@ export function DeliverablesTreeViz() {
                 }}
                 aria-label={`Spotlight: ${leaf.file} — ${leaf.description}`}
                 className={cn(
-                  "cursor-pointer rounded-[8px] border p-4 text-left transition-all duration-150 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                  "cursor-pointer rounded-[8px] border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                  !prefersReducedMotion && "hover:scale-[1.02] active:scale-[0.98]",
                   meta.inactive,
                 )}
               >
