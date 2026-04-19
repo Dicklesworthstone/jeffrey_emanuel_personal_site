@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-// import Image from "next/image";
+import Image from "next/image";
+import illustration from "@/assets/wills_estate_post_illustration.webp";
 import {
   Crimson_Pro,
   JetBrains_Mono,
@@ -331,6 +332,26 @@ export function WillsEstateArticle() {
               One skill. Twelve axioms. A structured intake that turns a
               chaotic family situation into an attorney-ready handoff package.
             </p>
+
+            {/* Illustration */}
+            <div className="relative mt-12 md:mt-16 mx-auto max-w-[560px]">
+              <div
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(6,182,212,0.10) 45%, transparent 70%)",
+                  filter: "blur(40px)",
+                  transform: "scale(1.2)",
+                }}
+              />
+              <Image
+                src={illustration}
+                alt="Warmly-lit desk scene with estate-planning documents, a laptop running an AI agent, and a parrot — evoking an estate plan drafted at home with the help of an AI skill"
+                className="relative z-10 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl"
+                priority
+                placeholder="blur"
+              />
+            </div>
 
             {/* Stat chips */}
             <div className="mt-10 md:mt-14 flex flex-wrap justify-center gap-3 md:gap-4">
