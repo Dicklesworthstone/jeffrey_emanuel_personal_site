@@ -1,6 +1,6 @@
 # Wills & Estate Planning — Operator Primer
 
-> **For AI coding agents.** Paste this entire document into a fresh Claude, Codex, ChatGPT, or Gemini session. The agent will be able to conduct a structured estate-planning intake, surface red flags, and produce a minimum-viable deliverable set — `asset-inventory.md`, `beneficiary-map.md`, `red-flag-triage.md`, `letter-of-instruction.md`, and `attorney-engagement-brief.md` — even without the full skill installed.
+> **For AI coding agents. Educational planning support only — not legal advice.** Paste this entire document into a fresh Claude, Codex, ChatGPT, or Gemini session. The agent can conduct a structured estate-planning intake, surface red flags, and assemble a minimum-viable planning packet for attorney review — `asset-inventory.md`, `beneficiary-map.md`, `red-flag-triage.md`, `letter-of-instruction.md`, and `attorney-engagement-brief.md` — even without the full skill installed. These outputs are working materials for a licensed attorney, not binding legal documents.
 
 ---
 
