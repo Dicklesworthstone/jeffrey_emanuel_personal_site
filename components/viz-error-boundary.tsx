@@ -12,6 +12,7 @@ const VIZ_SKELETON_HEIGHTS = {
   "deliverables-tree": "min-h-[48rem] md:min-h-[42rem]",
   "anti-pattern-cards": "min-h-[32rem] md:min-h-[34rem]",
   "pricing-comparison": "min-h-[56rem] md:min-h-[44rem]",
+  "install-flow": "min-h-[36rem] md:min-h-[32rem]",
 } as const;
 
 function getVizHeightClass(vizId: string) {
@@ -136,4 +137,15 @@ export const PricingComparisonViz = withErrorBoundary(
     { ssr: false, loading: () => <VizSkeleton vizId="pricing-comparison" /> },
   ),
   "pricing-comparison",
+);
+
+export const InstallFlowViz = withErrorBoundary(
+  dynamic(
+    () =>
+      import("./wills-estate-visualizations").then((m) => ({
+        default: m.InstallFlowViz,
+      })),
+    { ssr: false, loading: () => <VizSkeleton vizId="install-flow" /> },
+  ),
+  "install-flow",
 );

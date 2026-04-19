@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Baby,
+  Brain,
   BriefcaseBusiness,
   Building2,
   CheckCircle2,
@@ -29,10 +30,13 @@ import {
   HandCoins,
   House,
   Inbox,
+  KeyRound,
   MapPinned,
+  MonitorDown,
   Landmark,
   Layers3,
   Lock,
+  PackagePlus,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -3521,6 +3525,354 @@ export function PricingComparisonViz() {
               fee schedules. This widget turns those public ranges into a
               deliberately simple comparison, not a quote.
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  InstallFlowViz                                                     */
+/* ------------------------------------------------------------------ */
+
+type InstallStep = {
+  number: number;
+  label: string;
+  sub: string;
+  time: string;
+  icon: ReactNode;
+  accent: string;
+  accentBorder: string;
+  accentBg: string;
+  accentText: string;
+  detail: ReactNode;
+};
+
+const INSTALL_STEPS: InstallStep[] = [
+  {
+    number: 1,
+    label: "Get a frontier-model subscription",
+    sub: "Claude Max ($100/mo) or GPT Pro ($200/mo). Cancel anytime.",
+    time: "~5 min",
+    icon: <Brain className="h-5 w-5" aria-hidden="true" />,
+    accent: "cyan",
+    accentBorder: "border-cyan-400/30",
+    accentBg: "bg-cyan-400/10",
+    accentText: "text-cyan-300",
+    detail: (
+      <>
+        <p>
+          The estate-planning skill runs inside Claude or ChatGPT — it needs one of their
+          paid &ldquo;frontier model&rdquo; tiers to have the reasoning budget for a
+          full intake session. Either works:
+        </p>
+        <ul className="mt-3 list-disc space-y-1.5 pl-5">
+          <li>
+            <a href="https://claude.ai/upgrade" target="_blank" rel="noopener noreferrer" className="text-cyan-300 underline underline-offset-2 hover:text-cyan-200">
+              Claude Max
+            </a>{" "}
+            — $100/month, Anthropic
+          </li>
+          <li>
+            <a href="https://chatgpt.com/pricing" target="_blank" rel="noopener noreferrer" className="text-cyan-300 underline underline-offset-2 hover:text-cyan-200">
+              ChatGPT Pro
+            </a>{" "}
+            — $200/month, OpenAI
+          </li>
+        </ul>
+        <p className="mt-3 text-slate-400">
+          Both offer a free trial or money-back period. You can cancel before the
+          first billing cycle if this isn&apos;t for you.
+        </p>
+      </>
+    ),
+  },
+  {
+    number: 2,
+    label: "Install the desktop app",
+    sub: "Claude Code or Codex Desktop, Mac/Windows, free. Signs in with step 1.",
+    time: "~5 min",
+    icon: <MonitorDown className="h-5 w-5" aria-hidden="true" />,
+    accent: "violet",
+    accentBorder: "border-violet-400/30",
+    accentBg: "bg-violet-400/10",
+    accentText: "text-violet-300",
+    detail: (
+      <>
+        <p>
+          The desktop app is the window where you&apos;ll talk to the AI.
+          It&apos;s a free download — your subscription from step 1 is what powers
+          the conversation.
+        </p>
+        <p className="mt-3">
+          Download whichever matches the subscription you chose. The app
+          installs like any other program: drag to Applications on Mac, or
+          run the installer on Windows.
+        </p>
+        <p className="mt-3 text-slate-400">
+          Once installed, sign in with the same email you used for the subscription.
+          That&apos;s the only setup the app needs.
+        </p>
+      </>
+    ),
+  },
+  {
+    number: 3,
+    label: "Subscribe at jeffreys-skills.md",
+    sub: "$20/mo, Stripe or PayPal. Makes your account ready to install skills.",
+    time: "~3 min",
+    icon: <KeyRound className="h-5 w-5" aria-hidden="true" />,
+    accent: "emerald",
+    accentBorder: "border-emerald-400/30",
+    accentBg: "bg-emerald-400/10",
+    accentText: "text-emerald-300",
+    detail: (
+      <>
+        <p>
+          Head to{" "}
+          <a href="https://jeffreys-skills.md/dashboard" target="_blank" rel="noopener noreferrer" className="text-emerald-300 underline underline-offset-2 hover:text-emerald-200">
+            jeffreys-skills.md/dashboard
+          </a>{" "}
+          and create an account. The subscription ($20/month) unlocks
+          your ability to install skills — including the estate-planning skill.
+        </p>
+        <p className="mt-3 text-slate-400">
+          Payment is handled by Stripe or PayPal. No long-term contract —
+          cancel from the dashboard whenever you like.
+        </p>
+      </>
+    ),
+  },
+  {
+    number: 4,
+    label: "Install the skill",
+    sub: "One button click in the desktop app. That's it — you're ready.",
+    time: "~2 min",
+    icon: <PackagePlus className="h-5 w-5" aria-hidden="true" />,
+    accent: "amber",
+    accentBorder: "border-amber-400/30",
+    accentBg: "bg-amber-400/10",
+    accentText: "text-amber-300",
+    detail: (
+      <>
+        <p>
+          Visit the{" "}
+          <a href="https://jeffreys-skills.md/skills/wills-and-estate-planning-skill" target="_blank" rel="noopener noreferrer" className="text-amber-300 underline underline-offset-2 hover:text-amber-200">
+            skill page
+          </a>
+          , click <strong className="text-white">Generate install prompt</strong>,
+          copy the text it gives you, and paste it into your desktop app.
+        </p>
+        <p className="mt-3">
+          The app will ask you once to approve a download — click Allow. It
+          fetches the skill, installs it, and tells you to reload. After
+          that, just describe what you need and the skill takes over.
+        </p>
+      </>
+    ),
+  },
+];
+
+export function InstallFlowViz() {
+  const prefersReducedMotion = useReducedMotion();
+  const [expandedStep, setExpandedStep] = useState<number | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const stepRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const moveFocus = (next: number) => {
+    const clamped = Math.max(0, Math.min(INSTALL_STEPS.length - 1, next));
+    setFocusedIndex(clamped);
+    stepRefs.current[clamped]?.focus();
+  };
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault();
+      moveFocus(index + 1);
+      return;
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault();
+      moveFocus(index - 1);
+      return;
+    }
+    if (event.key === "Home") {
+      event.preventDefault();
+      moveFocus(0);
+      return;
+    }
+    if (event.key === "End") {
+      event.preventDefault();
+      moveFocus(INSTALL_STEPS.length - 1);
+      return;
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setExpandedStep(expandedStep === index ? null : index);
+    }
+  };
+
+  const springTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 260, damping: 26 };
+
+  const expandedData = expandedStep !== null ? INSTALL_STEPS[expandedStep] : null;
+
+  return (
+    <section
+      aria-label="Install flow: four steps to get started"
+      className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-cyan-300/10"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.08),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.06),transparent_38%)]" />
+      <div className="relative space-y-6 p-5 md:p-7">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-100">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+            Setup
+          </div>
+          <h3 className="text-2xl font-semibold tracking-tight text-white md:text-[2rem]">
+            What you need (about fifteen minutes of setup)
+          </h3>
+          <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
+            Four steps, each one a few minutes. No terminal, no code, no
+            technical background required. If you can install an app and
+            fill out a web form, you can do this.
+          </p>
+        </div>
+
+        {/* Step cards */}
+        <div role="list" aria-label="Install steps" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {INSTALL_STEPS.map((step, index) => {
+            const isExpanded = expandedStep === index;
+            const isFocused = index === focusedIndex;
+            const delay = prefersReducedMotion ? 0 : index * 0.08;
+
+            return (
+              <motion.div
+                key={step.number}
+                role="listitem"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                animate={mounted ? { opacity: 1, y: 0 } : undefined}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay, ease: [0.19, 1, 0.22, 1] }}
+              >
+                <button
+                  ref={(node) => { stepRefs.current[index] = node; }}
+                  type="button"
+                  aria-label={`Step ${step.number}: ${step.label}`}
+                  aria-expanded={isExpanded}
+                  aria-controls={`install-detail-${step.number}`}
+                  tabIndex={isFocused ? 0 : -1}
+                  onClick={() => {
+                    setExpandedStep(isExpanded ? null : index);
+                    setFocusedIndex(index);
+                  }}
+                  onFocus={() => setFocusedIndex(index)}
+                  onKeyDown={(event) => handleKeyDown(event, index)}
+                  className={cn(
+                    "group relative flex w-full min-h-[11rem] cursor-pointer flex-col rounded-2xl border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                    isExpanded
+                      ? cn(step.accentBorder, step.accentBg, "focus-visible:ring-white/80")
+                      : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-white/60",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full border text-sm font-bold",
+                      isExpanded ? cn(step.accentBorder, step.accentText) : "border-white/15 text-white",
+                    )}>
+                      {step.number}
+                    </span>
+                    <span className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-xl border",
+                      isExpanded ? cn(step.accentBorder, step.accentText) : "border-white/10 text-slate-400 group-hover:text-slate-200",
+                    )}>
+                      {step.icon}
+                    </span>
+                  </div>
+                  <p className="mt-4 text-sm font-semibold leading-5 text-white">{step.label}</p>
+                  <p className="mt-1.5 text-xs leading-5 text-slate-400">{step.sub}</p>
+                  <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[10px] font-semibold text-slate-300">
+                      {step.time}
+                    </span>
+                    <ArrowRight className={cn(
+                      "h-3.5 w-3.5 transition-transform",
+                      isExpanded ? "rotate-90 text-white" : "text-slate-500 group-hover:text-slate-300",
+                    )} aria-hidden="true" />
+                  </div>
+                </button>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Connection arrows (desktop only) */}
+        <div className="hidden lg:flex items-center justify-center gap-0 -mt-3 mb-1 px-8" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex flex-1 items-center">
+              <motion.div
+                className="h-px flex-1 bg-gradient-to-r from-white/5 via-white/15 to-white/5"
+                initial={prefersReducedMotion ? { scaleX: 1 } : { scaleX: 0 }}
+                animate={mounted ? { scaleX: 1 } : undefined}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.3 + i * 0.15, ease: "easeOut" }}
+                style={{ transformOrigin: "left" }}
+              />
+              <motion.div
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+                animate={mounted ? { opacity: 1 } : undefined}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: 0.6 + i * 0.15 }}
+              >
+                <ArrowRight className="h-3.5 w-3.5 text-white/20 mx-1 shrink-0" />
+              </motion.div>
+            </div>
+          ))}
+        </div>
+
+        {/* Detail panel */}
+        <AnimatePresence initial={false} mode="wait">
+          {expandedData ? (
+            <motion.div
+              id={`install-detail-${expandedData.number}`}
+              key={expandedData.number}
+              role="region"
+              aria-label={`Details for step ${expandedData.number}: ${expandedData.label}`}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
+              transition={springTransition}
+              className={cn("rounded-2xl border p-5 md:p-6", expandedData.accentBorder, "bg-white/[0.03]")}
+            >
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold", expandedData.accentBorder, expandedData.accentText)}>
+                  Step {expandedData.number}
+                </span>
+                <span className="text-sm font-semibold text-white">{expandedData.label}</span>
+              </div>
+              <div className="text-sm leading-7 text-slate-200">
+                {expandedData.detail}
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
+        {/* Total ribbon */}
+        <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/5 px-5 py-3 text-center">
+          <CheckCircle2 className="h-5 w-5 text-emerald-400" aria-hidden="true" />
+          <p className="text-sm font-semibold text-white">
+            About 15 minutes. Then you&apos;re done setting up.
+          </p>
+          <div className="flex gap-1.5" aria-hidden="true">
+            {INSTALL_STEPS.map((step) => (
+              <span key={step.number} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+                {step.time}
+              </span>
+            ))}
           </div>
         </div>
       </div>
