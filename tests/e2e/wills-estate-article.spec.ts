@@ -76,12 +76,13 @@ async function visitArticle(page: Page, scenario: string) {
 }
 
 async function expectInViewport(page: Page, selector: string) {
-  const visible = await page.locator(selector).first().evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    return rect.bottom > 0 && rect.top < window.innerHeight;
-  });
-
-  expect(visible).toBe(true);
+  await expect(async () => {
+    const visible = await page.locator(selector).first().evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < window.innerHeight;
+    });
+    expect(visible).toBe(true);
+  }).toPass({ timeout: 3000 });
 }
 
 async function expectVisualizationLoaded(page: Page, vizId: (typeof VIZ_IDS)[number]) {
@@ -170,9 +171,9 @@ test.describe("Wills & Estate Planning Article", () => {
       }
     } else {
       logStep(scenario, "assert static install paths");
-      await expect(page.getByText("In Claude or Codex Desktop", { exact: false })).toBeVisible();
-      await expect(page.getByText("From the terminal", { exact: false })).toBeVisible();
-      await expect(page.getByText("Direct download", { exact: false })).toBeVisible();
+      await expect(page.getByRole("heading", { name: /In Claude or Codex Desktop/i })).toBeVisible();
+      await expect(page.getByRole("heading", { name: /From the terminal/i })).toBeVisible();
+      await expect(page.getByRole("heading", { name: /Direct download/i })).toBeVisible();
     }
 
     runtime.assertClean();
