@@ -582,13 +582,28 @@ export function WillsEstateArticle() {
             Before I go further, a note for anyone who has not heard the word
             before: a <em>skill</em> can be thought of as a bundle of
             &ldquo;how to&rdquo; knowledge that is prepared for use by an AI
-            agent such as Claude Code or OpenAI&apos;s Codex. It combines
-            reference materials, workflows, scripts, subagents, and so on, all
-            in a way that is maximally agent-intuitive and agent-ergonomic and
-            optimized for context efficiency (at least for a well-designed
-            skill, which most are not). The agent loads the skill at the start
-            of a session and then behaves like a prepared specialist for the
-            rest of that conversation.
+            agent such as Claude Code or OpenAI&apos;s Codex (yes, both names
+            have &ldquo;Code&rdquo; in them; more on that in a moment). It
+            combines reference materials, workflows, scripts, subagents, and
+            so on, all in a way that is maximally agent-intuitive and
+            agent-ergonomic and optimized for context efficiency (at least
+            for a well-designed skill, which most are not). The agent loads
+            the skill at the start of a session and then behaves like a
+            prepared specialist for the rest of that conversation.
+          </p>
+
+          <p>
+            A quick reassurance before anyone decides this is not for them:
+            you are the right reader for this even if you are not a
+            programmer and have never opened a terminal. The desktop apps I
+            recommend below (Claude Code and Codex Desktop) were originally
+            built for software engineers, and the &ldquo;Code&rdquo; in
+            those names is a legacy name; nothing you will do in them is
+            code-specific. You chat in a text box, drop documents into a
+            folder, and approve the occasional file read when the agent
+            asks. You will never type a command. You will never see a black
+            terminal window. If you can use Gmail and know how to open a
+            folder on your computer, you can use this.
           </p>
 
           <p>
@@ -613,8 +628,9 @@ export function WillsEstateArticle() {
 
           <p>
             So I built it. This article is the long-form explanation of what
-            the skill is, what you need to run it, and how a smart non-technical
-            reader with a Saturday afternoon can walk away with the package a
+            the skill is, what you need to run it, and how a smart
+            non-technical reader with three to six hours (across a couple of
+            sittings, not a forced marathon) can walk away with the package a
             real estate-planning attorney actually wants to receive.
           </p>
         </EC>
@@ -642,8 +658,8 @@ export function WillsEstateArticle() {
 
           <p>
             The interviewing is the part a good agent-plus-skill can do, for
-            roughly the cost of a nice dinner, in a single weekend. Here is
-            what you actually need to buy:
+            roughly the cost of a nice dinner, across a couple of sittings.
+            You need four things:
           </p>
 
           <RefTable
@@ -775,9 +791,10 @@ export function WillsEstateArticle() {
             An <strong>agent</strong> is the same frontier model, but given
             permission to do things. Open files you point it at. Organize a
             folder on your computer. Ask you follow-up questions and
-            remember the answers across a whole conversation. It is not a
-            different kind of model; it is the same model working through a
-            problem alongside you instead of answering a one-shot question.
+            remember the answers across a whole conversation. Same model,
+            same reasoning; the difference is that it can read the
+            documents you put in front of it and carry the thread forward
+            instead of answering a one-shot question.
           </p>
 
           <p>
@@ -1066,6 +1083,74 @@ export function WillsEstateArticle() {
           </ol>
 
           <WorkingFolderViz />
+
+          <div className="mt-10 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/80 to-slate-900/40 p-6 md:p-8">
+            <p className="text-[11px] font-mono text-cyan-300 uppercase tracking-[0.25em] mb-3">
+              What a session actually feels like
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-slate-300 mb-6">
+              Two composite exchanges (invented details, real question
+              pattern) that show the rhythm: the agent asks a specific
+              question, you answer honestly, and it flags the landmine you
+              would not have known to look for.
+            </p>
+
+            <div className="space-y-5">
+              <div className="rounded-xl border border-white/5 bg-black/20 p-4 md:p-5">
+                <p className="text-[10px] font-mono text-amber-300 uppercase tracking-widest mb-3">
+                  Exchange 1 · the stale beneficiary form
+                </p>
+                <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
+                  <strong className="text-white">Agent:</strong> When did
+                  you last update the beneficiary form on your 401(k)?
+                </p>
+                <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
+                  <strong className="text-white">You:</strong> When I
+                  started the job, so... 2009? I think I put my ex-wife
+                  down at the time. That was before I met Sam.
+                </p>
+                <p className="text-sm md:text-[15px] leading-relaxed text-slate-300">
+                  <strong className="text-white">Agent:</strong> That is a
+                  landmine; the plan administrator will pay your ex unless
+                  you and Sam signed a waiver naming someone else. It does
+                  not matter what your will says. We are flagging this as
+                  a first-action item in the Attorney Engagement Brief so
+                  it is the first thing your lawyer fixes.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-white/5 bg-black/20 p-4 md:p-5">
+                <p className="text-[10px] font-mono text-amber-300 uppercase tracking-widest mb-3">
+                  Exchange 2 · the blended-family default
+                </p>
+                <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
+                  <strong className="text-white">Agent:</strong> Walk me
+                  through your current marriage and the kids from your
+                  first marriage. How do you picture it all working
+                  together?
+                </p>
+                <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
+                  <strong className="text-white">You:</strong> I&apos;d
+                  leave everything to my wife and trust her to take care
+                  of my two kids from my first marriage.
+                </p>
+                <p className="text-sm md:text-[15px] leading-relaxed text-slate-300">
+                  <strong className="text-white">Agent:</strong> That is
+                  the most common blended-family pattern, and the most
+                  common one to go sideways. If you leave everything to
+                  her, she can later rewrite her own will and leave it
+                  all to her daughter from her first marriage; your kids
+                  end up with nothing and there is nothing they can do
+                  about it legally. The usual structure that protects
+                  everyone is a <J t="qtip">QTIP trust</J>: your wife
+                  gets income and access to principal for her whole life;
+                  whatever is left at her death goes to your kids.
+                  Should we put that on the list for your attorney to
+                  draft, or did you want something different?
+                </p>
+              </div>
+            </div>
+          </div>
         </EC>
       </section>
 
@@ -1115,6 +1200,22 @@ export function WillsEstateArticle() {
               get baked into estate plans.
             </li>
             <li>
+              <strong>It is fine to not have every document ready.</strong>{" "}
+              When the skill asks for something you cannot put your hands on
+              in the next ten minutes, tell it{" "}
+              <em>&ldquo;I don&apos;t have that right now.&rdquo;</em> The
+              session continues. When you find the document a day later,
+              drop it into the folder, open a new sitting, and say
+              something like{" "}
+              <em>
+                &ldquo;I found the 401(k) statement; please re-check
+                whatever you flagged about beneficiaries.&rdquo;
+              </em>{" "}
+              Nothing is blocked by a single missing document. The skill
+              tracks what it is still waiting on so you can finish in
+              pieces.
+            </li>
+            <li>
               <strong>Save the final packet in your folder.</strong> It is
               yours. Email the Attorney Engagement Brief plus whichever
               supporting documents your attorney asks for. Keep the folder
@@ -1137,9 +1238,8 @@ export function WillsEstateArticle() {
           />
 
           <p>
-            Four things worth knowing, each of which the skill handles
-            automatically. You do not have to understand any of them to
-            use it.
+            Four things the skill handles automatically, without your
+            having to think about them or understand the mechanics.
           </p>
 
           <Sub>1. It auto-adjusts to your complexity.</Sub>
@@ -1293,12 +1393,83 @@ export function WillsEstateArticle() {
             <summary>Is my data private?</summary>
             <div className="sm-details-body">
               <p>
-                Yes. The agent runs on your computer, reading files you
-                explicitly give it. It does not upload your financial
-                documents, your tax returns, or your family history to any
-                server. Nothing leaves your laptop except, at your
-                direction, the sanitized Attorney Engagement Brief you
-                choose to send your lawyer.
+                Your files stay on your computer. The agent reads documents
+                you explicitly point it at; it does not upload them to any
+                remote storage, and nothing the skill produces leaves your
+                folder unless you choose to send it.
+              </p>
+              <p className="mt-3">
+                What does go to Anthropic or OpenAI is the conversation
+                itself: your questions, the agent&apos;s responses, and
+                whatever the agent quotes from your files while reasoning.
+                On consumer subscriptions (Claude Max, GPT Pro), transcripts
+                are retained per each provider&apos;s published policy and
+                are not used to train the models by default. If you need
+                stronger guarantees, both providers offer enterprise plans
+                with zero-retention.
+              </p>
+              <p className="mt-3">
+                For most readers planning for themselves, this is a
+                reasonable tradeoff: the same tradeoff you make every time
+                you type something into ChatGPT or Claude. If you are a
+                lawyer, doctor, or business owner planning around
+                professionally-confidential material, talk to your attorney
+                about whether your specific situation warrants an
+                enterprise plan or a different tool. See the next question
+                for the narrower but important topic of{" "}
+                <em>attorney-client privilege</em>.
+              </p>
+            </div>
+          </details>
+
+          <details className="sm-details">
+            <summary>
+              Does using an AI skill waive attorney-client privilege?
+            </summary>
+            <div className="sm-details-body">
+              <p>
+                Short answer: you do not have an attorney-client
+                relationship with an AI chatbot, so there is no privilege to
+                waive in the conventional sense. At least one recent New
+                York case has held that discussing otherwise-privileged
+                legal matters with a consumer-grade AI forfeits the
+                privilege you would have had in a conversation with a human
+                lawyer. The law here is new and under-developed, and I
+                personally think it is outrageous that a human lawyer gets
+                privilege on the same conversation an AI does not; that
+                should change. Today, it has not.
+              </p>
+              <p className="mt-3">
+                For most readers using this skill to prepare a
+                simple-to-moderate estate plan, this is a non-issue: you
+                are not hiring a lawyer for the intake part, and the
+                skill&apos;s whole purpose is to hand a prepared packet to
+                your attorney for the parts that need one. The skill&apos;s
+                output is your property.
+              </p>
+              <p className="mt-3">
+                If you are a high-net-worth or ultra-high-net-worth
+                testator and you think your estate might be contested,
+                take this seriously. The skill&apos;s intake architecture
+                (detailed interview, intake record, decision ledger, letter
+                of wishes) inadvertently builds exactly the kind of
+                contemporaneous record a contest lawyer would love to see.
+                The skill will, at the end of a session, offer to delete
+                every intermediate work product from your working folder
+                and clear the session history once you confirm you have
+                saved the final document somewhere safe; those files are
+                your property to destroy, and doing so is not spoliation
+                of evidence since no litigation is pending. Your attorney
+                may additionally want any further work to run under an
+                enterprise plan with zero-retention or under their direct
+                supervision so that the process is papered properly from
+                the start.
+              </p>
+              <p className="mt-3">
+                For bedside or deathbed drafting of a high-stakes will,
+                use a lawyer, not this skill. The drafting attorney is the
+                single most important future witness to testator capacity,
+                and that is not a role an agent can fill.
               </p>
             </div>
           </details>
@@ -1503,9 +1674,9 @@ export function WillsEstateArticle() {
             compress: the preparation, not the judgment. Your attorney still
             signs. Your CPA still files. Your Medicare broker still enrolls
             you. What changes is that a large share of the preparation can
-            happen on your Saturday afternoon at the kitchen table, for
-            roughly a hundred and twenty dollars, instead of entirely inside
-            the specialist&apos;s billable hour.
+            happen across a couple of evenings or a weekend morning at your
+            kitchen table, for roughly a hundred and twenty dollars, instead
+            of entirely inside the specialist&apos;s billable hour.
           </p>
 
           <p>
