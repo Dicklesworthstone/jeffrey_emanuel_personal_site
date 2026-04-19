@@ -296,13 +296,13 @@ export function TierTriageViz() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-sky-300/10">
+    <section aria-label="Wealth tier triage: five-tier ladder with complexity overlays" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-sky-300/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,211,252,0.12),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.08),transparent_38%)]" />
       <div className="relative space-y-6 p-5 md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-300/20 bg-sky-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-100">
-              <Layers3 className="h-3.5 w-3.5" />
+              <Layers3 className="h-3.5 w-3.5" aria-hidden="true" />
               Tier Triage
             </div>
             <div className="space-y-2">
@@ -434,7 +434,7 @@ export function TierTriageViz() {
                   <ul className="mt-3 space-y-3">
                     {expandedTier.complications.map((complication) => (
                       <li key={complication} className="flex gap-3">
-                        <CheckCircle2 className={cn("mt-0.5 h-4 w-4 shrink-0", expandedStyles.detailAccent)} />
+                        <CheckCircle2 className={cn("mt-0.5 h-4 w-4 shrink-0", expandedStyles.detailAccent)} aria-hidden="true" />
                         <span className="text-sm leading-6 text-slate-200">{complication}</span>
                       </li>
                     ))}
@@ -693,13 +693,13 @@ export function AxiomCoherenceViz() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-emerald-300/10">
+    <section aria-label="Axiom coherence: eight-spoke diagram showing plan coherence vs incoherence" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-emerald-300/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.08),transparent_38%)]" />
       <div className="relative space-y-6 p-5 md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-100">
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
               Axiom Coherence
             </div>
             <div className="space-y-2">
@@ -722,7 +722,7 @@ export function AxiomCoherenceViz() {
                 aria-pressed={mode === value}
                 onClick={() => setModeAndSelection(value)}
                 className={cn(
-                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                   mode === value
                     ? value === "coherent"
                       ? "bg-emerald-400/20 text-emerald-50"
@@ -777,7 +777,7 @@ export function AxiomCoherenceViz() {
 
               <div className="absolute left-1/2 top-1/2 z-10 w-36 -translate-x-1/2 -translate-y-1/2 rounded-[24px] border border-white/12 bg-[#081525] px-4 py-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
                 <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white">
-                  <Users className="h-5 w-5" />
+                  <Users className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <p className="mt-3 text-lg font-semibold text-white">You</p>
                 <p className="mt-1 text-xs leading-5 text-slate-400">
@@ -1188,13 +1188,13 @@ export function IntakePhasesViz() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-sky-300/10">
+    <section aria-label="Intake phases: nine-phase adaptive workflow" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-sky-300/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_38%)]" />
       <div className="relative space-y-6 p-5 md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-300/20 bg-sky-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-100">
-              <Waypoints className="h-3.5 w-3.5" />
+              <Waypoints className="h-3.5 w-3.5" aria-hidden="true" />
               Intake Phases
             </div>
             <div className="space-y-2">
@@ -2090,13 +2090,13 @@ export function DeliverablesTreeViz() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-violet-300/10">
+    <section aria-label="Deliverables tree: 45-artifact folder structure with filtering" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-violet-300/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_38%)]" />
       <div className="relative space-y-6 p-5 md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-violet-100">
-              <FolderTree className="h-3.5 w-3.5" />
+              <FolderTree className="h-3.5 w-3.5" aria-hidden="true" />
               Deliverables Tree
             </div>
             <div className="space-y-2">
@@ -2335,7 +2335,7 @@ export function DeliverablesTreeViz() {
                     href={DELIVERABLE_SKILL_CATALOG_HREF}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-300/30 hover:text-cyan-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                    className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-300/30 hover:text-cyan-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
                   >
                     View in skill catalog
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -2395,7 +2395,7 @@ export function DeliverablesTreeViz() {
                   setSelectedPath(deliverablePath(leaf));
                 }}
                 className={cn(
-                  "rounded-[8px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                  "rounded-[8px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                   meta.inactive,
                 )}
               >
@@ -2658,13 +2658,13 @@ export function AntiPatternCardsViz() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-rose-300/10">
+    <section aria-label="Anti-pattern cards: common estate planning failures" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-rose-300/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.08),transparent_38%)]" />
       <div className="relative space-y-6 p-5 md:p-7">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-rose-300/20 bg-rose-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-100">
-              <AlertTriangle className="h-3.5 w-3.5" />
+              <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
               Anti-Patterns
             </div>
             <div className="space-y-2">
