@@ -464,9 +464,11 @@ export function WillsEstateArticle() {
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
-              One skill. Twelve axioms. A structured intake that turns a
-              chaotic family situation into a handoff packet for attorney
-              review.
+              A structured intake that walks you through the questions a good
+              estate-planning attorney would ask, and produces a complete
+              document package. Hand it to your attorney for review and
+              sign-off, or, if you are willing to skip the lawyer step,
+              execute the will the skill generates directly.
             </p>
 
             {/* Illustration */}
