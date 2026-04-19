@@ -1126,274 +1126,80 @@ export function WillsEstateArticle() {
 
       <Divider />
 
-      {/* ========== WHO THIS IS FOR (hgjp.12) ========== */}
-      <section data-section="who" className="pb-10 md:pb-14">
+      {/* ========== WHAT THE SKILL DOES (compressed showcase) ========== */}
+      <section data-section="showcase" className="pb-10 md:pb-14">
         <EC>
           <SectionHeader
-            id="who"
-            eyebrow="Scope"
-            title="Who this is for, and who it isn't."
+            id="showcase"
+            eyebrow="What you get"
+            title="What the skill actually does for you."
           />
 
           <p>
-            Most Americans think estate planning is for rich people. It is
-            not. It is for anyone who owns anything, cares about anyone,
-            or would prefer a county court not decide what happens to
-            their children. The skill is specifically designed to scale:
-            from a twenty-six-year-old renter with a first job and a
-            401(k) through to a hundred-and-fifty-million-dollar
-            industrialist with four generations to plan for. The same
-            interview adapts to whichever tier actually fits your facts.
+            Four things worth knowing, each of which the skill handles
+            automatically. You do not have to understand any of them to
+            use it.
+          </p>
+
+          <Sub>1. It auto-adjusts to your complexity.</Sub>
+
+          <p>
+            The skill scales from a twenty-six-year-old renter with a
+            first 401(k) through to a hundred-million-dollar industrialist
+            with four generations to plan for. Same interview; different
+            depth. Tap a rung below to see which tier matches your facts.
+            A blended family, a business stake, self-custodied crypto, or
+            a second-state property bumps you a tier regardless of net
+            worth.
           </p>
 
           <TierTriageViz />
 
-          <p>
-            Tap a rung to see the archetype, the primary goals for that
-            tier, and the core documents it typically produces.
-            Default-selected is Tier 2, the modal American reader
-            (homeowner, retirement accounts, minor children), because that
-            is who most of you are.
-          </p>
-
-          <Sub>What bumps you up a tier, regardless of net worth</Sub>
+          <Sub>2. It catches the mistakes that wreck most plans.</Sub>
 
           <p>
-            Complexity sometimes matters more than net worth. The skill
-            treats each of the following as a complexity overlay that
-            increases the depth of analysis regardless of which tier the
-            raw net-worth number puts you in:
-          </p>
-
-          <ul className="list-disc pl-6 space-y-2 text-slate-300">
-            <li>
-              <J t="blended-family">Blended family</J>: stepchildren,
-              remarriage, children from prior relationships
-            </li>
-            <li>
-              A non-U.S.-citizen spouse (<J t="qdot">QDOT</J> and treaty
-              analysis territory)
-            </li>
-            <li>A privately-held business or partnership interest</li>
-            <li>
-              A disabled or vulnerable heir who may need a special-needs
-              trust
-            </li>
-            <li>Assets in multiple states or multiple countries</li>
-            <li>
-              Specialty items: firearms under the <J t="nfa">NFA</J>,{" "}
-              <J t="self-custody">self-custodied crypto</J>,
-              creator-economy royalty streams, pre-IPO stock, a
-              concentrated position in one company, a known capacity or
-              cognition concern
-            </li>
-          </ul>
-
-          <p>
-            Any one of these bumps you up a tier of depth. Two or more and
-            you are probably in the Tier 3 or 4 range regardless of what
-            your net worth says.
-          </p>
-
-          <Sub>Who this is <strong>not</strong> for (honest scope limits)</Sub>
-
-          <ul className="list-disc pl-6 space-y-3 text-slate-300">
-            <li>
-              <strong>Non-U.S. domiciliaries.</strong> The skill is U.S.
-              federal plus all fifty states. If you live outside the U.S.
-              and your assets are outside the U.S., this is not the right
-              tool for you yet. We can handle a U.S. citizen living abroad
-              with U.S. assets; we cannot handle a Singaporean with
-              Singaporean property and Singaporean heirs.
-            </li>
-            <li>
-              <strong>People who need a will today.</strong> The skill has
-              an <Mono>urgent-bedside-signing</Mono> mode for
-              capacity-on-the-clock situations, but for a genuinely acute
-              emergency you want a real lawyer on the phone and ideally in
-              the room. The right tool for that is your phone, not a
-              laptop.
-            </li>
-            <li>
-              <strong>
-                People who want a one-page &ldquo;just write my will&rdquo;
-                experience.
-              </strong>{" "}
-              The skill is deliberately thorough, producing forty-five
-              artifacts, because coordination across documents is the
-              whole point. If all you want is a single cheap will, buy one
-              from LegalZoom and close the tab. You are not being served
-              by the skill&apos;s depth if depth is not what you need.
-            </li>
-          </ul>
-
-          <Sub>Who this absolutely is for</Sub>
-
-          <p>
-            Anyone with a blended family. Anyone with kids under eighteen.
-            Anyone with property in more than one state. Anyone with a
-            business, or a substantial stake in one. Anyone who has crypto
-            they self-custody. Anyone whose plan was last updated before
-            the 2026 <J t="obbba">OBBBA</J>, or before their remarriage,
-            or before their move, or before their kid was born. Anyone who
-            has been meaning to do this for the last decade and has not.
-          </p>
-
-          <p>
-            If any of those describe you, the rest of the article is for
-            you.
-          </p>
-        </EC>
-      </section>
-
-      <Divider />
-
-      {/* ========== WHAT THE SKILL PRODUCES (hgjp.15) ========== */}
-      <section data-section="produces" className="pb-10 md:pb-14">
-        <EC>
-          <SectionHeader
-            id="produces"
-            eyebrow="The output"
-            title="Forty-five artifacts you walk away with."
-          />
-
-          <p>
-            A serious session does not leave you with a pile of loose
-            files. It produces a structured project directory:{" "}
-            <Mono>my-estate-plan/</Mono> with three subdirectories (
-            <Mono>intake/</Mono>, <Mono>analyses/</Mono>,{" "}
-            <Mono>deliverables/</Mono>) and forty-five files organized so
-            a lawyer, a spouse, or a future version of you can pick up
-            where you left off. The skill enforces the structure through a
-            coverage matrix it writes at the start of the session and
-            updates throughout;{" "}
-            <Mono>scripts/plan-validator.py</Mono> runs as a backstop that
-            flags untouched starter outputs and missing overlay entries
-            before the skill declares the session complete.
-          </p>
-
-          <p>What forty-five artifacts, concretely, look like:</p>
-
-          <DeliverablesTreeViz />
-
-          <p>
-            Click any file to see what it is and a representative snippet.
-            Filter by category (intake, analyses, deliverables) or by
-            the operating mode that triggers it.
-          </p>
-
-          <Sub>Three deliverables that deserve extra attention</Sub>
-
-          <p>
-            Of the forty-five, three are disproportionately important. Any
-            serious reader should pay extra attention to these three.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 my-6 md:my-8">
-            <div className="rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/[0.05] via-purple-500/[0.04] to-emerald-500/[0.05] p-5 backdrop-blur-xl">
-              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-2">
-                Spotlight · day one
-              </p>
-              <p className="font-mono text-[13px] text-cyan-200 mb-3 break-all">
-                if-i-die-tomorrow.md
-              </p>
-              <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                One page. Where every critical document lives. Who to call
-                first. A pointer to where passwords and seed phrases are
-                stored (never the passwords themselves). The name of the
-                lawyer who drafted the plan. This is the page your spouse
-                or executor actually opens in the first forty-eight hours
-                after a death. Everything else in the packet is for the
-                months after.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.05] via-cyan-500/[0.04] to-purple-500/[0.05] p-5 backdrop-blur-xl">
-              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-emerald-300 mb-2">
-                Spotlight · coordination
-              </p>
-              <p className="font-mono text-[13px] text-emerald-200 mb-3 break-all">
-                beneficiary-map.md
-              </p>
-              <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                Every account, every contract, every life-insurance
-                policy. Who is currently named. Who should be named. The
-                delta. This is the single artifact that catches eighty
-                percent of real-world plan failures before they happen. It
-                is also the hardest to produce by hand; you have to pull
-                up every beneficiary form across every institution, which
-                is exactly why the skill&apos;s{" "}
-                <Mono>beneficiary-audit</Mono> subagent walks you through
-                it.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-purple-500/25 bg-gradient-to-br from-purple-500/[0.05] via-cyan-500/[0.04] to-emerald-500/[0.05] p-5 backdrop-blur-xl">
-              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-purple-300 mb-2">
-                Spotlight · handoff
-              </p>
-              <p className="font-mono text-[13px] text-purple-200 mb-3 break-all">
-                attorney-engagement-brief.md
-              </p>
-              <p className="text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
-                Four pages, structured in the way an estates attorney
-                actually wants to read a new client. Your facts, your
-                goals in your own words, the design choices the skill
-                recommended, the open legal questions the skill could not
-                resolve, and the specific state-law items that need
-                verification. Hand this to your lawyer and their first
-                billable meeting can start in the &ldquo;here are the
-                remaining legal questions&rdquo; mode instead of the
-                &ldquo;tell me your whole life story from scratch&rdquo;
-                mode.
-              </p>
-            </div>
-          </div>
-
-          <p>
-            The skill does not sign, witness, notarize, file, or record
-            any document. Every path ends at a licensed attorney who does.
-            The artifacts make that attorney&apos;s work smaller and their
-            billable hours more focused, not optional.
-          </p>
-        </EC>
-      </section>
-
-      <Divider />
-
-      {/* ========== ANTI-PATTERNS (hgjp.17) ========== */}
-      <section data-section="anti" className="pb-10 md:pb-14">
-        <EC>
-          <SectionHeader
-            id="anti"
-            eyebrow="What goes wrong"
-            title="Anti-patterns: the parrot, the ex-spouse, the springing POA."
-          />
-
-          <p>
-            Most estate-plan disasters are not exotic. They are one of
-            about fifteen patterns the skill is specifically designed to
-            catch, and once you know them they are obvious in retrospect.
-            The skill runs every plan through them before it hands you
-            anything. Here are the ones most worth burning into your
-            memory.
+            Most estate-plan disasters are not exotic. They are a
+            handful of patterns the skill runs every plan through before
+            it hands you anything: the 401(k) that still names an
+            ex-spouse, the trust that was drafted but never funded, the
+            springing POA that does not trigger when you need it, the
+            pet with a longer life expectancy than yours. Tap a card to
+            see what actually goes wrong and which subagent catches it.
           </p>
 
           <AntiPatternCardsViz />
 
-          <p>
-            Each card flips on tap or focus. Front: the pattern name plus
-            a one-line hook. Back: what actually goes wrong, the worst
-            case, and which subagent the skill uses to catch it. A small
-            bit of insider baseball for the curious reader.
-          </p>
+          <Sub>3. You walk away with a real document package.</Sub>
 
           <p>
-            The skill cannot prevent grief. It cannot change the fact that
-            someone you love will die, or that you will. What it can do
-            is make sure that on the day that matters most, none of the
-            patterns above are live in your plan, and that the people you
-            love are not the ones doing the discovering.
+            A serious session produces a structured project directory with
+            forty-five files organized so a lawyer, a spouse, or a future
+            version of you can pick up where you left off. Intake files,
+            analyses, draft documents, and an Attorney Engagement Brief
+            structured the way an estates attorney actually wants to read
+            a new client.
+          </p>
+
+          <DeliverablesTreeViz />
+
+          <Sub>4. The math versus a cold-start attorney consult.</Sub>
+
+          <p>
+            Attorney rates and timelines vary. The point is the order of
+            magnitude. Slide the net-worth bar and toggle the complexity
+            overlays to see a rough estimate of what an attorney
+            would quote for a comparable cold-start consultation versus
+            what this skill costs you in a month.
+          </p>
+
+          <PricingComparisonViz />
+
+          <p>
+            The comparison is a rough guide, not a legal fee quote.
+            Exact quotes vary by state, firm, and facts. The skill
+            subscription is the real number. The attorney number is the
+            rough order of magnitude you are skipping past by showing up
+            already prepared.
           </p>
         </EC>
       </section>
@@ -1410,256 +1216,37 @@ export function WillsEstateArticle() {
           />
 
           <p>
-            One of the things that is genuinely hard about estate planning is
-            that the law is a moving target. The federal exemption changed
-            materially in 2018, changed again in 2026 under the{" "}
-            <J t="obbba">OBBBA</J>, and will likely change again. State estate
-            tax thresholds drift. State execution formalities (how many
-            witnesses, notarization requirements, whether the will can be
-            electronic) vary across fifty jurisdictions and some of them have
-            updated their rules inside the last three years. The{" "}
-            <J t="secure-act">Secure Act</J> and Secure 2.0 rewrote how
-            inherited retirement accounts work.{" "}
-            <J t="medicaid-lookback">Medicaid lookback</J> periods are
-            state-specific and politically volatile.
+            Estate-planning law is a moving target. The federal exemption
+            changed in 2018, changed again in 2026 under the{" "}
+            <J t="obbba">OBBBA</J>, and will likely change again. State
+            thresholds drift. Execution formalities vary across fifty
+            jurisdictions. The skill separates the evergreen methodology
+            it trusts in full from the volatile law it has to re-verify at
+            session time; every live-law lookup is logged in{" "}
+            <Mono>official-source-log.md</Mono> with source URL and date,
+            so your attorney can audit what the skill relied on and your
+            future self can see what needs rechecking.
           </p>
 
           <p>
-            The skill separates two kinds of knowledge. The evergreen
-            methodology (the kernel&apos;s twelve axioms, the cognitive
-            operators, the tier-routing logic, the coordination discipline)
-            is stable. Those are the parts you can trust. The volatile law
-            (current thresholds, current formalities, current{" "}
-            <J t="portability">portability</J> mechanics, current domicile
-            rules) is handled under what the skill calls its{" "}
-            <strong>verification-first discipline</strong>. Nothing in that
-            category gets treated as final until it has been checked against
-            primary sources in the current session. The skill&apos;s output
-            contract includes a file called{" "}
-            <Mono>official-source-log.md</Mono> in which every live-law lookup
-            is recorded with the source URL and the date it was checked. Your
-            attorney can audit it. Your future self, doing a plan review in
-            2028, can see exactly which pieces of your 2026 analysis need
-            rechecking.
-          </p>
-
-          <ul className="list-disc pl-6 space-y-2 text-slate-300">
-            <li>
-              Federal transfer-tax thresholds, annual exclusion amounts, and{" "}
-              <J t="portability">portability</J> mechanics
-            </li>
-            <li>
-              State estate-tax and inheritance-tax thresholds, plus domicile
-              rules for anyone with assets in more than one jurisdiction
-            </li>
-            <li>
-              Execution formalities: witness counts, notarization, self-proving
-              affidavit rules, and whether electronic wills are recognized
-            </li>
-            <li>
-              Spousal-rights questions such as elective share, community
-              property, and whether a transfer-on-death or Lady Bird deed is
-              even available in the state at issue
-            </li>
-            <li>
-              Volatile edge-case overlays such as{" "}
-              <J t="medicaid-lookback">Medicaid lookback</J> windows,
-              POLST/MOLST naming, and <J t="nfa">NFA</J> transfer rules
-            </li>
-          </ul>
-
-          <p>
-            That is not scrupulous overkill; it is the only defensible posture
-            for an AI-driven tool in a volatile-law domain. If the skill ever
-            recommended a strategy that was correct in 2022 but wrong under the
-            current year&apos;s law, the result would not be a cute hallucination
-            bug. It would be a family losing real money, real time, or both.
-            Verification-first is the alternative.
-          </p>
-
-          <Sub eyebrow="The handoff">What your attorney receives</Sub>
-
-          <p>
-            Every session ends at a licensed estate-planning attorney in your
-            state. This is true for the Tier 1 renter with a modest estate and
-            it is true for the Tier 5 industrialist. What changes is the size
-            of the packet you bring.
+            The output handed to your attorney is, at minimum, four
+            documents: an <strong>Attorney Engagement Brief</strong> of
+            about four pages, a set of <strong>Interview Questions</strong>
+            {" "}you can ask them on the first call, a{" "}
+            <strong>Handoff Readiness</strong> scorecard the skill runs
+            on its own output before it ever leaves your laptop, and a{" "}
+            <strong>Document Package Index</strong> so nothing is lost in
+            email. The skill does not sign, notarize, or file anything. It
+            cannot practice law. What it can do is make sure the lawyer
+            who does is starting from a prepared client instead of a cold
+            start.
           </p>
 
           <p>
-            The skill produces, at minimum, four documents aimed specifically
-            at the attorney:
+            The whole thing: your attorney still signs. The skill gives
+            them the best first meeting they have ever had from a new
+            client.
           </p>
-
-          <p>
-            An <strong>Attorney Engagement Brief</strong> of about four pages.
-            It summarizes your situation, your goals in your own words, the
-            design choices the skill recommended, every open legal question the
-            skill could not resolve without a lawyer, and the specific
-            state-law items that need verification. It is structured to be read
-            in ten minutes.
-          </p>
-
-          <p>
-            A set of <strong>Attorney Interview Questions</strong>: the
-            questions you should ask your lawyer on the first call to confirm
-            that they are the right fit, are familiar with your state&apos;s
-            edge cases, and are not going to drop the ball on one of the
-            flagged items. Useful for anyone hiring counsel for the first time.
-          </p>
-
-          <p>
-            An <strong>Attorney Handoff Readiness</strong> scorecard. The skill
-            grades its own output against the question &ldquo;can counsel draft
-            efficiently from this packet?&rdquo; before it ever leaves your
-            laptop. If the grade comes back yellow or red, the skill flags what
-            is missing and loops you back to fix it before you send anything.
-          </p>
-
-          <p>
-            A <strong>Document Package Index</strong> listing everything the
-            attorney will need: your drafts, your supporting financial
-            documents, the beneficiary forms you have confirmed, the titling
-            records you have pulled. No &ldquo;I think I sent you the deed,
-            didn&apos;t I?&rdquo; email chains.
-          </p>
-
-          <Sub>The honest framing</Sub>
-
-          <p>
-            None of what the skill produces is legal advice. None of it creates
-            an attorney-client relationship. None of it can be filed with a
-            court or executed without a human lawyer&apos;s involvement. The
-            skill does not sign, witness, notarize, or record any document. It
-            does not file <J t="form-706">Form 706</J>. It does not transfer
-            title to a trust.
-          </p>
-
-          <p>
-            What it does is make the lawyer&apos;s job smaller. The first
-            meeting with an estates attorney for a case like Maya&apos;s is
-            often many billable hours of &ldquo;let me understand your life
-            before I can draft anything.&rdquo; With the skill&apos;s packet in
-            hand, that can become a shorter, more drafting-oriented
-            conversation: &ldquo;good, I can draft this, here are the three
-            questions I have for you before I start.&rdquo; The savings can be
-            meaningful, but they depend on the lawyer, the state, and the
-            facts.
-          </p>
-
-          <p>
-            The skill&apos;s job is to give your attorney the best first
-            meeting they have ever had from a new client. Theirs is to sign the
-            documents. That is the whole thing.
-          </p>
-        </EC>
-      </section>
-
-      <Divider />
-
-      {/* ========== COMPARISON TABLE (hgjp.38) ========== */}
-      <section data-section="comparison" className="pb-10 md:pb-14">
-        <EC>
-          <SectionHeader
-            id="comparison"
-            eyebrow="Vs. form-based tools"
-            title="Why not just use LegalZoom?"
-          />
-
-          <p>
-            The obvious question a serious reader asks at this point is:
-            why not just use{" "}
-            <a
-              href="https://legalzoom.com"
-              className="text-cyan-400 underline underline-offset-2"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              LegalZoom
-            </a>
-            ?{" "}
-            <a
-              href="https://trustandwill.com"
-              className="text-cyan-400 underline underline-offset-2"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Trust &amp; Will
-            </a>{" "}
-            runs a full estate-plan bundle for a few hundred dollars, flat
-            rate.{" "}
-            <a
-              href="https://rocketlawyer.com"
-              className="text-cyan-400 underline underline-offset-2"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Rocket Lawyer
-            </a>{" "}
-            has a subscription. Both of them are fine for what they do.
-            They are not the same kind of thing as this skill and it is
-            worth spelling out why.
-          </p>
-
-          <RefTable
-            cols={[
-              { key: "dim", label: "Dimension" },
-              {
-                key: "them",
-                label: "LegalZoom / Trust & Will / Rocket Lawyer",
-              },
-              { key: "us", label: "wills-and-estate-planning skill" },
-            ]}
-            rows={[
-              {
-                dim: <strong>What you get</strong>,
-                them: "One document at a time from a form-based intake (a will, a trust, a POA).",
-                us: "A coordinated plan: will + trust + beneficiary audit + titling audit + POAs + digital inventory + attorney handoff packet, checked for cross-document coherence.",
-              },
-              {
-                dim: <strong>Coordination across documents</strong>,
-                them: "None. Your will is produced in isolation from your 401(k) beneficiary forms, your deeds, or your insurance.",
-                us: "The main feature. Catches the 80% of real-world plan failures (mismatched beneficiaries, trusts that were never funded, ex-spouses still on contracts) before they happen.",
-              },
-              {
-                dim: <strong>State-law accuracy</strong>,
-                them: "Static templates, often months behind actual law.",
-                us: (
-                  <>
-                    Verification-first against primary sources on every
-                    live-law check; logged in{" "}
-                    <Mono>official-source-log.md</Mono> per session.
-                  </>
-                ),
-              },
-              {
-                dim: <strong>Where it ends</strong>,
-                them: "The document is the endpoint. If you want an attorney to review, you start over with them.",
-                us: "Every session ends at a licensed attorney in your state. Produces an Attorney Engagement Brief designed to reduce redundant intake and make the first billable meeting materially shorter.",
-              },
-              {
-                dim: <strong>What it costs</strong>,
-                them: "$79-499 per document, or $100-200/year for a subscription bundle.",
-                us: "$20/month, cancel anytime. Over a year, either cost is small, but the output is a different category of thing.",
-              },
-            ]}
-          />
-
-          <p>
-            If you rent, have no dependents, own no property, and just want
-            a single do-it-yourself will in case of emergency, buy a $79
-            will from LegalZoom and move on with your life. It is a better
-            use of your money than this skill. The skill earns its keep
-            the moment coordination across more than one document starts
-            to matter: the blended family, the business interest, the
-            second-state property, the vulnerable heir, the concentrated
-            stock position, the pet with a longer life expectancy than
-            yours. If any two of those describe you, the skill is a much
-            better fit than a form-based will generator, and an initial
-            consultation with an estates attorney is better than either.
-          </p>
-
-          <PricingComparisonViz />
         </EC>
       </section>
 
@@ -1900,81 +1487,55 @@ export function WillsEstateArticle() {
           </h2>
 
           <p>
-            Estate planning is one of a small set of problems where the
-            judgment-layer professionals are plentiful and well-trained, and
-            the billable hours they charge are mostly for asking you good
-            questions and writing down your answers. Tax preparation is
-            another. Medicare plan selection. Social Security claiming
-            strategy. College financial aid optimization. Divorce financial
-            planning. Medical bill auditing. Long-term care insurance
-            purchase. In every one of these, you are often paying an expert
-            for a long initial intake before they can do the part only they can
-            do.
+            Estate planning is one of a handful of expensive-by-default life
+            admin domains where the professional is plentiful and
+            well-trained, and most of the hours they bill for are actually
+            just asking you careful questions and writing your answers down.
+            Tax preparation is another. Medicare plan selection. Social
+            Security claiming strategy. College financial aid. Divorce
+            financial planning. Medical bill auditing. Long-term-care
+            insurance. In every one of these, you pay an expert for a long
+            initial intake before they can do the part only they can do.
           </p>
 
           <p>
-            That shape of problem is exactly what an agent-driven skill can
-            compress: the preparation, not the judgment. Your attorney
-            still signs. Your CPA still files. Your Medicare broker still
-            enrolls you. What changes is that a large share of the
-            preparation can happen on your Saturday afternoon at the kitchen
-            table with your agent, instead of entirely inside the
-            specialist&apos;s intake process.
+            That shape of problem is exactly what an agent-plus-skill can
+            compress: the preparation, not the judgment. Your attorney still
+            signs. Your CPA still files. Your Medicare broker still enrolls
+            you. What changes is that a large share of the preparation can
+            happen on your Saturday afternoon at the kitchen table, for
+            roughly a hundred and twenty dollars, instead of entirely inside
+            the specialist&apos;s billable hour.
           </p>
 
           <p>
-            I do not want to overclaim. None of this compresses to zero. A
-            good estates attorney or CPA is still worth their fee; you are
-            now paying them for the part that is actually them, not for the
-            part that was intake. If anything the skill makes your
-            professional relationships more efficient, not less necessary.
-            A family of modest means with a complicated situation will
-            still benefit from an hour of an attorney&apos;s time. A family
-            with fifty million dollars and three generations to plan for
-            will still need ongoing counsel for the next two decades. The
-            skill does not replace any of that. It can make the first meeting
-            more useful and shorten some of the work that follows.
+            This is the shape of a lot of what is coming. The model is not
+            that AI replaces the professional. The model is that the
+            professional gets to spend their time on what they are actually
+            expert at, because the intake work no longer has to run
+            through their clock. You get the packet. They get the
+            signature.
           </p>
 
           <p>
-            What it gives you, if you use it well, is two things. Your
-            family&apos;s affairs, organized coherently, for maybe the
-            first time in your adult life. And a packet an attorney can
-            draft against on a much shorter timeline than a cold start.
-          </p>
-
-          <p>
-            If you have been putting this off for a decade (and
-            statistically you probably have), the{" "}
-            <a
-              href="#install"
-              className="text-cyan-400 underline underline-offset-2"
-            >
-              ninety-second install
-            </a>{" "}
-            above is the only barrier left.
-          </p>
-
-          <p>
-            If you want the other concrete proof point for this pattern, start
-            at{" "}
-            <a
-              href="https://jeffreys-skills.md/dashboard"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 underline underline-offset-2"
-            >
-              jeffreys-skills.md/dashboard
-            </a>{" "}
-            and then read{" "}
+            If you want the other concrete proof point, the{" "}
             <a
               href="/writing/tax_gpt_using_ai_for_tax_prep"
               className="text-cyan-400 underline underline-offset-2"
             >
-              the tax-preparation article
-            </a>
-            . Tax prep was the first place this shape of problem became obvious
-            to me; estate planning is the second.
+              tax-preparation article
+            </a>{" "}
+            is the first place this pattern became obvious to me. Estate
+            planning is the second. If you have a frontier-model
+            subscription already, the only real barrier to trying this
+            one yourself is the{" "}
+            <a
+              href="#setup"
+              className="text-cyan-400 underline underline-offset-2"
+            >
+              twenty minutes of setup
+            </a>{" "}
+            above.
           </p>
 
           <div className="sm-sign-off">
@@ -1987,10 +1548,9 @@ export function WillsEstateArticle() {
                   TL;DR
                 </p>
                 <p className="text-[13px] text-slate-300">
-                  Two hundred files of estate-planning judgment. One
-                  conversation with your agent. Your attorney still signs.
-                  Your spouse can find the 401(k) beneficiary form. Your
-                  parrot is provided for.
+                  One skill. One weekend. Roughly $120. Your attorney still
+                  signs. Your spouse can find the 401(k) beneficiary form.
+                  Your parrot is provided for.
                 </p>
               </div>
             </div>
