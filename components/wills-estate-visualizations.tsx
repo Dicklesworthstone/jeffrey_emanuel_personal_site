@@ -2146,7 +2146,7 @@ export function DeliverablesTreeViz() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 rounded-[8px] border border-white/10 bg-black/25 p-2 text-center">
+          <div className="grid grid-cols-4 gap-2 rounded-[8px] border border-white/10 bg-black/25 p-2 text-center">
             {DELIVERABLE_FOLDERS.map((folder) => (
               <div key={folder} className="rounded-[8px] bg-white/[0.04] px-3 py-2">
                 <p className={cn("text-lg font-semibold", DELIVERABLE_FOLDER_META[folder].accent)}>
@@ -2157,6 +2157,10 @@ export function DeliverablesTreeViz() {
                 </p>
               </div>
             ))}
+            <div className="rounded-[8px] bg-white/[0.04] px-3 py-2">
+              <p className="text-lg font-semibold text-white">{deliverableTreeLeaves.length}</p>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Total</p>
+            </div>
           </div>
         </div>
 
@@ -2418,7 +2422,7 @@ export function DeliverablesTreeViz() {
           </AnimatePresence>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {spotlightLeaves.map((leaf) => {
             const meta = DELIVERABLE_FOLDER_META[leaf.folder];
             return (
