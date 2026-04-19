@@ -68,12 +68,49 @@ function J({ t, children }: { t: string; children?: ReactNode }) {
 // Primer download link constants
 const PRIMER_HREF = "/wills-and-estate-planning-primer.md";
 const PRIMER_FILENAME = "WILLS_AND_ESTATE_PLANNING_PRIMER.md";
+const SKILL_PAGE_HREF =
+  "https://jeffreys-skills.md/skills/wills-and-estate-planning-skill";
+const JSM_HOME_HREF = "https://jeffreys-skills.md/";
+const JSM_DASHBOARD_HREF = "https://jeffreys-skills.md/dashboard";
+const CLAUDE_DESKTOP_INSTALL_HREF =
+  "https://support.anthropic.com/en/articles/10065433-installing-claude-desktop";
+const CODEX_DESKTOP_HREF = "https://openai.com/codex/";
+
+const ARTICLE_SLUG = "wills-and-estate-planning";
+
+function getViewportClass() {
+  if (typeof window === "undefined") return "desktop";
+  const w = window.innerWidth;
+  if (w < 640) return "mobile";
+  if (w < 1024) return "tablet";
+  return "desktop";
+}
+
+function emitArticleEvent(name: string, props: Record<string, unknown> = {}) {
+  if (typeof window === "undefined") return;
+  if (navigator.doNotTrack === "1") return;
+  const payload = {
+    article_slug: ARTICLE_SLUG,
+    viewport_class: getViewportClass(),
+    ...props,
+  };
+  if (process.env.NODE_ENV !== "production") {
+    console.info(`[${name}]`, payload);
+    return;
+  }
+  if (typeof window.gtag === "function") {
+    window.gtag("event", name, payload);
+  }
+}
+
+type InstallPathKey = "desktop" | "cli" | "manual";
 
 function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
   return (
     <a
       href={PRIMER_HREF}
       download={PRIMER_FILENAME}
+      onClick={() => emitArticleEvent("primer_download_clicked")}
       className={`group relative inline-flex items-center gap-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-purple-500/10 via-cyan-500/10 to-emerald-500/10 backdrop-blur-xl transition-all hover:border-cyan-400/60 hover:shadow-[0_0_32px_rgba(6,182,212,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
         compact ? "px-4 py-3" : "px-5 py-4 md:px-6 md:py-5"
       }`}
@@ -232,6 +269,8 @@ function Sub({
 
 export function WillsEstateArticle() {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeInstallPath, setActiveInstallPath] =
+    useState<InstallPathKey>("desktop");
   const articleRef = useRef<HTMLDivElement>(null);
   const tocScrollFrameRef = useRef<number | null>(null);
   const tocScrollTimerRef = useRef<number | null>(null);
@@ -266,6 +305,7 @@ export function WillsEstateArticle() {
     if (!anchor) return;
 
     event.preventDefault();
+    emitArticleEvent("toc_link_clicked", { anchor_id: id });
     if (tocScrollFrameRef.current !== null) {
       window.cancelAnimationFrame(tocScrollFrameRef.current);
       tocScrollFrameRef.current = null;
@@ -313,6 +353,29 @@ export function WillsEstateArticle() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    emitArticleEvent("article_viewed");
+    let maxProgress = 0;
+    const trackMax = () => {
+      const { progress } = getScrollMetrics();
+      if (progress > maxProgress) maxProgress = progress;
+    };
+    window.addEventListener("scroll", trackMax, { passive: true });
+    const emitDepth = () => {
+      const bucket =
+        maxProgress < 0.25 ? "0-25" : maxProgress < 0.5 ? "25-50" : maxProgress < 0.75 ? "50-75" : "75-100";
+      emitArticleEvent("article_scroll_depth", { scroll_depth_bucket: bucket });
+    };
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") emitDepth();
+    });
+    window.addEventListener("beforeunload", emitDepth);
+    return () => {
+      window.removeEventListener("scroll", trackMax);
+      window.removeEventListener("beforeunload", emitDepth);
+    };
+  }, []);
+
   // Section reveal on scroll
   useEffect(() => {
     const root = articleRef.current;
@@ -358,6 +421,12 @@ export function WillsEstateArticle() {
       role="main"
       className={`sm-scope sm-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
+      onClick={(e) => {
+        const a = (e.target as HTMLElement).closest?.("a[href]") as HTMLAnchorElement | null;
+        if (a?.href?.includes("jeffreys-skills.md")) {
+          emitArticleEvent("jsm_skill_page_outbound_clicked", { target: a.href });
+        }
+      }}
     >
       {/* Scroll progress */}
       <div
@@ -843,16 +912,32 @@ export function WillsEstateArticle() {
           <SectionHeader
             id="install"
             eyebrow="Install"
-            title="Ninety seconds, no terminal."
+            title="Get the skill into your agent in 90 seconds."
           />
 
           <p>
-            If you&apos;re not a developer, this is the only install path you
-            need to read. You already have Claude or Codex Desktop installed
-            (if you don&apos;t, the download links for both are at the bottom
-            of this section). You have a paid{" "}
-            <J t="jsm">jeffreys-skills.md</J> subscription. That is it. No
-            command line, no Homebrew, no package managers, no YAML files.
+            If you&apos;re not a developer, Path 1 below is the only install
+            flow you need. You already have Claude or Codex Desktop installed.
+            If you still need the app, start with the official{" "}
+            <a
+              href={CLAUDE_DESKTOP_INSTALL_HREF}
+              className="text-cyan-400 underline underline-offset-2"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Claude Desktop setup page
+            </a>{" "}
+            or the{" "}
+            <a
+              href={CODEX_DESKTOP_HREF}
+              className="text-cyan-400 underline underline-offset-2"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Codex app page
+            </a>
+            . Then come back here with a paid <J t="jsm">jeffreys-skills.md</J>{" "}
+            subscription. No Homebrew. No YAML. No package-manager archaeology.
           </p>
 
           <p className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-[15px] leading-relaxed text-amber-100">
@@ -862,138 +947,362 @@ export function WillsEstateArticle() {
             sign the final documents.
           </p>
 
-          <Sub eyebrow="Path 1">
-            In Claude or Codex Desktop (recommended)
-          </Sub>
-
           <p>
-            The whole flow fits in three clicks and one paste.
+            Three routes exist because readers show up with very different
+            setups. Path 1 is the default. Path 2 is for developers who already
+            use <Mono>jsm</Mono>. Path 3 exists for restricted laptops and
+            weird environments where the agent cannot complete the download
+            itself.
           </p>
 
-          <p>
-            <strong>Step 1.</strong> Open{" "}
-            <a
-              href="https://jeffreys-skills.md/skills/wills-and-estate-planning-skill"
-              className="text-cyan-400 underline underline-offset-2"
-              target="_blank"
-              rel="noopener noreferrer"
+          <div
+            className="mt-8 grid gap-3 md:grid-cols-3"
+            role="tablist"
+            aria-label="Install paths"
+          >
+            <article
+              className={`rounded-3xl border p-5 md:p-6 backdrop-blur-xl transition-all ${
+                activeInstallPath === "desktop"
+                  ? "border-cyan-400/60 bg-cyan-500/10 shadow-[0_0_28px_rgba(34,211,238,0.15)]"
+                  : "border-white/10 bg-white/[0.04]"
+              }`}
             >
-              jeffreys-skills.md/skills/wills-and-estate-planning-skill
-            </a>{" "}
-            in your browser. Make sure you are signed in — the skill page
-            shows a page-not-found screen if you are not. If you see that
-            screen, sign in at the dashboard first and reload.
-          </p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
+                  Path 1
+                </p>
+                <span className="rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-emerald-200">
+                  Recommended
+                </span>
+              </div>
+              <h3 className="mt-4 text-[1.15rem] font-semibold text-white">
+                In Claude or Codex Desktop
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                Click <strong>Generate install prompt</strong>, paste once,
+                approve one download, and reload skills. This is the no-terminal
+                path.
+              </p>
+              <div className="mt-5 flex flex-col gap-3">
+                <a
+                  href={SKILL_PAGE_HREF}
+                  className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-100 transition-colors hover:border-cyan-300 hover:bg-cyan-500/25"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open the skill page
+                </a>
+                <button
+                  id="install-tab-desktop"
+                  type="button"
+                  role="tab"
+                  aria-label="In Claude or Codex Desktop"
+                  aria-selected={activeInstallPath === "desktop"}
+                  aria-controls="install-panel-desktop"
+                  tabIndex={activeInstallPath === "desktop" ? 0 : -1}
+                  onClick={() => { setActiveInstallPath("desktop"); emitArticleEvent("install_section_cta_clicked", { target: "desktop" }); }}
+                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors ${
+                    activeInstallPath === "desktop"
+                      ? "border-cyan-300/60 bg-white/10 text-white"
+                      : "border-white/10 bg-black/20 text-slate-300 hover:border-cyan-400/30 hover:text-white"
+                  }`}
+                >
+                  {activeInstallPath === "desktop"
+                    ? "Showing the exact steps"
+                    : "Show the exact steps"}
+                </button>
+              </div>
+            </article>
 
-          <p>
-            <strong>Step 2.</strong> On the right side of the skill page, find
-            the card labeled <strong>Install in Claude or Codex Desktop</strong>.
-            Click the blue <strong>Generate install prompt</strong> button. A
-            block of text appears in a textarea below the button, along with a
-            countdown (&ldquo;Expires in 9:58&rdquo;). Click{" "}
-            <strong>Copy</strong> to the right of the textarea.
-          </p>
+            <article
+              className={`rounded-3xl border p-5 md:p-6 backdrop-blur-xl transition-all ${
+                activeInstallPath === "cli"
+                  ? "border-cyan-400/60 bg-cyan-500/10 shadow-[0_0_28px_rgba(34,211,238,0.15)]"
+                  : "border-white/10 bg-white/[0.04]"
+              }`}
+            >
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
+                Path 2
+              </p>
+              <h3 className="mt-4 text-[1.15rem] font-semibold text-white">
+                Via the jsm CLI
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                For developers who already use <Mono>jsm</Mono>. No mystery
+                bash block here: you authenticate once, then install the skill
+                you actually want.
+              </p>
+              <div className="mt-5 flex flex-col gap-3">
+                <a
+                  href={JSM_HOME_HREF}
+                  className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-100 transition-colors hover:border-cyan-300 hover:bg-cyan-500/25"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Install or update jsm
+                </a>
+                <button
+                  id="install-tab-cli"
+                  type="button"
+                  role="tab"
+                  aria-label="Via the jsm CLI"
+                  aria-selected={activeInstallPath === "cli"}
+                  aria-controls="install-panel-cli"
+                  tabIndex={activeInstallPath === "cli" ? 0 : -1}
+                  onClick={() => { setActiveInstallPath("cli"); emitArticleEvent("install_section_cta_clicked", { target: "cli" }); }}
+                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors ${
+                    activeInstallPath === "cli"
+                      ? "border-cyan-300/60 bg-white/10 text-white"
+                      : "border-white/10 bg-black/20 text-slate-300 hover:border-cyan-400/30 hover:text-white"
+                  }`}
+                >
+                  {activeInstallPath === "cli"
+                    ? "Showing the exact steps"
+                    : "Show the exact steps"}
+                </button>
+              </div>
+            </article>
 
-          <p>
-            <strong>Step 3.</strong> Open Claude Desktop or Codex Desktop.
-            Click in the chat input at the bottom. Paste the text with ⌘-V (or
-            Ctrl-V on Windows). Hit Enter.
-          </p>
+            <article
+              className={`rounded-3xl border p-5 md:p-6 backdrop-blur-xl transition-all ${
+                activeInstallPath === "manual"
+                  ? "border-cyan-400/60 bg-cyan-500/10 shadow-[0_0_28px_rgba(34,211,238,0.15)]"
+                  : "border-white/10 bg-white/[0.04]"
+              }`}
+            >
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
+                Path 3
+              </p>
+              <h3 className="mt-4 text-[1.15rem] font-semibold text-white">
+                Manual ZIP fallback
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                When the agent-paste flow is blocked by a locked-down machine or
+                browser environment, download the signed ZIP and drop it into
+                the skill directory yourself.
+              </p>
+              <div className="mt-5 flex flex-col gap-3">
+                <a
+                  href={SKILL_PAGE_HREF}
+                  className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-100 transition-colors hover:border-cyan-300 hover:bg-cyan-500/25"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open the ZIP download page
+                </a>
+                <button
+                  id="install-tab-manual"
+                  type="button"
+                  role="tab"
+                  aria-label="Manual ZIP fallback"
+                  aria-selected={activeInstallPath === "manual"}
+                  aria-controls="install-panel-manual"
+                  tabIndex={activeInstallPath === "manual" ? 0 : -1}
+                  onClick={() => { setActiveInstallPath("manual"); emitArticleEvent("install_section_cta_clicked", { target: "manual" }); }}
+                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition-colors ${
+                    activeInstallPath === "manual"
+                      ? "border-cyan-300/60 bg-white/10 text-white"
+                      : "border-white/10 bg-black/20 text-slate-300 hover:border-cyan-400/30 hover:text-white"
+                  }`}
+                >
+                  {activeInstallPath === "manual"
+                    ? "Showing the exact steps"
+                    : "Show the exact steps"}
+                </button>
+              </div>
+            </article>
+          </div>
 
-          <p>
-            <strong>Step 4.</strong> The agent will read the prompt, show you a
-            &ldquo;Would you like to allow this command?&rdquo; dialog (for the
-            download), click <strong>Allow</strong>. After a short wait, the
-            agent will tell you the skill has been installed and ask you to
-            reload skills. On Claude Desktop that is ⌘-Shift-P →
-            &ldquo;Reload skills&rdquo;; on Codex Desktop, quit and reopen.
-            The skill will appear when you type <Mono>/</Mono> in the prompt.
-          </p>
+          <div className="mt-6">
+            <div
+              id="install-panel-desktop"
+              role="tabpanel"
+              aria-labelledby="install-tab-desktop"
+              hidden={activeInstallPath !== "desktop"}
+              className={`rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.07] via-white/[0.03] to-emerald-500/[0.06] p-5 md:p-6 ${
+                activeInstallPath === "desktop" ? "block" : "hidden"
+              }`}
+            >
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
+                Path 1 · in Claude or Codex Desktop
+              </p>
+              <h3 className="mt-3 text-[1.2rem] font-semibold text-white">
+                The whole flow fits in four short steps.
+              </h3>
+              <ol className="mt-5 space-y-4 text-slate-300">
+                <li>
+                  <strong>Step 1.</strong> Open{" "}
+                  <a
+                    href={SKILL_PAGE_HREF}
+                    className="text-cyan-400 underline underline-offset-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    jeffreys-skills.md/skills/wills-and-estate-planning-skill
+                  </a>{" "}
+                  in your browser. Make sure you are signed in. If you see a
+                  page-not-found screen, sign in at{" "}
+                  <a
+                    href={JSM_DASHBOARD_HREF}
+                    className="text-cyan-400 underline underline-offset-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    jeffreys-skills.md/dashboard
+                  </a>{" "}
+                  first and reload.
+                </li>
+                <li>
+                  <strong>Step 2.</strong> Find the card labeled{" "}
+                  <strong>Install in Claude or Codex Desktop</strong>. Click{" "}
+                  <strong>Generate install prompt</strong>. A textarea appears
+                  below the button with a ten-minute countdown
+                  (&ldquo;Expires in 9:58&rdquo;). Click <strong>Copy</strong>.
+                </li>
+                <li>
+                  <strong>Step 3.</strong> Open Claude Desktop or Codex
+                  Desktop, click in the chat box, paste the prompt, and hit
+                  Enter.
+                </li>
+                <li>
+                  <strong>Step 4.</strong> The agent reads the prompt, asks for
+                  permission to run one download command, and installs the skill
+                  into the right folder. Click <strong>Allow</strong>. Then
+                  reload skills. On Claude Desktop that is ⌘-Shift-P →
+                  &ldquo;Reload skills&rdquo;; on Codex Desktop, quit and
+                  reopen. The skill appears when you type <Mono>/</Mono>.
+                </li>
+              </ol>
+            </div>
 
-          <p>
-            That is the whole install. The URL embedded in the prompt is a
-            one-time token bound to your paid account and valid for ten
-            minutes, so even if you paste the prompt into someone else&apos;s
-            computer it will not work for them. If the code expires before you
-            get to pasting it, just click <strong>Generate install prompt</strong>{" "}
-            again.
-          </p>
+            <div
+              id="install-panel-cli"
+              role="tabpanel"
+              aria-labelledby="install-tab-cli"
+              hidden={activeInstallPath !== "cli"}
+              className={`rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.07] via-white/[0.03] to-emerald-500/[0.06] p-5 md:p-6 ${
+                activeInstallPath === "cli" ? "block" : "hidden"
+              }`}
+            >
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
+                Path 2 · via the jsm CLI
+              </p>
+              <h3 className="mt-3 text-[1.2rem] font-semibold text-white">
+                The familiar path for people who already live in the terminal.
+              </h3>
+              <ol className="mt-5 space-y-4 text-slate-300">
+                <li>
+                  <strong>Step 1.</strong> Install or update <Mono>jsm</Mono>{" "}
+                  from{" "}
+                  <a
+                    href={JSM_HOME_HREF}
+                    className="text-cyan-400 underline underline-offset-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    jeffreys-skills.md
+                  </a>{" "}
+                  if it is not already on the machine you use for Claude or
+                  Codex.
+                </li>
+                <li>
+                  <strong>Step 2.</strong> Run <Mono>jsm login</Mono> once so
+                  the CLI is tied to the same paid account you use on the site.
+                </li>
+                <li>
+                  <strong>Step 3.</strong> Run{" "}
+                  <Mono>jsm install wills-and-estate-planning-skill</Mono>. The
+                  CLI downloads the signed bundle, verifies it, and installs it
+                  into <Mono>~/.claude/skills/</Mono> or{" "}
+                  <Mono>~/.codex/skills/</Mono> automatically.
+                </li>
+              </ol>
+              <p className="mt-5 text-sm leading-relaxed text-slate-300">
+                If Claude&apos;s plugin channel is available in your environment,
+                that route is fine too. The important contract is the same: the
+                signed bundle still comes from <J t="jsm">jeffreys-skills.md</J>
+                .
+              </p>
+            </div>
 
-          <Sub eyebrow="Path 2">From the terminal (power users)</Sub>
+            <div
+              id="install-panel-manual"
+              role="tabpanel"
+              aria-labelledby="install-tab-manual"
+              hidden={activeInstallPath !== "manual"}
+              className={`rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.07] via-white/[0.03] to-emerald-500/[0.06] p-5 md:p-6 ${
+                activeInstallPath === "manual" ? "block" : "hidden"
+              }`}
+            >
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
+                Path 3 · manual ZIP fallback
+              </p>
+              <h3 className="mt-3 text-[1.2rem] font-semibold text-white">
+                Use this only when Path 1 cannot complete the download.
+              </h3>
+              <ol className="mt-5 space-y-4 text-slate-300">
+                <li>
+                  <strong>Step 1.</strong> Open the same skill page and click{" "}
+                  <strong>Download ZIP</strong>. It uses the same signed,
+                  single-use install token under the hood.
+                </li>
+                <li>
+                  <strong>Step 2.</strong> Unzip the archive and drag the
+                  resulting <Mono>wills-and-estate-planning-skill/</Mono>{" "}
+                  folder into the right skills directory:
+                  <ul className="mt-3 list-disc pl-6 space-y-2 text-slate-300">
+                    <li>
+                      macOS / Linux: <Mono>~/.claude/skills/</Mono> for Claude
+                      Desktop, <Mono>~/.codex/skills/</Mono> or{" "}
+                      <Mono>~/.agents/skills/</Mono> for Codex
+                    </li>
+                    <li>
+                      Windows: <Mono>%USERPROFILE%\.claude\skills\</Mono>,{" "}
+                      <Mono>%USERPROFILE%\.codex\skills\</Mono>, or{" "}
+                      <Mono>%USERPROFILE%\.agents\skills\</Mono>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Step 3.</strong> If you are unsure where that folder
+                  lives, use the <strong>Reveal folder</strong> helper on the
+                  install card. Then reload skills exactly as in Path 1.
+                </li>
+              </ol>
+            </div>
+          </div>
 
-          <p>
-            If you are comfortable with a command line:
-          </p>
-
-          <Code>
-{`# macOS / Linux
-curl -fsSL https://jeffreys-skills.md/install.sh | bash
-
-# Windows (PowerShell as Admin)
-irm https://jeffreys-skills.md/install.ps1 | iex
-
-jsm login
-jsm install wills-and-estate-planning-skill`}
-          </Code>
-
-          <p>
-            That path authenticates via an OAuth handoff to your browser
-            session, installs the skill into your agent&apos;s skills directory
-            (<Mono>~/.claude/skills/</Mono> or <Mono>~/.codex/skills/</Mono>),
-            and is done in about the same time as Path 1. Power users may
-            prefer it. Everyone else should ignore it.
-          </p>
-
-          <Sub eyebrow="Path 3">Direct download (if both above fail)</Sub>
-
-          <p>
-            For the small number of readers on restricted corporate laptops or
-            in environments where the agent can&apos;t be trusted to run a
-            download command, there is a direct{" "}
-            <strong>Download ZIP</strong> button on the same install card. Same
-            single-use token under the hood. Unzip the file and drag the
-            resulting folder into:
-          </p>
-
-          <ul className="list-disc pl-6 space-y-1 text-slate-300">
-            <li>
-              macOS / Linux: <Mono>~/.claude/skills/</Mono> (for Claude
-              Desktop) or <Mono>~/.codex/skills/</Mono> (for Codex Desktop)
-            </li>
-            <li>
-              Windows: <Mono>%USERPROFILE%\.claude\skills\</Mono> or{" "}
-              <Mono>%USERPROFILE%\.codex\skills\</Mono>
-            </li>
-          </ul>
-
-          <p>
-            A <strong>Reveal folder</strong> helper next to the button opens
-            Finder or Explorer pointing at the right directory. After dragging,
-            reload skills in the app as in Step 4 above.
-          </p>
+          <div className="sm-insight-card mt-8">
+            <p className="text-[11px] font-mono text-purple-300 uppercase tracking-[0.25em] mb-3">
+              Why this works without a terminal
+            </p>
+            <p className="text-base md:text-lg leading-relaxed text-slate-200">
+              The agent <em>is</em> the terminal. You never type a command
+              yourself; you approve one. The URL embedded in the generated
+              prompt is tied to your paid account and expires after roughly ten
+              minutes, so copying that prompt onto someone else&apos;s machine
+              does not give them a reusable installer.
+            </p>
+          </div>
 
           <Sub>If something goes wrong</Sub>
 
           <ul className="list-disc pl-6 space-y-2 text-slate-300">
             <li>
-              <strong>The code expired before I pasted it.</strong> Click{" "}
-              <strong>Generate install prompt</strong> again. They&apos;re
-              cheap.
+              <strong>The code expired before I pasted it.</strong> Go back and
+              click <strong>Generate install prompt</strong> again. They are
+              intentionally short-lived.
             </li>
             <li>
               <strong>The agent refused the download step.</strong> Click
-              &ldquo;Allow&rdquo; on the permission dialog; it only asks once
-              per session. If you clicked Deny by mistake, ask the agent to try
-              again.
+              &ldquo;Allow&rdquo; on the permission dialog. If you denied it by
+              mistake, ask the agent to retry.
             </li>
             <li>
-              <strong>
-                The skill did not appear in the picker after reload.
-              </strong>{" "}
-              Quit and reopen the desktop app. If it still doesn&apos;t show,
-              use Path 3 to verify the skill folder is present at the expected
-              path. If it is present but not loading, email support with the
-              correlation ID shown on the install card.
+              <strong>The skill did not appear in the picker after reload.</strong>{" "}
+              Quit and reopen the desktop app once. If it still does not show,
+              use Path 3 to confirm the folder landed in the expected skills
+              directory.
             </li>
           </ul>
         </EC>
