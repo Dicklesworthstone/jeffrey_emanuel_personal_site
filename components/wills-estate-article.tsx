@@ -458,7 +458,7 @@ export function WillsEstateArticle() {
 
           <p>
             So I built it, and I went a little further than I meant to. The
-            wills-and-estate-planning skill now runs to two hundred files and
+            wills-and-estate-planning skill now runs to over two hundred files and
             something like twenty-four thousand lines of text. It has seventeen
             subagents, one hundred thirty-five reference documents covering
             federal and state law through the 2026{" "}
@@ -853,7 +853,7 @@ jsm install wills-and-estate-planning-skill`}
           </Code>
 
           <p>
-            That path authenticates via an OAuth hand-off to your browser
+            That path authenticates via an OAuth handoff to your browser
             session, installs the skill into your agent&apos;s skills directory
             (<Mono>~/.claude/skills/</Mono> or <Mono>~/.codex/skills/</Mono>),
             and is done in about the same time as Path 1. Power users may
@@ -986,7 +986,7 @@ jsm install wills-and-estate-planning-skill`}
             your net worth says.
           </p>
 
-          <Sub>Who this is NOT for (honest scope limits)</Sub>
+          <Sub>Who this is <strong>not</strong> for (honest scope limits)</Sub>
 
           <ul className="list-disc pl-6 space-y-3 text-slate-300">
             <li>
@@ -1051,7 +1051,7 @@ jsm install wills-and-estate-planning-skill`}
           <p>
             The most common failure mode in estate planning is not a drafting
             mistake. It is incoherence between documents. A
-            beautifully-written <J t="will">will</J> that says
+            beautifully-drafted <J t="will">will</J> that says
             &ldquo;everything to my kids equally&rdquo; does exactly nothing if
             the <J t="401k-spousal-consent">401(k)</J> still names the
             ex-spouse, because retirement accounts pass by contract, not by
