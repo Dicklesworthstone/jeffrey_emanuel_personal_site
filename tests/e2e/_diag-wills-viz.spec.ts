@@ -35,7 +35,7 @@ test.describe("wills viz diagnostic", () => {
       test(`${target.id} @ ${vp.name}`, async ({ page }) => {
         test.setTimeout(90_000);
         await page.setViewportSize({ width: vp.width, height: vp.height });
-        await page.goto("/writing/wills-and-estate-planning-using-ai", {
+        await page.goto("/writing/wills-and-estate-planning", {
           waitUntil: "domcontentloaded",
         });
         await page.waitForLoadState("networkidle", { timeout: 60_000 });

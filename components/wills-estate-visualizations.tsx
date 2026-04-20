@@ -346,8 +346,8 @@ export function TierTriageViz() {
         </div>
 
         <div className="relative">
-          <div className="pointer-events-none absolute left-[10%] right-[10%] top-8 hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent md:block" />
-          <div role="group" aria-label="Wealth tier triage ladder" className="grid gap-3 md:grid-cols-5">
+          <div className="pointer-events-none absolute left-[10%] right-[10%] top-8 hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent lg:block" />
+          <div role="group" aria-label="Wealth tier triage ladder" className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {TIER_TRIAGE_ITEMS.map((tier, index) => {
               const isSelected = index === selectedIndex;
               const isExpanded = index === expandedIndex;
@@ -4130,7 +4130,7 @@ export function WorkingFolderViz() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,0.92fr)_auto_minmax(0,1fr)] xl:items-stretch">
+        <div className="mt-8 grid gap-4 xl:grid-cols-3 xl:gap-5 xl:items-stretch">
           <motion.div
             role="group"
             aria-label="Files you put in"
@@ -4247,7 +4247,7 @@ export function WorkingFolderViz() {
             </div>
           </motion.div>
 
-          <div className="flex items-center justify-center py-1 xl:py-0" aria-hidden="true">
+          <div className="flex items-center justify-center py-1 xl:hidden" aria-hidden="true">
             <motion.div
               animate={
                 prefersReducedMotion ? undefined : { x: [0, 7, 0], opacity: [0.8, 1, 0.8] }
@@ -4260,7 +4260,7 @@ export function WorkingFolderViz() {
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-200"
             >
               <span>Ask</span>
-              <ArrowRight className="h-4 w-4 rotate-90 xl:rotate-0" />
+              <ArrowRight className="h-4 w-4 rotate-90" />
             </motion.div>
           </div>
 
@@ -4337,7 +4337,7 @@ export function WorkingFolderViz() {
             </div>
           </motion.div>
 
-          <div className="flex items-center justify-center py-1 xl:py-0" aria-hidden="true">
+          <div className="flex items-center justify-center py-1 xl:hidden" aria-hidden="true">
             <motion.div
               animate={
                 prefersReducedMotion ? undefined : { x: [0, 7, 0], opacity: [0.8, 1, 0.8] }
@@ -4350,7 +4350,7 @@ export function WorkingFolderViz() {
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-200"
             >
               <span>Wait ~30 min</span>
-              <ArrowRight className="h-4 w-4 rotate-90 xl:rotate-0" />
+              <ArrowRight className="h-4 w-4 rotate-90" />
             </motion.div>
           </div>
 
