@@ -6,6 +6,10 @@ fs.mkdirSync(OUT_DIR, { recursive: true });
 
 test.use({ baseURL: "http://localhost:3000" });
 
+// Run serially — parallel navigations overwhelm the dev server and produce
+// spurious "no hero" errors on cold-compile misses.
+test.describe.configure({ mode: "serial" });
+
 // Every article with a hero "Scroll to ..." indicator. The exact label varies
 // across articles (Explore / Discover / Optimize / Initialization).
 const articles = [
