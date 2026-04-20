@@ -72,9 +72,8 @@ const PRIMER_FILENAME = "WILLS_AND_ESTATE_PLANNING_PRIMER.md";
 const SKILL_PAGE_HREF =
   "https://jeffreys-skills.md/skills/wills-and-estate-planning-skill";
 const JSM_HOME_HREF = "https://jeffreys-skills.md/";
-const CLAUDE_DESKTOP_INSTALL_HREF =
-  "https://support.anthropic.com/en/articles/10065433-installing-claude-desktop";
-const CODEX_DESKTOP_HREF = "https://openai.com/codex/";
+const CLAUDE_DESKTOP_INSTALL_HREF = "https://claude.com/download";
+const CODEX_DESKTOP_HREF = "https://chatgpt.com/codex";
 
 const ARTICLE_SLUG = "wills-and-estate-planning";
 
@@ -607,7 +606,7 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
-            A few months ago I posted a tax-preparation skill on my paid skills
+            I recently posted a tax-preparation skill on my paid skills
             site,{" "}
             <a
               href="https://jeffreys-skills.md/"
@@ -622,16 +621,20 @@ export function WillsEstateArticle() {
             thousand. That is on a twenty-dollar-a-month subscription. It got
             me thinking about which other expensive-specialist problems look
             the same shape as tax prep, where the billable hours are mostly
-            good questions, patient listening, and a disciplined checklist. The
-            replies kept pointing at the same one: writing a will.
+            good questions, patient listening, and a disciplined checklist. One
+            reply suggested writing a will, and I knew right away it was the
+            right answer.
           </p>
 
           <p>
             So I built it. This article is the long-form explanation of what
             the skill is, what you need to run it, and how a smart
             non-technical reader with three to six hours (across a couple of
-            sittings, not a forced marathon) can walk away with the package a
-            real estate-planning attorney actually wants to receive.
+            sittings, not a forced marathon) can walk away with an actual
+            finished will that is incredibly thoughtful and well-informed and
+            custom-tailored to their specific situation, along with the
+            polished package an estate-planning attorney actually wants to
+            receive if they choose to engage one.
           </p>
         </EC>
       </section>
@@ -650,16 +653,21 @@ export function WillsEstateArticle() {
           <p>
             A full estate-plan consultation with a decent attorney runs
             somewhere between fifteen and twenty-five thousand dollars for a
-            household with any real complexity. Most of those hours are not the
-            attorney drafting; they are the attorney asking you careful
-            questions, waiting for you to find documents, and writing down your
-            answers. The expensive part is the interviewing.
+            household with any real complexity. Most of those hours are not
+            the attorney drafting. They are the attorney walking you through
+            tradeoffs, asking careful questions, explaining what each option
+            actually means, and building the plan one decision at a time. The
+            expensive part is the expertise, not the typing.
           </p>
 
           <p>
-            The interviewing is the part a good agent-plus-skill can do, for
-            roughly the cost of a nice dinner, across a couple of sittings.
-            You need four things:
+            A good agent-plus-skill can do that same work for roughly the cost
+            of a nice dinner, across a couple of sittings. The skill arms the
+            model with an unbelievably rich framework and reference corpus,
+            the same body of material a white-shoe firm&apos;s
+            wills-and-trusts division draws on every day, so what you get out
+            of the conversation is expert advice custom-tailored to your
+            specific situation. You need four things:
           </p>
 
           <RefTable
@@ -673,12 +681,12 @@ export function WillsEstateArticle() {
               {
                 item: <strong>Claude Max (5x tier)</strong>,
                 price: "$100/mo",
-                note: "Sign up at claude.ai → Settings → Upgrade. Plenty of capacity for this skill. Cancel after the month if you want.",
+                note: "Sign up at claude.ai → Settings → Upgrade. Runs Claude Code, which is where you do the initial deep work. Cancel after the month if you want.",
               },
               {
-                item: <strong>or GPT Pro</strong>,
-                price: "$200/mo",
-                note: "Sign up at chatgpt.com. Use instead of, or alongside, Claude Max.",
+                item: <strong>GPT Pro</strong>,
+                price: "$100/mo",
+                note: "Sign up at chatgpt.com. Runs Codex, which is what you use to audit the package Claude produced. Highly recommended to subscribe to both.",
               },
               {
                 item: <strong>jeffreys-skills.md</strong>,
@@ -688,31 +696,70 @@ export function WillsEstateArticle() {
               {
                 item: <strong>Your attorney&apos;s review</strong>,
                 price: "$2-4k",
-                note: "Unavoidable and correct. They still sign the documents. The packet the skill produces makes this meeting dramatically shorter.",
+                note: "Strictly optional. If you decide you want a licensed attorney to review and bless the result, the packet the skill produces makes that meeting dramatically shorter and cheaper than starting from scratch.",
               },
             ]}
           />
 
           <p>
-            Pick one of Claude Max or GPT Pro. If you have the budget, run the
-            skill through both; the two frontier models catch different things,
-            and the two second opinions are the cheapest quality insurance
-            you&apos;ll buy this year. Cancel whichever ones you don&apos;t
-            want next month. You keep every document the skill produces
-            forever.
+            The recommended setup is both. Do the initial deep work in
+            Claude Code with Opus 4.7 at the maximum thinking-effort tier,
+            then hand the resulting package to Codex with GPT-5.4 at the
+            maximum reasoning-effort tier and ask it to audit what Claude
+            produced. The two frontier models do not overlap perfectly; a
+            gap one misses the other usually catches. About two hundred
+            and twenty dollars for a month of both is the cheapest
+            quality insurance you will buy this year, and you can cancel
+            either next month. If budget is tight, Claude Max alone is
+            enough to produce a real plan. You keep every document the
+            skill produces forever.
           </p>
 
           <p>
-            The other thing worth saying about a hundred-dollar-a-month
-            frontier-model subscription: while you have it, it will also audit
-            your tax return, review your insurance coverage, draft a business
-            plan, compare Medicare plans, explain a confusing hospital bill, or
-            pre-read a long contract before you send it to a lawyer. It is
-            among the best hundred dollars per month you will spend this year
-            even before the estate plan.
+            Two short commands set the top reasoning tier on each tool.
+            Launch Claude Code with{" "}
+            <Mono>claude --model opus --effort max</Mono>, or inside a
+            session type <Mono>/model opus</Mono> and{" "}
+            <Mono>/effort max</Mono>. Launch Codex with{" "}
+            <Mono>codex --model gpt-5.4 -c model_reasoning_effort=xhigh</Mono>.
+            To make those the defaults, add{" "}
+            <Mono>model: &quot;opus&quot;</Mono> and{" "}
+            <Mono>effortLevel: &quot;max&quot;</Mono> to Claude Code&apos;s{" "}
+            <Mono>settings.json</Mono>, and add{" "}
+            <Mono>model = &quot;gpt-5.4&quot;</Mono> plus{" "}
+            <Mono>model_reasoning_effort = &quot;xhigh&quot;</Mono> to{" "}
+            <Mono>~/.codex/config.toml</Mono>. These are the highest
+            reasoning tiers each tool exposes as of 2026.
           </p>
 
-          <MarkdownDownloadButton />
+          <p>
+            The other thing worth saying about a Claude Max or GPT Pro
+            subscription: the wills skill is one of a growing library on
+            the skills site. The same setup gives you access to a
+            world-class tax consultation for US residents (see{" "}
+            <a
+              href="https://x.com/doodlestein/status/2043875653951307854"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline underline-offset-2"
+            >
+              my writeup on that one
+            </a>
+            ), my modes-of-reasoning skill for pressure-testing any
+            project, business plan, or serious decision you are working
+            through (see{" "}
+            <a
+              href="https://x.com/doodlestein/status/2041660563005100220"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline underline-offset-2"
+            >
+              this short post
+            </a>
+            ), and more than a hundred other skills across different
+            specialist domains. The estate plan is one of several reasons
+            the subscription pays for itself in the first month.
+          </p>
 
           {/* TOC */}
           <nav className="sm-toc mt-10" aria-label="Table of contents">
@@ -750,7 +797,7 @@ export function WillsEstateArticle() {
               </li>
               <li>
                 <a href="#attorney" onClick={(event) => handleTocJump(event, "attorney")}>
-                  The attorney still signs the documents
+                  When (and whether) to involve an attorney
                 </a>
               </li>
               <li>
@@ -789,12 +836,13 @@ export function WillsEstateArticle() {
 
           <p>
             An <strong>agent</strong> is the same frontier model, but given
-            permission to do things. Open files you point it at. Organize a
-            folder on your computer. Ask you follow-up questions and
-            remember the answers across a whole conversation. Same model,
-            same reasoning; the difference is that it can read the
-            documents you put in front of it and carry the thread forward
-            instead of answering a one-shot question.
+            a set of tools that let it actually do things on your local
+            computer. It can read the files you point it at, edit them,
+            save new files, run code, open a browser to check a source,
+            and carry a long multi-sitting conversation forward without
+            losing the thread. Same model, same reasoning; the difference
+            is that it can act on your machine instead of just answering
+            one-shot questions in a chat box.
           </p>
 
           <p>
@@ -815,8 +863,9 @@ export function WillsEstateArticle() {
             The skill is disciplined. Your job is just to answer good
             questions honestly. The skill makes sure the agent asks the
             right ones, cross-checks the answers, catches contradictions,
-            and produces the specific set of documents an estate-planning
-            attorney actually wants to receive.
+            and produces a complete, signable document package at the
+            quality level a top estate-planning firm would put its name
+            on.
           </p>
 
           <p>
@@ -826,11 +875,13 @@ export function WillsEstateArticle() {
             exemption to use it. You have to know the names of your family
             members, roughly what you own, and where the important documents
             live. The skill handles the rest, and flags anything it is
-            genuinely unsure about for the attorney who signs the final
-            papers.
+            genuinely unsure about so you (or an attorney, if you choose
+            to involve one) can verify before anything gets signed.
           </p>
 
-          <StackViz />
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+            <StackViz />
+          </div>
         </EC>
       </section>
 
@@ -844,13 +895,6 @@ export function WillsEstateArticle() {
             eyebrow="Setup"
             title="What you need, in about twenty minutes."
           />
-
-          <p className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-[15px] leading-relaxed text-amber-100">
-            This skill is educational planning support, not legal advice. A
-            licensed estate-planning attorney in your state still needs to
-            review and sign the final documents. Nothing on this page creates
-            an attorney-client relationship.
-          </p>
 
           <p>
             Four things, in order. Each one takes two to five minutes.
@@ -882,10 +926,12 @@ export function WillsEstateArticle() {
                 >
                   chatgpt.com
                 </a>{" "}
-                → Upgrade → Pro ($200/mo). Either works. Claude Max is the
-                cheaper starting point for this skill; pick GPT Pro if you
-                prefer OpenAI&apos;s model. Pay by card. Cancel next month
-                if you want to. No long-term contract.
+                → Upgrade → Pro ($100/mo). Both work. The recommended
+                setup is to subscribe to both and use Claude Code for the
+                initial deep work plus Codex for the audit pass; if
+                budget is tight, Claude Max alone is the cheaper
+                starting point. Pay by card. Cancel next month. No
+                long-term contract.
               </p>
             </li>
 
@@ -951,7 +997,10 @@ export function WillsEstateArticle() {
                 >
                   wills-and-estate-planning skill
                 </a>{" "}
-                page. Click <strong>Generate install prompt</strong>. Copy
+                page (the link only works once you are signed in with an
+                active subscription from step 3; otherwise it bounces to
+                the login screen). Click{" "}
+                <strong>Generate install prompt</strong>. Copy
                 the block of text it gives you. Paste that block into your
                 desktop app&apos;s chat box. Press enter. The agent reads it,
                 asks you to approve one download, installs itself, and
@@ -960,7 +1009,9 @@ export function WillsEstateArticle() {
             </li>
           </ol>
 
-          <InstallFlowViz />
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+            <InstallFlowViz />
+          </div>
 
           <div className="sm-insight-card mt-8">
             <p className="text-[11px] font-mono text-purple-300 uppercase tracking-[0.25em] mb-3">
@@ -1013,8 +1064,9 @@ export function WillsEstateArticle() {
                 wherever. Call it something you will recognize later.{" "}
                 <Mono>my-estate-plan</Mono> is a reasonable default. This is
                 where everything will live: your input documents, the
-                drafts the skill produces, and the final packet for your
-                attorney.
+                drafts the skill produces, and the final packet (which
+                you can execute yourself or hand to an attorney if you
+                want one in the loop).
               </p>
             </li>
 
@@ -1025,8 +1077,11 @@ export function WillsEstateArticle() {
                 </strong>
               </p>
               <p className="mt-2 leading-relaxed">
-                Messy is fine. The skill will organize it. What you want in
-                there: last year&apos;s tax return, a statement from each
+                Messy is fine. The skill will organize it. The documents
+                can be PDFs, Microsoft Word files, or even photos or
+                scans of paper pages; the skill will read all of them.
+                What you want in there: last year&apos;s tax return, a
+                statement from each
                 brokerage / 401(k) / IRA / bank account, current beneficiary
                 designations on retirement accounts and life insurance, any
                 existing will or trust (even if it is old or wrong), deeds,
@@ -1082,7 +1137,9 @@ export function WillsEstateArticle() {
             </li>
           </ol>
 
-          <WorkingFolderViz />
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+            <WorkingFolderViz />
+          </div>
 
           <div className="mt-10 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/80 to-slate-900/40 p-6 md:p-8">
             <p className="text-[11px] font-mono text-cyan-300 uppercase tracking-[0.25em] mb-3">
@@ -1120,8 +1177,9 @@ export function WillsEstateArticle() {
                   by default, but the details depend on whether Sam ever
                   signed a spousal consent. Every retirement form needs to
                   be re-verified; we are flagging this as a first-action
-                  item in the Attorney Engagement Brief so it is the first
-                  thing your lawyer fixes.
+                  item so it gets fixed before you sign anything (and if
+                  you do decide to loop in an attorney, it is already at
+                  the top of the Attorney Engagement Brief).
                 </p>
               </div>
 
@@ -1151,9 +1209,8 @@ export function WillsEstateArticle() {
                   <J t="qtip">QTIP trust</J>: your wife gets the income
                   from the assets for her whole life; whatever remains at
                   her death goes to your kids, not to whoever she names
-                  in her own will. Should we put that on the list for
-                  your attorney to draft, or did you want something
-                  different?
+                  in her own will. Should we draft that structure into
+                  the plan, or did you want something different?
                 </p>
               </div>
             </div>
@@ -1173,8 +1230,8 @@ export function WillsEstateArticle() {
           />
 
           <p>
-            Short list. These are the tips that separate a good first pass
-            from a great attorney-ready one.
+            Short list. These are the tips that separate a good first
+            pass from a great final package.
           </p>
 
           <ul className="list-disc pl-6 space-y-3 text-slate-300 mt-4">
@@ -1223,11 +1280,12 @@ export function WillsEstateArticle() {
               come back.
             </li>
             <li>
-              <strong>Save the final packet in your folder.</strong> It is
-              yours. Email the Attorney Engagement Brief plus whichever
-              supporting documents your attorney asks for. Keep the folder
-              itself backed up somewhere sane, the same way you would keep
-              your tax returns.
+              <strong>Save the final packet in your folder.</strong> It
+              is yours. If you decide to engage an attorney, email them
+              the Attorney Engagement Brief plus whichever supporting
+              documents they ask for. Either way, keep the folder itself
+              backed up somewhere sane, the same way you would keep your
+              tax returns.
             </li>
           </ul>
         </EC>
@@ -1261,7 +1319,9 @@ export function WillsEstateArticle() {
             worth.
           </p>
 
-          <TierTriageViz />
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+            <TierTriageViz />
+          </div>
 
           <Sub>2. It catches the mistakes that wreck most plans.</Sub>
 
@@ -1275,20 +1335,25 @@ export function WillsEstateArticle() {
             see what actually goes wrong and which subagent catches it.
           </p>
 
-          <AntiPatternCardsViz />
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+            <AntiPatternCardsViz />
+          </div>
 
           <Sub>3. You walk away with a real document package.</Sub>
 
           <p>
-            A serious session produces a structured project directory with
-            forty-five files organized so a lawyer, a spouse, or a future
-            version of you can pick up where you left off. Intake files,
+            A serious session produces a structured project directory
+            with forty-five files organized so you, your spouse, or a
+            future version of you (or an attorney, if you decide to
+            involve one) can pick up where you left off. Intake files,
             analyses, draft documents, and an Attorney Engagement Brief
-            structured the way an estates attorney actually wants to read
-            a new client.
+            structured to top-firm standards in case you want a human
+            review.
           </p>
 
-          <DeliverablesTreeViz />
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+            <DeliverablesTreeViz />
+          </div>
 
           <Sub>4. The math versus a cold-start attorney consult.</Sub>
 
@@ -1300,7 +1365,9 @@ export function WillsEstateArticle() {
             what this skill costs you in a month.
           </p>
 
-          <PricingComparisonViz />
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+            <PricingComparisonViz />
+          </div>
 
           <p>
             The comparison is a rough guide, not a legal fee quote.
@@ -1319,8 +1386,8 @@ export function WillsEstateArticle() {
         <EC>
           <SectionHeader
             id="attorney-heading"
-            eyebrow="Handing off"
-            title="The attorney still signs the documents."
+            eyebrow="The optional handoff"
+            title="Using an attorney is strictly optional."
           />
 
           <p>
@@ -1332,28 +1399,40 @@ export function WillsEstateArticle() {
             it trusts in full from the volatile law it has to re-verify at
             session time; every live-law lookup is logged in{" "}
             <Mono>official-source-log.md</Mono> with source URL and date,
-            so your attorney can audit what the skill relied on and your
+            so you can audit what the skill relied on (and hand that
+            audit trail to an attorney too, if you bring one in) and your
             future self can see what needs rechecking.
           </p>
 
           <p>
-            The output handed to your attorney is, at minimum, four
-            documents: an <strong>Attorney Engagement Brief</strong> of
-            about four pages, a set of <strong>Interview Questions</strong>
-            {" "}you can ask them on the first call, a{" "}
-            <strong>Handoff Readiness</strong> scorecard the skill runs
-            on its own output before it ever leaves your laptop, and a{" "}
-            <strong>Document Package Index</strong> so nothing is lost in
-            email. The skill does not sign, notarize, or file anything. It
-            cannot practice law. What it can do is make sure the lawyer
-            who does is starting from a prepared client instead of a cold
-            start.
+            The expertise itself lives in the skill. It brings the same
+            framework, checklists, and reference material a white-shoe
+            firm&apos;s wills-and-trusts division would apply to a client
+            in your situation, and it works through that material
+            carefully, case by case, against your specific facts. What
+            you walk away with is a complete package: a finished will,
+            the supporting documents, an{" "}
+            <strong>Attorney Engagement Brief</strong> of about four
+            pages for the case where you do want a second opinion, a set
+            of <strong>Interview Questions</strong> ready for that
+            meeting, a <strong>Handoff Readiness</strong> scorecard the
+            skill runs on its own output before anything leaves your
+            laptop, and a <strong>Document Package Index</strong> so
+            nothing is lost. The skill does not itself sign, notarize,
+            or file anything, and it does not form an attorney-client
+            relationship; the execution formalities (witnesses,
+            sometimes a notary) are on you or on whatever attorney you
+            choose to engage.
           </p>
 
           <p>
-            The whole thing: your attorney still signs. The skill gives
-            them the best first meeting they have ever had from a new
-            client.
+            Most readers find that a straightforward will produced by
+            the skill stands on its own. Readers with genuinely
+            complicated situations often still want a short attorney
+            review, and the packet is designed to make that review a
+            ninety-minute sign-off rather than a fifteen-thousand-dollar
+            intake. Either way, the expert analysis is already done by
+            the time you close the laptop.
           </p>
         </EC>
       </section>
@@ -1373,11 +1452,14 @@ export function WillsEstateArticle() {
             <summary>Is this legal advice?</summary>
             <div className="sm-details-body">
               <p>
-                No. The skill produces audit documents, drafts, and a handoff
-                packet for your attorney. Your attorney is the one who actually
-                advises you, drafts the final documents, and signs off on
-                execution. Nothing the skill produces creates an
-                attorney-client relationship with anyone.
+                Not in the formal legal sense. The skill produces audit
+                documents, a complete plan, and the full set of drafts.
+                Using the skill does not create an attorney-client
+                relationship with anyone, and the skill itself is not a
+                law firm. If you want formal legal advice from a licensed
+                professional, engage an attorney; if you choose not to,
+                the documents are still yours to execute under your
+                state&apos;s formalities.
               </p>
             </div>
           </details>
@@ -1386,12 +1468,16 @@ export function WillsEstateArticle() {
             <summary>Do I still need an attorney?</summary>
             <div className="sm-details-body">
               <p>
-                Yes. For anyone with more than a trivial estate, minor
-                children, a blended family, a business, disability in the
-                family, or unusual circumstances, you want a real attorney.
-                The skill can make that attorney&apos;s first meeting more
-                efficient and better prepared. It does not replace the
-                meeting.
+                Not strictly. The skill produces a thorough,
+                custom-tailored plan built on the same kind of analysis a
+                white-shoe firm&apos;s wills-and-trusts division would
+                apply, and for many readers that is enough. If your case
+                has real complications (minor children, a blended family,
+                a business, a special-needs beneficiary, unusual assets,
+                or property across multiple states), having a licensed
+                attorney review the packet is cheap insurance, and the
+                packet is designed to make that review short. An attorney
+                is recommended but not required.
               </p>
             </div>
           </details>
@@ -1454,10 +1540,13 @@ export function WillsEstateArticle() {
               <p className="mt-3">
                 For most readers using this skill to prepare a
                 simple-to-moderate estate plan, this is a non-issue: you
-                are not hiring a lawyer for the intake part, and the
-                skill&apos;s whole purpose is to hand a prepared packet to
-                your attorney for the parts that need one. The skill&apos;s
-                output is your property.
+                are not hiring a lawyer in the first place. The skill
+                produces the plan; the output is your property; you
+                execute the documents under your state&apos;s formalities.
+                If you do loop in an attorney for the parts that only
+                humans can do (deathbed witnessing, contested estates,
+                certain international filings), the packet is designed
+                to make that short.
               </p>
               <p className="mt-3">
                 If you are a high-net-worth or ultra-high-net-worth
@@ -1590,14 +1679,14 @@ export function WillsEstateArticle() {
           </details>
 
           <details className="sm-details">
-            <summary>Can my attorney see what the skill produced?</summary>
+            <summary>Can I share what the skill produced with an attorney?</summary>
             <div className="sm-details-body">
               <p>
-                Yes, and they should. The Attorney Engagement Brief is
-                designed precisely for that handoff. Most attorneys who have
-                seen the output say some version of &ldquo;thank god, I
-                usually spend my whole first meeting just digging this
-                information out of clients.&rdquo;
+                Yes. The Attorney Engagement Brief is designed precisely
+                for that handoff if you decide to engage one. Most
+                attorneys who have seen the output say some version of
+                &ldquo;thank god, I usually spend my whole first meeting
+                just digging this information out of clients.&rdquo;
               </p>
             </div>
           </details>
@@ -1682,22 +1771,40 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
-            That shape of problem is exactly what an agent-plus-skill can
-            compress: the preparation, not the judgment. Your attorney still
-            signs. Your CPA still files. Your Medicare broker still enrolls
-            you. What changes is that a large share of the preparation can
-            happen across a couple of evenings or a weekend morning at your
-            kitchen table, for roughly a hundred and twenty dollars, instead
-            of entirely inside the specialist&apos;s billable hour.
+            That shape of problem is exactly what an agent-plus-skill
+            can compress and, in many cases, fully replace. Frontier
+            models in 2026 are that good. Agent harnesses are that
+            capable. Marry them with a skill that is comprehensive,
+            correct, well-conceived, and deliberately optimized for
+            agent use, and the combination can replace the specialist
+            outright across a surprising range of situations, at a
+            quality level that holds up against what a top firm would
+            produce.
           </p>
 
           <p>
-            This is the shape of a lot of what is coming. The model is not
-            that AI replaces the professional. The model is that the
-            professional gets to spend their time on what they are actually
-            expert at, because the intake work no longer has to run
-            through their clock. You get the packet. They get the
-            signature.
+            The caveat is the skill. A generic chatbot with a vague
+            prompt does not produce this result. The skill is where the
+            expertise is encoded: the frameworks a top firm uses
+            internally, the checklists, the decision trees, the edge
+            cases, the ugly special situations, the questions that
+            actually matter, the references that ground the reasoning.
+            Get that part right, and the frontier model plus agent
+            harness does the rest. Get it wrong, and what you get back
+            is shallow, generic, and not worth trusting.
+          </p>
+
+          <p>
+            This is the shape of a lot of what is coming. The older
+            view was that AI assists the professional. What is actually
+            happening, for a broad category of professional work that
+            is mostly careful intake, pattern-matching, and disciplined
+            drafting, is that AI running the right skill replaces the
+            professional entirely. For the cases where a licensed human
+            still has to sign something personally, you hand them a
+            finished, audited packet. For the many cases where no
+            signature is legally required, you skip that step and keep
+            the money.
           </p>
 
           <p>
@@ -1732,9 +1839,9 @@ export function WillsEstateArticle() {
                   TL;DR
                 </p>
                 <p className="text-[13px] text-slate-300">
-                  One skill. One weekend. Roughly $120. Your attorney still
-                  signs. Your spouse can find the 401(k) beneficiary form.
-                  Your parrot is provided for.
+                  One skill. One weekend. Roughly $120. Attorney optional.
+                  Your spouse can find the 401(k) beneficiary form. Your
+                  parrot is provided for.
                 </p>
               </div>
             </div>
