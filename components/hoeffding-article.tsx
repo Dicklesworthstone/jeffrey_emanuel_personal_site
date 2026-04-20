@@ -210,7 +210,7 @@ export function HoeffdingArticle() {
 
         <motion.div 
           style={{ opacity: heroOpacity }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-20"
+          className="mt-12 flex flex-col items-center gap-4 z-20 md:absolute md:bottom-12 md:left-1/2 md:-translate-x-1/2 md:mt-0"
         >
           <span className="hd-instrument-label tracking-[0.5em]">Initialization</span>
           <div className="w-px h-12 bg-gradient-to-b from-white/40 to-transparent" />
