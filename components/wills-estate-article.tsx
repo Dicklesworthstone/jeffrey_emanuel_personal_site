@@ -716,8 +716,19 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
-            Two short commands set the top reasoning tier on each tool.
-            Launch Claude Code with{" "}
+            Setting the top reasoning tier takes a moment in each tool.
+            If you are using the new desktop apps (the latest Mac
+            builds, for example), the controls live right in the
+            message entry field. In the Codex app, click the{" "}
+            <Mono>Select reasoning effort</Mono> control and set it to{" "}
+            <Mono>Extra High</Mono>. In the Claude app, pick{" "}
+            <Mono>Opus 4.7</Mono> as the model and turn on{" "}
+            <Mono>Adaptive Thinking</Mono>. That is all it takes.
+          </p>
+
+          <p>
+            If you prefer the CLIs, two short commands do the same
+            thing. Launch Claude Code with{" "}
             <Mono>claude --model opus --effort max</Mono>, or inside a
             session type <Mono>/model opus</Mono> and{" "}
             <Mono>/effort max</Mono>. Launch Codex with{" "}
@@ -743,7 +754,7 @@ export function WillsEstateArticle() {
               rel="noopener noreferrer"
               className="text-cyan-400 underline underline-offset-2"
             >
-              my writeup on that one
+              my post on that one
             </a>
             ), my modes-of-reasoning skill for pressure-testing any
             project, business plan, or serious decision you are working
@@ -1643,14 +1654,25 @@ export function WillsEstateArticle() {
           </details>
 
           <details className="sm-details">
-            <summary>Can I share the skill with my spouse?</summary>
+            <summary>Can I use this for my spouse too?</summary>
             <div className="sm-details-body">
               <p>
-                One subscription per user. Your spouse needs their own,
-                which at twenty dollars a month is a reasonable thing to
-                ask them for. Every bundle you download is watermarked with
-                your account identity, which is mostly honor-system
-                deterrence, but it is the honor system.
+                Yes. You can run the skill a second time in the same
+                session, reusing the working folder, and ask it to
+                generate the parallel set of documents for your
+                spouse. Most household facts (assets, kids, state of
+                residence) are identical, so the second pass is
+                faster than the first.
+              </p>
+              <p>
+                The license covers your own household: you and your
+                spouse, under one subscription. It does not cover
+                sharing or redistributing the skill files to anyone
+                else. The skill content is copyrighted and licensed
+                for personal use the same way a piece of software is,
+                so please do not post, resell, or hand the files to a
+                friend. If a friend wants to use it, point them at the
+                skills site.
               </p>
             </div>
           </details>
