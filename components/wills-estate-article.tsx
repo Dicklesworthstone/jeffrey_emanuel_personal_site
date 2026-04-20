@@ -1338,12 +1338,12 @@ export function WillsEstateArticle() {
 
           <p>
             A serious session produces a structured project directory
-            with forty-five files organized so you, your spouse, or a
-            future version of you (or an attorney, if you decide to
-            involve one) can pick up where you left off. Intake files,
-            analyses, draft documents, and an Attorney Engagement Brief
-            structured to top-firm standards in case you want a human
-            review.
+            with roughly forty-five files, one per template the skill
+            carries, organized so you, your spouse, or a future version
+            of you (or an attorney, if you decide to involve one) can
+            pick up where you left off. Intake files, analyses, draft
+            documents, and an Attorney Engagement Brief structured to
+            top-firm standards in case you want a human review.
           </p>
 
           <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">

@@ -12,10 +12,7 @@ export const contentType = "image/png";
 
 export default async function Image() {
   const illustrationData = await fetch(
-    new URL(
-      "../../../assets/wills_estate_post_illustration.webp",
-      import.meta.url,
-    ),
+    new URL("./og-illustration.png", import.meta.url),
   ).then((response) => response.arrayBuffer());
 
   return new ImageResponse(
@@ -90,245 +87,247 @@ export default async function Image() {
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
             alignItems: "center",
-            justifyContent: "flex-start",
-            gap: 80,
+            justifyContent: "center",
+            width: 500,
+            height: 500,
+            marginLeft: 48,
+            position: "relative",
             zIndex: 10,
-            padding: "40px 80px",
-            width: "100%",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -22,
+              left: -22,
+              right: -22,
+              bottom: -22,
+              borderRadius: 44,
+              background:
+                "radial-gradient(circle, rgba(6,182,212,0.28) 0%, rgba(168,85,247,0.16) 45%, transparent 70%)",
+              filter: "blur(40px)",
+              display: "flex",
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              width: 460,
+              height: 460,
+              borderRadius: 28,
+              border: "1px solid rgba(255,255,255,0.12)",
+              overflow: "hidden",
+              boxShadow:
+                "0 30px 80px -20px rgba(6,182,212,0.35), 0 10px 40px -10px rgba(168,85,247,0.28)",
+              position: "relative",
+            }}
+          >
+            <img
+              src={illustrationData as unknown as string}
+              alt=""
+              width={460}
+              height={460}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "flex",
+              }}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            flex: 1,
+            padding: "0 56px 0 56px",
+            zIndex: 10,
           }}
         >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              width: 500,
-              height: 500,
-              position: "relative",
-              marginLeft: 24,
+              gap: 10,
+              marginBottom: 20,
+              padding: "8px 16px",
+              borderRadius: 20,
+              background: "rgba(245,158,11,0.12)",
+              border: "1px solid rgba(245,158,11,0.26)",
             }}
           >
             <div
               style={{
-                position: "absolute",
-                top: -22,
-                left: -22,
-                right: -22,
-                bottom: -22,
-                borderRadius: 44,
-                background:
-                  "radial-gradient(circle, rgba(6,182,212,0.28) 0%, rgba(168,85,247,0.16) 45%, transparent 70%)",
-                filter: "blur(40px)",
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: "#f59e0b",
                 display: "flex",
               }}
             />
-
-            <div
+            <span
               style={{
+                fontSize: 12,
+                color: "#fdba74",
+                fontWeight: 700,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
                 display: "flex",
-                width: 460,
-                height: 460,
-                borderRadius: 28,
-                border: "1px solid rgba(255,255,255,0.12)",
-                overflow: "hidden",
-                boxShadow:
-                  "0 30px 80px -20px rgba(6,182,212,0.35), 0 10px 40px -10px rgba(168,85,247,0.28)",
-                position: "relative",
               }}
             >
-              <img
-                src={illustrationData as unknown as string}
-                alt=""
-                width={460}
-                height={460}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "flex",
-                }}
-              />
-            </div>
+              Life Planning · AI Agents · Attorney Review
+            </span>
           </div>
 
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "center",
-              flex: 1,
-              maxWidth: 560,
+              marginBottom: 20,
+            }}
+          >
+            <h1
+              style={{
+                fontSize: 52,
+                fontWeight: 900,
+                color: "white",
+                margin: 0,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.08,
+                display: "flex",
+              }}
+            >
+              Drafting a Serious
+            </h1>
+            <h1
+              style={{
+                fontSize: 52,
+                fontWeight: 900,
+                background:
+                  "linear-gradient(to right, #f59e0b 0%, #a855f7 40%, #06b6d4 72%, #10b981 100%)",
+                backgroundClip: "text",
+                color: "transparent",
+                margin: 0,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.08,
+                display: "flex",
+              }}
+            >
+              Estate Plan on a Saturday.
+            </h1>
+          </div>
+
+          <p
+            style={{
+              fontSize: 20,
+              color: "#94a3b8",
+              margin: 0,
+              marginBottom: 24,
+              lineHeight: 1.5,
+              fontWeight: 400,
+              display: "flex",
+              maxWidth: 520,
+            }}
+          >
+            {"AI agents · paid skill · attorney signs the docs."}
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              marginBottom: 24,
+            }}
+          >
+            {[
+              {
+                label: "201 files",
+                color: "rgba(168,85,247,0.12)",
+                border: "rgba(168,85,247,0.24)",
+                text: "#d8b4fe",
+              },
+              {
+                label: "17 subagents",
+                color: "rgba(6,182,212,0.12)",
+                border: "rgba(6,182,212,0.24)",
+                text: "#7dd3fc",
+              },
+              {
+                label: "45 templates",
+                color: "rgba(16,185,129,0.12)",
+                border: "rgba(16,185,129,0.24)",
+                text: "#6ee7b7",
+              },
+            ].map((badge) => (
+              <div
+                key={badge.label}
+                style={{
+                  display: "flex",
+                  padding: "8px 13px",
+                  borderRadius: 999,
+                  background: badge.color,
+                  border: `1px solid ${badge.border}`,
+                  color: badge.text,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {badge.label}
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
             }}
           >
             <div
               style={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                background:
+                  "linear-gradient(135deg, #f59e0b 0%, #a855f7 45%, #06b6d4 100%)",
                 display: "flex",
-                alignItems: "center",
-                gap: 10,
-                marginBottom: 20,
-                padding: "8px 16px",
-                borderRadius: 20,
-                background: "rgba(245,158,11,0.12)",
-                border: "1px solid rgba(245,158,11,0.26)",
               }}
-            >
-              <div
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: "#f59e0b",
-                  display: "flex",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 12,
-                  color: "#fdba74",
-                  fontWeight: 700,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  display: "flex",
-                }}
-              >
-                Life Planning · AI Agents · Attorney Review
-              </span>
-            </div>
-
-            <div
+            />
+            <span
               style={{
+                fontSize: 16,
+                color: "#cbd5e1",
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
                 display: "flex",
-                flexDirection: "column",
-                marginBottom: 20,
               }}
             >
-              <h1
-                style={{
-                  fontSize: 52,
-                  fontWeight: 900,
-                  color: "white",
-                  margin: 0,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1.08,
-                  display: "flex",
-                }}
-              >
-                Drafting a Serious
-              </h1>
-              <h1
-                style={{
-                  fontSize: 52,
-                  fontWeight: 900,
-                  background:
-                    "linear-gradient(to right, #f59e0b 0%, #a855f7 40%, #06b6d4 72%, #10b981 100%)",
-                  backgroundClip: "text",
-                  color: "transparent",
-                  margin: 0,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1.08,
-                  display: "flex",
-                }}
-              >
-                Estate Plan on a Saturday.
-              </h1>
-            </div>
-
-            <p
-              style={{
-                fontSize: 20,
-                color: "#94a3b8",
-                margin: 0,
-                marginBottom: 24,
-                lineHeight: 1.5,
-                fontWeight: 400,
-                display: "flex",
-                maxWidth: 520,
-              }}
-            >
-              {"AI agents · paid skill · attorney signs the docs."}
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              {[
-                {
-                  label: "201 files",
-                  color: "rgba(168,85,247,0.12)",
-                  border: "rgba(168,85,247,0.24)",
-                  text: "#d8b4fe",
-                },
-                {
-                  label: "17 subagents",
-                  color: "rgba(6,182,212,0.12)",
-                  border: "rgba(6,182,212,0.24)",
-                  text: "#7dd3fc",
-                },
-                {
-                  label: "45 templates",
-                  color: "rgba(16,185,129,0.12)",
-                  border: "rgba(16,185,129,0.24)",
-                  text: "#6ee7b7",
-                },
-              ].map((badge) => (
-                <div
-                  key={badge.label}
-                  style={{
-                    display: "flex",
-                    padding: "8px 13px",
-                    borderRadius: 999,
-                    background: badge.color,
-                    border: `1px solid ${badge.border}`,
-                    color: badge.text,
-                    fontSize: 14,
-                    fontWeight: 700,
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  {badge.label}
-                </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              <div
-                style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: "50%",
-                  background:
-                    "linear-gradient(135deg, #f59e0b 0%, #a855f7 45%, #06b6d4 100%)",
-                  display: "flex",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 16,
-                  color: "#cbd5e1",
-                  fontWeight: 500,
-                  letterSpacing: "-0.01em",
-                  display: "flex",
-                }}
-              >
-                Jeffrey Emanuel · jeffreyemanuel.com
-              </span>
-            </div>
+              Jeffrey Emanuel · jeffreyemanuel.com
+            </span>
           </div>
         </div>
+
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 4,
+            background:
+              "linear-gradient(90deg, transparent 0%, #f59e0b 22%, #a855f7 46%, #06b6d4 70%, #10b981 88%, transparent 100%)",
+            display: "flex",
+          }}
+        />
       </div>
     ),
     size,
