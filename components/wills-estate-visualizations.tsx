@@ -2176,7 +2176,7 @@ export function DeliverablesTreeViz() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 rounded-[8px] border border-white/10 bg-black/25 p-2 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-[8px] border border-white/10 bg-black/25 p-2 text-center">
             {DELIVERABLE_FOLDERS.map((folder) => (
               <div key={folder} className="rounded-[8px] bg-white/[0.04] px-3 py-2">
                 <p className={cn("text-lg font-semibold", DELIVERABLE_FOLDER_META[folder].accent)}>
@@ -2194,8 +2194,8 @@ export function DeliverablesTreeViz() {
           </div>
         </div>
 
-        <div className="grid gap-4 rounded-[8px] border border-white/10 bg-black/20 p-4">
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <div className="grid min-w-0 gap-4 rounded-[8px] border border-white/10 bg-black/20 p-4">
+          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
             <label className="block">
               <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 Search artifacts
@@ -2247,7 +2247,7 @@ export function DeliverablesTreeViz() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
               Operating mode
             </p>
-            <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+            <div className="mt-2 flex flex-wrap gap-2">
               {DELIVERABLE_MODE_FILTERS.map((filter) => {
                 const active = modeFilter === filter.id;
                 return (
@@ -2257,7 +2257,7 @@ export function DeliverablesTreeViz() {
                     aria-pressed={active}
                     onClick={() => setModeFilter(filter.id)}
                     className={cn(
-                      "shrink-0 rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                      "rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
                       active
                         ? "border-emerald-300/35 bg-emerald-400/15 text-emerald-50"
                         : "border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200",
@@ -3638,7 +3638,7 @@ const INSTALL_STEPS: InstallStep[] = [
   {
     number: 1,
     label: "Get a frontier-model subscription",
-    sub: "Claude Max ($100/mo) or GPT Pro ($200/mo). Cancel anytime.",
+    sub: "Claude Max ($100/mo) or GPT Pro ($100/mo). Both recommended.",
     time: "~7 min",
     icon: <Brain className="h-5 w-5" aria-hidden="true" />,
     accent: "cyan",
@@ -3657,13 +3657,13 @@ const INSTALL_STEPS: InstallStep[] = [
             <a href="https://claude.ai/upgrade" target="_blank" rel="noopener noreferrer" className="text-cyan-300 underline underline-offset-2 hover:text-cyan-200">
               Claude Max
             </a>{" "}
-            — $100/month, Anthropic
+            at $100/month, Anthropic
           </li>
           <li>
             <a href="https://chatgpt.com/pricing" target="_blank" rel="noopener noreferrer" className="text-cyan-300 underline underline-offset-2 hover:text-cyan-200">
               ChatGPT Pro
             </a>{" "}
-            — $200/month, OpenAI
+            at $100/month, OpenAI
           </li>
         </ul>
         <p className="mt-3 text-slate-400">
@@ -4050,7 +4050,7 @@ const WORKING_FOLDER_OUTPUT_FOLDERS: WorkingFolderOutputFolder[] = [
   {
     id: "drafts",
     name: "drafts/",
-    summary: "First-pass planning documents ready for attorney review.",
+    summary: "First-pass planning documents, ready to sign or to hand to an attorney for review.",
     files: [
       "will-draft.md",
       "durable-poa-draft.md",
@@ -4061,7 +4061,7 @@ const WORKING_FOLDER_OUTPUT_FOLDERS: WorkingFolderOutputFolder[] = [
   {
     id: "audits",
     name: "audits/",
-    summary: "Cross-checks that surface hidden beneficiary and execution risks before you pay for legal cleanup.",
+    summary: "Cross-checks that surface hidden beneficiary and execution risks before they become expensive problems.",
     files: [
       "beneficiary-audit.md",
       "anti-pattern-scan.md",
@@ -4072,7 +4072,7 @@ const WORKING_FOLDER_OUTPUT_FOLDERS: WorkingFolderOutputFolder[] = [
   {
     id: "attorney-handoff",
     name: "attorney-handoff/",
-    summary: "A compact packet that lets counsel review facts, questions, and readiness in one pass.",
+    summary: "Optional handoff packet if you decide to involve an attorney: facts, questions, and readiness in one pass.",
     files: [
       "attorney-engagement-brief.md",
       "questions-for-counsel.md",
@@ -4118,14 +4118,15 @@ export function WorkingFolderViz() {
             Using the skill
           </p>
           <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-[2rem]">
-            Put your real documents in one folder, point the desktop app at it,
-            and wait for an attorney-ready packet.
+            Put your real documents in one folder, point the desktop app
+            at it, and walk away with a complete, signable packet.
           </h3>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300 sm:text-[15px]">
-            This is the mental model: you are not filling out a giant form. You
-            are giving the skill one working folder so it can read what already
-            exists, draft the missing pieces, and organize everything for the
-            lawyer who will finalize it.
+            This is the mental model: you are not filling out a giant
+            form. You are giving the skill one working folder so it can
+            read what already exists, draft the missing pieces, and
+            organize everything for you (or for an attorney, if you
+            decide you want one in the loop).
           </p>
         </div>
 
@@ -4300,8 +4301,9 @@ export function WorkingFolderViz() {
 
                 <div className="mt-4 space-y-3">
                   <div className="mr-8 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-slate-200">
-                    I can read the documents in your working folder, organize
-                    what matters, and draft a first pass for attorney review.
+                    I can read the documents in your working folder,
+                    organize what matters, and draft a complete first
+                    pass of the plan for you to review.
                   </div>
 
                   <div className="ml-auto max-w-[24rem] rounded-2xl border border-cyan-300/30 bg-cyan-400/[0.14] px-4 py-3 text-sm font-medium leading-6 text-white shadow-[0_10px_30px_rgba(14,165,233,0.12)]">
@@ -4617,7 +4619,7 @@ export function StackViz() {
               Agent + skill + your documents become one working estate-planning stack
             </h3>
             <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
-              The model brings reasoning, the skill brings the domain method, and your folder brings the facts. The output is a package your attorney can review and sign.
+              The model brings reasoning, the skill brings the domain method, and your folder brings the facts. The output is a complete, signable plan (with an attorney-ready handoff packet tucked in, if you want it).
             </p>
           </div>
         </div>
@@ -4724,9 +4726,9 @@ export function StackViz() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-100">Output package</p>
-              <p className="text-2xl font-semibold text-white">Complete estate plan package — ready for your attorney to sign</p>
+              <p className="text-2xl font-semibold text-white">Complete, signable estate plan package</p>
               <p className="max-w-3xl text-sm leading-7 text-slate-100/90">
-                Intake outputs, planning recommendations, file requests, and document-ready instructions land in one folder so counsel can review substance instead of reconstructing your facts from scratch.
+                Intake outputs, planning recommendations, file requests, and document-ready instructions land in one folder. You can execute it directly or, if you choose, hand the Attorney Engagement Brief to a lawyer for a short sign-off review.
               </p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
