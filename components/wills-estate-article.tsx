@@ -529,7 +529,7 @@ export function WillsEstateArticle() {
 
         {/* Scroll indicator */}
         <div
-          className="absolute bottom-16 left-0 w-full flex flex-col items-center gap-4 z-20 transition-opacity duration-500"
+          className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
           style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
         >
           <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
