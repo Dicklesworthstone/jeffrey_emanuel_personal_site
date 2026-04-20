@@ -716,31 +716,15 @@ export function WillsEstateArticle() {
           </p>
 
           <p>
-            Setting the top reasoning tier takes a moment in each tool.
-            If you are using the new desktop apps (the latest Mac
-            builds, for example), the controls live right in the
-            message entry field. In the Codex app, click the{" "}
+            Setting the top reasoning tier takes a moment in each
+            desktop app. The controls live right in the message entry
+            field. In Codex Desktop, click the{" "}
             <Mono>Select reasoning effort</Mono> control and set it to{" "}
-            <Mono>Extra High</Mono>. In the Claude app, pick{" "}
+            <Mono>Extra High</Mono>. In Claude Code, pick{" "}
             <Mono>Opus 4.7</Mono> as the model and turn on{" "}
-            <Mono>Adaptive Thinking</Mono>. That is all it takes.
-          </p>
-
-          <p>
-            If you prefer the CLIs, two short commands do the same
-            thing. Launch Claude Code with{" "}
-            <Mono>claude --model opus --effort max</Mono>, or inside a
-            session type <Mono>/model opus</Mono> and{" "}
-            <Mono>/effort max</Mono>. Launch Codex with{" "}
-            <Mono>codex --model gpt-5.4 -c model_reasoning_effort=xhigh</Mono>.
-            To make those the defaults, add{" "}
-            <Mono>model: &quot;opus&quot;</Mono> and{" "}
-            <Mono>effortLevel: &quot;max&quot;</Mono> to Claude Code&apos;s{" "}
-            <Mono>settings.json</Mono>, and add{" "}
-            <Mono>model = &quot;gpt-5.4&quot;</Mono> plus{" "}
-            <Mono>model_reasoning_effort = &quot;xhigh&quot;</Mono> to{" "}
-            <Mono>~/.codex/config.toml</Mono>. These are the highest
-            reasoning tiers each tool exposes as of 2026.
+            <Mono>Adaptive Thinking</Mono>. These are the highest
+            reasoning tiers each tool exposes as of 2026, and that is
+            all it takes.
           </p>
 
           <p>
