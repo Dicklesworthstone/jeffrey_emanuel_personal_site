@@ -40,13 +40,18 @@ for (const { slug, label } of articles) {
       const indicatorRect = indicator.getBoundingClientRect();
       const children = Array.from(heroEl.children) as HTMLElement[];
       let contentBottom = -Infinity;
+      let found = false;
       for (const child of children) {
         if (child === indicator || child.contains(indicator)) continue;
         const cs = getComputedStyle(child);
         if (cs.position === "absolute" || cs.position === "fixed") continue;
         const r = child.getBoundingClientRect();
-        if (r.bottom > contentBottom) contentBottom = r.bottom;
+        if (r.bottom > contentBottom) {
+          contentBottom = r.bottom;
+          found = true;
+        }
       }
+      if (!found) return { error: "no in-flow hero content" } as const;
       return {
         indicator: {
           top: Math.round(indicatorRect.top),
