@@ -992,9 +992,10 @@ export function WillsEstateArticle() {
                 >
                   wills-and-estate-planning skill
                 </a>{" "}
-                page (the link only works once you are signed in with an
-                active subscription from step 3; otherwise it bounces to
-                the login screen). Click{" "}
+                page (the install card only appears for paying
+                subscribers; if you are not yet signed in with an active
+                subscription from step 3, the page shows a public preview
+                of the skill instead). Click{" "}
                 <strong>Generate install prompt</strong>. Copy
                 the block of text it gives you. Paste that block into your
                 desktop app&apos;s chat box. Press enter. The agent reads it,
