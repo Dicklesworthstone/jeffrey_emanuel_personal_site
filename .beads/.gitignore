@@ -11,6 +11,9 @@ daemon.log
 daemon.pid
 bd.sock
 
+# Beads writer advisory flock (touched on every br open/close, never useful in git)
+.write.lock
+
 # Sync runtime/backoff state (created/removed by bd sync)
 sync-state.json
 
