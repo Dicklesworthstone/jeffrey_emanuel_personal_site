@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 
 export const alt =
-  "Drafting a Serious Estate Plan on a Saturday | Jeffrey Emanuel";
+  "An AI Skill for Wills & Estate Planning | Jeffrey Emanuel";
 export const size = {
   width: 1200,
   height: 600,
@@ -181,7 +181,7 @@ export default async function Image() {
                 display: "flex",
               }}
             >
-              Life Planning · AI Agents · Attorney Review
+              Wills · Estates · AI Agents
             </span>
           </div>
 
@@ -203,7 +203,7 @@ export default async function Image() {
                 display: "flex",
               }}
             >
-              Drafting a Serious
+              An AI Skill for
             </h1>
             <h1
               style={{
@@ -219,7 +219,7 @@ export default async function Image() {
                 display: "flex",
               }}
             >
-              Estate Plan on a Saturday.
+              Wills & Estate Planning
             </h1>
           </div>
 
@@ -235,7 +235,7 @@ export default async function Image() {
               maxWidth: 520,
             }}
           >
-            {"AI agents · paid skill · attorney signs the docs."}
+            {"A Claude Code + Codex skill for estate-planning intake."}
           </p>
 
           <div

@@ -28,7 +28,7 @@ const DRAFT =
   )?.draft ?? false;
 
 const OG_IMAGE_ALT =
-  "Drafting a Serious Estate Plan on a Saturday | Jeffrey Emanuel";
+  "An AI Skill for Wills & Estate Planning | Jeffrey Emanuel";
 
 export const metadata: Metadata = {
   title: `${ARTICLE_TITLE} | Jeffrey Emanuel`,
