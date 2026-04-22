@@ -485,7 +485,6 @@ export function WillsEstateArticle() {
                 src={illustration}
                 alt="Warmly-lit desk scene with estate-planning documents, a laptop running an AI agent, and a parrot, evoking an estate plan drafted at home with the help of an AI skill"
                 className="relative z-10 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl"
-                priority
                 placeholder="blur"
               />
             </div>

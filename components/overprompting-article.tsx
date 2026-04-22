@@ -186,7 +186,6 @@ export function OverpromptingArticle() {
                 src={illustration}
                 alt="Illustration depicting the tension between detailed instructions and creative freedom in AI prompting"
                 className="relative z-10 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl"
-                priority
                 placeholder="blur"
               />
             </div>

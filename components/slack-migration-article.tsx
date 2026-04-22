@@ -671,7 +671,6 @@ export function SlackMigrationArticle() {
                 src={illustration}
                 alt="Illustration depicting a migration from a Slack-style chat workspace to a self-hosted Mattermost server, driven by an AI agent pair"
                 className="relative z-10 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl"
-                priority
                 placeholder="blur"
               />
             </div>
