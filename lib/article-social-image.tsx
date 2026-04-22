@@ -70,18 +70,6 @@ const WRITING_SOCIAL_DATA: Record<string, Omit<WritingSocialData, "slug">> = {
       "A non-parametric measure that catches non-linear dependence where Pearson and Spearman fail.",
     category: "Statistics",
   },
-  "wills-and-estate-planning": {
-    title: "An AI Skill for Wills & Estate Planning",
-    excerpt:
-      "A Claude Code / Codex skill that drafts a structured estate-planning package in a weekend for attorney review.",
-    category: "Life Planning · AI Agents",
-  },
-  "slack-mattermost-migration": {
-    title: "Using AI Agents to Migrate Off Slack",
-    excerpt:
-      "Two paired Claude Code / Codex skills move a company from Slack to a self-hosted Mattermost, end to end.",
-    category: "Ops · AI Agents",
-  },
   intro_post_discussing_blogging_system: {
     title: "Introducing a Next.js GitHub Blogging System",
     excerpt:
