@@ -194,7 +194,7 @@ export default async function Image() {
           >
             <h1
               style={{
-                fontSize: 54,
+                fontSize: 48,
                 fontWeight: 900,
                 color: "white",
                 margin: 0,
@@ -207,7 +207,7 @@ export default async function Image() {
             </h1>
             <h1
               style={{
-                fontSize: 54,
+                fontSize: 48,
                 fontWeight: 900,
                 background:
                   "linear-gradient(to right, #f59e0b 0%, #a855f7 40%, #06b6d4 72%, #10b981 100%)",
