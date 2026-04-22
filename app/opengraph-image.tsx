@@ -360,6 +360,9 @@ export default async function Image() {
     ),
     {
       ...size,
+      headers: {
+        "cache-control": "public, immutable, no-transform, max-age=31536000",
+      },
     }
   );
 }
