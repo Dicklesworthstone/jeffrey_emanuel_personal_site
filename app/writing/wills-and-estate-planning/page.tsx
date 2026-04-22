@@ -27,11 +27,48 @@ const DRAFT =
     (item) => item.href === ARTICLE_CANONICAL,
   )?.draft ?? false;
 
+const OG_IMAGE_ALT =
+  "Drafting a Serious Estate Plan on a Saturday | Jeffrey Emanuel";
+
 export const metadata: Metadata = {
   title: `${ARTICLE_TITLE} | Jeffrey Emanuel`,
   description: ARTICLE_DESCRIPTION,
   alternates: {
     canonical: ARTICLE_CANONICAL,
+  },
+  // Override the file-convention opengraph-image / twitter-image routes
+  // with pre-rendered static JPEGs under /public/og. The dynamic routes
+  // are ~700KB PNGs rendered in ~4-5s; X's Twitterbot times out on those
+  // and silently drops the card. Static ~100KB JPEGs served from the CDN
+  // are fetched in milliseconds. Regenerate with `bun run prerender:og`
+  // after editing the dynamic route's JSX.
+  openGraph: {
+    title: `${ARTICLE_TITLE} | Jeffrey Emanuel`,
+    description: ARTICLE_DESCRIPTION,
+    type: "article",
+    url: ARTICLE_CANONICAL,
+    images: [
+      {
+        url: "/og/wills-and-estate-planning-opengraph.jpg",
+        width: 1200,
+        height: 630,
+        alt: OG_IMAGE_ALT,
+        type: "image/jpeg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${ARTICLE_TITLE} | Jeffrey Emanuel`,
+    description: ARTICLE_DESCRIPTION,
+    images: [
+      {
+        url: "/og/wills-and-estate-planning-twitter.jpg",
+        width: 1200,
+        height: 600,
+        alt: OG_IMAGE_ALT,
+      },
+    ],
   },
   ...(DRAFT && {
     robots: { index: false, follow: false },

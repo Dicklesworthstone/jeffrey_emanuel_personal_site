@@ -14,6 +14,7 @@
     "build:with-stats": "bun run update-stats && rm -rf .next && next build",
     "update-stats": "bun run scripts/update-stats.ts",
     "fetch-tldr-stars": "bun run scripts/fetch-tldr-stars.ts",
+    "prerender:og": "bun run scripts/prerender-og.ts",
     "start": "next start",
     "check:interactive-article-scopes": "bun run scripts/validate-interactive-article-scopes.ts",
     "lint": "bun run check:interactive-article-scopes && eslint --max-warnings=0",
@@ -74,6 +75,7 @@
     "eslint-config-next": "16.1.6",
     "jsdom": "^27.4.0",
     "playwright": "^1.58.2",
+    "sharp": "^0.34.5",
     "tailwindcss": "4.1.18",
     "typescript": "5.9.3",
     "vitest": "^4.0.18"

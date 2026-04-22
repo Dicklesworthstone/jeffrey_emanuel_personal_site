@@ -2,12 +2,47 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { SlackMigrationArticle } from "@/components/slack-migration-article";
 
+const OG_TITLE =
+  "Using AI Agents and Skills to Migrate Off Slack | Jeffrey Emanuel";
+const OG_DESCRIPTION =
+  "How two paired Claude Code / Codex skills move a company from Slack to a self-hosted Mattermost — end to end, driven by an agent, with a fail-closed readiness gate, a named rollback owner, and 96-99% lower ongoing cost.";
+
 export const metadata: Metadata = {
-  title: "Using AI Agents and Skills to Migrate Off Slack | Jeffrey Emanuel",
-  description:
-    "How two paired Claude Code / Codex skills move a company from Slack to a self-hosted Mattermost — end to end, driven by an agent, with a fail-closed readiness gate, a named rollback owner, and 96-99% lower ongoing cost.",
+  title: OG_TITLE,
+  description: OG_DESCRIPTION,
   alternates: {
     canonical: "/writing/slack-mattermost-migration",
+  },
+  // See /writing/wills-and-estate-planning/page.tsx for rationale — static
+  // JPEGs under /public/og bypass the slow dynamic route for crawlers.
+  // Regenerate with `bun run prerender:og`.
+  openGraph: {
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    type: "article",
+    url: "/writing/slack-mattermost-migration",
+    images: [
+      {
+        url: "/og/slack-mattermost-migration-opengraph.jpg",
+        width: 1200,
+        height: 630,
+        alt: OG_TITLE,
+        type: "image/jpeg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    images: [
+      {
+        url: "/og/slack-mattermost-migration-twitter.jpg",
+        width: 1200,
+        height: 600,
+        alt: OG_TITLE,
+      },
+    ],
   },
 };
 
