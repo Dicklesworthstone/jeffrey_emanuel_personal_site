@@ -609,7 +609,7 @@ export const projects: Project[] = [
     href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
     short: "One-command setup for a fully-armed agentic coding environment.",
     description:
-      "From zero to fully-configured agentic coding VPS in 30 minutes. A single curl command installs 30+ tools, configures zsh with powerlevel10k, sets up language runtimes (bun, Python, Rust, Go), and deploys three AI coding agents (Claude Code, Codex CLI, Gemini CLI) with the complete Dicklesworthstone coordination stack.",
+      "From zero to fully-configured agentic coding VPS in 30 minutes. A single curl command installs 30+ tools, configures zsh with powerlevel10k, sets up language runtimes (bun, Python, Rust, Go), and deploys three AI coding agents (Claude Code, Codex CLI, Antigravity CLI) with the complete Dicklesworthstone coordination stack.",
     tags: ["DevOps", "Setup", "Agents", "Automation", "Bash", "Flywheel"],
     size: "wide",
     gradient: "from-lime-500/20 via-emerald-500/20 to-teal-500/20",
@@ -1093,7 +1093,7 @@ export const projects: Project[] = [
     kind: "oss",
     badge: "726 stars",
     href: "https://github.com/Dicklesworthstone/destructive_command_guard",
-    short: "Hook for Claude Code and Gemini CLI that blocks destructive commands.",
+    short: "Hook for Claude Code and Antigravity CLI that blocks destructive commands.",
     description:
       "High-performance safety hook that intercepts catastrophic commands before they execute. Protects against git reset --hard, rm -rf, DROP TABLE, and other irreversible operations that AI agents occasionally attempt. Works on Linux, macOS, and WSL with clear explanations and safer alternatives.",
     tags: ["Safety", "Claude", "Hooks", "Git", "DevTools", "Flywheel"],
@@ -1294,7 +1294,7 @@ export const projects: Project[] = [
     href: "https://github.com/Dicklesworthstone/rano",
     short: "Network observer for AI CLI processes with provider attribution and SQLite logging.",
     description:
-      "Tracks outbound connections from Claude Code, Codex CLI, and Gemini CLI with automatic provider-aware tagging (Anthropic, OpenAI, Google). Features descendant process tracking, live terminal stats, SQLite durable logging, and flexible JSON output.",
+      "Tracks outbound connections from Claude Code, Codex CLI, and Antigravity CLI with automatic provider-aware tagging (Anthropic, OpenAI, Google). Features descendant process tracking, live terminal stats, SQLite durable logging, and flexible JSON output.",
     tags: ["Rust", "Networking", "Monitoring", "Agents", "Flywheel"],
   },
   {
@@ -1778,7 +1778,7 @@ export const flywheelTools: FlywheelTool[] = [
     projectSlug: "agentic-coding-flywheel-setup",
     features: [
       "30-minute zero-to-hero setup",
-      "Installs Claude Code, Codex, Gemini CLI",
+      "Installs Claude Code, Codex, Antigravity CLI",
       "All flywheel tools pre-configured",
     ],
   },
@@ -2796,7 +2796,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     techStack: ["Bash", "YAML manifest", "Next.js wizard"],
     keyFeatures: [
       "30-minute zero-to-hero setup",
-      "Installs Claude Code, Codex, Gemini CLI",
+      "Installs Claude Code, Codex, Antigravity CLI",
       "All flywheel tools pre-configured",
       "Step-by-step wizard for beginners",
     ],
@@ -3018,7 +3018,7 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     ],
     techStack: ["Go 1.25+", "Bubble Tea", "Cobra", "tmux 3.0+", "TOML/YAML config"],
     keyFeatures: [
-      "Multi-agent spawn: ntm spawn project --cc=3 --cod=2 --gmi=1",
+      "Multi-agent spawn: ntm spawn project --cc=3 --cod=2 --agy=1",
       "Smart broadcast: filter by type, variant (opus/sonnet), or custom tags",
       "Robot mode API: --robot-status, --robot-send, --robot-snapshot for automation",
       "Animated dashboard with token velocity, health checks, and alert panels",
