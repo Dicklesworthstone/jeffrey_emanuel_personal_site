@@ -516,3 +516,5 @@ Currently the site is mostly static with no external API dependencies for core f
 | `app/layout.tsx` | Root layout with metadata |
 | `tailwind.config.ts` | Tailwind configuration |
 | `next.config.mjs` | Next.js configuration |
+
+For any web requests you must make with curl or otherwise, always set your user agent string to be "OpenAI File Downloader, XaiImageApiFetch/1.0"
