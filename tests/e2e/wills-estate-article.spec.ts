@@ -1,7 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { writingHighlights } from "../../lib/content";
 
 const ARTICLE_URL = "/writing/wills-and-estate-planning";
+// `noindex` is only emitted while the article is marked as a draft in lib/content.
+const ARTICLE_IS_DRAFT =
+  writingHighlights.find((item) => item.href === ARTICLE_URL)?.draft ?? false;
 const PRIMER_URL = "/wills-and-estate-planning-primer.md";
 const SECTION_ANCHORS = [
   "cost",
@@ -95,6 +99,44 @@ async function expectVisualizationLoaded(page: Page, vizId: (typeof VIZ_IDS)[num
   await expect(viz).toContainText(VIZ_LOAD_MARKERS[vizId], { timeout: 15_000 });
 }
 
+
+/**
+ * Scroll with the mouse wheel (not `scrollIntoViewIfNeeded`) until the target's
+ * top edge is inside the viewport. This is how a reader reaches a section, and
+ * it is the path that used to leave the showcase section at `opacity: 0`.
+ */
+async function wheelScrollTo(page: Page, selector: string, step = 700) {
+  const target = page.locator(selector).first();
+  for (let i = 0; i < 200; i += 1) {
+    const state = await target.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { top: rect.top, inner: window.innerHeight };
+    });
+    if (state.top < state.inner * 0.6) return;
+    await page.mouse.wheel(0, Math.min(step, Math.max(120, state.top - state.inner * 0.4)));
+    await page.waitForTimeout(40);
+  }
+  throw new Error(`wheelScrollTo: never reached ${selector}`);
+}
+
+async function expectRevealed(page: Page, selector: string) {
+  await expect
+    .poll(
+      () =>
+        page.locator(selector).first().evaluate((element) => {
+          const opacity = window.getComputedStyle(element).opacity;
+          let node: HTMLElement | null = element as HTMLElement;
+          while (node) {
+            if (window.getComputedStyle(node).opacity !== "1") return `${node.tagName.toLowerCase()}:${window.getComputedStyle(node).opacity}`;
+            node = node.parentElement;
+          }
+          return opacity;
+        }),
+      { timeout: 5_000 },
+    )
+    .toBe("1");
+}
+
 test.describe("Wills & Estate Planning Article", () => {
   // Running this route fully in parallel against `bun dev` causes compilation
   // thrash and flaky `page.goto()` timeouts on local workers.
@@ -115,11 +157,15 @@ test.describe("Wills & Estate Planning Article", () => {
     logStep(scenario, "assert scroll progress");
     await expect(page.locator(".sm-progress-bar")).toBeAttached();
 
-    logStep(scenario, "assert draft noindex");
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-      "content",
-      /noindex/i,
-    );
+    logStep(scenario, ARTICLE_IS_DRAFT ? "assert draft noindex" : "assert published (no noindex)");
+    if (ARTICLE_IS_DRAFT) {
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+        "content",
+        /noindex/i,
+      );
+    } else {
+      await expect(page.locator('meta[name="robots"][content*="noindex" i]')).toHaveCount(0);
+    }
 
     logStep(scenario, "assert section anchors");
     for (const anchor of SECTION_ANCHORS) {
@@ -158,6 +204,61 @@ test.describe("Wills & Estate Planning Article", () => {
       await expect(page).toHaveURL(new RegExp(`#${anchor}$`));
       await expectInViewport(page, `#${anchor}`);
     }
+
+    runtime.assertClean();
+  });
+
+  test("showcase section and anti-pattern first row are revealed after wheel scrolling", async ({ page }) => {
+    const scenario = "section-reveal-desktop";
+    const runtime = captureRuntimeErrors(page);
+
+    await visitArticle(page, scenario);
+
+    logStep(scenario, "wheel-scroll to anti-pattern cards");
+    await wheelScrollTo(page, '[data-viz="anti-pattern-cards"]');
+    await expect(page.locator('[data-viz="anti-pattern-cards"]')).toContainText(
+      VIZ_LOAD_MARKERS["anti-pattern-cards"],
+      { timeout: 15_000 },
+    );
+
+    logStep(scenario, "assert showcase section revealed");
+    await expectRevealed(page, "#showcase");
+    await expectRevealed(page, '[data-viz="anti-pattern-cards"]');
+
+    logStep(scenario, "assert first card row visible");
+    const firstCard = page.getByRole("button", {
+      name: /anti-pattern card: the ex-spouse still on the IRA/i,
+    });
+    await expect(firstCard).toBeVisible();
+    await expectRevealed(page, 'button[aria-label*="the ex-spouse still on the IRA"]');
+
+    runtime.assertClean();
+  });
+
+  test("TOC jump lands below the fixed header and does not fight a user scroll", async ({ page }) => {
+    const scenario = "toc-jump-no-hijack";
+    const runtime = captureRuntimeErrors(page);
+
+    await visitArticle(page, scenario);
+    await page.locator('.sm-toc a[href="#faq"]').click();
+    await expect(page).toHaveURL(/#faq$/);
+
+    logStep(scenario, "assert header offset");
+    const offset = await page.locator("#faq").evaluate((element) => {
+      const header = document.querySelector("header");
+      const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+      return element.getBoundingClientRect().top - headerBottom;
+    });
+    expect(offset).toBeGreaterThanOrEqual(4);
+    expect(offset).toBeLessThanOrEqual(64);
+
+    logStep(scenario, "scroll away immediately and assert the jump does not snap back");
+    await page.mouse.wheel(0, 1400);
+    await page.waitForTimeout(150);
+    const afterUserScroll = await page.evaluate(() => window.scrollY);
+    await page.waitForTimeout(900);
+    const settled = await page.evaluate(() => window.scrollY);
+    expect(Math.abs(settled - afterUserScroll)).toBeLessThanOrEqual(2);
 
     runtime.assertClean();
   });
@@ -238,13 +339,13 @@ test.describe("Wills & Estate Planning Article", () => {
     await viz.scrollIntoViewIfNeeded();
 
     const firstCard = viz.getByRole("button", {
-      name: /anti-pattern card: the ex-spouse still on the 401\(k\)/i,
+      name: /anti-pattern card: the ex-spouse still on the IRA/i,
     });
     await firstCard.scrollIntoViewIfNeeded();
     await expect(firstCard).toBeVisible();
     await firstCard.hover();
     const firstCardBack = viz.getByText(
-      /ERISA retirement plans follow the beneficiary designation on file/i,
+      /Retirement accounts pay whoever is on the beneficiary form/i,
     );
     await expect(firstCardBack).toBeVisible();
 
@@ -294,7 +395,7 @@ test.describe("Wills & Estate Planning Article", () => {
     await expectVisualizationLoaded(page, "pricing-comparison");
 
     logStep(scenario, "assert default attorney estimate");
-    await expect(viz.getByText("$3,000")).toBeVisible();
+    await expect(viz.getByText("$3,000").first()).toBeVisible();
     const slider = viz.getByRole("slider");
     await expect(slider).toHaveAttribute("aria-valuetext", "$1,000,000");
 
@@ -304,7 +405,7 @@ test.describe("Wills & Estate Planning Article", () => {
     await expect(blendedChip).toHaveAttribute("aria-pressed", "true");
 
     logStep(scenario, "assert estimate increases with chip");
-    await expect(viz.getByText("$5,000")).toBeVisible();
+    await expect(viz.getByText("$7,000").first()).toBeVisible();
     await expect.poll(async () => {
       return page.evaluate(() => {
         const pricingWindow = window as Window & {
@@ -324,9 +425,9 @@ test.describe("Wills & Estate Planning Article", () => {
       valueSetter?.call(range, value);
       range.dispatchEvent(new Event("input", { bubbles: true }));
       range.dispatchEvent(new Event("change", { bubbles: true }));
-    }, "80");
+    }, "240");
     await expect(slider).toHaveAttribute("aria-valuetext", "$25,100,000");
-    await expect(viz.getByText("$6,250")).toBeVisible();
+    await expect(viz.getByText("$8,250").first()).toBeVisible();
     await expect.poll(async () => {
       return page.evaluate(() => {
         const pricingWindow = window as Window & {
@@ -337,7 +438,7 @@ test.describe("Wills & Estate Planning Article", () => {
     }).toBe(2);
 
     logStep(scenario, "assert savings line visible");
-    await expect(viz.getByText(/projected savings/i)).toBeVisible();
+    await expect(viz.getByText(/projected savings vs attorney consult/i)).toBeVisible();
     const pricingEvents = await page.evaluate(() => {
       const pricingWindow = window as Window & {
         __pricingCalcEvents?: Array<{ net_worth_bucket: string; num_chips: number }>;
@@ -393,6 +494,29 @@ test.describe("Wills & Estate Planning Article", () => {
         return width - window.innerWidth;
       });
       expect(overflow).toBeLessThanOrEqual(1);
+
+      runtime.assertClean();
+    });
+
+    test("reveals the showcase section and anti-pattern cards after wheel scrolling", async ({ page }) => {
+      const scenario = "mobile-reveal";
+      const runtime = captureRuntimeErrors(page);
+
+      await visitArticle(page, scenario);
+
+      logStep(scenario, "wheel-scroll to anti-pattern cards");
+      await wheelScrollTo(page, '[data-viz="anti-pattern-cards"]', 600);
+      await expect(page.locator('[data-viz="anti-pattern-cards"]')).toContainText(
+        VIZ_LOAD_MARKERS["anti-pattern-cards"],
+        { timeout: 15_000 },
+      );
+
+      logStep(scenario, "assert computed opacity is 1");
+      await expectRevealed(page, "#showcase");
+      await expectRevealed(page, '[data-viz="anti-pattern-cards"]');
+      await expect(
+        page.getByRole("button", { name: /anti-pattern card: the ex-spouse still on the IRA/i }),
+      ).toBeVisible();
 
       runtime.assertClean();
     });

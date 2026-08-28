@@ -86,7 +86,7 @@ export function DemoShowcase({
             key={filter.value}
             onClick={() => setActiveCategory(filter.value)}
             className={cn(
-              "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+              "inline-flex min-h-10 items-center rounded-full px-3 text-xs font-medium transition-colors",
               activeCategory === filter.value
                 ? "bg-violet-500/20 text-violet-300"
                 : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300"
@@ -119,8 +119,12 @@ export function DemoShowcase({
     );
   }
 
+  // Only a real landmark when it carries its own heading; embedded under a
+  // SectionShell it is a plain div so the landmark list is not doubled.
+  const Container = heading ? "section" : "div";
+
   return (
-    <section className={cn("", className)} aria-label="Live demos">
+    <Container className={cn("", className)} aria-label={heading ? "Live demos" : undefined}>
       {/* Header */}
       {(heading || subheading) && (
         <div className="mb-8 text-center">
@@ -140,9 +144,8 @@ export function DemoShowcase({
       {/* Demo grid */}
       <motion.div
         variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
+        initial={false}
+        animate="visible"
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <AnimatePresence mode="popLayout">
@@ -161,7 +164,7 @@ export function DemoShowcase({
           ))}
         </AnimatePresence>
       </motion.div>
-    </section>
+    </Container>
   );
 }
 

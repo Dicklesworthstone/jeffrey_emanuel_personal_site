@@ -29,7 +29,8 @@ import {
 import { flywheelTools, flywheelDescription, type FlywheelTool } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { getColorDefinition } from "@/lib/colors";
-import { formatStarCount } from "@/lib/format-stars";
+import { formatStarCount, formatStarCountFull } from "@/lib/format-stars";
+import tldrToolStars from "@/lib/data/tldr-tool-stars.json";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import BottomSheet from "@/components/bottom-sheet";
 import Magnetic from "@/components/magnetic";
@@ -51,6 +52,13 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   FileCode,
   Sparkles,
 };
+
+// Star total derived from the same snapshot the TLDR diagram uses, so the
+// badge cannot drift from the per-tool numbers shown elsewhere.
+const FLYWHEEL_TOTAL_STARS = Object.values(tldrToolStars as Record<string, number>).reduce(
+  (sum, stars) => sum + stars,
+  0
+);
 
 // Layout constants - base values for desktop (scaled down on mobile via CSS transform)
 const CONTAINER_SIZE = 520;
@@ -739,10 +747,13 @@ const EcosystemVitalityBadge = React.memo(function EcosystemVitalityBadge({
 
         <div className="h-4 w-px bg-violet-500/30" />
 
-        {/* Stars estimate */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold text-white">10K+</span>
-          <span className="text-xs text-slate-400">GitHub stars</span>
+        {/* Stars across the flywheel tools (snapshot in lib/data/tldr-tool-stars.json) */}
+        <div
+          className="flex items-center gap-1.5"
+          title={`${formatStarCountFull(FLYWHEEL_TOTAL_STARS)} GitHub stars across the ${toolCount} flywheel tools (snapshot: lib/data/tldr-tool-stars.json)`}
+        >
+          <span className="text-sm font-semibold text-white">{formatStarCount(FLYWHEEL_TOTAL_STARS)}+</span>
+          <span className="text-xs text-slate-400">stars across the tools</span>
         </div>
 
         <div className="h-4 w-px bg-violet-500/30" />
@@ -909,7 +920,7 @@ export default function FlywheelVisualization() {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr,340px] xl:grid-cols-[1fr,380px]">
+      <div className="grid gap-8 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
         {/* Flywheel visualization */}
         <div
           className="relative flex flex-col items-center justify-center"

@@ -133,6 +133,8 @@ export function EndorsementShowcase({
     setCarouselIndex((i) => (i >= itemCount - 1 ? 0 : i + 1));
   }, [itemCount]);
 
+  // Attached to the nav rows: arrow keys work while a prev/next/dot button
+  // has focus, without adding a focusable region that only exists to catch keys.
   const handleCarouselKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (itemCount <= 1) return;
@@ -206,7 +208,7 @@ export function EndorsementShowcase({
           type="button"
           onClick={() => setActiveTag(null)}
           className={cn(
-            "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+            "inline-flex min-h-10 items-center rounded-full px-3 text-xs font-medium transition-colors",
             activeTag === null
               ? "bg-sky-500/20 text-sky-300"
               : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300"
@@ -221,7 +223,7 @@ export function EndorsementShowcase({
             key={tag}
             onClick={() => setActiveTag(activeTag === tag ? null : tag)}
             className={cn(
-              "rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors",
+              "inline-flex min-h-10 items-center rounded-full px-3 text-xs font-medium capitalize transition-colors",
               activeTag === tag
                 ? "bg-sky-500/20 text-sky-300"
                 : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300"
@@ -240,13 +242,13 @@ export function EndorsementShowcase({
     if (otherItems.length <= 1) return null;
 
     return (
-      <div className="mt-4 flex items-center justify-center gap-4">
+      <div className="mt-4 flex items-center justify-center gap-4" onKeyDown={handleCarouselKeyDown}>
         <button
           type="button"
           onClick={goToPrev}
           disabled={!canGoPrev}
           className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 transition-all",
+            "flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 transition-all",
             canGoPrev
               ? "text-slate-300 hover:border-slate-600 hover:bg-slate-700"
               : "cursor-not-allowed text-slate-600"
@@ -263,7 +265,7 @@ export function EndorsementShowcase({
               type="button"
               key={idx}
               onClick={() => setCarouselIndex(idx)}
-              className="group/dot flex h-11 min-w-[24px] items-center justify-center px-1.5"
+              className="group/dot flex h-11 min-w-11 items-center justify-center px-1.5"
               aria-current={idx === safeCarouselIndex ? "true" : undefined}
               aria-label={`Go to endorsement ${idx + 1}`}
             >
@@ -284,7 +286,7 @@ export function EndorsementShowcase({
           onClick={goToNext}
           disabled={!canGoNext}
           className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 transition-all",
+            "flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 transition-all",
             canGoNext
               ? "text-slate-300 hover:border-slate-600 hover:bg-slate-700"
               : "cursor-not-allowed text-slate-600"
@@ -315,10 +317,16 @@ export function EndorsementShowcase({
     );
   }
 
+  // When embedded under a SectionShell (no heading of its own) this is a
+  // plain div; a nested <section aria-label> would add a second landmark
+  // for the same block.
+  const Container = heading ? "section" : "div";
+  const containerLabel = heading ? "Endorsements" : undefined;
+
   // Grid layout - show all in responsive grid
   if (layout === "grid") {
     return (
-      <section className={cn("", className)} aria-label="Endorsements">
+      <Container className={cn("", className)} aria-label={containerLabel}>
         {(heading || subheading) && (
           <div className="mb-8 text-center">
             {heading && (
@@ -358,7 +366,7 @@ export function EndorsementShowcase({
             ))}
           </AnimatePresence>
         </motion.div>
-      </section>
+      </Container>
     );
   }
 
@@ -367,7 +375,7 @@ export function EndorsementShowcase({
     const currentItem = filteredEndorsements[safeCarouselIndex];
 
     return (
-      <section className={cn("", className)} aria-label="Endorsements carousel">
+      <Container className={cn("", className)} aria-label={heading ? "Endorsements carousel" : undefined}>
         {(heading || subheading) && (
           <div className="mb-8 text-center">
             {heading && (
@@ -388,10 +396,6 @@ export function EndorsementShowcase({
           className="relative overflow-hidden"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          onKeyDown={handleCarouselKeyDown}
-          tabIndex={0}
-          role="region"
-          aria-label="Endorsements carousel"
         >
           <AnimatePresence mode="wait">
             {currentItem && (
@@ -414,11 +418,11 @@ export function EndorsementShowcase({
         </div>
 
         {filteredEndorsements.length > 1 && (
-          <div className="mt-4 flex items-center justify-center gap-4">
+          <div className="mt-4 flex items-center justify-center gap-4" onKeyDown={handleCarouselKeyDown}>
             <button
               type="button"
               onClick={goToPrev}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
               aria-label="Previous endorsement"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -430,7 +434,7 @@ export function EndorsementShowcase({
                   type="button"
                   key={idx}
                   onClick={() => setCarouselIndex(idx)}
-                  className="group/dot flex h-11 min-w-[24px] items-center justify-center px-1.5"
+                  className="group/dot flex h-11 min-w-11 items-center justify-center px-1.5"
                   aria-current={idx === safeCarouselIndex ? "true" : undefined}
                   aria-label={`Go to endorsement ${idx + 1}`}
                 >
@@ -449,20 +453,20 @@ export function EndorsementShowcase({
             <button
               type="button"
               onClick={goToNext}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-800/50 text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700"
               aria-label="Next endorsement"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         )}
-      </section>
+      </Container>
     );
   }
 
   // Featured layout (default) - prominent featured item with carousel of others below
   return (
-    <section className={cn("", className)} aria-label="Endorsements">
+    <Container className={cn("", className)} aria-label={containerLabel}>
       {(heading || subheading) && (
         <div className="mb-8 text-center">
           {heading && (
@@ -480,19 +484,13 @@ export function EndorsementShowcase({
 
       {/* Featured endorsement */}
       {featuredItem && (
-        <motion.div
-          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
-          className="mb-8"
-        >
+        <div className="mb-8">
           <EndorsementCard
             {...toCardProps(featuredItem)}
             variant="featured"
             highlight
           />
-        </motion.div>
+        </div>
       )}
 
       {/* Other endorsements in carousel */}
@@ -502,16 +500,12 @@ export function EndorsementShowcase({
           className="relative"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          onKeyDown={handleCarouselKeyDown}
-          tabIndex={0}
-          role="region"
-          aria-label="More endorsements"
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
               More Endorsements
             </h3>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-400" aria-live="polite">
               {safeCarouselIndex + 1} of {otherItems.length}
             </span>
           </div>
@@ -536,7 +530,7 @@ export function EndorsementShowcase({
           {renderCarouselNav()}
         </div>
       )}
-    </section>
+    </Container>
   );
 }
 

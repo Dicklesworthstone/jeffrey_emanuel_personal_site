@@ -1,16 +1,46 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, useId } from "react";
-import { motion, useReducedMotion, useInView } from "framer-motion";
+import { useState, useCallback, useRef, useId } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Mail, Check, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { siteConfig } from "@/lib/content";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error";
+
+/**
+ * Map the subscribe endpoint's HTTP status to copy that names the problem
+ * and, where possible, what to do next. 404 is the "list does not exist /
+ * newsletter not set up" case, so it points at the direct-email fallback.
+ */
+function describeSubscribeFailure(status: number): { message: string; suggestEmail: boolean } {
+  if (status === 404) {
+    return { message: "Newsletter signup isn't available yet — email me instead.", suggestEmail: true };
+  }
+  if (status === 400 || status === 422) {
+    return { message: "That email address doesn't look right. Check it and try again.", suggestEmail: false };
+  }
+  if (status === 409) {
+    return { message: "That address is already subscribed.", suggestEmail: false };
+  }
+  if (status === 429) {
+    return { message: "Too many attempts. Wait a minute and try again.", suggestEmail: false };
+  }
+  if (status >= 500) {
+    return { message: "The newsletter service is having trouble. Try again in a few minutes, or email me.", suggestEmail: true };
+  }
+  return { message: "Signup didn't go through. Try again, or email me directly.", suggestEmail: true };
+}
+
+const NETWORK_FAILURE = {
+  message: "Couldn't reach the newsletter service. Check your connection and try again, or email me directly.",
+  suggestEmail: true,
+};
 
 interface NewsletterSignupProps {
   /** Optional CSS class name */
@@ -39,26 +69,16 @@ export function NewsletterSignup({
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [errorSuggestsEmail, setErrorSuggestsEmail] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { once: true, margin: "-50px" });
   const { lightTap, mediumTap } = useHapticFeedback();
   const inputId = useId();
-
-  // Reset to idle after showing success for a while
-  useEffect(() => {
-    if (status === "success") {
-      const timer = setTimeout(() => {
-        setStatus("idle");
-        setEmail("");
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-    return;
-  }, [status]);
+  const errorId = useId();
+  // The success state stays put: it is the confirmation and should not
+  // vanish before a slower reader has finished it.
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -68,6 +88,7 @@ export function NewsletterSignup({
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         setStatus("error");
         setErrorMessage("Please enter a valid email address");
+        setErrorSuggestsEmail(false);
         lightTap();
         return;
       }
@@ -93,12 +114,17 @@ export function NewsletterSignup({
           setStatus("success");
           mediumTap();
         } else {
-          throw new Error("Subscription failed");
+          const failure = describeSubscribeFailure(response.status);
+          setStatus("error");
+          setErrorMessage(failure.message);
+          setErrorSuggestsEmail(failure.suggestEmail);
+          lightTap();
         }
       } catch {
-        // If fetch fails, show error state
+        // fetch itself rejected: offline, DNS, or a CORS-blocked response
         setStatus("error");
-        setErrorMessage("Something went wrong. Please try again.");
+        setErrorMessage(NETWORK_FAILURE.message);
+        setErrorSuggestsEmail(NETWORK_FAILURE.suggestEmail);
         lightTap();
       }
     },
@@ -107,16 +133,11 @@ export function NewsletterSignup({
 
   if (compact) {
     return (
-      <div ref={containerRef} className={cn("relative", className)}>
-        <motion.div
-          initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: reducedMotion ? 0 : 0.5 }}
-          className="rounded-2xl border border-slate-800/80 bg-slate-900/50 p-4 backdrop-blur-sm"
-        >
+      <div className={cn("relative", className)}>
+        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/50 p-4 pointer-fine:backdrop-blur-sm">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
-              <Mail className="h-4 w-4 text-white" />
+              <Mail className="h-4 w-4 text-white" aria-hidden="true" />
             </div>
             <span className="text-sm font-semibold text-white">{heading}</span>
           </div>
@@ -127,7 +148,7 @@ export function NewsletterSignup({
               <span>You&apos;re subscribed!</span>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex gap-2" aria-busy={status === "submitting"}>
               <label htmlFor={inputId} className="sr-only">
                 Email address
               </label>
@@ -147,9 +168,10 @@ export function NewsletterSignup({
                 autoComplete="email"
                 inputMode="email"
                 disabled={status === "submitting"}
+                aria-describedby={status === "error" ? errorId : undefined}
                 className={cn(
-                  "flex-1 rounded-lg border bg-slate-950/50 px-3 py-2 text-sm text-white placeholder:text-slate-500",
-                  "outline-none transition-colors focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30",
+                  "min-h-10 flex-1 rounded-lg border bg-slate-950/50 px-3 py-2 text-sm text-white placeholder:text-slate-500",
+                  "outline-none transition-colors focus-visible:border-violet-500/50 focus-visible:ring-2 focus-visible:ring-violet-500/40",
                   status === "error"
                     ? "border-red-500/50"
                     : "border-slate-700/50"
@@ -160,7 +182,7 @@ export function NewsletterSignup({
                 disabled={status === "submitting"}
                 aria-label="Subscribe"
                 className={cn(
-                  "rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white transition-all",
+                  "inline-flex min-h-10 items-center justify-center rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white transition-all",
                   "hover:bg-violet-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 )}
               >
@@ -174,41 +196,33 @@ export function NewsletterSignup({
           )}
 
           {status === "error" && errorMessage && (
-            <p className="mt-2 flex items-center gap-1 text-xs text-red-400">
-              <AlertCircle className="h-3 w-3" />
-              {errorMessage}
+            <p id={errorId} role="alert" className="mt-2 flex flex-wrap items-center gap-1 text-xs text-red-400">
+              <AlertCircle className="h-3 w-3 shrink-0" aria-hidden="true" />
+              <span>{errorMessage}</span>
+              {errorSuggestsEmail && (
+                <a href={`mailto:${siteConfig.email}`} className="underline underline-offset-2 hover:text-red-300">
+                  {siteConfig.email}
+                </a>
+              )}
             </p>
           )}
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className={cn("relative", className)}>
-      <motion.div
-        initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: reducedMotion ? 0 : 0.6 }}
-        className="relative overflow-hidden rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-slate-900/80 to-slate-900/60 p-8 backdrop-blur-sm sm:p-10"
-      >
+    <div className={cn("relative", className)}>
+      <div className="relative overflow-hidden rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-slate-900/80 to-slate-900/60 p-8 pointer-fine:backdrop-blur-sm sm:p-10">
         {/* Background decorations */}
         <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-violet-500/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-purple-500/10 blur-3xl" />
 
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* Icon */}
-          <motion.div
-            initial={reducedMotion ? {} : { scale: 0.8, opacity: 0 }}
-            animate={isInView ? { scale: 1, opacity: 1 } : {}}
-            transition={{
-              duration: reducedMotion ? 0 : 0.5,
-              delay: reducedMotion ? 0 : 0.2,
-            }}
-            className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30"
-          >
-            <Mail className="h-7 w-7 text-white" />
-          </motion.div>
+          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30">
+            <Mail className="h-7 w-7 text-white" aria-hidden="true" />
+          </div>
 
           {/* Heading */}
           <h3 className="mb-3 text-2xl font-bold text-white sm:text-3xl">
@@ -239,6 +253,7 @@ export function NewsletterSignup({
               ref={formRef}
               onSubmit={handleSubmit}
               className="flex w-full max-w-md flex-col gap-3 sm:flex-row"
+              aria-busy={status === "submitting"}
             >
               <div className="relative flex-1">
                 <label htmlFor={inputId} className="sr-only">
@@ -260,11 +275,10 @@ export function NewsletterSignup({
                   autoComplete="email"
                   inputMode="email"
                   disabled={status === "submitting"}
-                  aria-label="Email address"
-                  aria-describedby={status === "error" ? "email-error" : undefined}
+                  aria-describedby={status === "error" ? errorId : undefined}
                   className={cn(
                     "w-full rounded-xl border bg-slate-950/50 px-4 py-3 text-white placeholder:text-slate-500",
-                    "outline-none transition-all focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/30",
+                    "outline-none transition-all focus-visible:border-violet-500/50 focus-visible:ring-2 focus-visible:ring-violet-500/40",
                     status === "error"
                       ? "border-red-500/50"
                       : "border-slate-700/50"
@@ -300,14 +314,19 @@ export function NewsletterSignup({
           {/* Error message */}
           {status === "error" && errorMessage && (
             <motion.p
-              id="email-error"
+              id={errorId}
               role="alert"
-              initial={{ opacity: 0, y: -5 }}
+              initial={reducedMotion ? false : { opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-3 flex items-center gap-2 text-sm text-red-400"
+              className="mt-3 flex flex-wrap items-center justify-center gap-2 text-sm text-red-400"
             >
-              <AlertCircle className="h-4 w-4" />
-              {errorMessage}
+              <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{errorMessage}</span>
+              {errorSuggestsEmail && (
+                <a href={`mailto:${siteConfig.email}`} className="underline underline-offset-2 hover:text-red-300">
+                  {siteConfig.email}
+                </a>
+              )}
             </motion.p>
           )}
 
@@ -316,7 +335,7 @@ export function NewsletterSignup({
             Unsubscribe anytime. No spam, ever.
           </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

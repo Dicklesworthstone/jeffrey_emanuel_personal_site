@@ -70,7 +70,7 @@ const sourceConfig: Record<
   },
   other: {
     icon: Quote,
-    label: "Quote",
+    label: "Source",
     accentColor: "text-amber-400",
     spotlightColor: "251, 191, 36",
     hoverBorder: "group-hover:border-amber-500/30",
@@ -287,7 +287,11 @@ export function EndorsementCard({
         target="_blank"
         rel="noopener noreferrer"
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-2xl sm:rounded-3xl"
-        aria-label={`View ${author}'s endorsement on ${config.label}`}
+        aria-label={
+          source === "other"
+            ? `View the source of ${author}'s endorsement`
+            : `View ${author}'s endorsement on ${config.label}`
+        }
       >
         {cardContent}
       </a>
