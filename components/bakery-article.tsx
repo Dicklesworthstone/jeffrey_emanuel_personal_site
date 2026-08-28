@@ -20,25 +20,70 @@ import {
 } from "lucide-react";
 import { calculateReadingTime } from "@/lib/reading-time";
 import { formatDate, getScrollMetrics } from "@/lib/utils";
+import ErrorBoundary from "@/components/error-boundary";
 import { BakeryMathTooltip } from "./bakery-math-tooltip";
 
-// Dynamic import visualizations
+// Skeleton heights sit close to the real rendered heights so the inline
+// visualizations do not shift the page when their chunk lands.
+const VIZ_HEIGHTS = {
+  doorway: "min-h-[42rem] lg:min-h-[32rem]",
+  nexus: "h-[420px] sm:h-[500px] md:h-[750px]",
+  memory: "min-h-[52rem] lg:min-h-[38rem]",
+} as const;
+
+function VizSkeleton({ heightClass }: { heightClass: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`ba-viz-container flex items-center justify-center ${heightClass}`}
+    >
+      <span className="sr-only">Loading visualization</span>
+      <span
+        aria-hidden="true"
+        className="h-5 w-5 rounded-full border-2 border-slate-600 border-t-amber-400 animate-spin motion-reduce:animate-none"
+      />
+    </div>
+  );
+}
+
+function VizFallback({ heightClass }: { heightClass: string }) {
+  return (
+    <div
+      role="alert"
+      className={`ba-viz-container flex flex-col items-center justify-center gap-3 px-6 text-center ${heightClass}`}
+    >
+      <AlertTriangle className="h-5 w-5 text-amber-400/70" aria-hidden="true" />
+      <p className="text-sm text-slate-400 mb-0">
+        This visualization failed to load. The surrounding text still covers the idea.
+      </p>
+    </div>
+  );
+}
+
+// Dynamic import visualizations (no SSR — they use browser APIs). Each one is
+// wrapped in its own error boundary so a WebGL or d3 failure cannot unwind the
+// whole article, and each shows a sized skeleton while its chunk loads.
 const BakeryHero = dynamic(
   () => import("./bakery-visualizations").then((m) => ({ default: m.BakeryHero })),
-  { ssr: false }
+  { ssr: false, loading: () => <div className="absolute inset-0" aria-hidden="true" /> }
 );
 const ProcessNexus = dynamic(
   () => import("./bakery-visualizations").then((m) => ({ default: m.ProcessNexus })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.nexus} /> }
 );
 const DoorwayRaceViz = dynamic(
   () => import("./bakery-visualizations").then((m) => ({ default: m.DoorwayRaceViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.doorway} /> }
 );
 const MemoryResilienceViz = dynamic(
   () => import("./bakery-visualizations").then((m) => ({ default: m.MemoryResilienceViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.memory} /> }
 );
+
+// Server-rendered fallback until the real prose is measured after mount
+// (≈640 words of article text at 200 wpm).
+const FALLBACK_READING_TIME = "4 min read";
 
 // Fonts
 const crimsonPro = Crimson_Pro({
@@ -80,35 +125,51 @@ function T({ k, children, theme = "amber" }: { k: string; children: React.ReactN
 }
 
 export function BakeryArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
-  
-  const readingTime = calculateReadingTime(`
-    The Bakery Algorithm was invented by Leslie Lamport in 1974. 
-    It's a locking mechanism used in concurrent programming to prevent 
-    multiple processes from entering their critical sections simultaneously, 
-    which could cause data corruption or inconsistencies.
-    It's named after the numbering system used in bakeries, where each customer 
-    gets a number and waits for their turn to be served. 
-    But unlike a physical bakery where a shopkeeper hands out tickets, 
-    Lamport's algorithm works in a world where there is no central authority.
-    What makes it truly legendary is that it achieves mutual exclusion 
-    without requiring any special atomic hardware instructions like 
-    Compare-and-Swap or Test-and-Set.
-    In most synchronization algorithms, ensuring mutual exclusion typically 
-    requires operations to be atomic.
-    The Bakery Algorithm is designed to work even when reads and writes 
-    to shared variables are not atomic.
-  `);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
+  const [readingTime, setReadingTime] = useState(FALLBACK_READING_TIME);
 
+  // Reading time from the real article prose (hero and visualizations excluded).
   useEffect(() => {
-    const handleScroll = () => {
+    const root = articleRef.current;
+    if (!root) return;
+    const raf = requestAnimationFrame(() => {
+      const clone = root.cloneNode(true) as HTMLElement;
+      clone
+        .querySelectorAll('[data-section="hero"], .ba-viz-container, [data-viz]')
+        .forEach((el) => el.remove());
+      const words = calculateReadingTime(clone.textContent ?? "");
+      if (words.words > 0) setReadingTime(words.text);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // Scroll progress: rAF-throttled passive listener writing straight to the
+  // DOM — no React state, so scrolling never re-renders the article tree.
+  useEffect(() => {
+    let rafId: number | null = null;
+    const update = () => {
+      rafId = null;
       const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+      if (scrollHintRef.current) {
+        scrollHintRef.current.style.opacity = String(Math.max(0, 0.5 - progress * 5));
+      }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => {
+      if (rafId === null) rafId = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   useEffect(() => {
@@ -137,7 +198,7 @@ export function BakeryArticle() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" }
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" }
     );
     targets.forEach((el) => {
       el.classList.add("ba-fade-section");
@@ -152,19 +213,22 @@ export function BakeryArticle() {
   return (
     <div
       ref={articleRef}
-      role="main"
       className={`bakery-scope ba-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       <div
+        ref={progressBarRef}
         className="ba-progress-bar"
-        style={{ transform: `scaleX(${scrollProgress})` }}
+        style={{ transform: "scaleX(0)" }}
+        aria-hidden="true"
       />
 
       {/* ========== HERO ========== */}
       <section data-section="hero" className="min-h-dvh flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
-        <div className="absolute inset-0 z-0 scale-110 md:scale-100">
-          <BakeryHero />
+        <div className="absolute inset-0 z-0 scale-110 md:scale-100" aria-hidden="true">
+          <ErrorBoundary fallback={<div className="absolute inset-0" />}>
+            <BakeryHero />
+          </ErrorBoundary>
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
@@ -180,9 +244,9 @@ export function BakeryArticle() {
                  Distributed Systems / Leslie Lamport
                </motion.div>
                
-               <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest bg-black/20 px-3 py-1 rounded-full border border-white/5">
-                  <Clock className="w-3 h-3" />
-                  {readingTime.text}
+               <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-widest bg-black/20 px-3 py-1 rounded-full border border-white/5">
+                  <Clock className="w-3 h-3" aria-hidden="true" />
+                  {readingTime}
                   <span className="mx-2 h-1 w-1 rounded-full bg-slate-700" />
                   {formatDate("2025-11-22")}
                </div>
@@ -206,13 +270,19 @@ export function BakeryArticle() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 1 }}
-          className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
-          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+          className="z-20 md:absolute md:bottom-16 md:left-0 md:w-full"
+          aria-hidden="true"
         >
-          <span className="text-[10px] uppercase tracking-[0.5em] text-white/30 font-bold">
-            Scroll to Discover
-          </span>
-          <div className="w-px h-16 bg-gradient-to-b from-white/20 via-white/5 to-transparent shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
+          <div
+            ref={scrollHintRef}
+            className="mt-12 flex flex-col items-center gap-4 md:mt-0"
+            style={{ opacity: 0.5 }}
+          >
+            <span className="text-xs uppercase tracking-[0.5em] text-white/30 font-bold">
+              Scroll to Discover
+            </span>
+            <div className="w-px h-16 bg-gradient-to-b from-white/20 via-white/5 to-transparent shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
+          </div>
         </motion.div>
       </section>
 
@@ -242,10 +312,10 @@ export function BakeryArticle() {
 
           <div className="ba-insight-card group">
             <div className="relative z-10">
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                <ShieldCheck className="w-8 h-8 text-amber-400" />
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                <ShieldCheck className="w-8 h-8 text-amber-400" aria-hidden="true" />
                 The First Correct Solution
-              </h3>
+              </h2>
               <p className="text-slate-400 text-base md:text-lg mb-0 leading-relaxed font-serif italic">
                 In the early 1970s, the <strong>Mutual Exclusion Problem</strong> was 
                 THE foundational challenge in concurrency research. While others 
@@ -299,9 +369,9 @@ export function BakeryArticle() {
                 <div className="mb-4 p-3 bg-white/5 rounded-xl w-fit group-hover:bg-amber-500/10 transition-colors shrink-0">
                   {item.icon}
                 </div>
-                <h4 className="text-white font-bold mb-3 text-lg md:text-xl group-hover:text-amber-400 transition-colors shrink-0">
+                <h3 className="text-white font-bold mb-3 text-lg md:text-xl group-hover:text-amber-400 transition-colors shrink-0">
                   {item.title}
-                </h4>
+                </h3>
                 <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light flex-1">
                   {item.text}
                 </p>
@@ -331,7 +401,9 @@ export function BakeryArticle() {
             This ensures that no two processes ever have the same priority.
           </p>
 
-          <DoorwayRaceViz />
+          <ErrorBoundary fallback={<VizFallback heightClass={VIZ_HEIGHTS.doorway} />}>
+            <DoorwayRaceViz />
+          </ErrorBoundary>
         </EC>
       </section>
 
@@ -350,7 +422,9 @@ export function BakeryArticle() {
           </p>
           
           <div className="my-12">
-            <ProcessNexus />
+            <ErrorBoundary fallback={<VizFallback heightClass={VIZ_HEIGHTS.nexus} />}>
+              <ProcessNexus />
+            </ErrorBoundary>
           </div>
 
           <p>
@@ -384,7 +458,9 @@ export function BakeryArticle() {
              &mdash; Leslie Lamport
           </div>
 
-          <MemoryResilienceViz />
+          <ErrorBoundary fallback={<VizFallback heightClass={VIZ_HEIGHTS.memory} />}>
+            <MemoryResilienceViz />
+          </ErrorBoundary>
 
           <p>
             In most synchronization algorithms, updating a flag or counter 
@@ -396,10 +472,10 @@ export function BakeryArticle() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12 items-stretch">
              <div className="p-6 bg-rose-500/5 border border-rose-500/10 rounded-2xl flex flex-col h-full group hover:bg-rose-500/10 transition-colors">
-                <h4 className="text-rose-400 font-bold mb-3 flex items-center gap-2 shrink-0">
-                   <AlertTriangle className="w-4 h-4" />
+                <h3 className="text-rose-400 font-bold mb-3 flex items-center gap-2 shrink-0">
+                   <AlertTriangle className="w-4 h-4" aria-hidden="true" />
                    Traditional Risk
-                </h4>
+                </h3>
                 <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                    Relying on atomicity means if the hardware fails to lock 
                    the bus during a write, the entire mutual exclusion 
@@ -407,10 +483,10 @@ export function BakeryArticle() {
                 </p>
              </div>
              <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex flex-col h-full group hover:bg-emerald-500/10 transition-colors">
-                <h4 className="text-emerald-400 font-bold mb-3 flex items-center gap-2 shrink-0">
-                   <ShieldCheck className="w-4 h-4" />
+                <h3 className="text-emerald-400 font-bold mb-3 flex items-center gap-2 shrink-0">
+                   <ShieldCheck className="w-4 h-4" aria-hidden="true" />
                    Bakery Resilience
-                </h4>
+                </h3>
                 <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                    Because the algorithm uses a loop to check other processes, 
                    an inconsistent view only results in a process waiting 

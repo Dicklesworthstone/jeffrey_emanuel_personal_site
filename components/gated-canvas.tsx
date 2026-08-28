@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { Canvas, type CanvasProps } from "@react-three/fiber";
-import { useInView } from "framer-motion";
+import { useInView, useReducedMotion } from "framer-motion";
 import { cn, supportsWebGL } from "@/lib/utils";
 
 type GatedCanvasProps = CanvasProps & {
@@ -24,6 +24,9 @@ export default function GatedCanvas({
 }: GatedCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(wrapperRef, { margin: "200px" });
+  // Under prefers-reduced-motion the scene still renders (so user-driven state
+  // changes show), but only on demand — no continuous time-based motion.
+  const prefersReducedMotion = useReducedMotion();
 
   // Without WebGL, mounting a Canvas throws an uncatchable async
   // context-creation error — render an empty placeholder instead.
@@ -31,9 +34,11 @@ export default function GatedCanvas({
     return <div className={cn("h-full w-full", wrapperClassName)} aria-hidden="true" />;
   }
 
+  const activeLoop = prefersReducedMotion ? "demand" : (frameloop ?? "always");
+
   return (
     <div ref={wrapperRef} className={cn("h-full w-full", wrapperClassName)}>
-      <Canvas {...props} frameloop={isInView ? (frameloop ?? "always") : "never"}>
+      <Canvas {...props} frameloop={isInView ? activeLoop : "never"}>
         {children}
       </Canvas>
     </div>

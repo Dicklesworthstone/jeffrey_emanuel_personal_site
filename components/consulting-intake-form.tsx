@@ -20,6 +20,12 @@ import { Controller, useForm, useWatch, type DefaultValues } from "react-hook-fo
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/lib/content";
+import CopyButton from "@/components/copy-button";
+
+/** Keeps the mailto: URL under the ~2,000-char limit of common mail clients. */
+const MESSAGE_MAX_LENGTH = 1500;
+const MESSAGE_MAX_LABEL = MESSAGE_MAX_LENGTH.toLocaleString("en-US");
 
 const engagementValues = [
   "market-analysis",
@@ -121,7 +127,7 @@ const formSchema = z.object({
   message: z
     .string()
     .min(1, "Please tell me about your needs")
-    .max(1500, "Message is too long for mailto link (max 1500 chars)"),
+    .max(MESSAGE_MAX_LENGTH, `Please keep your message under ${MESSAGE_MAX_LABEL} characters.`),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -247,27 +253,36 @@ const Textarea = forwardRef<
   );
 });
 
-// Radio card component
+// Radio card component (a real ARIA radio: role/aria-checked + roving tabindex)
 function RadioCard({
   selected,
   onClick,
   label,
   description,
+  tabIndex,
+  onKeyDown,
 }: {
   selected: boolean;
   onClick: () => void;
   label: string;
   description?: string;
+  tabIndex: number;
+  onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
 }) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.button
       type="button"
+      role="radio"
+      aria-checked={selected}
+      tabIndex={tabIndex}
+      onKeyDown={onKeyDown}
       onClick={onClick}
       whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
       className={cn(
         "relative flex flex-col items-start rounded-xl border p-4 text-left transition-all duration-200",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60",
         selected
           ? "border-violet-500/50 bg-violet-500/10 shadow-lg shadow-violet-500/5"
           : "border-slate-700/50 bg-slate-900/40 hover:border-slate-600/50 hover:bg-slate-900/60"
@@ -319,10 +334,12 @@ function ChipToggle({
   return (
     <motion.button
       type="button"
+      aria-pressed={selected}
       onClick={onClick}
       whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
       className={cn(
-        "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",
+        "min-h-10 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60",
         selected
           ? "border-violet-500/50 bg-violet-500/20 text-violet-300 shadow-lg shadow-violet-500/5"
           : "border-slate-700/50 bg-slate-900/40 text-slate-400 hover:border-slate-600/50 hover:bg-slate-900/60 hover:text-slate-300"
@@ -446,8 +463,15 @@ export default function ConsultingIntakeForm() {
   const [stepIndex, setStepIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  // The plain-text version of what we asked the mail client to send, so the
+  // user can copy it if the mailto: hand-off did not work.
+  const [composedMessage, setComposedMessage] = useState<{ subject: string; body: string } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+  // True only after the user has moved between steps; gates the focus effect
+  // so nothing is focused (and nothing scrolls) on initial page load.
+  const hasNavigatedRef = useRef(false);
   const prefersReducedMotion = useReducedMotion();
 
   const {
@@ -467,17 +491,29 @@ export default function ConsultingIntakeForm() {
   const selectedTimeline = useWatch({ control, name: "timeline" });
   const selectedBudget = useWatch({ control, name: "budget" });
   const selectedInterests = useWatch({ control, name: "interests" }) ?? [];
+  const messageValue = useWatch({ control, name: "message" }) ?? "";
+  const messageLength = messageValue.length;
 
   useEffect(() => {
+    // Only move focus after a user-initiated step change. On mount this effect
+    // also runs (stepIndex = 0) and a focus() call would scroll the page down
+    // to the form and can pop the keyboard on Android.
+    if (!hasNavigatedRef.current) return;
     const node = stepRefs.current[stepIndex];
     if (!node) return;
     const focusable = node.querySelector<HTMLElement>(
-      "input, select, textarea, button"
+      'input, select, textarea, button, [role="radio"][tabindex="0"]'
     );
     if (focusable) {
-      focusable.focus();
+      focusable.focus({ preventScroll: true });
     }
   }, [stepIndex]);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      successHeadingRef.current?.focus({ preventScroll: true });
+    }
+  }, [isSubmitted]);
 
   const scrollToFormTop = () => {
     if (!formRef.current) return;
@@ -491,12 +527,14 @@ export default function ConsultingIntakeForm() {
     const stepFields = steps[stepIndex]?.fields ?? [];
     const isValid = await trigger(stepFields, { shouldFocus: true });
     if (!isValid) return;
+    hasNavigatedRef.current = true;
     setDirection(1);
     setStepIndex((prev) => Math.min(prev + 1, steps.length - 1));
     scrollToFormTop();
   };
 
   const handleBack = () => {
+    hasNavigatedRef.current = true;
     setDirection(-1);
     setStepIndex((prev) => Math.max(prev - 1, 0));
     scrollToFormTop();
@@ -511,12 +549,9 @@ export default function ConsultingIntakeForm() {
       ? budgetOptions.find((opt) => opt.value === data.budget)?.label
       : undefined;
 
-    const subject = encodeURIComponent(
-      `Consulting Inquiry from ${data.name} at ${data.company}`
-    );
+    const subject = `Consulting Inquiry from ${data.name} at ${data.company}`;
 
-    const body = encodeURIComponent(
-      `Name: ${data.name}
+    const body = `Name: ${data.name}
 Email: ${data.email}
 Company: ${data.company}
 Role: ${data.role || "Not specified"}
@@ -527,26 +562,26 @@ Budget Range: ${budgetLabel || "Not specified"}
 
 Areas of Interest:
 ${
-        data.interests.length > 0
-          ? data.interests
-              .map((interest) => interestOptions.find((opt) => opt.id === interest)?.label)
-              .filter(Boolean)
-              .map((label) => `- ${label}`)
-              .join("\n")
-          : "None specified"
-      }
+      data.interests.length > 0
+        ? data.interests
+            .map((interest) => interestOptions.find((opt) => opt.id === interest)?.label)
+            .filter(Boolean)
+            .map((label) => `- ${label}`)
+            .join("\n")
+        : "None specified"
+    }
 
 Message:
-${data.message}`
-    );
+${data.message}`;
 
+    // This page has no server-side send: the mail client does the delivery.
+    // Keep the composed text so the follow-up screen can offer it for copying
+    // instead of pretending the hand-off succeeded.
+    setComposedMessage({ subject, body });
     window.location.assign(
-      `mailto:jeffreyemanuel@gmail.com?subject=${subject}&body=${body}`
+      `mailto:${siteConfig.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     );
-
-    setTimeout(() => {
-      setIsSubmitted(true);
-    }, 800);
+    setIsSubmitted(true);
   };
 
   if (isSubmitted) {
@@ -567,26 +602,54 @@ ${data.message}`
           <CheckCircle2 className="h-8 w-8 text-emerald-400" />
         </motion.div>
 
-        <h3 className="text-xl font-bold text-white">Message Ready</h3>
+        <h3
+          ref={successHeadingRef}
+          tabIndex={-1}
+          className="rounded-md text-xl font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+        >
+          Your email app should have opened
+        </h3>
         <p className="mt-2 text-sm text-slate-400">
-          Your email client should have opened with the inquiry details. If it
-          did not open, you can email me directly at{" "}
+          Nothing is sent by this page itself. If your email app didn&apos;t open,
+          copy the message below and send it to{" "}
           <a
-            href="mailto:jeffreyemanuel@gmail.com"
-            className="font-medium text-emerald-400 hover:text-emerald-300"
+            href={`mailto:${siteConfig.email}`}
+            className="font-medium text-emerald-400 underline decoration-emerald-500/40 underline-offset-4 hover:text-emerald-300"
           >
-            jeffreyemanuel@gmail.com
+            {siteConfig.email}
           </a>
+          .
         </p>
+
+        {composedMessage && (
+          <div className="mt-6 text-left">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                Your message
+              </span>
+              <span className="inline-flex items-center gap-2 text-xs text-slate-400">
+                <CopyButton text={`Subject: ${composedMessage.subject}\n\n${composedMessage.body}`} />
+                Copy message
+              </span>
+            </div>
+            <p className="mt-3 text-xs text-slate-400">
+              Subject: <span className="text-slate-200">{composedMessage.subject}</span>
+            </p>
+            <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-slate-800/70 bg-slate-950/60 p-4 font-sans text-xs leading-relaxed text-slate-300">
+              {composedMessage.body}
+            </pre>
+          </div>
+        )}
 
         <button
           type="button"
           onClick={() => {
             setIsSubmitted(false);
+            setComposedMessage(null);
             setStepIndex(0);
             reset(defaultValues);
           }}
-          className="mt-6 text-sm font-medium text-slate-500 transition-colors hover:text-slate-300"
+          className="mt-6 min-h-11 rounded-md px-2 text-sm font-medium text-slate-400 transition-colors hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
         >
           Submit another inquiry
         </button>
@@ -612,7 +675,11 @@ ${data.message}`
               handleNext();
             }
       }
-      className="space-y-8"
+      // zod owns validation (inline, per step); native bubbles would show a
+      // second, differently-worded message for the same field.
+      noValidate
+      // Room for the fixed header when the form scrolls itself into view
+      className="scroll-mt-32 space-y-8"
     >
       <StepIndicator steps={steps} currentStep={stepIndex} />
 
@@ -709,7 +776,9 @@ ${data.message}`
                   <Target className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Type of Engagement</h3>
+                  <h3 id="engagement-type-heading" className="text-lg font-semibold text-white">
+                    Type of Engagement
+                  </h3>
                   <p className="text-xs text-slate-500">{currentStep.description}</p>
                 </div>
               </div>
@@ -717,20 +786,53 @@ ${data.message}`
               <Controller
                 name="engagementType"
                 control={control}
-                render={({ field }) => (
+                render={({ field }) => {
+                  const selectedIndex = engagementOptions.findIndex((opt) => opt.value === field.value);
+                  // Roving tabindex: one tab stop for the group, arrows move + select.
+                  const moveSelection = (
+                    event: React.KeyboardEvent<HTMLButtonElement>,
+                    delta: number
+                  ) => {
+                    event.preventDefault();
+                    const count = engagementOptions.length;
+                    const current = selectedIndex === -1 ? 0 : selectedIndex;
+                    const next = (current + delta + count) % count;
+                    field.onChange(engagementOptions[next].value);
+                    const radios = event.currentTarget.parentElement?.querySelectorAll<HTMLElement>(
+                      '[role="radio"]'
+                    );
+                    radios?.[next]?.focus({ preventScroll: true });
+                  };
+                  const handleRadioKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+                    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+                      moveSelection(event, 1);
+                    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+                      moveSelection(event, -1);
+                    }
+                  };
+                  return (
                   <div className="space-y-3">
                     <div
                       role="radiogroup"
+                      aria-labelledby="engagement-type-heading"
+                      aria-required="true"
+                      aria-invalid={errors.engagementType ? true : undefined}
                       aria-describedby={errors.engagementType ? "engagementType-error" : undefined}
                       className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
                     >
-                      {engagementOptions.map((opt) => (
+                      {engagementOptions.map((opt, index) => (
                         <RadioCard
                           key={opt.value}
                           selected={field.value === opt.value}
                           onClick={() => field.onChange(opt.value)}
                           label={opt.label}
                           description={opt.description}
+                          tabIndex={
+                            selectedIndex === -1
+                              ? index === 0 ? 0 : -1
+                              : index === selectedIndex ? 0 : -1
+                          }
+                          onKeyDown={handleRadioKeyDown}
                         />
                       ))}
                     </div>
@@ -745,7 +847,8 @@ ${data.message}`
                       </p>
                     )}
                   </div>
-                )}
+                  );
+                }}
               />
 
               <div className="grid gap-6 sm:grid-cols-2">
@@ -754,7 +857,9 @@ ${data.message}`
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
                       <Calendar className="h-4 w-4" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white">Timeline</h3>
+                    <label htmlFor="timeline" className="text-lg font-semibold text-white">
+                      Timeline
+                    </label>
                   </div>
                   <Controller
                     name="timeline"
@@ -778,7 +883,9 @@ ${data.message}`
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
                       <DollarSign className="h-4 w-4" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white">Budget Range</h3>
+                    <label htmlFor="budget" className="text-lg font-semibold text-white">
+                      Budget Range
+                    </label>
                   </div>
                   <Controller
                     name="budget"
@@ -816,21 +923,24 @@ ${data.message}`
                 name="interests"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex flex-wrap gap-2">
-                    {interestOptions.map((opt) => (
-                      <ChipToggle
-                        key={opt.id}
-                        selected={field.value?.includes(opt.id)}
-                        onClick={() => {
-                          const next = field.value?.includes(opt.id)
-                            ? field.value.filter((item) => item !== opt.id)
-                            : [...(field.value ?? []), opt.id];
-                          field.onChange(next);
-                        }}
-                        label={opt.label}
-                      />
-                    ))}
-                  </div>
+                  <fieldset className="min-w-0 border-0 p-0">
+                    <legend className="sr-only">Areas of interest (optional, choose any that apply)</legend>
+                    <div className="flex flex-wrap gap-2">
+                      {interestOptions.map((opt) => (
+                        <ChipToggle
+                          key={opt.id}
+                          selected={field.value?.includes(opt.id)}
+                          onClick={() => {
+                            const next = field.value?.includes(opt.id)
+                              ? field.value.filter((item) => item !== opt.id)
+                              : [...(field.value ?? []), opt.id];
+                            field.onChange(next);
+                          }}
+                          label={opt.label}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
                 )}
               />
 
@@ -843,11 +953,23 @@ ${data.message}`
                 <Textarea
                   id="message"
                   rows={5}
+                  maxLength={MESSAGE_MAX_LENGTH}
                   placeholder="Describe your fund's current AI exposure, where you feel most uncertain, and what success would look like..."
                   error={!!errors.message}
-                  aria-describedby={errors.message ? "message-error" : undefined}
+                  aria-describedby={
+                    errors.message ? "message-error message-counter" : "message-counter"
+                  }
                   {...register("message")}
                 />
+                <p
+                  id="message-counter"
+                  className={cn(
+                    "text-right text-xs tabular-nums",
+                    messageLength >= MESSAGE_MAX_LENGTH ? "text-amber-300" : "text-slate-400"
+                  )}
+                >
+                  {messageLength.toLocaleString("en-US")} / {MESSAGE_MAX_LABEL}
+                </p>
               </FormField>
 
               <div className="rounded-xl border border-slate-800/70 bg-slate-950/60 p-4 text-xs text-slate-400">
@@ -925,6 +1047,7 @@ ${data.message}`
             <motion.button
               type="submit"
               disabled={isSubmitting}
+              aria-busy={isSubmitting}
               whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
               whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
               className={cn(
@@ -953,8 +1076,10 @@ ${data.message}`
         </div>
       </div>
 
-      <p className="text-center text-xs text-slate-500">
-        This will open your email client with the inquiry details pre-filled.
+      <p className="text-center text-xs text-slate-400">
+        Sending opens your email app with the inquiry pre-filled; nothing is
+        submitted from this page. If that doesn&apos;t work, you&apos;ll get a
+        copyable version to send yourself.
       </p>
     </form>
   );

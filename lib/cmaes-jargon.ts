@@ -22,7 +22,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "A regime where you want to find the minimum or maximum of a function but you don't have access to its internal code or derivatives. You can only evaluate it at specific points and see the result.",
     why: "Most real-world engineering problems (simulations, complex software, physical experiments) are black boxes where gradients are either impossible to compute or meaningless.",
     analogy: "Tuning a car engine by only listening to the sound and looking at the speed, without knowing exactly how the fuel injection software works.",
-    related: ["gradient-descent", "objective-function"]
+    related: ["objective-function", "zero-order"]
   },
   "covariance-matrix": {
     term: "Covariance Matrix",
@@ -30,7 +30,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "A square matrix that encodes the variance of each dimension and the correlation between dimensions. In CMA-ES, it defines the shape of the ellipsoid from which new candidate points are sampled.",
     why: "By adapting this matrix, the algorithm can learn to search faster along 'benign' directions and move cautiously in 'dangerous' directions.",
     analogy: "The stretching and tilting of a balloon. A sphere has a simple identity matrix; a rotated cigar has a matrix with strong off-diagonal correlations.",
-    related: ["multivariate-normal", "eigenvectors"]
+    related: ["multivariate-normal", "hessian", "step-size"]
   },
   "multivariate-normal": {
     term: "Multivariate Normal",
@@ -38,7 +38,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "The core probability distribution used for sampling. It is defined by a mean vector and a covariance matrix.",
     why: "The Gaussian distribution is the maximum-entropy distribution for a given mean and variance, making it the most 'unbiased' choice for local search.",
     analogy: "A multi-dimensional cloud of dust where the density is highest at the center and falls off symmetrically (or ellipsoidally) as you move away.",
-    related: ["covariance-matrix", "gaussian"]
+    related: ["covariance-matrix", "step-size"]
   },
   "evolution-strategy": {
     term: "Evolution Strategy",
@@ -46,7 +46,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "A class of algorithms inspired by natural selection that use mutation and selection to iteratively improve a population of candidate solutions.",
     why: "Unlike Genetic Algorithms which focus on crossovers, Evolution Strategies focus on adapting the mutation parameters (like step size) to the local landscape.",
     analogy: "A group of scouts exploring a mountain range in the dark, where the scouts who find lower ground call the center of the group toward them.",
-    related: ["genetic-algorithm", "cma-es"]
+    related: ["cma-es", "ipop-cma-es"]
   },
   "step-size": {
     term: "Step-Size (\u03c3)",
@@ -54,7 +54,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "A scalar value that controls the overall width of the search distribution. It scales the covariance matrix to make the search wider or more focused.",
     why: "Proper step-size control is critical to avoid getting stuck in local minima (too small) or overshooting the optimal region (too large).",
     analogy: "The 'zoom' level on a map. You start zoomed out to find the right city, then zoom in to find the specific street.",
-    related: ["cma-es", "adaptation"]
+    related: ["cma-es", "evolution-path"]
   },
   "natural-gradient": {
     term: "Natural Gradient",
@@ -62,12 +62,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "A gradient update that takes the geometry of the parameter space (the Fisher Information Metric) into account, ensuring that steps are 'consistent' regardless of how the parameters are scaled.",
     why: "CMA-ES is theoretically linked to natural gradients, which explains why it is so robust to poorly scaled or rotated coordinate systems.",
     analogy: "Walking directly toward a destination on a map while accounting for the fact that the terrain might be steeper in some directions than others.",
-    related: ["information-geometry", "fisher-information"]
-  },
-  "operator": {
-    term: "Mathematical Operator",
-    short: "Defines the relationship between terms",
-    long: "Symbols like =, +, and \u223c that describe how the different components of the algorithm interact to update the search distribution."
+    related: ["invariance", "hessian"]
   },
   "objective-function": {
     term: "Objective Function",
@@ -75,7 +70,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "The function (f(x)) that we are trying to optimize. In engineering, this could be the drag of a wing, the cost of a bridge, or the error of a model.",
     why: "It defines the 'landscape' the optimizer must navigate. The more complex the landscape (bumps, ridges, noise), the more you need a robust optimizer like CMA-ES.",
     analogy: "The terrain of a landscape where the height at any point is the 'cost' and we are looking for the deepest valley.",
-    related: ["black-box-optimization", "loss-function"]
+    related: ["black-box-optimization", "zero-order"]
   },
   "hessian": {
     term: "Hessian Matrix",
@@ -83,7 +78,7 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "The matrix of second-order partial derivatives of a function. It describes the local 'shape' of the function's surface.",
     why: "CMA-ES implicitly approximates the inverse Hessian, allowing it to take 'Newton-like' steps without ever calculating a second derivative.",
     analogy: "Knowing whether you are in a shallow bowl (low curvature) or a sharp, narrow trench (high curvature).",
-    related: ["curvature", "gradient"]
+    related: ["covariance-matrix", "natural-gradient"]
   },
   "ranking": {
     term: "Rank-based Selection",
@@ -113,6 +108,22 @@ const JARGON_DB: Record<string, JargonTerm> = {
     long: "A strategy where the algorithm is restarted with a larger population size whenever it gets stuck.",
     why: "It allows the algorithm to transition from a local search to a global search, eventually finding the global minimum of complex, multimodal functions.",
     analogy: "If a small group of scouts gets trapped in a local valley, send out a much larger army to search the entire mountain range."
+  },
+  "multimodality": {
+    term: "Multimodality",
+    short: "Many separate valleys",
+    long: "A landscape with several distinct minima. Only one of them is the global minimum; the others are local minima that can trap a purely local search.",
+    why: "On a multimodal objective, a single CMA-ES run may converge into whichever basin it started in, which is why restart strategies such as IPOP exist.",
+    analogy: "A mountain range with dozens of valleys of different depths: from inside one valley you cannot see whether a deeper one lies over the next ridge.",
+    related: ["local-minima", "ipop-cma-es"]
+  },
+  "local-minima": {
+    term: "Local Minimum",
+    short: "A valley that is not the deepest",
+    long: "A point whose objective value is lower than every nearby point but higher than the global minimum. Local optimizers stop here because every small step goes uphill.",
+    why: "Escaping local minima requires exploration at a larger scale, which CMA-ES provides by increasing its step-size and, under IPOP, its population.",
+    analogy: "A dip in the road on a mountain pass: water pools there even though the sea is far lower.",
+    related: ["multimodality", "ipop-cma-es"]
   },
   "stochastic-optimization": {
     term: "Stochastic Optimization",

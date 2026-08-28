@@ -86,14 +86,14 @@ function generateSoftwareApplicationSchema(project: typeof projects[number]) {
     schema["programmingLanguage"] = programmingLanguage;
   }
 
-  // Add aggregate rating if we have star count (GitHub stars as social proof)
-  if (stars && stars > 50) {
-    schema["aggregateRating"] = {
-      "@type": "AggregateRating",
-      "ratingValue": Math.min(5, 4 + (stars / 1000) * 0.5).toFixed(1),
-      "ratingCount": stars,
-      "bestRating": "5",
-      "worstRating": "1",
+  // GitHub stars are a like/bookmark count, not reviews, so they are exposed
+  // as an InteractionCounter (never as an AggregateRating, which would be a
+  // fabricated review score).
+  if (stars && stars > 0) {
+    schema["interactionStatistic"] = {
+      "@type": "InteractionCounter",
+      "interactionType": "https://schema.org/LikeAction",
+      "userInteractionCount": stars,
     };
   }
 

@@ -298,32 +298,53 @@ export function TldrSynergyDiagram({
       return;
     }
 
-    const previousScroll = window.scrollY;
-    const targetScroll = Math.max(
-      0,
-      element.getBoundingClientRect().top +
-        window.scrollY -
-        Math.round(window.innerHeight * 0.35)
-    );
+    const computeTarget = () =>
+      Math.max(
+        0,
+        element.getBoundingClientRect().top +
+          window.scrollY -
+          Math.round(window.innerHeight * 0.35)
+      );
 
     window.scrollTo({
-      top: targetScroll,
+      top: computeTarget(),
       behavior: shouldAnimateDiagram ? "smooth" : "auto",
     });
 
+    // Re-check the landing position only once the scroll has actually ended
+    // (layout can shift while a smooth scroll is in flight). A fixed 100ms
+    // check used to fire mid-scroll and hard-cut the animation every click.
     if (scrollFixTimeoutRef.current) {
       window.clearTimeout(scrollFixTimeoutRef.current);
+      scrollFixTimeoutRef.current = null;
     }
-    scrollFixTimeoutRef.current = window.setTimeout(() => {
-      if (Math.abs(window.scrollY - targetScroll) > 2) {
-        window.scrollTo({ top: targetScroll, behavior: "auto" });
-      } else if (window.scrollY === previousScroll) {
-        window.scrollTo({
-          top: Math.max(0, targetScroll),
-          behavior: "auto",
-        });
+    const settle = () => {
+      scrollFixTimeoutRef.current = null;
+      const finalTarget = computeTarget();
+      if (Math.abs(window.scrollY - finalTarget) > 2) {
+        window.scrollTo({ top: finalTarget, behavior: "auto" });
       }
-    }, 100);
+    };
+    // Feature-detect without letting TS narrow `window` to `never` in the else branch
+    const supportsScrollEnd = "onscrollend" in (window as object);
+    if (!shouldAnimateDiagram) {
+      settle();
+    } else if (supportsScrollEnd) {
+      let fallback = 0;
+      const onScrollEnd = () => {
+        window.clearTimeout(fallback);
+        settle();
+      };
+      window.addEventListener("scrollend", onScrollEnd, { once: true });
+      // scrollend never fires if the page was already at the target
+      fallback = window.setTimeout(() => {
+        window.removeEventListener("scrollend", onScrollEnd);
+        settle();
+      }, 1200);
+      scrollFixTimeoutRef.current = fallback;
+    } else {
+      scrollFixTimeoutRef.current = window.setTimeout(settle, 600);
+    }
 
     const targetCard = element.querySelector("[data-testid=\"tool-card\"]") ?? element;
     applyNodeHighlight(targetCard as Element);
@@ -622,21 +643,14 @@ export function TldrSynergyDiagram({
 
             <div className="h-4 w-px bg-violet-500/30" />
 
-            {/* Stars */}
+            {/* Stars (sum of the core tools' counts from lib/data/tldr-tool-stars.json) */}
             <div className="flex items-center gap-1.5">
               <span className="text-sm font-semibold text-white">
                 {totalStars >= 1000 ? `${(totalStars / 1000).toFixed(1).replace(/\.0$/, "")}K+` : `${totalStars}+`}
               </span>
               <span className="text-xs text-slate-400">GitHub stars</span>
             </div>
-
-            <div className="h-4 w-px bg-violet-500/30" />
-
-            {/* Active indicator */}
-            <div className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <span className="text-xs text-emerald-400">Active</span>
-            </div>
+            {/* No "Active" dot: it was a constant, not a probed status. */}
           </div>
         </div>
 

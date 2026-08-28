@@ -35,7 +35,36 @@ export function TldrSectionNav({
   const reducedMotion = prefersReducedMotion ?? false;
   const [visible, setVisible] = useState(false);
   const [activeSection, setActiveSection] = useState(sections[0]?.id ?? "");
+  // Measured height of the fixed site header; null until measured (SSR falls
+  // back to the top-12/md:top-16 classes).
+  const [headerHeight, setHeaderHeight] = useState<number | null>(null);
   const observersRef = useRef<IntersectionObserver[]>([]);
+
+  // The site header's padding is spring-animated (taller at the top of the
+  // page), so a static offset leaves this nav tucked under it. Measure instead.
+  useEffect(() => {
+    const headers = Array.from(document.querySelectorAll<HTMLElement>("header"));
+    const header =
+      headers.find((el) => {
+        const position = window.getComputedStyle(el).position;
+        return position === "fixed" || position === "sticky";
+      }) ?? headers[0];
+    if (!header) return;
+
+    const measure = () => {
+      setHeaderHeight(Math.round(header.getBoundingClientRect().height));
+    };
+    const frame = window.requestAnimationFrame(measure);
+
+    const observer =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    observer?.observe(header);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+    };
+  }, []);
 
   // Show nav after scrolling past the trigger element
   useEffect(() => {
@@ -104,6 +133,7 @@ export function TldrSectionNav({
             "sticky top-12 z-40 border-b border-white/5 bg-slate-950/80 backdrop-blur-lg md:top-16",
             className
           )}
+          style={headerHeight !== null ? { top: headerHeight } : undefined}
         >
           <div className="container mx-auto flex gap-1 overflow-x-auto px-4 py-2 sm:gap-4 sm:px-6 sm:py-3">
             {sections.map((section) => {

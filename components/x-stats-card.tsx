@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Eye, Heart, Bookmark, TrendingUp } from "lucide-react";
+import { Eye, Heart, Bookmark, TrendingUp, ChevronDown } from "lucide-react";
 import { AnimatedNumber } from "@/components/animated-number";
-import { heroStats } from "@/lib/content";
+import { heroStats, siteConfig } from "@/lib/content";
+import { cn } from "@/lib/utils";
 
 // Single source of truth: the follower count shown here must match the
 // "Audience on X" stat maintained in lib/content.ts.
@@ -18,6 +19,12 @@ interface XEngagementStat {
   numericValue: number;
 }
 
+// Calendar-year 2025 figures from X Analytics (rounded). Keep the year label
+// and the source note next to them: these are dated snapshots, not live data.
+const ENGAGEMENT_YEAR = "2025";
+const X_HANDLE = siteConfig.social.x.split("/").filter(Boolean).pop() ?? "";
+const ENGAGEMENT_SOURCE = `Impressions, likes and bookmarks as reported by X Analytics for @${X_HANDLE}, calendar year ${ENGAGEMENT_YEAR} (rounded).`;
+
 const engagementStats: XEngagementStat[] = [
   { icon: Eye, label: "Impressions", value: "25.7M", numericValue: 25.7 },
   { icon: Heart, label: "Likes", value: "154.8K", numericValue: 154.8 },
@@ -27,10 +34,14 @@ const engagementStats: XEngagementStat[] = [
 export function XStatsCard() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [pinnedOpen, setPinnedOpen] = useState(false);
+  const [hoverOpen, setHoverOpen] = useState(false);
   const [hasExpandedOnce, setHasExpandedOnce] = useState(false);
-  const [supportsHover, setSupportsHover] = useState(true);
+  const [supportsHover, setSupportsHover] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const panelId = useId();
+
+  const isExpanded = pinnedOpen || (supportsHover && hoverOpen);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -55,26 +66,32 @@ export function XStatsCard() {
     return () => observer.disconnect();
   }, []);
 
+  // Hover-to-peek is an enhancement on hover-capable devices only; the
+  // button below is the real (keyboard/touch/AT) control.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mediaQuery = window.matchMedia("(hover: hover)");
-
     const updateHoverSupport = () => {
       setSupportsHover(mediaQuery.matches);
     };
-
-    updateHoverSupport();
+    const hydrationId = setTimeout(updateHoverSupport, 0);
 
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener("change", updateHoverSupport);
-      return () => mediaQuery.removeEventListener("change", updateHoverSupport);
+      return () => {
+        clearTimeout(hydrationId);
+        mediaQuery.removeEventListener("change", updateHoverSupport);
+      };
     }
 
     mediaQuery.addListener(updateHoverSupport);
-    return () => mediaQuery.removeListener(updateHoverSupport);
+    return () => {
+      clearTimeout(hydrationId);
+      mediaQuery.removeListener(updateHoverSupport);
+    };
   }, []);
 
-  // Track if we've ever expanded (for animation purposes)
+  // Track if we've ever expanded (the inner counters run once, on first reveal)
   useEffect(() => {
     if (isExpanded && !hasExpandedOnce) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time flag, not a sync loop
@@ -82,57 +99,21 @@ export function XStatsCard() {
     }
   }, [isExpanded, hasExpandedOnce]);
 
-  const handleClick = useCallback(() => {
-    if (supportsHover) return;
-    setIsExpanded((prev) => !prev);
-  }, [supportsHover]);
-
-  const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setIsExpanded((prev) => !prev);
-    }
-  }, []);
-
   return (
     <div
       ref={containerRef}
-      className="group relative bg-slate-950/40 px-6 py-6 backdrop-blur transition-colors hover:bg-slate-950/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 focus-visible:ring-inset"
-      onMouseEnter={() => {
-        if (supportsHover) {
-          setIsExpanded(true);
-        }
-      }}
-      onMouseLeave={() => {
-        if (supportsHover) {
-          setIsExpanded(false);
-        }
-      }}
-      onFocus={() => {
-        if (supportsHover) {
-          setIsExpanded(true);
-        }
-      }}
-      onBlur={() => {
-        if (supportsHover) {
-          setIsExpanded(false);
-        }
-      }}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
-      aria-expanded={isExpanded}
-      aria-label="X/Twitter audience statistics. Hover or focus to see 2025 engagement highlights."
+      className="group relative bg-slate-950/40 px-6 py-6 transition-colors pointer-fine:backdrop-blur pointer-coarse:bg-slate-950/70 hover:bg-slate-950/20"
+      onMouseEnter={() => setHoverOpen(true)}
+      onMouseLeave={() => setHoverOpen(false)}
     >
       {/* Subtle inner glow on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true" />
 
-      {/* Main stat - matching other stats grid items */}
-      <dt className="text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors group-hover:text-sky-400/70">
+      {/* Main stat - a real definition, exposed to AT like its sibling cells */}
+      <dt className="relative text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors group-hover:text-sky-400/70">
         Audience on X
       </dt>
-      <dd className="mt-3 text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
+      <dd className="relative mt-3 text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
         <AnimatedNumber
           value={audienceThousands}
           suffix="K+"
@@ -140,66 +121,74 @@ export function XStatsCard() {
           isVisible={isVisible}
           decimals={0}
         />
+        <p className="mt-2 text-xs font-medium leading-relaxed tracking-normal text-slate-400/80">
+          Analysts, founders, researchers, and engineers.
+        </p>
+
+        {/* Disclosure control for the dated engagement figures */}
+        <button
+          type="button"
+          onClick={() => setPinnedOpen((prev) => !prev)}
+          aria-expanded={isExpanded}
+          aria-controls={panelId}
+          className="mt-2 inline-flex min-h-10 items-center gap-1.5 rounded-md text-xs font-semibold tracking-normal text-slate-400 transition-colors hover:text-sky-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
+        >
+          <TrendingUp className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+          <span>{ENGAGEMENT_YEAR} highlights</span>
+          <ChevronDown
+            className={cn(
+              "h-3.5 w-3.5 transition-transform motion-reduce:transition-none",
+              isExpanded && "rotate-180"
+            )}
+            aria-hidden="true"
+          />
+        </button>
+
+        {/* Engagement figures - always mounted so the counters keep their state */}
+        <motion.div
+          id={panelId}
+          initial={false}
+          animate={{
+            opacity: isExpanded ? 1 : 0,
+            height: isExpanded ? "auto" : 0,
+          }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
+          className="overflow-hidden"
+          inert={!isExpanded}
+        >
+          <dl
+            className="mt-2 space-y-1.5 border-t border-slate-700/50 pt-3"
+            title={ENGAGEMENT_SOURCE}
+          >
+            {engagementStats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div
+                  key={stat.label}
+                  className="flex items-center justify-between gap-3 rounded-lg bg-slate-800/50 px-2.5 py-1.5"
+                >
+                  <dt className="flex items-center gap-1.5 text-xs font-medium tracking-normal text-slate-400">
+                    <Icon className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                    {stat.label}
+                  </dt>
+                  <dd className="text-sm font-bold tracking-normal text-slate-200">
+                    <AnimatedNumber
+                      value={stat.numericValue}
+                      suffix={stat.value.includes("M") ? "M" : "K"}
+                      duration={1200 + index * 150}
+                      isVisible={hasExpandedOnce}
+                      decimals={stat.value.includes(".") ? 1 : 0}
+                    />
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+          <p className="mt-2 text-xs font-medium tracking-normal text-slate-500">
+            X Analytics, calendar year {ENGAGEMENT_YEAR}, rounded.
+          </p>
+        </motion.div>
       </dd>
-      <p className="mt-2 text-xs font-medium leading-relaxed text-slate-400/80">
-        Analysts, founders, researchers, and engineers.
-      </p>
-
-      {/* 2025 Engagement Stats - Expandable (always mounted to preserve animation state) */}
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: isExpanded ? 1 : 0,
-          height: isExpanded ? "auto" : 0,
-        }}
-        transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
-        className="overflow-hidden"
-        style={{ pointerEvents: isExpanded ? "auto" : "none" }}
-      >
-            <div className="mt-4 border-t border-slate-700/50 pt-4">
-              <div className="mb-2 flex items-center gap-1.5">
-                <TrendingUp className="h-3 w-3 text-emerald-400" />
-                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400/90">
-                  2025 Highlights
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-1.5">
-                {engagementStats.map((stat, index) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div
-                      key={stat.label}
-                      className="flex flex-col items-center rounded-lg bg-slate-800/50 px-1.5 py-1.5"
-                    >
-                      <Icon className="mb-0.5 h-2.5 w-2.5 text-slate-400" />
-                      <span className="text-xs font-bold text-slate-200">
-                        <AnimatedNumber
-                          value={stat.numericValue}
-                          suffix={stat.value.includes("M") ? "M" : "K"}
-                          duration={1200 + index * 150}
-                          isVisible={hasExpandedOnce}
-                          decimals={stat.value.includes(".") ? 1 : 0}
-                        />
-                      </span>
-                      <span className="text-[7px] font-medium uppercase tracking-wider text-slate-500">
-                        {stat.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-      </motion.div>
-
-      {/* Hint to expand */}
-      <motion.div
-        className="mt-3 flex items-center gap-1 text-[9px] font-medium text-slate-400"
-        animate={{ opacity: isExpanded ? 0 : 1 }}
-        transition={{ duration: 0.15 }}
-      >
-        <span className="hidden sm:inline">Hover for 2025 stats</span>
-        <span className="sm:hidden">Tap for 2025 stats</span>
-      </motion.div>
     </div>
   );
 }

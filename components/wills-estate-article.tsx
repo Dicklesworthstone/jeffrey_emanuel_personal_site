@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useRef,
-  useState,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
@@ -125,7 +125,7 @@ function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
         <p className="text-sm md:text-base font-bold text-white tracking-tight">
           Download the operator primer as Markdown
         </p>
-        <p className="text-[11px] md:text-xs text-slate-400 font-mono tracking-wide mt-0.5">
+        <p className="text-xs text-slate-400 font-mono tracking-wide mt-0.5">
           agent-readable · paste into any fresh session
         </p>
       </div>
@@ -150,7 +150,7 @@ function EC({ children }: { children: ReactNode }) {
 function Divider() {
   return (
     <div
-      data-section
+      aria-hidden="true"
       className="w-full h-px my-12 md:my-16 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent"
     />
   );
@@ -180,7 +180,7 @@ function RefTable({
   return (
     <div className="sm-table-wrap">
       {caption && (
-        <p className="px-4 pt-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-slate-500">
+        <p className="px-4 pt-3 pb-1 text-xs font-mono uppercase tracking-widest text-slate-500">
           {caption}
         </p>
       )}
@@ -256,22 +256,31 @@ function Sub({
   );
 }
 
-export function WillsEstateArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const articleRef = useRef<HTMLDivElement>(null);
-  const tocScrollFrameRef = useRef<number | null>(null);
-  const tocScrollTimerRef = useRef<number | null>(null);
+// Gap kept between the fixed site header and a jumped-to section's top edge.
+const TOC_JUMP_HEADER_GAP_PX = 12;
+// A single corrective re-alignment after a TOC jump (a skeleton near the
+// target may be swapped for the real visualization within a few hundred ms).
+// It never runs later than this, and any user scroll input cancels it.
+const TOC_JUMP_SETTLE_MS = 450;
+const TOC_JUMP_CANCEL_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
 
-  useEffect(() => {
-    return () => {
-      if (tocScrollFrameRef.current !== null) {
-        window.cancelAnimationFrame(tocScrollFrameRef.current);
-      }
-      if (tocScrollTimerRef.current !== null) {
-        window.clearTimeout(tocScrollTimerRef.current);
-      }
-    };
+function getFixedHeaderHeight() {
+  const header = document.querySelector("header");
+  return header ? header.getBoundingClientRect().height : 88;
+}
+
+export function WillsEstateArticle() {
+  const articleRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const scrollCueRef = useRef<HTMLDivElement>(null);
+  const tocSettleCancelRef = useRef<(() => void) | null>(null);
+
+  const cancelTocSettle = useCallback(() => {
+    tocSettleCancelRef.current?.();
+    tocSettleCancelRef.current = null;
   }, []);
+
+  useEffect(() => cancelTocSettle, [cancelTocSettle]);
 
   const handleTocJump = (
     event: ReactMouseEvent<HTMLAnchorElement>,
@@ -293,61 +302,65 @@ export function WillsEstateArticle() {
 
     event.preventDefault();
     emitArticleEvent("toc_link_clicked", { anchor_id: id });
-    if (tocScrollFrameRef.current !== null) {
-      window.cancelAnimationFrame(tocScrollFrameRef.current);
-      tocScrollFrameRef.current = null;
-    }
-    if (tocScrollTimerRef.current !== null) {
-      window.clearTimeout(tocScrollTimerRef.current);
-      tocScrollTimerRef.current = null;
-    }
+    cancelTocSettle();
 
     window.history.pushState(null, "", `#${id}`);
-    anchor.scrollIntoView({ behavior: "auto", block: "start" });
 
-    const deadline = window.performance.now() + 2400;
-    const keepAnchorInView = () => {
-      if (!anchor.isConnected) return;
-
-      const rect = anchor.getBoundingClientRect();
-      const anchorInViewport = rect.bottom > 0 && rect.top < window.innerHeight;
-      if (!anchorInViewport) {
-        anchor.scrollIntoView({ behavior: "auto", block: "start" });
-      }
-
-      if (window.performance.now() >= deadline) {
-        tocScrollFrameRef.current = null;
-        tocScrollTimerRef.current = null;
-        return;
-      }
-
-      tocScrollTimerRef.current = window.setTimeout(() => {
-        tocScrollFrameRef.current = window.requestAnimationFrame(keepAnchorInView);
-      }, 160);
+    const targetOffset = () => getFixedHeaderHeight() + TOC_JUMP_HEADER_GAP_PX;
+    const alignAnchor = () => {
+      const top = anchor.getBoundingClientRect().top + window.scrollY - targetOffset();
+      window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
     };
+    alignAnchor();
 
-    tocScrollFrameRef.current = window.requestAnimationFrame(keepAnchorInView);
+    let settleTimer: number | null = window.setTimeout(() => {
+      settleTimer = null;
+      if (anchor.isConnected) {
+        const drift = anchor.getBoundingClientRect().top - targetOffset();
+        if (Math.abs(drift) > 8) alignAnchor();
+      }
+      cancel();
+    }, TOC_JUMP_SETTLE_MS);
+
+    const cancel = () => {
+      if (settleTimer !== null) {
+        window.clearTimeout(settleTimer);
+        settleTimer = null;
+      }
+      TOC_JUMP_CANCEL_EVENTS.forEach((name) => window.removeEventListener(name, cancel));
+      if (tocSettleCancelRef.current === cancel) tocSettleCancelRef.current = null;
+    };
+    TOC_JUMP_CANCEL_EVENTS.forEach((name) =>
+      window.addEventListener(name, cancel, { passive: true }),
+    );
+    tocSettleCancelRef.current = cancel;
   };
 
-  // Scroll progress bar
-  useEffect(() => {
-    const handleScroll = () => {
-      const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
+  // One rAF-throttled passive scroll listener drives the progress bar and the
+  // hero scroll cue through refs (no React state, no article re-render per
+  // scroll event) and tracks the max depth for the analytics event.
   useEffect(() => {
     emitArticleEvent("article_viewed");
+    let frame: number | null = null;
     let maxProgress = 0;
-    const trackMax = () => {
+
+    const paint = () => {
+      frame = null;
       const { progress } = getScrollMetrics();
       if (progress > maxProgress) maxProgress = progress;
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+      if (scrollCueRef.current) {
+        scrollCueRef.current.style.opacity = String(Math.max(0, 0.5 - progress * 5));
+      }
     };
-    window.addEventListener("scroll", trackMax, { passive: true });
+    const handleScroll = () => {
+      if (frame === null) frame = window.requestAnimationFrame(paint);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    paint();
+
     const emitDepth = () => {
       const bucket =
         maxProgress < 0.25 ? "0-25" : maxProgress < 0.5 ? "25-50" : maxProgress < 0.75 ? "50-75" : "75-100";
@@ -359,13 +372,17 @@ export function WillsEstateArticle() {
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("beforeunload", emitDepth);
     return () => {
-      window.removeEventListener("scroll", trackMax);
+      window.removeEventListener("scroll", handleScroll);
+      if (frame !== null) window.cancelAnimationFrame(frame);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", emitDepth);
     };
   }, []);
 
-  // Section reveal on scroll
+  // Section reveal on scroll. `threshold: 0` so the first pixel of a section
+  // entering the lower 90% of the viewport reveals it: a 5% threshold could
+  // never be met by the ~17,000px showcase section on a phone. The hero is
+  // already painted (no post-hydration pop) and the dividers are excluded.
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
@@ -373,7 +390,7 @@ export function WillsEstateArticle() {
     root.classList.add(readyClass);
 
     const targets = root.querySelectorAll(
-      ":scope > section:not(:first-child), :scope > article, [data-section]",
+      ':scope > section[data-section]:not([data-section="hero"]), :scope > article',
     );
 
     if (typeof IntersectionObserver === "undefined") {
@@ -392,7 +409,7 @@ export function WillsEstateArticle() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" },
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" },
     );
     targets.forEach((el) => {
       el.classList.add("sm-fade-section");
@@ -416,11 +433,17 @@ export function WillsEstateArticle() {
         }
       }}
     >
-      {/* Scroll progress */}
+      {/* Scroll progress (driven through the ref by the scroll effect) */}
       <div
+        ref={progressBarRef}
         className="sm-progress-bar"
-        style={{ transform: `scaleX(${scrollProgress})` }}
+        style={{ transform: "scaleX(0)" }}
       />
+
+      {/* One shared status line for the lazily mounted visualizations */}
+      <p role="status" className="sr-only">
+        Interactive visualizations load as you scroll to them.
+      </p>
 
       {/* ========== HERO (hgjp.7) ========== */}
       <section
@@ -457,8 +480,11 @@ export function WillsEstateArticle() {
             <h1 className="sm-display-title mb-6 text-white text-balance">
               An AI Skill for
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-emerald-400 drop-shadow-[0_0_30px_rgba(6,182,212,0.3)]">
-                Wills &amp; Estate Planning.
+              {/* Glow lives on the wrapper: a `filter` on the clipped text itself is a WebKit compositing hazard */}
+              <span className="inline-block drop-shadow-[0_0_30px_rgba(6,182,212,0.3)]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-emerald-400">
+                  Wills &amp; Estate Planning.
+                </span>
               </span>
             </h1>
 
@@ -487,6 +513,8 @@ export function WillsEstateArticle() {
                 alt="Warmly-lit desk scene with estate-planning documents, a laptop running an AI agent, and a parrot, evoking an estate plan drafted at home with the help of an AI skill"
                 className="relative z-10 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl"
                 placeholder="blur"
+                priority
+                sizes="(max-width: 640px) 100vw, 560px"
               />
             </div>
 
@@ -511,7 +539,7 @@ export function WillsEstateArticle() {
               ].map(({ icon: Icon, label, tone }) => (
                 <div
                   key={label}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full border backdrop-blur-xl text-[11px] font-mono tracking-wide ${
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full border backdrop-blur-xl text-xs font-mono tracking-wide ${
                     tone === "purple"
                       ? "border-purple-500/20 bg-purple-500/5 text-purple-200"
                       : tone === "cyan"
@@ -529,8 +557,9 @@ export function WillsEstateArticle() {
 
         {/* Scroll indicator */}
         <div
+          ref={scrollCueRef}
           className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
-          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+          style={{ opacity: 0.5 }}
         >
           <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
@@ -549,7 +578,7 @@ export function WillsEstateArticle() {
               For readers who want to try before subscribing
             </p>
             <MarkdownDownloadButton />
-            <p className="text-[11px] md:text-xs text-slate-500 font-mono max-w-[560px] leading-relaxed">
+            <p className="text-xs text-slate-500 font-mono max-w-[560px] leading-relaxed">
               Paste this into Claude, Codex, or ChatGPT and the agent has
               enough to run a basic estate-planning intake, even without
               subscribing to the full skill.
@@ -647,13 +676,15 @@ export function WillsEstateArticle() {
           <SectionHeader
             id="cost-heading"
             eyebrow="The pitch"
-            title="One weekend, roughly $120, instead of $20,000."
+            title="One weekend, roughly $120, instead of $3,000 to $20,000."
           />
 
           <p>
-            A full estate-plan consultation with a decent attorney runs
-            somewhere between fifteen and twenty-five thousand dollars for a
-            household with any real complexity. Most of those hours are not
+            A full estate-plan consultation with a decent attorney runs from
+            a few thousand dollars for a simple will up to somewhere between
+            fifteen and twenty-five thousand dollars for a household with any
+            real complexity (the calculator further down lets you dial in
+            your own facts). Most of those hours are not
             the attorney drafting. They are the attorney walking you through
             tradeoffs, asking careful questions, explaining what each option
             actually means, and building the plan one decision at a time. The
@@ -762,7 +793,7 @@ export function WillsEstateArticle() {
             <ol>
               <li>
                 <a href="#cost" onClick={(event) => handleTocJump(event, "cost")}>
-                  One weekend, roughly $120, instead of $20,000
+                  One weekend, roughly $120, instead of $3,000 to $20,000
                 </a>
               </li>
               <li>
@@ -874,7 +905,7 @@ export function WillsEstateArticle() {
             to involve one) can verify before anything gets signed.
           </p>
 
-          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2 xl:w-[max(100%,min(1200px,calc(100vw-40rem)))]">
             <StackViz />
           </div>
         </EC>
@@ -1005,7 +1036,7 @@ export function WillsEstateArticle() {
             </li>
           </ol>
 
-          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2 xl:w-[max(100%,min(1200px,calc(100vw-40rem)))]">
             <InstallFlowViz />
           </div>
 
@@ -1133,7 +1164,7 @@ export function WillsEstateArticle() {
             </li>
           </ol>
 
-          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2 xl:w-[max(100%,min(1200px,calc(100vw-40rem)))]">
             <WorkingFolderViz />
           </div>
 
@@ -1150,7 +1181,7 @@ export function WillsEstateArticle() {
 
             <div className="space-y-5">
               <div className="rounded-xl border border-white/5 bg-black/20 p-4 md:p-5">
-                <p className="text-[10px] font-mono text-amber-300 uppercase tracking-widest mb-3">
+                <p className="text-xs font-mono text-amber-300 uppercase tracking-widest mb-3">
                   Exchange 1 · the stale beneficiary form
                 </p>
                 <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
@@ -1180,7 +1211,7 @@ export function WillsEstateArticle() {
               </div>
 
               <div className="rounded-xl border border-white/5 bg-black/20 p-4 md:p-5">
-                <p className="text-[10px] font-mono text-amber-300 uppercase tracking-widest mb-3">
+                <p className="text-xs font-mono text-amber-300 uppercase tracking-widest mb-3">
                   Exchange 2 · the blended-family default
                 </p>
                 <p className="text-sm md:text-[15px] leading-relaxed text-slate-300 mb-2">
@@ -1315,7 +1346,7 @@ export function WillsEstateArticle() {
             worth.
           </p>
 
-          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2 xl:w-[max(100%,min(1200px,calc(100vw-40rem)))]">
             <TierTriageViz />
           </div>
 
@@ -1324,14 +1355,14 @@ export function WillsEstateArticle() {
           <p>
             Most estate-plan disasters are not exotic. They are a
             handful of patterns the skill runs every plan through before
-            it hands you anything: the 401(k) that still names an
+            it hands you anything: the IRA that still names an
             ex-spouse, the trust that was drafted but never funded, the
             springing POA that does not trigger when you need it, the
             pet with a longer life expectancy than yours. Tap a card to
             see what actually goes wrong and which subagent catches it.
           </p>
 
-          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2 xl:w-[max(100%,min(1200px,calc(100vw-40rem)))]">
             <AntiPatternCardsViz />
           </div>
 
@@ -1347,7 +1378,7 @@ export function WillsEstateArticle() {
             top-firm standards in case you want a human review.
           </p>
 
-          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2 xl:w-[max(100%,min(1200px,calc(100vw-40rem)))]">
             <DeliverablesTreeViz />
           </div>
 
@@ -1361,7 +1392,7 @@ export function WillsEstateArticle() {
             what this skill costs you in a month.
           </p>
 
-          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2">
+          <div className="my-8 w-full lg:relative lg:left-1/2 lg:my-10 lg:w-[min(calc(100vw-48px),1200px)] lg:-translate-x-1/2 xl:w-[max(100%,min(1200px,calc(100vw-40rem)))]">
             <PricingComparisonViz />
           </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState, Suspense, Component, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, Suspense, Component, type ReactNode } from "react";
 import * as THREE from "three";
 import { Sparkles } from "lucide-react";
 import { supportsWebGL } from "@/lib/utils";
@@ -781,11 +781,30 @@ function StaticFallback() {
   );
 }
 
+// `(pointer: coarse)` as an external store: SSR snapshot is `false`, the
+// client reads matchMedia synchronously and re-renders only on real changes.
+const COARSE_POINTER_QUERY = "(pointer: coarse)";
+function subscribeCoarsePointer(onChange: () => void) {
+  const mq = window.matchMedia(COARSE_POINTER_QUERY);
+  mq.addEventListener?.("change", onChange);
+  return () => mq.removeEventListener?.("change", onChange);
+}
+function getCoarsePointerSnapshot() {
+  return window.matchMedia(COARSE_POINTER_QUERY).matches;
+}
+
 export default function HeaderIcon3D() {
   const [mounted, setMounted] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
+  // A 60fps WebGL loop in a fixed header on every page is a battery cost
+  // phones never asked for; touch devices get the static icon instead.
+  const coarsePointer = useSyncExternalStore(
+    subscribeCoarsePointer,
+    getCoarsePointerSnapshot,
+    () => false
+  );
   const isMountedRef = useRef(false);
 
   // Stop the render loop entirely while the tab is hidden
@@ -829,7 +848,7 @@ export default function HeaderIcon3D() {
   };
 
   // Show static fallback if not mounted, error, or reduced motion preferred
-  if (!mounted || hasError || prefersReducedMotion) {
+  if (!mounted || hasError || prefersReducedMotion || coarsePointer) {
     return <StaticFallback />;
   }
 

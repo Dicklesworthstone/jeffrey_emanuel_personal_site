@@ -97,7 +97,7 @@ export default async function HomePage() {
             eyebrow="Infrastructure"
             title="Lumera Network"
             description="A Cosmos-based L1 for durable storage and AI verification, aimed at the world where agents talk to chains as fluently as to APIs."
-            href="https://pastel.network"
+            href="https://lumera.io"
             linkText="Visit Lumera"
             accentColor="text-sky-400"
             hoverBorder="hover:border-sky-500/30"
@@ -112,98 +112,95 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.08),transparent_70%)]" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <HapticLink
-            href="/tldr"
-            className="group block"
-          >
-            <div className="relative rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-black/40 to-black/20 p-8 sm:p-12 backdrop-blur-sm transition-all duration-300 hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10">
-              {/* Decorative elements */}
-              <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-violet-500/10 blur-3xl" />
-              <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" />
+          <div className="group relative isolate rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-black/40 to-black/20 p-8 sm:p-12 transition-all duration-300 hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 focus-within:border-violet-500/40">
+            {/* Decorative elements */}
+            <div className="absolute -right-20 -top-20 -z-10 h-60 w-60 rounded-full bg-violet-500/10 blur-3xl" aria-hidden="true" />
+            <div className="absolute -bottom-10 -left-10 -z-10 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" aria-hidden="true" />
 
-              <div className="relative flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:justify-between lg:gap-12">
-                <div className="max-w-2xl">
-                  <div className="mb-4 flex items-center justify-center lg:justify-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/30">
-                      <Workflow className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-violet-400">
-                      Featured Ecosystem
-                    </span>
+            <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left lg:justify-between lg:gap-12">
+              <div className="max-w-2xl">
+                <div className="mb-4 flex items-center justify-center lg:justify-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/30">
+                    <Workflow className="h-5 w-5 text-white" aria-hidden="true" />
                   </div>
-
-                  <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
-                    The Agentic Coding Tooling Flywheel
-                  </h2>
-
-                  <p className="mt-4 text-base leading-relaxed text-slate-400 sm:text-lg">
-                    Fourteen interconnected tools that transform how AI coding agents work together.
-                    Coordination, memory, task tracking, safety, and search. I use these to run
-                    10+ agents simultaneously. My GitHub squares get darker green each month because
-                    each tool amplifies the others.
-                  </p>
-
-                  {/* Notable Stargazers - avatar strip showing influential developers */}
-                  <div className="mt-6">
-                    <NotableStargazers variant="compact" maxItems={6} />
-                  </div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-violet-400">
+                    Featured Ecosystem
+                  </span>
                 </div>
 
-                {/* Mini flywheel preview */}
-                <div className="mt-8 lg:mt-0 flex flex-col items-center">
-                  <div className="relative flex h-32 w-32 sm:h-40 sm:w-40 items-center justify-center">
-                    {/* Animated dashed ring - Use CSS animation instead of Framer Motion for Server Component */}
-                    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="48"
-                        fill="none"
-                        stroke="rgba(139, 92, 246, 0.3)"
-                        strokeWidth="1"
-                        strokeDasharray="8 4"
-                        className="animate-[spin_20s_linear_infinite] origin-center"
-                      />
-                    </svg>
-                    {/* Tool dots - positioned using percentages for responsive scaling */}
-                    {tldrFlywheelTools.map((tool, i) => {
-                      const angle = ((i / tldrFlywheelTools.length) * 2 * Math.PI) - (Math.PI / 2);
-                      // Use 38% of container size as radius (leaves room for dot size)
-                      const radiusPercent = 38;
-                      const xPercent = Math.cos(angle) * radiusPercent;
-                      const yPercent = Math.sin(angle) * radiusPercent;
-                      return (
-                        <div
-                          key={tool.id}
-                          className={cn(
-                            "absolute h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-gradient-to-br shadow-lg animate-[pulse_3s_ease-in-out_infinite]",
-                            tool.color
-                          )}
-                          style={{
-                            left: `calc(50% + ${xPercent}%)`,
-                            top: `calc(50% + ${yPercent}%)`,
-                            transform: "translate(-50%, -50%)",
-                            animationDelay: `${i * 0.1}s`
-                          }}
-                        />
-                      );
-                    })}
-                    {/* Center icon */}
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/20 ring-1 ring-violet-500/40">
-                      <Zap className="h-6 w-6 text-violet-400" />
-                    </div>
-                  </div>
+                <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                  The Agentic Coding Tooling Flywheel
+                </h2>
 
-                  <Magnetic strength={0.2}>
-                    <div className="mt-6 flex items-center gap-2 text-sm font-bold text-violet-400 transition-colors group-hover:text-violet-300">
-                      Explore the TLDR
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </div>
-                  </Magnetic>
+                <p className="mt-4 text-base leading-relaxed text-slate-400 sm:text-lg">
+                  Fourteen interconnected tools that transform how AI coding agents work together.
+                  Coordination, memory, task tracking, safety, and search. I use these to run
+                  10+ agents simultaneously. My GitHub squares get darker green each month because
+                  each tool amplifies the others.
+                </p>
+
+                {/* Notable Stargazers - rendered outside the CTA link (its avatars are links
+                    themselves) and lifted above the stretched-link overlay so they stay clickable */}
+                <div className="relative z-10 mt-6">
+                  <NotableStargazers variant="compact" maxItems={6} />
                 </div>
               </div>
+
+              {/* Mini flywheel preview */}
+              <div className="mt-8 lg:mt-0 flex flex-col items-center">
+                <div className="relative flex h-32 w-32 sm:h-40 sm:w-40 items-center justify-center" aria-hidden="true">
+                  {/* Dashed ring - CSS animation (Server Component); the only motion in this banner */}
+                  <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="48"
+                      fill="none"
+                      stroke="rgba(139, 92, 246, 0.3)"
+                      strokeWidth="1"
+                      strokeDasharray="8 4"
+                      className="motion-safe:animate-[spin_20s_linear_infinite] origin-center"
+                    />
+                  </svg>
+                  {/* Tool dots - static; positioned using percentages for responsive scaling */}
+                  {tldrFlywheelTools.map((tool, i) => {
+                    const angle = ((i / tldrFlywheelTools.length) * 2 * Math.PI) - (Math.PI / 2);
+                    // Use 38% of container size as radius (leaves room for dot size)
+                    const radiusPercent = 38;
+                    const xPercent = Math.cos(angle) * radiusPercent;
+                    const yPercent = Math.sin(angle) * radiusPercent;
+                    return (
+                      <div
+                        key={tool.id}
+                        className={cn(
+                          "absolute h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-gradient-to-br shadow-lg",
+                          tool.color
+                        )}
+                        style={{
+                          left: `calc(50% + ${xPercent}%)`,
+                          top: `calc(50% + ${yPercent}%)`,
+                          transform: "translate(-50%, -50%)",
+                        }}
+                      />
+                    );
+                  })}
+                  {/* Center icon */}
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/20 ring-1 ring-violet-500/40">
+                    <Zap className="h-6 w-6 text-violet-400" />
+                  </div>
+                </div>
+
+                {/* The CTA is the only anchor; after:inset-0 stretches its hit area over the card */}
+                <HapticLink
+                  href="/tldr"
+                  className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-violet-400 transition-colors group-hover:text-violet-300 after:absolute after:inset-0 after:rounded-3xl after:content-['']"
+                >
+                  Explore the TLDR
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </HapticLink>
+              </div>
             </div>
-          </HapticLink>
+          </div>
         </div>
       </section>
 
@@ -213,7 +210,7 @@ export default async function HomePage() {
         iconNode={<Globe className="h-5 w-5" />}
         eyebrow="Explore"
         title="More from the flywheel"
-        kicker="A prompt library and an interactive setup wizard for getting started fast."
+        kicker="Dedicated sites for the tools, Rust ports, and prompt collections that make up the flywheel."
       >
         <FeaturedSites sites={featuredSites} />
       </SectionShell>
@@ -229,6 +226,7 @@ export default async function HomePage() {
           className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-6 lg:gap-8 lg:grid-cols-3 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
           staggerDelay={0.08}
           scrollIndicator
+          animateIn={false}
         >
           {featuredProjects.map((project) => (
               <div key={project.name} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
@@ -258,10 +256,10 @@ export default async function HomePage() {
           <Magnetic strength={0.15} className="inline-block">
             <HapticLink
               href="/nvidia-story"
-              className="inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-300"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-slate-500 transition-colors hover:text-slate-300"
             >
               <span>See the story behind the $600B drop</span>
-              <ArrowRight className="h-3 w-3" />
+              <ArrowRight className="h-3 w-3" aria-hidden="true" />
             </HapticLink>
           </Magnetic>
         </div>
@@ -278,9 +276,12 @@ export default async function HomePage() {
           className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
           staggerDelay={0.1}
           scrollIndicator
+          animateIn={false}
         >
           {featuredWriting.map((item) => (
-            <WritingCard key={item.title} item={item} />
+            <div key={item.title} className="snap-center shrink-0 w-[85vw] sm:w-[60vw] md:w-auto h-full">
+              <WritingCard item={item} />
+            </div>
           ))}
         </AnimatedGrid>
       </SectionShell>
@@ -313,9 +314,9 @@ export default async function HomePage() {
       <SectionShell
         id="activity"
         iconNode={<Activity className="h-5 w-5" />}
-        eyebrow="Live Activity"
+        eyebrow="Recent Activity"
         title="GitHub Heartbeat"
-        kicker="Real-time pulse of my open-source work. The flywheel spins faster every week."
+        kicker="Recent public events from my GitHub account, refreshed every few minutes."
       >
         <div className="mx-auto max-w-2xl">
           <GitHubHeartbeat />
@@ -334,6 +335,7 @@ export default async function HomePage() {
             className="flex -mx-4 px-4 gap-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 lg:gap-8 md:mx-0 md:px-0 md:pb-0 md:overflow-visible no-scrollbar"
             staggerDelay={0.1}
             scrollIndicator
+            animateIn={false}
           >
             {featuredThreads.map((thread) => (
               <ThreadCard key={thread.href} thread={thread} />

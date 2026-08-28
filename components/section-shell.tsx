@@ -56,7 +56,9 @@ export default function SectionShell({
       id={id}
       aria-labelledby={headingId}
       className={cn(
-        "relative mx-auto max-w-7xl px-4 py-28 sm:px-6 md:py-36 lg:px-8 lg:py-44",
+        // Sections stack on most pages; 176px+176px per section at lg produced
+        // ~700px of dead space between blocks. Keep the rhythm, trim the excess.
+        "relative mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8 lg:py-32",
         className
       )}
     >
@@ -70,7 +72,7 @@ export default function SectionShell({
         className="relative z-10"
         style={{ opacity: 1 }}
       >
-        <div className="mb-16 max-w-3xl md:mb-24">
+        <div className="mb-12 max-w-3xl md:mb-16">
           {eyebrow && (
             <div className="mb-6 flex items-center gap-3">
               <div className="h-px w-6 bg-gradient-to-r from-sky-500/80 to-transparent" />

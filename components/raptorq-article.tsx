@@ -2,7 +2,7 @@
 
 import "katex/dist/katex.min.css";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import {
   Crimson_Pro,
@@ -14,31 +14,82 @@ import { RaptorQJargon } from "./raptorq-jargon";
 import { MathTooltip } from "./math-tooltip";
 import { getJargon } from "@/lib/raptorq-jargon";
 import { getScrollMetrics } from "@/lib/utils";
+import ErrorBoundary from "@/components/error-boundary";
 
-// Dynamic import visualizations (no SSR - they use browser APIs)
+// Skeleton heights sit close to the real rendered heights so the inline
+// visualizations do not shift the page when their chunk lands.
+const VIZ_HEIGHTS = {
+  matrix: "min-h-[44rem] xl:min-h-[28rem]",
+  ripple: "min-h-[56rem] lg:min-h-[38rem]",
+  precode: "min-h-[40rem]",
+  peeling: "min-h-[30rem] md:min-h-[36rem]",
+  toy: "min-h-[42rem] lg:min-h-[34rem]",
+} as const;
+
+function VizSkeleton({ heightClass }: { heightClass: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`rq-viz-container flex items-center justify-center ${heightClass}`}
+    >
+      <span className="sr-only">Loading visualization</span>
+      <span
+        aria-hidden="true"
+        className="h-5 w-5 rounded-full border-2 border-slate-600 border-t-cyan-400 animate-spin motion-reduce:animate-none"
+      />
+    </div>
+  );
+}
+
+function VizFallback({ heightClass }: { heightClass: string }) {
+  return (
+    <div
+      role="alert"
+      className={`rq-viz-container flex flex-col items-center justify-center gap-3 px-6 text-center ${heightClass}`}
+    >
+      <span aria-hidden="true" className="text-amber-400/70 text-xl">!</span>
+      <p className="text-sm text-slate-400 mb-0">
+        This visualization failed to load. The surrounding text still covers the idea.
+      </p>
+    </div>
+  );
+}
+
+function SafeViz({ heightClass, children }: { heightClass: string; children: React.ReactNode }) {
+  return (
+    <ErrorBoundary fallback={<VizFallback heightClass={heightClass} />}>
+      {children}
+    </ErrorBoundary>
+  );
+}
+
+// Dynamic import visualizations (no SSR - they use browser APIs). Each one
+// shows a sized skeleton while its chunk loads and is mounted inside its own
+// error boundary so a WebGL or d3 failure cannot unwind the whole article.
 const HeroParticles = dynamic(
   () => import("./raptorq-visualizations").then((m) => ({ default: m.HeroParticles })),
-  { ssr: false }
+  { ssr: false, loading: () => <div className="absolute inset-0 z-0" aria-hidden="true" /> }
 );
 const MatrixViz = dynamic(
   () => import("./raptorq-visualizations").then((m) => ({ default: m.MatrixViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.matrix} /> }
 );
 const DegreeRippleViz = dynamic(
   () => import("./raptorq-visualizations").then((m) => ({ default: m.DegreeRippleViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.ripple} /> }
 );
 const PrecodeViz = dynamic(
   () => import("./raptorq-visualizations").then((m) => ({ default: m.PrecodeViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.precode} /> }
 );
 const PeelingViz = dynamic(
   () => import("./raptorq-visualizations").then((m) => ({ default: m.PeelingViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.peeling} /> }
 );
 const ToyDecodeViz = dynamic(
   () => import("./raptorq-visualizations").then((m) => ({ default: m.ToyDecodeViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton heightClass={VIZ_HEIGHTS.toy} /> }
 );
 
 // Fonts
@@ -59,8 +110,8 @@ const bricolageGrotesque = Bricolage_Grotesque({
   display: "swap",
 });
 
-// KaTeX helpers
-function M({ t, explanation }: { t: string; explanation?: string }) {
+// KaTeX helpers (memoised: KaTeX only re-renders when the formula changes)
+const M = memo(function M({ t, explanation }: { t: string; explanation?: string }) {
   const html = katex.renderToString(t, {
     throwOnError: false,
     displayMode: false,
@@ -76,27 +127,30 @@ function M({ t, explanation }: { t: string; explanation?: string }) {
     return <MathTooltip term={getJargon(explanation)} variant="purple">{content}</MathTooltip>;
   }
   return content;
-}
+});
 
-function MBlock({ t, explanation }: { t: string; explanation?: string }) {
+// Display math is nowrap; the block owns its horizontal overflow so a wide
+// formula scrolls inside its box instead of being clipped by the page.
+const MBlock = memo(function MBlock({ t, explanation }: { t: string; explanation?: string }) {
   const html = katex.renderToString(t, {
     throwOnError: false,
     displayMode: true,
   });
-  const content = (
-    <div
-      className="rq-math-block"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+  const content = <div dangerouslySetInnerHTML={{ __html: html }} />;
+
+  return (
+    <div className="rq-math-block max-w-full overflow-x-auto">
+      {explanation ? (
+        <MathTooltip term={getJargon(explanation)} variant="purple">{content}</MathTooltip>
+      ) : (
+        content
+      )}
+    </div>
   );
+});
 
-  if (explanation) {
-    return <MathTooltip term={getJargon(explanation)} variant="purple">{content}</MathTooltip>;
-  }
-  return content;
-}
-
-// Shorthand for jargon
+// Shorthand for jargon: exactly one tooltip trigger per term (RaptorQJargon
+// already falls back to plain text when the key is unknown).
 function J({
   t,
   children,
@@ -104,14 +158,7 @@ function J({
   t: string;
   children?: React.ReactNode;
 }) {
-  const termData = getJargon(t);
-  if (!termData) return <>{children}</>;
-
-  return (
-    <MathTooltip term={termData} variant="purple">
-      <RaptorQJargon term={t}>{children}</RaptorQJargon>
-    </MathTooltip>
-  );
+  return <RaptorQJargon term={t}>{children}</RaptorQJargon>;
 }
 
 // Section divider
@@ -129,17 +176,35 @@ function EC({ children }: { children: React.ReactNode }) {
 }
 
 export function RaptorQArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
 
+  // Scroll progress: rAF-throttled passive listener writing straight to the
+  // DOM — no React state, so scrolling never re-renders the article tree.
   useEffect(() => {
-    const handleScroll = () => {
+    let rafId: number | null = null;
+    const update = () => {
+      rafId = null;
       const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+      if (scrollHintRef.current) {
+        scrollHintRef.current.style.opacity = String(Math.max(0, 0.5 - progress * 5));
+      }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => {
+      if (rafId === null) rafId = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Section reveal on scroll
@@ -169,7 +234,7 @@ export function RaptorQArticle() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" }
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" }
     );
     targets.forEach((el) => {
       el.classList.add("rq-fade-section");
@@ -184,24 +249,27 @@ export function RaptorQArticle() {
   return (
     <div
       ref={articleRef}
-      role="main"
       className={`raptorq-scope rq-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* Scroll Progress */}
       <div
+        ref={progressBarRef}
         className="rq-progress-bar"
-        style={{ transform: `scaleX(${scrollProgress})` }}
+        style={{ transform: "scaleX(0)" }}
+        aria-hidden="true"
       />
 
       {/* ========== HERO ========== */}
       <section data-section="hero" className="min-h-dvh flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
-        <HeroParticles />
+        <ErrorBoundary fallback={<div className="absolute inset-0 z-0" aria-hidden="true" />}>
+          <HeroParticles />
+        </ErrorBoundary>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
           <div className="text-center relative z-20">
-            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
+            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
               Protocol Intelligence / RFC 6330
             </div>
@@ -222,10 +290,12 @@ export function RaptorQArticle() {
         </EC>
 
         <div
-          className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
-          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+          ref={scrollHintRef}
+          className="mt-12 flex flex-col items-center gap-4 z-20 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
+          style={{ opacity: 0.5 }}
+          aria-hidden="true"
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
+          <span className="text-xs uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
@@ -273,9 +343,9 @@ export function RaptorQArticle() {
 
           <div className="rq-insight-card group">
             <div className="relative z-10">
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
                 How Good Is It, Really?
-              </h3>
+              </h2>
               <p className="text-slate-400 text-base md:text-lg mb-0 leading-relaxed font-serif italic">
                 This is all codified in <strong>RaptorQ (RFC 6330)</strong>.
                 The RFC actually has a SHALL-level decoder requirement: if you
@@ -330,9 +400,9 @@ export function RaptorQArticle() {
           <p>So why isn&rsquo;t this the end of the story? Two problems:</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-12 mb-16 items-stretch">
             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-cyan-500/30 group flex flex-col h-full">
-              <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-cyan-400 transition-colors shrink-0">
+              <h3 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-cyan-400 transition-colors shrink-0">
                 You must choose <M t="R" /> in advance
-              </h4>
+              </h3>
               <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light flex-1">
                 Reed-Solomon is <strong>fixed-rate</strong>. You pick your
                 redundancy budget before you send anything. If the channel is
@@ -341,9 +411,9 @@ export function RaptorQArticle() {
               </p>
             </div>
             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-[2rem] p-6 md:p-10 transition-all duration-500 hover:border-purple-500/30 group flex flex-col h-full">
-              <h4 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-purple-400 transition-colors shrink-0">
+              <h3 className="text-white font-bold mb-5 text-lg md:text-xl group-hover:text-purple-400 transition-colors shrink-0">
                 It gets slow at scale
-              </h4>
+              </h3>
               <p className="text-lg text-slate-300 leading-relaxed mb-0 font-light flex-1">
                 Reed-Solomon encoding and decoding cost grows with block size.
                 Standard implementations are <M t="O(n \cdot K)" explanation="complexity-quadratic" /> for encoding
@@ -420,7 +490,7 @@ export function RaptorQArticle() {
             encoded packets, each one the XOR of a random subset of source symbols.
           </p>
 
-          <MatrixViz />
+          <SafeViz heightClass={VIZ_HEIGHTS.matrix}><MatrixViz /></SafeViz>
 
           <p>
             This explains the <strong>fungibility</strong>. Order doesn&rsquo;t matter
@@ -447,14 +517,14 @@ export function RaptorQArticle() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 items-stretch">
             <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full">
-              <h4 className="text-white font-bold mb-3 text-lg shrink-0">Rateless</h4>
+              <h3 className="text-white font-bold mb-3 text-lg shrink-0">Rateless</h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                 The sender can generate as many repair packets as needed. No
                 fixed <M t="n" />. No negotiation loop.
               </p>
             </div>
             <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full">
-              <h4 className="text-white font-bold mb-3 text-lg shrink-0">Systematic</h4>
+              <h3 className="text-white font-bold mb-3 text-lg shrink-0">Systematic</h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                 The original data symbols are part of the encoding stream. In the
                 common case of low loss, the receiver just gets the source symbols
@@ -462,7 +532,7 @@ export function RaptorQArticle() {
               </p>
             </div>
             <div className="rq-insight-card !my-0 !p-6 md:!p-8 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full">
-              <h4 className="text-white font-bold mb-3 text-lg shrink-0">Near-MDS</h4>
+              <h3 className="text-white font-bold mb-3 text-lg shrink-0">Near-MDS</h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-0 flex-1">
                 It behaves almost like an optimal erasure code: you need only
                 slightly more than the block size. The RFC pins down a steep
@@ -587,7 +657,7 @@ export function RaptorQArticle() {
             </p>
           </div>
 
-          <DegreeRippleViz />
+          <SafeViz heightClass={VIZ_HEIGHTS.ripple}><DegreeRippleViz /></SafeViz>
 
           <p>
             The decoding picture is graph-theoretic. Draw a bipartite graph:
@@ -652,7 +722,7 @@ export function RaptorQArticle() {
             <J t="rank">rank</J> failures).
           </p>
 
-          <PrecodeViz />
+          <SafeViz heightClass={VIZ_HEIGHTS.precode}><PrecodeViz /></SafeViz>
 
           <p>The workflow becomes two stages:</p>
           <ol className="list-decimal list-inside space-y-6 text-slate-200 text-lg md:text-xl lg:text-2xl ml-4 mb-16 border-l border-white/10 pl-8 font-light">
@@ -757,7 +827,7 @@ export function RaptorQArticle() {
             every step.
           </p>
 
-          <ToyDecodeViz />
+          <SafeViz heightClass={VIZ_HEIGHTS.toy}><ToyDecodeViz /></SafeViz>
         </EC>
       </section>
 
@@ -782,7 +852,7 @@ export function RaptorQArticle() {
             equation to a single-unknown equation. The process cascades.
           </p>
 
-          <PeelingViz />
+          <SafeViz heightClass={VIZ_HEIGHTS.peeling}><PeelingViz /></SafeViz>
 
           <p>
             But what if the peeling stalls? What if every remaining equation
@@ -865,9 +935,9 @@ export function RaptorQArticle() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-12 items-stretch">
             <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
+              <h3 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 <J t="systematic-encoding">Systematic Encoding</J>
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 The first <M t="K" /> encoding symbols are the source symbols
                 themselves. If the channel is clean, the receiver doesn&rsquo;t decode
@@ -875,9 +945,9 @@ export function RaptorQArticle() {
               </p>
             </div>
             <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
+              <h3 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 One Integer of Metadata
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 A repair packet carries an{" "}
                 <strong>
@@ -889,9 +959,9 @@ export function RaptorQArticle() {
               </p>
             </div>
             <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
+              <h3 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 Padding to <M t="K'" />
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 RFC 6330 quietly pads your block from <M t="K" /> to{" "}
                 <M t="K'" /> using a lookup table, adding padding symbols that
@@ -900,9 +970,9 @@ export function RaptorQArticle() {
               </p>
             </div>
             <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors flex flex-col h-full group">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
+              <h3 className="text-white font-bold mb-4 text-lg md:text-xl shrink-0 group-hover:text-cyan-400 transition-colors">
                 A Degree Table, Not Pure Randomness
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-0">
                 RFC 6330 hardcodes a degree distribution heavily weighted toward
                 low degrees (2 and 3 dominate). The expected LT degree is about{" "}
@@ -912,13 +982,13 @@ export function RaptorQArticle() {
               </p>
             </div>
             <div className="rq-insight-card !my-0 !bg-slate-900/50 hover:bg-slate-900 transition-colors md:col-span-2 group">
-              <h4 className="text-white font-bold mb-4 text-lg md:text-xl group-hover:text-cyan-400 transition-colors">
+              <h3 className="text-white font-bold mb-4 text-lg md:text-xl group-hover:text-cyan-400 transition-colors">
                 Permanent Inactivation
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-0">
                 RaptorQ pre-selects a small set of intermediate symbols (the PI
                 symbols) to be treated as inactivated from the start. The count
-                scales as roughly <M t="\sqrt{'{K}'}" />: for{" "}
+                scales as roughly <M t="\sqrt{K}" />: for{" "}
                 <M t="K = 10{,}000" />, the dense core is about{" "}
                 <M t="100 \times 100" />. That&rsquo;s cubic work on a 100-variable
                 system, not a 10,000-variable one.
@@ -970,10 +1040,10 @@ y = XOR(C[i] for i in indices)`}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10 items-stretch">
             <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 md:p-6 flex flex-col h-full">
-              <h4 className="text-red-300 font-bold mb-3 shrink-0">
+              <h3 className="text-red-300 font-bold mb-3 shrink-0">
                 Over <J t="gf2">GF(2)</J>{" "}
                 <span className="text-xs font-mono text-red-400 font-normal">(pure XOR)</span>
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-4 flex-1">
                 The product converges to about{" "}
                 <strong className="text-red-300 font-black">0.289</strong>. That&rsquo;s a ~71%
@@ -986,12 +1056,12 @@ y = XOR(C[i] for i in indices)`}
               </p>
             </div>
             <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 md:p-6 flex flex-col h-full">
-              <h4 className="text-emerald-300 font-bold mb-3 shrink-0">
+              <h3 className="text-emerald-300 font-bold mb-3 shrink-0">
                 Over <J t="gf256">GF(256)</J>{" "}
                 <span className="text-xs font-mono text-emerald-400 font-normal">
                   (byte arithmetic)
                 </span>
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-4 flex-1">
                 The product converges to about{" "}
                 <strong className="text-emerald-300 font-black">0.996</strong>. Nearly full
@@ -1175,12 +1245,12 @@ y = XOR(C[i] for i in indices)`}
           </ul>
 
           <div className="flex flex-wrap gap-3 mb-12">
-             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 w-full mb-2">Related Terms:</div>
+             <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 w-full mb-2">Related Terms:</div>
              <J t="mds">
-                <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/10 transition-colors">Maximum Distance Separable</span>
+                <span className="inline-flex items-center min-h-10 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/10 transition-colors">Maximum Distance Separable</span>
              </J>
              <J t="shamirs-secret-sharing">
-                <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/10 transition-colors">Secret Sharing</span>
+                <span className="inline-flex items-center min-h-10 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/10 transition-colors">Secret Sharing</span>
              </J>
           </div>
 
@@ -1205,7 +1275,7 @@ y = XOR(C[i] for i in indices)`}
           <p>It helps to see RaptorQ in context.</p>
           <div className="overflow-x-auto my-12 custom-scrollbar">
             <table className="min-w-[560px] w-full text-sm text-slate-300 border border-white/10 rounded-2xl overflow-hidden">
-              <thead className="bg-white/5 text-slate-400 uppercase tracking-widest text-[10px]">
+              <thead className="bg-white/5 text-slate-400 uppercase tracking-widest text-xs">
                 <tr>
                   <th className="text-left p-3 md:p-4 font-black">Scheme</th>
                   <th className="text-left p-3 md:p-4 font-black">Overhead</th>

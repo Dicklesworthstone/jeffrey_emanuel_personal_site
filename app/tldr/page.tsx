@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { Copy, Check } from "lucide-react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import ErrorBoundary from "@/components/error-boundary";
@@ -89,23 +89,42 @@ function FlywheelExplanation() {
 
 const INSTALL_COMMAND = `curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/agentic_coding_flywheel_setup/main/install.sh | bash -s -- --yes --mode vibe`;
 
+type CopyState = "idle" | "copied" | "manual";
+
 function FooterCTA({ id }: { id?: string }) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<CopyState>("idle");
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const codeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    };
+  }, []);
 
   const handleCopy = useCallback(async () => {
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
     try {
       await navigator.clipboard.writeText(INSTALL_COMMAND);
-      setCopied(true);
-      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
-      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      setCopyState("copied");
+      copyTimeoutRef.current = setTimeout(() => setCopyState("idle"), 2000);
     } catch {
-      // Silently fail - clipboard API may not be available
+      // Clipboard API unavailable (insecure context, denied permission, old
+      // browser): select the command so a keyboard copy works, and say so.
+      const selection = window.getSelection();
+      if (codeRef.current && selection) {
+        const range = document.createRange();
+        range.selectNodeContents(codeRef.current);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      setCopyState("manual");
+      copyTimeoutRef.current = setTimeout(() => setCopyState("idle"), 6000);
     }
   }, []);
 
   return (
-    <section id={id} className="border-t border-white/5 py-12 md:py-16">
+    <section id={id} className="scroll-mt-32 border-t border-white/5 py-12 md:py-16">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
           Get Started
@@ -115,33 +134,41 @@ function FooterCTA({ id }: { id?: string }) {
           One command, 30 minutes, and you&apos;re ready to go.
         </p>
         <div className="mt-6 flex flex-col items-center gap-4 md:mt-8">
-          <div className="group relative w-full max-w-4xl">
-            <div className="overflow-x-auto rounded-xl bg-slate-900/80 ring-1 ring-slate-700/50 transition-all duration-200 hover:ring-violet-500/30">
-              <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-4">
-                <code className="flex-1 whitespace-nowrap font-mono text-xs text-violet-300 sm:text-sm md:text-base">
+          <div className="w-full max-w-4xl">
+            {/* The copy button lives outside the horizontal scroll container so it
+                stays on screen on phones even though the command is ~150 chars. */}
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-slate-900/80 p-2 ring-1 ring-slate-700/50 transition-[box-shadow] duration-200 hover:ring-violet-500/30 sm:gap-3">
+              <div className="min-w-0 overflow-x-auto px-2 py-2 sm:px-4">
+                <code
+                  ref={codeRef}
+                  className="whitespace-nowrap font-mono text-xs text-violet-300 sm:text-sm md:text-base"
+                >
                   {INSTALL_COMMAND}
                 </code>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="flex-shrink-0 flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg bg-slate-800 p-2.5 text-slate-400 transition-all duration-200 hover:bg-violet-600 hover:text-white active:scale-95 sm:p-2.5"
-                  aria-label={copied ? "Copied!" : "Copy to clipboard"}
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4 text-emerald-400 sm:h-5 sm:w-5" />
-                  ) : (
-                    <Copy className="h-4 w-4 sm:h-5 sm:w-5" />
-                  )}
-                </button>
               </div>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg bg-slate-800 p-2.5 text-slate-400 transition-all duration-200 hover:bg-violet-600 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60"
+                aria-label={copyState === "copied" ? "Copied install command" : "Copy install command"}
+              >
+                {copyState === "copied" ? (
+                  <Check className="h-4 w-4 text-emerald-400 sm:h-5 sm:w-5" aria-hidden="true" />
+                ) : (
+                  <Copy className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                )}
+              </button>
             </div>
-            <div role="status" aria-live="polite" aria-atomic="true">
-              {copied && (
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white shadow-lg">
-                  Copied!
-                </div>
+            <p role="status" aria-live="polite" aria-atomic="true" className="mt-2 min-h-5 text-xs">
+              {copyState === "copied" && (
+                <span className="text-emerald-400">Copied to clipboard</span>
               )}
-            </div>
+              {copyState === "manual" && (
+                <span className="text-amber-300">
+                  Couldn&apos;t access the clipboard. The command is selected; press Ctrl+C (⌘C on Mac) to copy it.
+                </span>
+              )}
+            </p>
           </div>
           <p className="text-xs text-slate-500">
             Or visit{" "}
@@ -178,7 +205,8 @@ export default function TldrPage() {
 
   return (
     <ErrorBoundary>
-      <main className="min-h-screen overflow-x-hidden">
+      {/* ClientShell already renders the page's single <main id="main-content"> */}
+      <div className="min-h-screen overflow-x-hidden">
         {/* Hero Section */}
         <TldrHero id="tldr-hero" />
 
@@ -232,7 +260,7 @@ export default function TldrPage() {
 
         {/* Footer CTA */}
         <FooterCTA id="get-started" />
-      </main>
+      </div>
     </ErrorBoundary>
   );
 }

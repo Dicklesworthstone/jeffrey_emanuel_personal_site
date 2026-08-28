@@ -1,4 +1,5 @@
 import tldrToolStarsData from "./data/tldr-tool-stars.json";
+import { formatStarCount } from "./format-stars";
 
 export const siteConfig = {
   name: "Jeffrey Emanuel",
@@ -13,8 +14,8 @@ export const siteConfig = {
     linkedin: "https://www.linkedin.com/in/jeffreyemanuel",
   },
   features: {
-    /** Enable newsletter signup section on homepage. Set to true once Buttondown is configured. */
-    newsletter: true,
+    // Buttondown list 'jeffreyemanuel' returned 404 on 2026-08-28; re-enable once a real list exists
+    newsletter: false,
   },
 } satisfies {
   name: string;
@@ -73,7 +74,7 @@ export const heroContent = {
     {
       name: "MCP Agent Mail",
       tagline: '"Gmail for Agents"',
-      highlight: "1K+ stars",
+      highlight: `${formatStarCount(tldrToolStarsData.mail)}+ stars`,
     },
     {
       name: "BV",
@@ -84,7 +85,7 @@ export const heroContent = {
     {
       name: "Cass",
       tagline: "Coding Agent Session Search",
-      description: "Sub-millisecond search across all your past agent sessions",
+      description: "Near-instant local search across all your past agent sessions",
     },
     {
       name: "CM",
@@ -107,12 +108,12 @@ export const heroContent = {
   },
   body: [
     "Using these tools and 52+ AI coding agent subscriptions (~$12K/month), I've made 85,434 GitHub contributions in the past year, the vast majority since January 2026. I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
-    "My 170+ open-source projects span agent infrastructure, the FrankenSuite of clean-room Rust reimplementations, static analysis, memory systems, and research tools. The flywheel keeps spinning faster; the cadence of my GitHub commits increases more and more each passing week because each tool amplifies the others.",
+    "My 170+ open-source projects span agent infrastructure, the FrankenSuite of clean-room Rust reimplementations, static analysis, memory systems, and research tools. The flywheel keeps spinning faster: my GitHub commit volume has grown month over month since October 2025 because each tool amplifies the others.",
     "I also founded Lumera Network (formerly Pastel), a Cosmos L1 for storage and AI verification. I consult to PE and hedge funds on AI automation after a decade as a long/short equity analyst at various funds, including Millennium and Balyasny.",
   ],
   primaryCta: {
     label: "Explore the Flywheel",
-    href: "/projects",
+    href: "/tldr",
   },
   secondaryCta: {
     label: "Work with me",
@@ -175,10 +176,10 @@ export const endorsements: Endorsement[] = [
     },
     source: {
       type: "other",
-      url: "https://www.bloomberg.com/opinion/authors/ARbTQlRLRjE/matthew-s-levine",
+      url: "https://www.bloomberg.com/opinion/articles/2025-01-28/deepseek-disruption-has-its-upside",
       platform: "Bloomberg Opinion",
     },
-    date: "2024",
+    date: "2025",
     tags: ["nvidia", "finance", "research"],
     featured: true,
     context: "On Jeffrey's Nvidia short thesis essay",
@@ -193,10 +194,10 @@ export const endorsements: Endorsement[] = [
     },
     source: {
       type: "podcast",
-      url: "https://www.bankless.com/",
+      url: "https://www.bankless.com/podcast/deepseek-r1-the-short-case-for-nvidia-stock-jeffrey-emanuel",
       platform: "Bankless Podcast",
     },
-    date: "2024",
+    date: "2025",
     tags: ["nvidia", "podcast", "research"],
     featured: true,
     context: "During Bankless podcast interview",
@@ -210,10 +211,10 @@ export const endorsements: Endorsement[] = [
     },
     source: {
       type: "other",
-      url: "https://slashdot.org/",
+      url: "https://hardware.slashdot.org/story/25/02/01/2235213/one-blogger-helped-spark-nvidias-600b-stock-collapse",
       platform: "Slashdot",
     },
-    date: "2024",
+    date: "2025",
     tags: ["nvidia", "media", "tech"],
     featured: false,
     context: "Slashdot feature coverage",
@@ -2006,6 +2007,8 @@ export type MediaItem = {
   kind: "Article" | "Podcast" | "Blog" | "Profile";
   category: "Nvidia & Markets" | "AI & Agents" | "Lumera/Pastel" | "Profile";
   blurb: string;
+  /** ISO date (YYYY-MM-DD). Only set where the date is evidenced in this repo (blurb text or the source URL path). */
+  date?: string;
 };
 
 export const mediaItems: MediaItem[] = [
@@ -2018,6 +2021,7 @@ export const mediaItems: MediaItem[] = [
     outlet: "Bankless Podcast",
     kind: "Podcast",
     category: "Nvidia & Markets",
+    date: "2025-01-28",
     blurb:
       "In-depth discussion of my viral 12,000-word analysis on Nvidia's competitive vulnerabilities, DeepSeek's efficiency breakthroughs, and the shifting landscape of AI infrastructure. This episode aired January 28, 2025, the day after Nvidia's historic $600B single-day market cap drop.",
   },
@@ -2067,6 +2071,7 @@ export const mediaItems: MediaItem[] = [
     outlet: "Slashdot",
     kind: "Article",
     category: "Nvidia & Markets",
+    date: "2025-02-01",
     blurb:
       "Coverage of how a 12,000-word blog post written from my Brooklyn apartment contributed to the largest single-day market cap drop in stock market history. Bloomberg's Matt Levine called it 'a candidate for the most impactful short research report ever.'",
   },
@@ -2076,6 +2081,7 @@ export const mediaItems: MediaItem[] = [
     outlet: "Bloomberg (Matt Levine)",
     kind: "Article",
     category: "Nvidia & Markets",
+    date: "2025-01-28",
     blurb:
       "Matt Levine's Money Stuff column where he characterized my analysis as 'a candidate for the most impactful short research report ever' and noted the online chatter claiming my post 'was an important catalyst' for the stock-market selloff.",
   },
@@ -2094,6 +2100,7 @@ export const mediaItems: MediaItem[] = [
     outlet: "Techmeme",
     kind: "Article",
     category: "Nvidia & Markets",
+    date: "2025-01-26",
     blurb:
       "Featured on Techmeme's front page covering Nvidia's four-part moat (Linux drivers, CUDA lock-in, Mellanox interconnect, R&D flywheel) and the emerging threats to each pillar from competitors and efficiency breakthroughs.",
   },
@@ -2103,6 +2110,7 @@ export const mediaItems: MediaItem[] = [
     outlet: "Global Advisors",
     kind: "Article",
     category: "Nvidia & Markets",
+    date: "2025-01-27",
     blurb:
       "Global Advisors highlighted my analysis of DeepSeek's R1 model, which made significant strides in enabling step-by-step reasoning without traditional reliance on vast supervised datasets—a groundbreaking achievement in AI.",
   },
@@ -2116,6 +2124,7 @@ export const mediaItems: MediaItem[] = [
     outlet: "Simon Willison's Weblog",
     kind: "Blog",
     category: "Nvidia & Markets",
+    date: "2025-01-27",
     blurb:
       "Simon Willison's analysis calling my piece 'Long, excellent...capturing the current state of the AI/LLM industry' and noting my 'rare combination of experience in both computer science and investment analysis.'",
   },
@@ -2125,6 +2134,7 @@ export const mediaItems: MediaItem[] = [
     outlet: "Eric Holscher's Blog",
     kind: "Blog",
     category: "Nvidia & Markets",
+    date: "2025-01-27",
     blurb:
       "Read the Docs founder Eric Holscher recommended my piece as one of two essential DeepSeek explainers, describing it as 'a long post (~60m read time) that goes through the whole context of R1 in great depth, but very readable with a bit of technical knowledge.'",
   },
@@ -2551,7 +2561,7 @@ export const nvidiaStoryData = {
 
   // Key narrative point
   narrativeInsight:
-    "DeepSeek V3 was released in late December 2024, and R1 on January 20. The market had NO reaction to either release. It took the essay—explaining what these efficiency breakthroughs meant for Nvidia's moat—to catalyze the selloff a full week later. This proves the essay was the proximate cause, not the DeepSeek releases themselves.",
+    "DeepSeek V3 was released in late December 2024, and R1 on January 20. Neither release moved the market. The selloff came a full week later, after the essay—explaining what these efficiency breakthroughs meant for Nvidia's moat—was shared widely. That timing is why the essay is widely credited with contributing to the drop, rather than the DeepSeek releases alone.",
 
   // Podcast appearances
   podcasts: [
@@ -2627,7 +2637,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Mail",
     color: "from-violet-500 to-purple-600",
     category: "core",
-    stars: 1836,
     whatItDoes:
       "A mail-like coordination layer for multi-agent workflows. Agents send messages, read threads, and reserve files asynchronously via MCP tools - like Gmail for AI coding agents.",
     whyItsUseful:
@@ -2673,7 +2682,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "GitBranch",
     color: "from-emerald-500 to-teal-600",
     category: "core",
-    stars: 1413,
     whatItDoes:
       "A fast terminal UI for viewing and analyzing Beads issues. Applies graph theory (PageRank, betweenness centrality, critical path) to identify which tasks unblock the most other work.",
     whyItsUseful:
@@ -2719,7 +2727,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Search",
     color: "from-cyan-500 to-sky-600",
     category: "core",
-    stars: 618,
     whatItDoes:
       "A unified TUI/CLI search engine that indexes 11+ coding agent formats (Claude Code, Codex, Cursor, Gemini, ChatGPT, Aider, Cline, and more) into a single searchable timeline. Supports BM25 keyword search, ML-powered semantic search, and hybrid RRF fusion.",
     whyItsUseful:
@@ -2768,7 +2775,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Cog",
     color: "from-purple-500 to-violet-600",
     category: "core",
-    stars: 1315,
     whatItDoes:
       "One-command bootstrap that transforms a fresh Ubuntu VPS into a fully-configured agentic coding environment with all flywheel tools installed.",
     whyItsUseful:
@@ -2814,7 +2820,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Bug",
     color: "from-rose-500 to-red-600",
     category: "core",
-    stars: 206,
     whatItDoes:
       "Custom pattern-based bug scanner with 1,000+ detection rules across multiple languages. Catches common bugs, security issues, and code smells before they become problems.",
     whyItsUseful:
@@ -2856,7 +2861,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "ShieldAlert",
     color: "from-red-500 to-rose-600",
     category: "core",
-    stars: 721,
     whatItDoes:
       "Intercepts dangerous shell commands (rm -rf, git reset --hard, etc.) before execution. Requires confirmation for destructive operations.",
     whyItsUseful:
@@ -2898,7 +2902,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "RefreshCw",
     color: "from-orange-500 to-amber-600",
     category: "core",
-    stars: 82,
     whatItDoes:
       "Keeps dozens (or hundreds) of Git repositories in sync with a single command. Clones missing repos, pulls updates, detects conflicts.",
     whyItsUseful:
@@ -2940,7 +2943,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Brain",
     color: "from-pink-500 to-fuchsia-600",
     category: "core",
-    stars: 290,
     whatItDoes:
       "A memory system built on top of CASS. Implements three-layer cognitive architecture: Episodic (experiences), Working (active context), and Procedural (skills and lessons learned).",
     whyItsUseful:
@@ -2987,7 +2989,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "LayoutGrid",
     color: "from-sky-500 to-blue-600",
     category: "core",
-    stars: 207,
     whatItDoes:
       "A tmux session orchestration platform that transforms tmux into a multi-agent command center. Spawn, broadcast to, and coordinate Claude/Codex/Gemini agents across tiled panes with smart routing and real-time monitoring.",
     whyItsUseful:
@@ -3039,7 +3040,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "ShieldCheck",
     color: "from-amber-500 to-orange-600",
     category: "core",
-    stars: 65,
     whatItDoes:
       "Two-person rule CLI for approving dangerous shell commands. Requires a second human or AI reviewer to approve risky operations before execution.",
     whyItsUseful:
@@ -3088,7 +3088,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Image",
     color: "from-slate-500 to-gray-600",
     category: "supporting",
-    stars: 36,
     whatItDoes:
       "Downloads images from iCloud public share links for use in remote debugging sessions. Converts iCloud URLs to direct image downloads.",
     whyItsUseful:
@@ -3130,7 +3129,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Archive",
     color: "from-blue-500 to-indigo-600",
     category: "supporting",
-    stars: 83,
     whatItDoes:
       "Ultra-fast search over X/Twitter data archives. Uses hybrid BM25 + semantic search with Reciprocal Rank Fusion.",
     whyItsUseful:
@@ -3172,7 +3170,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "FileCode",
     color: "from-green-500 to-emerald-600",
     category: "supporting",
-    stars: 16,
     whatItDoes:
       "Terminal UI for combining source code files into LLM-ready prompts. Select files, preview output, copy to clipboard with token counting.",
     whyItsUseful:
@@ -3214,7 +3211,6 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
     icon: "Sparkles",
     color: "from-teal-500 to-emerald-600",
     category: "core",
-    stars: 141,
     whatItDoes:
       "Complete skill management platform: store, search, track effectiveness, package for sharing, and integrate with AI agents via MCP. Skills come from hand-written files, CASS mining, bundles, or guided workflows.",
     whyItsUseful:
@@ -3256,7 +3252,8 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
   },
 ];
 
-// Merge build-time star counts (overrides hardcoded fallbacks)
+// Star counts come from lib/data/tldr-tool-stars.json (written by scripts/fetch-tldr-stars.ts).
+// There are deliberately no literal `stars:` values above so the page cannot drift from the data file.
 const _starsMap = tldrToolStarsData as Record<string, number>;
 for (const tool of tldrFlywheelTools) {
   if (_starsMap[tool.id] !== undefined) {
@@ -3264,15 +3261,31 @@ for (const tool of tldrFlywheelTools) {
   }
 }
 
+/**
+ * Star totals derived from the same data file the tool cards use, so every
+ * "flywheel stars" figure on the site comes from one source.
+ */
+export const tldrToolStarTotals = {
+  all: tldrFlywheelTools.reduce((sum, t) => sum + (t.stars ?? 0), 0),
+  core: tldrFlywheelTools
+    .filter((t) => t.category === "core")
+    .reduce((sum, t) => sum + (t.stars ?? 0), 0),
+};
+
+const _tldrCoreCount = tldrFlywheelTools.filter((t) => t.category === "core").length;
+const _tldrSupportingCount = tldrFlywheelTools.length - _tldrCoreCount;
+
 export const tldrPageData = {
   hero: {
+    eyebrow: `${_tldrCoreCount} core + ${_tldrSupportingCount} supporting open-source tools`,
     title: "The Agentic Coding Flywheel",
     subtitle: "TL;DR Edition",
     description:
       "14 interconnected tools that transform multi-agent AI coding workflows. Each tool makes the others more powerful - the more you use it, the faster it spins. While others argue about agentic coding, we're just over here building as fast as we can.",
     stats: [
-      { label: "Ecosystem Tools", value: "14" },
-      { label: "GitHub Stars", value: "20K+" },
+      { label: "Ecosystem Tools", value: String(tldrFlywheelTools.length) },
+      // Sum of the 14 tools' stars from lib/data/tldr-tool-stars.json (not the whole-profile 20K+ figure)
+      { label: "GitHub Stars", value: `${formatStarCount(tldrToolStarTotals.all)}+` },
       { label: "Languages", value: "5" },
     ],
   },
@@ -3285,7 +3298,7 @@ export const tldrPageData = {
     paragraphs: [
       "A flywheel stores rotational energy - the more you spin it, the easier each push becomes. These tools work the same way. The more you use them, the more valuable the system becomes.",
       "Every agent session generates searchable history (CASS). Past solutions become retrievable memory (CM). Dependencies surface bottlenecks (BV). Agents coordinate without conflicts (Mail). Each piece feeds the others.",
-      "The result: I shipped 20,000+ lines of production Go code in a single day with BV. The flywheel keeps spinning faster - my GitHub commits accelerate each week because each tool amplifies the others.",
+      "The result: I shipped 20,000+ lines of production Go code in a single day with BV. The flywheel keeps spinning faster - my commit volume has grown month over month since October 2025 because each tool amplifies the others.",
     ],
   },
 };

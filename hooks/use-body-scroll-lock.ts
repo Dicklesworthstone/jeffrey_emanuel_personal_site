@@ -104,7 +104,13 @@ export function useBodyScrollLock(isLocked: boolean) {
         document.documentElement.style.removeProperty("--scrollbar-width");
 
         requestAnimationFrame(() => {
-          window.scrollTo(0, scrollY);
+          // Restore instantly: `html { scroll-behavior: smooth }` would
+          // otherwise animate from the top back to the previous offset.
+          const root = document.documentElement;
+          const previousBehavior = root.style.scrollBehavior;
+          root.style.scrollBehavior = "auto";
+          window.scrollTo({ top: scrollY, left: 0, behavior: "auto" });
+          root.style.scrollBehavior = previousBehavior;
         });
       }
     };

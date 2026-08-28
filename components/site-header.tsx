@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { navItems, siteConfig } from "@/lib/content";
@@ -41,35 +41,16 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const shortcutAriaLabel = `Search site (${shortcutModifier}+K)`;
 
   const { scrollY } = useScroll();
-  
-  // Keep an always-visible frosted header to prevent text overlap on article pages.
-  const headerOpacity = useTransform(scrollY, [0, 40], [0.985, 0.995]);
-  const headerBlurValue = useTransform(scrollY, [0, 40], [18, 26]);
-  const headerSaturateValue = useTransform(scrollY, [0, 40], [1.1, 1.4]);
-  const headerPaddingValue = useTransform(scrollY, [0, 40], [12, 8]);
-  const headerBorderOpacity = useTransform(scrollY, [0, 40], [0.22, 0.3]);
-  
-  // Spring-smoothed values for buttery performance
-  const smoothOpacity = useSpring(headerOpacity, { stiffness: 300, damping: 30 });
-  const smoothBlur = useSpring(headerBlurValue, { stiffness: 300, damping: 30 });
-  const smoothSaturate = useSpring(headerSaturateValue, { stiffness: 300, damping: 30 });
-  const smoothPadding = useSpring(headerPaddingValue, { stiffness: 300, damping: 30 });
-  const smoothBorderOpacity = useSpring(headerBorderOpacity, { stiffness: 300, damping: 30 });
 
-  const headerPaddingTop = useTransform(
-    smoothPadding,
-    (v) => `calc(${v}px + env(safe-area-inset-top, 0px))`
-  );
-  const headerPaddingBottom = useTransform(smoothPadding, (v) => `${v}px`);
-  
-  // Combine filters for backdrop - using more robust direct string interpolation if needed, 
-  // but useTransform with array is generally supported.
-  const headerBackdrop = useTransform(
-    [smoothBlur, smoothSaturate],
-    ([blur, sat]) => `blur(${blur}px) saturate(${sat})`
-  );
-  const headerBackgroundColor = useTransform(smoothOpacity, (v) => `rgba(2, 6, 23, ${v})`);
-  const headerBorderColor = useTransform(smoothBorderOpacity, (v) => `rgba(255, 255, 255, ${v})`);
+  // One coarse boolean drives the compact/expanded header through CSS
+  // transitions. The previous five scroll-driven springs re-laid-out the
+  // header (padding) and re-rasterised a viewport-wide backdrop blur at a
+  // changing radius on every frame for a 4px/1% visual delta.
+  const [scrolled, setScrolled] = useState(false);
+  useMotionValueEvent(scrollY, "change", (v) => {
+    const next = v > 40;
+    setScrolled((prev) => (prev === next ? prev : next));
+  });
 
   // Detect OS for meta key - must run after hydration to avoid mismatch
   useEffect(() => {
@@ -141,18 +122,19 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
 
   return (
     <>
-      <motion.header
-        className="fixed top-0 left-0 right-0 z-[90] border-b transition-colors duration-300"
+      <header
+        data-scrolled={scrolled ? "true" : "false"}
+        className={cn(
+          "fixed top-0 left-0 right-0 z-[90] border-b transition-[padding,background-color,border-color] duration-300 ease-out",
+          scrolled ? "border-white/30 bg-slate-950/[0.995]" : "border-white/[0.22] bg-slate-950/[0.985]"
+        )}
         style={{
-          paddingTop: headerPaddingTop,
-          paddingBottom: headerPaddingBottom,
-          backgroundColor: headerBackgroundColor,
-          backdropFilter: headerBackdrop,
-          WebkitBackdropFilter: headerBackdrop,
-          borderColor: headerBorderColor,
+          paddingTop: `calc(${scrolled ? 8 : 12}px + env(safe-area-inset-top, 0px))`,
+          paddingBottom: scrolled ? 8 : 12,
+          backdropFilter: "blur(22px) saturate(1.25)",
+          WebkitBackdropFilter: "blur(22px) saturate(1.25)",
           boxShadow: "0 12px 36px -26px rgba(2, 6, 23, 0.95)",
           paddingRight: "var(--scrollbar-width, 0px)",
-          willChange: "padding, background-color, backdrop-filter, border-color"
         }}
         role="banner"
       >
@@ -262,7 +244,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
           </button>
         </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -285,19 +267,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                  style={{ backgroundImage: `url("${NOISE_SVG_DATA_URI}")` }} 
             />
 
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                setOpen(false);
-              }}
-              onTouchStart={mediumTap}
-              className="absolute right-4 top-[max(0.75rem,calc(0.75rem+env(safe-area-inset-top,0px)))] z-[90] flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-slate-200 transition-all"
-              aria-label="Close navigation menu"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            
+            {/* The header's own toggle (z-95, crossfaded to an X) stays on top of
+                this overlay and closes it — a second close button at the same
+                pixels was unreachable by touch and stole initial focus. */}
             <nav
               className="relative flex flex-1 flex-col justify-center px-8"
               onClick={(event) => event.stopPropagation()}

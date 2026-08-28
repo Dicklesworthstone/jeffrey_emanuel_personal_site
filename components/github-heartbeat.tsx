@@ -178,11 +178,13 @@ const colorMap: Record<string, { bg: string; text: string; border: string; glow:
 };
 
 // Animated heartbeat line component
-function HeartbeatLine() {
+function HeartbeatLine({ active }: { active: boolean }) {
   const prefersReducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
-  // Mount the infinite sweep/pulse loops only while the line is on screen.
-  const isInView = useInView(containerRef, { margin: "100px" });
+  // Mount the infinite sweep/pulse loops only while the line is on screen and
+  // the feed actually has data (no cosmetic liveness while loading/failed).
+  const inView = useInView(containerRef, { margin: "100px" });
+  const isInView = inView && active;
 
   if (prefersReducedMotion) {
     return (
@@ -334,52 +336,56 @@ function EventCard({
 // Stats display
 function StatsDisplay({
   eventsToday,
-  streak,
-  isLive,
+  windowSaturated,
+  status,
+  fetchedAt,
+  now,
 }: {
   eventsToday: number;
-  streak: number;
-  isLive: boolean;
+  /** All events in the 30-event window landed today, so the count is a lower bound. */
+  windowSaturated: boolean;
+  status: "loading" | "ready" | "error";
+  fetchedAt: Date | null;
+  now: Date | null;
 }) {
-  const prefersReducedMotion = useReducedMotion();
+  const hasFreshness = status === "ready" && fetchedAt !== null && now !== null;
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        {/* Live indicator */}
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <div className="flex flex-wrap items-center gap-4">
+        {/* Freshness indicator - derived from the upstream response time, not cosmetic */}
         <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            {!prefersReducedMotion && isLive && (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span
+            className={cn(
+              "inline-flex h-2 w-2 rounded-full",
+              status === "ready" ? "bg-emerald-500" : "bg-slate-500"
             )}
-            <span
-              className={cn(
-                "relative inline-flex h-2 w-2 rounded-full",
-                isLive ? "bg-emerald-500" : "bg-slate-500"
-              )}
-            />
-          </span>
+            aria-hidden="true"
+          />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            {isLive ? "Live" : "Offline"}
+            {status === "loading" && "Loading"}
+            {status === "error" && "Feed unavailable"}
+            {status === "ready" && (hasFreshness ? (
+              <>
+                Updated{" "}
+                <time dateTime={fetchedAt.toISOString()}>{formatRelativeTime(fetchedAt, now)}</time>
+              </>
+            ) : "Recent")}
           </span>
         </div>
 
-        {/* Events today */}
-        <div className="flex items-center gap-1.5">
-          <Activity className="h-3.5 w-3.5 text-emerald-400" />
-          <span className="text-sm font-semibold text-slate-300">
-            {eventsToday} <span className="text-slate-500 font-normal">today</span>
-          </span>
-        </div>
+        {/* Events today (bounded by the 30-event window GitHub returns) */}
+        {status === "ready" && (
+          <div className="flex items-center gap-1.5">
+            <Activity className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+            <span className="text-sm font-semibold text-slate-300">
+              {eventsToday}
+              {windowSaturated ? "+" : ""}{" "}
+              <span className="text-slate-500 font-normal">today</span>
+            </span>
+          </div>
+        )}
       </div>
-
-      {/* Streak badge */}
-      {streak > 0 && (
-        <div className="flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1">
-          <span className="text-lg">🔥</span>
-          <span className="text-xs font-bold text-amber-400">{streak} day streak</span>
-        </div>
-      )}
     </div>
   );
 }
@@ -387,8 +393,8 @@ function StatsDisplay({
 // Main component
 export default function GitHubHeartbeat({ className }: { className?: string }) {
   const [events, setEvents] = useState<HeartbeatEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [fetchedAt, setFetchedAt] = useState<Date | null>(null);
   const fetchedRef = useRef(false);
   // Initialize with null to avoid hydration mismatch, set after mount
   const [now, setNow] = useState<Date | null>(null);
@@ -399,42 +405,70 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     setNow(new Date());
   }, []);
 
-  // Fetch events
+  // Fetch events. Non-OK responses are handled quietly (no throw, no console
+  // noise): the card degrades to a labeled "unavailable" state instead.
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
+    let cancelled = false;
 
     async function fetchEvents() {
+      let response: Response;
       try {
-        const response = await fetch("/api/github-heartbeat");
-
-        if (!response.ok) {
-          throw new Error(`GitHub API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (!Array.isArray(data)) {
-          throw new Error("Invalid response format");
-        }
-
-        const parsed = data
-          .filter((e) =>
-            ["PushEvent", "PullRequestEvent", "CreateEvent", "WatchEvent", "ForkEvent"].includes(
-              e.type
-            )
-          )
-          .map(parseEvent);
-
-        setEvents(parsed);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch");
-      } finally {
-        setLoading(false);
+        response = await fetch("/api/github-heartbeat", { headers: { Accept: "application/json" } });
+      } catch {
+        if (!cancelled) setStatus("error");
+        return;
       }
+
+      if (!response.ok) {
+        if (!cancelled) setStatus("error");
+        return;
+      }
+
+      let data: unknown;
+      try {
+        data = await response.json();
+      } catch {
+        if (!cancelled) setStatus("error");
+        return;
+      }
+
+      // Accept both the { events, fetchedAt } envelope and a bare array.
+      const rawEvents: unknown = Array.isArray(data)
+        ? data
+        : data && typeof data === "object" && Array.isArray((data as { events?: unknown }).events)
+          ? (data as { events: unknown[] }).events
+          : null;
+
+      if (!rawEvents) {
+        if (!cancelled) setStatus("error");
+        return;
+      }
+
+      const parsed = (rawEvents as GitHubEvent[])
+        .filter((e) =>
+          ["PushEvent", "PullRequestEvent", "CreateEvent", "WatchEvent", "ForkEvent"].includes(
+            e.type
+          )
+        )
+        .map(parseEvent);
+
+      const fetchedAtRaw =
+        data && typeof data === "object" && typeof (data as { fetchedAt?: unknown }).fetchedAt === "string"
+          ? Date.parse((data as { fetchedAt: string }).fetchedAt)
+          : Date.parse(response.headers.get("date") ?? "");
+
+      if (cancelled) return;
+      setEvents(parsed);
+      setFetchedAt(Number.isFinite(fetchedAtRaw) ? new Date(fetchedAtRaw) : new Date());
+      setStatus("ready");
     }
 
     fetchEvents();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Update relative time labels once per minute; pause while the tab is hidden
@@ -472,43 +506,26 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     return `${year}-${month}-${day}`;
   }, []);
 
-  // Calculate stats
+  // Calculate stats. The streak was dropped on purpose: a 30-event window
+  // cannot tell a real streak from a busy day, so it was not an honest number.
   const stats = useMemo(() => {
     // Return defaults if now is not yet set (during SSR/hydration)
-    if (!now) return { eventsToday: 0, streak: 0 };
+    if (!now) return { eventsToday: 0, windowSaturated: false };
 
     const todayKey = getLocalDayKey(now);
     const eventsToday = events.filter((e) => getLocalDayKey(e.timestamp) === todayKey).length;
+    const windowSaturated = events.length > 0 && eventsToday === events.length;
 
-    // Simple streak calculation (consecutive days with activity)
-    const uniqueDays = new Set(events.map((e) => getLocalDayKey(e.timestamp)));
-    let streak = 0;
-    
-    // Start checking from either today (if active) or yesterday
-    let checkDate = todayKey;
-    if (!uniqueDays.has(checkDate)) {
-      const d = new Date(now.getTime());
-      d.setDate(d.getDate() - 1);
-      checkDate = getLocalDayKey(d);
-    }
-
-    while (uniqueDays.has(checkDate)) {
-      streak++;
-      const [year, month, day] = checkDate.split("-").map(Number);
-      const d = new Date(year, month - 1, day);
-      d.setDate(d.getDate() - 1);
-      checkDate = getLocalDayKey(d);
-    }
-
-    return { eventsToday, streak };
+    return { eventsToday, windowSaturated };
   }, [events, now, getLocalDayKey]);
 
-  const isLive = !loading && !error && events.length > 0;
+  const loading = status === "loading";
+  const error = status === "error";
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 p-6 backdrop-blur-xl",
+        "relative min-h-[608px] overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 p-6",
         className
       )}
     >
@@ -527,7 +544,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
             </div>
             <div>
               <h3 className="text-base font-bold text-white">GitHub Heartbeat</h3>
-              <p className="text-xs text-slate-500">Real-time activity feed</p>
+              <p className="text-xs text-slate-500">Recent public activity</p>
             </div>
           </div>
 
@@ -535,21 +552,27 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
             href={`https://github.com/${GITHUB_USERNAME}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-1.5 text-xs font-medium text-slate-400 transition-all hover:border-slate-600 hover:bg-slate-800 hover:text-white"
+            className="flex min-h-11 items-center gap-1.5 rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2.5 text-xs font-medium text-slate-400 transition-all hover:border-slate-600 hover:bg-slate-800 hover:text-white"
           >
             <span>@{GITHUB_USERNAME}</span>
-            <ExternalLink className="h-3 w-3" />
+            <ExternalLink className="h-3 w-3" aria-hidden="true" />
           </a>
         </div>
 
         {/* Heartbeat visualization */}
         <div className="mb-4">
-          <HeartbeatLine />
+          <HeartbeatLine active={status === "ready" && events.length > 0} />
         </div>
 
         {/* Stats row */}
         <div className="mb-5">
-          <StatsDisplay eventsToday={stats.eventsToday} streak={stats.streak} isLive={isLive} />
+          <StatsDisplay
+            eventsToday={stats.eventsToday}
+            windowSaturated={stats.windowSaturated}
+            status={status}
+            fetchedAt={fetchedAt}
+            now={now}
+          />
         </div>
 
         {/* Events list */}
@@ -564,13 +587,22 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-              <div className="text-3xl">💤</div>
-              <p className="text-sm text-slate-500">Activity feed unavailable</p>
+              <Clock className="h-8 w-8 text-slate-600" aria-hidden="true" />
+              <p className="text-sm text-slate-400">Activity feed unavailable</p>
+              <a
+                href={`https://github.com/${GITHUB_USERNAME}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-emerald-400 hover:text-emerald-300"
+              >
+                See activity on GitHub
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
             </div>
           ) : events.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-              <Clock className="h-8 w-8 text-slate-600" />
-              <p className="text-sm text-slate-500">No recent activity</p>
+              <Clock className="h-8 w-8 text-slate-600" aria-hidden="true" />
+              <p className="text-sm text-slate-400">No recent public activity</p>
             </div>
           ) : now ? (
             <AnimatePresence mode="popLayout">
@@ -588,10 +620,10 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
               href={`https://github.com/${GITHUB_USERNAME}?tab=overview`}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-emerald-400"
+              className="group flex min-h-11 items-center justify-center gap-2 text-sm font-medium text-slate-400 transition-colors hover:text-emerald-400"
             >
               <span>View full activity</span>
-              <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </a>
           </div>
         )}

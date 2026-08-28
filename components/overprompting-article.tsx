@@ -10,7 +10,31 @@ import {
 } from "next/font/google";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import illustration from "@/assets/overprompting_post_illustration.webp";
+import ErrorBoundary from "@/components/error-boundary";
+import { OverpromptingMathTooltip } from "./overprompting-math-tooltip";
 import { getScrollMetrics } from "@/lib/utils";
+
+// Placeholder heights sized near each visualization's rendered height so the
+// chunk resolving does not shove the prose around (mobile / desktop).
+const VIZ_HEIGHTS = {
+  constraints: "min-h-[720px] md:min-h-[560px]",
+  quality: "min-h-[720px] md:min-h-[600px]",
+  plan: "min-h-[440px] md:min-h-[520px]",
+} as const;
+
+function VizSkeleton({ className }: { className: string }) {
+  return <div aria-hidden="true" className={`animate-pulse bg-white/[0.02] ${className}`} />;
+}
+
+function VizFallback({ className }: { className: string }) {
+  return (
+    <div role="alert" className={`flex items-center justify-center p-8 text-center ${className}`}>
+      <p className="text-sm text-slate-400 mb-0 max-w-md">
+        This visualization could not be rendered on this device. The surrounding text stands on its own.
+      </p>
+    </div>
+  );
+}
 
 // Dynamic import visualizations (no SSR — they use browser APIs / refs)
 const ConstraintViz = dynamic(
@@ -18,21 +42,21 @@ const ConstraintViz = dynamic(
     import("./overprompting-visualizations").then((m) => ({
       default: m.ConstraintViz,
     })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className={VIZ_HEIGHTS.constraints} /> }
 );
 const QualityCurveViz = dynamic(
   () =>
     import("./overprompting-visualizations").then((m) => ({
       default: m.QualityCurveViz,
     })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className={VIZ_HEIGHTS.quality} /> }
 );
 const PlanExecuteViz = dynamic(
   () =>
     import("./overprompting-visualizations").then((m) => ({
       default: m.PlanExecuteViz,
     })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className={VIZ_HEIGHTS.plan} /> }
 );
 
 // Fonts — same editorial system as RaptorQ for consistency
@@ -69,20 +93,41 @@ function EC({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Section heading (the article is a continuous essay; these give AT and the TOC a structure)
+function H2({ children }: { children: React.ReactNode }) {
+  return <h2 className="op-section-title text-white mb-8 md:mb-10">{children}</h2>;
+}
+
+// Shorthand for jargon tooltips
+function J({ k, children }: { k: string; children: React.ReactNode }) {
+  return <OverpromptingMathTooltip mathKey={k}>{children}</OverpromptingMathTooltip>;
+}
+
 export function OverpromptingArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [chefMode, setChefMode] = useState<"annoying" | "trusting">("annoying");
   const articleRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
 
-  // Scroll progress bar
+  // Scroll progress: rAF-throttled, written straight to the DOM so scrolling
+  // never re-renders the article (and with it every Three.js scene).
   useEffect(() => {
-    const handleScroll = () => {
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
       const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${progress})`;
+      if (scrollHintRef.current) scrollHintRef.current.style.opacity = String(Math.max(0, 0.5 - progress * 5));
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => {
+      if (frame === 0) frame = requestAnimationFrame(paint);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    paint();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   // Section reveal on scroll
@@ -112,7 +157,7 @@ export function OverpromptingArticle() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" }
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" }
     );
     targets.forEach((el) => {
       el.classList.add("op-fade-section");
@@ -133,8 +178,10 @@ export function OverpromptingArticle() {
     >
       {/* Scroll Progress */}
       <div
+        ref={progressRef}
         className="op-progress-bar"
-        style={{ transform: `scaleX(${scrollProgress})` }}
+        style={{ transform: "scaleX(0)" }}
+        aria-hidden="true"
       />
 
       {/* ========== HERO ========== */}
@@ -146,13 +193,14 @@ export function OverpromptingArticle() {
             background:
               "radial-gradient(circle, rgba(245,158,11,0.08) 0%, rgba(249,115,22,0.04) 40%, transparent 70%)",
           }}
+          aria-hidden="true"
         />
 
         <EC>
           <div className="text-center relative z-20">
             {/* Badge */}
-            <div className="inline-flex items-center gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
-              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+            <div className="inline-flex items-center gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
+              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" aria-hidden="true" />
               AI Prompting / Strategy
             </div>
 
@@ -181,6 +229,7 @@ export function OverpromptingArticle() {
                   filter: "blur(40px)",
                   transform: "scale(1.2)",
                 }}
+                aria-hidden="true"
               />
               <Image
                 src={illustration}
@@ -194,10 +243,12 @@ export function OverpromptingArticle() {
 
         {/* Scroll indicator */}
         <div
+          ref={scrollHintRef}
           className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
-          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+          style={{ opacity: 0.5 }}
+          aria-hidden="true"
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
+          <span className="text-xs uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
@@ -207,6 +258,7 @@ export function OverpromptingArticle() {
       {/* ========== NARRATIVE PART 1 ========== */}
       <article data-section="part-1">
         <EC>
+          <H2>A Puzzle From Image Editing</H2>
           <p className="op-drop-cap">
             {"I've mentioned this before, but I think it's so revealing and important to understand that I want to convey it again:"}
           </p>
@@ -240,7 +292,9 @@ export function OverpromptingArticle() {
       <section data-section="viz-constraints">
         <EC>
           <div className="op-viz-container">
-            <ConstraintViz />
+            <ErrorBoundary fallback={<VizFallback className={VIZ_HEIGHTS.constraints} />}>
+              <ConstraintViz />
+            </ErrorBoundary>
           </div>
         </EC>
       </section>
@@ -250,11 +304,16 @@ export function OverpromptingArticle() {
       {/* ========== NARRATIVE PART 2 ========== */}
       <section data-section="part-2">
         <EC>
+          <H2>Every Word Moves the Model</H2>
           <p>
             {"The answer is that these models are already trained so much to give good results out of the box. But they're also designed to be very helpful, attentive, and accommodating to every part of your request."}
           </p>
           <p>
-            {'In fact, every single word in your prompt is "attended to" by the model and has an impact on the specific activation states that occur in its "brain."'}
+            {"In fact, every single word in your prompt is "}
+            <J k="attention-mechanism">&ldquo;attended to&rdquo;</J>
+            {" by the model and has an impact on the specific "}
+            <J k="activations">activation states</J>
+            {' that occur in its "brain."'}
           </p>
           <p>
             {"Because this activation weight space is so incomprehensibly vast, you'd be amazed at just how different those activations can be as a result of what might seem to be a minor change in the wording of a prompt."}
@@ -270,6 +329,7 @@ export function OverpromptingArticle() {
       {/* ========== NARRATIVE PART 3 ========== */}
       <section data-section="part-3">
         <EC>
+          <H2>Hiring a Chef</H2>
           <p>
             {"An analogy here is especially informative. Suppose you want to hire a famous and talented chef to prepare a special meal for your party. Great, surely it will be a wonderful meal, right?"}
           </p>
@@ -277,88 +337,89 @@ export function OverpromptingArticle() {
             {"But then you start giving all these additional requests and tweaks to the chef: \"Martin has nut allergies. Oh and Lucy loves duck, be sure to include that. Oh, and our apple trees are ripe, wouldn't it be so great to use those, too.\" And on and on, you give more rules and requirements and constraints."}
           </p>
 
-          {/* Interactive Chef Widget */}
-          <div className="my-12 p-1 bg-white/5 rounded-[2rem] border border-white/10 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-rose-500/5 opacity-50" />
-
-            <div className="relative z-10 p-6 md:p-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-                <div>
-                  <h4 className="text-xl font-bold text-white mb-1">Kitchen Simulator</h4>
-                  <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">Cognitive Load Analysis</p>
-                </div>
-
-                <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 backdrop-blur-md">
-                  <button
-                    type="button"
-                    onClick={() => setChefMode("annoying")}
-                    className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "annoying" ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" : "text-slate-500 hover:text-slate-300"}`}
-                  >
-                    Annoying Planner
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setChefMode("trusting")}
-                    className={`px-4 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase transition-all ${chefMode === "trusting" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-slate-300"}`}
-                  >
-                    Trusting Client
-                  </button>
-                </div>
+          {/* Interactive Chef Widget: one bordered container, no nested cards */}
+          <div className="my-12 p-6 md:p-8 rounded-3xl border border-white/10 bg-gradient-to-br from-amber-500/[0.04] to-rose-500/[0.04] relative">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-1">Chef analogy</h3>
+                <p className="text-xs text-slate-400 font-mono uppercase tracking-widest mb-0">Illustrative: two ways to brief the same chef</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-mono uppercase">
-                      <span className="text-slate-400">Creative Flow</span>
-                      <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
-                        {chefMode === "trusting" ? "Unobstructed" : "Blocked"}
-                      </span>
-                    </div>
-                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-full" : "bg-rose-500 w-[15%]"}`}
-                      />
-                    </div>
-                  </div>
+              <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 backdrop-blur-md self-start md:self-auto" role="group" aria-label="Client behaviour">
+                <button
+                  type="button"
+                  onClick={() => setChefMode("annoying")}
+                  aria-pressed={chefMode === "annoying"}
+                  className={`min-h-11 px-4 rounded-lg text-xs font-bold tracking-tighter uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${chefMode === "annoying" ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" : "text-slate-500 hover:text-slate-300"}`}
+                >
+                  Annoying Planner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChefMode("trusting")}
+                  aria-pressed={chefMode === "trusting"}
+                  className={`min-h-11 px-4 rounded-lg text-xs font-bold tracking-tighter uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${chefMode === "trusting" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-slate-300"}`}
+                >
+                  Trusting Client
+                </button>
+              </div>
+            </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-mono uppercase">
-                      <span className="text-slate-400">Output Artistry</span>
-                      <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
-                        {chefMode === "trusting" ? "Michelin Star" : "Diner Food"}
-                      </span>
-                    </div>
-                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-[95%]" : "bg-rose-500 w-[40%]"}`}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-md relative overflow-hidden min-h-[140px] flex flex-col justify-center">
-                  <div className="absolute top-0 right-0 p-4 opacity-10">
-                    {chefMode === "trusting" ? <CheckCircle2 className="w-12 h-12 text-emerald-400" /> : <AlertTriangle className="w-12 h-12 text-rose-400" />}
-                  </div>
-                  <p className="text-sm text-slate-300 leading-relaxed italic relative z-10">
-                    {chefMode === "trusting"
-                      ? "“I trust your expertise. We want a vegetable-forward summer experience. Surprise us.”"
-                      : "“Use the 2024 vintage oil, no nuts, keep it under 400 calories, and make sure the plating is symmetrical.”"}
-                  </p>
-                  <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${chefMode === "trusting" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
-                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-                      {chefMode === "trusting" ? "Chef is in the zone" : "Chef is frustrated"}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-mono uppercase">
+                    <span className="text-slate-400">Creative Flow</span>
+                    <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
+                      {chefMode === "trusting" ? "Unobstructed" : "Blocked"}
                     </span>
                   </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden" aria-hidden="true">
+                    <div
+                      className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-full" : "bg-rose-500 w-[15%]"}`}
+                    />
+                  </div>
                 </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-mono uppercase">
+                    <span className="text-slate-400">Output Artistry</span>
+                    <span className={chefMode === "trusting" ? "text-emerald-400" : "text-rose-400"}>
+                      {chefMode === "trusting" ? "Michelin Star" : "Diner Food"}
+                    </span>
+                  </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden" aria-hidden="true">
+                    <div
+                      className={`h-full transition-all duration-700 ease-out ${chefMode === "trusting" ? "bg-emerald-500 w-[95%]" : "bg-rose-500 w-[40%]"}`}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 mb-0">Bars are a metaphor, not measurements.</p>
               </div>
+
+              <blockquote className="m-0 pl-5 border-l-2 border-white/10 relative min-h-[140px] flex flex-col justify-center">
+                <div className="absolute top-0 right-0 opacity-10" aria-hidden="true">
+                  {chefMode === "trusting" ? <CheckCircle2 className="w-12 h-12 text-emerald-400" /> : <AlertTriangle className="w-12 h-12 text-rose-400" />}
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed italic relative z-10 mb-0">
+                  {chefMode === "trusting"
+                    ? "“I trust your expertise. We want a vegetable-forward summer experience. Surprise us.”"
+                    : "“Use the 2024 vintage oil, no nuts, keep it under 400 calories, and make sure the plating is symmetrical.”"}
+                </p>
+                <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${chefMode === "trusting" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} aria-hidden="true" />
+                  <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">
+                    {chefMode === "trusting" ? "Chef is in the zone" : "Chef is frustrated"}
+                  </span>
+                </div>
+              </blockquote>
             </div>
           </div>
 
           <p>
-            {"The chef wants to be helpful (assume you're paying them a lot), but every time you add another one of your rules, you are restricting and circumscribing what they can do. You are dramatically narrowing and constraining their search space and impeding their creative process, because now they keep bumping against your rules."}
+            {"The chef wants to be helpful (assume you're paying them a lot), but every time you add another one of your rules, you are restricting and circumscribing what they can do. You are dramatically narrowing and constraining their "}
+            <J k="search-space">search space</J>
+            {" and impeding their creative process, because now they keep bumping against your rules."}
           </p>
           <p>
             {"Instead of focusing on what they know best, which is creating incredible dishes and meal experiences, they are forced to waste their cognitive energy on dancing around these constraints."}
@@ -378,7 +439,9 @@ export function OverpromptingArticle() {
       <section data-section="viz-quality">
         <EC>
           <div className="op-viz-container">
-            <QualityCurveViz />
+            <ErrorBoundary fallback={<VizFallback className={VIZ_HEIGHTS.quality} />}>
+              <QualityCurveViz />
+            </ErrorBoundary>
           </div>
         </EC>
       </section>
@@ -388,6 +451,7 @@ export function OverpromptingArticle() {
       {/* ========== NARRATIVE PART 4 ========== */}
       <section data-section="part-4">
         <EC>
+          <H2>Plan Loosely, Execute Precisely</H2>
           <p>
             {'The chef is the model, and you are the annoying party planner. Every time you try to tell the model exactly what to do and how, just understand that, although you might end up with something that on the surface conforms with all your requirements, it will be the equivalent of that "face-in-hole" photo that "technically" looks like the person but also looks 2-dimensional and like a bad Photoshop attempt: no artistry, and not likely to fool anyone about it being natural or real.'}
           </p>
@@ -415,7 +479,9 @@ export function OverpromptingArticle() {
       <section data-section="viz-plan">
         <EC>
           <div className="op-viz-container">
-            <PlanExecuteViz />
+            <ErrorBoundary fallback={<VizFallback className={VIZ_HEIGHTS.plan} />}>
+              <PlanExecuteViz />
+            </ErrorBoundary>
           </div>
         </EC>
       </section>
@@ -425,6 +491,7 @@ export function OverpromptingArticle() {
       {/* ========== NARRATIVE PART 5 ========== */}
       <section data-section="part-5" className="pb-10 md:pb-14">
         <EC>
+          <H2>The Same Idea for Brownfield Code</H2>
           <p>
             {"If you squint, you will also see a connection to my other big advice for working with brownfield projects that already have a ton of code (and also my approach to porting)."}
           </p>

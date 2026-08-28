@@ -31,12 +31,19 @@ export function useKeyboardShortcuts({
     (event: KeyboardEvent) => {
       if (!enabled) return;
 
-      // Don't trigger shortcuts when typing in inputs
+      // Don't trigger shortcuts when typing in inputs, choosing in a
+      // <select>, operating an ARIA widget, or while a dialog/sheet is open.
       const target = event.target as HTMLElement;
       const isInput =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
+        target.tagName === "SELECT" ||
+        target.isContentEditable ||
+        Boolean(
+          target.closest?.(
+            '[role="dialog"], [role="slider"], [role="listbox"], [role="textbox"], [role="combobox"], [contenteditable="true"], [data-shortcuts-off]'
+          )
+        );
 
       // Allow Cmd+K even in inputs
       const isCmdK =

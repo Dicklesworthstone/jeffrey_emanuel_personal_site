@@ -34,7 +34,9 @@ export function BakeryMathTooltip({ mathKey, children, className, theme = "amber
       ariaLabel={`Explain: ${mathData.term}`}
       variant={theme === "amber" ? "amber" : "cyan"}
       className={cn(
-        "hover:bg-white/5",
+        // `group/math` powers the hover Info badge below; the ring keeps keyboard focus visible.
+        "group/math rounded-sm hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020204]",
+        theme === "amber" ? "focus-visible:ring-amber-400" : "focus-visible:ring-cyan-400",
         className
       )}
       tooltipContent={<MathTooltipContent math={mathData} theme={theme} />}
@@ -109,7 +111,7 @@ function MathSheetContent({ math, theme }: { math: JargonTerm, theme: "amber" | 
         </div>
 
         {math.analogy && (
-          <div className={cn("rounded-2xl border bg-opacity-5 p-5 shadow-inner", borderColor, theme === "amber" ? "bg-amber-500" : "bg-cyan-500")}>
+          <div className={cn("rounded-2xl border p-5 shadow-inner", borderColor, theme === "amber" ? "bg-amber-500/5" : "bg-cyan-500/5")}>
             <h4 className={cn("mb-2 text-xs font-black uppercase tracking-[0.2em]", accentColor)}>Intuitive Analogy</h4>
             <p className="text-base leading-relaxed text-slate-200">
               {math.analogy}
@@ -118,8 +120,8 @@ function MathSheetContent({ math, theme }: { math: JargonTerm, theme: "amber" | 
         )}
 
         {math.why && (
-          <div className={cn("rounded-2xl border bg-opacity-5 p-5", theme === "cyan" ? "border-amber-500/20 bg-amber-500" : "border-cyan-500/20 bg-cyan-500")}>
-            <h4 className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-cyan-400">Why it matters</h4>
+          <div className={cn("rounded-2xl border p-5", theme === "cyan" ? "border-amber-500/20 bg-amber-500/5" : "border-cyan-500/20 bg-cyan-500/5")}>
+            <h4 className={cn("mb-2 text-xs font-black uppercase tracking-[0.2em]", theme === "cyan" ? "text-amber-400" : "text-cyan-400")}>Why it matters</h4>
             <p className="text-base leading-relaxed text-slate-200">
               {math.why}
             </p>

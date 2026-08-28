@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { getScrollMetrics } from "@/lib/utils";
 
@@ -11,23 +17,27 @@ const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
 
 export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
-  const [progress, setProgress] = useState(0);
+  // Progress lives in a motion value so the ring updates without re-rendering
+  // React on every scroll frame; only the coarse visibility boolean is state.
+  const progress = useMotionValue(0);
+  const dashOffset = useTransform(progress, (p) => CIRCUMFERENCE * (1 - p));
   const { mediumTap } = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
-
-  const handleScroll = useCallback(() => {
-    const { scrollTop, progress: scrollProgress } = getScrollMetrics();
-    setIsVisible(scrollTop > 400);
-    setProgress(scrollProgress);
-  }, []);
 
   useEffect(() => {
     let ticking = false;
 
+    const measure = () => {
+      const { scrollTop, progress: scrollProgress } = getScrollMetrics();
+      progress.set(scrollProgress);
+      const next = scrollTop > 400;
+      setIsVisible((prev) => (prev === next ? prev : next));
+    };
+
     const onScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          handleScroll();
+          measure();
           ticking = false;
         });
         ticking = true;
@@ -35,13 +45,12 @@ export default function ScrollToTop() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Initial scroll position sync on mount
-    handleScroll();
+    measure();
 
     return () => {
       window.removeEventListener("scroll", onScroll);
     };
-  }, [handleScroll]);
+  }, [progress]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -49,8 +58,6 @@ export default function ScrollToTop() {
       behavior: prefersReducedMotion ? "auto" : "smooth",
     });
   };
-
-  const dashOffset = CIRCUMFERENCE * (1 - progress);
 
   return (
     <AnimatePresence>
@@ -62,7 +69,7 @@ export default function ScrollToTop() {
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
           onClick={scrollToTop}
           onTouchStart={mediumTap}
-          className="fixed bottom-[max(1.5rem,calc(1.5rem+env(safe-area-inset-bottom)))] right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 shadow-lg shadow-sky-500/20 backdrop-blur-xl transition-all active:scale-95 hover:border-sky-500/60 hover:bg-sky-500/20"
+          className="fixed bottom-[max(1.5rem,calc(1.5rem+env(safe-area-inset-bottom)))] right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 shadow-lg shadow-sky-500/20 backdrop-blur-xl transition-[border-color,background-color,transform] active:scale-95 hover:border-sky-500/60 hover:bg-sky-500/20"
           aria-label="Scroll to top"
         >
           {/* Progress ring */}
@@ -77,7 +84,7 @@ export default function ScrollToTop() {
                 <stop offset="100%" stopColor="#a78bfa" />
               </linearGradient>
             </defs>
-            <circle
+            <motion.circle
               cx="24"
               cy="24"
               r={CIRCLE_RADIUS}
@@ -86,8 +93,7 @@ export default function ScrollToTop() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={dashOffset}
-              style={{ transition: "stroke-dashoffset 0.1s ease-out" }}
+              style={{ strokeDashoffset: dashOffset }}
             />
           </svg>
           <ArrowUp className="relative h-5 w-5" />

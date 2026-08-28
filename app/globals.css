@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/*
+  Design-system token override.
+  `text-slate-500` is the site's "muted" role at 10–14px in ~275 places, but the
+  stock value (#64748b) is 4.24:1 on slate-950 and 3.75:1 on slate-900 — below
+  WCAG AA (4.5:1) for small text. This value keeps the muted feel while passing
+  on every site surface (6.2:1 on slate-950, 5.5:1 on slate-900, 4.5:1 on
+  slate-800). slate-600 stays reserved for decorative/borders only.
+*/
+@theme {
+  --color-slate-500: #8390a5;
+}
+
 :root {
   color-scheme: dark;
 
@@ -153,6 +165,13 @@
   --blur-xl: 24px;
 }
 
+/*
+  Element-level resets live in the `base` cascade layer so that Tailwind
+  utilities (which sit in the later `utilities` layer) always win. Unlayered,
+  these rules silently overrode every `border-*`, `transition-*` and
+  `rounded-*` utility on the site.
+*/
+@layer base {
 ::selection {
   background-color: rgba(56, 189, 248, 0.2); /* Softer sky blue selection */
   color: #ffffff;
@@ -194,6 +213,7 @@ main {
   position: relative;
   z-index: 1;
 }
+} /* end @layer base (resets) */
 
 /* CSS-driven caret blink: no JS animation frames, honors reduced motion. */
 @keyframes cursor-blink {
@@ -351,7 +371,21 @@ body::after {
   padding: 0.2em 0.4em;
   border-radius: 6px;
   color: #7dd3fc; /* Sky-300 */
-  white-space: nowrap;
+  /* Long identifiers/paths must wrap on phones instead of being clipped by
+     the page's horizontal overflow masks. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Display math owns its own horizontal scrollbox on narrow screens
+   (KaTeX renders display blocks as nowrap). */
+.prose .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 .prose pre {
@@ -527,13 +561,15 @@ body::after {
   ========================================
 */
 
-/* Button press feedback */
+/* Button press feedback (base layer so `transition-*` utilities win) */
+@layer base {
 button {
   transition: transform 0.15s ease-out, box-shadow 0.2s ease-out;
 }
 
 button:active:not(:disabled) {
   transform: scale(0.97);
+}
 }
 
 /* Primary button glow effect */
@@ -590,9 +626,11 @@ button:active:not(:disabled) {
 }
 
 /* Nav link hover indicator */
+@layer base {
 nav a {
   position: relative;
   transition: color 0.2s ease-out;
+}
 }
 
 /* Interactive element hover lift */
@@ -638,8 +676,10 @@ button, a {
 }
 
 /* Utility for section spacing */
+@layer base {
 section[data-section] {
   scroll-margin-top: 120px;
+}
 }
 
 /*
@@ -650,34 +690,20 @@ section[data-section] {
   Sky-400 (#38bdf8) on slate-950 (#020617) provides excellent contrast.
 */
 
-/* Base focus-visible styles */
+/* Base focus-visible styles. No border-radius here: forcing a radius on
+   focus snapped every `rounded-full` control to 8px the moment it received
+   keyboard focus. The outline follows the element's own radius. */
+@layer base {
 :focus-visible {
   outline: 2px solid #38bdf8;
   outline-offset: 3px;
-  border-radius: 4px;
   transition: outline-offset 0.15s ease-out;
 }
 
-/* Enhanced focus for interactive cards and larger elements */
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid #38bdf8;
   outline-offset: 3px;
-  border-radius: 8px;
-}
-
-/* Focus ring animation for extra visibility */
-@keyframes focus-pulse {
-  0%, 100% { outline-color: #38bdf8; }
-  50% { outline-color: #7dd3fc; }
-}
-
-/* Cards and larger interactive areas get ring style */
-.glass-card:focus-within,
-article:focus-within {
-  outline: 2px solid #38bdf8;
-  outline-offset: 2px;
-  border-radius: 24px;
 }
 
 /* Form inputs - inset ring style */
@@ -687,6 +713,7 @@ select:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px #020617, 0 0 0 4px #38bdf8;
   border-color: #38bdf8;
+}
 }
 
 /* Skip link for keyboard users */
@@ -889,7 +916,7 @@ select:focus-visible {
 
 .hd-instrument-label {
   font-family: var(--font-jetbrains), monospace;
-  font-size: 10px;
+  font-size: 12px; /* labels informative readouts — 12px floor */
   font-weight: 900;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -954,7 +981,7 @@ select:focus-visible {
   box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
 }
 
-.hd-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+.hd-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
   font-size: 1.625rem;
   line-height: 1.85;
   color: #cbd5e1;
@@ -1145,11 +1172,11 @@ select:focus-visible {
   width: 100%;
   transform-origin: left;
   background: linear-gradient(to right, #22d3ee, #a855f7);
-  z-index: 40;
+  z-index: 95;
   pointer-events: none;
 }
 
-.raptorq-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+.raptorq-scope.rq-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
   font-size: 1.5rem;
   line-height: 1.8;
   color: #f1f5f9;
@@ -1196,7 +1223,7 @@ select:focus-visible {
     margin-bottom: 1.5rem;
   }
 
-  .raptorq-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+  .raptorq-scope.rq-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
   }
@@ -1274,7 +1301,7 @@ select:focus-visible {
   height: 3px;
   width: 100%;
   background: linear-gradient(to right, #22d3ee, #a855f7);
-  z-index: 40;
+  z-index: 95;
   transform-origin: 0 0;
   will-change: transform;
   pointer-events: none;
@@ -1293,6 +1320,35 @@ select:focus-visible {
 .hoeffding-scope .hd-math-block .katex {
   font-size: 1.5em;
   color: var(--hd-cyan);
+}
+
+/* RaptorQ display math: same owned scrollbox as Hoeffding's (the class was
+   referenced from JSX but had no rule, so wide formulas were clipped by the
+   scope's overflow-x: clip on phones). */
+.raptorq-scope .rq-math-block {
+  text-align: center;
+  margin: 2.5rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.raptorq-scope .rq-math-block .katex-display {
+  margin: 0;
+}
+
+/* Overprompting action buttons: comfortable touch targets on phones. */
+@media (max-width: 768px) {
+  .overprompting-scope .op-btn-action,
+  .overprompting-scope .op-btn-secondary {
+    min-height: 44px;
+  }
 }
 
 /*
@@ -1458,7 +1514,8 @@ select:focus-visible {
     .cmaes-scope .rq-viz-container,
     .hoeffding-scope .hd-viz-container,
     .bakery-scope .ba-viz-container,
-    .barra-scope .barra-viz-container) [class~="text-[7px]"] {
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[7px]"] {
   font-size: 0.625rem;
 }
 
@@ -1467,7 +1524,8 @@ select:focus-visible {
     .cmaes-scope .rq-viz-container,
     .hoeffding-scope .hd-viz-container,
     .bakery-scope .ba-viz-container,
-    .barra-scope .barra-viz-container) [class~="text-[8px]"] {
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[8px]"] {
   font-size: 0.67rem;
 }
 
@@ -1476,7 +1534,8 @@ select:focus-visible {
     .cmaes-scope .rq-viz-container,
     .hoeffding-scope .hd-viz-container,
     .bakery-scope .ba-viz-container,
-    .barra-scope .barra-viz-container) [class~="text-[9px]"] {
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[9px]"] {
   font-size: 0.75rem;
 }
 
@@ -1485,7 +1544,8 @@ select:focus-visible {
     .cmaes-scope .rq-viz-container,
     .hoeffding-scope .hd-viz-container,
     .bakery-scope .ba-viz-container,
-    .barra-scope .barra-viz-container) [class~="text-[10px]"] {
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[10px]"] {
   font-size: 0.8rem;
 }
 
@@ -1494,7 +1554,8 @@ select:focus-visible {
     .cmaes-scope .rq-viz-container,
     .hoeffding-scope .hd-viz-container,
     .bakery-scope .ba-viz-container,
-    .barra-scope .barra-viz-container) [class~="text-[11px]"] {
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[11px]"] {
   font-size: 0.85rem;
 }
 
@@ -1503,7 +1564,8 @@ select:focus-visible {
     .cmaes-scope .rq-viz-container,
     .hoeffding-scope .hd-viz-container,
     .bakery-scope .ba-viz-container,
-    .barra-scope .barra-viz-container) [class~="text-[12px]"] {
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[12px]"] {
   font-size: 0.9rem;
 }
 
@@ -1513,7 +1575,8 @@ select:focus-visible {
       .cmaes-scope .rq-viz-container,
       .hoeffding-scope .hd-viz-container,
       .bakery-scope .ba-viz-container,
-      .barra-scope .barra-viz-container) [class~="md:text-[8px]"] {
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[8px]"] {
     font-size: 0.75rem;
   }
 
@@ -1522,7 +1585,8 @@ select:focus-visible {
       .cmaes-scope .rq-viz-container,
       .hoeffding-scope .hd-viz-container,
       .bakery-scope .ba-viz-container,
-      .barra-scope .barra-viz-container) [class~="md:text-[9px]"] {
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[9px]"] {
     font-size: 0.8rem;
   }
 
@@ -1531,7 +1595,8 @@ select:focus-visible {
       .cmaes-scope .rq-viz-container,
       .hoeffding-scope .hd-viz-container,
       .bakery-scope .ba-viz-container,
-      .barra-scope .barra-viz-container) [class~="md:text-[10px]"] {
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[10px]"] {
     font-size: 0.875rem;
   }
 
@@ -1540,7 +1605,8 @@ select:focus-visible {
       .cmaes-scope .rq-viz-container,
       .hoeffding-scope .hd-viz-container,
       .bakery-scope .ba-viz-container,
-      .barra-scope .barra-viz-container) [class~="md:text-[11px]"] {
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[11px]"] {
     font-size: 0.93rem;
   }
 
@@ -1549,7 +1615,8 @@ select:focus-visible {
       .cmaes-scope .rq-viz-container,
       .hoeffding-scope .hd-viz-container,
       .bakery-scope .ba-viz-container,
-      .barra-scope .barra-viz-container) [class~="md:text-[12px]"] {
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[12px]"] {
     font-size: 1rem;
   }
 }
@@ -1595,7 +1662,7 @@ select:focus-visible {
   width: 100%;
   transform-origin: left;
   background: linear-gradient(90deg, #f59e0b, #f97316, #f43f5e);
-  z-index: 40;
+  z-index: 95;
   pointer-events: none;
 }
 
@@ -1624,7 +1691,7 @@ select:focus-visible {
 }
 
 /* Editorial paragraph styling */
-.overprompting-scope.op-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+.overprompting-scope.op-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
   font-size: 1.625rem;
   line-height: 1.85;
   color: #f1f5f9;
@@ -1635,7 +1702,7 @@ select:focus-visible {
   hanging-punctuation: first;
 }
 
-.overprompting-scope.op-body p:not(.text-sm):not(.text-base):not(.text-xl) + p:not(.text-sm):not(.text-base):not(.text-xl) {
+.overprompting-scope.op-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) + p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
   margin-top: 2.25rem;
 }
 
@@ -1688,7 +1755,7 @@ select:focus-visible {
     margin-bottom: 1.5rem;
   }
 
-  .overprompting-scope.op-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+  .overprompting-scope.op-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
     font-size: 1.375rem;
     line-height: 1.85;
     margin-bottom: 3rem;
@@ -1838,7 +1905,7 @@ select:focus-visible {
 }
 
 /* Editorial Content - Stripe-level clarity */
-.bakery-scope.ba-body p:not(.text-sm):not(.text-base) {
+.bakery-scope.ba-body p:not([class*="text-"]):not(.text-sm):not(.text-base) {
   font-size: clamp(1.125rem, 2.5vw, 1.625rem);
   line-height: 1.7;
   color: #cbd5e1;
@@ -1938,7 +2005,7 @@ select:focus-visible {
   width: 100%;
   transform-origin: left;
   background: linear-gradient(to right, #f59e0b, #f97316, #f43f5e);
-  z-index: 40;
+  z-index: 95;
   pointer-events: none;
 }
 
@@ -1960,7 +2027,7 @@ select:focus-visible {
     border-right: none;
   }
   
-  .bakery-scope.ba-body p:not(.text-sm):not(.text-base) {
+  .bakery-scope.ba-body p:not([class*="text-"]):not(.text-sm):not(.text-base) {
     font-size: 1.125rem;
     margin-bottom: 1.75rem;
   }
@@ -1992,15 +2059,9 @@ select:focus-visible {
   position: relative;
 }
 
-/* Background Grain Effect */
-.cmaes-scope::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 1;
-}
+/* (The per-article fixed grain layer was removed: the site already paints one
+   grain via body::before, and a second full-viewport fixed layer only added
+   compositing cost + moiré.) */
 
 /* Sophisticated Typography */
 .cmaes-scope .rq-display-title {
@@ -2042,7 +2103,7 @@ select:focus-visible {
 }
 
 /* Editorial Content */
-.cmaes-scope.rq-body p:not(.text-sm):not(.text-base) {
+.cmaes-scope.rq-body p:not([class*="text-"]):not(.text-sm):not(.text-base) {
   font-size: clamp(1.35rem, 2.8vw, 1.875rem);
   line-height: 1.65;
   color: #94a3b8;
@@ -2087,6 +2148,11 @@ select:focus-visible {
 }
 
 .cmaes-scope .rq-viz-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 2rem 3rem;
   background: rgba(255, 255, 255, 0.02);
   border-bottom: 1px solid var(--cma-border);
@@ -2279,13 +2345,13 @@ select:focus-visible {
   height: 3px;
   width: 100%;
   background: linear-gradient(to right, #10b981, #22d3ee, #3b82f6);
-  z-index: 40;
+  z-index: 95;
   transform-origin: 0 0;
   will-change: transform;
   pointer-events: none;
 }
 
-.barra-scope.barra-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+.barra-scope.barra-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
   font-size: 1.625rem;
   line-height: 1.85;
   color: #f1f5f9;
@@ -2353,7 +2419,7 @@ select:focus-visible {
     font-size: 3.25rem;
   }
 
-  .barra-scope.barra-body p:not(.text-sm):not(.text-base):not(.text-xl) {
+  .barra-scope.barra-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
     font-size: 1.375rem;
     line-height: 1.85;
   }
@@ -2626,7 +2692,7 @@ select:focus-visible {
   width: 100%;
   transform-origin: left;
   background: linear-gradient(90deg, #a855f7, #06b6d4, #10b981);
-  z-index: 40;
+  z-index: 95;
   pointer-events: none;
 }
 
@@ -2641,7 +2707,7 @@ select:focus-visible {
 }
 
 /* Editorial paragraph styling */
-.sm-scope.sm-body p:not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) {
+.sm-scope.sm-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) {
   font-size: 1.5rem;
   line-height: 1.8;
   color: #f1f5f9;
@@ -2652,7 +2718,7 @@ select:focus-visible {
   hanging-punctuation: first;
 }
 
-.sm-scope.sm-body p:not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) + p:not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) {
+.sm-scope.sm-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) + p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) {
   margin-top: 2rem;
 }
 
@@ -2940,15 +3006,28 @@ select:focus-visible {
   }
 }
 
-/* Range slider */
+/* Range slider: a 44px-tall hit box with a 6px painted track, so the thumb
+   is comfortably grabbable on phones and vertical page panning still works. */
 .sm-scope .sm-range {
   -webkit-appearance: none;
   appearance: none;
+  height: 44px;
+  min-height: 44px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y pinch-zoom;
+}
+
+.sm-scope .sm-range::-webkit-slider-runnable-track {
   height: 6px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 9999px;
-  outline: none;
-  cursor: pointer;
+}
+
+.sm-scope .sm-range::-moz-range-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
 }
 
 .sm-scope .sm-range::-webkit-slider-thumb {
@@ -2956,12 +3035,13 @@ select:focus-visible {
   appearance: none;
   width: 18px;
   height: 18px;
+  margin-top: -6px; /* (6px track − 18px thumb) / 2 */
   border-radius: 9999px;
   background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
   box-shadow: 0 0 16px rgba(6, 182, 212, 0.45);
   cursor: pointer;
   border: 2px solid #020204;
-  transition: transform 0.15s ease-out;
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
 }
 
 .sm-scope .sm-range::-webkit-slider-thumb:hover {
@@ -2976,6 +3056,18 @@ select:focus-visible {
   box-shadow: 0 0 16px rgba(6, 182, 212, 0.45);
   cursor: pointer;
   border: 2px solid #020204;
+}
+
+/* Visible keyboard focus on the thumb (the input itself is transparent). */
+.sm-scope .sm-range:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.sm-scope .sm-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px #020204, 0 0 0 6px #22d3ee;
+}
+.sm-scope .sm-range:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px #020204, 0 0 0 6px #22d3ee;
 }
 
 /* Horizontal scroller for the stage cards */
@@ -3018,7 +3110,7 @@ select:focus-visible {
     margin: 1.75rem 0;
   }
 
-  .sm-scope.sm-body p:not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) {
+  .sm-scope.sm-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl):not(.text-\[10px\]):not(.text-\[11px\]):not(.text-\[12px\]):not(.text-\[13px\]):not(.text-\[15px\]):not(.text-\[9px\]) {
     font-size: 1.2rem;
     line-height: 1.75;
     margin-bottom: 1.75rem;

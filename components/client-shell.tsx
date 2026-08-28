@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, Profiler } from "react";
+import { useState, useCallback, Profiler } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
@@ -13,7 +13,6 @@ import ServiceWorkerRegistration from "@/components/service-worker-registration"
 import { useMobileOptimizations } from "@/hooks/use-mobile-optimizations";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useScroll, useSpring } from "framer-motion";
-import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 
 // Lazy load modals to reduce initial bundle size
 const CommandPalette = dynamic(() => import("@/components/command-palette"), {
@@ -94,43 +93,47 @@ export default function ClientShell({ children }: { children: React.ReactNode })
     enabled: !isCommandPaletteOpen && !isShortcutsModalOpen,
   });
 
-  useEffect(() => {
-    // Instant scroll on navigation
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }, [pathname]);
+  // Next's App Router already scrolls new navigations to the top and restores
+  // the previous offset on back/forward; a manual scrollTo here defeated the
+  // restoration and sent readers back to the top of /writing after an essay.
+
+  // Article routes own their reading-progress bar and a floating TOC toggle in
+  // the same corner ScrollToTop would occupy, so the shell renders neither there.
+  const isArticleRoute = /^\/writing\/[^/]+\/?$/.test(pathname ?? "");
 
   return (
     <ErrorBoundary>
+      {/* reducedMotion="user": every framer-motion animation in the tree honours
+          prefers-reduced-motion (transforms/layout are zeroed, opacity kept) */}
+      <MotionConfig reducedMotion="user">
       <div className="flex min-h-screen flex-col relative overflow-x-hidden">
         {/* Global Progress Bar — article pages render their own reading-progress bar instead */}
-        {!/^\/writing\/[^/]+\/?$/.test(pathname ?? "") && (
+        {!isArticleRoute && (
           <motion.div
-            className="fixed top-0 left-0 right-0 z-[95] h-1 origin-left bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500"
-            style={{ scaleX }}
+            className="fixed left-0 right-0 z-[95] h-1 origin-left bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500"
+            style={{ scaleX, top: "env(safe-area-inset-top, 0px)" }}
+            aria-hidden="true"
           />
         )}
-
-        {/* Global Texture Overlay (GPU Accelerated) */}
-        <div 
-          className="pointer-events-none fixed inset-0 z-[9999] opacity-[0.03] mix-blend-overlay will-change-transform"
-          style={{ backgroundImage: `url("${NOISE_SVG_DATA_URI}")` }}
-        />
 
         <SiteHeader onOpenCommandPalette={openCommandPalette} />
         {(() => {
           const pageTransition = (
-            <AnimatePresence mode="wait">
+            // initial={false}: the first paint is never animated in. The
+            // transition is opacity + a small rise only: animating `filter` on
+            // <main> left `filter: blur(0px)` behind, which turned <main> into
+            // the containing block for every position:fixed descendant (the
+            // reading-progress bars) and re-rasterised the whole page on phones.
+            <AnimatePresence mode="wait" initial={false}>
               <motion.main
                 id="main-content"
                 key={pathname}
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.98, y: 10, filter: "blur(10px)" }}
-                animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.02, y: -10, filter: "blur(10px)" }}
-                transition={prefersReducedMotion ? { duration: 0 } : { 
-                  opacity: { duration: 0.4 },
-                  scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                  filter: { duration: 0.4 }
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={prefersReducedMotion ? { duration: 0 } : {
+                  opacity: { duration: 0.22 },
+                  y: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
                 }}
                 className="flex-1 min-h-screen"
                 tabIndex={-1}
@@ -147,7 +150,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
           ) : pageTransition;
         })()}
         <SiteFooter />
-        <ScrollToTop />
+        {!isArticleRoute && <ScrollToTop />}
         <EasterEggs />
 
         {/* Global modals */}
@@ -163,6 +166,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
         {/* PWA Service Worker Registration */}
         <ServiceWorkerRegistration />
       </div>
+      </MotionConfig>
     </ErrorBoundary>
   );
 }

@@ -45,6 +45,21 @@ function getSummaryExcerpt(data: Record<string, unknown>): string {
   return "";
 }
 
+/**
+ * Normalize a frontmatter date to an ISO string. A missing or unparseable date
+ * yields "" (unknown) so consumers omit it, rather than a fake 1970 timestamp
+ * that would be published in feeds, sitemaps and JSON-LD.
+ */
+function normalizePostDate(value: unknown, slug: string): string {
+  if (value === undefined || value === null || value === "") return "";
+  const parsed = new Date(value as string | number | Date);
+  if (Number.isNaN(parsed.getTime())) {
+    console.warn(`[content] ${slug}: invalid frontmatter date ${JSON.stringify(value)}; treating as unknown`);
+    return "";
+  }
+  return parsed.toISOString();
+}
+
 export type Post = {
   slug: string;
   title: string;
@@ -115,12 +130,7 @@ export const getPostBySlug = cache((slug: string) => {
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
 
-  const parsedDate = data.date ? new Date(data.date) : null;
-  // Use a fixed fallback date for deterministic builds/rendering if date is invalid
-  const safeDate =
-    parsedDate && !Number.isNaN(parsedDate.getTime())
-      ? parsedDate.toISOString()
-      : "1970-01-01T00:00:00.000Z";
+  const safeDate = normalizePostDate(data.date, realSlug);
 
   const items: Post = {
     ...data,
@@ -173,11 +183,7 @@ export function getAllPostsMeta() {
       const fileContents = fs.readFileSync(fullPath, "utf8");
       const { data } = matter(fileContents);
       
-      const parsedDate = data.date ? new Date(data.date) : null;
-      const safeDate =
-        parsedDate && !Number.isNaN(parsedDate.getTime())
-          ? parsedDate.toISOString()
-          : "1970-01-01T00:00:00.000Z";
+      const safeDate = normalizePostDate(data.date, realSlug);
 
       posts.push({
         ...data,

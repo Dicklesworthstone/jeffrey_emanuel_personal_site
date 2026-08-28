@@ -35,7 +35,10 @@ describe("ErrorBoundary", () => {
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-    expect(screen.getByText("Test error message")).toBeInTheDocument();
+    // Raw error text is developer-only (shown in development builds); visitors
+    // get a plain-language explanation that names the recovery actions.
+    expect(screen.queryByText("Test error message")).not.toBeInTheDocument();
+    expect(screen.getByText(/trying again usually fixes it/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /reload page/i })).toBeInTheDocument();
   });
 
@@ -89,7 +92,8 @@ describe("ErrorBoundary", () => {
     );
 
     // Initial error state
-    expect(screen.getByText("Transient error")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByText("Recovered content")).not.toBeInTheDocument();
     
     // Fix the issue so next render succeeds
     state.shouldThrow = false;

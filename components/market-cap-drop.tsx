@@ -35,7 +35,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
         <motion.div
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.5 }}
           className="mb-2 flex items-center justify-center gap-2 text-rose-400"
         >
           <TrendingDown className="h-5 w-5" />
@@ -47,7 +47,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
         <motion.div
           initial={prefersReducedMotion ? {} : { scale: 0.8, opacity: 0 }}
           animate={isInView ? { scale: 1, opacity: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.4, type: "spring", bounce: 0.3 }}
+          transition={{ duration: 0.8, delay: 0.1, type: "spring", bounce: 0.3 }}
         >
           <span className="block text-6xl font-black tracking-tight text-white sm:text-7xl md:text-8xl lg:text-9xl">
             <AnimatedNumber
@@ -63,19 +63,21 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
         <motion.p
           initial={prefersReducedMotion ? {} : { opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-4 text-lg text-slate-400"
         >
           The largest in stock market history
         </motion.p>
       </div>
 
-      {/* Stylized chart visualization */}
+      {/* Stylized chart visualization. The line is drawn as a short sequence
+          (steady → drop → markers/labels) that starts within 0.6s and finishes
+          in ~1.4s instead of the previous 4s choreography. */}
       {showChart && (
         <motion.div
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 1.5 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-12"
         >
           <svg
@@ -100,7 +102,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               strokeLinecap="round"
               initial={prefersReducedMotion ? {} : { pathLength: 0 }}
               animate={isInView ? { pathLength: 1 } : {}}
-              transition={{ duration: 1, delay: 1.8, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
             />
 
             {/* The drop */}
@@ -113,7 +115,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               strokeLinejoin="round"
               initial={prefersReducedMotion ? {} : { pathLength: 0 }}
               animate={isInView ? { pathLength: 1 } : {}}
-              transition={{ duration: 0.8, delay: 2.8, ease: "easeIn" }}
+              transition={{ duration: 0.4, delay: 0.9, ease: "easeIn" }}
             />
 
             {/* Drop point marker */}
@@ -124,7 +126,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               className="fill-rose-500"
               initial={prefersReducedMotion ? {} : { scale: 0, opacity: 0 }}
               animate={isInView ? { scale: 1, opacity: 1 } : {}}
-              transition={{ duration: 0.3, delay: 3.2 }}
+              transition={{ duration: 0.3, delay: 0.9 }}
             />
 
             {/* End point marker */}
@@ -135,7 +137,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               className="fill-rose-600"
               initial={prefersReducedMotion ? {} : { scale: 0, opacity: 0 }}
               animate={isInView ? { scale: 1, opacity: 1 } : {}}
-              transition={{ duration: 0.3, delay: 3.6 }}
+              transition={{ duration: 0.3, delay: 1.3 }}
             />
 
             {/* Gradients */}
@@ -158,7 +160,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               textAnchor="middle"
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.3, delay: 3.8 }}
+              transition={{ duration: 0.3, delay: 0.6 }}
             >
               Jan 26
             </motion.text>
@@ -169,7 +171,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               textAnchor="middle"
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.3, delay: 4 }}
+              transition={{ duration: 0.3, delay: 1.3 }}
             >
               Jan 27
             </motion.text>

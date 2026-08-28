@@ -1,10 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ExternalLink, Play, Cpu, GraduationCap, Wrench } from "lucide-react";
 import type { LiveDemo, DemoCategory } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
+
+// A touch that travels further than this before lifting is a scroll, not a tap.
+const TAP_MOVE_THRESHOLD_PX = 8;
 
 // Category-specific styling
 const categoryConfig: Record<
@@ -83,13 +86,31 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
     rectRef.current = null;
   };
 
+  // Haptics fire on a completed tap (pointerup with < 8px travel), never on
+  // touchstart, so a scroll that begins on the card does not buzz.
+  const tapStartRef = useRef<{ x: number; y: number } | null>(null);
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLAnchorElement>) => {
+    tapStartRef.current = e.pointerType === "touch" ? { x: e.clientX, y: e.clientY } : null;
+  }, []);
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLAnchorElement>) => {
+    const start = tapStartRef.current;
+    tapStartRef.current = null;
+    if (!start) return;
+    if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < TAP_MOVE_THRESHOLD_PX) lightTap();
+  }, [lightTap]);
+  const handlePointerCancel = useCallback(() => {
+    tapStartRef.current = null;
+  }, []);
+
   return (
     <a
       href={demo.url}
       target="_blank"
       rel="noopener noreferrer"
       className={cn("block h-full", className)}
-      onTouchStart={lightTap}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
     >
       <article
         ref={divRef}
@@ -101,7 +122,6 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
           "transition-all duration-300 ease-out",
           "hover:bg-black/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
           "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
-          "will-change-transform",
           config.hoverBorder,
           featured ? "p-6 md:p-8" : "p-5 md:p-6"
         )}
@@ -206,9 +226,9 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
                 "group-hover:text-white"
               )}
             >
-              <Play className="h-3 w-3 fill-current" />
+              <Play className="h-3 w-3 fill-current" aria-hidden="true" />
               <span className="hidden sm:inline">Try It</span>
-              <ExternalLink className="h-3 w-3 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ExternalLink className="h-3 w-3 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
             </div>
           </div>
         </div>

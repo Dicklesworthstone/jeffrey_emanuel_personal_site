@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
@@ -31,22 +32,29 @@ export default function GlobalError({
           </div>
           
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-white">
-            Critical System Error
+            Something went wrong
           </h1>
-          
+
           <p className="mb-8 text-slate-400">
-            Something went wrong at the root level. We apologize for the inconvenience.
+            The page failed to render. Trying again usually fixes it; if it
+            doesn&apos;t, the home page always works.
           </p>
 
           <div className="space-y-4">
             <button
               type="button"
               onClick={() => reset()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:bg-violet-500 hover:shadow-violet-500/25 active:scale-95"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-6 py-3 font-semibold text-slate-950 shadow-lg transition-colors hover:bg-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
             >
               <RefreshCw className="h-4 w-4" />
-              Try Again
+              Try again
             </button>
+            <Link
+              href="/"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/60 px-6 py-3 font-semibold text-slate-100 transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+            >
+              Back to home
+            </Link>
             
             {process.env.NODE_ENV === "development" && (
               <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900/50 p-4 text-left">

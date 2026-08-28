@@ -371,9 +371,9 @@ export const TldrToolCard = memo(function TldrToolCard({
             <div className="space-y-4 p-4 sm:space-y-5 sm:p-5">
               {/* Why it's useful */}
               <div>
-                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Why It&apos;s Useful
-                </h3>
+                </h4>
                 <p className="text-xs leading-relaxed text-slate-300 sm:text-sm">
                   {tool.whyItsUseful}
                 </p>
@@ -381,9 +381,9 @@ export const TldrToolCard = memo(function TldrToolCard({
 
               {/* Key features */}
               <div>
-                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Key Features
-                </h3>
+                </h4>
                 <ul className="space-y-1 sm:space-y-1.5">
                   {tool.keyFeatures.map((feature) => (
                     <li
@@ -399,9 +399,9 @@ export const TldrToolCard = memo(function TldrToolCard({
 
               {/* Tech stack */}
               <div>
-                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                   Tech Stack
-                </h3>
+                </h4>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {tool.techStack.map((tech) => (
                     <span
@@ -417,9 +417,9 @@ export const TldrToolCard = memo(function TldrToolCard({
               {/* Synergies */}
               {tool.synergies.length > 0 && (
                 <div>
-                  <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
+                  <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 sm:mb-2 sm:text-xs">
                     Synergies
-                  </h3>
+                  </h4>
                   <div className="grid gap-1.5 sm:gap-2 sm:grid-cols-2">
                     {tool.synergies.map((synergy) => (
                       <SynergyPill

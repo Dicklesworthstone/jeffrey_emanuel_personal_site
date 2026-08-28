@@ -18,6 +18,7 @@ import {
   Linkedin,
   ArrowRight,
   FileText,
+  X,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { navItems, projects, writingHighlights, siteConfig } from "@/lib/content";
@@ -490,6 +491,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 <kbd className="hidden rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 sm:inline-block">
                   ESC
                 </kbd>
+                {/* Touch devices have no Escape key: give them a real close control */}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/10 hover:text-white sm:hidden"
+                  aria-label="Close search"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
               {/* Screen reader status announcements */}

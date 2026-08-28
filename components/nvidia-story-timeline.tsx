@@ -265,7 +265,7 @@ export function NvidiaStoryTimeline({
         className="mb-12 rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-center md:p-6"
       >
         <p className="text-sm leading-relaxed text-amber-200/80 md:text-base">
-          <span className="font-semibold text-amber-300">Key insight: </span>
+          <span className="font-semibold text-amber-300">Why the timing matters: </span>
           {nvidiaStoryData.narrativeInsight}
         </p>
       </motion.div>

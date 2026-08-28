@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import { motion, useSpring } from "framer-motion";
+import { motion, useSpring, useReducedMotion } from "framer-motion";
 
 interface MagneticProps {
   children: React.ReactNode;
@@ -19,12 +19,15 @@ export default function Magnetic({ children, strength = 0.3, className }: Magnet
   
   const x = useSpring(0, { stiffness: 150, damping: 15, mass: 0.1 });
   const y = useSpring(0, { stiffness: 150, damping: 15, mass: 0.1 });
+  // Cursor-following is non-essential motion; skip it under reduced motion.
+  const prefersReducedMotion = useReducedMotion();
 
   const handleMouseEnter = useCallback(() => {
+    if (prefersReducedMotion) return;
     if (ref.current) {
       rectRef.current = ref.current.getBoundingClientRect();
     }
-  }, []);
+  }, [prefersReducedMotion]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!rectRef.current) return;

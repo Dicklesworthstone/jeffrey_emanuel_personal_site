@@ -3,6 +3,12 @@ import { getPublishedPosts } from "@/lib/mdx";
 
 export const dynamic = "force-static";
 
+// The index is built once at build time from content/writing; it only changes
+// on deploy, so let browsers and the CDN hold it instead of re-downloading
+// ~170 KB every time the command palette opens.
+const SEARCH_INDEX_CACHE_CONTROL =
+  "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
+
 export async function GET() {
   const posts = getPublishedPosts();
   
@@ -34,5 +40,7 @@ export async function GET() {
     };
   });
 
-  return NextResponse.json(searchIndex);
+  return NextResponse.json(searchIndex, {
+    headers: { "Cache-Control": SEARCH_INDEX_CACHE_CONTROL },
+  });
 }

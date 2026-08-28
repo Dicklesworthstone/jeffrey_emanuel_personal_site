@@ -18,8 +18,22 @@ import {
 import { getProjectBySlug, getProjectSlugs, type Project } from "@/lib/content";
 import { JsonLd } from "@/components/json-ld";
 import SectionShell from "@/components/section-shell";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import NotableStargazersWrapper from "@/components/notable-stargazers-wrapper";
+import type { StargazerIntelligence } from "@/lib/stargazer-types";
+import stargazerIntelligenceJson from "@/lib/data/stargazer-intelligence.json";
+
+const stargazerIntelligence = stargazerIntelligenceJson as unknown as Partial<StargazerIntelligence>;
+
+/** Per-repo stargazer data, or null when the CI data has nothing to show for it. */
+function getRepoStargazerInfo(repoKey: string | undefined) {
+  if (!repoKey) return null;
+  const repo = stargazerIntelligence.byRepo?.[repoKey];
+  if (!repo || !Array.isArray(repo.topStargazers) || repo.topStargazers.length === 0) return null;
+  const lastUpdated =
+    typeof stargazerIntelligence.lastUpdated === "string" ? stargazerIntelligence.lastUpdated : "";
+  return { lastUpdated };
+}
 
 // Map project slugs to GitHub repo names used in stargazer-intelligence.json
 const SLUG_TO_REPO: Record<string, string> = {
@@ -87,6 +101,8 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
   const starCount = extractStarCount(project.badge);
   const displayBadge = starCount ? null : project.badge;
   const details = project.details;
+  const stargazerRepoKey = SLUG_TO_REPO[slug];
+  const stargazerInfo = getRepoStargazerInfo(stargazerRepoKey);
 
   // Get related projects
   const relatedProjects = details?.relatedProjects
@@ -185,16 +201,22 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
           <p className="text-lg leading-relaxed text-slate-300">{project.description}</p>
         </div>
 
-        {/* Notable Stargazers - only show for projects with stargazer data */}
-        {slug && SLUG_TO_REPO[slug] && (
+        {/* Notable stargazers - only rendered when the CI data actually has entries for this repo */}
+        {stargazerRepoKey && stargazerInfo && (
           <div className="mb-12">
-            <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-white">
-              <Users className={cn("h-5 w-5", accentColor)} />
-              Notable Developers Using This
+            <h2 className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-xl font-bold text-white">
+              <Users className={cn("h-5 w-5", accentColor)} aria-hidden="true" />
+              Notable stargazers
+              {stargazerInfo.lastUpdated && (
+                <span className="text-sm font-medium text-slate-400">
+                  · as of{" "}
+                  <time dateTime={stargazerInfo.lastUpdated}>{formatDate(stargazerInfo.lastUpdated)}</time>
+                </span>
+              )}
             </h2>
             <NotableStargazersWrapper
               variant="project"
-              repoSlug={SLUG_TO_REPO[slug]}
+              repoSlug={stargazerRepoKey}
               maxItems={5}
               showStats={false}
             />

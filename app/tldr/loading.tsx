@@ -4,7 +4,7 @@
  */
 export default function TldrLoading() {
   return (
-    <main className="min-h-screen overflow-x-hidden" aria-hidden="true">
+    <div className="min-h-screen overflow-x-hidden" aria-hidden="true">
       {/* Hero skeleton */}
       <section className="relative overflow-hidden py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 text-center">
@@ -63,7 +63,8 @@ export default function TldrLoading() {
                 <div className="h-4 w-96 max-w-full animate-pulse rounded bg-slate-800/25" />
               </div>
               <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: section === 1 ? 6 : 3 }, (_, i) => (
+                {/* 11 core + 3 supporting cards, matching tldrFlywheelTools */}
+                {Array.from({ length: section === 1 ? 11 : 3 }, (_, i) => (
                   <div
                     key={i}
                     className="animate-pulse rounded-xl border border-slate-800/40 bg-slate-900/30 p-5"
@@ -86,6 +87,6 @@ export default function TldrLoading() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

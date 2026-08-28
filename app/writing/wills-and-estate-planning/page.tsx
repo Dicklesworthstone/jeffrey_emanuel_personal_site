@@ -1,7 +1,24 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
+import TableOfContents from "@/components/table-of-contents";
 import { WillsEstateArticle } from "@/components/wills-estate-article";
 import { writingHighlights } from "@/lib/content";
+import type { TocHeading } from "@/lib/extract-headings";
+
+// The nine top-level sections of the article. The ids match the `<section id>`
+// anchors in `WillsEstateArticle` (and the inline TOC / URL hashes), so the
+// floating scroll-spy TOC and the inline contents list agree.
+const ARTICLE_TOC_HEADINGS: TocHeading[] = [
+  { id: "cost", text: "One weekend, roughly $120, instead of $3,000 to $20,000", level: 2 },
+  { id: "what-is-it", text: "What is an AI agent, and what is a skill?", level: 2 },
+  { id: "setup", text: "What you need (twenty minutes of setup)", level: 2 },
+  { id: "folder", text: "Using the skill: your working folder", level: 2 },
+  { id: "tips", text: "How to get the most out of it", level: 2 },
+  { id: "showcase", text: "What the skill actually does for you", level: 2 },
+  { id: "attorney", text: "When (and whether) to involve an attorney", level: 2 },
+  { id: "faq", text: "Questions you are about to ask", level: 2 },
+  { id: "pattern", text: "A pattern, not a product", level: 2 },
+];
 
 const ARTICLE_TITLE = "An AI Skill for Wills & Estate Planning";
 const ARTICLE_DESCRIPTION =
@@ -107,7 +124,7 @@ export default function WillsEstatePlanningPage() {
     <>
       <JsonLd data={articleSchema} />
       <div className="bg-[#020204] border-b border-white/6">
-        <div className="mx-auto flex max-w-[800px] flex-wrap items-center gap-x-3 gap-y-1 px-4 py-4 text-[11px] uppercase tracking-[0.24em] text-slate-400 md:px-6 md:text-[12px]">
+        <div className="mx-auto flex max-w-[800px] flex-wrap items-center gap-x-3 gap-y-1 px-4 py-4 text-xs uppercase tracking-[0.24em] text-slate-400 md:px-6">
           <span>By Jeffrey Emanuel</span>
           <span aria-hidden="true" className="text-slate-600">
             /
@@ -117,6 +134,7 @@ export default function WillsEstatePlanningPage() {
           </time>
         </div>
       </div>
+      <TableOfContents headings={ARTICLE_TOC_HEADINGS} />
       <WillsEstateArticle />
     </>
   );

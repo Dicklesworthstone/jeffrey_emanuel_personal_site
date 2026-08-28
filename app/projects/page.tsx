@@ -88,21 +88,22 @@ export default function ProjectsPage() {
   }, [activeFilter, selectedTags]);
 
   const showFlywheel = activeFilter === "all" || activeFilter === "flywheel";
+  const isFiltering = selectedTags.size > 0 || activeFilter !== "all";
 
   return (
     <SectionShell
       id="projects"
       icon={Zap}
-      eyebrow="The Constellation"
+      eyebrow={`${projects.length} projects`}
       title="A catalog of experiments and products"
       kicker="Explore the ecosystem of tools, protocols, and research papers I've built. Filter by category or browse the full grid."
       headingLevel={1}
     >
       {/* Filter Controls */}
       <LayoutGroup>
-        <nav
+        <div
           className="mb-4 sm:mb-6 flex flex-wrap justify-center gap-1.5 sm:gap-2"
-          role="tablist"
+          role="group"
           aria-label="Filter projects by category"
         >
           {filters.map((filter) => {
@@ -113,11 +114,9 @@ export default function ProjectsPage() {
                 type="button"
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="projects-grid"
+                aria-pressed={isActive}
                 className={cn(
-                  "relative flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors",
+                  "relative flex min-h-10 items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                   isActive
                     ? "text-white"
@@ -131,12 +130,12 @@ export default function ProjectsPage() {
                     transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                <Icon className="relative z-10 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Icon className="relative z-10 h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
                 <span className="relative z-10">{filter.label}</span>
               </button>
             );
           })}
-        </nav>
+        </div>
       </LayoutGroup>
 
       {/* Flywheel Visualization - only shown for "all" or "flywheel" filters */}
@@ -176,10 +175,10 @@ export default function ProjectsPage() {
             <button
               type="button"
               onClick={clearTags}
-              className="ml-2 flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
+              className="ml-2 flex min-h-10 items-center gap-1 rounded-full bg-violet-500/20 px-2.5 py-0.5 text-xs font-medium text-violet-300 transition-colors hover:bg-violet-500/30"
               aria-label={`Clear ${selectedTags.size} selected tags`}
             >
-              <X className="h-3 w-3" />
+              <X className="h-3 w-3" aria-hidden="true" />
               Clear ({selectedTags.size})
             </button>
           )}
@@ -199,7 +198,7 @@ export default function ProjectsPage() {
                 onClick={() => toggleTag(tag)}
                 aria-pressed={isSelected}
                 className={cn(
-                  "rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium transition-all",
+                  "inline-flex min-h-10 items-center rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium transition-all",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                   isSelected
                     ? "bg-violet-500/30 text-violet-200 ring-1 ring-inset ring-violet-500/50"
@@ -214,9 +213,13 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Results count indicator */}
-      {(selectedTags.size > 0 || activeFilter !== "all") && (
-        <div className="mb-6 text-center">
+      {/* Results count indicator - a persistent live region so filter changes are announced */}
+      <div
+        role="status"
+        aria-live="polite"
+        className={cn("text-center", isFiltering && "mb-6")}
+      >
+        {isFiltering && (
           <p className="text-sm text-slate-400">
             Showing <span className="font-semibold text-white">{filteredProjects.length}</span>{" "}
             {filteredProjects.length === 1 ? "project" : "projects"}
@@ -224,13 +227,12 @@ export default function ProjectsPage() {
               <span> matching {selectedTags.size === 1 ? "tag" : "tags"}</span>
             )}
           </p>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* The Grid - moves up immediately when flywheel is hidden */}
       <motion.div
         id="projects-grid"
-        role="tabpanel"
         layout={!prefersReducedMotion}
         transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeInOut" }}
       >

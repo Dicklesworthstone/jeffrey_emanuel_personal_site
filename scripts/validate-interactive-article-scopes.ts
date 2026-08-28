@@ -16,12 +16,12 @@ const requiredSelectors = [
   ".bakery-scope .ba-display-title",
   ".cmaes-scope .rq-display-title",
   ".barra-scope .barra-display-title",
-  ".overprompting-scope.op-body p:not(.text-sm):not(.text-base):not(.text-xl)",
-  ".raptorq-scope.rq-body p:not(.text-sm):not(.text-base):not(.text-xl)",
-  ".hd-body p:not(.text-sm):not(.text-base):not(.text-xl)",
-  ".bakery-scope.ba-body p:not(.text-sm):not(.text-base)",
-  ".cmaes-scope.rq-body p:not(.text-sm):not(.text-base)",
-  ".barra-scope.barra-body p:not(.text-sm):not(.text-base):not(.text-xl)",
+  ".overprompting-scope.op-body p:not([class*=\"text-\"]):not(.text-sm):not(.text-base):not(.text-xl)",
+  ".raptorq-scope.rq-body p:not([class*=\"text-\"]):not(.text-sm):not(.text-base):not(.text-xl)",
+  ".hd-body p:not([class*=\"text-\"]):not(.text-sm):not(.text-base):not(.text-xl)",
+  ".bakery-scope.ba-body p:not([class*=\"text-\"]):not(.text-sm):not(.text-base)",
+  ".cmaes-scope.rq-body p:not([class*=\"text-\"]):not(.text-sm):not(.text-base)",
+  ".barra-scope.barra-body p:not([class*=\"text-\"]):not(.text-sm):not(.text-base):not(.text-xl)",
 ];
 
 const missingAnchors = requiredAnchors.filter((anchor) => !css.includes(anchor));

@@ -2,44 +2,79 @@
 
 import "katex/dist/katex.min.css";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Crimson_Pro,
   JetBrains_Mono,
   Bricolage_Grotesque,
 } from "next/font/google";
-import { RotateCcw, Activity, Cpu, Box } from "lucide-react";
+import { ArrowUp, Activity, Cpu, Box, RefreshCw } from "lucide-react";
 import katex from "katex";
 import { CMAESJargon } from "./cmaes-jargon";
 import { CMAESMathTooltip } from "./cmaes-math-tooltip";
 import { GranularMath } from "./granular-math";
+import ErrorBoundary from "@/components/error-boundary";
 import { getScrollMetrics } from "@/lib/utils";
+
+/**
+ * Placeholder rendered while a visualization chunk loads. Sized close to the
+ * real component (per breakpoint) so the article does not jump when it lands.
+ */
+function VizSkeleton({ className }: { className: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`my-12 md:my-24 w-full rounded-[2rem] md:rounded-[3rem] border border-white/5 bg-white/[0.02] animate-pulse ${className}`}
+    />
+  );
+}
+
+function VizFallback({ name }: { name: string }) {
+  return (
+    <div
+      role="alert"
+      className="my-12 md:my-24 rounded-[2rem] border border-amber-500/20 bg-amber-500/5 p-8 text-center"
+    >
+      <p className="text-base text-slate-200 mb-4">
+        The {name} visualization could not be rendered on this device.
+      </p>
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="rq-btn-secondary min-h-11 !inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+      >
+        <RefreshCw className="w-4 h-4" aria-hidden="true" />
+        Reload
+      </button>
+    </div>
+  );
+}
 
 // Dynamic import visualizations (no SSR)
 const HeroCMAES = dynamic(
   () => import("./cmaes-visualizations").then((m) => ({ default: m.HeroCMAES })),
-  { ssr: false }
+  { ssr: false, loading: () => <div className="absolute inset-0" aria-hidden="true" /> }
 );
 const SelectionWalkthrough = dynamic(
   () => import("./cmaes-visualizations").then((m) => ({ default: m.SelectionWalkthrough })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[960px] md:min-h-[820px] lg:min-h-[720px]" /> }
 );
 const ComparisonViz = dynamic(
   () => import("./cmaes-visualizations").then((m) => ({ default: m.ComparisonViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[900px] sm:min-h-[1000px] lg:min-h-[640px]" /> }
 );
 const BenchmarkRunner = dynamic(
   () => import("./cmaes-visualizations").then((m) => ({ default: m.BenchmarkRunner })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[1040px] lg:min-h-[700px]" /> }
 );
 const NoiseRobustnessViz = dynamic(
   () => import("./cmaes-visualizations").then((m) => ({ default: m.NoiseRobustnessViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[720px] md:min-h-[440px]" /> }
 );
 const RestartViz = dynamic(
   () => import("./cmaes-visualizations").then((m) => ({ default: m.RestartViz })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[760px] md:min-h-[480px]" /> }
 );
 
 // Fonts
@@ -60,8 +95,9 @@ const bricolageGrotesque = Bricolage_Grotesque({
   display: "swap",
 });
 
-// KaTeX helpers
-function M({ t, explanation }: { t: string; explanation?: string }) {
+// KaTeX helpers (memoised: the article never needs to re-render a formula
+// whose source string has not changed)
+const M = memo(function M({ t, explanation }: { t: string; explanation?: string }) {
   const html = katex.renderToString(t, {
     throwOnError: false,
     displayMode: false,
@@ -77,7 +113,7 @@ function M({ t, explanation }: { t: string; explanation?: string }) {
     return <CMAESMathTooltip mathKey={explanation}>{content}</CMAESMathTooltip>;
   }
   return content;
-}
+});
 
 // Shorthand for jargon
 function J({
@@ -105,17 +141,43 @@ function EC({ children }: { children: React.ReactNode }) {
 }
 
 export function CMAESArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const heroHintRef = useRef<HTMLDivElement>(null);
+  // Only the back-to-top button needs React state, and only when it crosses
+  // its threshold; the progress bar and hero hint are written straight to
+  // the DOM from a rAF-throttled scroll listener.
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const showBackToTopRef = useRef(false);
 
   useEffect(() => {
-    const handleScroll = () => {
+    let rafId: number | null = null;
+    const apply = () => {
+      rafId = null;
       const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+      if (heroHintRef.current) {
+        heroHintRef.current.style.opacity = String(Math.max(0, 0.5 - progress * 5));
+      }
+      const show = progress > 0.2;
+      if (show !== showBackToTopRef.current) {
+        showBackToTopRef.current = show;
+        setShowBackToTop(show);
+      }
+    };
+    const handleScroll = () => {
+      if (rafId === null) rafId = window.requestAnimationFrame(apply);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll, { passive: true });
+    apply();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Section reveal on scroll
@@ -145,7 +207,8 @@ export function CMAESArticle() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" }
+      // threshold 0 so very tall sections still reveal on short phone viewports
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" }
     );
     targets.forEach((el) => {
       el.classList.add("rq-fade-section");
@@ -165,8 +228,10 @@ export function CMAESArticle() {
     >
       {/* Scroll Progress */}
       <div
+        ref={progressBarRef}
         className="rq-progress-bar !bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
-        style={{ transform: `scaleX(${scrollProgress})` }}
+        style={{ transform: "scaleX(0)" }}
+        aria-hidden="true"
       />
 
       {/* ========== HERO ========== */}
@@ -176,7 +241,7 @@ export function CMAESArticle() {
 
         <EC>
           <div className="text-center relative z-20">
-            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
+            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-amber-400 tracking-[0.3em] uppercase backdrop-blur-xl">
               <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
               Non-Convex Intelligence / Adaptive Search
             </div>
@@ -195,10 +260,12 @@ export function CMAESArticle() {
         </EC>
 
         <div
+          ref={heroHintRef}
           className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
-          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+          style={{ opacity: 0.5 }}
+          aria-hidden="true"
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">
+          <span className="text-xs uppercase tracking-[0.4em] text-white/40">
             Scroll to Optimize
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-amber-500/20 to-transparent" />
@@ -273,7 +340,9 @@ export function CMAESArticle() {
             </li>
           </ol>
           
-          <SelectionWalkthrough />
+          <ErrorBoundary fallback={<VizFallback name="Loop Discovery" />}>
+            <SelectionWalkthrough />
+          </ErrorBoundary>
 
           <p className="mt-12 text-pretty">
             The initially spherical Gaussian gradually transforms into a rotated and stretched <J t="covariance-matrix">ellipsoid</J>. This shape aligns with the valleys and ridges of the objective function, implicitly learning the local <J t="hessian">Hessian</J> without calculating derivatives.
@@ -298,7 +367,7 @@ export function CMAESArticle() {
               <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-6">
                 <Box className="w-6 h-6 text-amber-400" />
               </div>
-              <h4 className="text-2xl font-black text-white mb-4 group-hover:text-amber-400 transition-colors tracking-tight">Airplane Wings</h4>
+              <h3 className="text-2xl font-black text-white mb-4 group-hover:text-amber-400 transition-colors tracking-tight">Airplane Wings</h3>
               <p className="text-base text-slate-400 leading-relaxed mb-0 font-light">
                 CFD simulations can take hours per run. Discontinuities arising from meshing and turbulence models make finite differences unreliable. A single gradient step might require days of computation.
               </p>
@@ -308,7 +377,7 @@ export function CMAESArticle() {
               <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-6">
                 <Activity className="w-6 h-6 text-orange-400" />
               </div>
-              <h4 className="text-2xl font-black text-white mb-4 group-hover:text-orange-400 transition-colors tracking-tight">Suspension Bridges</h4>
+              <h3 className="text-2xl font-black text-white mb-4 group-hover:text-orange-400 transition-colors tracking-tight">Suspension Bridges</h3>
               <p className="text-base text-slate-400 leading-relaxed mb-0 font-light">
                 Finite element models involve sharp changes as constraints flip between satisfied and violated states. Brittle constraints and mode-crossing make standard gradient descent ineffective.
               </p>
@@ -320,7 +389,7 @@ export function CMAESArticle() {
                   <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-6">
                     <Cpu className="w-6 h-6 text-red-400" />
                   </div>
-                  <h4 className="text-3xl font-black text-white mb-4 group-hover:text-red-400 transition-colors tracking-tight">Transformer Hyperparameters</h4>
+                  <h3 className="text-3xl font-black text-white mb-4 group-hover:text-red-400 transition-colors tracking-tight">Transformer Hyperparameters</h3>
                   <p className="text-lg text-slate-400 leading-relaxed mb-0 font-light text-pretty">
                     Architecture choices such as layer counts and attention heads are inherently discrete. The extreme cost of training runs often limits the total evaluation budget to a few hundred points.
                   </p>
@@ -328,7 +397,7 @@ export function CMAESArticle() {
                 <div className="hidden md:block w-px h-32 bg-white/5" />
                 <div className="md:w-1/3 text-center">
                   <div className="text-5xl font-black text-white mb-2 tracking-tighter">200</div>
-                  <div className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500">Typical Eval Budget</div>
+                  <div className="text-xs uppercase font-black tracking-[0.2em] text-slate-500">Typical Eval Budget</div>
                 </div>
               </div>
             </div>
@@ -355,7 +424,9 @@ export function CMAESArticle() {
             CMA-ES is intended for scenarios where gradients are unavailable, computationally prohibitive, or obscured by numerical noise. It serves as a robust alternative when local slopes are too deceptive for reliable optimization.
           </p>
           
-          <ComparisonViz />
+          <ErrorBoundary fallback={<VizFallback name="Geometry War" />}>
+            <ComparisonViz />
+          </ErrorBoundary>
 
           <p className="mt-12 text-pretty">
             By the fifth generation, the covariance <M t="C" /> typically evolves beyond its initial state. Its eigenvectors align with directions where the objective varies gently, allowing the distribution to navigate narrow valleys effectively. This process approximates the local curvature without requiring a formal Hessian or explicit gradients.
@@ -369,20 +440,20 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
-            The Invariance Property
+            4. The Invariance Property
           </h2>
           <p>
             CMA-ES maintains robustness through its <J t="invariance">Invariance</J> properties, making it essentially &quot;coordinate-free.&quot;
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
             <div className="rq-insight-card !m-0 border-amber-500/20 p-8">
-              <h4 className="text-white text-xl md:text-2xl font-bold mb-3">Translation & Rotation</h4>
+              <h3 className="text-white text-xl md:text-2xl font-bold mb-3">Translation & Rotation</h3>
               <p className="text-base md:text-xl text-slate-300 leading-relaxed mb-0">
                 Rotating the search space or shifting the starting point does not alter the algorithm&rsquo;s trajectory. It is independent of the axis orientation.
               </p>
             </div>
             <div className="rq-insight-card !m-0 border-orange-500/20 p-8">
-              <h4 className="text-white text-xl md:text-2xl font-bold mb-3">Rank-Based Scaling</h4>
+              <h3 className="text-white text-xl md:text-2xl font-bold mb-3">Rank-Based Scaling</h3>
               <p className="text-base md:text-xl text-slate-300 leading-relaxed mb-0">
                 Because selection relies solely on the <strong>rank</strong> of samples, the algorithm is invariant to monotonic transforms of the objective. Optimizing <M t="f(x)" /> yields identical results to optimizing <M t="\log(f(x))" />.
               </p>
@@ -400,13 +471,15 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
-            Stochastic Robustness
+            5. Stochastic Robustness
           </h2>
           <p className="mb-12">
             Many engineering black-boxes are <J t="stochastic-optimization">Stochastic</J>, producing noisy feedback due to rounding errors or sensor jitter.
           </p>
           
-          <NoiseRobustnessViz />
+          <ErrorBoundary fallback={<VizFallback name="Noise Filter" />}>
+            <NoiseRobustnessViz />
+          </ErrorBoundary>
 
           <p className="mt-12 text-pretty">
             Gradient-based methods often struggle with noise because they depend on single-point estimates. CMA-ES leverages its entire population to filter out jitter, identifying the underlying global structure through the noise.
@@ -420,13 +493,15 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white text-balance">
-            Escaping Local Minima
+            6. Escaping Local Minima
           </h2>
           <p className="mb-12">
             Real-world landscapes are frequently <J t="multimodality">Multimodal</J>, containing deceptive <J t="local-minima">Local Minima</J>. CMA-ES addresses this through a &quot;Restart with Increasing Population&quot; strategy (<J t="ipop-cma-es">IPOP</J>).
           </p>
           
-          <RestartViz />
+          <ErrorBoundary fallback={<VizFallback name="Escaping Local Traps" />}>
+            <RestartViz />
+          </ErrorBoundary>
 
           <p className="mt-12">
             When progress stalls, the algorithm increases its search radius and expands the population size. This shift from local refinement to global exploration enables CMA-ES to locate the global optimum in vast and complex search spaces.
@@ -440,7 +515,7 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
-            4. Historical Context
+            7. Historical Context
           </h2>
           <p>
             CMA-ES is the culmination of several historical lines of optimization research.
@@ -448,21 +523,21 @@ export function CMAESArticle() {
           
           <div className="space-y-12 my-12">
             <div>
-              <h4 className="text-amber-400 font-mono uppercase tracking-widest text-xs mb-4">Evolution Strategies</h4>
+              <h3 className="text-amber-400 font-mono uppercase tracking-widest text-xs mb-4">Evolution Strategies</h3>
               <p className="text-slate-300">
                 In contrast to genetic algorithms that emphasized bitstrings and crossover, the German <strong>evolution strategies</strong> community focused on continuous search spaces and Gaussian mutations. CMA-ES, introduced in the mid-1990s, extended this by adapting a <em>full covariance matrix</em>.
               </p>
             </div>
             
             <div>
-              <h4 className="text-amber-400 font-mono uppercase tracking-widest text-xs mb-4">Information Geometry</h4>
+              <h3 className="text-amber-400 font-mono uppercase tracking-widest text-xs mb-4">Information Geometry</h3>
               <p className="text-slate-300">
                 Viewed through the lens of information geometry, the core CMA-ES update is a <strong>natural gradient</strong> step on the manifold of multivariate normals. This provides a rigorous mathematical foundation for its adaptive behavior.
               </p>
             </div>
 
             <div>
-              <h4 className="text-amber-400 font-mono uppercase tracking-widest text-xs mb-4">Kriging &amp; Gaussian Processes</h4>
+              <h3 className="text-amber-400 font-mono uppercase tracking-widest text-xs mb-4">Kriging &amp; Gaussian Processes</h3>
               <p className="text-slate-300">
                 CMA-ES shares a common philosophical basis with <strong>Kriging</strong> (Gaussian-process regression). While Kriging models the unknown function itself, CMA-ES uses its Gaussian model as a <strong>proposal distribution</strong> to explore regions of low objective values.
               </p>
@@ -477,24 +552,24 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
-            5. Disciplinary Silos
+            8. Disciplinary Silos
           </h2>
           <p>
             Optimization research is often divided into distinct communities that rarely interact.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
             <div className="bg-slate-900/40 p-10 rounded-2xl border border-white/5">
-              <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" /> GECCO
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-0">
                 The evolutionary computation community focuses on EDAs, surrogate models, and derivative-free methods as the primary language of optimization.
               </p>
             </div>
             <div className="bg-slate-900/40 p-10 rounded-2xl border border-white/5">
-              <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-blue-500" /> NeurIPS
-              </h4>
+              </h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-0 text-pretty">
                 The deep learning community primarily relies on backpropagation and SGD variants. While they utilize Bayesian optimization, evolutionary computation is often treated as a separate discipline.
               </p>
@@ -512,7 +587,7 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
-            6. Creative System Optimization
+            9. Creative System Optimization
           </h2>
           <p>
             CMA-ES is particularly useful for tuning systems where end-to-end differentiability is not feasible.
@@ -538,13 +613,15 @@ export function CMAESArticle() {
       <section>
         <EC>
           <h2 className="rq-section-title mb-8 mt-16 text-white">
-            7. Implementations
+            10. Implementations
           </h2>
           <p className="mb-16">
             Watch the algorithm navigate different landscapes in real-time below.
           </p>
           
-          <BenchmarkRunner />
+          <ErrorBoundary fallback={<VizFallback name="Live Telemetry" />}>
+            <BenchmarkRunner />
+          </ErrorBoundary>
 
           <h3 className="text-2xl font-bold text-white mt-20 mb-8 tracking-tight">Personal Rust Implementations</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
@@ -576,9 +653,9 @@ export function CMAESArticle() {
 
           <div className="grid grid-cols-1 gap-8 text-slate-200 my-12">
             <div className="rq-insight-card !m-0 border-amber-500/20 p-6 md:p-8">
-              <h4 className="text-white text-xl md:text-2xl font-bold mb-4">
+              <h3 className="text-white text-xl md:text-2xl font-bold mb-4">
                 <J t="multivariate-normal">The Search Distribution</J>
-              </h4>
+              </h3>
               <p className="text-base md:text-xl leading-relaxed text-slate-200 mb-5">
                 CMA-ES does not &ldquo;push a single point downhill.&rdquo; It updates a full search distribution, where
                 <span className="text-white"> the center </span>is <M t="m" />, the
@@ -613,9 +690,9 @@ export function CMAESArticle() {
             </div>
 
             <div className="rq-insight-card !m-0 border-orange-500/20 p-6 md:p-8">
-              <h4 className="text-white text-xl md:text-2xl font-bold mb-4">
+              <h3 className="text-white text-xl md:text-2xl font-bold mb-4">
                 <J t="ranking">Invariance Properties</J>
-              </h4>
+              </h3>
               <p className="text-base md:text-xl leading-relaxed text-slate-200 mb-5">
                 Selection depends on <strong>rank</strong>, not raw magnitude. That means monotonic transforms preserve decisions, and rigid linear transforms of coordinates preserve behavior.
               </p>
@@ -637,9 +714,9 @@ export function CMAESArticle() {
             </div>
 
             <div className="rq-insight-card !m-0 border-red-500/20 p-6 md:p-8">
-              <h4 className="text-white text-xl md:text-2xl font-bold mb-4">
+              <h3 className="text-white text-xl md:text-2xl font-bold mb-4">
                 <J t="step-size">Adaptive Step-size Control (CSA)</J>
-              </h4>
+              </h3>
               <p className="text-base md:text-xl leading-relaxed text-slate-200 mb-5">
                 CSA tracks whether successive updates keep moving coherently in one direction. If the path is unusually long, the algorithm increases <M t="\sigma" />; if motion zig-zags, it contracts <M t="\sigma" />.
               </p>
@@ -688,10 +765,13 @@ export function CMAESArticle() {
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 md:bottom-8 w-12 h-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50 opacity-0"
-        style={{ opacity: scrollProgress > 0.2 ? 1 : 0, pointerEvents: scrollProgress > 0.2 ? 'auto' : 'none' }}
+        aria-label="Back to top"
+        aria-hidden={!showBackToTop}
+        tabIndex={showBackToTop ? 0 : -1}
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 md:right-8 md:bottom-8 w-12 h-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-[opacity,transform] duration-300 z-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020204]"
+        style={{ opacity: showBackToTop ? 1 : 0, pointerEvents: showBackToTop ? 'auto' : 'none' }}
       >
-        <RotateCcw className="w-6 h-6" />
+        <ArrowUp className="w-6 h-6" aria-hidden="true" />
       </button>
 
     </div>

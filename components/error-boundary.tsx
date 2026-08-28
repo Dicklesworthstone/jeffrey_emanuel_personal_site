@@ -53,14 +53,17 @@ export default class ErrorBoundary extends Component<
             Something went wrong
           </h2>
           <p className="mt-3 text-sm text-slate-400">
-            {this.state.error?.message ||
-              "An unexpected error occurred while rendering this section."}
+            {/* Raw error messages are developer text; visitors get a plain
+                explanation and the two recovery actions. */}
+            {process.env.NODE_ENV === "development" && this.state.error?.message
+              ? this.state.error.message
+              : "This section hit an unexpected error. Trying again usually fixes it; reloading the page always does."}
           </p>
           <div className="mt-6 flex gap-3">
             <button
               type="button"
               onClick={this.reset}
-              className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
             >
               <RefreshCw className="h-4 w-4" />
               Try again
@@ -70,7 +73,7 @@ export default class ErrorBoundary extends Component<
               onClick={() => {
                 window.location.reload();
               }}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-100 shadow-sm shadow-slate-900/70 hover:border-slate-500 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-100 shadow-sm shadow-slate-900/70 hover:border-slate-500 hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
             >
               Reload page
             </button>

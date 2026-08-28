@@ -68,9 +68,10 @@ export default function SiteFooter() {
                 <Magnetic key={social.label} strength={0.2}>
                   <a
                     href={social.href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="group relative flex h-10 w-10 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all hover:border-white/10 hover:bg-white/10 hover:text-white hover:scale-110"
+                    // mailto: opens the mail client; a blank tab would be empty
+                    target={social.href.startsWith("mailto:") ? undefined : "_blank"}
+                    rel={social.href.startsWith("mailto:") ? undefined : "noreferrer noopener"}
+                    className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-[border-color,background-color,color,transform] hover:border-white/10 hover:bg-white/10 hover:text-white hover:scale-110"
                     aria-label={social.label}
                   >
                     <social.icon className="h-4 w-4 transition-transform group-hover:rotate-12" aria-hidden="true" />
@@ -81,7 +82,7 @@ export default function SiteFooter() {
             <button
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-300"
+              className="inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-300"
               aria-label="Back to top"
             >
               Back to top
@@ -122,8 +123,8 @@ export default function SiteFooter() {
                 <a
                   key={social.label}
                   href={social.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
+                  target={social.href.startsWith("mailto:") ? undefined : "_blank"}
+                  rel={social.href.startsWith("mailto:") ? undefined : "noreferrer noopener"}
                   className="group flex flex-col items-center gap-1.5"
                   aria-label={social.label}
                 >

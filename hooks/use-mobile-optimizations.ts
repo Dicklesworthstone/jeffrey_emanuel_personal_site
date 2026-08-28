@@ -109,12 +109,14 @@ function detectCapabilities(): DeviceCapabilities {
     "(prefers-reduced-motion: reduce)"
   ).matches;
 
-  // Low memory detection (Chrome only)
+  // Low memory detection (Chrome only). Safari never exposes deviceMemory, so
+  // "unknown" must not be read as "low" — that made every iPhone score
+  // medium-tier regardless of hardware.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hasLowMemory = (navigator as any).deviceMemory
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ? (navigator as any).deviceMemory <= 4
-    : isMobile;
+    : false;
 
   // Low power mode detection (heuristic: iOS low power mode reduces CPU frequency)
   const isLowPowerMode = isSlowConnection || hasLowMemory;
@@ -221,15 +223,41 @@ function getInitialCapabilities(): DeviceCapabilities {
  * Hook to get device capabilities and quality settings for Three.js rendering.
  * Re-evaluates on visibility change and orientation change.
  */
+/**
+ * Value-equality for capability snapshots. Every consumer keys `useMemo`
+ * geometry on the capabilities/quality object, so a fresh-but-identical
+ * object on tab-return or rotation used to rebuild whole Three.js scenes.
+ */
+function sameCapabilities(a: DeviceCapabilities, b: DeviceCapabilities): boolean {
+  return (
+    a.tier === b.tier &&
+    a.isMobile === b.isMobile &&
+    a.isSlowConnection === b.isSlowConnection &&
+    a.hardwareConcurrency === b.hardwareConcurrency &&
+    a.devicePixelRatio === b.devicePixelRatio &&
+    a.prefersReducedMotion === b.prefersReducedMotion &&
+    a.hasLowMemory === b.hasLowMemory &&
+    a.isLowPowerMode === b.isLowPowerMode &&
+    a.maxTextureSize === b.maxTextureSize &&
+    a.supportsWebGL2 === b.supportsWebGL2
+  );
+}
+
 export function useDeviceCapabilities() {
   // Initialize with SSR-safe defaults and honor reduced-motion immediately on client.
   const [capabilities, setCapabilities] = useState<DeviceCapabilities>(() => getInitialCapabilities());
   const [isHydrated, setIsHydrated] = useState(false);
 
+  // Only publish a new object when something actually changed.
+  const applyDetected = () => {
+    const next = detectCapabilities();
+    setCapabilities((prev) => (sameCapabilities(prev, next) ? prev : next));
+  };
+
   // Detect actual capabilities after hydration
   useEffect(() => {
     const hydrationId = setTimeout(() => {
-      setCapabilities(detectCapabilities());
+      applyDetected();
       setIsHydrated(true);
     }, 0);
     return () => clearTimeout(hydrationId);
@@ -239,7 +267,7 @@ export function useDeviceCapabilities() {
     // Re-detect on visibility change (user might have changed power settings)
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        setCapabilities(detectCapabilities());
+        applyDetected();
       }
     };
 
@@ -248,13 +276,13 @@ export function useDeviceCapabilities() {
     // Re-detect on orientation change
     const handleOrientationChange = () => {
       if (orientationTimeout) clearTimeout(orientationTimeout);
-      orientationTimeout = setTimeout(() => setCapabilities(detectCapabilities()), 100);
+      orientationTimeout = setTimeout(applyDetected, 100);
     };
 
     // Listen for reduced motion preference changes
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const handleMotionChange = () => {
-      setCapabilities(detectCapabilities());
+      applyDetected();
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);

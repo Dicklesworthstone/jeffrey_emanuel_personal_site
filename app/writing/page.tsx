@@ -59,25 +59,45 @@ export default function WritingPage() {
 
   const mergedItems = Array.from(itemsByHref.values()).filter((item) => !item.draft);
 
+  const dateValue = (value: string | undefined) => {
+    const time = value ? new Date(value).getTime() : Number.NaN;
+    return Number.isNaN(time) ? Number.NEGATIVE_INFINITY : time;
+  };
+
   // Get featured items
   const featured = mergedItems.filter((item) => item.featured)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => dateValue(b.date) - dateValue(a.date));
   
   const featuredHrefs = new Set(featured.map((f) => f.href));
 
   // Get archive items (non-featured)
   const archive = mergedItems
     .filter((item) => !featuredHrefs.has(item.href))
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+  // Data eyebrow: "31 essays · 2024–2026" (year range only from items with real dates)
+  const years = mergedItems
+    .map((item) => (item.date ? new Date(item.date).getUTCFullYear() : Number.NaN))
+    .filter((year) => Number.isFinite(year));
+  const essayCount = mergedItems.length;
+  const yearRange =
+    years.length > 0
+      ? (() => {
+          const min = Math.min(...years);
+          const max = Math.max(...years);
+          return min === max ? `${min}` : `${min}–${max}`;
+        })()
+      : "";
+  const eyebrow = `${essayCount} ${essayCount === 1 ? "essay" : "essays"}${yearRange ? ` · ${yearRange}` : ""}`;
 
   return (
     <div>
       <SectionShell
         id="writing-main"
         iconNode={<PenSquare className="h-5 w-5" />}
-        eyebrow="The Library"
+        eyebrow={eyebrow}
         title="Essays, research notes, and deep dives"
-        kicker="I write to think. This is a collection of my technical essays on AI architecture, market mechanics, and software engineering. No fluff, just density."
+        kicker="I write to think. This is a collection of my technical essays on AI architecture, market mechanics, and software engineering."
         headingLevel={1}
       >
         <WritingGrid featured={featured} archive={archive} />

@@ -172,7 +172,7 @@ export const jargonDictionary: Record<string, JargonTerm> = {
   portability: {
     term: "Portability",
     short: "The surviving spouse's ability to use the deceased spouse's unused estate-tax exemption.",
-    long: "When the first spouse dies with, say, $3M in assets and a $15M exemption, $12M of exemption goes unused. With portability, the surviving spouse can add that $12M to their own $15M exemption, giving them a combined $27M exemption. But portability is NOT automatic — it requires filing IRS Form 706 within 9 months of death (plus extensions), even when no estate tax is owed.",
+    long: "When the first spouse dies with, say, $3M in assets and a $15M exemption, $12M of exemption goes unused. With portability, the surviving spouse can add that $12M to their own $15M exemption, giving them a combined $27M exemption. But portability is NOT automatic — it requires filing IRS Form 706 within 9 months of death (plus extensions), even when no estate tax is owed. If the deadline was missed, estates that were not otherwise required to file can often still make a late portability election up to five years after death under Rev. Proc. 2022-32; after that, private-letter-ruling relief is the only route.",
     why: "Families routinely skip the Form 706 because 'there's no tax to pay.' Years later, the surviving spouse's estate exceeds the single exemption, and the DSUE is lost forever.",
     related: ["dsue", "form-706"],
   },
@@ -185,7 +185,7 @@ export const jargonDictionary: Record<string, JargonTerm> = {
   "form-706": {
     term: "Form 706",
     short: "The IRS estate-tax return, also used to elect portability of the deceased spouse's unused exemption.",
-    long: "Filed within 9 months of death (6-month extension available). Required when the gross estate exceeds the filing threshold, or when the surviving spouse wants to claim the DSUE. Even for estates well below the exemption, filing the 706 to lock in portability is one of the highest-value estate-planning moves available.",
+    long: "Filed within 9 months of death (6-month extension available). Required when the gross estate exceeds the filing threshold, or when the surviving spouse wants to claim the DSUE. Even for estates well below the exemption, filing the 706 to lock in portability is one of the highest-value estate-planning moves available. Missed it? Rev. Proc. 2022-32 lets many estates below the filing threshold elect portability late, up to five years after death.",
     related: ["portability", "dsue"],
   },
   "step-up-basis": {
@@ -218,7 +218,7 @@ export const jargonDictionary: Record<string, JargonTerm> = {
     term: "QDOT",
     short: "A special trust required to get the marital deduction when the surviving spouse is not a U.S. citizen.",
     long: "Qualified Domestic Trust. The unlimited marital deduction doesn't apply to non-citizen spouses because the IRS fears the survivor will take the money and leave the U.S., never paying estate tax. A QDOT gives the non-citizen spouse income for life, but principal distributions are taxed at estate-tax rates. At least one trustee must be a U.S. citizen or domestic corporation.",
-    why: "Bumps any estate with a non-citizen spouse up at least one complexity tier. Miss this and the full estate tax hits at the first death.",
+    why: "Bumps any estate with a non-citizen spouse up at least one complexity tier. Miss this and anything above the decedent's own exclusion (about $15M in 2026) is taxed at the first death instead of being deferred until the survivor dies (IRC §2056(d), §2056A).",
     related: ["qtip"],
   },
   ilit: {
@@ -231,7 +231,7 @@ export const jargonDictionary: Record<string, JargonTerm> = {
   "crummey-notice": {
     term: "Crummey Notice",
     short: "A letter sent to ILIT beneficiaries giving them a temporary right to withdraw each gift, which makes it qualify for the annual gift-tax exclusion.",
-    long: "Named after the Crummey v. Commissioner case. Each time you contribute to the ILIT to pay premiums, beneficiaries receive a notice that they can withdraw up to the annual exclusion amount (currently $18,000 per beneficiary) for a limited window (typically 30 days). They never actually withdraw, but the right to withdraw transforms a future-interest gift into a present-interest gift.",
+    long: "Named after the Crummey v. Commissioner case. Each time you contribute to the ILIT to pay premiums, beneficiaries receive a notice that they can withdraw up to the annual exclusion amount ($19,000 per beneficiary for 2026; verify the current-year figure) for a limited window (typically 30 days). They never actually withdraw, but the right to withdraw transforms a future-interest gift into a present-interest gift.",
     related: ["ilit"],
   },
   grat: {

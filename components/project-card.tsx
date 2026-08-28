@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { ArrowUpRight, Star, GitFork, Box, Beaker, Repeat } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import type { Project } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
-import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 import Magnetic from "@/components/magnetic";
 import { memo } from "react";
+
+// A touch that travels further than this before lifting is a scroll, not a tap.
+const TAP_MOVE_THRESHOLD_PX = 8;
 
 const KindIcon = ({ kind, className }: { kind: Project["kind"]; className?: string }) => {
   switch (kind) {
@@ -29,7 +31,6 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
   const cardRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -68,7 +69,6 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
   }, [isTouchDevice, x, y, mouseX, mouseY]);
 
   const handleMouseEnter = () => {
-    setIsHovered(true);
     if (cardRef.current) {
       rectRef.current = cardRef.current.getBoundingClientRect();
     }
@@ -78,12 +78,27 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
     spotlightOpacity.set(0);
     x.set(0);
     y.set(0);
     rectRef.current = null;
   };
+
+  // Haptics fire on a completed tap (pointerup with < 8px travel), never on
+  // touchstart, so a scroll that begins on the card does not buzz.
+  const tapStartRef = useRef<{ x: number; y: number } | null>(null);
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLAnchorElement>) => {
+    tapStartRef.current = e.pointerType === "touch" ? { x: e.clientX, y: e.clientY } : null;
+  }, []);
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLAnchorElement>) => {
+    const start = tapStartRef.current;
+    tapStartRef.current = null;
+    if (!start) return;
+    if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < TAP_MOVE_THRESHOLD_PX) lightTap();
+  }, [lightTap]);
+  const handlePointerCancel = useCallback(() => {
+    tapStartRef.current = null;
+  }, []);
 
   // Extract star count from badge
   const starMatch = project.badge?.match(/^([\d,]+\.?\d*[KkMm]?\+?)\s+stars?$/);
@@ -131,7 +146,9 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
       href={linkHref}
       {...(isInternalLink ? {} : { target: "_blank", rel: "noopener noreferrer" })}
       className="block h-full perspective-1000"
-      onTouchStart={lightTap}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
     >
       <motion.article
         ref={cardRef}
@@ -144,28 +161,20 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
           transformStyle: "preserve-3d",
         }}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-slate-900/40 p-4 sm:p-6 md:p-8 backdrop-blur-sm",
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-slate-900/40 p-4 sm:p-6 md:p-8",
+          // Backdrop blur only for fine pointers; touch devices get a solid tint instead
+          "pointer-fine:backdrop-blur-sm pointer-coarse:bg-slate-900/70",
           "transition-colors duration-500 ease-out",
           "hover:bg-slate-900/60 hover:border-white/10",
           "active:scale-[0.98] active:brightness-110",
           "focus-within:border-white/20",
-          "will-change-transform",
           hoverBorder
         )}
       >
-        {/* Noise Overlay */}
-        <div 
-          className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-overlay transition-opacity duration-500 group-hover:opacity-[0.05]"
-          style={{ backgroundImage: `url("${NOISE_SVG_DATA_URI}")` }}
-        />
-
         {/* Custom Gradient Background */}
         {project.gradient && (
            <div className={cn("absolute inset-0 opacity-[0.08] transition-opacity duration-700 group-hover:opacity-[0.2] bg-gradient-to-br", project.gradient)} aria-hidden="true" />
         )}
-
-        {/* Scanline Effect */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] opacity-[0.02] group-hover:opacity-[0.04]" />
 
         {/* Dynamic Spotlight Effect */}
         <motion.div
@@ -182,28 +191,6 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
             <div className="flex-1">
               <div className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest">
                 <div className="relative flex h-5 w-5 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden">
-                   <AnimatePresence>
-                     {isHovered && !isTouchDevice && (
-                       <>
-                         <motion.div 
-                           initial={{ opacity: 0, x: 0 }}
-                           animate={{ opacity: 0.5, x: -1 }}
-                           exit={{ opacity: 0 }}
-                           className="absolute inset-0 flex items-center justify-center text-rose-500 mix-blend-screen"
-                         >
-                           <KindIcon kind={project.kind} />
-                         </motion.div>
-                         <motion.div 
-                           initial={{ opacity: 0, x: 0 }}
-                           animate={{ opacity: 0.5, x: 1 }}
-                           exit={{ opacity: 0 }}
-                           className="absolute inset-0 flex items-center justify-center text-cyan-500 mix-blend-screen"
-                         >
-                           <KindIcon kind={project.kind} />
-                         </motion.div>
-                       </>
-                     )}
-                   </AnimatePresence>
                    <KindIcon kind={project.kind} className={cn("relative z-10", accentColor)} />
                 </div>
                 <span className="text-slate-500 transition-colors group-hover:text-slate-400">
@@ -221,7 +208,7 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
               {starCount && (
                 <span className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 group-hover:ring-amber-400/50 group-hover:shadow-amber-500/20">
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1500ms] ease-in-out motion-reduce:transition-none motion-safe:group-hover:translate-x-full" aria-hidden="true" />
-                  <Star className="relative h-3.5 w-3.5 fill-amber-400 text-amber-400 drop-shadow-[0_0_3px_rgba(251,191,36,0.5)]" />
+                  <Star className="relative h-3.5 w-3.5 fill-amber-400 text-amber-400 drop-shadow-[0_0_3px_rgba(251,191,36,0.5)]" aria-hidden="true" />
                   <span className="relative font-mono tracking-tight">{starCount}</span>
                 </span>
               )}
@@ -262,7 +249,7 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
                   {isInternalLink ? "Details" : "View"}
                   <span className="absolute -bottom-1 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full" />
                 </span>
-                <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
               </div>
             </Magnetic>
           </div>

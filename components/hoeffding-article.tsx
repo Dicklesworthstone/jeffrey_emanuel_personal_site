@@ -2,7 +2,7 @@
 
 import "katex/dist/katex.min.css";
 
-import { useEffect, useRef, useState, memo } from "react";
+import { useEffect, useRef, memo } from "react";
 import dynamic from "next/dynamic";
 import {
   Crimson_Pro,
@@ -10,33 +10,68 @@ import {
   Bricolage_Grotesque,
 } from "next/font/google";
 import katex from "katex";
-import { Calculator, ShieldCheck, Layers, ArrowLeft, ChevronDown } from "lucide-react";
+import { Calculator, ShieldCheck, Layers, ArrowLeft, ChevronDown, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { MathTooltip, type TooltipVariant } from "./math-tooltip";
+import ErrorBoundary from "@/components/error-boundary";
 import { getHoeffdingMath } from "@/lib/hoeffding-math";
 import { getScrollMetrics } from "@/lib/utils";
+
+/**
+ * Placeholder rendered while a visualization chunk loads. Sized close to the
+ * real component (per breakpoint) so the article does not jump when it lands.
+ */
+function VizSkeleton({ className }: { className: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`w-full rounded-[2rem] border border-white/5 bg-white/[0.02] animate-pulse ${className}`}
+    />
+  );
+}
+
+function VizFallback({ name }: { name: string }) {
+  return (
+    <div
+      role="alert"
+      className="rounded-[2rem] border border-cyan-500/20 bg-cyan-500/5 p-8 text-center"
+    >
+      <p className="text-base text-slate-200 mb-4">
+        The {name} visualization could not be rendered on this device.
+      </p>
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="hd-btn-secondary min-h-11 inline-flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+      >
+        <RefreshCw className="w-4 h-4" aria-hidden="true" />
+        Reload
+      </button>
+    </div>
+  );
+}
 
 // Dynamic import visualizations
 const HoeffdingHero = dynamic(
   () => import("./hoeffding-visualizations").then((m) => m.HoeffdingHero),
-  { ssr: false }
+  { ssr: false, loading: () => <div className="absolute inset-0" aria-hidden="true" /> }
 );
 const DependencyLab = dynamic(
   () => import("./hoeffding-visualizations").then((m) => m.DependencyLab),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[1240px] md:min-h-[1320px] lg:min-h-[820px]" /> }
 );
 const OutlierCrusher = dynamic(
   () => import("./hoeffding-visualizations").then((m) => m.OutlierCrusher),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[760px] md:min-h-[660px]" /> }
 );
 const RankingVisualizer = dynamic(
   () => import("./hoeffding-visualizations").then((m) => m.RankingVisualizer),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[900px] md:min-h-[640px]" /> }
 );
 const CodePlayground = dynamic(
   () => import("./hoeffding-visualizations").then((m) => m.CodePlayground),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className="min-h-[980px] lg:min-h-[560px]" /> }
 );
 
 // Fonts
@@ -92,20 +127,34 @@ function EC({ children, className = "" }: { children: React.ReactNode; className
 }
 
 export function HoeffdingArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
+  // Progress bar is written straight to the DOM from a rAF-throttled scroll
+  // listener; a setState per scroll event would re-render the whole article.
   useEffect(() => {
-    const handleScroll = () => {
+    let rafId: number | null = null;
+    const apply = () => {
+      rafId = null;
       const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+    };
+    const handleScroll = () => {
+      if (rafId === null) rafId = window.requestAnimationFrame(apply);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll, { passive: true });
+    apply();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Section reveal on scroll
@@ -132,7 +181,9 @@ export function HoeffdingArticle() {
           }
         });
       },
-      { threshold: 0.1, rootMargin: "0px 0px -100px 0px" }
+      // threshold 0: sections taller than ten viewports never reach 10 %
+      // visibility on a phone and would otherwise stay hidden forever.
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" }
     );
     targets.forEach((el) => {
       el.classList.add("hd-fade-section");
@@ -151,10 +202,11 @@ export function HoeffdingArticle() {
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* HUD Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-1 z-40 bg-white/5 pointer-events-none">
-        <motion.div 
-          className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-blue-500"
-          style={{ scaleX: scrollProgress, transformOrigin: "0%" }}
+      <div className="fixed top-0 left-0 w-full h-1 z-40 bg-white/5 pointer-events-none" aria-hidden="true">
+        <div
+          ref={progressBarRef}
+          className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-blue-500 origin-left"
+          style={{ transform: "scaleX(0)" }}
         />
       </div>
 
@@ -162,7 +214,7 @@ export function HoeffdingArticle() {
       <nav className="fixed top-24 left-8 z-40 hidden lg:block">
         <Link 
           href="/writing"
-          className="hd-glass-panel px-6 py-3 rounded-full flex items-center gap-3 hover:scale-105 transition-all group"
+          className="hd-glass-panel min-h-11 px-6 py-3 rounded-full flex items-center gap-3 hover:scale-105 transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-cyan-400" />
           <span className="hd-instrument-label opacity-100 text-white/60">Library</span>
@@ -227,13 +279,13 @@ export function HoeffdingArticle() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
             <div className="space-y-4">
-              <h4 className="text-white font-black uppercase tracking-widest text-sm">The Detection Limit</h4>
+              <h2 className="text-white font-black uppercase tracking-widest text-sm">The Detection Limit</h2>
               <p className="text-slate-400 leading-relaxed">
                 Standard measures like Pearson and Spearman rely on the assumption of directionality. They ask: &quot;As X goes up, does Y go up?&quot; This logic fails completely if the data forms a circle, a cross, or a sine wave. In these cases, the &quot;average&quot; direction is zero, making the relationship invisible to traditional tools.
               </p>
             </div>
             <div className="space-y-4">
-              <h4 className="text-white font-black uppercase tracking-widest text-sm">The Independence Gap</h4>
+              <h2 className="text-white font-black uppercase tracking-widest text-sm">The Independence Gap</h2>
               <p className="text-slate-400 leading-relaxed">
                 Hoeffding&apos;s <M t="D" /> ignores direction entirely. It asks a more fundamental question: &quot;Is the joint behavior of X and Y different from what we would expect if they were purely random?&quot; It quantifies the distance between the observed data and a state of total independence.
               </p>
@@ -253,7 +305,7 @@ export function HoeffdingArticle() {
           </div>
 
           <div className="mt-20 space-y-8 text-lg leading-relaxed text-slate-300">
-            <h3 className="text-3xl md:text-4xl text-white font-black tracking-tight">Where Correlation Falls Short</h3>
+            <h2 className="text-3xl md:text-4xl text-white font-black tracking-tight">Where Correlation Falls Short</h2>
             <p>
               Suppose you have two sequences of numbers and need to quantify their dependence. Sometimes this is time-series data
               (price vs. volume, or stock A returns vs. stock B returns). Sometimes there is no timeline at all (height vs. weight across
@@ -276,14 +328,14 @@ export function HoeffdingArticle() {
 
           <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="hd-glass-panel rounded-3xl p-8">
-              <h4 className="text-white font-black uppercase tracking-widest text-xs mb-4">Spearman&apos;s Rho</h4>
+              <h3 className="text-white font-black uppercase tracking-widest text-xs mb-4">Spearman&apos;s Rho</h3>
               <p className="text-slate-300 mb-0">
                 Spearman improves robustness by replacing each raw value with its within-sequence rank. Extreme magnitudes become bounded
                 ordinal positions, which helps with outliers, but the method still focuses on monotonic trends.
               </p>
             </div>
             <div className="hd-glass-panel rounded-3xl p-8">
-              <h4 className="text-white font-black uppercase tracking-widest text-xs mb-4">Kendall&apos;s Tau</h4>
+              <h3 className="text-white font-black uppercase tracking-widest text-xs mb-4">Kendall&apos;s Tau</h3>
               <p className="text-slate-300 mb-0">
                 Kendall compares concordant vs. discordant pairs (including tie handling) and is also rank-based and robust. However, it still
                 misses many complex shapes because pairwise monotonic logic is not expressive enough.
@@ -313,7 +365,7 @@ export function HoeffdingArticle() {
           </div>
 
           <div className="mt-16 hd-callout hd-glass-panel !border-l-purple-500 !bg-purple-500/[0.03]">
-            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-3">Embeddings and Retrieval</h4>
+            <h3 className="text-white font-black uppercase tracking-widest text-xs mb-3">Embeddings and Retrieval</h3>
             <p className="text-slate-200 mb-0">
               Cosine similarity is excellent for coarse retrieval over large vector sets: it quickly removes most irrelevant candidates. For
               fine-grained ranking near the top of a shortlist, high-dimensional geometry can be unintuitive and brittle. Hoeffding&apos;s{" "}
@@ -322,7 +374,7 @@ export function HoeffdingArticle() {
           </div>
 
           <div className="mt-16 space-y-8 text-lg leading-relaxed text-slate-300">
-            <h3 className="text-3xl md:text-4xl text-white font-black tracking-tight">How Hoeffding&apos;s D Differs</h3>
+            <h2 className="text-3xl md:text-4xl text-white font-black tracking-tight">How Hoeffding&apos;s D Differs</h2>
             <p>
               Hoeffding introduced this statistic in his 1948 paper, <em>A Non-Parametric Test of Independence</em>. Like Spearman and Kendall,
               we first move into rank space (with average-rank handling for ties). Hoeffding&apos;s method then compares the observed
@@ -335,7 +387,7 @@ export function HoeffdingArticle() {
             </p>
             <p>
               The cost is computational load. For <M t="N=5{,}000" /> points, the relevant combinatorial scale includes roughly{" "}
-              <span className="text-white font-semibold">6.2 billion quadruples</span> (<MT mathKey="n-choose-4"><M t="n \text{ choose } 4" /></MT>).
+              <span className="text-white font-semibold">26 trillion quadruples</span> (<MT mathKey="n-choose-4"><M t="n \text{ choose } 4" /></MT>, about <M t="2.6 \times 10^{13}" />).
               That extra work buys much broader detection power.
             </p>
           </div>
@@ -355,8 +407,10 @@ export function HoeffdingArticle() {
             </p>
           </div>
           
-          <DependencyLab />
-          
+          <ErrorBoundary fallback={<VizFallback name="Dependency Lab" />}>
+            <DependencyLab />
+          </ErrorBoundary>
+
           <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 text-slate-400">
             <p className="leading-relaxed">
               The heatmap on the right represents the <MT mathKey="residuals"><strong>Residuals</strong></MT> (<MT mathKey="residuals"><M t="P(X,Y) - P(X)P(Y)" /></MT>). Intense color pockets indicate that certain combinations of <M t="X" /> and <M t="Y" /> happen far more (or less) frequently than random chance would allow.
@@ -381,10 +435,14 @@ export function HoeffdingArticle() {
             </p>
           </div>
 
-          <OutlierCrusher />
+          <ErrorBoundary fallback={<VizFallback name="Magnitude Sanitization" />}>
+            <OutlierCrusher />
+          </ErrorBoundary>
 
           <div className="mt-20">
-            <RankingVisualizer />
+            <ErrorBoundary fallback={<VizFallback name="Linear Compression" />}>
+              <RankingVisualizer />
+            </ErrorBoundary>
           </div>
         </EC>
       </section>
@@ -410,9 +468,9 @@ export function HoeffdingArticle() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-white/5">
-                  <th className="p-6 text-[10px] uppercase tracking-widest font-black text-slate-500">Measure</th>
-                  <th className="p-6 text-[10px] uppercase tracking-widest font-black text-slate-500">Geometric Focus</th>
-                  <th className="p-6 text-[10px] uppercase tracking-widest font-black text-slate-500">Detectable Topologies</th>
+                  <th scope="col" className="p-6 text-xs uppercase tracking-widest font-black text-slate-500">Measure</th>
+                  <th scope="col" className="p-6 text-xs uppercase tracking-widest font-black text-slate-500">Geometric Focus</th>
+                  <th scope="col" className="p-6 text-xs uppercase tracking-widest font-black text-slate-500">Detectable Topologies</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -441,45 +499,52 @@ export function HoeffdingArticle() {
             <div className="hd-instrument-label mb-12">Colorized Formula Instrument</div>
             
             {/* COLORIZED FORMULA START */}
-            <div className="hd-glass-panel rounded-3xl p-10 md:p-16 bg-black/40 border-white/5 relative mb-16">
-              <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-2xl md:text-4xl lg:text-5xl font-mono leading-none tracking-tighter">
-                <div className="flex items-center gap-4">
-                  <span className="text-white/40 italic">D = </span>
-                  <MT mathKey="normalization" color="#f8fafc">30</MT>
-                  <span className="text-white/20">&times;</span>
+            <div className="hd-glass-panel rounded-3xl p-6 sm:p-10 md:p-16 bg-black/40 border-white/5 relative mb-10">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 text-lg sm:text-2xl md:text-4xl lg:text-5xl leading-none tracking-tight">
+                <div className="flex items-center gap-3">
+                  <span className="text-white/40"><M t="D =" /></span>
+                  <MT mathKey="normalization" color="#f8fafc"><M t="30" /></MT>
+                  <span className="text-white/20"><M t="\times" /></span>
                 </div>
-                
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center gap-2 pb-4">
-                    <span className="text-white/20">(</span>
-                    <MT mathKey="d1-term" color="#22d3ee">D_1</MT>
-                    <span className="text-white/20">+</span>
-                    <MT mathKey="d2-term" color="#a855f7">D_2</MT>
-                    <span className="text-white/20">-</span>
-                    <MT mathKey="d3-term" color="#10b981">2D_3</MT>
-                    <span className="text-white/20">)</span>
+
+                <div className="flex flex-col items-center max-w-full">
+                  <div className="flex items-center gap-1.5 sm:gap-2 pb-3 md:pb-4 flex-wrap justify-center">
+                    <span className="text-white/20"><M t="(" /></span>
+                    <MT mathKey="d1-term" color="#22d3ee"><M t="D_1" /></MT>
+                    <span className="text-white/20"><M t="+" /></span>
+                    <MT mathKey="d2-term" color="#a855f7"><M t="D_2" /></MT>
+                    <span className="text-white/20"><M t="-" /></span>
+                    <MT mathKey="d3-term" color="#10b981"><M t="2D_3" /></MT>
+                    <span className="text-white/20"><M t=")" /></span>
                   </div>
-                  <div className="h-0.5 bg-white/10 w-full rounded-full" />
-                  <div className="pt-4">
+                  <div className="h-0.5 bg-white/10 w-full rounded-full" aria-hidden="true" />
+                  <div className="pt-3 md:pt-4 max-w-full overflow-x-auto">
                     <MT mathKey="normalization" color="#f8fafc">
                       <M t="N(N-1)(N-2)(N-3)(N-4)" />
                     </MT>
                   </div>
                 </div>
               </div>
-              
-              {/* Legend Helper */}
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
+
+              {/* Legend: labelled chips (tap or hover for the full explanation) */}
+              <ul className="mt-8 flex flex-wrap justify-center gap-2 list-none m-0 p-0" aria-label="Formula terms">
                  {[
-                   { k: "d1-term", c: "#22d3ee" },
-                   { k: "d2-term", c: "#a855f7" },
-                   { k: "d3-term", c: "#10b981" }
+                   { k: "d1-term", c: "#22d3ee", tex: "D_1", label: "Residual energy" },
+                   { k: "d2-term", c: "#a855f7", tex: "D_2", label: "Internal variation" },
+                   { k: "d3-term", c: "#10b981", tex: "D_3", label: "Interaction" },
+                   { k: "normalization", c: "#f8fafc", tex: "N", label: "Sample size" },
                  ].map(item => (
-                   <MT key={item.k} mathKey={item.k} color={item.c} simple>
-                     <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.2)]" style={{ backgroundColor: item.c }} />
-                   </MT>
+                   <li key={item.k}>
+                     <MT mathKey={item.k} color={item.c} simple>
+                       <span className="inline-flex items-center gap-2 min-h-10 px-3 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-slate-200">
+                         <span className="inline-block w-2.5 h-2.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.2)]" style={{ backgroundColor: item.c }} aria-hidden="true" />
+                         <M t={item.tex} />
+                         <span className="uppercase tracking-wider text-slate-400">{item.label}</span>
+                       </span>
+                     </MT>
+                   </li>
                  ))}
-              </div>
+              </ul>
             </div>
             {/* COLORIZED FORMULA END */}
             
@@ -503,7 +568,7 @@ export function HoeffdingArticle() {
                     <span className="text-white font-black uppercase tracking-widest text-sm">Complexity Tax</span>
                   </div>
                   <p className="text-sm text-slate-400 leading-relaxed text-pretty">
-                    Evaluating quadruples (<MT mathKey="n-choose-4"><M t="n \text{ choose } 4" /></MT>) is expensive. For <M t="N=5{,}000" />, the engine must process <span className="text-white font-bold underline decoration-amber-500/50">6.2 billion</span> combinations.
+                    Evaluating quadruples (<MT mathKey="n-choose-4"><M t="n \text{ choose } 4" /></MT>) is expensive. For <M t="N=5{,}000" />, the engine must process about <span className="text-white font-bold underline decoration-amber-500/50">26 trillion</span> combinations.
                   </p>
                </div>
             </div>
@@ -512,24 +577,39 @@ export function HoeffdingArticle() {
           <div className="hd-glass-panel rounded-3xl p-8 bg-black/60 backdrop-blur-xl">
             <div className="hd-instrument-label mb-6">Mental Model</div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <MT mathKey="d1-term">
-                <div className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 text-center transition-all hover:bg-cyan-500/10">
-                  <div className="font-mono font-bold text-cyan-400 mb-1">D1</div>
-                  <div className="text-[10px] uppercase text-slate-500 font-black tracking-widest">Residual Energy</div>
-                </div>
-              </MT>
-              <MT mathKey="d2-term">
-                <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-500/5 text-center transition-all hover:bg-purple-500/10">
-                  <div className="font-mono font-bold text-purple-400 mb-1">D2</div>
-                  <div className="text-[10px] uppercase text-slate-500 font-black tracking-widest">Internal Variation</div>
-                </div>
-              </MT>
-              <MT mathKey="d3-term">
-                <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-center transition-all hover:bg-emerald-500/10">
-                  <div className="font-mono font-bold text-emerald-400 mb-1">D3</div>
-                  <div className="text-[10px] uppercase text-slate-500 font-black tracking-widest">Interaction</div>
-                </div>
-              </MT>
+              <div className="p-5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 transition-colors hover:bg-cyan-500/10">
+                <MT mathKey="d1-term">
+                  <span className="inline-flex items-baseline gap-2 mb-2">
+                    <span className="font-mono font-bold text-cyan-400"><M t="D_1" /></span>
+                    <span className="text-xs uppercase text-slate-400 font-black tracking-widest">Residual Energy</span>
+                  </span>
+                </MT>
+                <p className="text-slate-300 text-sm mb-0">
+                  Captures aggregate concordance/discordance energy beyond what independence predicts.
+                </p>
+              </div>
+              <div className="p-5 rounded-xl border border-purple-500/20 bg-purple-500/5 transition-colors hover:bg-purple-500/10">
+                <MT mathKey="d2-term">
+                  <span className="inline-flex items-baseline gap-2 mb-2">
+                    <span className="font-mono font-bold text-purple-400"><M t="D_2" /></span>
+                    <span className="text-xs uppercase text-slate-400 font-black tracking-widest">Internal Variation</span>
+                  </span>
+                </MT>
+                <p className="text-slate-300 text-sm mb-0">
+                  Measures internal rank variability in each sequence, independent of cross-sequence coupling.
+                </p>
+              </div>
+              <div className="p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 transition-colors hover:bg-emerald-500/10">
+                <MT mathKey="d3-term">
+                  <span className="inline-flex items-baseline gap-2 mb-2">
+                    <span className="font-mono font-bold text-emerald-400"><M t="D_3" /></span>
+                    <span className="text-xs uppercase text-slate-400 font-black tracking-widest">Interaction</span>
+                  </span>
+                </MT>
+                <p className="text-slate-300 text-sm mb-0">
+                  Interaction term blending concordance structure with each sequence&apos;s internal rank geometry.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -563,26 +643,6 @@ export function HoeffdingArticle() {
             </div>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="hd-glass-panel rounded-2xl p-6">
-              <h4 className="text-white font-black uppercase tracking-widest text-[10px] mb-3">D1</h4>
-              <p className="text-slate-300 text-sm mb-0">
-                Captures aggregate concordance/discordance energy beyond what independence predicts.
-              </p>
-            </div>
-            <div className="hd-glass-panel rounded-2xl p-6">
-              <h4 className="text-white font-black uppercase tracking-widest text-[10px] mb-3">D2</h4>
-              <p className="text-slate-300 text-sm mb-0">
-                Measures internal rank variability in each sequence, independent of cross-sequence coupling.
-              </p>
-            </div>
-            <div className="hd-glass-panel rounded-2xl p-6">
-              <h4 className="text-white font-black uppercase tracking-widest text-[10px] mb-3">D3</h4>
-              <p className="text-slate-300 text-sm mb-0">
-                Interaction term blending concordance structure with each sequence&apos;s internal rank geometry.
-              </p>
-            </div>
-          </div>
         </EC>
       </section>
 
@@ -599,7 +659,9 @@ export function HoeffdingArticle() {
             </p>
           </div>
 
-          <CodePlayground />
+          <ErrorBoundary fallback={<VizFallback name="TypeScript Kernel" />}>
+            <CodePlayground />
+          </ErrorBoundary>
 
           <div className="mt-16 space-y-8 text-slate-300 leading-relaxed">
             <p>
@@ -725,7 +787,7 @@ def hoeffd_example():
               <p>
                 This is also why the method is more computationally expensive than pairwise rank correlation. Pair counting at{" "}
                 <M t="N=5{,}000" /> is already ~12.5 million comparisons (<M t="N \text{ choose } 2" />), but quadruple-level structure scales
-                to roughly 6.2 billion (<MT mathKey="n-choose-4"><M t="N \text{ choose } 4" /></MT>) before the internal arithmetic inside each
+                to roughly 26 trillion (<MT mathKey="n-choose-4"><M t="N \text{ choose } 4" /></MT>) before the internal arithmetic inside each
                 step. The cost is substantial, but it buys much broader pattern sensitivity.
               </p>
               <p>
@@ -755,7 +817,7 @@ def hoeffd_example():
           </p>
           <Link 
             href="/writing"
-            className="inline-flex items-center gap-2 text-cyan-400 hover:text-white transition-colors font-bold uppercase tracking-widest text-[10px]"
+            className="inline-flex items-center gap-2 min-h-11 px-4 rounded-full text-cyan-400 hover:text-white transition-colors font-bold uppercase tracking-widest text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
           >
             <ArrowLeft className="w-3 h-3" /> Back to Library
           </Link>

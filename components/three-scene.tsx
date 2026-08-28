@@ -1,11 +1,10 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, PerformanceMonitor } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState, useCallback, createContext, useContext } from "react";
 import type { JSX } from "react";
 import * as THREE from "three";
-import gsap from "gsap";
 import {
   useDeviceCapabilities,
   type QualitySettings,
@@ -209,9 +208,10 @@ function StarField({ density = 420, color = "#38bdf8" }: { density?: number; col
   const ref = useRef<THREE.Points>(null);
   const { quality } = useQuality();
 
+  // Scale density based on quality settings (a primitive, so a value-equal
+  // quality object re-emitted by the capabilities hook does not rebuild it)
+  const numPoints = scaleCount(density, quality);
   const positions = useMemo(() => {
-    // Scale density based on quality settings
-    const numPoints = scaleCount(density, quality);
     const pts = new Float32Array(numPoints * 3);
     // Use seeded random for deterministic, pure positioning
     const rand = seededRandom(42);
@@ -228,7 +228,7 @@ function StarField({ density = 420, color = "#38bdf8" }: { density?: number; col
       pts[idx + 2] = z;
     }
     return pts;
-  }, [density, quality]);
+  }, [numPoints]);
 
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
@@ -271,13 +271,13 @@ function FloatingPolyhedron({ palette }: { palette: Palette }) {
     ref.current.position.y = Math.sin(t * 0.7) * 0.2;
   });
   return (
-    <mesh ref={ref} castShadow>
+    <mesh ref={ref}>
       <icosahedronGeometry args={[1.2, 1]} />
       <meshStandardMaterial
         metalness={0.35}
         roughness={0.18}
-        color={new THREE.Color(palette[0])}
-        emissive={new THREE.Color(palette[1])}
+        color={palette[0]}
+        emissive={palette[1]}
         emissiveIntensity={1.35}
       />
     </mesh>
@@ -352,9 +352,13 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
-    const t = clock.getElapsedTime() * 0.35;
+    const elapsed = clock.getElapsedTime();
+    const t = elapsed * 0.35;
     const dummy = dummyRef.current;
     const drift = Math.sin(t * 0.6) * params.wobble;
+    // Emissive pulse (0.8 -> 1.6 over 5.6s) lives in the render loop so it
+    // stops with the scene instead of keeping a separate ticker alive.
+    mat.emissiveIntensity = 1.2 + 0.4 * Math.sin((elapsed / 5.6) * Math.PI * 2);
     for (let i = 0; i < actualCount; i++) {
       const k = (i / actualCount) * Math.PI * 2;
       const x = Math.sin((params.ax + drift) * k + t) * Math.cos(params.bx * k + params.phase) * 2.1
@@ -375,15 +379,6 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
       groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.2;
     }
   });
-
-  // gsap pulsing emissive
-  useEffect(() => {
-    const tl = gsap.timeline({ repeat: -1, yoyo: true });
-    tl.to(mat, { emissiveIntensity: 1.6, duration: 2.8, ease: "sine.inOut" });
-    return () => {
-      tl.kill();
-    };
-  }, [mat]);
 
   return (
     <group ref={groupRef}>
@@ -452,61 +447,6 @@ function SceneWaveGrid({ palette, seed }: { palette: Palette; seed: number }) {
 }
 
 // ---------------------------------------------------------------------------
-// Variant: Lorenz ribbons (chaotic attractor)
-// ---------------------------------------------------------------------------
-function LorenzRibbons({ palette }: { palette: Palette }) {
-  const lineRef = useRef<THREE.LineSegments>(null);
-  const geometry = useMemo(() => {
-    const pts: THREE.Vector3[] = [];
-    let x = 0.1, y = 0, z = 0;
-    const dt = 0.007;
-    const sigma = 10, rho = 28, beta = 8 / 3;
-    for (let i = 0; i < 12000; i++) {
-      const dx = sigma * (y - x) * dt;
-      const dy = (x * (rho - z) - y) * dt;
-      const dz = (x * y - beta * z) * dt;
-      x += dx; y += dy; z += dz;
-      if (i % 2 === 0) pts.push(new THREE.Vector3(x * 0.06, y * 0.06, z * 0.06));
-    }
-    const g = new THREE.BufferGeometry();
-    g.setFromPoints(pts);
-    return g;
-  }, []);
-
-  useEffect(() => () => geometry.dispose(), [geometry]);
-
-  useFrame(({ clock }) => {
-    if (!lineRef.current) return;
-    const m = lineRef.current.material as THREE.LineBasicMaterial;
-    m.opacity = 0.6 + Math.sin(clock.getElapsedTime() * 0.8) * 0.25;
-  });
-
-  return (
-    <lineSegments ref={lineRef} geometry={geometry}>
-      <lineBasicMaterial
-        color={palette[1]}
-        transparent
-        opacity={0.78}
-        linewidth={1.5}
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </lineSegments>
-  );
-}
-
-function SceneLorenz({ palette, seed: _ }: { palette: Palette; seed: number }) {
-  return (
-    <>
-      <StarField density={260} color={palette[2]} />
-      <ambientLight intensity={0.4} />
-      <pointLight position={[0, 4, 3]} intensity={1.3} color={palette[0]} />
-      <LorenzRibbons palette={palette} />
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Variant: Helix ribbons
 // ---------------------------------------------------------------------------
 function HelixLines({ palette, turns = 5, strands = 4 }: { palette: Palette; turns?: number; strands?: number }) {
@@ -566,11 +506,16 @@ function SceneHelix({ palette, seed: _ }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 function TorusGarden({ palette, seed }: { palette: Palette; seed: number }) {
   const ref = useRef<THREE.Group>(null);
-  
+  const { quality } = useQuality();
+  // 16 knots at 120x32 is ~123k triangles; low tier gets 6 knots at 60x16.
+  const knotCount = Math.max(6, Math.floor(16 * quality.particleMultiplier));
+  const tubularSegments = scaleSegments(120, quality);
+  const radialSegments = scaleSegments(32, quality);
+
   // Shared geometry and materials to avoid recreation and leaks
   const rand = useMemo(() => seededRandom(seed), [seed]);
   const torii = useMemo(() => {
-    return Array.from({ length: 16 }).map((_, i) => ({
+    return Array.from({ length: knotCount }).map((_, i) => ({
       radius: 0.6 + rand() * 1.6,
       tube: 0.08 + rand() * 0.12,
       tilt: rand() * Math.PI,
@@ -579,11 +524,11 @@ function TorusGarden({ palette, seed }: { palette: Palette; seed: number }) {
       p: 2 + i % 5,
       q: 3 + (i % 3)
     }));
-  }, [palette, rand]);
+  }, [palette, rand, knotCount]);
 
-  const geometries = useMemo(() => 
-    torii.map(t => new THREE.TorusKnotGeometry(t.radius, t.tube, 120, 32, t.p, t.q)),
-  [torii]);
+  const geometries = useMemo(() =>
+    torii.map(t => new THREE.TorusKnotGeometry(t.radius, t.tube, tubularSegments, radialSegments, t.p, t.q)),
+  [torii, tubularSegments, radialSegments]);
 
   const materials = useMemo(() => 
     torii.map(t => new THREE.MeshStandardMaterial({ 
@@ -790,71 +735,6 @@ function SceneClifford({ palette, seed }: { palette: Palette; seed: number }) {
       <ambientLight intensity={0.35} />
       <pointLight position={[2, 2, 2]} intensity={1} color={palette[0]} />
       <Clifford palette={palette} seed={seed} />
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Variant: Supershape morphing sphere
-// ---------------------------------------------------------------------------
-function supershape(theta: number, m: number, n1: number, n2: number, n3: number, a = 1, b = 1) {
-  const t1 = Math.pow(Math.abs(Math.cos((m * theta) / 4) / a), n2);
-  const t2 = Math.pow(Math.abs(Math.sin((m * theta) / 4) / b), n3);
-  return Math.pow(t1 + t2, -1 / n1);
-}
-
-function SuperShapeBlob({ palette, seed }: { palette: Palette; seed: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const tempVec = useRef(new THREE.Vector3());
-  const geom = useMemo(() => new THREE.IcosahedronGeometry(1.1, 4), []);
-  useEffect(() => () => geom.dispose(), [geom]);
-  const rand = useMemo(() => seededRandom(seed), [seed]);
-  const params = useMemo(
-    () => ({ m1: 3 + Math.floor(rand() * 8), m2: 4 + Math.floor(rand() * 6), n1: 0.2 + rand() * 1.8, n2: 0.2 + rand() * 1.8, n3: 0.2 + rand() * 1.8 }),
-    [rand],
-  );
-
-  // Store original positions for stable calculations
-  const originalPositions = useMemo(() => {
-    const pos = geom.attributes.position as THREE.BufferAttribute;
-    return new Float32Array(pos.array);
-  }, [geom]);
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const pos = geom.attributes.position as THREE.BufferAttribute;
-    const t = clock.getElapsedTime();
-    const v = tempVec.current;
-    for (let i = 0; i < pos.count; i++) {
-      // Read from original positions to avoid drift
-      v.set(originalPositions[i * 3], originalPositions[i * 3 + 1], originalPositions[i * 3 + 2]).normalize();
-      const r1 = supershape(Math.atan2(v.y, v.x), params.m1, params.n1, params.n2, params.n3);
-      const r2 = supershape(Math.acos(v.z), params.m2, params.n1, params.n2, params.n3);
-      const r = 1 + 0.55 * r1 * r2 + 0.15 * Math.sin(t * 1.2 + i * 0.3);
-      v.multiplyScalar(r);
-      pos.setXYZ(i, v.x, v.y, v.z);
-    }
-    // eslint-disable-next-line react-hooks/immutability
-    pos.needsUpdate = true;
-    geom.computeVertexNormals();
-    meshRef.current.rotation.y = t * 0.25;
-    meshRef.current.rotation.x = Math.sin(t * 0.6) * 0.2;
-  });
-
-  return (
-    <mesh ref={meshRef} geometry={geom}>
-      <meshStandardMaterial color={palette[0]} emissive={palette[1]} emissiveIntensity={1.1} roughness={0.35} metalness={0.45} wireframe={false} />
-    </mesh>
-  );
-}
-
-function SceneSupershape({ palette, seed }: { palette: Palette; seed: number }) {
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[4, 4, 2]} intensity={1.2} color={palette[2]} />
-      <SuperShapeBlob palette={palette} seed={seed} />
-      <StarField density={320} color={palette[3]} />
     </>
   );
 }
@@ -1188,7 +1068,8 @@ function MobiusLoom({ palette, seed, bands = 3, points = 420 }: { palette: Palet
   useEffect(() => () => lineMats.forEach((m) => m.dispose()), [lineMats]);
 
   const particleCount = Math.max(24, Math.floor(points * quality.particleMultiplier));
-  const particleGeom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const particleGeomSegments = scaleSegments(6, quality);
+  const particleGeom = useMemo(() => new THREE.SphereGeometry(0.035, particleGeomSegments, particleGeomSegments), [particleGeomSegments]);
   useEffect(() => () => particleGeom.dispose(), [particleGeom]);
 
   const particleMat = useMemo(
@@ -1333,7 +1214,8 @@ function HyperbolicWeave({ palette, seed, arcCount = 18, segments = 64 }: { pale
   const material = useMemo(() => makeLineMaterial(palette[1], 0.72), [palette]);
 
   const nodeCount = Math.max(16, Math.floor(90 * quality.particleMultiplier));
-  const nodeGeom = useMemo(() => new THREE.SphereGeometry(0.045, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const nodeGeomSegments = scaleSegments(6, quality);
+  const nodeGeom = useMemo(() => new THREE.SphereGeometry(0.045, nodeGeomSegments, nodeGeomSegments), [nodeGeomSegments]);
   const nodeMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[2], emissiveIntensity: 1.0, roughness: 0.3 }),
     [palette],
@@ -1404,7 +1286,11 @@ function SceneHyperbolic({ palette, seed }: { palette: Palette; seed: number }) 
 // ---------------------------------------------------------------------------
 function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const geom = useMemo(() => new THREE.SphereGeometry(1.3, 64, 64), []);
+  const { quality } = useQuality();
+  // 64x64 (4.2k verts) on high; medium 44x44 (~2k), low 32x32 (~1k)
+  const sphereSegments = scaleSegments(64, quality);
+  const geom = useMemo(() => new THREE.SphereGeometry(1.3, sphereSegments, sphereSegments), [sphereSegments]);
+  const normalsFrame = useRef(0);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({
       color: palette[0],
@@ -1424,11 +1310,27 @@ function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number 
     amplitude: 0.3 + rand() * 0.4,
   }), [rand]);
 
-  // Store original positions
-  const originalPositions = useMemo(() => {
+  // Store original positions plus the per-vertex spherical terms that do not
+  // depend on time (theta, phi, sin^m theta), so the frame loop only pays for
+  // the time-varying cosines.
+  const vertexData = useMemo(() => {
     const pos = geom.attributes.position as THREE.BufferAttribute;
-    return new Float32Array(pos.array);
-  }, [geom]);
+    const original = new Float32Array(pos.array);
+    const count = pos.count;
+    const theta = new Float32Array(count);
+    const phi = new Float32Array(count);
+    const sinThetaPowM = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      const ox = original[i * 3];
+      const oy = original[i * 3 + 1];
+      const oz = original[i * 3 + 2];
+      const r = Math.sqrt(ox * ox + oy * oy + oz * oz);
+      theta[i] = Math.acos(oy / r);
+      phi[i] = Math.atan2(oz, ox);
+      sinThetaPowM[i] = Math.pow(Math.sin(theta[i]), coeffs.m);
+    }
+    return { original, theta, phi, sinThetaPowM };
+  }, [geom, coeffs.m]);
 
   useEffect(() => () => geom.dispose(), [geom]);
   useEffect(() => () => mat.dispose(), [mat]);
@@ -1437,21 +1339,17 @@ function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number 
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
     const pos = geom.attributes.position as THREE.BufferAttribute;
+    const { original, theta, phi, sinThetaPowM } = vertexData;
 
     for (let i = 0; i < pos.count; i++) {
-      const ox = originalPositions[i * 3];
-      const oy = originalPositions[i * 3 + 1];
-      const oz = originalPositions[i * 3 + 2];
-
-      // Convert to spherical coordinates
-      const r = Math.sqrt(ox * ox + oy * oy + oz * oz);
-      const theta = Math.acos(oy / r);
-      const phi = Math.atan2(oz, ox);
+      const ox = original[i * 3];
+      const oy = original[i * 3 + 1];
+      const oz = original[i * 3 + 2];
 
       // Simplified spherical harmonic Y_l^m
-      const harmonic = Math.cos(coeffs.m * phi + t * 0.5) *
-                       Math.pow(Math.sin(theta), coeffs.m) *
-                       Math.cos(coeffs.l * theta + t * 0.3);
+      const harmonic = Math.cos(coeffs.m * phi[i] + t * 0.5) *
+                       sinThetaPowM[i] *
+                       Math.cos(coeffs.l * theta[i] + t * 0.3);
 
       const displacement = 1 + coeffs.amplitude * harmonic * Math.sin(t * 0.8 + i * 0.01);
 
@@ -1459,7 +1357,12 @@ function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number 
     }
     // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
-    geom.computeVertexNormals();
+    // Normals are the expensive half of the update; every third frame is
+    // visually indistinguishable at these displacement rates.
+    normalsFrame.current = (normalsFrame.current + 1) % 3;
+    if (normalsFrame.current === 0) {
+      geom.computeVertexNormals();
+    }
 
     meshRef.current.rotation.y = t * 0.2;
     meshRef.current.rotation.x = Math.sin(t * 0.4) * 0.15;
@@ -1913,7 +1816,9 @@ function PhaseShearField({ palette, seed, grid = 26 }: { palette: Palette; seed:
     return coords;
   }, [size, count, seed]);
 
-  const geom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const geomSegments = scaleSegments(6, quality);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.035, geomSegments, geomSegments), [geomSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({
       color: palette[0],
@@ -2358,14 +2263,16 @@ function TorusKnotLattice({ palette, seed, loops = 3 }: { palette: Palette; seed
 
   const tubeSegments = Math.max(200, Math.floor(320 * quality.geometryDetail));
   const tubeRadius = 0.05 + 0.02 * quality.geometryDetail;
-  const tubeGeometry = useMemo(() => new THREE.TubeGeometry(curve, tubeSegments, tubeRadius, scaleSegments(10, quality), true), [curve, tubeSegments, tubeRadius, quality]);
+  const tubeRadialSegments = scaleSegments(10, quality);
+  const tubeGeometry = useMemo(() => new THREE.TubeGeometry(curve, tubeSegments, tubeRadius, tubeRadialSegments, true), [curve, tubeSegments, tubeRadius, tubeRadialSegments]);
   const tubeMaterial = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.9, roughness: 0.3, metalness: 0.4 }),
     [palette],
   );
 
   const orbitCount = Math.max(24, Math.floor(140 * quality.particleMultiplier));
-  const orbitGeom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const orbitGeomSegments = scaleSegments(6, quality);
+  const orbitGeom = useMemo(() => new THREE.SphereGeometry(0.035, orbitGeomSegments, orbitGeomSegments), [orbitGeomSegments]);
   const orbitMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[2], emissive: palette[3], emissiveIntensity: 1.1, roughness: 0.35 }),
     [palette],
@@ -2595,7 +2502,8 @@ function RosslerAttractor({ palette, seed, count = 18000 }: { palette: Palette; 
   }, [positions]);
 
   const emberCount = Math.max(18, Math.floor(120 * quality.particleMultiplier));
-  const emberGeom = useMemo(() => new THREE.SphereGeometry(0.04, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const emberGeomSegments = scaleSegments(6, quality);
+  const emberGeom = useMemo(() => new THREE.SphereGeometry(0.04, emberGeomSegments, emberGeomSegments), [emberGeomSegments]);
   const emberMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[2], emissiveIntensity: 1.1, roughness: 0.35 }),
     [palette],
@@ -2875,7 +2783,8 @@ function FibrationLattice({ palette, seed, loops = 16, segments = 80 }: { palett
   const arcMaterial = useMemo(() => makeLineMaterial(palette[3], 0.42), [palette]);
 
   const beadCount = Math.max(16, Math.floor(90 * quality.particleMultiplier));
-  const beadGeom = useMemo(() => new THREE.SphereGeometry(0.045, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const beadGeomSegments = scaleSegments(6, quality);
+  const beadGeom = useMemo(() => new THREE.SphereGeometry(0.045, beadGeomSegments, beadGeomSegments), [beadGeomSegments]);
   const beadMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[2], emissiveIntensity: 1.1, roughness: 0.3 }),
     [palette],
@@ -2965,7 +2874,9 @@ function FiligreeOrbitals({ palette, seed, count = 260 }: { palette: Palette; se
     }));
   }, [actualCount, seed]);
 
-  const geom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const geomSegments = scaleSegments(6, quality);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.035, geomSegments, geomSegments), [geomSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 1.0, roughness: 0.35 }),
     [palette],
@@ -3032,7 +2943,9 @@ function LemniscateWeave({ palette, seed, count = 180 }: { palette: Palette; see
     }));
   }, [actualCount, seed]);
 
-  const geom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const geomSegments = scaleSegments(6, quality);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.035, geomSegments, geomSegments), [geomSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 1.0, roughness: 0.35 }),
     [palette],
@@ -3222,7 +3135,9 @@ function VortexGrid({ palette, seed, size = 24 }: { palette: Palette; seed: numb
     return coords;
   }, [grid, seed]);
 
-  const geom = useMemo(() => new THREE.SphereGeometry(0.03, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const geomSegments = scaleSegments(6, quality);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.03, geomSegments, geomSegments), [geomSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.8, roughness: 0.35 }),
     [palette],
@@ -3285,7 +3200,9 @@ function OrbitalSwarm({ palette, seed, count = 140 }: { palette: Palette; seed: 
     }));
   }, [actualCount, seed]);
 
-  const geom = useMemo(() => new THREE.SphereGeometry(0.035, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const geomSegments = scaleSegments(6, quality);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.035, geomSegments, geomSegments), [geomSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.9, roughness: 0.35 }),
     [palette],
@@ -3351,7 +3268,9 @@ function TorusPhyllotaxis({ palette, seed, count = 700 }: { palette: Palette; se
     return { R, r };
   }, [seed]);
 
-  const geom = useMemo(() => new THREE.SphereGeometry(0.03, scaleSegments(6, quality), scaleSegments(6, quality)), [quality]);
+  const geomSegments = scaleSegments(6, quality);
+
+  const geom = useMemo(() => new THREE.SphereGeometry(0.03, geomSegments, geomSegments), [geomSegments]);
   const mat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: palette[1], emissive: palette[2], emissiveIntensity: 0.9, roughness: 0.35 }),
     [palette],
@@ -3642,102 +3561,16 @@ function ScenePolygonBloom({ palette, seed }: { palette: Palette; seed: number }
 }
 
 // ---------------------------------------------------------------------------
-// Variant: Reaction-Diffusion Waves on a Torus
-// ---------------------------------------------------------------------------
-function ReactionDiffusionTorus({ palette, seed }: { palette: Palette; seed: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const geom = useMemo(() => new THREE.TorusGeometry(1.2, 0.5, 64, 128), []);
-  const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({
-      color: palette[0],
-      emissive: palette[1],
-      emissiveIntensity: 0.6,
-      metalness: 0.5,
-      roughness: 0.3,
-    }),
-    [palette]
-  );
-
-  const rand = useMemo(() => seededRandom(seed), [seed]);
-  const offsets = useMemo(() => ({
-    f1: 6 + rand() * 4,
-    f2: 5 + rand() * 3,
-    f3: 4 + rand() * 4,
-    f4: 6 + rand() * 3,
-  }), [rand]);
-
-  const originalPositions = useMemo(() => {
-    const pos = geom.attributes.position as THREE.BufferAttribute;
-    return new Float32Array(pos.array);
-  }, [geom]);
-
-  useEffect(() => () => geom.dispose(), [geom]);
-  useEffect(() => () => mat.dispose(), [mat]);
-
-  const frameCount = useRef(0);
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const t = clock.getElapsedTime();
-    const pos = geom.attributes.position as THREE.BufferAttribute;
-
-    for (let i = 0; i < pos.count; i++) {
-      const idx = i * 3;
-      const ox = originalPositions[idx];
-      const oy = originalPositions[idx + 1];
-      const oz = originalPositions[idx + 2];
-
-      // Create reaction-diffusion-like patterns
-      const angle1 = Math.atan2(oy, ox);
-      const angle2 = Math.atan2(oz, Math.sqrt(ox * ox + oy * oy) - 1.2);
-
-      const wave1 = Math.sin(angle1 * offsets.f1 + t * 2) * Math.cos(angle2 * offsets.f2 - t * 1.5);
-      const wave2 = Math.cos(angle1 * offsets.f3 - t * 1.2) * Math.sin(angle2 * offsets.f4 + t * 0.8);
-      const displacement = 1 + 0.08 * (wave1 + wave2);
-
-      pos.setXYZ(i, ox * displacement, oy * displacement, oz * displacement);
-    }
-    // eslint-disable-next-line react-hooks/immutability
-    pos.needsUpdate = true;
-    
-    // Only recompute normals every 2 frames to save CPU
-    frameCount.current++;
-    if (frameCount.current % 2 === 0) {
-      geom.computeVertexNormals();
-    }
-
-    meshRef.current.rotation.y = t * 0.2;
-    meshRef.current.rotation.x = t * 0.1;
-  });
-
-  return <mesh ref={meshRef} geometry={geom} material={mat} />;
-}
-
-function SceneReactionDiffusion({ palette, seed }: { palette: Palette; seed: number }) {
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[3, 4, 2]} intensity={1.2} color={palette[2]} />
-      <pointLight position={[-2, -2, 3]} intensity={0.8} color={palette[0]} />
-      <ReactionDiffusionTorus palette={palette} seed={seed} />
-      <StarField density={280} color={palette[3]} />
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Variant map and rotation plan
 // ---------------------------------------------------------------------------
 type VariantKey =
   | "orbits"
   | "lissajous"
   | "wave"
-  | "lorenz"
   | "helix"
   | "torus"
   | "flock"
   | "clifford"
-  | "supershape"
   | "hopf"
   | "ikeda"
   | "gyroid"
@@ -3770,19 +3603,16 @@ type VariantKey =
   | "sineweave"
   | "harmonicribbons"
   | "dejong"
-  | "polygonbloom"
-  | "reactiondiffusion";
+  | "polygonbloom";
 
 const scenes: Record<VariantKey, (opts: { palette: Palette; seed: number }) => JSX.Element> = {
   orbits: ({ palette, seed }) => <SceneOrbits palette={palette} seed={seed} />,
   lissajous: ({ palette, seed }) => <SceneLissajous palette={palette} seed={seed} />,
   wave: ({ palette, seed }) => <SceneWaveGrid palette={palette} seed={seed} />,
-  lorenz: ({ palette, seed }) => <SceneLorenz palette={palette} seed={seed} />,
   helix: ({ palette, seed }) => <SceneHelix palette={palette} seed={seed} />,
   torus: ({ palette, seed }) => <SceneTorus palette={palette} seed={seed} />,
   flock: ({ palette, seed }) => <SceneFlock palette={palette} seed={seed} />,
   clifford: ({ palette, seed }) => <SceneClifford palette={palette} seed={seed} />,
-  supershape: ({ palette, seed }) => <SceneSupershape palette={palette} seed={seed} />,
   hopf: ({ palette, seed }) => <SceneHopf palette={palette} seed={seed} />,
   ikeda: ({ palette, seed }) => <SceneIkeda palette={palette} seed={seed} />,
   gyroid: ({ palette, seed }) => <SceneGyroid palette={palette} seed={seed} />,
@@ -3816,7 +3646,6 @@ const scenes: Record<VariantKey, (opts: { palette: Palette; seed: number }) => J
   harmonicribbons: ({ palette, seed }) => <SceneHarmonicRibbons palette={palette} seed={seed} />,
   dejong: ({ palette, seed }) => <SceneDeJong palette={palette} seed={seed} />,
   polygonbloom: ({ palette, seed }) => <ScenePolygonBloom palette={palette} seed={seed} />,
-  reactiondiffusion: ({ palette, seed }) => <SceneReactionDiffusion palette={palette} seed={seed} />,
 };
 
 const lightVariants: VariantKey[] = [
@@ -3875,7 +3704,7 @@ const mediumVariants: VariantKey[] = [
   "polygonbloom",
 ];
 
-const rotationPlan: { variant: VariantKey; palette: number; seed: number; background?: string }[] = [
+const rotationPlan: { variant: VariantKey; palette: number; seed: number }[] = [
   // Phase 1: Mysterious & ethereal
   { variant: "aizawa", palette: 4, seed: 200 },           // Strange attractor
   { variant: "hyperbolic", palette: 5, seed: 201 },      // Hyperbolic weave
@@ -3927,25 +3756,77 @@ const rotationPlan: { variant: VariantKey; palette: number; seed: number; backgr
 // ---------------------------------------------------------------------------
 // Main exported component
 // ---------------------------------------------------------------------------
-export default function ThreeScene({ isActive = true }: { isActive?: boolean }) {
+
+// Keeps the canvas from hijacking vertical touch scrolling: three's
+// OrbitControls sets `touch-action: none` on connect, so re-assert `pan-y`
+// afterwards (this renders after OrbitControls, so its effect runs later).
+function TouchActionSync() {
+  const gl = useThree((state) => state.gl);
+  useEffect(() => {
+    gl.domElement.style.touchAction = "pan-y";
+  }, [gl]);
+  return null;
+}
+
+const FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
+
+export default function ThreeScene({
+  isActive = true,
+  onContextLost,
+}: {
+  isActive?: boolean;
+  /** Called once if the WebGL context is lost; the host swaps in the static fallback. */
+  onContextLost?: () => void;
+}) {
   const { capabilities, quality } = useDeviceCapabilities();
-  const { isMobile, tier } = capabilities;
+  const { tier } = capabilities;
   const prefersReducedMotion = capabilities.prefersReducedMotion;
   const slot = useTimeSlot(SLOT_MINUTES);
   const plan = rotationPlan[slot % rotationPlan.length];
   const palette = palettes[plan.palette % palettes.length];
 
+  // Depend on primitives rather than the `quality` object so a re-detected
+  // but value-equal capabilities object (tab return, orientation change)
+  // does not hand every scene a new identity and rebuild its geometry.
+  const {
+    particleMultiplier,
+    geometryDetail,
+    maxDpr,
+    enableShadows,
+    enablePostProcessing,
+    maxParticles,
+    targetFps,
+  } = quality;
+  const stableQuality = useMemo<QualitySettings>(
+    () => ({ particleMultiplier, geometryDetail, maxDpr, enableShadows, enablePostProcessing, maxParticles, targetFps }),
+    [particleMultiplier, geometryDetail, maxDpr, enableShadows, enablePostProcessing, maxParticles, targetFps],
+  );
+
+  // Rotation (and pointer events on the canvas) only for fine pointers. Touch
+  // devices keep the canvas inert so a finger drag scrolls the page instead
+  // of spinning the scene; this also covers iPadOS, whose UA says "Macintosh".
+  const [finePointer, setFinePointer] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(FINE_POINTER_QUERY).matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia(FINE_POINTER_QUERY);
+    const sync = () => setFinePointer(query.matches);
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
   // Dynamic DPR state for performance scaling
-  const [currentDpr, setCurrentDpr] = useState<number>(quality.maxDpr);
+  const [currentDpr, setCurrentDpr] = useState<number>(maxDpr);
   const [perfMode, setPerfMode] = useState<"normal" | "safe">("normal");
   const declineStreakRef = useRef(0);
   const inclineStreakRef = useRef(0);
 
-  // Sync currentDpr with quality changes
+  // Only ever lower the DPR here: a re-detected cap must not throw away what
+  // PerformanceMonitor has already learned (its incline path raises it back).
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing state with prop changes for adaptive quality
-    setCurrentDpr(quality.maxDpr);
-  }, [quality.maxDpr]);
+    setCurrentDpr((prev) => Math.min(prev, maxDpr));
+  }, [maxDpr]);
 
   // Performance regression handler - lower DPR when FPS drops
   const handleDecline = useCallback(() => {
@@ -3959,17 +3840,34 @@ export default function ThreeScene({ isActive = true }: { isActive?: boolean }) 
 
   // Performance improvement handler - raise DPR when FPS is good
   const handleIncline = useCallback(() => {
-    setCurrentDpr((prev) => Math.min(quality.maxDpr, prev + 0.25));
+    setCurrentDpr((prev) => Math.min(maxDpr, prev + 0.25));
     inclineStreakRef.current += 1;
     if (inclineStreakRef.current >= 3) {
       declineStreakRef.current = 0;
       setPerfMode("normal");
     }
-  }, [quality.maxDpr]);
+  }, [maxDpr]);
+
+  // Context loss is a DOM event, not a render error, so surface it to the host.
+  const onContextLostRef = useRef(onContextLost);
+  useEffect(() => {
+    onContextLostRef.current = onContextLost;
+  }, [onContextLost]);
+  const handleCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
+    gl.domElement.setAttribute("aria-hidden", "true");
+    gl.domElement.addEventListener(
+      "webglcontextlost",
+      (event) => {
+        event.preventDefault();
+        onContextLostRef.current?.();
+      },
+      { once: true },
+    );
+  }, []);
 
   const autoRotateSpeed = tier === "low" ? 0.08 : tier === "medium" ? 0.18 : 0.28;
   const allowAnimation = isActive && !prefersReducedMotion;
-  const targetFps = quality.targetFps;
+  const enableRotate = finePointer && !prefersReducedMotion;
 
   const variant = useMemo(() => {
     if (perfMode === "safe" || tier === "low") {
@@ -3985,52 +3883,59 @@ export default function ThreeScene({ isActive = true }: { isActive?: boolean }) 
 
   // Context value
   const contextValue: QualityContextValue = useMemo(() => ({
-    quality,
+    quality: stableQuality,
     tier
-  }), [quality, tier]);
+  }), [stableQuality, tier]);
 
   // Render the variant as a component to ensure hooks are isolated and
   // properly reset when the variant changes (via the key prop).
   const SceneComponent = scenes[variant];
 
   return (
-    <Canvas
-      camera={{ position: [0, 0, 6], fov: 40 }}
-      className="h-[280px] w-full touch-none sm:h-[380px] md:h-[420px] lg:h-[460px]"
-      dpr={currentDpr}
-      performance={{ min: 0.3 }}
-      style={{ touchAction: "none" }}
-      frameloop={allowAnimation ? "always" : "demand"}
+    <div
+      aria-hidden="true"
+      className="h-[280px] w-full sm:h-[380px] md:h-[420px] lg:h-[460px]"
+      style={{ touchAction: "pan-y", pointerEvents: enableRotate ? "auto" : "none" }}
     >
-      {/* Performance monitoring - automatically scales DPR based on FPS */}
-      {allowAnimation && (
-        <PerformanceMonitor
-          onDecline={handleDecline}
-          onIncline={handleIncline}
-          flipflops={3}
-          bounds={() => {
-            if (tier === "high") return [targetFps - 5, targetFps];
-            if (tier === "medium") return [targetFps - 10, targetFps];
-            return [targetFps - 15, targetFps];
-          }}
-        />
-      )}
-      <QualityContext.Provider value={contextValue}>
-        <color attach="background" args={[plan.background ?? "#020617"]} />
-        <ambientLight intensity={0.18} />
-        <hemisphereLight intensity={0.2} color="#dbeafe" groundColor="#0b1120" />
-        <MathematicalHalo palette={palette} />
-        <SceneComponent key={variant} palette={palette} seed={plan.seed} />
-        <OrbitControls
-          enableZoom={false}
-          autoRotate={allowAnimation}
-          autoRotateSpeed={autoRotateSpeed}
-          enablePan={false}
-          enableRotate={!isMobile && !prefersReducedMotion}
-          enableDamping={tier === "high"}
-          makeDefault
-        />
-      </QualityContext.Provider>
-    </Canvas>
+      <Canvas
+        camera={{ position: [0, 0, 6], fov: 40 }}
+        className="h-full w-full"
+        dpr={currentDpr}
+        style={{ touchAction: "pan-y" }}
+        frameloop={allowAnimation ? "always" : "demand"}
+        onCreated={handleCreated}
+      >
+        {/* Performance monitoring - automatically scales DPR based on FPS */}
+        {allowAnimation && (
+          <PerformanceMonitor
+            onDecline={handleDecline}
+            onIncline={handleIncline}
+            flipflops={3}
+            bounds={() => {
+              if (tier === "high") return [targetFps - 5, targetFps];
+              if (tier === "medium") return [targetFps - 10, targetFps];
+              return [targetFps - 15, targetFps];
+            }}
+          />
+        )}
+        <QualityContext.Provider value={contextValue}>
+          <color attach="background" args={["#020617"]} />
+          <ambientLight intensity={0.18} />
+          <hemisphereLight intensity={0.2} color="#dbeafe" groundColor="#0b1120" />
+          <MathematicalHalo palette={palette} />
+          <SceneComponent key={variant} palette={palette} seed={plan.seed} />
+          <OrbitControls
+            enableZoom={false}
+            autoRotate={allowAnimation}
+            autoRotateSpeed={autoRotateSpeed}
+            enablePan={false}
+            enableRotate={enableRotate}
+            enableDamping={tier === "high"}
+            makeDefault
+          />
+          <TouchActionSync />
+        </QualityContext.Provider>
+      </Canvas>
+    </div>
   );
 }

@@ -20,6 +20,10 @@ function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true });
+  // Infinite loops (glow pulse, scroll hint) only run while the hero is on screen,
+  // so they stop compositing once the reader has scrolled into the story.
+  const isOnScreen = useInView(ref, { amount: 0.1 });
+  const runLoops = !prefersReducedMotion && isOnScreen;
 
   return (
     <section
@@ -34,11 +38,11 @@ function HeroSection() {
         {/* Subtle animated glow */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: prefersReducedMotion ? 0.3 : [0.1, 0.3, 0.1] }}
+          animate={{ opacity: runLoops ? [0.1, 0.3, 0.1] : 0.3 }}
           transition={
-            prefersReducedMotion
-              ? {}
-              : { duration: 8, repeat: Infinity, ease: "easeInOut" }
+            runLoops
+              ? { duration: 8, repeat: Infinity, ease: "easeInOut" }
+              : { duration: 0.4 }
           }
           className="absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/20 blur-[120px]"
         />
@@ -60,7 +64,7 @@ function HeroSection() {
         <motion.h1
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
           className="mb-8 text-5xl font-black tracking-tight text-white sm:text-6xl md:text-7xl"
         >
           {nvidiaStoryData.hero.headline}
@@ -73,52 +77,49 @@ function HeroSection() {
         <motion.p
           initial={prefersReducedMotion ? {} : { opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.8, delay: 1.5 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
           className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl"
         >
           {nvidiaStoryData.hero.subheadline}
         </motion.p>
 
-        {/* CTA to read the essay */}
-        <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 2 }}
-          className="mt-10"
-        >
+        {/* CTA to read the essay: rendered immediately, no entrance delay */}
+        <div className="mt-10">
           <Link
             href={nvidiaStoryData.hero.essayUrl}
-            className="inline-flex items-center gap-2 rounded-full bg-violet-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-violet-400 hover:shadow-lg hover:shadow-violet-500/30"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-violet-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-violet-400 hover:shadow-lg hover:shadow-violet-500/30"
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4" aria-hidden="true" />
             Read the Essay
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
+        </div>
+
+        {/* Scroll indicator: in normal flow (not absolutely positioned) so it can
+            never overlap the CTA on short phone viewports. */}
+        <motion.div
+          initial={prefersReducedMotion ? {} : { opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="mt-12 flex justify-center"
+          aria-hidden="true"
+        >
+          <motion.div
+            animate={runLoops ? { y: [0, 8, 0] } : { y: 0 }}
+            transition={runLoops ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
+            className="flex flex-col items-center gap-2 text-slate-500"
+          >
+            <span className="text-xs uppercase tracking-wider">Scroll</span>
+            <div className="h-6 w-4 rounded-full border border-slate-600 p-1">
+              <motion.div
+                animate={runLoops ? { y: [0, 8, 0] } : { y: 0 }}
+                transition={runLoops ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
+                className="h-1.5 w-1.5 rounded-full bg-slate-500"
+              />
+            </div>
+          </motion.div>
         </motion.div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={prefersReducedMotion ? {} : { opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: 2.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={prefersReducedMotion ? {} : { y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2 text-slate-500"
-        >
-          <span className="text-xs uppercase tracking-wider">Scroll</span>
-          <div className="h-6 w-4 rounded-full border border-slate-600 p-1">
-            <motion.div
-              animate={prefersReducedMotion ? {} : { y: [0, 8, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="h-1.5 w-1.5 rounded-full bg-slate-500"
-            />
-          </div>
-        </motion.div>
-      </motion.div>
     </section>
   );
 }
@@ -269,7 +270,8 @@ function SectionWrapper({ children, className, id }: SectionWrapperProps) {
 
 export function NvidiaStory() {
   return (
-    <main className="min-h-screen bg-slate-950">
+    // ClientShell already renders the page's single <main id="main-content">
+    <div className="min-h-screen bg-slate-950">
       {/* Hero - The $600B Drop */}
       <HeroSection />
 
@@ -293,7 +295,7 @@ export function NvidiaStory() {
 
       {/* Aftermath - The story continues */}
       <AftermathSection />
-    </main>
+    </div>
   );
 }
 

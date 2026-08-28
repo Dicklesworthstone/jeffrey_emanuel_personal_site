@@ -1,187 +1,205 @@
 "use client";
 
-// KaTeX CSS - only loaded when this component is used (blog posts only)
-import "katex/dist/katex.min.css";
+/**
+ * Client islands for the markdown article pipeline.
+ *
+ * The markdown itself (react-markdown + remark-gfm/remark-math + rehype-slug/
+ * rehype-katex) is rendered on the server in app/writing/[slug]/page.tsx, so
+ * the parser and KaTeX never ship to the browser. Only the fenced code block
+ * needs client behaviour: a copy button and a lazily loaded syntax
+ * highlighter that swaps in *after* the server-rendered <pre> is on screen.
+ */
 
-import { useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import rehypeSlug from "rehype-slug";
-import dynamic from "next/dynamic";
-import { cn } from "@/lib/utils";
-import ErrorBoundary from "@/components/error-boundary";
+import { useEffect, useState, type ComponentType, type CSSProperties } from "react";
+import type { SyntaxHighlighterProps } from "react-syntax-highlighter";
 import CopyButton from "@/components/copy-button";
 
-let cachedTheme: Record<string, React.CSSProperties> | null = null;
-let themePromise: Promise<Record<string, React.CSSProperties>> | null = null;
+type HighlighterBundle = {
+  SyntaxHighlighter: ComponentType<SyntaxHighlighterProps>;
+  style: Record<string, CSSProperties>;
+};
 
-function loadTheme() {
-  if (cachedTheme) {
-    return Promise.resolve(cachedTheme);
-  }
-  if (!themePromise) {
-    themePromise = import("react-syntax-highlighter/dist/esm/styles/prism/one-dark")
-      .then((mod) => {
-        cachedTheme = mod.default;
-        return cachedTheme;
+// Languages that appear in content/writing fences (python, bash, rust,
+// javascript, markdown) plus the small set the rest of the site links to.
+// prism-light registers nothing by default; unregistered languages render as
+// plain text, so each fence language must be listed here explicitly.
+const SUPPORTED_LANGUAGES = new Set([
+  "bash",
+  "python",
+  "typescript",
+  "tsx",
+  "javascript",
+  "json",
+  "rust",
+  "yaml",
+  "toml",
+  "sql",
+  "go",
+  "diff",
+  "markdown",
+]);
+
+const LANGUAGE_ALIASES: Record<string, string> = {
+  sh: "bash",
+  shell: "bash",
+  zsh: "bash",
+  console: "bash",
+  py: "python",
+  ts: "typescript",
+  js: "javascript",
+  jsx: "javascript",
+  jsonc: "json",
+  yml: "yaml",
+  md: "markdown",
+  rs: "rust",
+  golang: "go",
+};
+
+/** Map a fence info string to a registered prism language, or null for plain text. */
+export function resolveHighlightLanguage(language: string | undefined): string | null {
+  if (!language) return null;
+  const key = language.toLowerCase();
+  const resolved = LANGUAGE_ALIASES[key] ?? key;
+  return SUPPORTED_LANGUAGES.has(resolved) ? resolved : null;
+}
+
+let cachedBundle: HighlighterBundle | null = null;
+let bundlePromise: Promise<HighlighterBundle> | null = null;
+
+// One promise gates highlighter + theme + grammars, so the plain <pre> is only
+// replaced once everything needed to render the highlighted block is ready.
+// This preserves the block's height (no collapse-then-reappear).
+function loadHighlighter(): Promise<HighlighterBundle> {
+  if (cachedBundle) return Promise.resolve(cachedBundle);
+  if (!bundlePromise) {
+    bundlePromise = Promise.all([
+      import("react-syntax-highlighter/dist/esm/prism-light"),
+      import("react-syntax-highlighter/dist/esm/styles/prism/one-dark"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/bash"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/python"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/typescript"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/tsx"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/javascript"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/json"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/rust"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/yaml"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/toml"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/sql"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/go"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/diff"),
+      import("react-syntax-highlighter/dist/esm/languages/prism/markdown"),
+    ])
+      .then(
+        ([
+          light,
+          theme,
+          bash,
+          python,
+          typescript,
+          tsx,
+          javascript,
+          json,
+          rust,
+          yaml,
+          toml,
+          sql,
+          go,
+          diff,
+          markdown,
+        ]) => {
+          const SyntaxHighlighter = light.default;
+          SyntaxHighlighter.registerLanguage("bash", bash.default);
+          SyntaxHighlighter.registerLanguage("python", python.default);
+          SyntaxHighlighter.registerLanguage("typescript", typescript.default);
+          SyntaxHighlighter.registerLanguage("tsx", tsx.default);
+          SyntaxHighlighter.registerLanguage("javascript", javascript.default);
+          SyntaxHighlighter.registerLanguage("json", json.default);
+          SyntaxHighlighter.registerLanguage("rust", rust.default);
+          SyntaxHighlighter.registerLanguage("yaml", yaml.default);
+          SyntaxHighlighter.registerLanguage("toml", toml.default);
+          SyntaxHighlighter.registerLanguage("sql", sql.default);
+          SyntaxHighlighter.registerLanguage("go", go.default);
+          SyntaxHighlighter.registerLanguage("diff", diff.default);
+          SyntaxHighlighter.registerLanguage("markdown", markdown.default);
+          cachedBundle = { SyntaxHighlighter, style: theme.default };
+          return cachedBundle;
+        }
+      )
+      .catch((error) => {
+        // Allow a later mount to retry instead of caching the failure forever.
+        bundlePromise = null;
+        throw error;
       });
   }
-  return themePromise;
+  return bundlePromise;
 }
 
-// Dynamically import syntax highlighter to reduce initial bundle size (~600KB)
-const SyntaxHighlighter = dynamic(
-  () => import("react-syntax-highlighter/dist/esm/prism-light").then(mod => mod.default),
-  {
-    ssr: false,
-    loading: () => null // Will use fallback code block while loading
-  }
-);
-
-interface MarkdownRendererProps {
-  content: string;
-  className?: string;
+interface MarkdownCodeBlockProps {
+  /** Fence info string, e.g. "python". */
+  language?: string;
+  /** Raw code text (trailing newline already stripped). */
+  code: string;
 }
 
-// Lazy-loaded code block with syntax highlighting
-function CodeBlock({ language, children }: { language: string; children: React.ReactNode }) {
-  const [style, setStyle] = useState<Record<string, React.CSSProperties> | null>(() => cachedTheme);
-  const [isLoaded, setIsLoaded] = useState(() => Boolean(cachedTheme));
-  
-  // Ensure content is a string
-  const content = String(children || "").replace(/\n$/, "");
+// Copy button reveal: hover on pointer devices, always on touch (no hover),
+// and whenever the button itself has focus so keyboard users can see it.
+const COPY_WRAPPER_CLASS =
+  "absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100";
+
+/**
+ * Fenced code block island. Server-renders a plain <pre> (so the article body
+ * and its height are in the HTML), then upgrades to the highlighted view once
+ * the highlighter bundle has loaded on the client.
+ */
+export function MarkdownCodeBlock({ language, code }: MarkdownCodeBlockProps) {
+  const highlightLanguage = resolveHighlightLanguage(language);
+  const [bundle, setBundle] = useState<HighlighterBundle | null>(() => cachedBundle);
 
   useEffect(() => {
-    if (cachedTheme) return;
+    if (!highlightLanguage || cachedBundle) return;
     let cancelled = false;
-    loadTheme()
-      .then((theme) => {
-        if (cancelled) return;
-        setStyle(theme);
-        setIsLoaded(true);
+    loadHighlighter()
+      .then((loaded) => {
+        if (!cancelled) setBundle(loaded);
       })
       .catch(() => {
-        if (cancelled) return;
-        setIsLoaded(false);
+        // Keep the plain <pre>; highlighting is progressive enhancement.
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [highlightLanguage]);
 
-  // Show simple code block while loading
-  if (!isLoaded || !style) {
+  if (!highlightLanguage || !bundle) {
     return (
       <div className="group relative rounded-lg bg-slate-900/80">
-        <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
-          <CopyButton text={content} />
+        <div className={COPY_WRAPPER_CLASS}>
+          <CopyButton text={code} />
         </div>
         <pre className="overflow-x-auto p-4 text-sm">
-          <code className="font-mono text-slate-300">{content}</code>
+          <code className="font-mono text-slate-300">{code}</code>
         </pre>
       </div>
     );
   }
 
+  const { SyntaxHighlighter, style } = bundle;
+
   return (
     <div className="group relative rounded-lg bg-[#282c34]">
-      <div className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
-        <CopyButton text={content} />
+      <div className={COPY_WRAPPER_CLASS}>
+        <CopyButton text={code} />
       </div>
       <SyntaxHighlighter
         style={style}
-        language={language}
+        language={highlightLanguage}
         PreTag="div"
-        customStyle={{ margin: 0, padding: '1rem', background: 'transparent' }}
+        customStyle={{ margin: 0, padding: "1rem", background: "transparent" }}
       >
-        {content}
+        {code}
       </SyntaxHighlighter>
     </div>
   );
 }
 
-export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
-  return (
-    <ErrorBoundary
-      fallback={
-        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-6 text-center">
-          <p className="text-sm text-amber-200/80">
-            Unable to render this content. The article may contain formatting that couldn&apos;t be processed.
-          </p>
-        </div>
-      }
-    >
-      <div
-        className={cn(
-          "prose prose-lg prose-invert max-w-none prose-pre:bg-slate-900/50 prose-pre:border prose-pre:border-slate-800 prose-headings:font-semibold prose-a:text-sky-300 hover:prose-a:text-sky-200 prose-img:rounded-xl",
-          className
-        )}
-      >
-        <ReactMarkdown
-        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: true }]]}
-        // rehype-slug adds IDs to headings for TOC navigation
-        // Keep HTML generation on the server so we don't ship the entire
-        // remark/rehype stack to the client. Math is rendered through KaTeX.
-        rehypePlugins={[rehypeSlug, [rehypeKatex, { strict: false }]]}
-        components={{
-          code({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) {
-            const match = /language-([A-Za-z0-9_+#-]+)/.exec(className || "");
-            return !inline && match ? (
-              <CodeBlock language={match[1]}>
-                {children}
-              </CodeBlock>
-            ) : (
-              <code {...props} className={cn("bg-slate-800/50 rounded px-1.5 py-0.5 text-sm font-mono text-sky-200", className)}>
-                {children}
-              </code>
-            );
-          },
-          table({ children }) {
-            return <div className="overflow-x-auto my-8 border border-slate-800 rounded-lg"><table className="min-w-full text-left text-sm">{children}</table></div>;
-          },
-          thead({ children }) {
-            return <thead className="bg-slate-900/50 text-slate-200 font-semibold border-b border-slate-800">{children}</thead>;
-          },
-          th({ children }) {
-            return <th className="px-6 py-4">{children}</th>;
-          },
-          img({ src, alt }) {
-             const safeSrc = (src as string) || "";
-             // Extract optional width/height from alt text if provided in format "alt text | 600x400"
-             const altParts = alt?.split("|") || [];
-             const cleanAlt = altParts[0]?.trim() || "";
-             const dimensions = altParts[1]?.trim().match(/(\d+)x(\d+)/);
-             const width = dimensions ? parseInt(dimensions[1], 10) : undefined;
-             const height = dimensions ? parseInt(dimensions[2], 10) : undefined;
-
-             return (
-                 <figure className="block my-8 relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={safeSrc}
-                      alt={cleanAlt}
-                      width={width}
-                      height={height}
-                      loading="lazy"
-                      decoding="async"
-                      className="rounded-xl border border-slate-800 shadow-2xl mx-auto max-w-full h-auto"
-                      style={{ aspectRatio: width && height ? `${width}/${height}` : "auto" }}
-                    />
-                    {cleanAlt && (
-                      <figcaption className="block text-center text-sm text-slate-500 mt-2 italic">
-                        {cleanAlt}
-                      </figcaption>
-                    )}
-                 </figure>
-             )
-          }
-        }}
-      >
-        {content}
-      </ReactMarkdown>
-      </div>
-    </ErrorBoundary>
-  );
-}
+export default MarkdownCodeBlock;

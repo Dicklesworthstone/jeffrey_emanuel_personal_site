@@ -5,12 +5,13 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
   type ComponentType,
   type ReactNode,
   type SVGProps,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowDown,
@@ -87,6 +88,35 @@ function mattermostMonthly(users: number): number {
 
 const CHART_MAX_YEARS = 5;
 
+// One-off fee added to the Mattermost line once a dedicated box is needed
+// (above the 50-user shared-VPS tier). Surfaced in the legend so the
+// Mattermost total is explainable to the cent.
+const SERVER_SETUP_FEE = 42;
+
+// The users slider is log-scaled so the headcounts the article talks about
+// (40, 340, 1,000) are spread across the track instead of crammed into the
+// first sixth of a linear 5→2,000 range. Tick labels sit at their true
+// positions on that log scale.
+const USERS_MIN = 5;
+const USERS_MAX = 2000;
+const SLIDER_STEPS = 1000;
+const USERS_LOG_RANGE = Math.log(USERS_MAX / USERS_MIN);
+const SLIDER_TICKS = [5, 40, 340, 1000, 2000];
+
+function sliderToUsers(pos: number): number {
+  const t = Math.min(1, Math.max(0, pos / SLIDER_STEPS));
+  const raw = USERS_MIN * Math.exp(t * USERS_LOG_RANGE);
+  return Math.min(USERS_MAX, Math.max(USERS_MIN, Math.round(raw / 5) * 5));
+}
+
+function usersToSlider(users: number): number {
+  return Math.round((Math.log(users / USERS_MIN) / USERS_LOG_RANGE) * SLIDER_STEPS);
+}
+
+function formatTick(v: number): string {
+  return v >= 1000 ? `${v / 1000}k` : String(v);
+}
+
 type ChartDims = {
   w: number;
   h: number;
@@ -96,27 +126,86 @@ type ChartDims = {
   padB: number;
   plotW: number;
   plotH: number;
+  narrow: boolean;
 };
 
-const CHART_DIMS: ChartDims = {
-  w: 640,
-  h: 340,
-  padL: 68,
-  padR: 30,
-  padT: 40,
-  padB: 48,
-  plotW: 640 - 68 - 30,
-  plotH: 340 - 40 - 48,
-};
+// The SVG viewBox is sized to the measured container width, so one SVG unit
+// is one CSS pixel and every label keeps its real font size on phones.
+function chartDimsFor(width: number): ChartDims {
+  const w = Math.max(280, Math.round(width));
+  const narrow = w < 480;
+  const h = narrow ? 300 : 340;
+  const padL = narrow ? 54 : 68;
+  const padR = narrow ? 14 : 30;
+  const padT = narrow ? 32 : 40;
+  const padB = narrow ? 46 : 48;
+  return {
+    w,
+    h,
+    padL,
+    padR,
+    padT,
+    padB,
+    plotW: w - padL - padR,
+    plotH: h - padT - padB,
+    narrow,
+  };
+}
+
+function useContainerWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setWidth(Math.round(el.clientWidth));
+    measure();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setWidth(Math.round(entry.contentRect.width));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, width };
+}
+
+// Arrow-key navigation for the exclusive toggle groups (role="radiogroup").
+function radioKeyNav(e: React.KeyboardEvent<HTMLButtonElement>) {
+  const dir =
+    e.key === "ArrowRight" || e.key === "ArrowDown"
+      ? 1
+      : e.key === "ArrowLeft" || e.key === "ArrowUp"
+        ? -1
+        : 0;
+  if (!dir) return;
+  const group = e.currentTarget.closest('[role="radiogroup"]');
+  if (!group) return;
+  const radios = Array.from(group.querySelectorAll<HTMLButtonElement>('[role="radio"]'));
+  const i = radios.indexOf(e.currentTarget);
+  if (i < 0) return;
+  e.preventDefault();
+  const next = radios[(i + dir + radios.length) % radios.length];
+  next.focus();
+  next.click();
+}
 
 export function CostCompoundingViz() {
-  const [users, setUsers] = useState(340);
+  const [sliderPos, setSliderPos] = useState(() => usersToSlider(340));
   const [plan, setPlan] = useState<PlanKey>("business");
   const [horizonYears, setHorizonYears] = useState(3);
+  const usersLabelId = useId();
 
+  const users = sliderToUsers(sliderPos);
   const slackMonthly = users * SLACK_PLAN_PRICE[plan];
   const mmMonthly = mattermostMonthly(users);
-  const setupFee = users > 50 ? 42 : 0;
+  const setupFee = users > 50 ? SERVER_SETUP_FEE : 0;
 
   const slackYear = slackMonthly * 12;
   const mmYear = mmMonthly * 12;
@@ -135,6 +224,9 @@ export function CostCompoundingViz() {
         ? fundingRatio.toFixed(0)
         : fundingRatio.toFixed(1);
 
+  const toggleBase =
+    "min-h-10 px-4 rounded-lg text-xs font-bold tracking-tight uppercase transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400";
+
   return (
     <div className="sm-viz-container">
       <div className="sm-viz-header">
@@ -142,10 +234,10 @@ export function CostCompoundingViz() {
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-400/20 text-emerald-400">
             <DollarSign className="h-3.5 w-3.5" />
           </div>
-          <span className="text-[10px] md:text-[11px] font-mono text-emerald-400 tracking-widest uppercase">
+          <span className="text-xs font-mono text-emerald-400 tracking-widest uppercase">
             Cost Compounder
           </span>
-          <span className="text-[10px] md:text-[11px] text-slate-500 font-mono">
+          <span className="text-xs text-slate-500 font-mono">
             · cumulative spend over time
           </span>
         </div>
@@ -155,7 +247,7 @@ export function CostCompoundingViz() {
         {/* Headline stat */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-6">
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-emerald-300 mb-1.5">
+            <p className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-300 mb-1.5">
               One year of {SLACK_PLAN_LABEL[plan]} buys
             </p>
             <div className="flex items-baseline gap-3 flex-wrap">
@@ -168,7 +260,7 @@ export function CostCompoundingViz() {
             </div>
           </div>
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] px-4 py-3 md:py-3.5">
-            <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-emerald-300 mb-1">
+            <p className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-300 mb-1">
               Savings at horizon
             </p>
             <div className="flex items-baseline gap-2">
@@ -184,76 +276,94 @@ export function CostCompoundingViz() {
 
         {/* Controls */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-4 md:gap-5 items-end pb-1">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex justify-between items-baseline">
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.2em]">Users</span>
+              <span id={usersLabelId} className="text-xs font-mono text-slate-500 uppercase tracking-[0.2em]">
+                Users
+              </span>
               <span className="text-xl font-black text-white tabular-nums">
                 {users.toLocaleString()}
               </span>
             </div>
-            <input
-              type="range"
-              min={5}
-              max={2000}
-              step={5}
-              value={users}
-              onChange={(e) => setUsers(parseInt(e.target.value, 10))}
-              className="sm-range w-full"
-              aria-label="User count"
-            />
-            <div className="flex justify-between text-[9px] font-mono text-slate-400 uppercase tracking-widest pt-0.5">
-              <span>5</span>
-              <span>40</span>
-              <span>340</span>
-              <span>1,000</span>
-              <span>2k</span>
+            {/* .sm-range supplies the 44px hit area, track, thumb and focus ring */}
+            <div className="flex items-center">
+              <input
+                type="range"
+                min={0}
+                max={SLIDER_STEPS}
+                step={1}
+                value={sliderPos}
+                onChange={(e) => setSliderPos(parseInt(e.target.value, 10))}
+                className="sm-range w-full"
+                aria-labelledby={usersLabelId}
+                aria-valuetext={`${users.toLocaleString()} users`}
+              />
+            </div>
+            <div className="relative h-4 text-xs font-mono text-slate-400 uppercase tracking-widest">
+              {SLIDER_TICKS.map((v, i) => (
+                <span
+                  key={v}
+                  className={cn(
+                    "absolute top-0 tabular-nums",
+                    i === 0 ? "translate-x-0" : i === SLIDER_TICKS.length - 1 ? "-translate-x-full" : "-translate-x-1/2",
+                  )}
+                  style={{ left: `${(usersToSlider(v) / SLIDER_STEPS) * 100}%` }}
+                >
+                  {formatTick(v)}
+                </span>
+              ))}
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.2em] block">
+            <span id={`${usersLabelId}-plan`} className="text-xs font-mono text-slate-500 uppercase tracking-[0.2em] block">
               Slack plan
             </span>
-            <div className="flex gap-1 p-1 bg-black/40 rounded-xl border border-white/5">
-              <button
-                type="button"
-                onClick={() => setPlan("pro")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-tight uppercase transition-all",
-                  plan === "pro"
-                    ? "bg-purple-500 text-white shadow-lg shadow-purple-500/20"
-                    : "text-slate-500 hover:text-slate-300",
-                )}
-              >
-                Pro
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlan("business")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-tight uppercase transition-all",
-                  plan === "business"
-                    ? "bg-purple-500 text-white shadow-lg shadow-purple-500/20"
-                    : "text-slate-500 hover:text-slate-300",
-                )}
-              >
-                Business+
-              </button>
+            <div
+              role="radiogroup"
+              aria-labelledby={`${usersLabelId}-plan`}
+              className="flex gap-1 p-1 bg-black/40 rounded-xl border border-white/5"
+            >
+              {(["pro", "business"] as const).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="radio"
+                  aria-checked={plan === key}
+                  onClick={() => setPlan(key)}
+                  onKeyDown={radioKeyNav}
+                  className={cn(
+                    toggleBase,
+                    plan === key
+                      ? "bg-purple-500 text-white shadow-lg shadow-purple-500/20"
+                      : "text-slate-500 hover:text-slate-300",
+                  )}
+                >
+                  {key === "pro" ? "Pro" : "Business+"}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.2em] block">
+            <span id={`${usersLabelId}-horizon`} className="text-xs font-mono text-slate-500 uppercase tracking-[0.2em] block">
               Horizon
             </span>
-            <div className="flex gap-1 p-1 bg-black/40 rounded-xl border border-white/5">
+            <div
+              role="radiogroup"
+              aria-labelledby={`${usersLabelId}-horizon`}
+              className="flex gap-1 p-1 bg-black/40 rounded-xl border border-white/5"
+            >
               {[1, 3, 5].map((y) => (
                 <button
                   key={y}
                   type="button"
+                  role="radio"
+                  aria-checked={horizonYears === y}
                   onClick={() => setHorizonYears(y)}
+                  onKeyDown={radioKeyNav}
                   className={cn(
-                    "px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-tight uppercase transition-all",
+                    toggleBase,
                     horizonYears === y
                       ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
                       : "text-slate-500 hover:text-slate-300",
@@ -276,45 +386,55 @@ export function CostCompoundingViz() {
           setupFee={setupFee}
         />
 
-        {/* Legend */}
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-[11px] md:text-xs">
-          <LegendPill color="purple" label={SLACK_PLAN_LABEL[plan]} detail={`${formatCurrencyShort(slackMonthly)} / month · ${formatCurrencyShort(slackYear)} / yr`} />
-          <LegendPill color="emerald" label="Self-hosted Mattermost" detail={`${formatCurrencyShort(mmMonthly)} / month · ${formatCurrencyShort(mmYear)} / yr`} />
-          <LegendPill color="amber" label="Cumulative savings" detail="area between the two lines" striped />
+        {/* Legend — swatches mirror exactly what the SVG draws */}
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
+          <LegendPill
+            swatch="slack"
+            label={SLACK_PLAN_LABEL[plan]}
+            detail={`${formatCurrencyShort(slackMonthly)} / month · ${formatCurrencyShort(slackYear)} / yr`}
+          />
+          <LegendPill
+            swatch="mattermost"
+            label="Self-hosted Mattermost"
+            detail={`${formatCurrencyShort(mmMonthly)} / month · ${formatCurrencyShort(mmYear)} / yr${
+              setupFee > 0 ? ` · + $${setupFee} one-time server setup fee` : ""
+            }`}
+          />
+          <LegendPill swatch="savings" label="Cumulative savings" detail="shaded area between the two lines" />
+          <LegendPill swatch="horizon" label={`Horizon · ${horizonYears}y`} detail="dashed marker where the totals are read" />
+          <LegendPill swatch="reference" label={`1 yr of ${SLACK_PLAN_LABEL[plan]}`} detail="dotted reference line" />
         </div>
       </div>
     </div>
   );
 }
 
+type LegendSwatch = "slack" | "mattermost" | "savings" | "horizon" | "reference";
+
 function LegendPill({
-  color,
+  swatch,
   label,
   detail,
-  striped,
 }: {
-  color: "purple" | "emerald" | "amber";
+  swatch: LegendSwatch;
   label: string;
   detail: string;
-  striped?: boolean;
 }) {
-  const bg =
-    color === "purple"
-      ? "bg-purple-500"
-      : color === "emerald"
-        ? "bg-emerald-500"
-        : "bg-amber-500";
+  const swatchClass =
+    swatch === "slack"
+      ? "h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-purple-400"
+      : swatch === "mattermost"
+        ? "h-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500"
+        : swatch === "savings"
+          ? "h-3 rounded-sm bg-emerald-500/20 bg-[repeating-linear-gradient(45deg,rgba(16,185,129,0.7)_0_2px,transparent_2px_5px)]"
+          : swatch === "horizon"
+            ? "h-0 border-t-2 border-dashed border-amber-400"
+            : "h-0 border-t-2 border-dotted border-rose-400";
   return (
     <div className="flex items-center gap-2 min-w-0">
-      <span
-        className={cn(
-          "inline-block w-4 h-1.5 rounded-full shrink-0",
-          bg,
-          striped && "opacity-50 bg-[repeating-linear-gradient(90deg,currentColor_0_3px,transparent_3px_6px)]",
-        )}
-      />
-      <span className="font-semibold text-white truncate">{label}</span>
-      <span className="text-slate-500 font-mono text-[10px] md:text-[11px] truncate">{detail}</span>
+      <span aria-hidden className={cn("inline-block w-4 shrink-0", swatchClass)} />
+      <span className="font-semibold text-white">{label}</span>
+      <span className="text-slate-500 font-mono text-xs">{detail}</span>
     </div>
   );
 }
@@ -336,6 +456,7 @@ function CostChart({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const gradientId = useId();
+  const { ref: wrapRef, width } = useContainerWidth<HTMLDivElement>();
   const chartYears = CHART_MAX_YEARS;
 
   const slackYear = slackMonthly * 12;
@@ -345,13 +466,17 @@ function CostChart({
   const xMax = chartYears;
   const yMax = Math.max(slackYear * chartYears, mmYear * chartYears + setupFee, 1);
 
-  const { w, h, padL, padT, plotW, plotH } = CHART_DIMS;
+  const dims = useMemo(() => chartDimsFor(width), [width]);
+  const { w, h, padL, padT, plotW, plotH, narrow } = dims;
 
   const xOf = (t: number) => padL + (t / xMax) * plotW;
   const yOf = (v: number) => padT + plotH - (v / yMax) * plotH;
 
   // Points for each year, 0..chartYears
   const years = useMemo(() => Array.from({ length: chartYears + 1 }, (_, i) => i), [chartYears]);
+  // Fewer x labels on narrow widths (the horizon options 1 / 3 / 5 stay labelled)
+  const xTickYears = narrow ? years.filter((t) => t === 0 || t % 2 === 1) : years;
+  const yTickFractions = narrow ? [0, 0.5, 1] : [0, 0.25, 0.5, 0.75, 1];
 
   const slackPoints = years.map((t) => ({ x: xOf(t), y: yOf(slackYear * t) }));
   const mmPoints = years.map((t) => ({ x: xOf(t), y: yOf(mmYear * t + setupFee) }));
@@ -367,25 +492,34 @@ function CostChart({
   const horizonMmY = yOf(mmYear * horizonYears + setupFee);
 
   // Y-axis ticks
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => ({
+  const yTicks = yTickFractions.map((f) => ({
     y: padT + plotH - f * plotH,
     value: f * yMax,
   }));
 
   const initialAnim = prefersReducedMotion ? {} : { initial: { pathLength: 0 }, animate: { pathLength: 1 } };
 
+  const axisFont = { fontSize: 11, fontFamily: "ui-monospace, monospace" } as const;
+  const labelFont = { fontSize: 12, fontFamily: "ui-monospace, monospace", fontWeight: 600 } as const;
+
+  const slackHorizonText = `${formatCurrencyShort(slackYear * horizonYears)} · ${horizonYears}y`;
+  const mmHorizonText = `${formatCurrencyShort(mmYear * horizonYears + setupFee)} · ${horizonYears}y`;
+
   return (
-    <div className="relative rounded-xl border border-white/10 bg-black/40 overflow-hidden">
+    <div ref={wrapRef} className="relative rounded-xl border border-white/10 bg-black/40 overflow-hidden min-h-[300px]">
+      {width > 0 && (
       <svg
         viewBox={`0 0 ${w} ${h}`}
-        className="block w-full h-auto text-slate-500"
+        width={w}
+        height={h}
+        className="block max-w-full h-auto text-slate-500"
         role="img"
-        aria-label={`Cumulative spend over ${chartYears} years for ${users} users`}
+        aria-label={`Cumulative spend over ${chartYears} years for ${users} users on ${SLACK_PLAN_LABEL[plan]} versus self-hosted Mattermost`}
       >
         <defs>
           <linearGradient id={`${gradientId}-slack`} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#a855f7" />
-            <stop offset="100%" stopColor="#f43f5e" />
+            <stop offset="100%" stopColor="#c084fc" />
           </linearGradient>
           <linearGradient id={`${gradientId}-mm`} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#06b6d4" />
@@ -393,8 +527,8 @@ function CostChart({
           </linearGradient>
           <linearGradient id={`${gradientId}-savings`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#10b981" stopOpacity="0.28" />
-            <stop offset="60%" stopColor="#06b6d4" stopOpacity="0.14" />
-            <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.02" />
+            <stop offset="60%" stopColor="#10b981" stopOpacity="0.14" />
+            <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
           </linearGradient>
           <pattern id={`${gradientId}-stripe`} x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <rect x="0" y="0" width="6" height="6" fill="transparent" />
@@ -415,11 +549,11 @@ function CostChart({
               strokeDasharray={i === 0 ? undefined : "3 4"}
             />
             <text
-              x={padL - 10}
+              x={padL - 8}
               y={tick.y + 4}
               textAnchor="end"
               className="fill-slate-500"
-              style={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }}
+              style={axisFont}
             >
               {formatCurrencyAxis(tick.value)}
             </text>
@@ -427,7 +561,7 @@ function CostChart({
         ))}
 
         {/* X ticks */}
-        {years.map((t) => (
+        {xTickYears.map((t) => (
           <g key={`x-${t}`}>
             <line
               x1={xOf(t)}
@@ -439,10 +573,10 @@ function CostChart({
             />
             <text
               x={xOf(t)}
-              y={padT + plotH + 20}
+              y={padT + plotH + 18}
               textAnchor="middle"
               className="fill-slate-500"
-              style={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }}
+              style={axisFont}
             >
               {t === 0 ? "0" : `${t}y`}
             </text>
@@ -526,11 +660,12 @@ function CostChart({
 
         {/* Horizon labels — flip to the left of the marker when near the right edge */}
         {(() => {
-          const LABEL_W = 118;
+          const charW = 7.3; // 12px monospace
+          const LABEL_W = Math.ceil(Math.max(slackHorizonText.length, mmHorizonText.length) * charW) + 16;
           const LABEL_H = 24;
           const flip = horizonX + 8 + LABEL_W > padL + plotW;
           const rectX = flip ? horizonX - 8 - LABEL_W : horizonX + 8;
-          const textX = flip ? horizonX - LABEL_W + 4 : horizonX + 16;
+          const textX = rectX + 8;
           const slackLabelY = Math.max(padT + 4, horizonSlackY - 30);
           const slackTextY = slackLabelY + 16;
           const mmLabelY = Math.min(padT + plotH - 4 - LABEL_H, horizonMmY - 12);
@@ -548,13 +683,8 @@ function CostChart({
                   stroke="#a855f7"
                   strokeOpacity="0.5"
                 />
-                <text
-                  x={textX}
-                  y={slackTextY}
-                  className="fill-purple-200"
-                  style={{ fontSize: 11, fontFamily: "ui-monospace, monospace", fontWeight: 600 }}
-                >
-                  {`${formatCurrencyShort(slackYear * horizonYears)} · ${horizonYears}y`}
+                <text x={textX} y={slackTextY} className="fill-purple-200" style={labelFont}>
+                  {slackHorizonText}
                 </text>
               </g>
               <g>
@@ -568,20 +698,15 @@ function CostChart({
                   stroke="#10b981"
                   strokeOpacity="0.5"
                 />
-                <text
-                  x={textX}
-                  y={mmTextY}
-                  className="fill-emerald-200"
-                  style={{ fontSize: 11, fontFamily: "ui-monospace, monospace", fontWeight: 600 }}
-                >
-                  {`${formatCurrencyShort(mmYear * horizonYears + setupFee)} · ${horizonYears}y`}
+                <text x={textX} y={mmTextY} className="fill-emerald-200" style={labelFont}>
+                  {mmHorizonText}
                 </text>
               </g>
             </>
           );
         })()}
 
-        {/* "One year of Slack" reference line */}
+        {/* "One year of Slack" reference line — rose is reserved for this line */}
         {slackYear < yMax && (
           <g opacity="0.7">
             <line
@@ -598,7 +723,7 @@ function CostChart({
               y={yOf(slackYear) - 6}
               textAnchor="end"
               className="fill-rose-300"
-              style={{ fontSize: 10, fontFamily: "ui-monospace, monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}
+              style={{ ...axisFont, letterSpacing: "0.08em", textTransform: "uppercase" }}
             >
               {`1 yr ${plan === "business" ? "Business+" : "Pro"} = ${formatCurrencyShort(slackYear)}`}
             </text>
@@ -627,14 +752,15 @@ function CostChart({
         {/* X-axis title */}
         <text
           x={padL + plotW / 2}
-          y={h - 6}
+          y={h - 8}
           textAnchor="middle"
           className="fill-slate-500"
-          style={{ fontSize: 10, fontFamily: "ui-monospace, monospace", letterSpacing: "0.15em", textTransform: "uppercase" }}
+          style={{ ...axisFont, letterSpacing: "0.15em", textTransform: "uppercase" }}
         >
-          cumulative spend · years from launch
+          {narrow ? "cumulative spend · years" : "cumulative spend · years from launch"}
         </text>
       </svg>
+      )}
     </div>
   );
 }
@@ -662,6 +788,8 @@ type PipelineNode = {
   size?: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   accent: PipelineAccent;
+  /** Printed in the kind label so phase membership is not colour-only. */
+  phase: "phase 1" | "phase 1 → 2" | "phase 2" | "post-cutover";
   description: string;
   details: string[];
   hashSealed?: boolean;
@@ -683,6 +811,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "system",
     id: "slack",
+    phase: "phase 1",
     label: "Your Slack Workspace",
     sub: "source of truth",
     icon: Hash,
@@ -697,6 +826,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "artifact",
     id: "raw-zip",
+    phase: "phase 1",
     label: "slack-export.zip",
     sub: "raw export + CSVs",
     size: "~12 GB",
@@ -712,6 +842,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "artifact",
     id: "enriched-zip",
+    phase: "phase 1",
     label: "slack-export.enriched.zip",
     sub: "files baked in, emails resolved",
     size: "~20 GB",
@@ -728,6 +859,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "artifact",
     id: "jsonl",
+    phase: "phase 1",
     label: "mattermost_import.jsonl",
     sub: "Mattermost's native import format",
     size: "~500 MB + 8 GB attachments",
@@ -743,6 +875,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "artifact",
     id: "import-zip",
+    phase: "phase 1",
     label: "mattermost-bulk-import.zip",
     sub: "ready for mmctl",
     size: "~22 GB",
@@ -758,6 +891,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "gate",
     id: "handoff",
+    phase: "phase 1 → 2",
     label: "handoff.json",
     sub: "hash-sealed Phase 1 → Phase 2 contract",
     icon: FileCheck,
@@ -773,6 +907,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "system",
     id: "staging",
+    phase: "phase 2",
     label: "Staging Mattermost",
     sub: "throwaway VPS, full-scale rehearsal",
     icon: PlayCircle,
@@ -787,6 +922,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "gate",
     id: "ready",
+    phase: "phase 2",
     label: "Fail-Closed Ready Gate",
     sub: "status: ready | blocked",
     icon: Lock,
@@ -802,6 +938,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "system",
     id: "production",
+    phase: "phase 2",
     label: "Production Mattermost",
     sub: "chat.yourdomain.com",
     icon: ServerCog,
@@ -816,6 +953,7 @@ const PIPELINE_NODES: PipelineNode[] = [
   {
     kind: "system",
     id: "users",
+    phase: "post-cutover",
     label: "Activated Users",
     sub: "/reset_password, one link each",
     icon: Users,
@@ -873,7 +1011,7 @@ const PIPELINE_EDGES: PipelineEdge[] = [
     stages: ["verify", "handoff"],
     accent: "emerald",
     cmd: "./migrate.sh",
-    description: "Five validators (manifest, JSONL ordering, enrichment, reconciliation, integration inventory), a secret scanner, and the hash-sealed handoff.json contract.",
+    description: "Four validators (artifact hash + layout, JSONL ordering + linkage, enrichment completeness, raw-vs-enriched-vs-JSONL count reconciliation), a secret scanner, the integration-inventory export, and the hash-sealed handoff.json contract.",
   },
   {
     id: "e-phase2-setup",
@@ -999,10 +1137,10 @@ export function PhasePipelineViz() {
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-cyan-400/20 text-cyan-400">
             <GitBranch className="h-3.5 w-3.5" />
           </div>
-          <span className="text-[10px] md:text-[11px] font-mono text-cyan-400 tracking-widest uppercase">
+          <span className="text-xs font-mono text-cyan-400 tracking-widest uppercase">
             Artifact Flow
           </span>
-          <span className="text-[10px] md:text-[11px] text-slate-500 font-mono">
+          <span className="text-xs text-slate-500 font-mono">
             · Slack → bytes on disk → Mattermost · tap to expand
           </span>
         </div>
@@ -1010,7 +1148,7 @@ export function PhasePipelineViz() {
 
       <div className="p-5 md:p-7 relative">
         {/* Background rail */}
-        <div className="absolute top-5 bottom-5 md:top-7 md:bottom-7 left-[38px] md:left-[60px] w-px bg-gradient-to-b from-purple-500/40 via-cyan-500/40 to-emerald-500/40 pointer-events-none" />
+        <div className="absolute top-5 bottom-5 md:top-7 md:bottom-7 left-[44px] md:left-[60px] w-px bg-gradient-to-b from-purple-500/40 via-cyan-500/40 to-emerald-500/40 pointer-events-none" />
 
         <div className="flex flex-col gap-2.5">
           {flow.map(({ node, edgeIn }, idx) => (
@@ -1076,9 +1214,11 @@ function PipelineNodeRow({
 }) {
   const cls = accentClasses(node.accent, active);
   const Icon = node.icon;
+  const detailId = useId();
 
-  const nodeKindLabel =
-    node.kind === "artifact" ? "artifact" : node.kind === "system" ? "system" : "gate";
+  const nodeKindLabel = `${
+    node.kind === "artifact" ? "artifact" : node.kind === "system" ? "system" : "gate"
+  } · ${node.phase}`;
 
   return (
     <div className="relative flex items-stretch gap-3 md:gap-4 z-[1]">
@@ -1087,7 +1227,7 @@ function PipelineNodeRow({
         <motion.div
           layout
           className={cn(
-            "relative z-[2] flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full border-2 backdrop-blur-md transition-all",
+            "relative z-[2] flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full border-2 backdrop-blur-md",
             cls.cardBorder,
             cls.cardBg,
             active ? cls.glow : "",
@@ -1102,12 +1242,12 @@ function PipelineNodeRow({
           )}
         </motion.div>
         {isFirst && (
-          <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] font-mono uppercase tracking-[0.25em] text-purple-300 whitespace-nowrap">
+          <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-mono uppercase tracking-[0.25em] text-purple-300 whitespace-nowrap">
             start
           </span>
         )}
         {isLast && (
-          <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[9px] font-mono uppercase tracking-[0.25em] text-emerald-300 whitespace-nowrap">
+          <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-xs font-mono uppercase tracking-[0.25em] text-emerald-300 whitespace-nowrap">
             done
           </span>
         )}
@@ -1118,10 +1258,10 @@ function PipelineNodeRow({
         <button
           type="button"
           onClick={onSelect}
-          aria-pressed={active}
           aria-expanded={active}
+          aria-controls={detail ? detailId : undefined}
           className={cn(
-            "text-left rounded-xl md:rounded-2xl border backdrop-blur-md px-4 py-3.5 md:px-5 md:py-4 transition-all group",
+            "text-left rounded-xl md:rounded-2xl border backdrop-blur-md px-4 py-3.5 md:px-5 md:py-4 transition-colors group focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
             cls.cardBg,
             cls.cardBorder,
             active ? cls.glow : "hover:bg-white/[0.04]",
@@ -1131,7 +1271,7 @@ function PipelineNodeRow({
         >
           <div className="flex items-start justify-between gap-3 mb-1.5 flex-wrap">
             <div className="min-w-0">
-              <p className={cn("text-[9px] font-mono uppercase tracking-[0.22em] mb-0.5", cls.text)}>
+              <p className={cn("text-xs font-mono uppercase tracking-[0.22em] mb-0.5", cls.text)}>
                 {nodeKindLabel}
                 {node.emphasis === "critical" ? " · fail-closed" : ""}
               </p>
@@ -1141,7 +1281,7 @@ function PipelineNodeRow({
             </div>
             {node.size && (
               <span className={cn(
-                "shrink-0 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-mono tabular-nums",
+                "shrink-0 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-mono tabular-nums",
                 cls.pillBg,
                 cls.pillBorder,
                 cls.text,
@@ -1157,6 +1297,7 @@ function PipelineNodeRow({
           {detail && (
             <motion.div
               key="detail"
+              id={detailId}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -1188,6 +1329,8 @@ function PipelineEdgeRow({
   detail?: ReactNode;
 }) {
   const cls = accentClasses(edge.accent, active);
+  const detailId = useId();
+  const phaseLabel = edge.cmd === "./migrate.sh" ? "phase 1" : "phase 2";
   return (
     <div className="relative flex items-start gap-3 md:gap-4 z-[1] py-1">
       <div className="relative shrink-0 w-12 md:w-16 flex items-start justify-center pt-2">
@@ -1197,10 +1340,10 @@ function PipelineEdgeRow({
         <button
           type="button"
           onClick={onSelect}
-          aria-pressed={active}
           aria-expanded={active}
+          aria-controls={detail ? detailId : undefined}
           className={cn(
-            "text-left rounded-xl border px-3 py-2 md:px-3.5 md:py-2 transition-all group backdrop-blur-md",
+            "text-left rounded-xl border px-3 py-2 md:px-3.5 md:py-2 min-h-11 transition-colors group backdrop-blur-md focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
             cls.cardBg,
             cls.cardBorder,
             active ? cls.glow : "hover:bg-white/[0.04]",
@@ -1208,18 +1351,16 @@ function PipelineEdgeRow({
           )}
         >
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className={cn("text-[9px] font-mono uppercase tracking-[0.22em]", cls.text)}>
+            <span className={cn("text-xs font-mono uppercase tracking-[0.22em]", cls.text)}>
               {!edge.cmd
                 ? "post-cutover"
-                : edge.stages.length === 1
-                  ? "stage"
-                  : "stages"}
+                : `${edge.stages.length === 1 ? "stage" : "stages"} · ${phaseLabel}`}
             </span>
             {edge.stages.map((s, i) => (
               <span key={s} className="flex items-center gap-1.5">
                 <span
                   className={cn(
-                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] md:text-[11px] font-mono tracking-tight border",
+                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-mono tracking-tight border",
                     cls.pillBg,
                     cls.pillBorder,
                     cls.textStrong,
@@ -1228,7 +1369,7 @@ function PipelineEdgeRow({
                   {s}
                 </span>
                 {i < edge.stages.length - 1 && (
-                  <span className="text-slate-600 text-[10px]">›</span>
+                  <span className="text-slate-600 text-xs">›</span>
                 )}
               </span>
             ))}
@@ -1238,6 +1379,7 @@ function PipelineEdgeRow({
           {detail && (
             <motion.div
               key="edge-detail"
+              id={detailId}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -1270,13 +1412,14 @@ function PipelineNodeDetail({ node }: { node: PipelineNode }) {
           <Icon className={cn("w-5 h-5", cls.icon)} />
         </div>
         <div className="min-w-0">
-          <p className={cn("text-[9px] font-mono uppercase tracking-[0.25em] mb-0.5", cls.text)}>
+          <p className={cn("text-xs font-mono uppercase tracking-[0.25em] mb-0.5", cls.text)}>
             {nodeKindLabel}
+            {` · ${node.phase}`}
             {node.emphasis === "critical" ? " · fail-closed" : ""}
             {node.size ? ` · ${node.size}` : ""}
           </p>
-          <h4 className="text-lg font-bold text-white tracking-tight">{node.label}</h4>
-          <p className="text-[11px] text-slate-400 font-mono">{node.sub}</p>
+          <h3 className="text-lg font-bold text-white tracking-tight">{node.label}</h3>
+          <p className="text-xs text-slate-400 font-mono">{node.sub}</p>
         </div>
       </div>
       <p className="text-sm md:text-[15px] text-slate-200 leading-relaxed">{node.description}</p>
@@ -1305,14 +1448,14 @@ function PipelineEdgeDetail({ edge }: { edge: PipelineEdge }) {
           <Zap className={cn("w-5 h-5", cls.icon)} />
         </div>
         <div className="min-w-0">
-          <p className={cn("text-[9px] font-mono uppercase tracking-[0.25em] mb-0.5", cls.text)}>
+          <p className={cn("text-xs font-mono uppercase tracking-[0.25em] mb-0.5", cls.text)}>
             {!edge.cmd
               ? "Post-cutover · no command"
-              : `Transition · ${edge.stages.length} ${edge.stages.length === 1 ? "stage" : "stages"}`}
+              : `${edge.cmd === "./migrate.sh" ? "Phase 1" : "Phase 2"} transition · ${edge.stages.length} ${edge.stages.length === 1 ? "stage" : "stages"}`}
           </p>
-          <h4 className="text-lg font-bold text-white tracking-tight">
+          <h3 className="text-lg font-bold text-white tracking-tight">
             {edge.stages.join(" → ")}
-          </h4>
+          </h3>
         </div>
       </div>
       <p className="text-sm md:text-[15px] text-slate-200 leading-relaxed">
@@ -1323,7 +1466,7 @@ function PipelineEdgeDetail({ edge }: { edge: PipelineEdge }) {
           <span
             key={s}
             className={cn(
-              "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-mono border",
+              "inline-flex items-center rounded-md px-2 py-1 text-xs font-mono border",
               cls.pillBg,
               cls.pillBorder,
               cls.textStrong,
@@ -1342,7 +1485,10 @@ function PipelineEdgeDetail({ edge }: { edge: PipelineEdge }) {
 // Animated stacked-bar summary above a filterable list.
 // ============================================================
 
-type Disposition = "native" | "sidecar" | "unrecoverable";
+// "partial" = imports natively, but only the slice the export token's account
+// can see (the Pro / slackdump blind-spot). Distinct from a sidecar, which is
+// preserved content re-homed into an archive channel.
+type Disposition = "native" | "sidecar" | "partial" | "unrecoverable";
 
 type Feature = {
   name: string;
@@ -1353,9 +1499,9 @@ type Feature = {
 
 const FEATURES: Feature[] = [
   { name: "Public channel messages", disposition: "native", note: "Every supported plan." },
-  { name: "Private channel messages", disposition: "native", pro: "sidecar", note: "Business+: native. Pro: only if the token's account is a member." },
-  { name: "Direct messages", disposition: "native", pro: "sidecar", note: "Business+: native. Pro: only DMs the token's user participates in." },
-  { name: "Group DMs (mpim)", disposition: "native", pro: "sidecar", note: "Same as DMs." },
+  { name: "Private channel messages", disposition: "native", pro: "partial", note: "Business+: native. Pro: only the private channels the export token's account is a member of; the rest never leave Slack." },
+  { name: "Direct messages", disposition: "native", pro: "partial", note: "Business+: native. Pro: only DMs the token's user participates in; other people's DMs are invisible to the export." },
+  { name: "Group DMs (mpim)", disposition: "native", pro: "partial", note: "Same as DMs: member-visible only on Pro." },
   { name: "Threads & thread replies", disposition: "native", note: "thread_ts preserved; JSONL validator blocks orphans." },
   { name: "Reactions (unicode)", disposition: "native", note: "Fully preserved." },
   { name: "Reactions (custom emoji)", disposition: "native", note: "Depends on mmetl mapping the custom name; drops listed in the reconciliation report." },
@@ -1367,7 +1513,7 @@ const FEATURES: Feature[] = [
   { name: "Canvases", disposition: "sidecar", note: "slack-canvases-archive channel; one post per canvas with HTML attachment." },
   { name: "Lists", disposition: "sidecar", note: "slack-lists-archive channel; JSON attachment." },
   { name: "Channel-audit CSV", disposition: "sidecar", note: "slack-export-admin channel." },
-  { name: "Workflow Builder automations", disposition: "unrecoverable", note: "JSON preserved as sidecar; rebuild as Playbooks or slash commands." },
+  { name: "Workflow Builder automations", disposition: "sidecar", note: "Workflow JSON preserved as a sidecar post; rebuild required as Playbooks or slash commands." },
   { name: "Slackbot replies", disposition: "unrecoverable", note: "Rebuild as Mattermost bot with keyword triggers." },
   { name: "Saved / Later items", disposition: "unrecoverable", note: "Per-user; ask users to re-save after activation." },
   { name: "Scheduled messages", disposition: "unrecoverable", note: "Not in Slack's export. Tell users to re-schedule." },
@@ -1410,6 +1556,16 @@ const DISPOSITION_META: Record<
     barBg: "bg-cyan-500/20",
     dot: "bg-cyan-400",
   },
+  partial: {
+    label: "Partial",
+    color: "text-purple-200",
+    icon: CircleDashed,
+    badgeBg: "bg-purple-500/10",
+    badgeBorder: "border-purple-500/30",
+    barFill: "bg-gradient-to-r from-purple-400 to-purple-500",
+    barBg: "bg-purple-500/20",
+    dot: "bg-purple-400",
+  },
   unrecoverable: {
     label: "Unrecoverable",
     color: "text-amber-200",
@@ -1422,9 +1578,18 @@ const DISPOSITION_META: Record<
   },
 };
 
+const DISPOSITION_ORDER: Disposition[] = ["native", "sidecar", "partial", "unrecoverable"];
+
 export function DataPreservationMatrixViz() {
   const [planTier, setPlanTier] = useState<"business" | "pro">("business");
   const [filter, setFilter] = useState<Disposition | "all">("all");
+  const groupId = useId();
+
+  // "Partial" only exists on Pro; don't strand the filter on an empty set.
+  const selectTier = useCallback((tier: "business" | "pro") => {
+    setPlanTier(tier);
+    if (tier === "business") setFilter((f) => (f === "partial" ? "all" : f));
+  }, []);
 
   const effective = useMemo(
     () =>
@@ -1439,9 +1604,15 @@ export function DataPreservationMatrixViz() {
   const counts = useMemo(() => {
     const native = effective.filter((f) => f.effective === "native").length;
     const sidecar = effective.filter((f) => f.effective === "sidecar").length;
+    const partial = effective.filter((f) => f.effective === "partial").length;
     const unrecoverable = effective.filter((f) => f.effective === "unrecoverable").length;
-    return { native, sidecar, unrecoverable, total: effective.length };
+    return { native, sidecar, partial, unrecoverable, total: effective.length };
   }, [effective]);
+
+  const filterKeys: Array<Disposition | "all"> = [
+    "all",
+    ...DISPOSITION_ORDER.filter((d) => d !== "partial" || planTier === "pro"),
+  ];
 
   const downgradedList = effective.filter((f) => f.downgraded);
 
@@ -1454,10 +1625,10 @@ export function DataPreservationMatrixViz() {
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-cyan-400/20 text-cyan-400">
             <Layers className="h-3.5 w-3.5" />
           </div>
-          <span className="text-[10px] md:text-[11px] font-mono text-cyan-400 tracking-widest uppercase">
+          <span className="text-xs font-mono text-cyan-400 tracking-widest uppercase">
             Data Preservation Matrix
           </span>
-          <span className="text-[10px] md:text-[11px] text-slate-500 font-mono">
+          <span className="text-xs text-slate-500 font-mono">
             · what survives · what becomes a sidecar · what you rebuild
           </span>
         </div>
@@ -1466,33 +1637,36 @@ export function DataPreservationMatrixViz() {
       <div className="p-5 md:p-7 space-y-5 md:space-y-6">
         {/* Plan toggle */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 text-[10px] font-bold uppercase tracking-tight self-start md:self-auto">
-            <button
-              type="button"
-              onClick={() => setPlanTier("business")}
-              className={cn(
-                "px-3 py-2 rounded-lg transition-all",
-                planTier === "business"
-                  ? "bg-purple-500 text-white shadow-lg shadow-purple-500/20"
-                  : "text-slate-500 hover:text-slate-300",
-              )}
-            >
-              Business+ · Track A
-            </button>
-            <button
-              type="button"
-              onClick={() => setPlanTier("pro")}
-              className={cn(
-                "px-3 py-2 rounded-lg transition-all",
-                planTier === "pro"
-                  ? "bg-purple-500 text-white shadow-lg shadow-purple-500/20"
-                  : "text-slate-500 hover:text-slate-300",
-              )}
-            >
-              Pro · Track B (slackdump)
-            </button>
+          <div
+            role="radiogroup"
+            aria-label="Slack plan tier"
+            className="flex p-1 bg-black/40 rounded-xl border border-white/5 text-xs font-bold uppercase tracking-tight self-start md:self-auto"
+          >
+            {(
+              [
+                { key: "business", label: "Business+ · Track A" },
+                { key: "pro", label: "Pro · Track B (slackdump)" },
+              ] as const
+            ).map((tier) => (
+              <button
+                key={tier.key}
+                type="button"
+                role="radio"
+                aria-checked={planTier === tier.key}
+                onClick={() => selectTier(tier.key)}
+                onKeyDown={radioKeyNav}
+                className={cn(
+                  "min-h-10 px-4 py-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
+                  planTier === tier.key
+                    ? "bg-purple-500 text-white shadow-lg shadow-purple-500/20"
+                    : "text-slate-500 hover:text-slate-300",
+                )}
+              >
+                {tier.label}
+              </button>
+            ))}
           </div>
-          <p className="text-[11px] text-slate-500 font-mono">
+          <p className="text-xs text-slate-500 font-mono">
             {counts.total} Slack features · disposition recomputes on plan toggle
           </p>
         </div>
@@ -1501,27 +1675,39 @@ export function DataPreservationMatrixViz() {
         <DispositionBar counts={counts} downgradedList={downgradedList} />
 
         {/* Filter chips */}
-        <div className="flex gap-2 flex-wrap items-center">
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.2em]">Filter</span>
-          {(["all", "native", "sidecar", "unrecoverable"] as const).map((f) => {
+        <div
+          role="radiogroup"
+          aria-labelledby={`${groupId}-filter`}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <span id={`${groupId}-filter`} className="text-xs font-mono text-slate-500 uppercase tracking-[0.2em]">
+            Filter
+          </span>
+          {filterKeys.map((f) => {
             const active = filter === f;
             const count = f === "all" ? counts.total : counts[f];
-            const color = f === "all" ? "slate" : f === "native" ? "emerald" : f === "sidecar" ? "cyan" : "amber";
+            const activeClass =
+              f === "all"
+                ? "bg-white/10 border-white/20 text-white"
+                : f === "native"
+                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-200"
+                  : f === "sidecar"
+                    ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-200"
+                    : f === "partial"
+                      ? "bg-purple-500/15 border-purple-500/40 text-purple-200"
+                      : "bg-amber-500/15 border-amber-500/40 text-amber-200";
             return (
               <button
                 key={f}
                 type="button"
+                role="radio"
+                aria-checked={active}
                 onClick={() => setFilter(f)}
+                onKeyDown={radioKeyNav}
                 className={cn(
-                  "px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest transition-all",
+                  "min-h-10 px-4 rounded-full border text-xs font-mono uppercase tracking-widest transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
                   active
-                    ? color === "slate"
-                      ? "bg-white/10 border-white/20 text-white"
-                      : color === "emerald"
-                        ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-200"
-                        : color === "cyan"
-                          ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-200"
-                          : "bg-amber-500/15 border-amber-500/40 text-amber-200"
+                    ? activeClass
                     : "bg-transparent border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20",
                 )}
               >
@@ -1546,7 +1732,7 @@ export function DataPreservationMatrixViz() {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.18 }}
                   className={cn(
-                    "group flex items-start gap-3 px-3 py-3 rounded-xl border transition-all",
+                    "group flex items-start gap-3 px-3 py-3 rounded-xl border",
                     meta.badgeBorder,
                     meta.badgeBg,
                     "hover:brightness-110",
@@ -1558,16 +1744,16 @@ export function DataPreservationMatrixViz() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                       <p className="text-sm font-semibold text-white">{f.name}</p>
-                      <span className={cn("text-[9px] font-mono uppercase tracking-widest", meta.color)}>
+                      <span className={cn("text-xs font-mono uppercase tracking-widest", meta.color)}>
                         {meta.label}
                       </span>
                       {f.downgraded && (
-                        <span className="text-[9px] font-mono uppercase tracking-widest text-amber-300/80">
+                        <span className="text-xs font-mono uppercase tracking-widest text-amber-300/80">
                           · downgraded on Pro
                         </span>
                       )}
                     </div>
-                    <p className="text-[12px] text-slate-400 leading-relaxed mt-1">{f.note}</p>
+                    <p className="text-xs text-slate-400 leading-relaxed mt-1">{f.note}</p>
                   </div>
                 </motion.div>
               );
@@ -1583,20 +1769,21 @@ function DispositionBar({
   counts,
   downgradedList,
 }: {
-  counts: { native: number; sidecar: number; unrecoverable: number; total: number };
+  counts: { native: number; sidecar: number; partial: number; unrecoverable: number; total: number };
   downgradedList: { name: string; downgraded: boolean }[];
 }) {
   const prefersReducedMotion = useReducedMotion();
   const pct = (n: number) => (counts.total > 0 ? (n / counts.total) * 100 : 0);
-  const parts = [
-    { key: "native" as const, count: counts.native, meta: DISPOSITION_META.native },
-    { key: "sidecar" as const, count: counts.sidecar, meta: DISPOSITION_META.sidecar },
-    { key: "unrecoverable" as const, count: counts.unrecoverable, meta: DISPOSITION_META.unrecoverable },
-  ];
+  // Partial only appears on Pro; keep it out of the bar and legend when empty.
+  const parts = DISPOSITION_ORDER.filter((key) => key !== "partial" || counts.partial > 0).map((key) => ({
+    key,
+    count: counts[key],
+    meta: DISPOSITION_META[key],
+  }));
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-between items-baseline text-[10px] font-mono uppercase tracking-[0.2em]">
+      <div className="flex justify-between items-baseline text-xs font-mono uppercase tracking-[0.2em]">
         <span className="text-slate-500">Disposition · what happens to each feature</span>
         <span className="text-slate-500 tabular-nums">
           {counts.total} features
@@ -1616,7 +1803,7 @@ function DispositionBar({
             transition={{ type: "spring", stiffness: 90, damping: 20 }}
           >
             {pct(p.count) > 7 && (
-              <div className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-black text-[#020204] px-2">
+              <div className="flex items-center gap-1.5 text-xs font-black text-[#020204] px-2">
                 <span className="uppercase tracking-wider">{p.meta.label}</span>
                 <span className="tabular-nums">{p.count}</span>
               </div>
@@ -1624,12 +1811,12 @@ function DispositionBar({
           </motion.div>
         ))}
       </div>
-      <div className="flex flex-wrap gap-x-5 gap-y-2 text-[11px] font-mono">
+      <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-mono">
         {parts.map((p) => (
           <div key={p.key} className="flex items-center gap-2">
             <span className={cn("inline-block w-2.5 h-2.5 rounded-full", p.meta.dot)} />
             <span className="text-white font-bold tabular-nums">{p.count}</span>
-            <span className="text-slate-500 uppercase tracking-widest text-[10px]">
+            <span className="text-slate-500 uppercase tracking-widest text-xs">
               {p.meta.label} · {pct(p.count).toFixed(0)}%
             </span>
           </div>
@@ -1648,11 +1835,11 @@ function DispositionBar({
             <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-4 py-3 flex items-start gap-3">
               <AlertTriangle className="w-4 h-4 text-amber-300 mt-0.5 shrink-0" />
               <div className="min-w-0">
-                <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-300 mb-1">
-                  Pro plan blind-spot · {downgradedList.length} {downgradedList.length === 1 ? "feature" : "features"} downgraded
+                <p className="text-xs font-mono uppercase tracking-[0.2em] text-amber-300 mb-1">
+                  Pro plan blind-spot · {downgradedList.length} {downgradedList.length === 1 ? "feature" : "features"} downgraded to partial
                 </p>
-                <p className="text-[12px] text-slate-300 leading-relaxed">
-                  {downgradedList.map((d) => d.name).join(" · ")}. The export token only sees what its owner participates in; written to <span className="font-mono text-amber-200">unresolved-gaps.md</span> in advance.
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {downgradedList.map((d) => d.name).join(" · ")}. These still import natively, but only the slice the export token’s owner participates in; the missing remainder is written to <span className="font-mono text-amber-200">unresolved-gaps.md</span> in advance.
                 </p>
               </div>
             </div>
@@ -1673,7 +1860,8 @@ function DispositionBar({
 type SlackState = "live" | "read-only" | "archived";
 type MmState = "offline" | "importing" | "live" | "activated";
 
-const USER_GRID_SIZE = 24; // dots shown
+const USER_GRID_SIZE = 24; // dots shown — a sample, not a headcount
+const TOTAL_USERS = 337; // matches the Slack panel stats and the script's log lines
 const TARGET_POSTS = 1_284_903;
 
 type CutoverEventBase = {
@@ -1828,13 +2016,13 @@ const CUTOVER_SCRIPT: CutoverEvent[] = [
     t: "T +1h",
     kind: "log",
     body: "mmctl user list --all | jq length → 147 activated · 190 pending",
-    activatedUsers: 10,
+    activatedUsers: 147,
   },
   {
     t: "T +4h",
     kind: "log",
     body: "mmctl user list --all | jq length → 289 activated · 48 pending",
-    activatedUsers: 20,
+    activatedUsers: 289,
   },
   {
     t: "T +1d",
@@ -1842,7 +2030,7 @@ const CUTOVER_SCRIPT: CutoverEvent[] = [
     body: "activation sweep sent · 334 / 337 active (99%)",
     tone: "success",
     slack: "archived",
-    activatedUsers: 24,
+    activatedUsers: 334,
   },
 ];
 
@@ -1892,40 +2080,45 @@ export function CutoverSimulatorViz() {
     return () => clearTimeout(id);
   }, [playing, index, atEnd]);
 
+  // Keep the newest event in view as the log grows (the panels it narrates
+  // sit above the log, so the reader should never have to scroll to follow).
+  const logRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = logRef.current;
+    if (!el || index === 0) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: prefersReducedMotion ? "auto" : "smooth" });
+  }, [index, prefersReducedMotion]);
+
   const reset = useCallback(() => {
     setIndex(0);
     setPlaying(false);
   }, []);
 
+  const controlBtn =
+    "inline-flex items-center gap-1.5 min-h-10 px-4 rounded-full bg-white/5 border border-white/10 text-xs font-mono uppercase tracking-widest text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400";
+
   return (
     <div className="sm-viz-container">
       <div className="sm-viz-header flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-400/20 text-emerald-400">
             <Zap className="h-3.5 w-3.5" />
           </div>
-          <span className="text-[10px] md:text-[11px] font-mono text-emerald-400 tracking-widest uppercase">
+          <span className="text-xs font-mono text-emerald-400 tracking-widest uppercase">
             Cutover Simulator
           </span>
-          <span className="text-[10px] md:text-[11px] text-slate-500 font-mono">
-            · both systems, live · T −60m → T +1d
+          <span className="text-xs text-slate-500 font-mono">
+            · scripted replay of a real cutover · T −60m → T +1d
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
-            onClick={() => {
-              if (atEnd) reset();
-              else setPlaying((p) => !p);
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-widest text-white hover:bg-white/10 transition-colors"
+            onClick={() => setPlaying((p) => !p)}
+            disabled={atEnd}
+            className={controlBtn}
           >
-            {atEnd ? (
-              <>
-                <CircleDashed className="w-3.5 h-3.5" />
-                Restart
-              </>
-            ) : playing ? (
+            {playing ? (
               <>
                 <PauseCircle className="w-3.5 h-3.5" />
                 Pause
@@ -1941,9 +2134,18 @@ export function CutoverSimulatorViz() {
             type="button"
             onClick={() => setIndex((i) => Math.min(events.length, i + 1))}
             disabled={atEnd}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-widest text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className={controlBtn}
           >
             Step
+          </button>
+          <button
+            type="button"
+            onClick={reset}
+            disabled={index === 0}
+            className={controlBtn}
+          >
+            <CircleDashed className="w-3.5 h-3.5" />
+            Restart
           </button>
         </div>
       </div>
@@ -1969,7 +2171,13 @@ export function CutoverSimulatorViz() {
 
         {/* Log + rules */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4 md:gap-5">
-          <div className="bg-black/50 rounded-2xl border border-white/10 p-4 md:p-5 min-h-[240px] md:min-h-[300px] max-h-[380px] overflow-y-auto">
+          <div
+            ref={logRef}
+            role="log"
+            aria-live="polite"
+            aria-label="Cutover approval log"
+            className="bg-black/50 rounded-2xl border border-white/10 p-4 md:p-5 min-h-[240px] md:min-h-[300px] max-h-[380px] overflow-y-auto"
+          >
             <AnimatePresence initial={false}>
               {visible.length === 0 ? (
                 <motion.p key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-slate-500 text-sm font-mono">
@@ -1984,7 +2192,7 @@ export function CutoverSimulatorViz() {
           <div className="space-y-3">
             <CutoverRule tone="normal" title="Approval rule" body={<>Use <span className="text-white font-semibold">Approve once</span>, not <span className="text-amber-300">Approve for the session</span>, during cutover.</>} />
             <CutoverRule tone="emerald" title="Idempotent" body={<>Interrupted? Re-run <span className="font-mono text-white">cutover</span>. Mattermost de-dupes on message ID.</>} />
-            <CutoverRule tone="amber" title="If it fails" body={<>Mechanical → fix, re-run. Data loss → <span className="font-mono text-white">ROLLBACK_CONFIRMATION=I_UNDERSTAND_THIS_RESTORES_BACKUPS</span>.</>} />
+            <CutoverRule tone="amber" title="If it fails" body={<>Mechanical → fix, re-run. Data loss → <code className="font-mono text-white break-all">ROLLBACK_CONFIRMATION=I_UNDERSTAND_THIS_RESTORES_BACKUPS</code>.</>} />
           </div>
         </div>
       </div>
@@ -2007,7 +2215,7 @@ function CutoverRule({ tone, title, body }: { tone: "normal" | "emerald" | "ambe
         : "text-slate-400";
   return (
     <div className={cn("rounded-xl border p-3", cls)}>
-      <p className={cn("text-[10px] font-mono uppercase tracking-[0.2em] mb-1.5", titleCls)}>
+      <p className={cn("text-xs font-mono uppercase tracking-[0.2em] mb-1.5", titleCls)}>
         {title}
       </p>
       <p className="text-xs text-slate-300 leading-relaxed">{body}</p>
@@ -2024,24 +2232,24 @@ function CutoverEventRow({ evt }: { evt: CutoverEvent }) {
     body = (
       <div className={cn("rounded-lg border p-3", destructive ? "border-amber-500/30 bg-amber-500/5" : "border-white/10 bg-white/[0.02]")}>
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.2em]", destructive ? "bg-amber-500/15 border border-amber-500/40 text-amber-200" : "bg-purple-500/15 border border-purple-500/30 text-purple-200")}>
+          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono uppercase tracking-[0.2em]", destructive ? "bg-amber-500/15 border border-amber-500/40 text-amber-200" : "bg-purple-500/15 border border-purple-500/30 text-purple-200")}>
             {destructive ? <AlertTriangle className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
             {destructive ? "destructive" : "approval"}
           </span>
-          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.2em]", evt.verdict === "approve" ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-200" : "bg-rose-500/15 border border-rose-500/30 text-rose-200")}>
+          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono uppercase tracking-[0.2em]", evt.verdict === "approve" ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-200" : "bg-rose-500/15 border border-rose-500/30 text-rose-200")}>
             {evt.verdict === "approve" ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
             {evt.verdict}
           </span>
         </div>
-        <pre className="text-[11px] md:text-[12px] font-mono text-white/90 whitespace-pre-wrap break-all leading-relaxed mb-1">
+        <pre className="text-xs font-mono text-white/90 whitespace-pre-wrap break-all leading-relaxed mb-1">
           $ {evt.cmd}
         </pre>
-        <p className="text-[11px] text-slate-400 leading-relaxed">{evt.why}</p>
+        <p className="text-xs text-slate-400 leading-relaxed">{evt.why}</p>
       </div>
     );
   } else if (evt.kind === "log") {
     body = (
-      <pre className="text-[11px] md:text-[12px] font-mono text-cyan-200/90 bg-cyan-500/[0.04] border border-cyan-500/10 rounded-md px-2.5 py-1.5 whitespace-pre-wrap break-all">
+      <pre className="text-xs font-mono text-cyan-200/90 bg-cyan-500/[0.04] border border-cyan-500/10 rounded-md px-2.5 py-1.5 whitespace-pre-wrap break-all">
         {evt.body}
       </pre>
     );
@@ -2055,7 +2263,7 @@ function CutoverEventRow({ evt }: { evt: CutoverEvent }) {
             ? "border-rose-500/30 bg-rose-500/10 text-rose-200"
             : "border-white/10 bg-white/5 text-slate-200";
     body = (
-      <div className={cn("inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-[11px] md:text-[12px] font-mono", toneClass)}>
+      <div className={cn("inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs font-mono", toneClass)}>
         <CheckCircle2 className="w-3.5 h-3.5" />
         {evt.body}
       </div>
@@ -2069,7 +2277,7 @@ function CutoverEventRow({ evt }: { evt: CutoverEvent }) {
       transition={{ duration: 0.22 }}
       className="flex gap-3 py-1.5"
     >
-      <span className="shrink-0 w-12 text-[10px] font-mono text-slate-500 tabular-nums pt-0.5">
+      <span className="shrink-0 w-12 text-xs font-mono text-slate-500 tabular-nums pt-0.5">
         {evt.t}
       </span>
       <div className="min-w-0 flex-1 text-sm">{body}</div>
@@ -2160,8 +2368,10 @@ function SlackPanel({ state }: { state: CutoverState }) {
               <Hash className="w-4 h-4 text-purple-300" />
             </div>
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-purple-300">Slack</p>
-              <p className="text-sm font-bold text-white">acme.slack.com</p>
+              <p className="text-xs font-mono uppercase tracking-[0.25em] text-purple-300">Slack</p>
+              <p className="text-sm font-bold text-white">
+                acme.slack.com <span className="text-xs font-normal text-slate-500">(illustrative)</span>
+              </p>
             </div>
           </div>
           <motion.div
@@ -2174,14 +2384,14 @@ function SlackPanel({ state }: { state: CutoverState }) {
             )}
           >
             <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot, state.slack === "live" && "animate-pulse")} />
-            <span className={cn("text-[10px] font-mono uppercase tracking-widest", meta.color)}>
+            <span className={cn("text-xs font-mono uppercase tracking-widest", meta.color)}>
               {meta.label}
             </span>
           </motion.div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+        <div className="grid grid-cols-2 gap-2 text-xs font-mono">
           <StatRow icon={Users} label="users" value="337" />
           <StatRow icon={Hash} label="channels" value="142" />
           <StatRow icon={Files} label="messages" value="1.28M" />
@@ -2191,7 +2401,7 @@ function SlackPanel({ state }: { state: CutoverState }) {
         {/* Fake channel list */}
         <div className="space-y-1 border-t border-white/5 pt-3">
           {["# general", "# engineering", "# design", "# random"].map((c) => (
-            <div key={c} className="flex items-center gap-2 text-[11px] font-mono text-slate-400">
+            <div key={c} className="flex items-center gap-2 text-xs font-mono text-slate-400">
               <span className="text-slate-600">#</span>
               <span className="truncate">{c.slice(2)}</span>
             </div>
@@ -2199,7 +2409,7 @@ function SlackPanel({ state }: { state: CutoverState }) {
         </div>
 
         {/* Write arrow indicator */}
-        <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest">
+        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest">
           {state.slack === "live" ? (
             <span className="text-emerald-300 inline-flex items-center gap-1">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -2223,9 +2433,14 @@ function SlackPanel({ state }: { state: CutoverState }) {
 }
 
 function MattermostPanel({ state }: { state: CutoverState }) {
+  const prefersReducedMotion = useReducedMotion();
   const meta = MM_STATE_META[state.mm];
   const postsPct = state.postsImported / TARGET_POSTS;
-  const activatedPct = state.activatedUsers / USER_GRID_SIZE;
+  const activatedPct = state.activatedUsers / TOTAL_USERS;
+  // The 24 dots are a sample of the 337 users; light one per ~14 activations
+  // (and at least one as soon as anyone has activated).
+  const litDots =
+    state.activatedUsers === 0 ? 0 : Math.min(USER_GRID_SIZE, Math.max(1, Math.round(activatedPct * USER_GRID_SIZE)));
 
   return (
     <motion.div
@@ -2241,8 +2456,10 @@ function MattermostPanel({ state }: { state: CutoverState }) {
               <Server className="w-4 h-4 text-cyan-300" />
             </div>
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-cyan-300">Mattermost</p>
-              <p className="text-sm font-bold text-white">chat.acme.com</p>
+              <p className="text-xs font-mono uppercase tracking-[0.25em] text-cyan-300">Mattermost</p>
+              <p className="text-sm font-bold text-white">
+                chat.acme.com <span className="text-xs font-normal text-slate-500">(illustrative)</span>
+              </p>
             </div>
           </div>
           <motion.div
@@ -2255,7 +2472,7 @@ function MattermostPanel({ state }: { state: CutoverState }) {
             )}
           >
             <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot, (state.mm === "importing" || state.mm === "live" || state.mm === "activated") && "animate-pulse")} />
-            <span className={cn("text-[10px] font-mono uppercase tracking-widest", meta.color)}>
+            <span className={cn("text-xs font-mono uppercase tracking-widest", meta.color)}>
               {state.mm === "importing" ? `Importing · ${Math.round(postsPct * 100)}%` : meta.label}
             </span>
           </motion.div>
@@ -2265,7 +2482,7 @@ function MattermostPanel({ state }: { state: CutoverState }) {
         <div className="flex items-center gap-4">
           <ImportProgressRing progress={state.importProgress} active={state.mm === "importing"} />
           <div className="flex-1 min-w-0">
-            <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-slate-400 mb-0.5">
+            <p className="text-xs font-mono uppercase tracking-[0.25em] text-slate-400 mb-0.5">
               Posts imported
             </p>
             <p className="text-xl md:text-2xl font-black text-white tabular-nums leading-none">
@@ -2274,7 +2491,7 @@ function MattermostPanel({ state }: { state: CutoverState }) {
                 {" "}/ {TARGET_POSTS.toLocaleString()}
               </span>
             </p>
-            <p className="text-[10px] font-mono text-slate-500 mt-1">
+            <p className="text-xs font-mono text-slate-500 mt-1">
               {state.mm === "offline" ? "waiting for import job"
                 : state.mm === "importing" ? "streaming from mattermost-bulk-import.zip"
                   : state.mm === "live" ? "reconciled · observed == handoff"
@@ -2286,17 +2503,17 @@ function MattermostPanel({ state }: { state: CutoverState }) {
         {/* User activation grid */}
         <div className="space-y-2 border-t border-white/5 pt-3">
           <div className="flex items-baseline justify-between">
-            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-400">
-              Activation
+            <p className="text-xs font-mono uppercase tracking-[0.25em] text-slate-400">
+              Activation · sample of {TOTAL_USERS}
             </p>
-            <p className="text-[10px] font-mono text-slate-400 tabular-nums">
-              {state.activatedUsers} / {USER_GRID_SIZE}
+            <p className="text-xs font-mono text-slate-400 tabular-nums">
+              {state.activatedUsers} / {TOTAL_USERS}
               <span className="text-slate-400"> · {Math.round(activatedPct * 100)}%</span>
             </p>
           </div>
-          <div className="grid grid-cols-12 gap-1">
+          <div className="grid grid-cols-12 gap-1" aria-hidden="true">
             {Array.from({ length: USER_GRID_SIZE }).map((_, i) => {
-              const activated = i < state.activatedUsers;
+              const activated = i < litDots;
               return (
                 <motion.div
                   key={i}
@@ -2306,7 +2523,11 @@ function MattermostPanel({ state }: { state: CutoverState }) {
                     scale: activated ? 1 : 0.9,
                     boxShadow: activated ? "0 0 10px rgba(16,185,129,0.5)" : "0 0 0 rgba(0,0,0,0)",
                   }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20, delay: activated ? i * 0.02 : 0 }}
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 260, damping: 20, delay: activated ? i * 0.02 : 0 }
+                  }
                   className="aspect-square rounded-[4px] border border-white/10"
                   title={activated ? "activated" : "pending"}
                 />
@@ -2321,9 +2542,9 @@ function MattermostPanel({ state }: { state: CutoverState }) {
 
 function StatRow({ icon: Icon, label, value }: { icon: ComponentType<SVGProps<SVGSVGElement>>; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+    <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400">
       <Icon className="w-3 h-3 text-slate-500" />
-      <span className="text-slate-500 uppercase tracking-widest text-[9px]">{label}</span>
+      <span className="text-slate-500 uppercase tracking-widest text-xs">{label}</span>
       <span className="text-white font-semibold tabular-nums">{value}</span>
     </div>
   );
@@ -2373,8 +2594,14 @@ function ImportProgressRing({ progress, active }: { progress: number; active: bo
 
 function TransferBridge({ state }: { state: CutoverState }) {
   const active = state.mm === "importing";
+  const prefersReducedMotion = useReducedMotion();
+  const bridgeRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(bridgeRef, { amount: 0.2 });
+  // The infinite loops only run while importing, on screen, and when the
+  // reader has not asked for reduced motion. The dashed stem stays static otherwise.
+  const animating = active && inView && !prefersReducedMotion;
   return (
-    <div className="hidden md:flex flex-col items-center justify-center py-6 w-14 relative">
+    <div ref={bridgeRef} className="hidden md:flex flex-col items-center justify-center py-6 w-14 relative">
       {/* Vertical baseline */}
       <div className="absolute inset-y-8 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
 
@@ -2382,8 +2609,8 @@ function TransferBridge({ state }: { state: CutoverState }) {
       <div className="relative w-px h-20 overflow-hidden">
         <motion.div
           initial={false}
-          animate={{ backgroundPositionY: active ? ["0%", "100%"] : "0%" }}
-          transition={{ duration: 1.4, repeat: active ? Infinity : 0, ease: "linear" }}
+          animate={{ backgroundPositionY: animating ? ["0%", "100%"] : "0%" }}
+          transition={{ duration: 1.4, repeat: animating ? Infinity : 0, ease: "linear" }}
           style={{
             backgroundImage: active
               ? "repeating-linear-gradient(0deg, #06b6d4 0 8px, transparent 8px 16px)"
@@ -2396,7 +2623,7 @@ function TransferBridge({ state }: { state: CutoverState }) {
       </div>
 
       {/* Packets flowing */}
-      {active && (
+      {animating && (
         <div className="absolute inset-0 pointer-events-none">
           {[0, 0.4, 0.8].map((delay) => (
             <motion.div
@@ -2412,7 +2639,7 @@ function TransferBridge({ state }: { state: CutoverState }) {
 
       {/* Label */}
       <div className={cn(
-        "mt-2 px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-widest border",
+        "mt-2 px-2 py-0.5 rounded-full text-xs font-mono uppercase tracking-widest border",
         active
           ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-200"
           : state.mm === "live" || state.mm === "activated"

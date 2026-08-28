@@ -13,6 +13,12 @@ interface AnimatedNumberProps {
   className?: string;
 }
 
+function formatValue(n: number, target: number, decimals?: number): string {
+  if (typeof decimals === "number") return n.toFixed(decimals);
+  // Auto-detect: if target is integer, show integer. Else show 1 decimal.
+  return target % 1 === 0 ? Math.round(n).toString() : n.toFixed(1);
+}
+
 export function AnimatedNumber({
   value,
   prefix = "",
@@ -23,22 +29,23 @@ export function AnimatedNumber({
   className,
 }: AnimatedNumberProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [count, setCount] = useState(0);
+  // Initialise at the true value so server markup, crawlers and the
+  // pre-scroll paint all show the real number. The count-up only begins once
+  // the parent reports visibility, and its first frame (easeOutExpo(0) === 0)
+  // is what resets the display to 0.
+  const [count, setCount] = useState(value);
   const [hasAnimated, setHasAnimated] = useState(false);
   const frameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  // Handle reduced motion preference after hydration
+  // Reduced motion: never count up; mark as settled after hydration
   useEffect(() => {
     if (prefersReducedMotion && !hasAnimated) {
-      const hydrationId = setTimeout(() => {
-        setCount(value);
-        setHasAnimated(true);
-      }, 0);
+      const hydrationId = setTimeout(() => setHasAnimated(true), 0);
       return () => clearTimeout(hydrationId);
     }
     return undefined;
-  }, [prefersReducedMotion, value, hasAnimated]);
+  }, [prefersReducedMotion, hasAnimated]);
 
   const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
@@ -75,31 +82,13 @@ export function AnimatedNumber({
     };
   }, [isVisible, hasAnimated, value, duration, prefersReducedMotion]);
 
-  // Determine display value
-  let displayNumber: string;
-  
-  if (typeof decimals === "number") {
-    displayNumber = count.toFixed(decimals);
-  } else {
-    // Auto-detect: if target is integer, show integer. Else show 1 decimal.
-    displayNumber = value % 1 === 0 
-      ? Math.round(count).toString() 
-      : count.toFixed(1);
-  }
-
-  // Ensure we show the final target correctly when finished or reduced motion
-  if (hasAnimated || prefersReducedMotion) {
-    if (typeof decimals === "number") {
-      displayNumber = value.toFixed(decimals);
-    } else {
-      displayNumber = value % 1 === 0 ? value.toString() : value.toFixed(1);
-    }
-  }
+  // Show the exact target once finished (or when motion is reduced); before
+  // the count-up starts, `count` already equals the target.
+  const settled = hasAnimated || Boolean(prefersReducedMotion);
+  const displayNumber = formatValue(settled ? value : count, value, decimals);
 
   // Final value for screen readers
-  const srValue = typeof decimals === "number" 
-    ? value.toFixed(decimals) 
-    : (value % 1 === 0 ? value.toString() : value.toFixed(1));
+  const srValue = formatValue(value, value, decimals);
 
   return (
     <span className={className}>

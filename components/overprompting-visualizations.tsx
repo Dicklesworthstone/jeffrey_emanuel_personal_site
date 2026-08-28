@@ -1,23 +1,106 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useMemo, type ComponentRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Minimize2, RotateCcw, Layers, Microscope, LayoutTemplate, MousePointer2
+import {
+  Minimize2, RotateCcw, Layers, Microscope, LayoutTemplate, Rotate3d, Move3d
 } from "lucide-react";
 import { useFrame } from "@react-three/fiber";
 // Visibility-gated Canvas: pauses each scene's render loop while offscreen
 import Canvas from "@/components/gated-canvas";
-import { 
-  Float, PerspectiveCamera, Stars, MeshTransmissionMaterial, 
-  CameraControls, Environment, Grid
+import {
+  Float, PerspectiveCamera, Stars, MeshTransmissionMaterial,
+  CameraControls, Environment, Lightformer, Grid
 } from "@react-three/drei";
 import { EffectComposer, Bloom, Noise, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
+import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
+import { cn } from "@/lib/utils";
+import { OverpromptingMathTooltip } from "./overprompting-math-tooltip";
 
 // ============================================================
 // SHARED UTILS & SHADERS
 // ============================================================
+
+/** True on touch-first devices, where a one-finger drag must keep scrolling the page. */
+function useCoarsePointer() {
+  const [coarse, setCoarse] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    const update = () => setCoarse(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return coarse;
+}
+
+/**
+ * Device tiering for the heavy scenes: post-processing, transmission samples,
+ * shadows and star counts all step down below the "high" tier; reduced motion
+ * freezes every time-based animation and switches the loop to on-demand frames.
+ */
+function useSceneQuality() {
+  const { capabilities, quality } = useDeviceCapabilities();
+  return {
+    high: quality.enablePostProcessing,
+    shadows: quality.enableShadows,
+    maxDpr: quality.maxDpr,
+    particles: quality.particleMultiplier,
+    frozen: capabilities.prefersReducedMotion,
+  };
+}
+
+function RotateToggle({ on, onToggle, className }: { on: boolean; onToggle: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      onClick={onToggle}
+      className={cn(
+        "inline-flex items-center gap-2 min-h-10 px-3 rounded-full border text-xs font-black uppercase tracking-widest backdrop-blur-md transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
+        on ? "bg-amber-500 text-black border-amber-400" : "bg-black/60 text-slate-200 border-white/20 hover:bg-black/80",
+        className
+      )}
+    >
+      <Rotate3d className="w-3.5 h-3.5" aria-hidden="true" />
+      {on ? "Rotate: on" : "Rotate"}
+    </button>
+  );
+}
+
+/**
+ * Local studio lighting rendered once into a small environment map. Replaces
+ * `<Environment preset="city" />`, which fetched an HDR from a third-party CDN
+ * at runtime and left the scene black until the download finished.
+ */
+function StudioEnvironment() {
+  return (
+    <Environment resolution={128} frames={1}>
+      <Lightformer form="rect" intensity={2} color="#fff7ed" position={[0, 5, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[10, 10, 1]} />
+      <Lightformer form="rect" intensity={1.4} color="#f59e0b" position={[-6, 1, 2]} rotation={[0, Math.PI / 2, 0]} scale={[6, 3, 1]} />
+      <Lightformer form="rect" intensity={1.2} color="#f43f5e" position={[6, -1, -2]} rotation={[0, -Math.PI / 2, 0]} scale={[6, 3, 1]} />
+      <Lightformer form="rect" intensity={0.8} color="#e2e8f0" position={[0, 0, -8]} scale={[8, 8, 1]} />
+    </Environment>
+  );
+}
+
+/** Shakes a wrapper group instead of fighting the camera controls for `camera.position`. */
+function ShakeGroup({ active, frozen, children }: { active: boolean; frozen: boolean; children: React.ReactNode }) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    if (frozen) {
+      ref.current.position.x = 0;
+      return;
+    }
+    ref.current.position.x = active
+      ? Math.sin(clock.elapsedTime * 50) * 0.05
+      : THREE.MathUtils.lerp(ref.current.position.x, 0, 0.1);
+  });
+  return <group ref={ref}>{children}</group>;
+}
 
 const GLITCH_SHADER = {
   vertex: `
@@ -129,16 +212,19 @@ const GLITCH_SHADER = {
 // ============================================================
 
 const SLICE_LABELS = [
-  "LIKENESS_LOCK", "POSE_RIGIDITY", "CLOTHING_MATCH", 
+  "LIKENESS_LOCK", "POSE_RIGIDITY", "CLOTHING_MATCH",
   "BEARD_LOGIC", "LIGHTING_FIX", "BG_STRICT"
 ];
 
-function ManifoldMesh({ level }: { level: number }) {
+const MAX_SLICES = SLICE_LABELS.length;
+// Each cut keeps 40% of the remaining volume (illustrative).
+const VOLUME_KEPT_PER_CUT = 0.4;
+
+function ManifoldMesh({ level, frozen, high, shadows }: { level: number; frozen: boolean; high: boolean; shadows: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const materialRef = useRef<any>(null);
-  
-  // Define clipping planes
+  const materialRef = useRef<ComponentRef<typeof MeshTransmissionMaterial>>(null);
+
+  // Define clipping planes (the material holds the same array; the frame loop mutates it through the ref)
   const planes = useMemo(() => {
     return [
       new THREE.Plane(new THREE.Vector3(1, 0, 0), 1.2),  // Right crop
@@ -152,39 +238,41 @@ function ManifoldMesh({ level }: { level: number }) {
 
   useFrame((state) => {
     if (!meshRef.current || !materialRef.current) return;
-    const t = state.clock.getElapsedTime();
-    
+    const t = frozen ? 0 : state.clock.getElapsedTime();
+
     // Rotate the manifold
     meshRef.current.rotation.x = t * 0.1;
     meshRef.current.rotation.y = t * 0.15;
 
     // Animate planes based on level
-    planes.forEach((plane, i) => {
+    const livePlanes = materialRef.current.clippingPlanes;
+    if (!livePlanes) return;
+    for (let i = 0; i < livePlanes.length; i++) {
+      const plane = livePlanes[i];
       const isActive = i < level;
-      const targetDist = isActive ? 0.4 + Math.sin(t + i)*0.05 : 3.0;
-      
-      // Lerp current constant to target
-      plane.constant += (targetDist - plane.constant) * 0.1;
-    });
+      const targetDist = isActive ? 0.4 + Math.sin(t + i) * 0.05 : 3.0;
+      // Reduced motion: jump straight to the target instead of easing over frames.
+      plane.constant = frozen ? targetDist : plane.constant + (targetDist - plane.constant) * 0.1;
+    }
   });
 
   return (
     <group>
       {/* The Creative Manifold */}
-      <mesh ref={meshRef} castShadow receiveShadow>
+      <mesh ref={meshRef} castShadow={shadows} receiveShadow={shadows}>
         <icosahedronGeometry args={[1.5, 8]} />
         <MeshTransmissionMaterial
           ref={materialRef}
-          backside
-          samples={4}
-          resolution={512}
+          backside={high}
+          samples={high ? 4 : 1}
+          resolution={high ? 512 : 256}
           thickness={0.5}
           roughness={0.2}
           anisotropy={0.3}
           chromaticAberration={0.1}
           color="#f59e0b"
           clippingPlanes={planes}
-          clipIntersection={false} 
+          clipIntersection={false}
         />
       </mesh>
 
@@ -196,32 +284,41 @@ function ManifoldMesh({ level }: { level: number }) {
   );
 }
 
+// Hoisted: one shared edge geometry for every laser plane, and scratch vectors for the frame loop.
+let planeEdgesGeometry: THREE.EdgesGeometry | null = null;
+function getPlaneEdges() {
+  if (!planeEdgesGeometry) planeEdgesGeometry = new THREE.EdgesGeometry(new THREE.PlaneGeometry(4, 4));
+  return planeEdgesGeometry;
+}
+const _planePos = new THREE.Vector3();
+const _planeLook = new THREE.Vector3();
+
 function PlaneVisualizer({ plane, isActive }: { plane: THREE.Plane; isActive: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  
+
   useFrame(() => {
     if (!meshRef.current) return;
-    const pos = plane.normal.clone().multiplyScalar(-plane.constant);
-    meshRef.current.position.copy(pos);
-    meshRef.current.lookAt(pos.clone().add(plane.normal));
+    _planePos.copy(plane.normal).multiplyScalar(-plane.constant);
+    meshRef.current.position.copy(_planePos);
+    _planeLook.copy(_planePos).add(plane.normal);
+    meshRef.current.lookAt(_planeLook);
   });
 
   return (
     <mesh ref={meshRef} visible={true}>
       <planeGeometry args={[4, 4]} />
       {/* Emissive material for Bloom effect */}
-      <meshBasicMaterial 
-        color="#f43f5e" 
-        transparent 
-        opacity={isActive ? 0.15 : 0} 
+      <meshBasicMaterial
+        color="#f43f5e"
+        transparent
+        opacity={isActive ? 0.15 : 0}
         side={THREE.DoubleSide}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
         toneMapped={false}
       />
       {isActive && (
-        <lineSegments>
-          <edgesGeometry args={[new THREE.PlaneGeometry(4, 4)]} />
+        <lineSegments geometry={getPlaneEdges()}>
           <lineBasicMaterial color="#f43f5e" opacity={0.8} transparent toneMapped={false} />
         </lineSegments>
       )}
@@ -229,9 +326,42 @@ function PlaneVisualizer({ plane, isActive }: { plane: THREE.Plane; isActive: bo
   );
 }
 
+function ActiveCutsList({ level }: { level: number }) {
+  return (
+    <div className="space-y-1">
+      <div className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-2">Active Cuts</div>
+      <AnimatePresence>
+        {level === 0 ? (
+          <motion.div key="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-slate-500 italic text-xs">&gt; Unconstrained...</motion.div>
+        ) : (
+          SLICE_LABELS.slice(0, level).map((label) => (
+            <motion.div
+              key={label}
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className="flex items-center gap-2 text-xs font-mono text-rose-400"
+            >
+              <span className="w-1.5 h-1.5 bg-rose-500 rounded-sm shadow-[0_0_8px_rgba(244,63,94,0.8)]" aria-hidden="true" />
+              {label}
+            </motion.div>
+          ))
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function ConstraintViz() {
   const [level, setLevel] = useState(0);
-  const percent = Math.max(1, Math.round(100 * Math.pow(0.4, level)));
+  const { high, shadows, maxDpr, particles, frozen } = useSceneQuality();
+  const coarse = useCoarsePointer();
+  const [rotateOn, setRotateOn] = useState(false);
+  const rotateAllowed = !coarse || rotateOn;
+
+  // One decimal so the fifth and sixth cuts read as different numbers (1.0% vs 0.4%).
+  const remaining = 100 * Math.pow(VOLUME_KEPT_PER_CUT, level);
+  const remainingLabel = remaining.toFixed(1);
+  const barWidth = Math.max(1.5, remaining);
 
   return (
     <div className="relative overflow-hidden group">
@@ -239,184 +369,186 @@ export function ConstraintViz() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0 flex items-center gap-2">
-              <Minimize2 className="w-5 h-5 text-amber-400" />
+              <Minimize2 className="w-5 h-5 text-amber-400" aria-hidden="true" />
               The Manifold Slicer
             </h3>
             <p className="text-sm text-slate-400 m-0 mt-1">
-              Constraints act as hyperplanes, slicing away valid creative solutions.
+              Constraints act as <OverpromptingMathTooltip mathKey="constraint-hyperplane">hyperplanes</OverpromptingMathTooltip>, slicing away valid creative solutions.
             </p>
-          </div>
-          <div className="hidden md:flex flex-col items-end">
-             <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Search Volume</span>
-             <span className="text-xl font-mono font-bold text-amber-400 tabular-nums">{percent}%</span>
           </div>
         </div>
       </div>
 
       <div className="px-4 md:px-6 py-6 md:py-8">
-        <div className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
-          <Canvas shadows gl={{ localClippingEnabled: true }} camera={{ position: [0, 0, 5], fov: 45 }}>
-            <color attach="background" args={['#050508']} />
-            <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade />
-            <ambientLight intensity={0.5} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-            <pointLight position={[-10, -10, -10]} intensity={0.5} color="#f43f5e" />
-            <Environment preset="city" />
-            
-            <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-              <ManifoldMesh level={level} />
-            </Float>
-            
-            <EffectGlitch trigger={level >= 5} />
-            
-            <EffectComposer enableNormalPass={false}>
-              <Bloom luminanceThreshold={0.5} mipmapBlur intensity={1.5} radius={0.6} />
-              <Noise opacity={0.05} />
-              <Vignette eskil={false} offset={0.1} darkness={1.1} />
-            </EffectComposer>
-            
-            <CameraControls minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} />
-          </Canvas>
+        <div className="relative w-full aspect-[4/3] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
+          <div className="absolute inset-0" aria-hidden="true">
+            <Canvas
+              shadows={shadows}
+              gl={{ localClippingEnabled: true }}
+              camera={{ position: [0, 0, 5], fov: 45 }}
+              dpr={[1, maxDpr]}
+              frameloop={frozen ? "demand" : undefined}
+            >
+              <color attach="background" args={['#050508']} />
+              <Stars radius={100} depth={50} count={Math.max(300, Math.round(2000 * particles))} factor={4} saturation={0} fade speed={frozen ? 0 : 1} />
+              <ambientLight intensity={0.5} />
+              <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow={shadows} />
+              <pointLight position={[-10, -10, -10]} intensity={0.5} color="#f43f5e" />
+              <StudioEnvironment />
 
-          {/* HUD Overlay */}
-          <div className="absolute inset-0 pointer-events-none p-4 md:p-6 flex flex-col justify-between">
+              <ShakeGroup active={level >= 5} frozen={frozen}>
+                <Float speed={frozen ? 0 : 2} rotationIntensity={0.2} floatIntensity={0.5}>
+                  <ManifoldMesh level={level} frozen={frozen} high={high} shadows={shadows} />
+                </Float>
+              </ShakeGroup>
+
+              {high && (
+                <EffectComposer enableNormalPass={false}>
+                  <Bloom luminanceThreshold={0.5} mipmapBlur intensity={1.5} radius={0.6} />
+                  <Noise opacity={0.05} />
+                  <Vignette eskil={false} offset={0.1} darkness={1.1} />
+                </EffectComposer>
+              )}
+
+              <CameraControls minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} enabled={rotateAllowed} />
+            </Canvas>
+          </div>
+
+          {/* HUD Overlay (desktop only; on phones the same readouts sit below the canvas) */}
+          <div className="absolute inset-0 pointer-events-none p-4 md:p-6 hidden md:flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <div className="h-px w-8 md:w-12 bg-amber-500/50" />
-                <span className="text-[9px] md:text-[10px] font-mono text-amber-500/50 uppercase tracking-tighter">Hyperplane Analysis</span>
+                <span className="text-xs font-mono text-amber-500/60 uppercase tracking-tighter">Hyperplane Analysis</span>
               </div>
-              
-              {/* Mobile Interaction Hint */}
-              <div className="md:hidden flex items-center gap-1 text-white/20">
-                <MousePointer2 className="w-3 h-3" />
-                <span className="text-[9px] uppercase tracking-widest">Drag</span>
-              </div>
+              {!coarse && (
+                <div className="flex items-center gap-1.5 text-white/60">
+                  <Move3d className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="text-xs uppercase tracking-widest">Drag to orbit</span>
+                </div>
+              )}
             </div>
-
-            <div className="space-y-1">
-              <div className="text-[9px] md:text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-2">Active Cuts</div>
-              <AnimatePresence>
-                {level === 0 ? (
-                  <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-slate-500 italic text-xs">&gt; Unconstrained...</motion.div>
-                ) : (
-                  SLICE_LABELS.slice(0, level).map((label) => (
-                    <motion.div 
-                      key={label}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      className="flex items-center gap-2 text-[10px] md:text-xs font-mono text-rose-400"
-                    >
-                      <span className="w-1.5 h-1.5 bg-rose-500 rounded-sm shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
-                      {label}
-                    </motion.div>
-                  ))
-                )}
-              </AnimatePresence>
-            </div>
+            <ActiveCutsList level={level} />
           </div>
+
+          {coarse && (
+            <RotateToggle on={rotateOn} onToggle={() => setRotateOn((v) => !v)} className="absolute top-3 right-3 z-10" />
+          )}
+        </div>
+
+        {/* Mobile readouts: outside the canvas so they never bury the manifold */}
+        <div className="md:hidden mt-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+          <ActiveCutsList level={level} />
         </div>
 
         {/* Controls */}
         <div className="mt-6 p-1 bg-white/5 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center gap-6 pr-2 pl-6 py-2">
           <div className="w-full flex items-center gap-4 py-2 md:py-0">
-            <span className="text-xs font-mono text-slate-400 shrink-0 uppercase tracking-wider">Solution Space</span>
-            <div className="h-1.5 flex-grow rounded-full bg-white/10 overflow-hidden">
+            <span className="text-xs font-mono text-slate-400 shrink-0 uppercase tracking-wider">
+              <OverpromptingMathTooltip mathKey="search-volume">Solution Space</OverpromptingMathTooltip>
+            </span>
+            <div className="h-1.5 flex-grow rounded-full bg-white/10 overflow-hidden" aria-hidden="true">
               <motion.div
                 className="h-full rounded-full bg-gradient-to-r from-amber-500 to-rose-500"
-                animate={{ width: `${percent}%` }}
+                animate={{ width: `${barWidth}%` }}
               />
             </div>
+            <span className="text-sm font-mono font-bold text-amber-400 tabular-nums shrink-0" aria-live="polite">
+              {remainingLabel}%
+            </span>
           </div>
         <div className="flex gap-2 w-full md:w-auto shrink-0">
           <button
             type="button"
-            onClick={() => setLevel(l => Math.min(l + 1, 6))}
-            disabled={level >= 6}
-            className="op-btn-action flex items-center justify-center gap-2 px-6 flex-grow md:flex-grow-0"
+            onClick={() => setLevel(l => Math.min(l + 1, MAX_SLICES))}
+            disabled={level >= MAX_SLICES}
+            className="op-btn-action min-h-11 flex items-center justify-center gap-2 px-6 flex-grow md:flex-grow-0"
             >
-              <Minimize2 className="w-3 h-3" /> SLICE
+              <Minimize2 className="w-3 h-3" aria-hidden="true" /> SLICE
             </button>
           <button
             type="button"
             onClick={() => setLevel(0)}
             disabled={level === 0}
-            className="op-btn-secondary w-12 flex items-center justify-center flex-grow md:flex-grow-0"
+            className="op-btn-secondary min-h-11 w-12 flex items-center justify-center flex-grow md:flex-grow-0"
               aria-label="Reset"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3 h-3" aria-hidden="true" />
             </button>
           </div>
         </div>
+        <p className="text-xs text-slate-500 mt-3 mb-0">
+          Illustrative: each cut keeps 40% of the remaining volume. The percentage is a metaphor for how quickly stacked constraints empty the space, not a measurement.
+        </p>
       </div>
     </div>
   );
 }
 
-function EffectGlitch({ trigger }: { trigger: boolean }) {
-  useFrame((state) => {
-    if (trigger) {
-      state.camera.position.x = Math.sin(state.clock.elapsedTime * 50) * 0.05;
-    } else {
-      state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, 0, 0.1);
-    }
-  });
-  return null;
-}
-
-
 // ============================================================
 // 2. HOLOGRAPHIC TUNER (Quality Curve)
 // ============================================================
 
-function HologramMesh({ specificity }: { specificity: number }) {
+// Hoisted colour presets: no per-frame allocations.
+const HOLO_AMBER = new THREE.Color("#f59e0b");
+const HOLO_EMERALD = new THREE.Color("#10b981");
+const HOLO_ROSE = new THREE.Color("#f43f5e");
+
+function HologramMesh({ specificity, frozen }: { specificity: number; frozen: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const shaderRef = useRef<THREE.ShaderMaterial>(null);
-  
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uDistortion: { value: 0 },
+      uOpacity: { value: 0.5 },
+      uColor: { value: new THREE.Color("#f59e0b") },
+    }),
+    []
+  );
+
   useFrame((state) => {
     if (!shaderRef.current || !meshRef.current) return;
-    const t = state.clock.elapsedTime;
-    
+    const t = frozen ? 0 : state.clock.elapsedTime;
+
     meshRef.current.rotation.y = t * 0.2;
-    
-    // Pass uniforms
     shaderRef.current.uniforms.uTime.value = t;
-    
+
     let distortion = 0;
     let opacity = 0.3;
-    const color = new THREE.Color("#f59e0b"); // Default Amber
-    
+    let color = HOLO_AMBER;
+    let shake = 0;
+
     if (specificity < 0.3) {
       // Vague State
       distortion = (0.3 - specificity) * 2.0;
-      opacity = 0.2 + specificity; 
-      color.set("#f59e0b");
+      opacity = 0.2 + specificity;
     } else if (specificity < 0.65) {
       // Sweet Spot
       distortion = 0;
       opacity = 0.9;
-      color.set("#10b981"); // Emerald
+      color = HOLO_EMERALD;
     } else {
       // Overprompted
       const intensity = (specificity - 0.65) / 0.35;
       distortion = intensity * 1.5; // High distortion
       opacity = 0.8;
-      color.set("#f43f5e"); // Rose
-      
-      // Shake mesh
-      meshRef.current.position.x = Math.sin(t * 50) * 0.02 * intensity;
+      color = HOLO_ROSE;
+      shake = frozen ? 0 : Math.sin(t * 50) * 0.02 * intensity;
     }
-    
-    shaderRef.current.uniforms.uDistortion.value = THREE.MathUtils.lerp(
-      shaderRef.current.uniforms.uDistortion.value, 
-      distortion, 
-      0.1
-    );
-    shaderRef.current.uniforms.uOpacity.value = THREE.MathUtils.lerp(
-      shaderRef.current.uniforms.uOpacity.value,
-      opacity,
-      0.1
-    );
-    shaderRef.current.uniforms.uColor.value.lerp(color, 0.1);
+    meshRef.current.position.x = shake;
+
+    const u = shaderRef.current.uniforms;
+    if (frozen) {
+      // Reduced motion: no easing across frames, just the resting state for this slider value.
+      u.uDistortion.value = distortion;
+      u.uOpacity.value = opacity;
+      u.uColor.value.copy(color);
+      return;
+    }
+    u.uDistortion.value = THREE.MathUtils.lerp(u.uDistortion.value, distortion, 0.1);
+    u.uOpacity.value = THREE.MathUtils.lerp(u.uOpacity.value, opacity, 0.1);
+    u.uColor.value.lerp(color, 0.1);
   });
 
   return (
@@ -428,82 +560,81 @@ function HologramMesh({ specificity }: { specificity: number }) {
         fragmentShader={GLITCH_SHADER.fragment}
         transparent
         side={THREE.DoubleSide}
-        uniforms={{
-          uTime: { value: 0 },
-          uDistortion: { value: 0 },
-          uOpacity: { value: 0.5 },
-          uColor: { value: new THREE.Color("#f59e0b") }
-        }}
+        uniforms={uniforms}
         toneMapped={false} // Important for bloom
       />
     </mesh>
   );
 }
 
+const ZONE_LABELS = {
+  vague: { text: "UNDERSPECIFIED", color: "text-amber-400", desc: "Model hallucinates to fill gaps." },
+  sweet: { text: "RESONANT", color: "text-emerald-400", desc: "Perfect signal-to-noise ratio." },
+  over: { text: "OVERCONSTRAINED", color: "text-rose-400", desc: "Conflicting constraints cause failure." },
+} as const;
+
 export function QualityCurveViz() {
   const [specificity, setSpecificity] = useState(0.1);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
+  const { high, maxDpr, frozen } = useSceneQuality();
+
   const zone = specificity < 0.3 ? "vague" : specificity < 0.65 ? "sweet" : "over";
-  const labels = {
-    vague: { text: "UNDERSPECIFIED", color: "text-amber-400", desc: "Model hallucinates to fill gaps." },
-    sweet: { text: "RESONANT", color: "text-emerald-400", desc: "Perfect signal-to-noise ratio." },
-    over: { text: "OVERCONSTRAINED", color: "text-rose-400", desc: "Conflicting constraints cause failure." }
-  };
+  const label = ZONE_LABELS[zone];
+  const integrity = Math.round((zone === "sweet" ? 1 : zone === "vague" ? specificity / 0.3 : (1 - specificity) / 0.35) * 100);
 
   return (
-    <div ref={containerRef} className="relative overflow-hidden group">
+    <div className="relative overflow-hidden group">
       <div className="op-viz-header">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0 flex items-center gap-2">
-              <Layers className="w-5 h-5 text-amber-400" />
+              <Layers className="w-5 h-5 text-amber-400" aria-hidden="true" />
               The Holographic Tuner
             </h3>
             <p className="text-sm text-slate-400 m-0 mt-1">
-              Tune the prompt specificity to find the resonance frequency.
+              Tune the prompt specificity to find the <OverpromptingMathTooltip mathKey="gaussian-quality">resonance frequency</OverpromptingMathTooltip>.
             </p>
           </div>
         </div>
       </div>
 
       <div className="px-4 md:px-6 py-6 md:py-8">
-        <div className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
+        <div className="relative w-full aspect-[4/3] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
           {/* Background Grid */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
-          
-          <Canvas gl={{ alpha: true }} camera={{ position: [0, 0, 4] }}>
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} intensity={1} />
-            <Float speed={2} rotationIntensity={0.2} floatIntensity={0.2}>
-              <HologramMesh specificity={specificity} />
-            </Float>
-            <EffectGlitch trigger={zone === "over"} />
-            
-            <EffectComposer enableNormalPass={false}>
-              <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.2} radius={0.5} />
-              <Noise opacity={0.1} />
-              <Vignette eskil={false} offset={0.1} darkness={1.1} />
-            </EffectComposer>
-          </Canvas>
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" aria-hidden="true" />
 
-          {/* Overlay Stats */}
-          <div className="absolute top-6 left-6 font-mono text-[10px] md:text-xs space-y-1">
+          <div className="absolute inset-0" aria-hidden="true">
+            <Canvas gl={{ alpha: true }} camera={{ position: [0, 0, 4] }} dpr={[1, maxDpr]} frameloop={frozen ? "demand" : undefined}>
+              <ambientLight intensity={0.5} />
+              <pointLight position={[10, 10, 10]} intensity={1} />
+              <ShakeGroup active={zone === "over"} frozen={frozen}>
+                <Float speed={frozen ? 0 : 2} rotationIntensity={0.2} floatIntensity={0.2}>
+                  <HologramMesh specificity={specificity} frozen={frozen} />
+                </Float>
+              </ShakeGroup>
+
+              {high && (
+                <EffectComposer enableNormalPass={false}>
+                  <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.2} radius={0.5} />
+                  <Noise opacity={0.1} />
+                  <Vignette eskil={false} offset={0.1} darkness={1.1} />
+                </EffectComposer>
+              )}
+            </Canvas>
+          </div>
+
+          {/* Overlay Stats (desktop only; phones get the row below the canvas) */}
+          <div className="absolute top-6 left-6 font-mono text-xs space-y-1 hidden md:block pointer-events-none">
             <div className="text-slate-500">SIGNAL_INTEGRITY</div>
-            <div className={`text-xl font-bold ${labels[zone].color}`}>
-              {Math.round((zone === "sweet" ? 1 : zone === "vague" ? specificity/0.3 : (1-specificity)/0.35) * 100)}%
-            </div>
+            <div className={cn("text-xl font-bold tabular-nums", label.color)}>{integrity}%</div>
           </div>
 
-          <div className="absolute top-6 right-6 font-mono text-[10px] md:text-xs text-right space-y-1">
+          <div className="absolute top-6 right-6 font-mono text-xs text-right space-y-1 hidden md:block pointer-events-none">
             <div className="text-slate-500">MODE</div>
-            <div className={`text-lg font-bold tracking-widest ${labels[zone].color}`}>
-              {labels[zone].text}
-            </div>
+            <div className={cn("text-lg font-bold tracking-widest", label.color)}>{label.text}</div>
           </div>
-          
+
           {/* Central Message */}
-          <div className="absolute bottom-20 left-0 right-0 flex justify-center pointer-events-none px-4 text-center">
+          <div className="absolute bottom-6 left-0 right-0 hidden md:flex justify-center pointer-events-none px-4 text-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={zone}
@@ -512,11 +643,24 @@ export function QualityCurveViz() {
                 exit={{ opacity: 0, y: -20 }}
                 className="bg-black/60 backdrop-blur-md px-6 py-3 rounded-full border border-white/10"
               >
-                <span className={`text-xs md:text-sm font-medium ${labels[zone].color}`}>
-                  {labels[zone].desc}
-                </span>
+                <span className={cn("text-xs md:text-sm font-medium", label.color)}>{label.desc}</span>
               </motion.div>
             </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Mobile readouts */}
+        <div className="md:hidden mt-4 grid grid-cols-2 gap-3 font-mono text-xs" aria-live="polite">
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+            <div className="text-slate-500">SIGNAL_INTEGRITY</div>
+            <div className={cn("text-lg font-bold tabular-nums", label.color)}>{integrity}%</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 text-right">
+            <div className="text-slate-500">MODE</div>
+            <div className={cn("text-sm font-bold tracking-widest break-words", label.color)}>{label.text}</div>
+          </div>
+          <div className={cn("col-span-2 p-3 rounded-xl bg-white/[0.03] border border-white/5 text-center font-sans", label.color)}>
+            {label.desc}
           </div>
         </div>
 
@@ -524,13 +668,13 @@ export function QualityCurveViz() {
         <div className="mt-8 px-4">
           <div className="relative h-12 flex items-center touch-none">
             {/* Track */}
-            <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full overflow-hidden" aria-hidden="true">
               <div className="absolute left-0 top-0 bottom-0 w-[30%] bg-amber-500/20" />
               <div className="absolute left-[30%] top-0 bottom-0 w-[35%] bg-emerald-500/20" />
               <div className="absolute left-[65%] top-0 bottom-0 w-[35%] bg-rose-500/20" />
             </div>
-            
-            {/* Slider */}
+
+            {/* Slider (visually hidden; the thumb below mirrors it and shows keyboard focus) */}
             <input
               type="range"
               min="0"
@@ -538,18 +682,20 @@ export function QualityCurveViz() {
               step="0.01"
               value={specificity}
               onChange={(e) => setSpecificity(parseFloat(e.target.value))}
-              className="relative z-10 w-full h-full opacity-0 cursor-pointer"
+              className="peer relative z-10 w-full h-full opacity-0 cursor-pointer"
               aria-label="Adjust prompt specificity"
+              aria-valuetext={`${Math.round(specificity * 100)} percent, ${label.text.toLowerCase()}`}
             />
-            
+
             {/* Visual Thumb */}
-            <motion.div 
-              className="absolute h-6 w-6 rounded-full bg-white border-2 border-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.5)] pointer-events-none"
+            <motion.div
+              aria-hidden="true"
+              className="absolute h-6 w-6 rounded-full bg-white border-2 border-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.5)] pointer-events-none peer-focus-visible:ring-2 peer-focus-visible:ring-amber-400 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#020204]"
               style={{ left: `calc(${specificity * 100}% - 12px)` }}
             />
           </div>
-          
-          <div className="flex justify-between text-[9px] md:text-[10px] font-mono text-slate-500 uppercase mt-2">
+
+          <div className="flex justify-between text-xs font-mono text-slate-500 uppercase mt-2" aria-hidden="true">
             <span>Vague</span>
             <span>Specific</span>
             <span>Overfit</span>
@@ -564,11 +710,25 @@ export function QualityCurveViz() {
 // 3. MACRO/MICRO LENS (Plan vs Execute)
 // ============================================================
 
-function NodeNetwork({ mode }: { mode: "plan" | "execute" }) {
+// Hoisted node layout; lines run from each node to the origin.
+const NODE_POSITIONS: THREE.Vector3[] = [
+  [-3, 2, -2], [3, 1, -3], [-2, -2, -1], [2, -3, -2],
+  [0, 4, -4], [0, -4, -4],
+].map(([x, y, z]) => new THREE.Vector3(x, y, z));
+const NETWORK_ORIGIN = new THREE.Vector3(0, 0, 0);
+
+const PLAN_DISTANCE = 12;
+const EXECUTE_DISTANCE = 2.5;
+
+function NodeNetwork({ mode, frozen }: { mode: "plan" | "execute"; frozen: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   useFrame((state) => {
     if (!groupRef.current) return;
+    if (frozen) {
+      groupRef.current.rotation.y = 0;
+      return;
+    }
     const t = state.clock.elapsedTime;
     // Gentle drift in plan mode
     if (mode === "plan") {
@@ -581,7 +741,7 @@ function NodeNetwork({ mode }: { mode: "plan" | "execute" }) {
       {/* Central Node (Execution Target) */}
       <mesh position={[0, 0, 0]}>
         <sphereGeometry args={[1, 32, 32]} />
-        <MeshTransmissionMaterial 
+        <MeshTransmissionMaterial
           color={mode === "plan" ? "#f59e0b" : "#f43f5e"}
           emissive={mode === "plan" ? "#f59e0b" : "#f43f5e"}
           emissiveIntensity={0.5}
@@ -606,21 +766,18 @@ function NodeNetwork({ mode }: { mode: "plan" | "execute" }) {
 
       {/* Surrounding Nodes (Planning Context) */}
       <group>
-        {[
-          [-3, 2, -2], [3, 1, -3], [-2, -2, -1], [2, -3, -2],
-          [0, 4, -4], [0, -4, -4]
-        ].map((pos, i) => (
-          <group key={i} position={pos as [number, number, number]}>
-            <mesh>
+        {NODE_POSITIONS.map((pos, i) => (
+          <group key={i}>
+            <mesh position={pos}>
               <sphereGeometry args={[0.4, 16, 16]} />
-              <meshStandardMaterial 
-                color="#64748b" 
-                transparent 
-                opacity={mode === "plan" ? 0.8 : 0.1} 
+              <meshStandardMaterial
+                color="#64748b"
+                transparent
+                opacity={mode === "plan" ? 0.8 : 0.1}
               />
             </mesh>
-            {/* Connection Line */}
-            <ConnectionLine start={new THREE.Vector3(...(pos as [number, number, number]))} end={new THREE.Vector3(0,0,0)} opacity={mode === "plan" ? 0.2 : 0} />
+            {/* Connection Line: node → central target */}
+            <ConnectionLine start={pos} opacity={mode === "plan" ? 0.2 : 0} />
           </group>
         ))}
       </group>
@@ -628,42 +785,44 @@ function NodeNetwork({ mode }: { mode: "plan" | "execute" }) {
   );
 }
 
-function ConnectionLine({ start, end, opacity }: { start: THREE.Vector3, end: THREE.Vector3, opacity: number }) {
-  const lineRef = useRef<THREE.Line>(null);
-  useLayoutEffect(() => {
-    if (lineRef.current) {
-      lineRef.current.geometry.setFromPoints([start, end]);
-    }
-  }, [start, end]);
-  const lineObj = useMemo(() => {
-    const geometry = new THREE.BufferGeometry();
-    const material = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity });
+/** One Line per node, created once; opacity is applied declaratively instead of rebuilding the object. */
+function ConnectionLine({ start, opacity }: { start: THREE.Vector3; opacity: number }) {
+  const line = useMemo(() => {
+    const geometry = new THREE.BufferGeometry().setFromPoints([start, NETWORK_ORIGIN]);
+    const material = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0 });
     return new THREE.Line(geometry, material);
-  }, [opacity]);
-  return <primitive ref={lineRef} object={lineObj} />;
+  }, [start]);
+
+  useEffect(() => {
+    return () => {
+      line.geometry.dispose();
+      (line.material as THREE.Material).dispose();
+    };
+  }, [line]);
+
+  return <primitive object={line} material-opacity={opacity} />;
 }
 
 export function PlanExecuteViz() {
   const [mode, setMode] = useState<"plan" | "execute">("plan");
   const controlsRef = useRef<CameraControls>(null);
+  const { high, maxDpr, particles, frozen } = useSceneQuality();
 
   useEffect(() => {
     if (controlsRef.current) {
-      if (mode === "plan") {
-        // Wide view
-        controlsRef.current.setLookAt(0, 0, 12, 0, 0, 0, true);
-      } else {
-        // Macro view (zoom inside)
-        controlsRef.current.setLookAt(0, 0, 2.5, 0, 0, 0, true);
-      }
+      const distance = mode === "plan" ? PLAN_DISTANCE : EXECUTE_DISTANCE;
+      // Reduced motion: cut instead of dollying.
+      controlsRef.current.setLookAt(0, 0, distance, 0, 0, 0, !frozen);
     }
-  }, [mode]);
+  }, [mode, frozen]);
+
+  const zoomLabel = mode === "plan" ? "1x" : `${(PLAN_DISTANCE / EXECUTE_DISTANCE).toFixed(1)}x`;
 
   return (
     <div>
       <div className="op-viz-header">
         <h3 className="text-lg md:text-xl font-bold text-white tracking-tight m-0 flex items-center gap-2">
-          <LayoutTemplate className="w-5 h-5 text-amber-400" />
+          <LayoutTemplate className="w-5 h-5 text-amber-400" aria-hidden="true" />
           The Macro-Micro Lens
         </h3>
         <p className="text-sm text-slate-400 m-0">
@@ -673,66 +832,76 @@ export function PlanExecuteViz() {
 
       <div className="px-4 md:px-6 py-6 md:py-8">
         <div className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl bg-[#050508] border border-white/5 overflow-hidden shadow-2xl">
-          <Canvas>
-            <PerspectiveCamera makeDefault position={[0, 0, 12]} fov={40} />
-            <CameraControls ref={controlsRef} minDistance={2} maxDistance={20} enabled={false} />
-            <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
-            <ambientLight intensity={0.2} />
-            <pointLight position={[10, 10, 10]} intensity={1} />
-            <Environment preset="city" />
-            
-            <NodeNetwork mode={mode} />
-            
-            {/* Grid floor for depth reference */}
-            <Grid 
-              position={[0, -5, 0]} 
-              args={[20, 20]} 
-              cellColor="#334155" 
-              sectionColor="#1e293b" 
-              fadeDistance={15} 
-            />
-            
-            <EffectComposer enableNormalPass={false}>
-              <Bloom luminanceThreshold={0.5} mipmapBlur intensity={1.0} radius={0.4} />
-              <Noise opacity={0.05} />
-              <Vignette eskil={false} offset={0.1} darkness={1.1} />
-            </EffectComposer>
-          </Canvas>
+          <div className="absolute inset-0" aria-hidden="true">
+            <Canvas dpr={[1, maxDpr]} frameloop={frozen ? "demand" : undefined}>
+              <PerspectiveCamera makeDefault position={[0, 0, PLAN_DISTANCE]} fov={40} />
+              <CameraControls ref={controlsRef} minDistance={2} maxDistance={20} enabled={false} />
+              <Stars radius={100} depth={50} count={Math.max(500, Math.round(5000 * particles))} factor={4} saturation={0} fade speed={frozen ? 0 : 1} />
+              <ambientLight intensity={0.2} />
+              <pointLight position={[10, 10, 10]} intensity={1} />
+              <StudioEnvironment />
+
+              <NodeNetwork mode={mode} frozen={frozen} />
+
+              {/* Grid floor for depth reference */}
+              <Grid
+                position={[0, -5, 0]}
+                args={[20, 20]}
+                cellColor="#334155"
+                sectionColor="#1e293b"
+                fadeDistance={15}
+              />
+
+              {high && (
+                <EffectComposer enableNormalPass={false}>
+                  <Bloom luminanceThreshold={0.5} mipmapBlur intensity={1.0} radius={0.4} />
+                  <Noise opacity={0.05} />
+                  <Vignette eskil={false} offset={0.1} darkness={1.1} />
+                </EffectComposer>
+              )}
+            </Canvas>
+          </div>
 
           {/* Mode Switcher HUD */}
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 pointer-events-none">
+        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex flex-wrap justify-center gap-3 md:gap-4 px-3 pointer-events-none" role="group" aria-label="Lens mode">
           <button
             type="button"
             onClick={() => setMode("plan")}
-            className={`pointer-events-auto px-6 py-3 rounded-xl border flex items-center gap-2 transition-all duration-500 ${
-                mode === "plan" 
-                  ? "bg-amber-500 text-white border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]" 
-                  : "bg-black/40 text-slate-400 border-white/10 hover:bg-white/5"
-              }`}
+            aria-pressed={mode === "plan"}
+            className={cn(
+              "pointer-events-auto min-h-11 px-5 md:px-6 py-3 rounded-xl border flex items-center gap-2 transition-colors duration-500",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300",
+              mode === "plan"
+                ? "bg-amber-500 text-white border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]"
+                : "bg-black/40 text-slate-400 border-white/10 hover:bg-white/5"
+            )}
             >
-              <LayoutTemplate className="w-4 h-4" />
+              <LayoutTemplate className="w-4 h-4" aria-hidden="true" />
               <span className="text-xs font-bold uppercase tracking-widest">Plan (Macro)</span>
             </button>
-            
+
           <button
             type="button"
             onClick={() => setMode("execute")}
-            className={`pointer-events-auto px-6 py-3 rounded-xl border flex items-center gap-2 transition-all duration-500 ${
-                mode === "execute" 
-                  ? "bg-rose-500 text-white border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.3)]" 
-                  : "bg-black/40 text-slate-400 border-white/10 hover:bg-white/5"
-              }`}
+            aria-pressed={mode === "execute"}
+            className={cn(
+              "pointer-events-auto min-h-11 px-5 md:px-6 py-3 rounded-xl border flex items-center gap-2 transition-colors duration-500",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300",
+              mode === "execute"
+                ? "bg-rose-500 text-white border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.3)]"
+                : "bg-black/40 text-slate-400 border-white/10 hover:bg-white/5"
+            )}
             >
-              <Microscope className="w-4 h-4" />
+              <Microscope className="w-4 h-4" aria-hidden="true" />
               <span className="text-xs font-bold uppercase tracking-widest">Execute (Micro)</span>
             </button>
           </div>
         </div>
-        
+
         {/* Helper Text */}
-        <div className="mt-6 flex justify-between text-xs text-slate-500 font-mono uppercase tracking-widest px-2">
+        <div className="mt-6 flex flex-wrap justify-between gap-2 text-xs text-slate-500 font-mono uppercase tracking-widest px-2">
           <span>Current Context: {mode === "plan" ? "Global Graph" : "Local Node"}</span>
-          <span>Zoom: {mode === "plan" ? "1x" : "10x"}</span>
+          <span>Zoom: {zoomLabel}</span>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import { Headphones, Play, Clock, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,26 +37,63 @@ function formatPodcastDate(dateValue: string): string {
 
 interface SpotifyEmbedProps {
   episodeId: string;
+  /** Where to send the listener if the embed never loads */
+  fallbackUrl: string;
   className?: string;
 }
 
-function SpotifyEmbed({ episodeId, className }: SpotifyEmbedProps) {
+const EMBED_TIMEOUT_MS = 6000;
+
+function SpotifyEmbed({ episodeId, fallbackUrl, className }: SpotifyEmbedProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  // The iframe is lazy-loaded, so only start the clock once it is near the viewport.
+  const isNearViewport = useInView(wrapperRef, { once: true, margin: "200px" });
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
 
   const handleLoad = useCallback(() => setIsLoaded(true), []);
   const handleError = useCallback(() => setHasError(true), []);
 
-  if (hasError) {
+  // iframes never fire `error` for HTTP failures or tracker blocking, so a
+  // timeout is the only reliable way to notice that Spotify was blocked.
+  useEffect(() => {
+    if (!isNearViewport || isLoaded) return;
+    const timer = window.setTimeout(() => setTimedOut(true), EMBED_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [isNearViewport, isLoaded]);
+
+  const showFallback = hasError || (timedOut && !isLoaded);
+
+  if (showFallback) {
     return (
-      <div className={cn("flex h-[152px] items-center justify-center rounded-lg bg-slate-800/50 text-slate-500", className)}>
-        <span className="text-sm">Unable to load player</span>
+      <div
+        ref={wrapperRef}
+        role="status"
+        className={cn(
+          "flex h-[152px] flex-col items-center justify-center gap-3 rounded-lg bg-slate-800/50 px-4 text-center",
+          className
+        )}
+      >
+        <span className="text-sm text-slate-400">
+          The Spotify player didn&apos;t load (it may be blocked in your browser).
+        </span>
+        <a
+          href={fallbackUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-violet-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-400"
+        >
+          <Play className="h-4 w-4" aria-hidden="true" />
+          Listen on Spotify
+          <ExternalLink className="h-3 w-3 opacity-60" aria-hidden="true" />
+        </a>
       </div>
     );
   }
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg", className)}>
+    <div ref={wrapperRef} className={cn("relative overflow-hidden rounded-lg", className)}>
       {/* Loading skeleton */}
       {!isLoaded && (
         <div className="absolute inset-0 animate-pulse bg-slate-800/50" />
@@ -168,9 +205,24 @@ function PodcastCard({ podcast, featured = false, showEmbed = false }: PodcastCa
           </p>
         )}
 
-        {/* Spotify embed or listen link */}
+        {/* Spotify embed (always followed by a plain link) or listen link */}
         {canEmbed ? (
-          <SpotifyEmbed episodeId={spotifyEpisodeId} className="mt-4" />
+          <>
+            <SpotifyEmbed
+              episodeId={spotifyEpisodeId}
+              fallbackUrl={podcast.spotifyUrl}
+              className="mt-4"
+            />
+            <a
+              href={podcast.spotifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex min-h-11 items-center gap-1.5 text-xs font-medium text-violet-400 transition-colors hover:text-violet-300"
+            >
+              Open this episode on Spotify
+              <ExternalLink className="h-3 w-3 opacity-70" aria-hidden="true" />
+            </a>
+          </>
         ) : (
           <a
             href={podcast.spotifyUrl}

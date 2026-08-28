@@ -1,5 +1,7 @@
 import { render, screen, act } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import * as framerMotion from "framer-motion";
 import { AnimatedNumber } from "@/components/animated-number";
 
 // Note: framer-motion is mocked globally in vitest.setup.tsx
@@ -12,6 +14,7 @@ describe("AnimatedNumber", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe("rendering", () => {
@@ -44,6 +47,34 @@ describe("AnimatedNumber", () => {
       const { container } = render(<AnimatedNumber value={5} className="text-xl" />);
       const wrapper = container.firstChild as HTMLElement;
       expect(wrapper).toHaveClass("text-xl");
+    });
+  });
+
+  describe("initial value (no 0 flash)", () => {
+    it("server markup contains the real number, not 0", () => {
+      const html = renderToString(<AnimatedNumber value={20} suffix="K+" />);
+      expect(html).toContain("20K+");
+      expect(html).not.toContain(">0K+<");
+    });
+
+    it("shows the real number on first render before the count-up is allowed to start", () => {
+      // Force the animated (non reduced-motion) code path for this test only.
+      vi.spyOn(framerMotion, "useReducedMotion").mockReturnValue(false);
+
+      render(<AnimatedNumber value={85} suffix="K+" isVisible={false} />);
+      // No timers advanced: this is the very first paint.
+      expect(screen.getByText("85K+", { selector: '[aria-hidden="true"]' })).toBeInTheDocument();
+      expect(screen.queryByText("0K+", { selector: '[aria-hidden="true"]' })).toBeNull();
+    });
+
+    it("ends on the exact target after the count-up", () => {
+      vi.spyOn(framerMotion, "useReducedMotion").mockReturnValue(false);
+
+      render(<AnimatedNumber value={41} suffix="K+" duration={100} isVisible />);
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText("41K+", { selector: '[aria-hidden="true"]' })).toBeInTheDocument();
     });
   });
 

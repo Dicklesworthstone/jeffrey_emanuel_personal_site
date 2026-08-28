@@ -294,9 +294,13 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
   // Keyboard shortcuts: "/" to focus search, j/k vim navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const inInput = ["INPUT", "TEXTAREA"].includes(
-        (e.target as HTMLElement)?.tagName ?? ""
-      );
+      const target = e.target instanceof Element ? e.target : null;
+      const inInput = ["INPUT", "TEXTAREA"].includes(target?.tagName ?? "");
+
+      // Never hijack modifier combos (Cmd+G, Ctrl+C, ...) or keys aimed at a
+      // real control: links, buttons, selects, editors, and open dialogs.
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (target?.closest("a, button, select, [contenteditable], [role=dialog]")) return;
 
       // Focus search on "/" key (when not in an input)
       if (e.key === "/" && !inInput) {
@@ -485,7 +489,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
 
       {/* Core Tools Section */}
       {coreTools.length > 0 && (
-        <section id="core-tools">
+        <section id="core-tools" className="scroll-mt-32">
           <SectionHeader
             title="Core Flywheel Tools"
             description="The backbone of multi-agent development: session management, communication, task tracking, static analysis, memory, search, safety guards, multi-repo sync, and automated setup. These tools form a self-reinforcing loop where each makes the others more powerful."
@@ -528,7 +532,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
 
       {/* Supporting Tools Section */}
       {supportingTools.length > 0 && (
-        <section id="supporting-tools">
+        <section id="supporting-tools" className="scroll-mt-32">
           <SectionHeader
             title="Supporting Tools"
             description="Extend the ecosystem with GitHub issue sync, archive search, and prompt crafting utilities. These tools enhance the core flywheel for specialized workflows."

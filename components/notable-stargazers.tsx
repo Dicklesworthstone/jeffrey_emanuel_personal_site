@@ -365,8 +365,8 @@ export function NotableStargazers({
         )}
       >
         <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-300">
-          <Star className="h-4 w-4 text-violet-400" />
-          Notable developers using this
+          <Star className="h-4 w-4 text-violet-400" aria-hidden="true" />
+          Notable stargazers
         </div>
 
         <AvatarStrip

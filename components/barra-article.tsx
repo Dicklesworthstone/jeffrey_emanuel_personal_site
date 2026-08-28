@@ -2,7 +2,7 @@
 
 import "katex/dist/katex.min.css";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import {
   Crimson_Pro,
@@ -12,7 +12,31 @@ import {
 import katex from "katex";
 import { Briefcase, Shield, BarChart3, TrendingUp, TrendingDown, Layers, Zap, AlertCircle } from "lucide-react";
 import { BarraJargon } from "./barra-jargon";
+import ErrorBoundary from "@/components/error-boundary";
 import { getScrollMetrics } from "@/lib/utils";
+
+// Placeholder heights sized near each visualization's rendered height so the
+// chunk resolving does not shove the prose around (mobile / desktop).
+const VIZ_HEIGHTS = {
+  returns: "min-h-[780px] lg:min-h-[510px]",
+  pod: "min-h-[760px] lg:min-h-[470px]",
+  cosmos: "min-h-[760px] lg:min-h-[600px]",
+  regression: "min-h-[460px]",
+} as const;
+
+function VizSkeleton({ className }: { className: string }) {
+  return <div aria-hidden="true" className={`barra-viz-container animate-pulse ${className}`} />;
+}
+
+function VizFallback({ className }: { className: string }) {
+  return (
+    <div role="alert" className={`barra-viz-container items-center justify-center p-8 text-center ${className}`}>
+      <p className="text-sm text-slate-400 mb-0 max-w-md">
+        This visualization could not be rendered on this device. The surrounding text stands on its own.
+      </p>
+    </div>
+  );
+}
 
 // Dynamic import visualizations (no SSR - they use browser APIs)
 const FactorHero = dynamic(
@@ -21,19 +45,19 @@ const FactorHero = dynamic(
 );
 const ReturnDecomposition = dynamic(
   () => import("./barra-visualizations").then((m) => ({ default: m.ReturnDecomposition })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className={VIZ_HEIGHTS.returns} /> }
 );
 const PodSimulator = dynamic(
   () => import("./barra-visualizations").then((m) => ({ default: m.PodSimulator })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className={VIZ_HEIGHTS.pod} /> }
 );
 const FactorCorrelationMatrix = dynamic(
   () => import("./barra-visualizations").then((m) => ({ default: m.FactorCorrelationMatrix })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className={VIZ_HEIGHTS.cosmos} /> }
 );
 const LiveRegression = dynamic(
   () => import("./barra-visualizations").then((m) => ({ default: m.LiveRegression })),
-  { ssr: false }
+  { ssr: false, loading: () => <VizSkeleton className={VIZ_HEIGHTS.regression} /> }
 );
 
 // Fonts
@@ -101,17 +125,29 @@ function EC({ children }: { children: React.ReactNode }) {
 }
 
 export function BarraArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
 
+  // Scroll progress: rAF-throttled, written straight to the DOM so scrolling
+  // never re-renders the article (and with it every Three.js scene).
   useEffect(() => {
-    const handleScroll = () => {
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
       const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${progress})`;
+      if (scrollHintRef.current) scrollHintRef.current.style.opacity = String(Math.max(0, 0.5 - progress * 5));
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => {
+      if (frame === 0) frame = requestAnimationFrame(paint);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    paint();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   // Section reveal on scroll
@@ -141,7 +177,7 @@ export function BarraArticle() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" }
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" }
     );
     targets.forEach((el) => {
       el.classList.add("barra-fade-section");
@@ -162,19 +198,23 @@ export function BarraArticle() {
     >
       {/* Scroll Progress */}
       <div
+        ref={progressRef}
         className="barra-progress-bar"
-        style={{ transform: `scaleX(${scrollProgress})` }}
+        style={{ transform: "scaleX(0)" }}
+        aria-hidden="true"
       />
 
       {/* ========== HERO ========== */}
       <section data-section="hero" className="min-h-dvh flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
-        <FactorHero />
+        <ErrorBoundary fallback={<div aria-hidden="true" className="absolute inset-0" />}>
+          <FactorHero />
+        </ErrorBoundary>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] z-10" />
 
         <EC>
           <div className="text-center relative z-20">
-            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-emerald-400 tracking-[0.3em] uppercase backdrop-blur-xl">
-              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            <div className="inline-flex items-center gap-3 mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-emerald-400 tracking-[0.3em] uppercase backdrop-blur-xl">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" aria-hidden="true" />
               Quantitative Finance / Risk Architecture
             </div>
             <h1 className="barra-display-title mb-6 text-white text-balance">
@@ -191,10 +231,12 @@ export function BarraArticle() {
         </EC>
 
         <div
+          ref={scrollHintRef}
           className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
-          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+          style={{ opacity: 0.5 }}
+          aria-hidden="true"
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
+          <span className="text-xs uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
@@ -204,7 +246,7 @@ export function BarraArticle() {
       {/* ========== THE BIRTH OF AN INDUSTRY STANDARD ========== */}
       <article data-section="intro">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white text-center">
+          <h2 className="barra-section-title text-white text-center">
             The Birth of an Industry Standard
           </h2>
           <p className="barra-drop-cap">
@@ -218,16 +260,16 @@ export function BarraArticle() {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-12">
-             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-all hover:border-emerald-500/30 group">
-                <Briefcase className="w-8 h-8 text-emerald-400 mb-6 group-hover:scale-110 transition-transform" />
-                <h4 className="text-white font-bold mb-2 text-xl">Market Dominance</h4>
+             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-colors hover:border-emerald-500/30 group">
+                <Briefcase className="w-8 h-8 text-emerald-400 mb-6 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                <h3 className="text-white font-bold mb-2 text-xl">Market Dominance</h3>
                 <p className="text-slate-400 text-sm leading-relaxed mb-0">
                   MSCI commands a $44B market cap, with total annual revenues nearly $2.9B in 2024. The Analytics segment, housing Barra, generated $675M at an adjusted EBITDA margin of nearly 50%.
                 </p>
              </div>
-             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-all hover:border-cyan-500/30 group">
-                <Shield className="w-8 h-8 text-cyan-400 mb-6 group-hover:scale-110 transition-transform" />
-                <h4 className="text-white font-bold mb-2 text-xl">Critical Infrastructure</h4>
+             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-colors hover:border-cyan-500/30 group">
+                <Shield className="w-8 h-8 text-cyan-400 mb-6 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                <h3 className="text-white font-bold mb-2 text-xl">Critical Infrastructure</h3>
                 <p className="text-slate-400 text-sm leading-relaxed mb-0">
                   Accessed by over 1,200 financial institutions. Enterprise licenses for multi-strategy platforms can exceed $1M annually. For Millennium or Citadel, these costs are trivial.
                 </p>
@@ -245,7 +287,7 @@ export function BarraArticle() {
       {/* ========== WHERE DO RETURNS COME FROM ========== */}
       <section data-section="returns">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white">
+          <h2 className="barra-section-title text-white">
             Where Do Returns Actually Come From?
           </h2>
           <p>
@@ -257,8 +299,10 @@ export function BarraArticle() {
           <p>
             This is the daily reality. Every morning, PMs wake up to factor exposure reports showing exactly what risks they&rsquo;re taking. When you buy a stock, you&rsquo;re not just buying a company; you&rsquo;re buying a bundle of characteristics: its <J t="size">size</J>, <J t="leverage">leverage</J>, <J t="momentum">momentum</J>, and volatility profile.
           </p>
-          
-          <ReturnDecomposition />
+
+          <ErrorBoundary fallback={<VizFallback className={VIZ_HEIGHTS.returns} />}>
+            <ReturnDecomposition />
+          </ErrorBoundary>
 
           <div className="barra-callout mt-12">
             Beyond risk management, factor models are tools for disentangling skill from luck. Has a manager achieved returns through a rigorous, repeatable alpha, or just by being long the market at the right time?
@@ -271,7 +315,7 @@ export function BarraArticle() {
       {/* ========== THE MATHEMATICAL ARCHITECTURE ========== */}
       <section data-section="math">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white">
+          <h2 className="barra-section-title text-white">
             The Mathematical Architecture
           </h2>
           <p>
@@ -284,17 +328,19 @@ export function BarraArticle() {
           <p className="text-slate-400 text-sm italic mt-4 mb-10 text-center">
             Where <M t="x_{i,t}" /> is <J t="factor-exposure">exposure</J>, <M t="f_t" /> is factor return, and <M t="\varepsilon_{i,t}" /> is <J t="idiosyncratic-risk">idiosyncratic noise</J>.
           </p>
-          
+
           <p>
             But attribution is just the warm-up. The real value comes from using this structure to forecast risk across the entire covariance matrix:
           </p>
           <MBlock t="\Sigma_t = B_t \Omega_t B_t^{\top} + \Delta_t" />
-          
+
           <p>
             This formula encodes a crucial assumption: stocks only correlate through shared factor exposures. Once you control for the fact that Microsoft and Apple are both large-cap tech stocks, their remaining risks should be independent. It&rsquo;s an elegant simplification that makes an intractable problem solvable.
           </p>
 
-          <LiveRegression />
+          <ErrorBoundary fallback={<VizFallback className={VIZ_HEIGHTS.regression} />}>
+            <LiveRegression />
+          </ErrorBoundary>
 
           <p className="mt-12">
             Each day, the system estimates factor returns using <J t="wls"><strong>weighted least squares regression</strong></J>. The weights, typically proportional to the square root of market cap, ensure mega-caps don&rsquo;t dominate while preventing micro-caps from adding too much noise.
@@ -307,7 +353,7 @@ export function BarraArticle() {
       {/* ========== LIFE INSIDE A POD ========== */}
       <section data-section="pod-life">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white">
+          <h2 className="barra-section-title text-white">
             Life Inside a Pod: The Daily Workflow
           </h2>
           <p>
@@ -316,9 +362,9 @@ export function BarraArticle() {
           <p>
             The platform provides strict boundaries. Market <J t="beta">beta</J> must stay between -5% and +5%. Style factor exposure can&rsquo;t exceed 0.5 standard deviations. Industry tilts are capped at 3% net. If you&rsquo;re outside, you can&rsquo;t trade until you hedge.
           </p>
-          
+
           <div className="bg-white/[0.02] border border-white/10 rounded-[2.5rem] p-8 md:p-12 my-12 relative overflow-hidden group">
-             <div className="absolute top-0 right-0 p-8 opacity-5">
+             <div className="absolute top-0 right-0 p-8 opacity-5" aria-hidden="true">
                 <Shield className="w-32 h-32 text-emerald-400" />
              </div>
              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 relative z-10">The Pre-Trade Optimizer</h3>
@@ -338,7 +384,7 @@ export function BarraArticle() {
       {/* ========== THE MULTI-STRATEGY ECOSYSTEM ========== */}
       <section data-section="ecosystem">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white">
+          <h2 className="barra-section-title text-white">
             The Multi-Strategy Ecosystem
           </h2>
           <p>
@@ -348,16 +394,18 @@ export function BarraArticle() {
             The dirty secret? It&rsquo;s only possible through <J t="leverage"><strong>leverage</strong></J>. Firms borrow 5x to 7x their LP capital. This leverage is what allows 20/20 fee structures (20% to firm, 20% to PM), but it makes the arithmetic brutal.
           </p>
 
-          <PodSimulator />
+          <ErrorBoundary fallback={<VizFallback className={VIZ_HEIGHTS.pod} />}>
+            <PodSimulator />
+          </ErrorBoundary>
 
           <p className="mt-12">
             A 5% gross loss on 6x leverage is a 30% loss on LP capital. This is why firms are infamous for the <strong>&ldquo;shoulder tap,&rdquo;</strong> slashing a pod&rsquo;s capital overnight during a drawdown.
           </p>
           <div className="barra-insight-card group my-12">
-             <h4 className="text-white font-bold mb-4 flex items-center gap-3">
-                <Zap className="w-5 h-5 text-amber-400" />
+             <h3 className="text-white font-bold mb-4 flex items-center gap-3 text-lg">
+                <Zap className="w-5 h-5 text-amber-400" aria-hidden="true" />
                 The 360 View
-             </h4>
+             </h3>
              <p className="text-sm text-slate-400 mb-0">
                 Consolidated firm view: $500M long momentum, $300M short value. If momentum crashes 3% in a day, the system identifies which pods are exposed. Those who drifted into it accidentally get the call to hedge immediately.
              </p>
@@ -370,7 +418,7 @@ export function BarraArticle() {
       {/* ========== STYLE FACTORS DECODED ========== */}
       <section data-section="factors">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white text-center">
+          <h2 className="barra-section-title text-white text-center">
             The Factors Decoded
           </h2>
           <p className="text-center text-slate-400 mb-16">
@@ -379,7 +427,7 @@ export function BarraArticle() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
              <div className="barra-insight-card !my-0 !bg-blue-500/5 hover:!bg-blue-500/10 transition-colors group cursor-default flex flex-col h-full">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0" aria-hidden="true">
                    <BarChart3 className="w-6 h-6 text-blue-400" />
                 </div>
                 <h3 className="text-white font-bold text-xl mb-4 shrink-0">RESVOL</h3>
@@ -389,7 +437,7 @@ export function BarraArticle() {
              </div>
 
              <div className="barra-insight-card !my-0 !bg-amber-500/5 hover:!bg-amber-500/10 transition-colors group cursor-default flex flex-col h-full">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0" aria-hidden="true">
                    <TrendingUp className="w-6 h-6 text-amber-400" />
                 </div>
                 <h3 className="text-white font-bold text-xl mb-4 shrink-0">MOM11M</h3>
@@ -399,7 +447,7 @@ export function BarraArticle() {
              </div>
 
              <div className="barra-insight-card !my-0 !bg-cyan-500/5 hover:!bg-cyan-500/10 transition-colors group cursor-default flex flex-col h-full">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shrink-0" aria-hidden="true">
                    <Layers className="w-6 h-6 text-cyan-400" />
                 </div>
                 <h3 className="text-white font-bold text-xl mb-4 shrink-0">SIZE</h3>
@@ -408,11 +456,13 @@ export function BarraArticle() {
                 </p>
              </div>
           </div>
-          
+
           <Divider />
-          
-          <FactorCorrelationMatrix />
-          
+
+          <ErrorBoundary fallback={<VizFallback className={VIZ_HEIGHTS.cosmos} />}>
+            <FactorCorrelationMatrix />
+          </ErrorBoundary>
+
           <div className="mt-12 space-y-8">
              <h3 className="text-white font-bold text-2xl mb-6">Ownership &amp; Crowding</h3>
              <p>
@@ -430,24 +480,24 @@ export function BarraArticle() {
       {/* ========== COMMON FAILURE MODES ========== */}
       <section data-section="failures">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white">
+          <h2 className="barra-section-title text-white">
             Common Failure Modes
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
              <div className="p-6 bg-rose-500/5 border border-rose-500/10 rounded-3xl group hover:bg-rose-500/10 transition-colors">
-                <h4 className="text-rose-400 font-bold mb-3 flex items-center gap-2">
-                   <AlertCircle className="w-4 h-4" />
+                <h3 className="text-rose-400 font-bold mb-3 flex items-center gap-2 text-lg">
+                   <AlertCircle className="w-4 h-4" aria-hidden="true" />
                    Hidden Factor Bets
-                </h4>
+                </h3>
                 <p className="text-sm text-slate-400 mb-0">
                    You think you&rsquo;ve found alpha in companies with high insider ownership, but really you&rsquo;ve just rediscovered the Value factor with extra steps.
                 </p>
              </div>
              <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-3xl group hover:bg-amber-500/10 transition-colors">
-                <h4 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
-                   <TrendingDown className="w-4 h-4" />
+                <h3 className="text-amber-400 font-bold mb-3 flex items-center gap-2 text-lg">
+                   <TrendingDown className="w-4 h-4" aria-hidden="true" />
                    Microstructure Traps
-                </h4>
+                </h3>
                 <p className="text-sm text-slate-400 mb-0">
                    Capture &ldquo;alpha&rdquo; from last-trade prices ping-ponging between bid and ask. In production, you can&rsquo;t capture this without paying the spread.
                 </p>
@@ -462,7 +512,7 @@ export function BarraArticle() {
       {/* ========== THE FUTURE ========== */}
       <section data-section="future" className="pb-10 md:pb-16">
         <EC>
-          <h2 className="barra-section-title mb-8 mt-16 text-white">
+          <h2 className="barra-section-title text-white">
             The Future of Risk
           </h2>
           <p>
@@ -472,7 +522,7 @@ export function BarraArticle() {
              The downside? Barra charges an insane amount for its tools. But because they publish the details of their factors, it is now possible to replicate &ldquo;close enough&rdquo; models using LLMs and affordable data APIs. 
           </p>
           <div className="barra-insight-card !bg-emerald-500/10 !border-emerald-500/20 mt-12">
-             <p className="text-emerald-400 font-bold mb-2 uppercase tracking-widest text-[10px]">Final Thought</p>
+             <p className="text-emerald-400 font-bold mb-2 uppercase tracking-widest text-xs">Final Thought</p>
              <p className="text-slate-300 mb-0 italic">
                 &ldquo;Sorry Mr. Rosenberg, but I won&rsquo;t be paying your company six figures for some linear algebra code! The democratization of quantitative risk management is here.&rdquo;
              </p>

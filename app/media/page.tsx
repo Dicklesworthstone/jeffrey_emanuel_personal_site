@@ -2,6 +2,7 @@
 
 import SectionShell from "@/components/section-shell";
 import { MediaItem, mediaItems } from "@/lib/content";
+import { formatDate } from "@/lib/utils";
 import { Newspaper, Podcast, PenLine, User, type LucideIcon } from "lucide-react";
 
 // Icon lookup object defined at module level
@@ -28,6 +29,14 @@ function MediaRow({ item }: { item: MediaItem }) {
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
             {item.outlet} • {item.kind}
+            {item.date && (
+              <>
+                {" • "}
+                <time dateTime={item.date} className="normal-case tracking-normal">
+                  {formatDate(item.date)}
+                </time>
+              </>
+            )}
           </p>
           <h3 className="mt-1 text-sm font-semibold text-slate-50 group-hover:text-sky-100">
             {item.title}
@@ -42,6 +51,19 @@ function MediaRow({ item }: { item: MediaItem }) {
   );
 }
 
+/** Newest first; items without an evidenced date keep their authored order after the dated ones. */
+function sortByDateDesc(items: MediaItem[]): MediaItem[] {
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      if (a.item.date && b.item.date) return b.item.date.localeCompare(a.item.date);
+      if (a.item.date) return -1;
+      if (b.item.date) return 1;
+      return a.index - b.index;
+    })
+    .map(({ item }) => item);
+}
+
 function MediaSection({
   title,
   items,
@@ -54,7 +76,7 @@ function MediaSection({
     <div className="mb-10">
       <h2 className="mb-5 text-lg font-semibold text-slate-200">{title}</h2>
       <div className="grid gap-5 md:grid-cols-2">
-        {items.map((item) => (
+        {sortByDateDesc(items).map((item) => (
           <MediaRow key={item.title} item={item} />
         ))}
       </div>

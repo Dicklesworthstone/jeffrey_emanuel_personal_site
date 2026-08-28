@@ -41,13 +41,13 @@ export default function AboutPage() {
             : fourteen interconnected tools that transform how AI coding agents collaborate.
             Agent Mail is critical to my workflow - it lets multiple Claude Code instances
             coordinate without stepping on each other. Beads Viewer uses PageRank to surface
-            which tasks unblock the most other work. CASS provides sub-millisecond search
+            which tasks unblock the most other work. CASS gives me near-instant search
             across all my past agent sessions. The ecosystem includes safety tools like
             Destructive Command Guard and the two-person rule CLI, plus Repo Updater for
             keeping everything in sync. Each tool amplifies the others.
           </p>
           <p>
-            The cadence of my GitHub commits increases more and more each passing week because the flywheel keeps
+            My GitHub commit volume has grown month over month since October 2025 because the flywheel keeps
             spinning faster. I make sure to make forward progress on every active
             project each day, even when I&apos;m too busy to spend real mental bandwidth
             on all of them. I&apos;ve developed prompts that keep the agents always
@@ -67,7 +67,7 @@ export default function AboutPage() {
         </div>
         <div className="mt-8 flex flex-wrap gap-4">
           <Link
-            href="/projects"
+            href="/tldr"
             className="inline-flex items-center gap-2 rounded-full bg-violet-500/10 px-5 py-2.5 text-sm font-semibold text-violet-400 ring-1 ring-inset ring-violet-500/30 transition-all hover:bg-violet-500/20 hover:text-violet-300"
           >
             Explore the Flywheel

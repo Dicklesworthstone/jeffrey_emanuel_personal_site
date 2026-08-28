@@ -1,8 +1,22 @@
 // Service Worker for Jeffrey Emanuel's site
-// Provides offline support and intelligent caching
+// Provides offline support and intelligent caching.
+//
+// Caching contract:
+//   - Navigations: network-first, fall back to cache, then /offline.
+//   - /_next/static/*: cache-first (content-hashed, immutable).
+//   - Other same-origin static assets (public/ images, icons, fonts): stale-while-
+//     revalidate — serve the cached copy immediately but refresh it in the
+//     background, so an image replaced in place after a deploy is picked up on
+//     the next visit instead of being cache-first forever.
+//   - /api/*: never intercepted.
+// Bump CACHE_VERSION when the caching contract changes; activate() deletes
+// every cache that does not match the current name.
 
-const CACHE_NAME = "jeffrey-emanuel-v1";
+const CACHE_VERSION = "v2";
+const CACHE_NAME = `jeffrey-emanuel-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline";
+// Bound the asset cache so months of hashed chunks cannot accumulate.
+const MAX_ASSET_ENTRIES = 200;
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -42,7 +56,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      // Delete old caches
+      // Delete every cache from a previous CACHE_VERSION
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames
@@ -55,6 +69,16 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Evict the oldest entries once the cache grows past MAX_ASSET_ENTRIES.
+async function trimCache(cache) {
+  const keys = await cache.keys();
+  if (keys.length <= MAX_ASSET_ENTRIES) return;
+  const excess = keys.length - MAX_ASSET_ENTRIES;
+  await Promise.all(keys.slice(0, excess).map((request) => cache.delete(request)));
+}
+
+const STATIC_ASSET_RE = /\.(js|css|png|jpg|jpeg|gif|webp|avif|svg|ico|woff|woff2)$/;
+
 // Fetch event - serve from cache or network
 self.addEventListener("fetch", (event) => {
   const { request } = event;
@@ -65,6 +89,10 @@ self.addEventListener("fetch", (event) => {
 
   // Skip Chrome extension requests and other non-http(s)
   if (!url.protocol.startsWith("http")) return;
+
+  // Only same-origin requests are cached (next/font self-hosts fonts, so
+  // there is no third-party font traffic to intercept).
+  if (url.origin !== self.location.origin) return;
 
   // Skip API routes - always go to network
   if (url.pathname.startsWith("/api/")) return;
@@ -105,28 +133,23 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Handle static assets (JS, CSS, images, fonts)
-  if (
-    url.pathname.startsWith("/_next/static/") ||
-    url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$/)
-  ) {
+  // Content-hashed build output: cache-first is safe forever.
+  if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       (async () => {
-        // Cache first for static assets
         const cachedResponse = await caches.match(request);
         if (cachedResponse) {
           return cachedResponse;
         }
-        // Fetch from network and cache
         try {
           const networkResponse = await fetch(request);
           if (networkResponse.ok) {
             const cache = await caches.open(CACHE_NAME);
             cache.put(request, networkResponse.clone());
+            trimCache(cache);
           }
           return networkResponse;
         } catch {
-          // Return empty response for failed asset requests
           return new Response("", { status: 404 });
         }
       })()
@@ -134,27 +157,29 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Handle Google Fonts
-  if (
-    url.hostname === "fonts.googleapis.com" ||
-    url.hostname === "fonts.gstatic.com"
-  ) {
+  // Un-hashed public assets: stale-while-revalidate.
+  if (STATIC_ASSET_RE.test(url.pathname)) {
     event.respondWith(
       (async () => {
-        const cachedResponse = await caches.match(request);
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(request);
+        const networkFetch = fetch(request)
+          .then((networkResponse) => {
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
+              trimCache(cache);
+            }
+            return networkResponse;
+          })
+          .catch(() => null);
+
         if (cachedResponse) {
+          // Refresh in the background; the client can keep using the cached copy.
+          event.waitUntil(networkFetch);
           return cachedResponse;
         }
-        try {
-          const networkResponse = await fetch(request);
-          if (networkResponse.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(request, networkResponse.clone());
-          }
-          return networkResponse;
-        } catch {
-          return new Response("", { status: 404 });
-        }
+        const networkResponse = await networkFetch;
+        return networkResponse || new Response("", { status: 404 });
       })()
     );
     return;

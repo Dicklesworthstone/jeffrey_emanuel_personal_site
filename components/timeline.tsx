@@ -1,10 +1,33 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { TimelineItem } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
-export default function Timeline({ items }: { items: TimelineItem[] }) {
+const MONTH_INDEX: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+};
+
+/**
+ * Sort key for a period's start: "Aug 2020 – Dec 2021" → 2020*12+7, "2001 – 2005" → 2001*12.
+ * Unparseable periods sort last.
+ */
+function periodStart(period: string): number {
+  const start = period.split(/[–—-]/)[0].trim();
+  const match = start.match(/^(?:([A-Za-z]{3})[A-Za-z]*\.?\s+)?(\d{4})$/);
+  if (!match) return Number.NEGATIVE_INFINITY;
+  const month = match[1] ? (MONTH_INDEX[match[1].toLowerCase()] ?? 0) : 0;
+  return Number(match[2]) * 12 + month;
+}
+
+export default function Timeline({ items: rawItems }: { items: TimelineItem[] }) {
+  // Always render newest-first regardless of authoring order in lib/content.ts
+  const items = useMemo(
+    () => [...rawItems].sort((a, b) => periodStart(b.period) - periodStart(a.period)),
+    [rawItems]
+  );
   const latestIndex = items.findIndex((item) => item.period.includes("Present"));
   const prefersReducedMotion = useReducedMotion();
 

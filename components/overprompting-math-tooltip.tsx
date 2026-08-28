@@ -30,11 +30,12 @@ export function OverpromptingMathTooltip({ mathKey, children, className }: Overp
   return (
     <TooltipShell
       title={mathData.term}
-      ariaLabel={`Explain math: ${mathData.term}`}
       variant="amber"
+      portalClassName="overprompting-scope"
       className={cn(
-        "relative inline-block cursor-help transition-all duration-200 group/math",
-        "hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-lg",
+        "relative inline-block cursor-help transition-colors duration-200 group/math rounded-lg",
+        "underline decoration-amber-500/40 decoration-2 underline-offset-4 hover:text-amber-300",
+        "focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020204]",
         className
       )}
       tooltipContent={<MathTooltipContent math={mathData} />}
@@ -42,7 +43,7 @@ export function OverpromptingMathTooltip({ mathKey, children, className }: Overp
     >
       <span className="relative inline-block">
         {children}
-        <span className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity">
+        <span className="absolute -right-1 -top-1 opacity-0 group-hover/math:opacity-100 transition-opacity" aria-hidden="true">
           <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 shadow-lg">
             <Sigma className="h-2 w-2 text-white" />
           </span>
@@ -57,7 +58,7 @@ function MathTooltipContent({ math }: { math: JargonTerm }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2 border-b border-white/5 pb-2">
         <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-400/20 text-amber-400">
-          <Sigma className="h-3.5 w-3.5" />
+          <Sigma className="h-3.5 w-3.5" aria-hidden="true" />
         </div>
         <span className="font-bold text-white tracking-tight">{math.term}</span>
       </div>
@@ -70,8 +71,8 @@ function MathTooltipContent({ math }: { math: JargonTerm }) {
         </p>
       </div>
       {math.analogy && (
-        <div className="rounded-lg bg-amber-400/5 border border-amber-500/10 px-3 py-2 text-[11px] text-slate-300 leading-relaxed">
-          <span className="font-bold text-amber-400 uppercase text-[9px] tracking-widest block mb-1">The Intuition:</span>
+        <div className="rounded-lg bg-amber-400/5 border border-amber-500/10 px-3 py-2 text-xs text-slate-300 leading-relaxed">
+          <span className="font-bold text-amber-400 uppercase text-xs tracking-widest block mb-1">The Intuition:</span>
           {math.analogy}
         </div>
       )}
@@ -84,7 +85,7 @@ function MathSheetContent({ math }: { math: JargonTerm }) {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400/20 to-rose-500/20 shadow-xl border border-amber-500/20">
-          <Sigma className="h-7 w-7 text-amber-400" />
+          <Sigma className="h-7 w-7 text-amber-400" aria-hidden="true" />
         </div>
         <div>
           <h3 className="text-2xl font-black text-white tracking-tight">{math.term}</h3>

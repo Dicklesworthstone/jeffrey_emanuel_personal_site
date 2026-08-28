@@ -31,17 +31,25 @@ function normalizeHeadingText(text: string): string {
     .trim();
 }
 
+/** Deepest heading level that is listed in the table of contents. */
+const MAX_TOC_LEVEL = 3;
+
 /**
- * Extract headings (h2, h3) from markdown content.
- * Returns an array of heading objects with id, text, and level.
+ * Extract headings from markdown content for the table of contents.
+ *
+ * Body `#` headings are rendered as `<h2>` (the page owns the single `<h1>`),
+ * so they are reported as level 2 here; `##` is level 2 and `###` level 3.
+ * Every heading level is run through the slugger (even ones deeper than the
+ * TOC shows) so duplicate-text suffixes (`foo-1`) stay in sync with rehype-slug,
+ * which slugs all headings in document order.
  */
 export function extractHeadings(content: string): TocHeading[] {
   const headings: TocHeading[] = [];
   const slugger = new GithubSlugger();
 
-  // Match markdown headings (## and ###)
-  // Avoid matching headings inside code blocks
-  const lines = content.split("\n");
+  // Normalize line endings first: several posts are CRLF, and `.` never
+  // matches `\r`, so `^##\s+(.*?)$` would silently miss every heading.
+  const lines = content.replace(/\r\n?/g, "\n").split("\n");
   let activeFence: string | null = null;
 
   for (const line of lines) {
@@ -71,33 +79,25 @@ export function extractHeadings(content: string): TocHeading[] {
 
     if (activeFence) continue;
 
-    // Match h2 (##) and h3 (###) headings, allowing for optional trailing hashes
-    const h2Match = line.match(/^##\s+(.*?)(?:\s+#+)?$/);
-    const h3Match = line.match(/^###\s+(.*?)(?:\s+#+)?$/);
+    // Match ATX headings (# through ######), allowing for optional trailing hashes
+    const headingMatch = line.match(/^(#{1,6})\s+(.*?)(?:\s+#+)?$/);
+    if (!headingMatch) continue;
 
-    if (h2Match) {
-      const rawText = h2Match[1].trim();
-      const text = normalizeHeadingText(rawText);
-      if (!text) continue;
-      const slug = slugger.slug(text);
+    const rawText = headingMatch[2].trim();
+    const text = normalizeHeadingText(rawText);
+    if (!text) continue;
 
-      headings.push({
-        id: slug,
-        text,
-        level: 2,
-      });
-    } else if (h3Match) {
-      const rawText = h3Match[1].trim();
-      const text = normalizeHeadingText(rawText);
-      if (!text) continue;
-      const slug = slugger.slug(text);
+    // Always advance the slugger so ids match rehype-slug's document-wide numbering.
+    const slug = slugger.slug(text);
+    const markdownLevel = headingMatch[1].length;
+    if (markdownLevel > MAX_TOC_LEVEL) continue;
 
-      headings.push({
-        id: slug,
-        text,
-        level: 3,
-      });
-    }
+    headings.push({
+      id: slug,
+      text,
+      // Body h1s are rendered as h2 by the article renderer.
+      level: Math.max(2, markdownLevel),
+    });
   }
 
   return headings;

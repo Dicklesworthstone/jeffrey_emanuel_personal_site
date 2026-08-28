@@ -20,10 +20,12 @@ interface CMAESMathTooltipProps {
  * Wraps math expressions with an intuitive explanation on hover/tap.
  */
 export function CMAESMathTooltip({ mathKey, children, className }: CMAESMathTooltipProps) {
-  const mathData = getJargon(mathKey);
+  const mathData = mathKey === "operator" ? undefined : getJargon(mathKey);
 
+  // Operators and punctuation (=, +, parentheses, commas) are rendered as
+  // plain spans: they carry no explanation worth a tab stop or a tooltip.
   if (!mathData) {
-    return <>{children}</>;
+    return <span className={className}>{children}</span>;
   }
 
   return (

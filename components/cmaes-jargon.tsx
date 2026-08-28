@@ -74,9 +74,9 @@ function TooltipContent({ term }: { term: JargonTerm }) {
           {term.related.map((r) => (
             <span
               key={r}
-              className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-500"
+              className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-slate-400"
             >
-              {r}
+              {getJargon(r)?.term ?? r}
             </span>
           ))}
         </div>
@@ -135,7 +135,7 @@ function SheetContent({ term }: { term: JargonTerm }) {
                   key={r}
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-400"
                 >
-                  {r}
+                  {getJargon(r)?.term ?? r}
                 </span>
               ))}
             </div>

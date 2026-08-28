@@ -13,6 +13,13 @@ interface TableOfContentsProps {
 /**
  * Floating table of contents with scroll-spy functionality.
  * Shows current section and provides quick navigation.
+ *
+ * Layout: the article column is `max-w-3xl` centered inside `max-w-5xl`, so
+ * its right edge sits at `50% + 24rem`. The fixed sidebar is anchored to
+ * `50% + 26rem` and only shown from the 2xl breakpoint (1536px), where
+ * `50% + 26rem + 16rem = 1440px` still fits inside the viewport. Between
+ * 1280px and 1535px a right-anchored sidebar would overlap the text, so those
+ * widths use the floating toggle + panel instead.
  */
 export default function TableOfContents({ headings }: TableOfContentsProps) {
   const defaultHeadingId = headings[0]?.id ?? "";
@@ -62,25 +69,38 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
     return () => observer.disconnect();
   }, [headings]);
 
-  // Smooth scroll to heading
+  // Smooth scroll to heading (offset by the fixed header) and sync the URL hash
   const scrollToHeading = useCallback(
     (id: string) => {
       const element = document.getElementById(id);
-      if (element) {
-        const headerElement = document.querySelector("header");
-        const headerHeight = headerElement
-          ? headerElement.getBoundingClientRect().height
-          : 88;
-        const offset = headerHeight + 12;
-        const top = element.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({
-          top,
-          behavior: prefersReducedMotion ? "auto" : "smooth",
-        });
-        setIsOpen(false);
+      if (!element) return;
+
+      const headerElement = document.querySelector("header");
+      const headerHeight = headerElement
+        ? headerElement.getBoundingClientRect().height
+        : 88;
+      const offset = headerHeight + 12;
+      const top = element.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({
+        top,
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+      });
+      if (window.location.hash !== `#${id}`) {
+        window.history.pushState(null, "", `#${id}`);
       }
+      setIsOpen(false);
     },
     [prefersReducedMotion]
+  );
+
+  const handleHeadingClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+      // Let modified clicks (open in new tab, etc.) behave like a normal link.
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      scrollToHeading(id);
+    },
+    [scrollToHeading]
   );
 
   // Close on escape
@@ -104,13 +124,13 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
 
   return (
     <>
-      {/* Mobile/Tablet: Floating toggle button */}
-      <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 z-40 xl:hidden">
+      {/* Mobile/Tablet/Desktop < 2xl: Floating toggle button */}
+      <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 z-40 2xl:hidden">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium shadow-lg backdrop-blur-md transition-all",
+            "flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-medium shadow-lg backdrop-blur-md transition-all",
             isOpen
               ? "bg-violet-500 text-white"
               : "border border-white/10 bg-slate-900/90 text-slate-300 hover:bg-slate-800"
@@ -119,17 +139,17 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
           aria-expanded={isOpen}
         >
           {isOpen ? (
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           ) : (
             <>
-              <List className="h-4 w-4" />
+              <List className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Contents</span>
             </>
           )}
         </button>
       </div>
 
-      {/* Mobile/Tablet: Dropdown panel */}
+      {/* Floating panel */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -138,7 +158,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm xl:hidden"
+              className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm 2xl:hidden"
               onClick={() => setIsOpen(false)}
             />
 
@@ -148,7 +168,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="fixed bottom-[calc(3rem+env(safe-area-inset-bottom))] right-4 z-40 w-72 rounded-2xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl xl:hidden"
+              className="fixed bottom-[calc(3rem+env(safe-area-inset-bottom))] right-4 z-40 w-72 rounded-2xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl 2xl:hidden"
             >
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
@@ -157,30 +177,38 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="text-slate-400 hover:text-white"
+                  className="-m-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 hover:text-white"
+                  aria-label="Close table of contents"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
-              <nav className="max-h-[min(50dvh,var(--mobile-viewport-height,50vh))] overflow-y-auto">
+              <nav
+                aria-label="Table of contents"
+                className="max-h-[min(50dvh,var(--mobile-viewport-height,50vh))] overflow-y-auto"
+              >
                 <ul className="space-y-1">
-                  {headings.map((heading) => (
-                    <li key={heading.id}>
-                      <button
-                        type="button"
-                        onClick={() => scrollToHeading(heading.id)}
-                        className={cn(
-                          "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                          heading.level === 3 && "pl-6",
-                          resolvedActiveId === heading.id
-                            ? "bg-violet-500/20 text-violet-300"
-                            : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                        )}
-                      >
-                        <span className="line-clamp-2">{heading.text}</span>
-                      </button>
-                    </li>
-                  ))}
+                  {headings.map((heading) => {
+                    const isActive = resolvedActiveId === heading.id;
+                    return (
+                      <li key={heading.id}>
+                        <a
+                          href={`#${heading.id}`}
+                          onClick={(event) => handleHeadingClick(event, heading.id)}
+                          aria-current={isActive ? "location" : undefined}
+                          className={cn(
+                            "block w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                            heading.level === 3 && "pl-6",
+                            isActive
+                              ? "bg-violet-500/20 text-violet-300"
+                              : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                          )}
+                        >
+                          <span className="line-clamp-2">{heading.text}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </nav>
             </motion.div>
@@ -188,47 +216,52 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
         )}
       </AnimatePresence>
 
-      {/* Desktop: Sidebar TOC */}
-      <aside className="hidden xl:block fixed top-32 right-8 w-64 max-h-[min(calc(100vh-160px),calc(100dvh-160px))] overflow-y-auto">
+      {/* Wide desktop (2xl+): sidebar anchored beside the reading column */}
+      <aside className="hidden 2xl:block fixed top-32 left-[calc(50%+26rem)] w-64 max-h-[min(calc(100vh-160px),calc(100dvh-160px))] overflow-y-auto">
         <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5 backdrop-blur-md">
           <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-            <List className="h-4 w-4" />
+            <List className="h-4 w-4" aria-hidden="true" />
             On this page
           </h3>
-          <nav>
+          <nav aria-label="Table of contents">
             <ul className="space-y-1">
-              {headings.map((heading) => (
-                <li key={heading.id}>
-                  <button
-                    type="button"
-                    onClick={() => scrollToHeading(heading.id)}
-                    className={cn(
-                      "group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-all",
-                      heading.level === 3 && "pl-5",
-                      resolvedActiveId === heading.id
-                        ? "bg-violet-500/20 text-violet-300"
-                        : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                    )}
-                  >
-                    <ChevronRight
+              {headings.map((heading) => {
+                const isActive = resolvedActiveId === heading.id;
+                return (
+                  <li key={heading.id}>
+                    <a
+                      href={`#${heading.id}`}
+                      onClick={(event) => handleHeadingClick(event, heading.id)}
+                      aria-current={isActive ? "location" : undefined}
                       className={cn(
-                        "h-3 w-3 transition-transform",
-                        resolvedActiveId === heading.id
-                          ? "text-violet-400"
-                          : "text-slate-500 group-hover:text-slate-400"
+                        "group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-all",
+                        heading.level === 3 && "pl-5",
+                        isActive
+                          ? "bg-violet-500/20 text-violet-300"
+                          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
                       )}
-                    />
-                    <span className="line-clamp-2">{heading.text}</span>
-                  </button>
-                </li>
-              ))}
+                    >
+                      <ChevronRight
+                        aria-hidden="true"
+                        className={cn(
+                          "h-3 w-3 shrink-0 transition-transform",
+                          isActive
+                            ? "text-violet-400"
+                            : "text-slate-500 group-hover:text-slate-400"
+                        )}
+                      />
+                      <span className="line-clamp-2">{heading.text}</span>
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
         </div>
 
-        {/* Current section indicator */}
+        {/* Current section indicator (visual only; aria-current on the link carries the state) */}
         {activeHeading && (
-          <div className="mt-4 rounded-xl border border-violet-500/20 bg-violet-500/10 px-4 py-3">
+          <div className="mt-4 rounded-xl border border-violet-500/20 bg-violet-500/10 px-4 py-3" aria-hidden="true">
             <p className="text-xs font-bold uppercase tracking-widest text-violet-400">
               Reading
             </p>
@@ -237,16 +270,6 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
             </p>
           </div>
         )}
-
-        {/* Screen reader announcement for section changes */}
-        <div
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-          className="sr-only"
-        >
-          {activeHeading ? `Now reading: ${activeHeading.text}` : ""}
-        </div>
       </aside>
     </>
   );

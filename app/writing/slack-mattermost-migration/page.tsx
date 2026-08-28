@@ -5,7 +5,7 @@ import { SlackMigrationArticle } from "@/components/slack-migration-article";
 const OG_TITLE =
   "Using AI Agents and Skills to Migrate Off Slack | Jeffrey Emanuel";
 const OG_DESCRIPTION =
-  "How two paired Claude Code / Codex skills move a company from Slack to a self-hosted Mattermost — end to end, driven by an agent, with a fail-closed readiness gate, a named rollback owner, and 96-99% lower ongoing cost.";
+  "How two paired Claude Code / Codex skills move a company from Slack to a self-hosted Mattermost — end to end, driven by an agent, with a fail-closed readiness gate, a named rollback owner, and 86–99% lower ongoing cost depending on headcount and plan.";
 
 export const metadata: Metadata = {
   title: OG_TITLE,
@@ -53,7 +53,7 @@ const articleSchema = {
   datePublished: "2026-04-16",
   dateModified: "2026-04-16",
   description:
-    "How two paired Claude Code / Codex skills move a company from Slack to a self-hosted Mattermost — end to end, driven by an agent, with a fail-closed readiness gate, a named rollback owner, and 96-99% lower ongoing cost.",
+    "How two paired Claude Code / Codex skills move a company from Slack to a self-hosted Mattermost — end to end, driven by an agent, with a fail-closed readiness gate, a named rollback owner, and 86–99% lower ongoing cost depending on headcount and plan.",
   author: {
     "@type": "Person",
     name: "Jeffrey Emanuel",

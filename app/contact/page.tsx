@@ -4,6 +4,7 @@ import SectionShell from "@/components/section-shell";
 import { siteConfig } from "@/lib/content";
 import { Mail, MessageCircle, Github, Linkedin } from "lucide-react";
 import NewsletterSignup from "@/components/newsletter-signup";
+import CopyButton from "@/components/copy-button";
 
 export default function ContactPage() {
   return (
@@ -16,7 +17,7 @@ export default function ContactPage() {
         kicker="For consulting, collaborations, or media, email is best. I read everything, though my response time depends on what I'm building that week."
         headingLevel={1}
       >
-        <div className="grid gap-8 md:grid-cols-[2fr,1fr]">
+        <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
           <div className="space-y-8">
             <div className="prose text-sm text-slate-300">
               <p>
@@ -37,25 +38,23 @@ export default function ContactPage() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                   Primary contact
                 </p>
-                <a
-                  href={`mailto:${siteConfig.email}`}
-                  className="mt-3 inline-flex items-center gap-3 text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-violet-400 hover:from-sky-300 hover:to-violet-300 transition-all md:text-xl"
-                >
-                  <Mail className="h-5 w-5 text-sky-400 shrink-0" />
-                  <span>{siteConfig.email}</span>
-                </a>
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <a
+                    href={`mailto:${siteConfig.email}`}
+                    className="inline-flex min-h-11 items-center gap-3 text-lg font-bold text-sky-300 underline decoration-sky-500/40 underline-offset-4 transition-colors hover:text-sky-200 hover:decoration-sky-300/60 md:text-xl"
+                  >
+                    <Mail className="h-5 w-5 shrink-0 text-sky-400" aria-hidden="true" />
+                    <span className="break-all">{siteConfig.email}</span>
+                  </a>
+                  <span className="inline-flex items-center gap-2 text-xs text-slate-400">
+                    <CopyButton text={siteConfig.email} />
+                    Copy address
+                  </span>
+                </div>
                 <p className="mt-3 text-xs text-slate-400">
                   Please avoid sending sensitive or confidential information in
                   the first email.
                 </p>
-                {/* Mobile: prominent tappable button */}
-                <a
-                  href={`mailto:${siteConfig.email}`}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-sky-500/10 py-3 text-sm font-bold text-sky-300 ring-1 ring-sky-500/30 transition-all active:scale-95 active:ring-sky-500/50 hover:bg-sky-500/20 md:hidden"
-                >
-                  <Mail className="h-4 w-4" />
-                  Send an email
-                </a>
               </div>
             </div>
 

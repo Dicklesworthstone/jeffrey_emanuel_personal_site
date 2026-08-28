@@ -1,11 +1,21 @@
+// KaTeX CSS - only loaded on markdown article pages
+import "katex/dist/katex.min.css";
+
 import { notFound, permanentRedirect } from "next/navigation";
+import { isValidElement, type ReactNode } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeSlug from "rehype-slug";
 import { getAllPostsMeta, getPostBySlug, isDraftPost } from "@/lib/mdx";
-import MarkdownRenderer from "@/components/markdown-renderer";
+import { MarkdownCodeBlock } from "@/components/markdown-renderer";
+import ErrorBoundary from "@/components/error-boundary";
 import ArticleProgress from "@/components/article-progress";
 import TableOfContents from "@/components/table-of-contents";
 import { calculateReadingTime } from "@/lib/reading-time";
 import { extractHeadings } from "@/lib/extract-headings";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -25,6 +35,8 @@ const STATIC_WRITING_ROUTE_SLUGS = new Set([
   "slack-mattermost-migration",
 ]);
 
+const SITE_HOSTNAMES = new Set(["jeffreyemanuel.com", "www.jeffreyemanuel.com"]);
+
 function normalizeIncomingSlug(slug: string): string {
   return slug.trim().replace(/\.md$/i, "");
 }
@@ -32,6 +44,142 @@ function normalizeIncomingSlug(slug: string): string {
 function getCanonicalWritingSlug(slug: string): string {
   const normalized = normalizeIncomingSlug(slug);
   return WRITING_ROUTE_REDIRECTS[normalized] ?? normalized;
+}
+
+/** Flatten a React node tree (as produced by react-markdown) to its text. */
+function nodeToText(node: ReactNode): string {
+  if (node === null || node === undefined || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeToText).join("");
+  if (isValidElement<{ children?: ReactNode }>(node)) return nodeToText(node.props.children);
+  return "";
+}
+
+function isExternalHref(href: string | undefined): boolean {
+  if (!href) return false;
+  try {
+    const url = new URL(href);
+    return (url.protocol === "http:" || url.protocol === "https:") && !SITE_HOSTNAMES.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * react-markdown element overrides. Everything here renders on the server;
+ * only <MarkdownCodeBlock> is a client island (copy button + lazy highlighter).
+ */
+const markdownComponents: Components = {
+  // The page already renders the post title as the single <h1>, so body "# "
+  // headings become <h2> (rehype-slug's id is preserved via props for the TOC).
+  h1({ node: _node, ...props }) {
+    return <h2 {...props} />;
+  },
+  pre({ node: _node, children }) {
+    if (!isValidElement<{ className?: string; children?: ReactNode }>(children)) {
+      return <pre>{children}</pre>;
+    }
+    const match = /language-([A-Za-z0-9_+#-]+)/.exec(children.props.className || "");
+    const code = nodeToText(children.props.children).replace(/\n$/, "");
+    return <MarkdownCodeBlock language={match?.[1]} code={code} />;
+  },
+  code({ node: _node, className, children, ...props }) {
+    return (
+      <code
+        {...props}
+        className={cn("bg-slate-800/50 rounded px-1.5 py-0.5 text-sm font-mono text-sky-200", className)}
+      >
+        {children}
+      </code>
+    );
+  },
+  a({ node: _node, href, children, ...props }) {
+    if (isExternalHref(href)) {
+      return (
+        <a {...props} href={href} target="_blank" rel="noopener noreferrer">
+          {children}
+        </a>
+      );
+    }
+    return (
+      <a {...props} href={href}>
+        {children}
+      </a>
+    );
+  },
+  table({ node: _node, children }) {
+    return (
+      <div className="overflow-x-auto my-8 border border-slate-800 rounded-lg">
+        <table className="min-w-full text-left text-sm">{children}</table>
+      </div>
+    );
+  },
+  thead({ node: _node, children }) {
+    return (
+      <thead className="bg-slate-900/50 text-slate-200 font-semibold border-b border-slate-800">
+        {children}
+      </thead>
+    );
+  },
+  th({ node: _node, children }) {
+    return <th className="px-6 py-4">{children}</th>;
+  },
+  img({ node: _node, src, alt }) {
+    const safeSrc = typeof src === "string" ? src : "";
+    // Extract optional width/height from alt text if provided in format "alt text | 600x400"
+    const altParts = alt?.split("|") || [];
+    const cleanAlt = altParts[0]?.trim() || "";
+    const dimensions = altParts[1]?.trim().match(/(\d+)x(\d+)/);
+    const width = dimensions ? parseInt(dimensions[1], 10) : undefined;
+    const height = dimensions ? parseInt(dimensions[2], 10) : undefined;
+
+    return (
+      <figure className="block my-8 relative">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={safeSrc}
+          alt={cleanAlt}
+          width={width}
+          height={height}
+          loading="lazy"
+          decoding="async"
+          className="rounded-xl border border-slate-800 shadow-2xl mx-auto max-w-full h-auto"
+          style={{ aspectRatio: width && height ? `${width}/${height}` : "auto" }}
+        />
+        {cleanAlt && (
+          <figcaption className="block text-center text-sm text-slate-500 mt-2 italic">
+            {cleanAlt}
+          </figcaption>
+        )}
+      </figure>
+    );
+  },
+};
+
+function ArticleBody({ content }: { content: string }) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-6 text-center">
+          <p className="text-sm text-amber-200/80">
+            Unable to render this content. The article may contain formatting that couldn&apos;t be processed.
+          </p>
+        </div>
+      }
+    >
+      <div className="prose prose-lg prose-invert max-w-none pb-6 prose-pre:bg-slate-900/50 prose-pre:border prose-pre:border-slate-800 prose-headings:font-semibold prose-a:text-sky-300 hover:prose-a:text-sky-200 prose-img:rounded-xl">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: true }]]}
+          // rehype-slug adds IDs to headings for TOC navigation; math is
+          // rendered to static KaTeX markup here on the server.
+          rehypePlugins={[rehypeSlug, [rehypeKatex, { strict: false }]]}
+          components={markdownComponents}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    </ErrorBoundary>
+  );
 }
 
 export async function generateStaticParams() {
@@ -94,8 +242,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
-    datePublished: post.date,
-    dateModified: post.date,
+    // Dates are only asserted when the frontmatter actually carries one.
+    ...(post.date && { datePublished: post.date, dateModified: post.date }),
     description: post.excerpt,
     author: {
       "@type": "Person",
@@ -122,7 +270,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       {/* Reading progress bar */}
       <ArticleProgress />
 
-      {/* Table of contents (sticky sidebar on desktop, floating on mobile) */}
+      {/* Table of contents (sticky sidebar on wide desktops, floating elsewhere) */}
       <TableOfContents headings={headings} />
 
       <article className="min-h-screen bg-[#020617]">
@@ -168,7 +316,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             )}
           </header>
 
-          <MarkdownRenderer content={post.content} className="pb-6" />
+          <ArticleBody content={post.content} />
 
           <div className="mt-14 pt-10 border-t border-slate-800/60">
             <Link

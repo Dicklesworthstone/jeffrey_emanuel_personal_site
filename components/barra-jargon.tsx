@@ -4,13 +4,18 @@ import { Info, HelpCircle } from "lucide-react";
 import { TooltipShell } from "./tooltip-shell";
 import { cn } from "@/lib/utils";
 
-const JARGON: Record<string, { title: string; def: string }> = {
+export interface BarraJargonEntry {
+  title: string;
+  def: string;
+}
+
+const JARGON: Record<string, BarraJargonEntry> = {
   "alpha": {
-    title: "Alpha (\u03b1)",
+    title: "Alpha (α)",
     def: "The excess return of an investment relative to the return of a benchmark index. It is often used as a measure of a manager's skill."
   },
   "beta": {
-    title: "Beta (\u03b2)",
+    title: "Beta (β)",
     def: "A measure of a stock's volatility in relation to the overall market. A beta of 1.0 indicates that the stock moves with the market."
   },
   "factor-exposure": {
@@ -71,6 +76,11 @@ const JARGON: Record<string, { title: string; def: string }> = {
   }
 };
 
+/** Look up a glossary entry by key (case-insensitive). Used by the visualizations' definition panels. */
+export function getBarraJargon(term: string): BarraJargonEntry | undefined {
+  return JARGON[term.toLowerCase()];
+}
+
 export function BarraJargon({ term, children }: { term: string; children?: React.ReactNode }) {
   const info = JARGON[term.toLowerCase()];
 
@@ -79,12 +89,12 @@ export function BarraJargon({ term, children }: { term: string; children?: React
   return (
     <TooltipShell
       title={info.title}
-      ariaLabel={`Explain term: ${info.title}`}
       variant="emerald"
       portalClassName="barra-scope"
       className={cn(
-        "relative inline-block cursor-help transition-all duration-200 group/jargon",
-        "underline decoration-emerald-500/30 decoration-2 underline-offset-4 rounded-md hover:text-emerald-400"
+        "relative inline-block cursor-help transition-colors duration-200 group/jargon rounded-md",
+        "underline decoration-emerald-500/30 decoration-2 underline-offset-4 hover:text-emerald-400",
+        "focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020204]"
       )}
       tooltipContent={<JargonTooltipContent info={info} />}
       sheetContent={<JargonSheetContent info={info} />}
@@ -94,14 +104,14 @@ export function BarraJargon({ term, children }: { term: string; children?: React
   );
 }
 
-function JargonTooltipContent({ info }: { info: { title: string; def: string } }) {
+function JargonTooltipContent({ info }: { info: BarraJargonEntry }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 border-b border-white/5 pb-2">
         <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-400/20 text-emerald-400">
-          <HelpCircle className="h-3.5 w-3.5" />
+          <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
         </div>
-        <span className="font-bold text-white tracking-tight uppercase text-[10px]">{info.title}</span>
+        <span className="font-bold text-white tracking-tight uppercase text-xs">{info.title}</span>
       </div>
       <p className="text-xs leading-relaxed text-slate-300 font-serif italic">
         {info.def}
@@ -110,12 +120,12 @@ function JargonTooltipContent({ info }: { info: { title: string; def: string } }
   );
 }
 
-function JargonSheetContent({ info }: { info: { title: string; def: string } }) {
+function JargonSheetContent({ info }: { info: BarraJargonEntry }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400/20 to-cyan-500/20 shadow-xl border border-emerald-500/20">
-          <Info className="h-7 w-7 text-emerald-400" />
+          <Info className="h-7 w-7 text-emerald-400" aria-hidden="true" />
         </div>
         <div>
           <h3 className="text-2xl font-black text-white tracking-tight uppercase">{info.title}</h3>

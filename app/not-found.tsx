@@ -1,8 +1,14 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Search } from "lucide-react";
 import SectionShell from "@/components/section-shell";
+
+// Server component so the 404 can carry its own <title>; the client
+// SectionShell receives a serialisable element instead of a component ref.
+export const metadata: Metadata = {
+  title: "Page not found | Jeffrey Emanuel",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (
@@ -11,7 +17,8 @@ export default function NotFound() {
         title="Page not found"
         eyebrow="404 Error"
         kicker="The page you are looking for doesn't exist. It might have been moved, deleted, or never existed in the first place."
-        icon={Search}
+        iconNode={<Search className="h-5 w-5" />}
+        headingLevel={1}
       >
         <div className="flex flex-col gap-4 sm:flex-row pt-8">
           <Link

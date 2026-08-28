@@ -5,6 +5,15 @@ import { motion, useReducedMotion, useInView } from "framer-motion";
 import { Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EndorsementShowcase } from "@/components/endorsement-showcase";
+import { getEndorsementsByTag, nvidiaStoryData } from "@/lib/content";
+
+// Data eyebrow: "5 reactions to the January 2025 essay" (count + month derived from content)
+const NVIDIA_REACTION_COUNT = getEndorsementsByTag("nvidia").length;
+const ESSAY_MONTH = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+}).format(new Date(`${nvidiaStoryData.stats.publishDate}T00:00:00Z`));
 
 // =============================================================================
 // NVIDIA QUOTE WALL
@@ -40,9 +49,9 @@ export function NvidiaQuoteWall({
           className="mb-12 text-center"
         >
           <div className="mb-4 flex items-center justify-center gap-2 text-amber-400">
-            <Quote className="h-5 w-5" />
+            <Quote className="h-5 w-5" aria-hidden="true" />
             <span className="text-sm font-medium uppercase tracking-wider">
-              In Their Words
+              {NVIDIA_REACTION_COUNT} reactions to the {ESSAY_MONTH} essay
             </span>
           </div>
           <h2 className="mb-3 text-3xl font-bold text-white md:text-4xl">

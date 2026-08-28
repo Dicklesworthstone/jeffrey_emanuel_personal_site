@@ -19,6 +19,8 @@ import {
   BarChart3,
   Bot,
 } from "lucide-react";
+import { tldrToolStarTotals } from "@/lib/content";
+import { formatStarCount } from "@/lib/format-stars";
 
 interface TransferPoint {
   financeSkill: string;
@@ -75,7 +77,7 @@ function SkillTransferCard({ transfer, index }: { transfer: TransferPoint; index
     >
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-amber-500/20 via-transparent to-violet-500/20 opacity-0 blur-sm transition-opacity duration-500 group-hover:opacity-100" />
 
-      <div className="relative grid grid-cols-[1fr,auto,1fr] items-center gap-2 rounded-2xl border border-white/[0.06] bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-500 hover:border-white/[0.1] hover:bg-slate-900/60 sm:gap-4 sm:p-6">
+      <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-2xl border border-white/[0.06] bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-500 hover:border-white/[0.1] hover:bg-slate-900/60 sm:gap-4 sm:p-6">
         {/* Finance Side */}
         <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-start sm:gap-4 sm:text-left">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-amber-600/5 text-amber-400 shadow-lg shadow-amber-500/5 sm:h-12 sm:w-12">
@@ -295,7 +297,8 @@ export default function TwoWorlds() {
               <ul className="space-y-4">
                 {[
                   { icon: <Workflow className="h-4 w-4" />, text: "Multi-agent orchestration systems" },
-                  { icon: <GitBranch className="h-4 w-4" />, text: "6K+ GitHub stars across tools" },
+                  // Derived from lib/data/tldr-tool-stars.json so it can't drift from /tldr
+                  { icon: <GitBranch className="h-4 w-4" />, text: `${formatStarCount(tldrToolStarTotals.all)}+ GitHub stars across the flywheel tools` },
                   { icon: <Brain className="h-4 w-4" />, text: "Context management & memory" },
                   { icon: <Zap className="h-4 w-4" />, text: "Flywheel effect in AI tooling" },
                 ].map((item, index) => (

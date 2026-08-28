@@ -1,6 +1,6 @@
 import { Feed } from "feed";
 import { writingHighlights, siteConfig } from "@/lib/content";
-import { getPublishedPostsMeta } from "@/lib/mdx";
+import { getPublishedPosts } from "@/lib/mdx";
 
 const DEFAULT_SITE_ORIGIN = "https://jeffreyemanuel.com";
 
@@ -34,12 +34,83 @@ function normalizeWritingPath(pathname: string): string {
   return `/writing/${normalizeWritingSlug(slug)}`;
 }
 
-function parseDateOrEpoch(value: string | Date): Date {
+/** Parse a date; returns null (item is skipped) instead of inventing an epoch date. */
+function parseKnownDate(value: string | Date | undefined): Date | null {
+  if (!value) return null;
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return new Date(0);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Convert the markdown body into simple, safe HTML for `content:encoded`.
+ * This is deliberately minimal (headings, paragraphs, fenced code) rather than
+ * a full renderer: it keeps the whole article text readable in feed readers
+ * without shipping the remark/rehype pipeline into a route handler. Inline
+ * markdown is left as-is (readers show it as text).
+ */
+function markdownToFeedHtml(markdown: string): string {
+  const blocks: string[] = [];
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+  let paragraph: string[] = [];
+  let fence: string | null = null;
+  let codeLines: string[] = [];
+
+  const flushParagraph = () => {
+    if (paragraph.length === 0) return;
+    blocks.push(`<p>${escapeHtml(paragraph.join("\n")).replace(/\n/g, "<br />")}</p>`);
+    paragraph = [];
+  };
+
+  for (const line of lines) {
+    const fenceMatch = line.trim().match(/^(`{3,}|~{3,})/);
+    if (fence) {
+      if (fenceMatch && fenceMatch[1][0] === fence[0] && fenceMatch[1].length >= fence.length) {
+        blocks.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+        fence = null;
+        codeLines = [];
+      } else {
+        codeLines.push(line);
+      }
+      continue;
+    }
+
+    if (fenceMatch) {
+      flushParagraph();
+      fence = fenceMatch[1];
+      continue;
+    }
+
+    const headingMatch = line.match(/^(#{1,6})\s+(.*?)(?:\s+#+)?$/);
+    if (headingMatch) {
+      flushParagraph();
+      // The post title is the feed item's title; body headings sit under it.
+      const level = Math.min(6, Math.max(2, headingMatch[1].length + 1));
+      blocks.push(`<h${level}>${escapeHtml(headingMatch[2].trim())}</h${level}>`);
+      continue;
+    }
+
+    if (!line.trim()) {
+      flushParagraph();
+      continue;
+    }
+
+    paragraph.push(line);
   }
-  return parsed;
+
+  if (fence && codeLines.length > 0) {
+    blocks.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+  }
+  flushParagraph();
+
+  return blocks.join("\n");
 }
 
 export async function GET() {
@@ -69,21 +140,7 @@ export async function GET() {
     },
   ];
 
-  const itemsByLink = new Map<
-    string,
-    {
-      title: string;
-      id: string;
-      link: string;
-      description: string;
-      content: string;
-      author: typeof defaultAuthor;
-      date: Date;
-      category: Array<{ name: string }>;
-    }
-  >();
-
-  const upsertItem = (item: {
+  type FeedEntry = {
     title: string;
     id: string;
     link: string;
@@ -92,7 +149,11 @@ export async function GET() {
     author: typeof defaultAuthor;
     date: Date;
     category: Array<{ name: string }>;
-  }) => {
+  };
+
+  const itemsByLink = new Map<string, FeedEntry>();
+
+  const upsertItem = (item: FeedEntry) => {
     const existing = itemsByLink.get(item.link);
     if (!existing) {
       itemsByLink.set(item.link, item);
@@ -101,21 +162,30 @@ export async function GET() {
     itemsByLink.set(item.link, {
       ...existing,
       ...item,
+      // Keep the full article body if one side only has a blurb.
+      content: item.content.length >= existing.content.length ? item.content : existing.content,
       date: item.date.getTime() > existing.date.getTime() ? item.date : existing.date,
     });
   };
 
-  getPublishedPostsMeta().forEach((post) => {
+  getPublishedPosts().forEach((post) => {
+    const date = parseKnownDate(post.date);
+    if (!date) {
+      console.warn(`[rss] skipping ${post.slug}: missing or invalid date`);
+      return;
+    }
     const path = normalizeWritingPath(`/writing/${String(post.slug)}`);
     const link = toAbsoluteUrl(path, origin);
+    const excerpt = String(post.excerpt || "");
+    const body = markdownToFeedHtml(post.content || "");
     upsertItem({
       title: String(post.title),
       id: link,
       link,
-      description: String(post.excerpt || ""),
-      content: String(post.excerpt || ""),
+      description: excerpt,
+      content: body || excerpt,
       author: defaultAuthor,
-      date: parseDateOrEpoch(String(post.date)),
+      date,
       category: [
         { name: (post.category as string) || "Essay" },
         { name: (post.source as string) || "Blog" },
@@ -124,6 +194,12 @@ export async function GET() {
   });
 
   writingHighlights.filter((item) => !item.draft).forEach((item) => {
+    const date = parseKnownDate(item.date);
+    if (!date) {
+      console.warn(`[rss] skipping ${item.href}: missing or invalid date`);
+      return;
+    }
+
     if (item.href.startsWith("http")) {
       upsertItem({
         title: item.title,
@@ -132,7 +208,7 @@ export async function GET() {
         description: item.blurb,
         content: item.blurb,
         author: defaultAuthor,
-        date: parseDateOrEpoch(item.date),
+        date,
         category: [{ name: item.category || "" }, { name: item.source || "" }],
       });
       return;
@@ -148,7 +224,7 @@ export async function GET() {
         description: item.blurb,
         content: item.blurb,
         author: defaultAuthor,
-        date: parseDateOrEpoch(item.date),
+        date,
         category: [{ name: item.category || "Essay" }, { name: item.source || "Blog" }],
       });
     }

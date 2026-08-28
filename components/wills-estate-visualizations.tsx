@@ -1,14 +1,17 @@
 "use client";
 
 import {
+  Fragment,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import {
   AlertCircle,
   AlertTriangle,
@@ -56,6 +59,33 @@ import {
 function cn(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
+
+/**
+ * Subscribe to a CSS media query without setting state inside an effect.
+ * These visualizations are client-only (`ssr: false`), so the first render
+ * already has `window`; the server snapshot only matters for type safety.
+ */
+function useMediaQuery(query: string): boolean {
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      if (typeof window === "undefined") return () => {};
+      const mediaQuery = window.matchMedia(query);
+      mediaQuery.addEventListener("change", onChange);
+      return () => mediaQuery.removeEventListener("change", onChange);
+    },
+    [query],
+  );
+  return useSyncExternalStore(
+    subscribe,
+    () => (typeof window === "undefined" ? false : window.matchMedia(query).matches),
+    () => false,
+  );
+}
+
+// Below `lg` the side-by-side control/output layouts collapse into a stack;
+// the vizzes switch to accordion patterns so output stays next to its control.
+const COMPACT_LAYOUT_QUERY = "(max-width: 1023px)";
+const FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 
 type TierAccentKey = "amber" | "sky" | "emerald" | "violet" | "rose";
 
@@ -176,7 +206,9 @@ const COMPLEXITY_OVERLAYS: ComplexityOverlay[] = [
   { id: "vulnerable-heir", label: "Vulnerable heir", impact: "+1 tier", delta: 1 },
   { id: "multi-state", label: "Multi-state/country", impact: "+1 tier", delta: 1 },
   { id: "nfa-firearms", label: "NFA firearms", impact: "Specialty", specialty: "Specialty counsel" },
-  { id: "self-custody-crypto", label: "Self-custody crypto", impact: "Specialty", specialty: "Specialty custody plan" },
+  // The prose says self-custodied crypto "bumps you a tier regardless of net
+  // worth", so it carries a delta as well as the specialty routing flag.
+  { id: "self-custody-crypto", label: "Self-custody crypto", impact: "+1 tier", delta: 1, specialty: "Specialty custody plan" },
 ];
 
 const TIER_LADDER_STYLES: Record<
@@ -240,6 +272,8 @@ const TIER_LADDER_STYLES: Record<
 
 export function TierTriageViz() {
   const prefersReducedMotion = useReducedMotion();
+  const isCompact = useMediaQuery(COMPACT_LAYOUT_QUERY);
+  const hasFinePointer = useMediaQuery(FINE_POINTER_QUERY);
   const [selectedIndex, setSelectedIndex] = useState(1);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(1);
   const [enabledOverlays, setEnabledOverlays] = useState<string[]>([]);
@@ -311,6 +345,69 @@ export function TierTriageViz() {
     );
   };
 
+  // "Enter to expand" only makes sense with a keyboard/mouse; touch gets "Tap".
+  const expandHint = hasFinePointer ? "Click or press Enter to expand" : "Tap to expand";
+
+  // The detail panel: rendered directly under the selected card's row below
+  // `lg` (accordion), and after the full ladder at `lg+` where the five cards
+  // share one row anyway.
+  const detailPanel = expandedTier ? (
+    <motion.div
+      key={expandedTier.id}
+      id={detailPanelId}
+      role="region"
+      aria-label={`${expandedTier.tier} detail panel`}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={prefersReducedMotion || isCompact ? undefined : { opacity: 0, y: -10 }}
+      transition={transition}
+      className={cn("rounded-[26px] border p-5 md:p-6", isCompact && "col-span-full", expandedStyles.detailPanel)}
+    >
+      <div className="grid gap-5 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", expandedStyles.badge)}>
+              {expandedTier.tier} · {expandedTier.label}
+            </span>
+            <span className="text-sm text-slate-300">{expandedTier.band}</span>
+          </div>
+          <div className="space-y-3">
+            <p className="text-xl font-semibold text-white">{expandedTier.archetype}</p>
+            <p className="text-sm leading-7 text-slate-200">{expandedTier.rungSummary}</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", expandedStyles.detailAccent)}>
+                Primary goals
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-200">{expandedTier.goal}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", expandedStyles.detailAccent)}>
+                Core deliverables
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-200">{expandedTier.deliverables}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", expandedStyles.detailAccent)}>
+            Typical complications
+          </p>
+          <ul className="mt-3 space-y-3">
+            {expandedTier.complications.map((complication) => (
+              <li key={complication} className="flex gap-3">
+                <CheckCircle2 className={cn("mt-0.5 h-4 w-4 shrink-0", expandedStyles.detailAccent)} aria-hidden="true" />
+                <span className="text-sm leading-6 text-slate-200">{complication}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </motion.div>
+  ) : null;
+
   return (
     <section aria-label="Wealth tier triage: five-tier ladder with complexity overlays" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-sky-300/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,211,252,0.12),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.08),transparent_38%)]" />
@@ -332,7 +429,7 @@ export function TierTriageViz() {
             </div>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
               Default focus
             </p>
             <p className="mt-1 text-sm text-white">
@@ -347,124 +444,76 @@ export function TierTriageViz() {
 
         <div className="relative">
           <div className="pointer-events-none absolute left-[10%] right-[10%] top-8 hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent lg:block" />
-          <div role="group" aria-label="Wealth tier triage ladder" className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div
+            role="group"
+            aria-label="Wealth tier triage ladder"
+            className="grid grid-flow-dense gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+          >
             {TIER_TRIAGE_ITEMS.map((tier, index) => {
               const isSelected = index === selectedIndex;
-              const isExpanded = index === expandedIndex;
+              const isCardExpanded = index === expandedIndex;
               const styles = TIER_LADDER_STYLES[tier.accent];
 
               return (
-                <button
-                  key={tier.id}
-                  ref={(node) => {
-                    buttonRefs.current[index] = node;
-                  }}
-                  type="button"
-                  tabIndex={isSelected ? 0 : -1}
-                  aria-pressed={isSelected}
-                  aria-expanded={isExpanded}
-                  aria-controls={detailPanelId}
-                  onClick={() => toggleExpanded(index)}
-                  onFocus={() => setSelectedIndex(index)}
-                  onKeyDown={(event) => handleKeyDown(event, index)}
-                  className={cn(
-                    "group relative rounded-[24px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
-                    isSelected ? styles.activeCard : styles.inactiveCard,
-                  )}
-                >
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-semibold", styles.badge)}>
-                      {tier.tier}
+                <Fragment key={tier.id}>
+                  <button
+                    ref={(node) => {
+                      buttonRefs.current[index] = node;
+                    }}
+                    type="button"
+                    tabIndex={isSelected ? 0 : -1}
+                    aria-expanded={isCardExpanded}
+                    aria-controls={detailPanelId}
+                    onClick={() => toggleExpanded(index)}
+                    onFocus={() => setSelectedIndex(index)}
+                    onKeyDown={(event) => handleKeyDown(event, index)}
+                    className={cn(
+                      "group relative rounded-[24px] border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                      isSelected ? styles.activeCard : styles.inactiveCard,
+                    )}
+                  >
+                    <span className="mb-4 flex items-center justify-between gap-3">
+                      <span className={cn("rounded-full border px-2.5 py-1 text-xs font-semibold", styles.badge)}>
+                        {tier.tier}
+                      </span>
+                      <span className={cn("flex h-10 w-10 items-center justify-center rounded-2xl border", styles.iconWrap)}>
+                        {tier.icon}
+                      </span>
                     </span>
-                    <span className={cn("flex h-10 w-10 items-center justify-center rounded-2xl border", styles.iconWrap)}>
-                      {tier.icon}
+
+                    <span className="block space-y-2">
+                      <span className="block text-lg font-semibold text-white">
+                        {tier.label}
+                      </span>
+                      <span className="block text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                        {tier.band}
+                      </span>
+                      <span className="block text-sm leading-6 text-slate-200">{tier.archetype}</span>
+                      <span className="block text-sm leading-6 text-slate-400">{tier.goal}</span>
                     </span>
-                  </div>
 
-                  <div className="space-y-2">
-                    <p className="text-lg font-semibold text-white">
-                      {tier.label}
-                    </p>
-                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
-                      {tier.band}
-                    </p>
-                    <p className="text-sm leading-6 text-slate-200">{tier.archetype}</p>
-                    <p className="text-sm leading-6 text-slate-400">{tier.goal}</p>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
-                    <span>{isExpanded ? "Tap again to collapse" : "Enter to expand"}</span>
-                    <ArrowRight className={cn("h-3.5 w-3.5 transition", isExpanded && "rotate-90")} aria-hidden="true" />
-                  </div>
-                </button>
+                    <span className="mt-4 flex items-center justify-between text-xs text-slate-400">
+                      <span>{isCardExpanded ? "Tap again to collapse" : expandHint}</span>
+                      <ArrowRight className={cn("h-3.5 w-3.5 transition", isCardExpanded && "rotate-90")} aria-hidden="true" />
+                    </span>
+                  </button>
+                  {isCompact && isCardExpanded ? detailPanel : null}
+                </Fragment>
               );
             })}
           </div>
         </div>
 
-        <AnimatePresence initial={false} mode="wait">
-          {expandedTier ? (
-            <motion.div
-              key={expandedTier.id}
-              id={detailPanelId}
-              role="region"
-              aria-label={`${expandedTier.tier} detail panel`}
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
-              transition={transition}
-              className={cn("rounded-[26px] border p-5 md:p-6", expandedStyles.detailPanel)}
-            >
-              <div className="grid gap-5 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold", expandedStyles.badge)}>
-                      {expandedTier.tier} · {expandedTier.label}
-                    </span>
-                    <span className="text-sm text-slate-300">{expandedTier.band}</span>
-                  </div>
-                  <div className="space-y-3">
-                    <p className="text-xl font-semibold text-white">{expandedTier.archetype}</p>
-                    <p className="text-sm leading-7 text-slate-200">{expandedTier.rungSummary}</p>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                      <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", expandedStyles.detailAccent)}>
-                        Primary goals
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-200">{expandedTier.goal}</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                      <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", expandedStyles.detailAccent)}>
-                        Core deliverables
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-200">{expandedTier.deliverables}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", expandedStyles.detailAccent)}>
-                    Typical complications
-                  </p>
-                  <ul className="mt-3 space-y-3">
-                    {expandedTier.complications.map((complication) => (
-                      <li key={complication} className="flex gap-3">
-                        <CheckCircle2 className={cn("mt-0.5 h-4 w-4 shrink-0", expandedStyles.detailAccent)} aria-hidden="true" />
-                        <span className="text-sm leading-6 text-slate-200">{complication}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        {!isCompact ? (
+          <AnimatePresence initial={false} mode="wait">
+            {detailPanel}
+          </AnimatePresence>
+        ) : null}
 
         <div className="rounded-[24px] border border-white/10 bg-black/20 p-4 md:p-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/45">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
                 Complexity overlay
               </p>
               <p className="max-w-3xl text-sm leading-6 text-slate-300">
@@ -493,7 +542,7 @@ export function TierTriageViz() {
                   aria-pressed={active}
                   onClick={() => toggleOverlay(overlay.id)}
                   className={cn(
-                    "rounded-full border px-3 py-2 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                    "inline-flex min-h-10 items-center rounded-full border px-3 py-2 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                     active
                       ? "border-white/20 bg-white/12 text-white"
                       : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:bg-white/[0.06]",
@@ -836,7 +885,7 @@ export function AxiomCoherenceViz() {
                       <span className={cn("flex h-8 w-8 items-center justify-center rounded-2xl border", styles.iconWrap)}>
                         {spoke.icon}
                       </span>
-                      <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]", styles.badge)}>
+                      <span className={cn("rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.14em]", styles.badge)}>
                         {mismatched ? "Break" : "Aligned"}
                       </span>
                     </div>
@@ -849,7 +898,7 @@ export function AxiomCoherenceViz() {
           </div>
 
           <div className="rounded-[26px] border border-white/10 bg-black/20 p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/45">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
               Preset state
             </p>
             <p className="mt-2 text-xl font-semibold text-white">
@@ -892,13 +941,13 @@ export function AxiomCoherenceViz() {
             <div className="grid gap-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold", selectedStyles.badge)}>
+                  <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", selectedStyles.badge)}>
                     {selectedSpoke.label}
                   </span>
                   <span className="text-sm text-slate-300">{selectedSpoke.control}</span>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", selectedStyles.detailAccent)}>
+                  <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", selectedStyles.detailAccent)}>
                     What this spoke is showing
                   </p>
                   <p className="mt-2 text-sm leading-7 text-slate-100">
@@ -909,7 +958,7 @@ export function AxiomCoherenceViz() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", selectedStyles.detailAccent)}>
+                    <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", selectedStyles.detailAccent)}>
                       Catching subagent
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-200">
@@ -917,7 +966,7 @@ export function AxiomCoherenceViz() {
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", selectedStyles.detailAccent)}>
+                    <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", selectedStyles.detailAccent)}>
                       Controlling document
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-200">{selectedSpoke.control}</p>
@@ -926,7 +975,7 @@ export function AxiomCoherenceViz() {
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", selectedStyles.detailAccent)}>
+                <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", selectedStyles.detailAccent)}>
                   Failure mode
                 </p>
                 {isIncoherent && selectedSpoke.mismatch ? (
@@ -1229,20 +1278,20 @@ export function IntakePhasesViz() {
                 tier or specialty logic when the earlier evidence actually supports it.
               </p>
               <div className="flex flex-wrap gap-3 pt-1">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold text-slate-300">
                   <span className="text-sky-400">9</span> phases
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold text-slate-300">
                   <span className="text-emerald-400">~85</span> min total
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold text-slate-300">
                   <span className="text-amber-400">9</span> artifacts
                 </span>
               </div>
             </div>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
               Narrative sync
             </p>
             <div className="mt-2 flex items-center gap-2">
@@ -1311,7 +1360,7 @@ export function IntakePhasesViz() {
                   )}
                 >
                   <div className="mb-4 flex items-center justify-between gap-2">
-                    <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-semibold", styles.badge)}>
+                    <span className={cn("rounded-full border px-2.5 py-1 text-xs font-semibold", styles.badge)}>
                       {phase.number}
                     </span>
                     <span className={cn("flex h-9 w-9 items-center justify-center rounded-2xl border", styles.iconWrap)}>
@@ -1319,18 +1368,18 @@ export function IntakePhasesViz() {
                     </span>
                   </div>
                   <p className="text-sm font-semibold leading-5 text-white">{phase.name}</p>
-                  <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+                  <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
                     {phase.minutes}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {isActive ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] text-white">
                         <span className="h-1.5 w-1.5 rounded-full bg-sky-400" aria-hidden="true" />
                         In view
                       </span>
                     ) : null}
                     {isDrilled ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-200">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">
                         <span className="h-1.5 w-1.5 rounded-full bg-violet-400" aria-hidden="true" />
                         Detail
                       </span>
@@ -1367,7 +1416,7 @@ export function IntakePhasesViz() {
             <div className="grid gap-5 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold", drilledStyles.badge)}>
+                  <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", drilledStyles.badge)}>
                     Phase {drilledPhase.number}
                   </span>
                   <span className="text-sm text-slate-300">{drilledPhase.name}</span>
@@ -1376,7 +1425,7 @@ export function IntakePhasesViz() {
                 </div>
 
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", drilledStyles.detailAccent)}>
+                  <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", drilledStyles.detailAccent)}>
                     Opening question
                   </p>
                   <p className="mt-2 text-base font-medium italic leading-7 text-slate-50">&ldquo;{drilledPhase.question}&rdquo;</p>
@@ -1384,13 +1433,13 @@ export function IntakePhasesViz() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", drilledStyles.detailAccent)}>
+                    <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", drilledStyles.detailAccent)}>
                       Typical artifact
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-200">{drilledPhase.artifact}</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", drilledStyles.detailAccent)}>
+                    <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", drilledStyles.detailAccent)}>
                       Branch point
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-200">{drilledPhase.branch}</p>
@@ -1399,7 +1448,7 @@ export function IntakePhasesViz() {
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className={cn("text-[11px] font-semibold uppercase tracking-[0.25em]", activeStyles.detailAccent)}>
+                <p className={cn("text-xs font-semibold uppercase tracking-[0.2em]", activeStyles.detailAccent)}>
                   What the scroll-linked highlighter is seeing
                 </p>
                 <div className="mt-3 space-y-3">
@@ -1964,25 +2013,38 @@ function deliverablePath(leaf: DeliverableLeaf) {
   return `${leaf.folder}/${leaf.file}`;
 }
 
+// Below `lg`, an expanded folder shows this many rows before "Show all" (the
+// selected file is always kept visible so the inline detail panel has a home).
+const COMPACT_LEAF_CAP = 8;
+
 export function DeliverablesTreeViz() {
   const prefersReducedMotion = useReducedMotion();
+  const isCompact = useMediaQuery(COMPACT_LAYOUT_QUERY);
   const [categoryFilter, setCategoryFilter] = useState<"all" | DeliverableFolder>("all");
   const [modeFilter, setModeFilter] = useState<"all" | DeliverableMode>("all");
   const [query, setQuery] = useState("");
   const [selectedPath, setSelectedPath] = useState("deliverables/if-i-die-tomorrow.md");
-  const [expandedFolders, setExpandedFolders] = useState<Record<DeliverableFolder, boolean>>({
-    intake: true,
-    analyses: true,
-    deliverables: true,
+  // Below `lg` the tree stacks above/around the detail panel, so only the
+  // folder holding the default selection starts open; at `lg+` all three do.
+  const [expandedFolders, setExpandedFolders] = useState<Record<DeliverableFolder, boolean>>(() =>
+    isCompact
+      ? { intake: false, analyses: false, deliverables: true }
+      : { intake: true, analyses: true, deliverables: true },
+  );
+  const [showAllFolders, setShowAllFolders] = useState<Record<DeliverableFolder, boolean>>({
+    intake: false,
+    analyses: false,
+    deliverables: false,
   });
   const treeItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const transition = prefersReducedMotion ? { duration: 0 } : { type: "spring" as const, stiffness: 260, damping: 26 };
 
   const normalizedQuery = query.trim().toLowerCase();
-  const filteredLeaves = useMemo(
+  // Mode + search first (category chip counts are derived from this set so the
+  // chips agree with the folder badges), then the category filter on top.
+  const modeAndSearchLeaves = useMemo(
     () =>
       deliverableTreeLeaves.filter((leaf) => {
-        const matchesCategory = categoryFilter === "all" || leaf.folder === categoryFilter;
         const matchesMode =
           modeFilter === "all" ||
           leaf.modes.includes("core") ||
@@ -1999,28 +2061,50 @@ export function DeliverablesTreeViz() {
           .toLowerCase();
         const matchesSearch = normalizedQuery.length === 0 || searchText.includes(normalizedQuery);
 
-        return matchesCategory && matchesMode && matchesSearch;
+        return matchesMode && matchesSearch;
       }),
-    [categoryFilter, modeFilter, normalizedQuery],
+    [modeFilter, normalizedQuery],
+  );
+  const filteredLeaves = useMemo(
+    () =>
+      modeAndSearchLeaves.filter(
+        (leaf) => categoryFilter === "all" || leaf.folder === categoryFilter,
+      ),
+    [modeAndSearchLeaves, categoryFilter],
   );
 
   const selectedLeaf = filteredLeaves.find((leaf) => deliverablePath(leaf) === selectedPath) ?? filteredLeaves[0] ?? null;
+  const selectedLeafPath = selectedLeaf ? deliverablePath(selectedLeaf) : null;
   const selectedStyles = selectedLeaf ? DELIVERABLE_FOLDER_META[selectedLeaf.folder] : DELIVERABLE_FOLDER_META.deliverables;
-  const groupedLeaves = DELIVERABLE_FOLDERS.map((folder) => ({
-    folder,
-    leaves: filteredLeaves.filter((leaf) => leaf.folder === folder),
-  })).filter((group) => group.leaves.length > 0);
+  const groupedLeaves = useMemo(
+    () =>
+      DELIVERABLE_FOLDERS.map((folder) => {
+        const leaves = filteredLeaves.filter((leaf) => leaf.folder === folder);
+        const capped = isCompact && !showAllFolders[folder];
+        const shownLeaves = capped
+          ? leaves.filter(
+              (leaf, index) => index < COMPACT_LEAF_CAP || deliverablePath(leaf) === selectedLeafPath,
+            )
+          : leaves;
+        return { folder, leaves, shownLeaves, hiddenCount: leaves.length - shownLeaves.length };
+      }).filter((group) => group.leaves.length > 0),
+    [filteredLeaves, isCompact, showAllFolders, selectedLeafPath],
+  );
   const spotlightLeaves = deliverableTreeLeaves.filter((leaf) => leaf.spotlight);
   const visibleTreeIds = useMemo(
     () =>
-      groupedLeaves.flatMap(({ folder, leaves }) => [
+      groupedLeaves.flatMap(({ folder, shownLeaves }) => [
         `folder:${folder}`,
         ...(expandedFolders[folder]
-          ? leaves.map((leaf) => `leaf:${deliverablePath(leaf)}`)
+          ? shownLeaves.map((leaf) => `leaf:${deliverablePath(leaf)}`)
           : []),
       ]),
     [expandedFolders, groupedLeaves],
   );
+  const folderCounts = DELIVERABLE_FOLDERS.map(
+    (folder) => deliverableTreeLeaves.filter((leaf) => leaf.folder === folder).length,
+  );
+  const totalsLabel = `${folderCounts.join(" + ")} = ${deliverableTreeLeaves.length}`;
 
   const focusTreeItem = (itemId: string) => {
     treeItemRefs.current[itemId]?.focus();
@@ -2155,6 +2239,69 @@ export function DeliverablesTreeViz() {
     }
   };
 
+  // The detail panel: inline under the selected file below `lg` (accordion),
+  // a side column at `lg+`.
+  const detailPanel = selectedLeaf ? (
+    <motion.div
+      key={deliverablePath(selectedLeaf)}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={prefersReducedMotion || isCompact ? undefined : { opacity: 0, y: -10 }}
+      transition={transition}
+      className={cn("rounded-[8px] border p-5", isCompact && "mt-2", selectedStyles.detail)}
+    >
+      <div className="flex flex-wrap items-center gap-3">
+        <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", selectedStyles.badge)}>
+          {selectedStyles.label}
+        </span>
+        <span className="font-mono text-sm text-slate-300">{deliverablePath(selectedLeaf)}</span>
+        <a
+          href={DELIVERABLE_SKILL_CATALOG_HREF}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-10 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-cyan-100 transition hover:border-cyan-300/30 hover:text-cyan-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
+        >
+          View in skill catalog
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </div>
+
+      <h4 className="mt-4 text-xl font-semibold tracking-tight text-white md:text-2xl">{selectedLeaf.label}</h4>
+      <p className="mt-2 text-sm leading-7 text-slate-300">{selectedLeaf.description}</p>
+
+      <div className="mt-5 rounded-[8px] border border-white/10 bg-black/25 p-4">
+        <p className={cn("text-xs font-semibold uppercase tracking-[0.18em]", selectedStyles.accent)}>
+          Representative snippet
+        </p>
+        <p className="mt-2 font-mono text-sm leading-7 text-slate-100">{selectedLeaf.snippet}</p>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-[8px] border border-white/10 bg-black/20 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Producing subagent
+          </p>
+          <p className="mt-2 font-mono text-sm text-cyan-200">{selectedLeaf.owner}</p>
+        </div>
+        <div className="rounded-[8px] border border-white/10 bg-black/20 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Mode coverage
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {selectedLeaf.modes.map((mode) => (
+              <span
+                key={mode}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold text-slate-200"
+              >
+                {DELIVERABLE_MODE_LABELS[mode]}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  ) : null;
+
   return (
     <section aria-label="Deliverables tree: 45-artifact folder structure with filtering" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-violet-300/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_38%)]" />
@@ -2177,19 +2324,19 @@ export function DeliverablesTreeViz() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-[8px] border border-white/10 bg-black/25 p-2 text-center">
-            {DELIVERABLE_FOLDERS.map((folder) => (
+            {DELIVERABLE_FOLDERS.map((folder, index) => (
               <div key={folder} className="rounded-[8px] bg-white/[0.04] px-3 py-2">
                 <p className={cn("text-lg font-semibold", DELIVERABLE_FOLDER_META[folder].accent)}>
-                  {deliverableTreeLeaves.filter((leaf) => leaf.folder === folder).length}
+                  {folderCounts[index]}
                 </p>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                <p className="text-xs uppercase tracking-[0.14em] text-slate-500">
                   {DELIVERABLE_FOLDER_META[folder].label}
                 </p>
               </div>
             ))}
             <div className="rounded-[8px] bg-white/[0.04] px-3 py-2">
               <p className="text-lg font-semibold text-white">{deliverableTreeLeaves.length}</p>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Total</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Total</p>
             </div>
           </div>
         </div>
@@ -2197,7 +2344,7 @@ export function DeliverablesTreeViz() {
         <div className="grid min-w-0 gap-4 rounded-[8px] border border-white/10 bg-black/20 p-4">
           <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
             <label className="block">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Search artifacts
               </span>
               <input
@@ -2205,12 +2352,12 @@ export function DeliverablesTreeViz() {
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search files, snippets, modes, or subagents"
                 aria-describedby="deliverables-filter-count"
-                className="mt-2 w-full rounded-[8px] border border-white/10 bg-[#081525] px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-violet-300/40 focus:ring-2 focus:ring-violet-300/20"
+                className="mt-2 w-full rounded-[8px] border border-white/10 bg-[#081525] px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus-visible:border-violet-300/60 focus-visible:ring-2 focus-visible:ring-violet-300/70"
               />
             </label>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Category
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -2219,8 +2366,8 @@ export function DeliverablesTreeViz() {
                   const label = filter === "all" ? "All" : DELIVERABLE_FOLDER_META[filter].label;
                   const count =
                     filter === "all"
-                      ? deliverableTreeLeaves.length
-                      : deliverableTreeLeaves.filter((leaf) => leaf.folder === filter).length;
+                      ? modeAndSearchLeaves.length
+                      : modeAndSearchLeaves.filter((leaf) => leaf.folder === filter).length;
 
                   return (
                     <button
@@ -2229,13 +2376,13 @@ export function DeliverablesTreeViz() {
                       aria-pressed={active}
                       onClick={() => setCategoryFilter(filter)}
                       className={cn(
-                        "rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                        "inline-flex min-h-10 items-center rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
                         active
                           ? "border-violet-300/35 bg-violet-400/15 text-violet-50"
                           : "border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200",
                       )}
                     >
-                      {label} <span className="text-slate-500">{count}</span>
+                      {label}&nbsp;<span className="text-slate-500">{count}</span>
                     </button>
                   );
                 })}
@@ -2244,7 +2391,7 @@ export function DeliverablesTreeViz() {
           </div>
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Operating mode
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -2257,7 +2404,7 @@ export function DeliverablesTreeViz() {
                     aria-pressed={active}
                     onClick={() => setModeFilter(filter.id)}
                     className={cn(
-                      "rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                      "inline-flex min-h-10 items-center rounded-[8px] border px-3 py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
                       active
                         ? "border-emerald-300/35 bg-emerald-400/15 text-emerald-50"
                         : "border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200",
@@ -2278,7 +2425,7 @@ export function DeliverablesTreeViz() {
           <div className="rounded-[8px] border border-white/10 bg-black/20 p-4">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   my-estate-plan/
                 </p>
                 <p id="deliverables-filter-count" className="mt-1 text-sm text-slate-300" role="status" aria-live="polite">
@@ -2287,92 +2434,108 @@ export function DeliverablesTreeViz() {
                 </p>
               </div>
               <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-                2 + 20 + 23 = 45
+                {totalsLabel}
               </div>
             </div>
 
             {groupedLeaves.length > 0 ? (
               <div role="tree" aria-label="Estate planning deliverables folder tree" className="space-y-4">
-                {groupedLeaves.map(({ folder, leaves }) => {
+                {groupedLeaves.map(({ folder, leaves, shownLeaves, hiddenCount }) => {
                   const meta = DELIVERABLE_FOLDER_META[folder];
+                  const groupId = `deliverables-tree-group-${folder}`;
+                  const isFolderExpanded = expandedFolders[folder];
                   return (
                     <div key={folder} className="rounded-[8px] border border-white/10 bg-white/[0.025] p-3">
                       <button
                         type="button"
                         role="treeitem"
-                        aria-expanded={expandedFolders[folder]}
+                        aria-expanded={isFolderExpanded}
                         aria-level={1}
                         aria-selected={selectedLeaf?.folder === folder}
+                        aria-owns={isFolderExpanded ? groupId : undefined}
                         ref={(node) => {
                           treeItemRefs.current[`folder:${folder}`] = node;
                         }}
                         onClick={() => setFolderExpanded(folder)}
-                        onKeyDown={(event) => handleFolderKeyDown(event, folder, leaves)}
+                        onKeyDown={(event) => handleFolderKeyDown(event, folder, shownLeaves)}
                         className="flex w-full min-h-[2.75rem] cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-transparent px-2 py-2 text-left transition-all duration-150 hover:bg-white/[0.04] focus:outline-none focus-visible:border-white/15 focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
                       >
-                        <div className="flex min-w-0 items-center gap-2 text-white">
+                        <span className="flex min-w-0 items-center gap-2 text-white">
                           <motion.span
-                            animate={{ rotate: expandedFolders[folder] ? 90 : 0 }}
+                            animate={{ rotate: isFolderExpanded ? 90 : 0 }}
                             transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 }}
                             className="inline-flex"
                             aria-hidden="true"
                           >
                             <ArrowRight className="h-4 w-4 shrink-0 text-slate-400" />
                           </motion.span>
-                          <FolderTree className={cn("h-4 w-4 shrink-0", meta.accent)} />
+                          <FolderTree className={cn("h-4 w-4 shrink-0", meta.accent)} aria-hidden="true" />
                           <span className="font-mono text-sm">{meta.title}</span>
-                        </div>
-                        <span className={cn("rounded-full border px-2.5 py-1 text-[10px] font-semibold", meta.badge)}>
+                        </span>
+                        <span className={cn("rounded-full border px-2.5 py-1 text-xs font-semibold", meta.badge)}>
                           {leaves.length} shown
                         </span>
                       </button>
 
-                      {expandedFolders[folder] ? (
-                        <div role="group" className="mt-3 space-y-2 border-l border-white/10 pl-3">
-                          {leaves.map((leaf) => {
+                      {isFolderExpanded ? (
+                        <div id={groupId} role="group" className="mt-3 space-y-2 border-l border-white/10 pl-3">
+                          {shownLeaves.map((leaf) => {
                             const path = deliverablePath(leaf);
-                            const selected = selectedLeaf ? deliverablePath(selectedLeaf) === path : false;
+                            const selected = selectedLeafPath === path;
                             const modeSummary = summarizeDeliverableModes(leaf.modes);
                             return (
-                              <button
-                                key={path}
-                                type="button"
-                                role="treeitem"
-                                aria-level={2}
-                                aria-selected={selected}
-                                ref={(node) => {
-                                  treeItemRefs.current[`leaf:${path}`] = node;
-                                }}
-                                onClick={() => setSelectedPath(path)}
-                                onKeyDown={(event) => handleLeafKeyDown(event, path, leaf.folder)}
-                                aria-label={`${leaf.file} — ${leaf.label}`}
-                                className={cn(
-                                  "w-full min-h-[2.75rem] cursor-pointer rounded-[8px] border p-3 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
-                                  selected
-                                    ? meta.active
-                                    : modeSummary
-                                      ? cn(meta.dependent, !prefersReducedMotion && "hover:scale-[1.01] active:scale-[0.99]")
-                                      : cn(meta.inactive, !prefersReducedMotion && "hover:scale-[1.01] active:scale-[0.99]"),
-                                )}
-                              >
-                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <p className="font-mono text-sm font-semibold text-white">{leaf.file}</p>
-                                    <p className="mt-1 text-xs leading-5 text-slate-400">{leaf.label}</p>
-                                  </div>
-                                  {modeSummary ? (
-                                    <span
-                                      title={modeSummary.title}
-                                      className="rounded-full border border-amber-300/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100"
-                                    >
-                                      {modeSummary.label}
+                              <Fragment key={path}>
+                                <button
+                                  type="button"
+                                  role="treeitem"
+                                  aria-level={2}
+                                  aria-selected={selected}
+                                  ref={(node) => {
+                                    treeItemRefs.current[`leaf:${path}`] = node;
+                                  }}
+                                  onClick={() => setSelectedPath(path)}
+                                  onKeyDown={(event) => handleLeafKeyDown(event, path, leaf.folder)}
+                                  aria-label={`${leaf.file} — ${leaf.label}`}
+                                  className={cn(
+                                    "w-full min-h-[2.75rem] cursor-pointer rounded-[8px] border p-3 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                                    selected
+                                      ? meta.active
+                                      : modeSummary
+                                        ? cn(meta.dependent, !prefersReducedMotion && "hover:scale-[1.01] active:scale-[0.99]")
+                                        : cn(meta.inactive, !prefersReducedMotion && "hover:scale-[1.01] active:scale-[0.99]"),
+                                  )}
+                                >
+                                  <span className="flex flex-wrap items-start justify-between gap-3">
+                                    <span className="block min-w-0">
+                                      <span className="block font-mono text-sm font-semibold text-white">{leaf.file}</span>
+                                      <span className="mt-1 block text-xs leading-5 text-slate-400">{leaf.label}</span>
                                     </span>
-                                  ) : null}
-                                </div>
-                              </button>
+                                    {modeSummary ? (
+                                      <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.12em] text-amber-100">
+                                        {modeSummary.label}
+                                        <span className="sr-only">. Modes: {modeSummary.title}</span>
+                                      </span>
+                                    ) : null}
+                                  </span>
+                                </button>
+                                {isCompact && selected ? detailPanel : null}
+                              </Fragment>
                             );
                           })}
                         </div>
+                      ) : null}
+
+                      {isFolderExpanded && hiddenCount > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowAllFolders((current) => ({ ...current, [folder]: true }))
+                          }
+                          className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
+                        >
+                          Show all {leaves.length} files in {meta.title}
+                          <span className="text-slate-500">(+{hiddenCount})</span>
+                        </button>
                       ) : null}
                     </div>
                   );
@@ -2388,68 +2551,11 @@ export function DeliverablesTreeViz() {
             )}
           </div>
 
-          <AnimatePresence initial={false} mode="wait">
-            {selectedLeaf ? (
-              <motion.div
-                key={deliverablePath(selectedLeaf)}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={transition}
-                className={cn("rounded-[8px] border p-5", selectedStyles.detail)}
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold", selectedStyles.badge)}>
-                    {selectedStyles.label}
-                  </span>
-                  <span className="font-mono text-sm text-slate-300">{deliverablePath(selectedLeaf)}</span>
-                  <a
-                    href={DELIVERABLE_SKILL_CATALOG_HREF}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-300/30 hover:text-cyan-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
-                  >
-                    View in skill catalog
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </a>
-                </div>
-
-                <h4 className="mt-4 text-xl font-semibold tracking-tight text-white md:text-2xl">{selectedLeaf.label}</h4>
-                <p className="mt-2 text-sm leading-7 text-slate-300">{selectedLeaf.description}</p>
-
-                <div className="mt-5 rounded-[8px] border border-white/10 bg-black/25 p-4">
-                  <p className={cn("text-[11px] font-semibold uppercase tracking-[0.22em]", selectedStyles.accent)}>
-                    Representative snippet
-                  </p>
-                  <p className="mt-2 font-mono text-sm leading-7 text-slate-100">{selectedLeaf.snippet}</p>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[8px] border border-white/10 bg-black/20 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                      Producing subagent
-                    </p>
-                    <p className="mt-2 font-mono text-sm text-cyan-200">{selectedLeaf.owner}</p>
-                  </div>
-                  <div className="rounded-[8px] border border-white/10 bg-black/20 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                      Mode coverage
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selectedLeaf.modes.map((mode) => (
-                        <span
-                          key={mode}
-                          className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-slate-200"
-                        >
-                          {DELIVERABLE_MODE_LABELS[mode]}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+          {!isCompact ? (
+            <AnimatePresence initial={false} mode="wait">
+              {detailPanel}
+            </AnimatePresence>
+          ) : null}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -2464,6 +2570,7 @@ export function DeliverablesTreeViz() {
                   setModeFilter("all");
                   setQuery("");
                   setExpandedFolders((current) => ({ ...current, [leaf.folder]: true }));
+                  setShowAllFolders((current) => ({ ...current, [leaf.folder]: true }));
                   setSelectedPath(deliverablePath(leaf));
                 }}
                 aria-label={`Spotlight: ${leaf.file} — ${leaf.description}`}
@@ -2473,11 +2580,11 @@ export function DeliverablesTreeViz() {
                   meta.inactive,
                 )}
               >
-                <p className={cn("text-[11px] font-semibold uppercase tracking-[0.22em]", meta.accent)}>
+                <span className={cn("block text-xs font-semibold uppercase tracking-[0.18em]", meta.accent)}>
                   Spotlight
-                </p>
-                <p className="mt-2 font-mono text-sm font-semibold text-white">{leaf.file}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">{leaf.description}</p>
+                </span>
+                <span className="mt-2 block font-mono text-sm font-semibold text-white">{leaf.file}</span>
+                <span className="mt-2 block text-sm leading-6 text-slate-300">{leaf.description}</span>
               </button>
             );
           })}
@@ -2489,9 +2596,9 @@ export function DeliverablesTreeViz() {
 
 const antiPatterns = [
   {
-    name: "The ex-spouse still on the 401(k)",
-    hook: "The will says everything to the kids. The plan administrator disagrees.",
-    explanation: "ERISA retirement plans follow the beneficiary designation on file. Your will does not override it. Plan administrators have a federal duty to pay whoever is named.",
+    name: "The ex-spouse still on the IRA",
+    hook: "The will says everything to the kids. The IRA custodian disagrees.",
+    explanation: "Retirement accounts pay whoever is on the beneficiary form, not whoever the will names. An IRA follows the form, full stop. An employer 401(k) at least defaults to your current spouse under federal law unless they signed a waiver, but the IRA form you filled out before the marriage still controls that account.",
     worstCase: "Your grieving spouse watches $400k leave the family and go to your ex.",
     subagent: "beneficiary-audit",
     icon: "AlertCircle",
@@ -2555,7 +2662,7 @@ const antiPatterns = [
   {
     name: "Form 706 portability filing skipped",
     hook: "The surviving spouse's executor never files Form 706 after the first spouse's death.",
-    explanation: "DSUE — the deceased spouse's unused federal exemption — transfers to the surviving spouse only if Form 706 is filed, usually within 9 months of death. Skip it and you lose millions of potential exemption when the second spouse dies.",
+    explanation: "DSUE — the deceased spouse's unused federal exemption — transfers to the surviving spouse only if Form 706 is filed, normally within 9 months of death (plus extensions). Estates below the filing threshold can often still elect late, up to five years after death under Rev. Proc. 2022-32; miss that too and millions of exemption are gone when the second spouse dies.",
     worstCase: "Your family pays federal estate tax on assets that would have sheltered for free.",
     subagent: "tax-analyzer",
     icon: "FileText",
@@ -2578,9 +2685,9 @@ const antiPatterns = [
   },
   {
     name: "The non-citizen spouse hole",
-    hook: "If your spouse is not a U.S. citizen, the unlimited marital deduction does not apply. There is a $60,000 threshold instead.",
-    explanation: "A U.S. estate can pass unlimited property to a U.S.-citizen spouse tax-free. To a non-citizen spouse, only the first $60,000 passes without tax. A QDOT trust solves it — but only if you set one up. Otherwise the math is brutal.",
-    worstCase: "A surviving non-citizen spouse pays six-figure estate tax on the family home.",
+    hook: "If your spouse is not a U.S. citizen, the unlimited marital deduction is off the table unless the assets pass through a QDOT.",
+    explanation: "A U.S. estate can pass unlimited property to a U.S.-citizen spouse tax-free. For a non-citizen spouse, IRC §2056(d) denies that marital deduction unless the assets go into a Qualified Domestic Trust (§2056A). Your own federal exclusion (about $15M in 2026) still applies, so what you lose without a QDOT is the deferral on everything above it. The $60,000 figure people quote is a different rule: the exemption for a non-resident alien decedent's U.S.-situs assets. Verify the current numbers with counsel.",
+    worstCase: "Above the exclusion, the estate tax that should have waited until the second death is due nine months after the first.",
     subagent: "overlay-resolver",
     icon: "Globe",
   },
@@ -2616,7 +2723,7 @@ const antiPatternMeta: Record<
   AntiPatternCardData["name"],
   { theme: string; riskLabel: string }
 > = {
-  "The ex-spouse still on the 401(k)": {
+  "The ex-spouse still on the IRA": {
     theme: "Beneficiaries",
     riskLabel: "Override risk",
   },
@@ -2670,6 +2777,22 @@ const antiPatternMeta: Record<
   },
 };
 
+/*
+  Card faces are built from `<span>`s (phrasing content) because at `sm+` both
+  faces live inside the flip `<button>`. The card title is exposed as a heading
+  outside the button (visually hidden) so heading navigation still works.
+*/
+type AntiPatternFaceProps = {
+  pattern: AntiPatternCardData;
+  icon: ReactNode;
+  className: string;
+  style?: React.CSSProperties;
+  hidden?: boolean;
+};
+
+const ANTI_PATTERN_CHIP_CLASS =
+  "rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em]";
+
 function AntiPatternCardFront({
   pattern,
   index,
@@ -2678,54 +2801,46 @@ function AntiPatternCardFront({
   className,
   style,
   hidden,
-}: {
-  pattern: AntiPatternCardData;
-  index: number;
-  icon: ReactNode;
-  hintText: string;
-  className: string;
-  style?: React.CSSProperties;
-  hidden?: boolean;
-}) {
+}: AntiPatternFaceProps & { index: number; hintText: string }) {
   const meta = antiPatternMeta[pattern.name];
 
   return (
-    <div className={className} style={style} aria-hidden={hidden}>
-      <div className="space-y-5">
-        <div className="flex items-start justify-between gap-3">
+    <span className={className} style={style} aria-hidden={hidden}>
+      <span className="block space-y-5">
+        <span className="flex items-start justify-between gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-rose-300/20 bg-rose-400/12 text-rose-100 shadow-[0_10px_24px_rgba(244,63,94,0.15)]">
             {icon}
           </span>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full border border-rose-300/20 bg-rose-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
+          <span className="flex items-center gap-2">
+            <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-rose-300/20 bg-rose-400/[0.08] text-rose-100")}>
               Failure mode
             </span>
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+            <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-white/10 bg-white/[0.04] text-slate-300")}>
               {String(index + 1).padStart(2, "0")}
             </span>
-          </div>
-        </div>
-        <div>
-          <h4 className="text-xl font-semibold leading-7 tracking-tight text-white">{pattern.name}</h4>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
+          </span>
+        </span>
+        <span className="block">
+          <span className="block text-xl font-semibold leading-7 tracking-tight text-white">{pattern.name}</span>
+          <span className="mt-3 flex flex-wrap gap-2">
+            <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-cyan-300/20 bg-cyan-400/[0.08] text-cyan-100")}>
               {meta.theme}
             </span>
-            <span className="rounded-full border border-amber-300/20 bg-amber-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+            <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-amber-300/20 bg-amber-400/[0.08] text-amber-100")}>
               {meta.riskLabel}
             </span>
-          </div>
-          <p className="mt-3 text-[15px] leading-7 text-slate-200">{pattern.hook}</p>
-        </div>
-      </div>
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs text-slate-400">
+          </span>
+          <span className="mt-3 block text-[15px] leading-7 text-slate-200">{pattern.hook}</span>
+        </span>
+      </span>
+      <span className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs text-slate-400">
         <span className="max-w-full leading-5 sm:max-w-[16rem]">{hintText}</span>
         <ArrowRight
-          className="h-4 w-4 text-rose-200 motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:translate-x-1"
+          className="h-4 w-4 shrink-0 text-rose-200 motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:translate-x-1"
           aria-hidden="true"
         />
-      </div>
-    </div>
+      </span>
+    </span>
   );
 }
 
@@ -2735,90 +2850,73 @@ function AntiPatternCardBack({
   className,
   style,
   hidden,
-}: {
-  pattern: AntiPatternCardData;
-  icon: ReactNode;
-  className: string;
-  style?: React.CSSProperties;
-  hidden?: boolean;
-}) {
+}: AntiPatternFaceProps) {
   const meta = antiPatternMeta[pattern.name];
 
   return (
-    <div className={className} style={style} aria-hidden={hidden}>
-      <div className="flex items-start justify-between gap-3">
+    <span className={className} style={style} aria-hidden={hidden}>
+      <span className="flex items-start justify-between gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-rose-300/25 bg-black/20 text-rose-100 shadow-[0_10px_24px_rgba(244,63,94,0.14)]">
           {icon}
         </span>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border border-rose-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100">
+        <span className="flex items-center gap-2">
+          <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-rose-300/20 bg-black/20 text-rose-100")}>
             Catch
           </span>
-          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
+          <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-cyan-300/20 bg-cyan-400/[0.08] text-cyan-100")}>
             Mitigation path
           </span>
-        </div>
-      </div>
+        </span>
+      </span>
 
-      <div className="mt-5 space-y-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
+      <span className="mt-5 block space-y-4">
+        <span className="block">
+          <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-rose-200">
             What actually goes wrong
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
+          </span>
+          <span className="mt-2 flex flex-wrap gap-2">
+            <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-cyan-300/20 bg-cyan-400/[0.08] text-cyan-100")}>
               {meta.theme}
             </span>
-            <span className="rounded-full border border-amber-300/20 bg-amber-400/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+            <span className={cn(ANTI_PATTERN_CHIP_CLASS, "border-amber-300/20 bg-amber-400/[0.08] text-amber-100")}>
               {meta.riskLabel}
             </span>
-          </div>
-          <p className="mt-2 text-[15px] leading-7 text-slate-100">{pattern.explanation}</p>
-        </div>
-        <div className="rounded-[8px] border border-rose-300/20 bg-gradient-to-r from-rose-400/[0.12] via-rose-400/[0.06] to-transparent p-3.5 shadow-[0_12px_30px_rgba(244,63,94,0.10)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-200">
+          </span>
+          <span className="mt-2 block text-sm leading-6 text-slate-100">{pattern.explanation}</span>
+        </span>
+        <span className="block rounded-[8px] border border-rose-300/20 bg-gradient-to-r from-rose-400/[0.12] via-rose-400/[0.06] to-transparent p-3.5 shadow-[0_12px_30px_rgba(244,63,94,0.10)]">
+          <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-rose-200">
             Worst case
-          </p>
-          <p className="mt-2 text-sm leading-6 text-rose-50">{pattern.worstCase}</p>
-        </div>
-        <div className="rounded-[8px] border border-white/10 bg-white/[0.04] p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+          </span>
+          <span className="mt-2 block text-sm leading-6 text-rose-50">{pattern.worstCase}</span>
+        </span>
+        <span className="block rounded-[8px] border border-white/10 bg-white/[0.04] p-3">
+          <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
             Catching subagent
-          </p>
-          <p className="mt-2 font-mono text-sm text-cyan-200">{pattern.subagent}</p>
-        </div>
-      </div>
-    </div>
+          </span>
+          <span className="mt-2 block font-mono text-sm text-cyan-200">{pattern.subagent}</span>
+        </span>
+      </span>
+    </span>
   );
 }
 
+// Below `sm` (single column) the 3D flip is replaced by an inline expand: the
+// back panel opens directly under the front so nothing is clipped or nested
+// inside a scroller within the button.
+const ANTI_PATTERN_COMPACT_QUERY = "(max-width: 639px)";
+
 export function AntiPatternCardsViz() {
   const prefersReducedMotion = useReducedMotion();
+  const isCompact = useMediaQuery(ANTI_PATTERN_COMPACT_QUERY);
+  const hasFinePointer = useMediaQuery(FINE_POINTER_QUERY);
   const [flippedCards, setFlippedCards] = useState<string[]>([]);
-  const [hasFinePointer, setHasFinePointer] = useState(false);
   const cardButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const pointerFocusRef = useRef(false);
   const hoverOnlyRef = useRef(new Set<string>());
   const transition = prefersReducedMotion
     ? { duration: 0 }
     : { type: "spring" as const, stiffness: 180, damping: 20, mass: 0.75 };
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const syncPointerCapability = () => {
-      setHasFinePointer(mediaQuery.matches);
-    };
-
-    syncPointerCapability();
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", syncPointerCapability);
-      return () => mediaQuery.removeEventListener("change", syncPointerCapability);
-    }
-
-    mediaQuery.addListener(syncPointerCapability);
-    return () => mediaQuery.removeListener(syncPointerCapability);
-  }, []);
 
   const hoverFlip = (name: string) => {
     if (!hasFinePointer) return;
@@ -2900,9 +2998,11 @@ export function AntiPatternCardsViz() {
     focusCardByIndex(nextIndex);
   };
 
-  const hintText = hasFinePointer
-    ? "Hover to preview, click to pin, or press Space"
-    : "Tap to flip, tap again to close, or press Space";
+  const hintText = isCompact
+    ? "Tap to expand, tap again to close, or press Space"
+    : hasFinePointer
+      ? "Hover to preview, click to pin, or press Space"
+      : "Tap to flip, tap again to close, or press Space";
 
   return (
     <section aria-label="Anti-pattern cards: common estate planning failures" className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-rose-300/10">
@@ -2919,20 +3019,22 @@ export function AntiPatternCardsViz() {
                 The patterns the skill is designed to catch
               </h3>
               <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-[15px]">
-                Flip each card to see what actually goes wrong, the worst case, and
+                {isCompact ? "Open" : "Flip"} each card to see what actually goes wrong, the worst case, and
                 which internal subagent catches the failure before the plan leaves draft mode.
               </p>
               <div
                 id="anti-pattern-interaction-help"
-                className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-slate-400"
+                className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-400"
               >
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                  {hasFinePointer
-                    ? "Desktop: hover previews, click pins"
-                    : "Touch: tap flips, tap again closes"}
+                  {isCompact
+                    ? "Touch: tap opens the details below the card, tap again closes"
+                    : hasFinePointer
+                      ? "Desktop: hover previews, click pins"
+                      : "Touch: tap flips, tap again closes"}
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                  Keyboard: arrows move, Home/End jump, Space flips
+                  Keyboard: arrows move, Home/End jump, Space {isCompact ? "opens" : "flips"}
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
                   Each card shows theme + failure label for quick scanning
@@ -2947,66 +3049,126 @@ export function AntiPatternCardsViz() {
           </div>
         </div>
 
-	        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {antiPatterns.map((pattern, index) => {
             const flipped = flippedCards.includes(pattern.name);
             const icon = antiPatternIconMap[pattern.icon] ?? <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
+            const statusId = `anti-pattern-card-status-${index}`;
+            const backPanelId = `anti-pattern-card-back-${index}`;
+            const statusText = flipped
+              ? "Back of card open. Press Space to return to the front summary."
+              : "Front of card visible. Press Space to reveal what goes wrong.";
+            const buttonLabel = `${flipped ? "Show front of" : "Show back of"} anti-pattern card: ${pattern.name}`;
 
+            const sharedButtonProps = {
+              ref: (node: HTMLButtonElement | null) => {
+                cardButtonRefs.current[index] = node;
+              },
+              type: "button" as const,
+              "aria-describedby": `anti-pattern-interaction-help ${statusId}`,
+              "aria-label": buttonLabel,
+              onPointerDown: (event: React.PointerEvent<HTMLButtonElement>) => {
+                pointerFocusRef.current = event.pointerType !== "touch";
+              },
+              onMouseEnter: () => {
+                if (hasFinePointer && !isCompact) hoverFlip(pattern.name);
+              },
+              onMouseLeave: () => {
+                pointerFocusRef.current = false;
+                if (hasFinePointer && !isCompact) hoverUnflip(pattern.name);
+              },
+              onKeyDown: (event: ReactKeyboardEvent<HTMLButtonElement>) => handleCardKeyDown(index, event),
+              onClick: () => toggleCard(pattern.name),
+              onFocus: () => {
+                if (pointerFocusRef.current) {
+                  pointerFocusRef.current = false;
+                }
+              },
+              onBlur: () => {
+                pointerFocusRef.current = false;
+              },
+            };
+
+            if (isCompact) {
+              return (
+                <div key={pattern.name} className="h-full">
+                  <h4 className="sr-only">{pattern.name}</h4>
+                  <button
+                    {...sharedButtonProps}
+                    aria-expanded={flipped}
+                    aria-controls={backPanelId}
+                    className={cn(
+                      "group relative block w-full rounded-[8px] text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                      flipped
+                        ? "shadow-[0_26px_60px_rgba(244,63,94,0.16)]"
+                        : "shadow-[0_18px_44px_rgba(0,0,0,0.16)]",
+                    )}
+                  >
+                    <AntiPatternCardFront
+                      pattern={pattern}
+                      index={index}
+                      icon={icon}
+                      hintText={hintText}
+                      className={cn(
+                        "flex flex-col justify-between rounded-[8px] border bg-[#081525] p-5 transition-colors",
+                        flipped ? "border-rose-300/30" : "border-white/10",
+                      )}
+                    />
+                    <span id={statusId} className="sr-only">
+                      {statusText}
+                    </span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {flipped ? (
+                      <motion.div
+                        id={backPanelId}
+                        initial={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
+                        transition={
+                          prefersReducedMotion
+                            ? { duration: 0 }
+                            : { duration: 0.26, ease: [0.22, 1, 0.36, 1] as const }
+                        }
+                        className="overflow-hidden"
+                      >
+                        <AntiPatternCardBack
+                          pattern={pattern}
+                          icon={icon}
+                          className="mt-2 flex flex-col rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5"
+                        />
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+              );
+            }
+
+            // Both faces occupy the same grid cell, so the card is as tall as
+            // its taller face: no fixed height, no clipping, no inner scroller.
             return (
               <motion.div
                 key={pattern.name}
-                initial={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
-                whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
                 whileHover={
                   prefersReducedMotion
                     ? undefined
                     : { y: -6, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const } }
                 }
-                viewport={{ once: true, amount: 0.18 }}
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0 }
-                    : { duration: 0.42, delay: index * 0.03, ease: [0.22, 1, 0.36, 1] as const }
-                }
                 className="h-full"
               >
+                <h4 className="sr-only">{pattern.name}</h4>
                 <button
-                  ref={(node) => {
-                    cardButtonRefs.current[index] = node;
-                  }}
-                  type="button"
+                  {...sharedButtonProps}
                   aria-pressed={flipped}
-                  aria-describedby={`anti-pattern-interaction-help anti-pattern-card-status-${index}`}
-                  aria-label={`${flipped ? "Show front of" : "Show back of"} anti-pattern card: ${pattern.name}`}
-                  onPointerDown={(event) => {
-                    pointerFocusRef.current = event.pointerType !== "touch";
-                  }}
-                  onMouseEnter={() => {
-                    if (hasFinePointer) hoverFlip(pattern.name);
-                  }}
-                  onMouseLeave={() => {
-                    pointerFocusRef.current = false;
-                    if (hasFinePointer) hoverUnflip(pattern.name);
-                  }}
-                  onKeyDown={(event) => handleCardKeyDown(index, event)}
-                  onClick={() => toggleCard(pattern.name)}
-                  onFocus={() => {
-                    if (pointerFocusRef.current) {
-                      pointerFocusRef.current = false;
-                    }
-                  }}
-                  onBlur={() => {
-                    pointerFocusRef.current = false;
-                  }}
                   className={cn(
-                    "group relative block w-full min-h-[21.5rem] rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f] sm:min-h-[23rem] xl:min-h-[26rem]",
+                    "group relative grid h-full w-full rounded-[8px] text-left outline-none [perspective:1200px] focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                     flipped
                       ? "shadow-[0_26px_60px_rgba(244,63,94,0.16)]"
                       : "shadow-[0_18px_44px_rgba(0,0,0,0.16)]",
                   )}
                 >
                   {prefersReducedMotion ? (
-                    <div className="absolute inset-0 rounded-[8px]">
+                    <span className="grid h-full rounded-[8px]">
                       <AntiPatternCardFront
                         pattern={pattern}
                         index={index}
@@ -3014,7 +3176,7 @@ export function AntiPatternCardsViz() {
                         hintText={hintText}
                         hidden={flipped}
                         className={cn(
-                          "absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 transition-opacity duration-200 group-hover:border-rose-300/25",
+                          "col-start-1 row-start-1 flex flex-col justify-between rounded-[8px] border border-white/10 bg-[#081525] p-5 transition-opacity duration-200 group-hover:border-rose-300/25",
                           flipped ? "pointer-events-none opacity-0" : "opacity-100",
                         )}
                       />
@@ -3023,16 +3185,16 @@ export function AntiPatternCardsViz() {
                         icon={icon}
                         hidden={!flipped}
                         className={cn(
-                          "absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 transition-opacity duration-200",
+                          "col-start-1 row-start-1 flex flex-col rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5 transition-opacity duration-200",
                           flipped ? "opacity-100" : "pointer-events-none opacity-0",
                         )}
                       />
-                    </div>
+                    </span>
                   ) : (
-                    <motion.div
+                    <motion.span
                       animate={{ rotateY: flipped ? 180 : 0 }}
                       transition={transition}
-                      className="absolute inset-0 rounded-[8px]"
+                      className="grid h-full rounded-[8px]"
                       style={{ transformStyle: "preserve-3d" }}
                     >
                       <AntiPatternCardFront
@@ -3041,22 +3203,20 @@ export function AntiPatternCardsViz() {
                         icon={icon}
                         hintText={hintText}
                         hidden={flipped}
-                        className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[8px] border border-white/10 bg-[#081525] p-5 transition group-hover:border-rose-300/25"
+                        className="col-start-1 row-start-1 flex flex-col justify-between rounded-[8px] border border-white/10 bg-[#081525] p-5 transition-colors group-hover:border-rose-300/25"
                         style={{ backfaceVisibility: "hidden" }}
                       />
                       <AntiPatternCardBack
                         pattern={pattern}
                         icon={icon}
                         hidden={!flipped}
-                        className="absolute inset-0 flex flex-col overflow-y-auto rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5"
+                        className="col-start-1 row-start-1 flex flex-col rounded-[8px] border border-rose-300/20 bg-rose-400/[0.09] p-5"
                         style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                       />
-                    </motion.div>
+                    </motion.span>
                   )}
-                  <span id={`anti-pattern-card-status-${index}`} className="sr-only">
-                    {flipped
-                      ? "Back of card open. Press Space to return to the front summary."
-                      : "Front of card visible. Press Space to reveal what goes wrong."}
+                  <span id={statusId} className="sr-only">
+                    {statusText}
                   </span>
                 </button>
               </motion.div>
@@ -3097,14 +3257,33 @@ const PRICING_NET_WORTH_PRESETS = [
 
 const PRICING_SLIDER_MIN = 100_000;
 const PRICING_SLIDER_MAX = 100_000_000;
+// 300 integer steps across the log scale: every preset above lands on an
+// integer step that maps back to exactly the preset value, so the DOM thumb
+// and React state never disagree (see `priceCalcValueFromSlider` rounding).
+const PRICING_SLIDER_STEPS = 300;
+const PRICING_SLIDER_NUDGE = 12;
+const PRICING_SLIDER_PAGE = 30;
+
+// Monthly stack the article assumes. Prices are the article's figures as of
+// 2026; the calculator subtracts the full stack, not just the skill.
 const PRICING_JSM_MONTHLY_PRICE = 20;
+const PRICING_CLAUDE_MAX_MONTHLY_PRICE = 100;
+const PRICING_GPT_PRO_MONTHLY_PRICE = 100;
+const PRICING_STACK_MONTHLY_MIN = PRICING_CLAUDE_MAX_MONTHLY_PRICE + PRICING_JSM_MONTHLY_PRICE;
+const PRICING_STACK_MONTHLY_RECOMMENDED = PRICING_STACK_MONTHLY_MIN + PRICING_GPT_PRO_MONTHLY_PRICE;
+const PRICING_FIGURES_AS_OF = "2026";
+
+// Attorney model: a $3,000 floor for a simple consult, plus a premium per
+// complexity overlay (three overlays land around the $15k the prose quotes for
+// "a household with any real complexity") and a small net-worth slope above $1M.
 const PRICING_ATTORNEY_MIN = 3_000;
-const PRICING_ATTORNEY_MAX = 40_000;
+const PRICING_ATTORNEY_COMPLEXITY_PREMIUM = 4_000;
+const PRICING_ATTORNEY_NET_WORTH_RATE = 0.00005;
 
 function priceCalcValueFromSlider(sliderValue: number) {
   const logMin = Math.log10(PRICING_SLIDER_MIN);
   const logMax = Math.log10(PRICING_SLIDER_MAX);
-  const exponent = logMin + (sliderValue / 100) * (logMax - logMin);
+  const exponent = logMin + (sliderValue / PRICING_SLIDER_STEPS) * (logMax - logMin);
   const rawValue = 10 ** exponent;
   if (rawValue < 1_000_000) return Math.round(rawValue / 5_000) * 5_000;
   if (rawValue < 10_000_000) return Math.round(rawValue / 25_000) * 25_000;
@@ -3114,11 +3293,7 @@ function priceCalcValueFromSlider(sliderValue: number) {
 function priceCalcSliderFromValue(value: number) {
   const logMin = Math.log10(PRICING_SLIDER_MIN);
   const logMax = Math.log10(PRICING_SLIDER_MAX);
-  return ((Math.log10(value) - logMin) / (logMax - logMin)) * 100;
-}
-
-function clampAttorneyEstimate(value: number) {
-  return Math.min(PRICING_ATTORNEY_MAX, Math.max(PRICING_ATTORNEY_MIN, value));
+  return Math.round(((Math.log10(value) - logMin) / (logMax - logMin)) * PRICING_SLIDER_STEPS);
 }
 
 function roundAttorneyEstimate(value: number) {
@@ -3168,6 +3343,10 @@ function emitPricingCalcChanged(netWorth: number, numChips: number) {
   }
 }
 
+const PRICING_LABEL_CLASS = "text-xs font-semibold uppercase tracking-[0.18em]";
+const PRICING_BADGE_CLASS =
+  "rounded-full border bg-black/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em]";
+
 export function PricingComparisonViz() {
   const prefersReducedMotion = useReducedMotion();
   const defaultNetWorth = 1_000_000;
@@ -3188,14 +3367,14 @@ export function PricingComparisonViz() {
   const numChips = selectedChips.length;
 
   const attorneyEstimate = useMemo(() => {
-    const complexityPremium = numChips * 2_000;
-    const netWorthPremium = Math.max(0, netWorth - 1_000_000) * 0.00005;
+    const complexityPremium = numChips * PRICING_ATTORNEY_COMPLEXITY_PREMIUM;
+    const netWorthPremium = Math.max(0, netWorth - 1_000_000) * PRICING_ATTORNEY_NET_WORTH_RATE;
     return roundAttorneyEstimate(
-      clampAttorneyEstimate(PRICING_ATTORNEY_MIN + netWorthPremium + complexityPremium),
+      Math.max(PRICING_ATTORNEY_MIN, PRICING_ATTORNEY_MIN + netWorthPremium + complexityPremium),
     );
   }, [netWorth, numChips]);
 
-  const savingsVsAttorney = Math.max(0, attorneyEstimate - PRICING_JSM_MONTHLY_PRICE);
+  const savingsVsAttorney = Math.max(0, attorneyEstimate - PRICING_STACK_MONTHLY_MIN);
   const selectedComplexityLabels = PRICING_COMPLEXITY_CHIPS.filter((chip) =>
     selectedChips.includes(chip.id),
   ).map((chip) => chip.label);
@@ -3222,12 +3401,12 @@ export function PricingComparisonViz() {
 
   const nudgeSliderValue = (delta: number) => {
     hasInteractedRef.current = true;
-    setSliderValue((current) => Math.max(0, Math.min(100, current + delta)));
+    setSliderValue((current) => Math.max(0, Math.min(PRICING_SLIDER_STEPS, current + delta)));
   };
 
   const setSliderBoundary = (boundary: "min" | "max") => {
     hasInteractedRef.current = true;
-    setSliderValue(boundary === "min" ? 0 : 100);
+    setSliderValue(boundary === "min" ? 0 : PRICING_SLIDER_STEPS);
   };
 
   const resetPricingScenario = () => {
@@ -3239,9 +3418,16 @@ export function PricingComparisonViz() {
   return (
     <section
       aria-label="Interactive pricing calculator comparing attorney, form-based, and jeffreys-skills.md costs"
-      className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-amber-300/10"
+      // `overflow-clip` (not `hidden`) so the section is not a scroll container
+      // and the mobile result strip can stick to the viewport bottom.
+      className="relative overflow-clip rounded-[28px] border border-white/10 bg-[#07111f] shadow-[0_24px_90px_rgba(0,0,0,0.25)] ring-1 ring-amber-300/10"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(34,211,238,0.08),transparent_38%)]" />
+      {/* One live line for screen readers; the visual panel below is not a live region. */}
+      <p id="pricing-live-summary" role="status" aria-live="polite" className="sr-only">
+        Attorney estimate {formatCurrency(attorneyEstimate)}; projected savings{" "}
+        {formatCurrency(savingsVsAttorney)}.
+      </p>
       <div className="relative grid gap-6 p-5 md:grid-cols-[1.1fr_0.9fr] md:p-7">
         <div className="space-y-6">
           <div className="space-y-3">
@@ -3272,7 +3458,7 @@ export function PricingComparisonViz() {
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-300">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
                   <span className="text-amber-200">01</span>
                   Set net worth
                 </div>
@@ -3291,7 +3477,7 @@ export function PricingComparisonViz() {
                 <button
                   type="button"
                   aria-label="Lower estimated net worth"
-                  onClick={() => nudgeSliderValue(-4)}
+                  onClick={() => nudgeSliderValue(-PRICING_SLIDER_NUDGE)}
                   className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-lg font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
                 >
                   -
@@ -3299,7 +3485,7 @@ export function PricingComparisonViz() {
                 <button
                   type="button"
                   aria-label="Raise estimated net worth"
-                  onClick={() => nudgeSliderValue(4)}
+                  onClick={() => nudgeSliderValue(PRICING_SLIDER_NUDGE)}
                   className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-lg font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]"
                 >
                   +
@@ -3309,7 +3495,7 @@ export function PricingComparisonViz() {
                   initial={prefersReducedMotion ? false : { opacity: 0.7, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={transition}
-                  className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold text-amber-100"
+                  className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-100"
                 >
                   {getNetWorthBucket(netWorth)}
                 </motion.div>
@@ -3333,11 +3519,11 @@ export function PricingComparisonViz() {
               <input
                 type="range"
                 min={0}
-                max={100}
+                max={PRICING_SLIDER_STEPS}
                 step={1}
                 value={sliderValue}
                 aria-label="Estimated net worth"
-                aria-describedby="pricing-slider-help pricing-slider-shortcuts pricing-live-summary"
+                aria-describedby="pricing-slider-help pricing-slider-shortcuts"
                 aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown PageUp PageDown Home End"
                 aria-valuetext={formatCurrency(netWorth)}
                 className="sm-range w-full"
@@ -3346,13 +3532,13 @@ export function PricingComparisonViz() {
                 onKeyDown={(event) => {
                   if (event.key === "PageUp") {
                     event.preventDefault();
-                    nudgeSliderValue(10);
+                    nudgeSliderValue(PRICING_SLIDER_PAGE);
                     return;
                   }
 
                   if (event.key === "PageDown") {
                     event.preventDefault();
-                    nudgeSliderValue(-10);
+                    nudgeSliderValue(-PRICING_SLIDER_PAGE);
                     return;
                   }
 
@@ -3374,6 +3560,17 @@ export function PricingComparisonViz() {
               />
             </label>
 
+            {/* Scale labels sit at the slider positions of the values they name (log scale: 0 / 1/3 / 2/3 / 1). */}
+            <div
+              aria-hidden="true"
+              className="relative mt-2 h-5 text-xs font-mono uppercase tracking-[0.14em] text-slate-500"
+            >
+              <span className="absolute left-0 top-0">$100K</span>
+              <span className="absolute left-1/3 top-0 -translate-x-1/2">$1M</span>
+              <span className="absolute left-2/3 top-0 -translate-x-1/2">$10M</span>
+              <span className="absolute right-0 top-0">$100M</span>
+            </div>
+
             <div
               role="group"
               aria-label="Common net worth presets"
@@ -3388,7 +3585,7 @@ export function PricingComparisonViz() {
                     aria-pressed={active}
                     onClick={() => setNetWorthFromPreset(preset.value)}
                     className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                      "inline-flex min-h-10 items-center justify-center rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                       active
                         ? "border-amber-300/35 bg-amber-400/[0.12] text-amber-100"
                         : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-amber-300/20 hover:bg-amber-400/[0.06]",
@@ -3399,19 +3596,12 @@ export function PricingComparisonViz() {
                 );
               })}
             </div>
-
-            <div className="mt-3 grid grid-cols-4 text-center text-[10px] font-mono uppercase tracking-[0.16em] text-slate-500 sm:text-[11px] sm:tracking-[0.18em]">
-              <span>$100K</span>
-              <span>$1M</span>
-              <span>$10M</span>
-              <span>$100M</span>
-            </div>
           </div>
 
           <div className="space-y-3">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-300">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
                   <span className="text-cyan-200">02</span>
                   Add complexity
                 </div>
@@ -3426,7 +3616,7 @@ export function PricingComparisonViz() {
                   initial={prefersReducedMotion ? false : { opacity: 0.75, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={transition}
-                  className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-100"
+                  className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-100"
                 >
                   {numChips} active
                 </motion.div>
@@ -3435,7 +3625,7 @@ export function PricingComparisonViz() {
                   disabled={isDefaultScenario}
                   onClick={resetPricingScenario}
                   className={cn(
-                    "rounded-full border px-3 py-1 text-[11px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                    "inline-flex min-h-10 items-center rounded-full border px-3 py-1 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                     isDefaultScenario
                       ? "cursor-not-allowed border-white/10 bg-white/[0.02] text-slate-500"
                       : "border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/15 hover:bg-white/[0.08]",
@@ -3457,7 +3647,7 @@ export function PricingComparisonViz() {
                     aria-describedby="pricing-chip-help"
                     onClick={() => toggleChip(chip.id)}
                     className={cn(
-                      "rounded-[16px] border px-4 py-3 text-left text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
+                      "min-h-11 rounded-[16px] border px-4 py-3 text-left text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07111f]",
                       active
                         ? "border-cyan-300/35 bg-cyan-400/[0.12] text-cyan-50 shadow-[0_14px_34px_rgba(34,211,238,0.12)]"
                         : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-cyan-300/20 hover:bg-cyan-400/[0.04]",
@@ -3488,14 +3678,39 @@ export function PricingComparisonViz() {
               })}
             </div>
           </div>
+
+          {/*
+            Below `md` the results column sits ~1,300px under the controls, so a
+            compact copy of the two headline numbers sticks to the bottom of the
+            viewport while the controls are on screen. Decorative for AT (the
+            sr-only status line above already announces the same values); the
+            right padding keeps it clear of the floating table-of-contents button.
+          */}
+          <div
+            aria-hidden="true"
+            className="sticky bottom-0 z-10 -mx-1 flex items-center justify-between gap-3 rounded-[16px] border border-white/10 bg-[#0b1526]/95 px-4 py-3 pr-16 shadow-[0_-12px_30px_rgba(0,0,0,0.35)] backdrop-blur md:hidden"
+          >
+            <span className="min-w-0">
+              <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-amber-200">
+                Attorney estimate
+              </span>
+              <span className="block text-lg font-semibold tracking-tight text-white">
+                {formatCurrency(attorneyEstimate)}
+              </span>
+            </span>
+            <span className="min-w-0 text-right">
+              <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                Savings
+              </span>
+              <span className="block text-lg font-semibold tracking-tight text-white">
+                {formatCurrency(savingsVsAttorney)}
+              </span>
+            </span>
+          </div>
         </div>
 
         <div className="space-y-4">
-          <div
-            aria-live="polite"
-            id="pricing-live-summary"
-            className="rounded-[22px] border border-white/10 bg-black/20 p-4 md:p-5"
-          >
+          <div className="rounded-[22px] border border-white/10 bg-black/20 p-4 md:p-5">
             <motion.p
               key={`pricing-scenario-${selectedComplexityLabels.join("|") || "base"}`}
               initial={prefersReducedMotion ? false : { opacity: 0.72, y: 6 }}
@@ -3513,11 +3728,11 @@ export function PricingComparisonViz() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <BriefcaseBusiness className="h-4 w-4 text-amber-100" aria-hidden="true" />
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200">
+                    <p className={cn(PRICING_LABEL_CLASS, "text-amber-200")}>
                       Attorney consult estimate
                     </p>
                   </div>
-                  <span className="rounded-full border border-amber-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+                  <span className={cn(PRICING_BADGE_CLASS, "border-amber-300/20 text-amber-100")}>
                     Scales with complexity
                   </span>
                 </div>
@@ -3531,8 +3746,9 @@ export function PricingComparisonViz() {
                   {formatCurrency(attorneyEstimate)}
                 </motion.p>
                 <p className="mt-2 text-sm leading-6 text-amber-50/80">
-                  Roughly modeled as a base intake + complexity premium, then
-                  soft-clamped so the widget stays in plausible territory.
+                  Roughly modeled as a {formatCurrency(PRICING_ATTORNEY_MIN)} base
+                  intake plus {formatCurrency(PRICING_ATTORNEY_COMPLEXITY_PREMIUM)} per
+                  complexity overlay and a small net-worth premium above $1M.
                 </p>
               </div>
 
@@ -3541,11 +3757,11 @@ export function PricingComparisonViz() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <FileCheck className="h-4 w-4 text-sky-100" aria-hidden="true" />
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-sky-200">
+                      <p className={cn(PRICING_LABEL_CLASS, "text-sky-200")}>
                         LegalZoom / Trust &amp; Will
                       </p>
                     </div>
-                    <span className="rounded-full border border-sky-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-100">
+                    <span className={cn(PRICING_BADGE_CLASS, "border-sky-300/20 text-sky-100")}>
                       Mostly flat
                     </span>
                   </div>
@@ -3553,8 +3769,9 @@ export function PricingComparisonViz() {
                     $199–$499
                   </p>
                   <p className="mt-2 text-sm leading-6 text-sky-50/80">
-                    Flat consumer-template pricing. It usually does not move
-                    with complexity, which is the whole point of the comparison.
+                    Flat consumer-template pricing ({PRICING_FIGURES_AS_OF} list prices).
+                    It usually does not move with complexity, which is the whole
+                    point of the comparison.
                   </p>
                 </div>
 
@@ -3562,20 +3779,22 @@ export function PricingComparisonViz() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-emerald-100" aria-hidden="true" />
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
-                        Jeffreys Skills.md
+                      <p className={cn(PRICING_LABEL_CLASS, "text-emerald-200")}>
+                        Skill + model stack
                       </p>
                     </div>
-                    <span className="rounded-full border border-emerald-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
-                      Monthly subscription
+                    <span className={cn(PRICING_BADGE_CLASS, "border-emerald-300/20 text-emerald-100")}>
+                      Monthly, cancel anytime
                     </span>
                   </div>
                   <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
-                    $20/mo
+                    {formatCurrency(PRICING_STACK_MONTHLY_MIN)}/mo
                   </p>
                   <p className="mt-2 text-sm leading-6 text-emerald-50/80">
-                    Month-to-month. Cancel when the packet is done and your
-                    attorney handoff is organized.
+                    Claude Max ({formatCurrency(PRICING_CLAUDE_MAX_MONTHLY_PRICE)}) plus the
+                    jeffreys-skills.md subscription ({formatCurrency(PRICING_JSM_MONTHLY_PRICE)});{" "}
+                    {formatCurrency(PRICING_STACK_MONTHLY_RECOMMENDED)} if you add GPT Pro for
+                    the audit pass. Cancel when the packet is done.
                   </p>
                 </div>
               </div>
@@ -3588,31 +3807,34 @@ export function PricingComparisonViz() {
               transition={transition}
               className="mt-4 rounded-[18px] border border-emerald-300/25 bg-emerald-400/[0.10] p-4"
             >
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+              <p className={cn(PRICING_LABEL_CLASS, "text-emerald-200")}>
                 Projected savings vs attorney consult
               </p>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
                 {formatCurrency(savingsVsAttorney)}
               </p>
-              <p className="mt-1 text-[11px] font-medium leading-4 text-emerald-200/70">
-                One-time attorney fee minus one month of the subscription
-                ({formatCurrency(PRICING_JSM_MONTHLY_PRICE)}/mo) — assumes the
-                work fits in a single month.
+              <p className="mt-1 text-xs font-medium leading-5 text-emerald-200/70">
+                One-time attorney fee minus one month of the full stack
+                ({formatCurrency(PRICING_STACK_MONTHLY_MIN)}/mo; subtract another{" "}
+                {formatCurrency(PRICING_GPT_PRO_MONTHLY_PRICE)} if you also run GPT Pro).
+                Assumes the work fits in a single month.
               </p>
             </motion.div>
 
             <p className="mt-4 text-sm font-medium leading-6 text-slate-200">
               This calculator is a rough guide, not a legal fee quote. Actual
-              attorneys quote based on actual facts. Your real skill
-              subscription is {formatCurrency(PRICING_JSM_MONTHLY_PRICE)} per
-              month; the attorney number is here so you can understand the
-              order of magnitude.
+              attorneys quote based on actual facts. Your real cost is the
+              monthly stack above ({formatCurrency(PRICING_STACK_MONTHLY_MIN)} to{" "}
+              {formatCurrency(PRICING_STACK_MONTHLY_RECOMMENDED)}, of which the skill
+              itself is {formatCurrency(PRICING_JSM_MONTHLY_PRICE)}); the attorney
+              number is here so you can understand the order of magnitude.
             </p>
 
             <p className="mt-3 text-xs leading-5 text-slate-400">
-              Sources: public consumer pricing pages for LegalZoom and Trust
-              &amp; Will, plus public estate-planning billing-rate surveys and
-              fee schedules. This widget turns those public ranges into a
+              Figures as of {PRICING_FIGURES_AS_OF}; verify current pricing before
+              relying on them. Sources: public consumer pricing pages for LegalZoom
+              and Trust &amp; Will, plus public estate-planning billing-rate surveys
+              and fee schedules. This widget turns those public ranges into a
               deliberately simple comparison, not a quote.
             </p>
           </div>
@@ -3644,7 +3866,7 @@ const INSTALL_STEPS: InstallStep[] = [
     number: 1,
     label: "Get a frontier-model subscription",
     sub: "Claude Max ($100/mo) or GPT Pro ($100/mo). Both recommended.",
-    time: "~7 min",
+    time: "~5 min",
     icon: <Brain className="h-5 w-5" aria-hidden="true" />,
     accent: "cyan",
     accentBorder: "border-cyan-400/30",
@@ -3672,8 +3894,8 @@ const INSTALL_STEPS: InstallStep[] = [
           </li>
         </ul>
         <p className="mt-3 text-slate-400">
-          Both offer a free trial or money-back period. You can cancel before the
-          first billing cycle if this isn&apos;t for you.
+          Both are month-to-month with no long-term contract; cancel whenever
+          you like and you keep every document the skill produced.
         </p>
       </>
     ),
@@ -3682,7 +3904,7 @@ const INSTALL_STEPS: InstallStep[] = [
     number: 2,
     label: "Install the desktop app",
     sub: "Claude Code or Codex Desktop, Mac/Windows, free. Signs in with step 1.",
-    time: "~7 min",
+    time: "~5 min",
     icon: <MonitorDown className="h-5 w-5" aria-hidden="true" />,
     accent: "violet",
     accentBorder: "border-violet-400/30",
@@ -3737,7 +3959,7 @@ const INSTALL_STEPS: InstallStep[] = [
   {
     number: 4,
     label: "Install the skill",
-    sub: "One button click in the desktop app. That's it — you're ready.",
+    sub: "Paste one install prompt. About two minutes.",
     time: "~2 min",
     icon: <PackagePlus className="h-5 w-5" aria-hidden="true" />,
     accent: "amber",
@@ -3875,7 +4097,7 @@ export function InstallFlowViz() {
                         ),
                   )}
                 >
-                  <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center justify-between gap-3">
                     <span className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-full border text-sm font-bold",
                       isExpanded ? cn(step.accentBorder, step.accentText) : "border-white/15 text-white",
@@ -3888,18 +4110,18 @@ export function InstallFlowViz() {
                     )}>
                       {step.icon}
                     </span>
-                  </div>
-                  <p className="mt-4 text-sm font-semibold leading-5 text-white">{step.label}</p>
-                  <p className="mt-1.5 text-xs leading-5 text-slate-400">{step.sub}</p>
-                  <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[10px] font-semibold text-slate-300">
+                  </span>
+                  <span className="mt-4 block text-sm font-semibold leading-5 text-white">{step.label}</span>
+                  <span className="mt-1.5 block text-xs leading-5 text-slate-400">{step.sub}</span>
+                  <span className="mt-auto flex items-center justify-between gap-2 pt-3">
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-xs font-semibold text-slate-300">
                       {step.time}
                     </span>
                     <ArrowRight className={cn(
                       "h-3.5 w-3.5 transition-transform",
                       isExpanded ? "rotate-90 text-white" : "text-slate-500 group-hover:text-slate-300",
                     )} aria-hidden="true" />
-                  </div>
+                  </span>
                 </button>
               </motion.div>
             );
@@ -3943,7 +4165,7 @@ export function InstallFlowViz() {
               className={cn("rounded-2xl border p-5 md:p-6", expandedData.accentBorder, "bg-white/[0.03]")}
             >
               <div className="flex flex-wrap items-center gap-3 mb-4">
-                <span className={cn("rounded-full border px-3 py-1 text-[11px] font-semibold", expandedData.accentBorder, expandedData.accentText)}>
+                <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", expandedData.accentBorder, expandedData.accentText)}>
                   Step {expandedData.number}
                 </span>
                 <span className="text-sm font-semibold text-white">{expandedData.label}</span>
@@ -3963,7 +4185,7 @@ export function InstallFlowViz() {
           </p>
           <div className="flex gap-1.5" aria-hidden="true">
             {INSTALL_STEPS.map((step) => (
-              <span key={step.number} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+              <span key={step.number} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs font-semibold text-slate-400">
                 {step.time}
               </span>
             ))}
@@ -3987,10 +4209,11 @@ type WorkingFolderInputFile = {
 };
 
 type WorkingFolderOutputFolder = {
-  id: string;
+  id: DeliverableFolder;
   name: string;
   summary: string;
   files: string[];
+  totalFiles: number;
 };
 
 const WORKING_FOLDER_INPUT_FILES: WorkingFolderInputFile[] = [
@@ -4052,41 +4275,34 @@ const WORKING_FOLDER_INPUT_FILES: WorkingFolderInputFile[] = [
   },
 ];
 
-const WORKING_FOLDER_OUTPUT_FOLDERS: WorkingFolderOutputFolder[] = [
-  {
-    id: "drafts",
-    name: "drafts/",
-    summary: "First-pass planning documents, ready to sign or to hand to an attorney for review.",
-    files: [
-      "will-draft.md",
-      "durable-poa-draft.md",
-      "healthcare-directive-draft.md",
-      "letter-of-wishes.md",
-    ],
+// The output side is derived from the same `deliverableTreeLeaves` the
+// DeliverablesTreeViz renders, so both diagrams show one folder/file layout.
+const WORKING_FOLDER_OUTPUT_SUMMARIES: Record<DeliverableFolder, string> = {
+  intake:
+    "The running record of household facts plus a checkpoint summary after every sitting, so the next session resumes cleanly.",
+  analyses:
+    "Cross-checks that surface beneficiary, titling, tax, and execution risks before they become expensive problems.",
+  deliverables:
+    "The plan itself: inventories, maps, letters, checklists, and the attorney handoff packet if you decide you want one.",
+};
+const WORKING_FOLDER_SPOTLIGHT_LIMIT = 4;
+
+const WORKING_FOLDER_OUTPUT_FOLDERS: WorkingFolderOutputFolder[] = DELIVERABLE_FOLDERS.map(
+  (folder) => {
+    const leaves = deliverableTreeLeaves.filter((leaf) => leaf.folder === folder);
+    const ordered = [
+      ...leaves.filter((leaf) => leaf.spotlight),
+      ...leaves.filter((leaf) => !leaf.spotlight),
+    ];
+    return {
+      id: folder,
+      name: DELIVERABLE_FOLDER_META[folder].title,
+      summary: WORKING_FOLDER_OUTPUT_SUMMARIES[folder],
+      files: ordered.slice(0, WORKING_FOLDER_SPOTLIGHT_LIMIT).map((leaf) => leaf.file),
+      totalFiles: leaves.length,
+    };
   },
-  {
-    id: "audits",
-    name: "audits/",
-    summary: "Cross-checks that surface hidden beneficiary and execution risks before they become expensive problems.",
-    files: [
-      "beneficiary-audit.md",
-      "anti-pattern-scan.md",
-      "official-source-log.md",
-      "missing-info-checklist.md",
-    ],
-  },
-  {
-    id: "attorney-handoff",
-    name: "attorney-handoff/",
-    summary: "Optional handoff packet if you decide to involve an attorney: facts, questions, and readiness in one pass.",
-    files: [
-      "attorney-engagement-brief.md",
-      "questions-for-counsel.md",
-      "matter-index.md",
-      "readiness-scorecard.md",
-    ],
-  },
-];
+);
 
 function renderWorkingFolderIcon(kind: WorkingFolderInputFile["kind"]): ReactNode {
   if (kind === "image") {
@@ -4102,9 +4318,14 @@ function renderWorkingFolderIcon(kind: WorkingFolderInputFile["kind"]): ReactNod
 
 export function WorkingFolderViz() {
   const prefersReducedMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  // The two connector loops (below xl) only run while the viz is near the viewport.
+  const connectorsInView = useInView(sectionRef, { margin: "200px 0px 200px 0px" });
   const [activeInputId, setActiveInputId] = useState(
     WORKING_FOLDER_INPUT_FILES[0]?.id ?? "",
   );
+  // Hover previews should not be announced; only click/keyboard selection is.
+  const [inputSelectionIntent, setInputSelectionIntent] = useState<"hover" | "explicit">("explicit");
   const [expandedOutputId, setExpandedOutputId] = useState<string | null>(
     WORKING_FOLDER_OUTPUT_FOLDERS[0]?.id ?? null,
   );
@@ -4113,8 +4334,23 @@ export function WorkingFolderViz() {
     WORKING_FOLDER_INPUT_FILES.find((file) => file.id === activeInputId) ??
     WORKING_FOLDER_INPUT_FILES[0];
 
+  const selectInput = (fileId: string, intent: "hover" | "explicit") => {
+    setActiveInputId(fileId);
+    setInputSelectionIntent(intent);
+  };
+
+  const connectorAnimate =
+    prefersReducedMotion || !connectorsInView
+      ? { x: 0, opacity: 0.8 }
+      : { x: [0, 7, 0], opacity: [0.8, 1, 0.8] };
+  const connectorTransition = (delay: number) =>
+    prefersReducedMotion || !connectorsInView
+      ? { duration: 0 }
+      : { duration: 1.7, delay, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" as const };
+
   return (
     <section
+      ref={sectionRef}
       className="overflow-hidden rounded-[32px] border border-cyan-400/20 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.15),_rgba(2,6,23,0.98)_44%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] px-4 py-6 text-white shadow-[0_24px_90px_rgba(2,8,23,0.48)] sm:px-6 sm:py-7 lg:px-8"
       aria-label="Working folder visualization"
     >
@@ -4173,8 +4409,8 @@ export function WorkingFolderViz() {
                     email, cloud storage, or a scanner app already.
                   </p>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300">
-                  8 inputs
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+                  {WORKING_FOLDER_INPUT_FILES.length} inputs
                 </span>
               </div>
 
@@ -4188,13 +4424,13 @@ export function WorkingFolderViz() {
                       type="button"
                       aria-label={`${file.name}. ${file.reason}`}
                       aria-pressed={isActive}
-                      onMouseEnter={() => setActiveInputId(file.id)}
-                      onFocus={() => setActiveInputId(file.id)}
-                      onClick={() => setActiveInputId(file.id)}
+                      onMouseEnter={() => selectInput(file.id, "hover")}
+                      onFocus={() => selectInput(file.id, "explicit")}
+                      onClick={() => selectInput(file.id, "explicit")}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
                           event.preventDefault();
-                          setActiveInputId(file.id);
+                          selectInput(file.id, "explicit");
                         }
                       }}
                       className={cn(
@@ -4222,7 +4458,7 @@ export function WorkingFolderViz() {
                         </span>
                         <span
                           className={cn(
-                            "mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]",
+                            "mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.12em]",
                             file.status === "you already have this"
                               ? "border-emerald-300/25 bg-emerald-400/[0.10] text-emerald-100"
                               : "border-amber-300/25 bg-amber-300/[0.10] text-amber-100",
@@ -4237,10 +4473,10 @@ export function WorkingFolderViz() {
               </div>
 
               <div
-                aria-live="polite"
+                aria-live={inputSelectionIntent === "explicit" ? "polite" : "off"}
                 className="mt-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.08] p-4"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
                   Why the skill uses this
                 </p>
                 <p className="mt-2 text-sm font-semibold text-white">
@@ -4255,15 +4491,9 @@ export function WorkingFolderViz() {
 
           <div className="flex items-center justify-center py-1 xl:hidden" aria-hidden="true">
             <motion.div
-              animate={
-                prefersReducedMotion ? undefined : { x: [0, 7, 0], opacity: [0.8, 1, 0.8] }
-              }
-              transition={
-                prefersReducedMotion
-                  ? undefined
-                  : { duration: 1.7, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
-              }
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-200"
+              animate={connectorAnimate}
+              transition={connectorTransition(0)}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
             >
               <span>Ask</span>
               <ArrowRight className="h-4 w-4 rotate-90" />
@@ -4288,7 +4518,7 @@ export function WorkingFolderViz() {
                 <MonitorDown className="h-4.5 w-4.5 text-cyan-200" aria-hidden="true" />
                 <span>Desktop app session</span>
               </div>
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.10] px-3 py-1 text-[11px] font-medium text-emerald-100">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.10] px-3 py-1 text-xs font-medium text-emerald-100">
                 reading files from <code className="rounded bg-white/10 px-1 font-mono">my-estate-plan/</code>
               </span>
             </div>
@@ -4300,7 +4530,7 @@ export function WorkingFolderViz() {
                     <Sparkles className="h-3.5 w-3.5 text-cyan-200" aria-hidden="true" />
                     Agent window
                   </div>
-                  <span className="rounded-full border border-cyan-400/20 bg-cyan-400/[0.10] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-100">
+                  <span className="rounded-full border border-cyan-400/20 bg-cyan-400/[0.10] px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100">
                     folder mode
                   </span>
                 </div>
@@ -4321,7 +4551,7 @@ export function WorkingFolderViz() {
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
                     What the app does
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-200">
@@ -4331,7 +4561,7 @@ export function WorkingFolderViz() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
                     Why this feels simple
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-200">
@@ -4345,17 +4575,11 @@ export function WorkingFolderViz() {
 
           <div className="flex items-center justify-center py-1 xl:hidden" aria-hidden="true">
             <motion.div
-              animate={
-                prefersReducedMotion ? undefined : { x: [0, 7, 0], opacity: [0.8, 1, 0.8] }
-              }
-              transition={
-                prefersReducedMotion
-                  ? undefined
-                  : { duration: 1.7, delay: 0.12, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
-              }
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-200"
+              animate={connectorAnimate}
+              transition={connectorTransition(0.12)}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
             >
-              <span>Wait ~30 min</span>
+              <span>3–6 hours over a weekend</span>
               <ArrowRight className="h-4 w-4 rotate-90" />
             </motion.div>
           </div>
@@ -4392,18 +4616,20 @@ export function WorkingFolderViz() {
                     What comes back
                   </p>
                   <p className="mt-1 text-xs leading-5 text-slate-400">
-                    Hover, tap, or focus any folder to inspect the packet before
-                    you send it to counsel.
+                    Hover, tap, or focus any folder to inspect the packet. The
+                    full {deliverableTreeLeaves.length}-file tree is further down
+                    the article.
                   </p>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300">
-                  3 outputs
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+                  {WORKING_FOLDER_OUTPUT_FOLDERS.length} folders
                 </span>
               </div>
 
               <div className="space-y-3">
                 {WORKING_FOLDER_OUTPUT_FOLDERS.map((folder) => {
                   const isExpanded = expandedOutputId === folder.id;
+                  const hiddenFiles = folder.totalFiles - folder.files.length;
 
                   return (
                     <div key={folder.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-2">
@@ -4439,7 +4665,8 @@ export function WorkingFolderViz() {
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-semibold text-white">
-                            {folder.name}
+                            {folder.name}{" "}
+                            <span className="font-normal text-slate-400">· {folder.totalFiles} files</span>
                           </span>
                           <span className="mt-1 block text-xs leading-5 text-slate-300">
                             {folder.summary}
@@ -4479,6 +4706,11 @@ export function WorkingFolderViz() {
                                     <span className="truncate">{fileName}</span>
                                   </li>
                                 ))}
+                                {hiddenFiles > 0 ? (
+                                  <li className="px-3 py-1 text-xs font-medium text-slate-400">
+                                    + {hiddenFiles} more in {folder.name}
+                                  </li>
+                                ) : null}
                               </ul>
                             </div>
                           </motion.div>
@@ -4503,6 +4735,7 @@ export function StackViz() {
   const activeCardId = previewCardId ?? expandedCardId;
   const transition = prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: "easeOut" as const };
 
+  // Card bodies are `<span>`s because they render inside the card `<button>`.
   const stackCards = [
     {
       id: "agent" as const,
@@ -4515,16 +4748,16 @@ export function StackViz() {
       accent: "border-sky-300/25 bg-sky-400/[0.08]",
       badge: "border-sky-300/20 bg-sky-400/10 text-sky-100",
       renderBody: (
-        <div className="grid gap-2">
+        <span className="grid gap-2">
           {["Claude Opus", "Claude Sonnet", "GPT-5"].map((model) => (
-            <div
+            <span
               key={model}
-              className="rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100"
+              className="block rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100"
             >
               {model}
-            </div>
+            </span>
           ))}
-        </div>
+        </span>
       ),
     },
     {
@@ -4538,24 +4771,24 @@ export function StackViz() {
       accent: "border-emerald-300/25 bg-emerald-400/[0.08]",
       badge: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
       renderBody: (
-        <div className="grid gap-2 sm:grid-cols-2">
+        <span className="grid gap-2 lg:grid-cols-2">
           {[
             { label: "Kernel", icon: <Shield className="h-4 w-4" aria-hidden="true" /> },
             { label: "Operators", icon: <GitBranch className="h-4 w-4" aria-hidden="true" /> },
             { label: "Intake phases", icon: <MapPinned className="h-4 w-4" aria-hidden="true" /> },
             { label: "Reference corpus", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
           ].map((item) => (
-            <div
+            <span
               key={item.label}
               className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-emerald-100">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-emerald-100">
                 {item.icon}
               </span>
               <span>{item.label}</span>
-            </div>
+            </span>
           ))}
-        </div>
+        </span>
       ),
     },
     {
@@ -4569,7 +4802,7 @@ export function StackViz() {
       accent: "border-violet-300/25 bg-violet-400/[0.08]",
       badge: "border-violet-300/20 bg-violet-400/10 text-violet-100",
       renderBody: (
-        <div className="space-y-2">
+        <span className="block space-y-2">
           {[
             { label: "Tax return", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
             { label: "401(k) statement", icon: <Landmark className="h-4 w-4" aria-hidden="true" /> },
@@ -4577,20 +4810,20 @@ export function StackViz() {
             { label: "Passport", icon: <Globe className="h-4 w-4" aria-hidden="true" /> },
             { label: "Crypto seed", icon: <Lock className="h-4 w-4" aria-hidden="true" /> },
           ].map((item, index) => (
-            <div
+            <span
               key={item.label}
               className={cn(
                 "flex items-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-sm font-medium text-slate-100",
                 index > 0 && "ml-3",
               )}
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-violet-100">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-violet-100">
                 {item.icon}
               </span>
               <span>{item.label}</span>
-            </div>
+            </span>
           ))}
-        </div>
+        </span>
       ),
     },
   ];
@@ -4630,7 +4863,8 @@ export function StackViz() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        {/* Three-up only from `md`: at 640-767px three columns are ~150px of content each. */}
+        <div className="grid gap-4 md:grid-cols-3">
           {stackCards.map((card, index) => {
             const isActive = activeCardId === card.id;
             const isExpanded = expandedCardId === card.id;
@@ -4638,6 +4872,7 @@ export function StackViz() {
 
             return (
               <div key={card.id} role="group" aria-label={`${card.eyebrow} column`} className="space-y-3">
+                <h4 className="sr-only">{card.title}</h4>
                 <motion.button
                   type="button"
                   aria-label={`${card.title}. ${card.helper}`}
@@ -4668,38 +4903,38 @@ export function StackViz() {
                     isActive || isExpanded ? "shadow-[0_18px_44px_rgba(15,23,42,0.5)]" : "border-white/10 bg-white/[0.03]",
                   )}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold", card.badge)}>
+                  <span className="flex items-start justify-between gap-3">
+                    <span className="block">
+                      <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold", card.badge)}>
                         {card.eyebrow}
                       </span>
-                      <h4 className="mt-3 text-xl font-semibold text-white">{card.title}</h4>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">{card.helper}</p>
-                    </div>
+                      <span className="mt-3 block text-xl font-semibold text-white">{card.title}</span>
+                      <span className="mt-2 block text-sm leading-6 text-slate-300">{card.helper}</span>
+                    </span>
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-white">
                       {card.icon}
                     </span>
-                  </div>
+                  </span>
 
-                  <div className="mt-4">{card.renderBody}</div>
+                  <span className="mt-4 block">{card.renderBody}</span>
 
                   <AnimatePresence initial={false}>
                     {isActive || isExpanded ? (
-                      <motion.p
+                      <motion.span
                         initial={prefersReducedMotion ? false : { opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={prefersReducedMotion ? undefined : { opacity: 0 }}
                         transition={transition}
-                        className="mt-4 rounded-2xl border border-white/10 bg-black/25 px-3 py-3 text-sm leading-6 text-slate-200"
+                        className="mt-4 block rounded-2xl border border-white/10 bg-black/25 px-3 py-3 text-sm leading-6 text-slate-200"
                       >
                         {card.detail}
-                      </motion.p>
+                      </motion.span>
                     ) : null}
                   </AnimatePresence>
                 </motion.button>
 
                 {index < stackCards.length - 1 ? (
-                  <div className="flex justify-center sm:hidden">
+                  <div className="flex justify-center md:hidden">
                     <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-300">
                       <ArrowDown className="h-4 w-4" aria-hidden="true" />
                       feeds the package
@@ -4711,7 +4946,7 @@ export function StackViz() {
           })}
         </div>
 
-        <div className="relative hidden h-16 sm:block" aria-hidden="true">
+        <div className="relative hidden h-16 md:block" aria-hidden="true">
           <div className="absolute left-[16.66%] top-0 h-8 w-px -translate-x-1/2 bg-white/15" />
           <div className="absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 bg-white/15" />
           <div className="absolute left-[83.33%] top-0 h-8 w-px -translate-x-1/2 bg-white/15" />
@@ -4722,7 +4957,7 @@ export function StackViz() {
           </div>
         </div>
 
-        <div className="flex justify-center sm:hidden" aria-hidden="true">
+        <div className="flex justify-center md:hidden" aria-hidden="true">
           <div className="rounded-full border border-white/10 bg-white/[0.04] p-2 text-slate-200">
             <ArrowDown className="h-4 w-4" aria-hidden="true" />
           </div>
@@ -4731,7 +4966,7 @@ export function StackViz() {
         <div className="rounded-[26px] border border-emerald-300/20 bg-emerald-400/[0.08] p-5 md:p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-100">Output package</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">Output package</p>
               <p className="text-2xl font-semibold text-white">Complete, signable estate plan package</p>
               <p className="max-w-3xl text-sm leading-7 text-slate-100/90">
                 Intake outputs, planning recommendations, file requests, and document-ready instructions land in one folder. You can execute it directly or, if you choose, hand the Attorney Engagement Brief to a lawyer for a short sign-off review.

@@ -5,7 +5,7 @@ import {
   useCallback,
   useRef,
   useEffect,
-  useLayoutEffect,
+  useId,
   type CSSProperties,
   type ReactNode,
 } from "react";
@@ -56,6 +56,7 @@ export function TooltipShell({
 }: TooltipShellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const descriptionId = useId();
   const [tooltipLayout, setTooltipLayout] = useState<{
     position: "top" | "bottom";
     style: CSSProperties;
@@ -110,7 +111,10 @@ export function TooltipShell({
 
   useEffect(() => {
     const checkMobile = () => {
-      const narrowViewport = window.matchMedia("(max-width: 900px)").matches;
+      // Sheet mode for narrow viewports or any touch-first device (iPad
+      // included). The sheet itself is no longer hidden at any breakpoint, so
+      // this single decision is the only visibility owner.
+      const narrowViewport = window.matchMedia("(max-width: 767px)").matches;
       const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)").matches;
       setIsMobile(narrowViewport || coarsePointer);
     };
@@ -119,7 +123,7 @@ export function TooltipShell({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isOpen) updatePosition();
   }, [isOpen, updatePosition]);
 
@@ -177,6 +181,12 @@ export function TooltipShell({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsOpen(false);
+        return;
+      }
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         const touchEnvironment =
@@ -189,10 +199,31 @@ export function TooltipShell({
         }
       }
     },
-    [isMobile]
+    [isMobile, isOpen]
   );
 
   const handleClose = useCallback(() => setIsOpen(false), []);
+
+  // Desktop tooltip: Escape anywhere and pointer-down outside both the trigger
+  // and the tooltip dismiss it (previously only mouseleave/blur timers could).
+  useEffect(() => {
+    if (!isOpen || isMobile) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+      if (triggerRef.current?.contains(t) || tooltipRef.current?.contains(t)) return;
+      setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [isOpen, isMobile]);
 
   const variantStyles = {
     cyan: "#22d3ee",
@@ -217,15 +248,23 @@ export function TooltipShell({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         className={cn(
-          "appearance-none bg-transparent border-none p-0 m-0 text-inherit font-inherit text-left cursor-help inline focus:outline-none",
+          // Visible keyboard focus by default so no consumer can forget it;
+          // the ring takes the trigger's own text colour.
+          "appearance-none bg-transparent border-none p-0 m-0 text-inherit font-inherit text-left cursor-help inline rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
           className
         )}
         role="button"
         tabIndex={0}
-        aria-label={ariaLabel}
+        // The visible word stays the accessible name (an aria-label here
+        // replaced "alpha" with "Explain term: Alpha" mid-sentence for
+        // screen-reader users); the purpose is exposed as a description.
+        aria-describedby={descriptionId}
         aria-expanded={isOpen}
       >
         {children}
+        <span id={descriptionId} className="sr-only">
+          {ariaLabel ?? "Definition available"}
+        </span>
       </span>
 
       {/* Desktop Tooltip */}

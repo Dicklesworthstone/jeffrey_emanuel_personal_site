@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
@@ -21,6 +21,51 @@ import illustration from "@/assets/slack_migration_post_illustration.webp";
 import { MathTooltip } from "./math-tooltip";
 import { getJargon } from "@/lib/slack-migration-jargon";
 import { getScrollMetrics } from "@/lib/utils";
+import ErrorBoundary from "@/components/error-boundary";
+
+// Sized placeholders so the dynamic chunks don't shove the prose around when
+// they resolve. Heights approximate each viz's rendered height (phone / desktop).
+const VIZ_MIN_HEIGHT = {
+  cost: "min-h-[58rem] md:min-h-[46rem]",
+  pipeline: "min-h-[106rem] md:min-h-[98rem]",
+  matrix: "min-h-[160rem] md:min-h-[130rem]",
+  cutover: "min-h-[92rem] md:min-h-[52rem]",
+} as const;
+type VizKey = keyof typeof VIZ_MIN_HEIGHT;
+
+function VizSkeleton({ viz }: { viz: VizKey }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`sm-viz-container flex ${VIZ_MIN_HEIGHT[viz]} items-center justify-center`}
+    >
+      <span className="sr-only">Loading visualization</span>
+      <span
+        aria-hidden="true"
+        className="h-5 w-5 rounded-full border-2 border-slate-600 border-t-cyan-400 motion-safe:animate-spin"
+      />
+    </div>
+  );
+}
+
+function VizFallback() {
+  return (
+    <div
+      role="alert"
+      className="sm-viz-container flex min-h-[16rem] items-center justify-center px-6 text-center"
+    >
+      <p className="text-sm text-slate-400">
+        This visualization failed to load. The surrounding text covers the same ground.
+      </p>
+    </div>
+  );
+}
+
+// A runtime error inside one viz should not unmount the whole article.
+function SafeViz({ children }: { children: ReactNode }) {
+  return <ErrorBoundary fallback={<VizFallback />}>{children}</ErrorBoundary>;
+}
 
 // Dynamic import visualizations (no SSR — they use browser APIs / framer-motion)
 const CostCompoundingViz = dynamic(
@@ -28,28 +73,28 @@ const CostCompoundingViz = dynamic(
     import("./slack-migration-visualizations").then((m) => ({
       default: m.CostCompoundingViz,
     })),
-  { ssr: false },
+  { ssr: false, loading: () => <VizSkeleton viz="cost" /> },
 );
 const PhasePipelineViz = dynamic(
   () =>
     import("./slack-migration-visualizations").then((m) => ({
       default: m.PhasePipelineViz,
     })),
-  { ssr: false },
+  { ssr: false, loading: () => <VizSkeleton viz="pipeline" /> },
 );
 const DataPreservationMatrixViz = dynamic(
   () =>
     import("./slack-migration-visualizations").then((m) => ({
       default: m.DataPreservationMatrixViz,
     })),
-  { ssr: false },
+  { ssr: false, loading: () => <VizSkeleton viz="matrix" /> },
 );
 const CutoverSimulatorViz = dynamic(
   () =>
     import("./slack-migration-visualizations").then((m) => ({
       default: m.CutoverSimulatorViz,
     })),
-  { ssr: false },
+  { ssr: false, loading: () => <VizSkeleton viz="cutover" /> },
 );
 
 // Fonts — the editorial system shared across this site's long-form articles
@@ -92,15 +137,14 @@ function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
     <a
       href={SOURCE_GUIDE_HREF}
       download={SOURCE_GUIDE_FILENAME}
-      className={`group relative inline-flex items-center gap-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-purple-500/10 via-cyan-500/10 to-emerald-500/10 backdrop-blur-xl transition-all hover:border-cyan-400/60 hover:shadow-[0_0_32px_rgba(6,182,212,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+      className={`group relative inline-flex items-center gap-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/[0.06] backdrop-blur-xl transition-[border-color,box-shadow] hover:border-cyan-400/60 hover:shadow-[0_0_32px_rgba(6,182,212,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
         compact ? "px-4 py-3" : "px-5 py-4 md:px-6 md:py-5"
       }`}
-      aria-label="Download the full migration guide as Markdown"
     >
-      {/* Subtle animated gradient border glow on hover */}
+      {/* Subtle glow on hover */}
       <span
         aria-hidden="true"
-        className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/0 via-cyan-500/0 to-emerald-500/0 group-hover:from-purple-500/10 group-hover:via-cyan-500/10 group-hover:to-emerald-500/10 transition-all pointer-events-none"
+        className="absolute inset-0 rounded-2xl bg-cyan-500/0 group-hover:bg-cyan-500/[0.06] transition-colors pointer-events-none"
       />
       <div className="relative flex h-11 w-11 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:bg-cyan-500/20 group-hover:border-cyan-400/40 transition-colors">
         <FileDown className="w-5 h-5 md:w-6 md:h-6 text-cyan-300" />
@@ -109,11 +153,11 @@ function MarkdownDownloadButton({ compact = false }: { compact?: boolean }) {
         <p className="text-sm md:text-base font-bold text-white tracking-tight">
           Download the operator primer as Markdown
         </p>
-        <p className="text-[11px] md:text-xs text-slate-400 font-mono tracking-wide mt-0.5">
+        <p className="text-[12px] text-slate-400 font-mono tracking-wide mt-0.5">
           agent-readable handoff · pairs with the three skills
         </p>
       </div>
-      <span className="relative ml-1 md:ml-2 inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/15 px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-cyan-200 shrink-0">
+      <span className="relative ml-1 md:ml-2 inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/15 px-2.5 py-1 text-[11px] font-mono uppercase tracking-widest text-cyan-200 shrink-0">
         <FileDown className="w-3 h-3" />
         .md
       </span>
@@ -149,10 +193,11 @@ function Code({ children }: { children: ReactNode }) {
   );
 }
 
-// Inline monospace snippet
+// Inline monospace snippet. Wraps (with a break opportunity anywhere) so long
+// tokens inside narrow grid cells never get clipped by the scope's overflow clip.
 function Mono({ children }: { children: ReactNode }) {
   return (
-    <span className="font-mono text-[0.85em] text-cyan-200 bg-cyan-500/10 border border-cyan-500/10 rounded px-1.5 py-[1px] whitespace-nowrap">
+    <span className="font-mono text-[0.85em] text-cyan-200 bg-cyan-500/10 border border-cyan-500/10 rounded px-1.5 py-[1px] whitespace-normal [overflow-wrap:anywhere]">
       {children}
     </span>
   );
@@ -173,7 +218,7 @@ function RefTable({
   return (
     <div className="sm-table-wrap">
       {caption && (
-        <p className="px-4 pt-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-slate-500">
+        <p className="px-4 pt-3 pb-1 text-[12px] font-mono uppercase tracking-widest text-slate-500">
           {caption}
         </p>
       )}
@@ -420,7 +465,6 @@ const DECISION_ACCENT: Record<
     bg: string;
     text: string;
     numBg: string;
-    rail: string;
     pillBg: string;
     pillBorder: string;
     pillText: string;
@@ -431,7 +475,6 @@ const DECISION_ACCENT: Record<
     bg: "bg-purple-500/[0.04]",
     text: "text-purple-300",
     numBg: "bg-purple-500/15 border-purple-500/30 text-purple-200",
-    rail: "bg-purple-500/40",
     pillBg: "bg-purple-500/12",
     pillBorder: "border-purple-500/30",
     pillText: "text-purple-200",
@@ -441,7 +484,6 @@ const DECISION_ACCENT: Record<
     bg: "bg-cyan-500/[0.04]",
     text: "text-cyan-300",
     numBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-200",
-    rail: "bg-cyan-500/40",
     pillBg: "bg-cyan-500/12",
     pillBorder: "border-cyan-500/30",
     pillText: "text-cyan-200",
@@ -451,7 +493,6 @@ const DECISION_ACCENT: Record<
     bg: "bg-emerald-500/[0.04]",
     text: "text-emerald-300",
     numBg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-200",
-    rail: "bg-emerald-500/40",
     pillBg: "bg-emerald-500/12",
     pillBorder: "border-emerald-500/30",
     pillText: "text-emerald-200",
@@ -461,7 +502,6 @@ const DECISION_ACCENT: Record<
     bg: "bg-amber-500/[0.04]",
     text: "text-amber-300",
     numBg: "bg-amber-500/15 border-amber-500/30 text-amber-200",
-    rail: "bg-amber-500/40",
     pillBg: "bg-amber-500/12",
     pillBorder: "border-amber-500/30",
     pillText: "text-amber-200",
@@ -474,11 +514,7 @@ function DecisionCard({ data }: { data: DecisionCardData }) {
     <div
       className={`relative rounded-2xl border ${cls.border} ${cls.bg} p-5 md:p-6 backdrop-blur-xl overflow-hidden`}
     >
-      <div
-        aria-hidden
-        className={`absolute left-0 top-5 bottom-5 w-[3px] rounded-full ${cls.rail} opacity-70`}
-      />
-      <div className="flex items-center gap-3 mb-4 md:mb-5 pl-2">
+      <div className="flex items-center gap-3 mb-4 md:mb-5">
         <span
           className={`inline-flex h-7 w-7 items-center justify-center rounded-lg border ${cls.numBg} font-mono text-[12px] font-bold`}
         >
@@ -490,7 +526,7 @@ function DecisionCard({ data }: { data: DecisionCardData }) {
           {data.question}
         </p>
       </div>
-      <div className="flex flex-col gap-2 md:gap-2.5 pl-2">
+      <div className="flex flex-col gap-2 md:gap-2.5">
         {data.branches.map((b, i) => (
           <DecisionBranchRow key={i} accent={data.accent} branch={b} />
         ))}
@@ -508,12 +544,12 @@ function DecisionBranchRow({
 }) {
   const cls = DECISION_ACCENT[accent];
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-2 md:gap-4 items-start rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2.5 md:px-4 md:py-3">
-      <div className="flex items-center gap-2 min-w-0">
+    <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-2 md:gap-4 items-start rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2.5 md:px-4 md:py-3">
+      <div className="flex items-start gap-2 min-w-0">
         <span aria-hidden className={`text-[14px] ${cls.text}`}>
           →
         </span>
-        <span className="text-[13px] md:text-[14px] font-semibold text-slate-100 truncate">
+        <span className="text-[13px] md:text-[14px] font-semibold text-slate-100">
           {branch.answer}
         </span>
       </div>
@@ -537,7 +573,7 @@ function DecisionPill({
   const cls = DECISION_ACCENT[accent];
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10.5px] md:text-[11px] font-mono font-semibold ${cls.pillBg} ${cls.pillBorder} ${cls.pillText}`}
+      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[12px] font-mono font-semibold ${cls.pillBg} ${cls.pillBorder} ${cls.pillText}`}
     >
       {children}
     </span>
@@ -545,18 +581,34 @@ function DecisionPill({
 }
 
 export function SlackMigrationArticle() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const articleRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
 
-  // Scroll progress bar
+  // Scroll progress bar — written straight to the DOM from a rAF-throttled
+  // passive listener, so scrolling never re-renders the article tree.
   useEffect(() => {
-    const handleScroll = () => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
       const { progress } = getScrollMetrics();
-      setScrollProgress(progress);
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${progress})`;
+      }
+      if (scrollHintRef.current) {
+        scrollHintRef.current.style.opacity = String(Math.max(0, 0.5 - progress * 5));
+      }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   // Section reveal on scroll
@@ -586,7 +638,7 @@ export function SlackMigrationArticle() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -60px 0px" },
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" },
     );
     targets.forEach((el) => {
       el.classList.add("sm-fade-section");
@@ -607,8 +659,10 @@ export function SlackMigrationArticle() {
     >
       {/* Scroll progress */}
       <div
+        ref={progressRef}
+        aria-hidden="true"
         className="sm-progress-bar"
-        style={{ transform: `scaleX(${scrollProgress})` }}
+        style={{ transform: "scaleX(0)" }}
       />
 
       {/* ========== HERO ========== */}
@@ -651,9 +705,10 @@ export function SlackMigrationArticle() {
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl lg:text-3xl text-slate-400 max-w-3xl mx-auto leading-tight mt-8 md:mt-12 font-light">
-              Two paired skills. One focused weekend. Roughly a{" "}
-              <span className="text-emerald-300">99% cut</span> in ongoing cost,
-              and your whole chat history on hardware you own.
+              Two paired skills. One focused weekend.{" "}
+              <span className="text-emerald-300">86–99% lower ongoing cost</span>{" "}
+              depending on headcount and plan, and your whole chat history on
+              hardware you own.
             </p>
 
             {/* Illustration */}
@@ -702,8 +757,10 @@ export function SlackMigrationArticle() {
 
         {/* Scroll indicator */}
         <div
+          ref={scrollHintRef}
+          aria-hidden="true"
           className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
-          style={{ opacity: Math.max(0, 0.5 - scrollProgress * 5) }}
+          style={{ opacity: 0.5 }}
         >
           <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
             Scroll to Explore
@@ -716,11 +773,11 @@ export function SlackMigrationArticle() {
       <section data-section="download-cta" className="pt-4 pb-8 md:pt-6 md:pb-12">
         <EC>
           <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.3em] text-slate-500">
+            <p className="text-[11px] md:text-[12px] font-mono uppercase tracking-[0.3em] text-slate-500">
               For operators who want to run this
             </p>
             <MarkdownDownloadButton />
-            <p className="text-[11px] md:text-xs text-slate-500 font-mono max-w-[560px] leading-relaxed">
+            <p className="text-[12px] text-slate-500 font-mono max-w-[560px] leading-relaxed">
               The agent-readable companion to the three skills. Paste the path into Claude Code or Codex and the agent has everything it needs to drive the migration.
             </p>
           </div>
@@ -758,9 +815,12 @@ export function SlackMigrationArticle() {
             {"The thing that actually got me interested in writing this up, by the way, isn’t Slack specifically. It’s the broader shape of problems like Slack: expensive enterprise software whose moat is mostly the difficulty of migrating off. Jira is one of these. Splunk is one of these. The pattern is always the same: your vendor quietly raises the price every year, you shop around, you find something plausible and open-source, you sit down and think about how much of a project it would actually be to move your data over, and you just stay and pay. Two well-designed agent skills break that pattern. The rest of this article is the Slack case in full operational detail; the pattern itself generalizes to other corners of enterprise software, and I’ll come back to it at the end."}
           </p>
 
-          {/* Table of contents */}
+          {/* Table of contents — labelled by the nav, not a heading, so the
+              outline stays h1 → h2 (the first h2 comes after this) */}
           <nav className="sm-toc" aria-label="Table of contents">
-            <h3>Contents</h3>
+            <p className="text-[12px] font-mono uppercase tracking-[0.22em] text-slate-400 mb-3.5">
+              Contents
+            </p>
             <ol>
               <li><a href="#install">Install the skills</a></li>
               <li><a href="#why-bother">Why bother migrating?</a></li>
@@ -780,8 +840,8 @@ export function SlackMigrationArticle() {
       {/* ========== SKILL CATALOG CALLOUTS ========== */}
       <section data-section="catalog">
         <EC>
-          <div className="my-5 md:my-6 rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-purple-500/[0.05] via-cyan-500/[0.05] to-emerald-500/[0.05] p-5 md:p-6 backdrop-blur-xl">
-            <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
+          <div className="my-5 md:my-6 rounded-2xl border border-cyan-500/25 bg-cyan-500/[0.04] p-5 md:p-6 backdrop-blur-xl">
+            <p className="text-[11px] md:text-[12px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
               Skill catalog pages · open in a new tab
             </p>
             <ul className="space-y-2.5 text-[13px] md:text-[14px] leading-relaxed">
@@ -827,7 +887,7 @@ export function SlackMigrationArticle() {
           <div className="my-5 md:my-6 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.04] via-cyan-500/[0.04] to-emerald-500/[0.04] p-5 md:p-6 backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-4">
               <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-emerald-300">
+              <p className="text-[11px] md:text-[12px] font-mono uppercase tracking-[0.25em] text-emerald-300">
                 What shipped in the latest release · April 2026
               </p>
             </div>
@@ -1029,7 +1089,9 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
 
         <EC>
           <div className="sm-viz-wrap">
-            <CostCompoundingViz />
+            <SafeViz>
+              <CostCompoundingViz />
+            </SafeViz>
           </div>
         </EC>
       </section>
@@ -1047,7 +1109,9 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
           </p>
 
           <div className="sm-viz-wrap">
-            <PhasePipelineViz />
+            <SafeViz>
+              <PhasePipelineViz />
+            </SafeViz>
           </div>
         </EC>
 
@@ -1063,7 +1127,7 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
             <div className="rounded-xl border border-purple-500/20 bg-purple-500/[0.04] p-4 md:p-5">
-              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-purple-300 mb-3">
+              <p className="text-[11px] md:text-[12px] font-mono uppercase tracking-[0.25em] text-purple-300 mb-3">
                 Four non-negotiable validators
               </p>
               <ul className="space-y-2 text-[13px] md:text-[14px] text-slate-300 leading-relaxed">
@@ -1074,7 +1138,7 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
               </ul>
             </div>
             <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] p-4 md:p-5">
-              <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
+              <p className="text-[11px] md:text-[12px] font-mono uppercase tracking-[0.25em] text-cyan-300 mb-3">
                 Six focused subagents
               </p>
               <ul className="space-y-2 text-[13px] md:text-[14px] text-slate-300 leading-relaxed font-mono">
@@ -1148,12 +1212,12 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
               "Every internal stakeholder will ask some variant of this (legal, HR, the people who ran Slackbot automations, the guy with four hundred saved items): "
             }
             <em>“does my X survive?”</em>
-            {" There are three possible answers, and the skill classifies each Slack feature into exactly one of them. "}
-            <strong>Native</strong> means it imports as first-class Mattermost data: public and private channel messages, DMs, threads, reactions, file attachments, pinned messages, channel topics, custom emoji images. <strong><J t="sidecar">Sidecar</J></strong> means the content is preserved, but as posts in a dedicated archive channel rather than as native Mattermost objects. Canvases, lists, and admin audit CSVs all end up this way. <strong>Unrecoverable</strong> means the content is not in Slack’s export at all and cannot be migrated; the best you can do is document it in <J t="unresolved-gaps">unresolved-gaps.md</J>, which the skill generates automatically, and plan a rebuild or an acceptance.
+            {" There are four possible answers, and the skill classifies each Slack feature into exactly one of them. "}
+            <strong>Native</strong> means it imports as first-class Mattermost data: public and private channel messages, DMs, threads, reactions, file attachments, pinned messages, channel topics, custom emoji images. <strong><J t="sidecar">Sidecar</J></strong> means the content is preserved, but as posts in a dedicated archive channel rather than as native Mattermost objects. Canvases, lists, Workflow Builder JSON, and admin audit CSVs all end up this way. <strong>Partial</strong> only shows up on Pro: the content imports natively, but only the slice the export token’s account can see (its own private channels and DMs), and the remainder is named in the gaps list rather than pretended away. <strong>Unrecoverable</strong> means the content is not in Slack’s export at all and cannot be migrated; the best you can do is document it in <J t="unresolved-gaps">unresolved-gaps.md</J>, which the skill generates automatically, and plan a rebuild or an acceptance.
           </p>
           <p>
             {
-              "The matrix below lets you filter by disposition and toggle between Business+ and Pro plans. On Business+, most things are native. On Pro, private channels and DMs downgrade because Slack's Free/Pro export cannot see content the export token's user is not a party to; you fall back to "
+              "The matrix below lets you filter by disposition and toggle between Business+ and Pro plans. On Business+, most things are native. On Pro, private channels and DMs downgrade to partial because Slack's Free/Pro export cannot see content the export token's user is not a party to; you fall back to "
             }
             <J t="track-b">slackdump-primary</J>
             {" and inherit that blind spot. The honest way to handle it is to write the blind spot into "}
@@ -1162,7 +1226,9 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
           </p>
 
           <div className="sm-viz-wrap">
-            <DataPreservationMatrixViz />
+            <SafeViz>
+              <DataPreservationMatrixViz />
+            </SafeViz>
           </div>
 
           <p>
@@ -1292,7 +1358,9 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
           </p>
 
           <div className="sm-viz-wrap">
-            <CutoverSimulatorViz />
+            <SafeViz>
+              <CutoverSimulatorViz />
+            </SafeViz>
           </div>
 
           <p>
@@ -1303,7 +1371,7 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
             {" click, not an “Approve for the rest of the session” click. The approvals are cheap and the alternative is risky. Second: the import is "}
             <J t="idempotent-import">idempotent</J>
             {", which is the reason you can re-run cutover if the network flakes at seventy percent. Mattermost de-duplicates posts by Slack message ID; a second run catches what the first missed without double-posting anything. Third: if anything goes sideways after the import job completes, rollback is one command with a deliberately annoying confirmation phrase baked in: "}
-            <span className="font-mono text-xs bg-white/[0.04] border border-white/10 rounded px-1.5 py-0.5">ROLLBACK_CONFIRMATION=I_UNDERSTAND_THIS_RESTORES_BACKUPS</span>
+            <code className="font-mono text-xs bg-white/[0.04] border border-white/10 rounded px-1.5 py-0.5 break-all">ROLLBACK_CONFIRMATION=I_UNDERSTAND_THIS_RESTORES_BACKUPS</code>
             {". The verbatim phrase is required on purpose; rollback restores the DB from the pre-cutover dump and is not a thing you want to kick off accidentally."}
           </p>
           <p>
@@ -1475,15 +1543,15 @@ claude plugins install slack-migration-to-mattermost-phase-3-ongoing-maintenance
 
           <div className="sm-sign-off">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 via-cyan-500/20 to-emerald-500/20 border border-white/10">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15 border border-cyan-500/30">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400">
+                <p className="text-[12px] font-mono uppercase tracking-[0.2em] text-slate-400">
                   TL;DR
                 </p>
                 <p className="text-[13px] text-slate-300">
-                  Two agent skills. One weekend. ~99% lower ongoing cost. Slack keeps working until you flip the switch yourself.
+                  Two agent skills. One weekend. 86–99% lower ongoing cost depending on headcount and plan. Slack keeps working until you flip the switch yourself.
                 </p>
               </div>
             </div>

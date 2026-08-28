@@ -208,8 +208,9 @@ export function TldrHero({ className, id }: TldrHeroProps) {
             transition={{ duration: reducedMotion ? 0 : 0.4 }}
             className="inline-flex items-center gap-2 rounded-full bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-300 ring-1 ring-inset ring-violet-500/20"
           >
-            <Cog className="h-4 w-4" />
-            <span>Open Source Ecosystem</span>
+            <Cog className="h-4 w-4" aria-hidden="true" />
+            {/* Data eyebrow derived from the tool list; falls back to the generic label */}
+            <span>{hero.eyebrow ?? "Open Source Ecosystem"}</span>
           </motion.div>
 
           {/* Title */}

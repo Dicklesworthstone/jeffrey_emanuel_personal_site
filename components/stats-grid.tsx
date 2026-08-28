@@ -78,7 +78,7 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
         return (
           <div
             key={stat.label}
-            className="group relative bg-slate-950/40 px-6 py-6 backdrop-blur transition-colors hover:bg-slate-950/20"
+            className="group relative bg-slate-950/40 px-6 py-6 transition-colors pointer-fine:backdrop-blur pointer-coarse:bg-slate-950/70 hover:bg-slate-950/20"
             style={{
               // Stagger the animation slightly for each stat
               animationDelay: `${index * 100}ms`,
@@ -88,7 +88,7 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
             <div className="absolute inset-x-0 top-0 h-px origin-center scale-x-0 bg-gradient-to-r from-sky-400 via-violet-400 to-sky-400 transition-transform duration-500 group-hover:scale-x-100" aria-hidden="true" />
 
             {/* Subtle inner glow on hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true" />
 
             <dt className="text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors group-hover:text-sky-400/70">
               {stat.label}
@@ -105,12 +105,12 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
               ) : (
                 stat.value
               )}
+              {stat.helper && (
+                <p className="mt-2 text-xs font-medium leading-relaxed tracking-normal text-slate-400/80">
+                  {stat.helper}
+                </p>
+              )}
             </dd>
-            {stat.helper && (
-              <p className="mt-2 text-xs font-medium leading-relaxed text-slate-400/80">
-                {stat.helper}
-              </p>
-            )}
           </div>
         );
       })}

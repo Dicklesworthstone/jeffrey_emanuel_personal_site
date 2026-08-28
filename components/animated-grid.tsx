@@ -13,6 +13,12 @@ interface AnimatedGridProps {
   initialDelay?: number;
   /** Show scroll progress dots on mobile for horizontal-scroll containers */
   scrollIndicator?: boolean;
+  /**
+   * Stagger the children in when the grid scrolls into view. Reserve this for
+   * the first section of a page; later sections should render settled
+   * (`animateIn={false}`) so every section does not enter the same way.
+   */
+  animateIn?: boolean;
 }
 
 // Stagger container for scroll-triggered animations
@@ -59,9 +65,11 @@ export default function AnimatedGrid({
   staggerDelay = 0.1,
   initialDelay = 0.05,
   scrollIndicator = false,
+  animateIn = true,
 }: AnimatedGridProps) {
   const prefersReducedMotion = useReducedMotion();
-  const variants = prefersReducedMotion ? reducedMotionVariants : itemVariants;
+  const shouldAnimate = animateIn && !prefersReducedMotion;
+  const variants = shouldAnimate ? itemVariants : reducedMotionVariants;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [atEnd, setAtEnd] = useState(false);
@@ -102,7 +110,7 @@ export default function AnimatedGrid({
         ref={scrollRef}
         variants={containerVariants}
         custom={{ staggerDelay, initialDelay }}
-        initial="hidden"
+        initial={shouldAnimate ? "hidden" : false}
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
         className={cn(className)}

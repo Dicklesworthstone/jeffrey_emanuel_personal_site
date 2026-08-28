@@ -5,6 +5,7 @@ const imageCache = new Map<string, { data: ArrayBuffer; contentType: string; tim
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 const MAX_CACHE_SIZE = 20; // Reduced to 20 to prevent memory pressure in lambda
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB max per image
+const UPSTREAM_TIMEOUT_MS = 8000; // Don't let a slow upstream hold the lambda open
 
 // Allowed domains for security (including www subdomains)
 const ALLOWED_DOMAINS = [
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
       const response = await fetch(currentUrl, {
         headers,
         redirect: "manual",
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
       });
 
       if (response.status >= 300 && response.status < 400) {
@@ -106,10 +108,7 @@ export async function GET(request: NextRequest) {
     const response = await fetchAllowedImage(url);
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: `Failed to fetch image: ${response.statusText}` },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: "Upstream image fetch failed" }, { status: 502 });
     }
 
     // Verify final URL after redirects
@@ -154,10 +153,12 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    // Log the detail server-side; never echo upstream error text to the client.
     console.error("OG image fetch error:", error);
+    const timedOut = error instanceof Error && error.name === "TimeoutError";
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to fetch image" },
-      { status: 500 }
+      { error: timedOut ? "Upstream image fetch timed out" : "Failed to fetch image" },
+      { status: timedOut ? 504 : 502 }
     );
   }
 }

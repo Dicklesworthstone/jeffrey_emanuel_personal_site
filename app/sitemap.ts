@@ -34,10 +34,11 @@ function normalizeWritingPath(pathname: string): string {
   return `/writing/${normalizeWritingSlug(slug)}`;
 }
 
-function parseDateOrNow(value: unknown): Date {
-  if (typeof value !== "string") return new Date();
+/** Parse a frontmatter/content date; unknown or invalid dates yield undefined (no lastmod claimed). */
+function parseKnownDate(value: unknown): Date | undefined {
+  if (typeof value !== "string" || !value.trim()) return undefined;
   const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -46,19 +47,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticPaths = new Set(navItems.map((item) => item.href));
   staticPaths.add("/nvidia-story");
 
+  // Static and project routes have no tracked modification date, so no
+  // `lastModified` is claimed for them (a build-time "now" would be a lie and
+  // teaches crawlers to ignore lastmod for the whole domain).
   const staticPages = Array.from(staticPaths).map((href) => ({
     url: toAbsoluteUrl(href, origin),
-    lastModified: new Date(),
     changeFrequency: 'monthly' as const,
     priority: href === '/' ? 1 : 0.8,
   }));
 
-  const writingPageMap = new Map<string, Date>();
+  const writingPageMap = new Map<string, Date | undefined>();
   const upsertWritingPage = (pathname: string, dateValue: unknown) => {
     const normalizedPath = normalizeWritingPath(pathname);
-    const nextDate = parseDateOrNow(dateValue);
+    const nextDate = parseKnownDate(dateValue);
     const existingDate = writingPageMap.get(normalizedPath);
-    if (!existingDate || nextDate.getTime() > existingDate.getTime()) {
+    if (!writingPageMap.has(normalizedPath)) {
+      writingPageMap.set(normalizedPath, nextDate);
+      return;
+    }
+    if (nextDate && (!existingDate || nextDate.getTime() > existingDate.getTime())) {
       writingPageMap.set(normalizedPath, nextDate);
     }
   };
@@ -75,14 +82,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const writingPages = Array.from(writingPageMap.entries()).map(([pathname, lastModified]) => ({
     url: toAbsoluteUrl(pathname, origin),
-    lastModified,
+    ...(lastModified && { lastModified }),
     changeFrequency: 'weekly' as const,
     priority: 0.6,
   }));
 
   const projectPages = getProjectSlugs().map((slug) => ({
     url: toAbsoluteUrl(`/projects/${slug}`, origin),
-    lastModified: new Date(),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
