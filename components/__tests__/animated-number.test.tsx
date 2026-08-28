@@ -52,7 +52,8 @@ describe("AnimatedNumber", () => {
 
   describe("initial value (no 0 flash)", () => {
     it("server markup contains the real number, not 0", () => {
-      const html = renderToString(<AnimatedNumber value={20} suffix="K+" />);
+      // React separates adjacent text expressions with <!-- --> markers.
+      const html = renderToString(<AnimatedNumber value={20} suffix="K+" />).replace(/<!--.*?-->/g, "");
       expect(html).toContain("20K+");
       expect(html).not.toContain(">0K+<");
     });

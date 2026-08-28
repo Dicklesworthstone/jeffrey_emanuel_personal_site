@@ -15,8 +15,10 @@ export function parseStatValue(value: string): {
   suffix: string;
   isAnimatable: boolean;
 } {
-  // Match patterns like "10K+", "7", "15+", "20K+", "$600B"
-  const match = value.match(/^([^0-9,.]+)?([0-9,.]+)(K|M|B)?(\+)?$/i);
+  // Match patterns like "10K+", "7", "15+", "20K+", "$600B". Only a currency
+  // symbol counts as a prefix: approximations such as "~15M" are rendered
+  // verbatim rather than counted up from 0.
+  const match = value.match(/^([$€£¥])?([0-9,.]+)(K|M|B)?(\+)?$/i);
 
   if (!match) {
     return { number: 0, prefix: "", suffix: value, isAnimatable: false };
