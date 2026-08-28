@@ -17,14 +17,6 @@ import type { TldrFlywheelTool } from "@/lib/content";
 const DIAGRAM_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 const DIAGRAM_HIGHLIGHT_ATTR = "data-diagram-highlighted";
 
-function getHasFinePointer() {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
-    return false;
-  }
-
-  return window.matchMedia(DIAGRAM_POINTER_QUERY).matches;
-}
-
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -49,8 +41,8 @@ function getCurvedPath(from: NodePosition, to: NodePosition) {
   const midX = (from.x + to.x) / 2;
   const midY = (from.y + to.y) / 2;
   const pullFactor = 0.3;
-  const controlX = midX + (VB_CENTER - midX) * pullFactor;
-  const controlY = midY + (VB_CENTER - midY) * pullFactor;
+  const controlX = (midX + (VB_CENTER - midX) * pullFactor).toFixed(2);
+  const controlY = (midY + (VB_CENTER - midY) * pullFactor).toFixed(2);
   return `M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}`;
 }
 
@@ -69,7 +61,9 @@ export function TldrSynergyDiagram({
   const cardHighlightRefs = useRef<HTMLElement[]>([]);
   const lastTouchActivationRef = useRef(0);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-  const [hasFinePointer, setHasFinePointer] = useState(getHasFinePointer);
+  // Starts false and syncs in an effect: reading matchMedia during the first
+  // client render diverges from the SSR markup and triggers hydration errors.
+  const [hasFinePointer, setHasFinePointer] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
   const scopeId = useId();
@@ -201,9 +195,11 @@ export function TldrSynergyDiagram({
     const positions: Record<string, NodePosition> = {};
     coreTools.forEach((tool, index) => {
       const angle = (index / coreTools.length) * 2 * Math.PI - Math.PI / 2;
+      // Rounded: raw trig floats can serialize differently server vs client,
+      // causing hydration mismatches in SSR'd SVG attributes.
       positions[tool.id] = {
-        x: VB_CENTER + VB_RADIUS * Math.cos(angle),
-        y: VB_CENTER + VB_RADIUS * Math.sin(angle),
+        x: Number((VB_CENTER + VB_RADIUS * Math.cos(angle)).toFixed(2)),
+        y: Number((VB_CENTER + VB_RADIUS * Math.sin(angle)).toFixed(2)),
       };
     });
     return positions;

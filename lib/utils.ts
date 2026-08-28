@@ -30,6 +30,29 @@ export function formatDate(dateString: string): string {
   }).format(date);
 }
 
+let cachedWebGLSupport: boolean | null = null;
+
+/**
+ * Probe once whether a WebGL context can actually be created. Mounting an R3F
+ * <Canvas> on a machine without GPU/WebGL throws an uncatchable async error
+ * ("Error creating WebGL context"), so callers should check this first and
+ * render their static fallback instead.
+ */
+export function supportsWebGL(): boolean {
+  if (typeof window === "undefined") return false;
+  if (cachedWebGLSupport !== null) return cachedWebGLSupport;
+
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+    cachedWebGLSupport = gl !== null;
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+  } catch {
+    cachedWebGLSupport = false;
+  }
+  return cachedWebGLSupport;
+}
+
 /**
  * Cross-browser scroll metrics for mobile/desktop.
  * Some engines report scroll state on body, others on documentElement/scroller.

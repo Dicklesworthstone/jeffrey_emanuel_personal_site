@@ -162,7 +162,7 @@ export function BakeryArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section data-section="hero" className="min-h-screen flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
+      <section data-section="hero" className="min-h-dvh flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
         <div className="absolute inset-0 z-0 scale-110 md:scale-100">
           <BakeryHero />
         </div>

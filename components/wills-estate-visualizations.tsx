@@ -3594,6 +3594,11 @@ export function PricingComparisonViz() {
               <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
                 {formatCurrency(savingsVsAttorney)}
               </p>
+              <p className="mt-1 text-[11px] font-medium leading-4 text-emerald-200/70">
+                One-time attorney fee minus one month of the subscription
+                ({formatCurrency(PRICING_JSM_MONTHLY_PRICE)}/mo) — assumes the
+                work fits in a single month.
+              </p>
             </motion.div>
 
             <p className="mt-4 text-sm font-medium leading-6 text-slate-200">

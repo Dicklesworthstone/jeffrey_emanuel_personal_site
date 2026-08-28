@@ -15,7 +15,7 @@ import { heroContent, heroStats, siteConfig, type Stat } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useClickParticles } from "@/hooks/use-click-particles";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
-import { cn } from "@/lib/utils";
+import { cn, supportsWebGL } from "@/lib/utils";
 import headshot from "@/assets/jeff_emanuel_headshot.webp";
 import Magnetic from "@/components/magnetic";
 
@@ -70,7 +70,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
       if (shouldRenderScene) return;
 
       const enable = () => {
-        setShouldRenderScene(true);
+        // Without WebGL, keep the static fallback instead of letting the
+        // Canvas throw an uncatchable async context-creation error.
+        setShouldRenderScene(supportsWebGL());
         idleHandleRef.current = null;
       };
 

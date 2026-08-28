@@ -170,7 +170,7 @@ export function HoeffdingArticle() {
       </nav>
 
       {/* ========== HERO ========== */}
-      <section data-section="hero" className="min-h-screen flex flex-col justify-start relative overflow-hidden pt-24 md:pt-32 pb-20">
+      <section data-section="hero" className="min-h-dvh flex flex-col justify-start relative overflow-hidden pt-24 md:pt-32 pb-20">
         <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="absolute inset-0">
           <HoeffdingHero />
         </motion.div>

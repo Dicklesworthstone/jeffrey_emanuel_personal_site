@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
+// Visibility-gated Canvas: pauses each scene's render loop while offscreen
+import Canvas from "@/components/gated-canvas";
 import { OrbitControls, Float, Text, MeshWobbleMaterial, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";

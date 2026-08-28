@@ -131,6 +131,13 @@ export function getColorDefinition(colorClass: string): ColorDefinition {
   );
   
   const result = key ? TAILWIND_GRADIENTS[key] : DEFAULT_COLOR;
+  if (!key && process.env.NODE_ENV === "development") {
+    // A silent violet fallback hides palette drift between content data and
+    // this map — surface it during development instead.
+    console.warn(
+      `[colors] No gradient mapping for "${colorClass}" — falling back to violet. Add it to TAILWIND_GRADIENTS in lib/colors.ts.`
+    );
+  }
   partialMatchCache.set(colorClass, result);
   return result;
 }

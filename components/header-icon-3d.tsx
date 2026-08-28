@@ -4,6 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, Suspense, Component, type ReactNode } from "react";
 import * as THREE from "three";
 import { Sparkles } from "lucide-react";
+import { supportsWebGL } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // Error Boundary for 3D content
@@ -804,6 +805,11 @@ export default function HeaderIcon3D() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration detection for client-only 3D rendering
     setMounted(true);
+    // Without WebGL, mounting the Canvas throws an uncatchable async error —
+    // fall back to the static icon instead.
+    if (!supportsWebGL()) {
+      setHasError(true);
+    }
     // Check reduced motion preference
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mq.matches);

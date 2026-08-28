@@ -4,6 +4,12 @@ import { useEffect, useRef, useState, useCallback, type KeyboardEvent as ReactKe
 import { motion, useReducedMotion } from "framer-motion";
 import { Eye, Heart, Bookmark, TrendingUp } from "lucide-react";
 import { AnimatedNumber } from "@/components/animated-number";
+import { heroStats } from "@/lib/content";
+
+// Single source of truth: the follower count shown here must match the
+// "Audience on X" stat maintained in lib/content.ts.
+const audienceStat = heroStats.find((s) => s.label === "Audience on X");
+const audienceThousands = Number.parseInt(audienceStat?.value ?? "", 10) || 0;
 
 interface XEngagementStat {
   icon: typeof Eye;
@@ -128,7 +134,7 @@ export function XStatsCard() {
       </dt>
       <dd className="mt-3 text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
         <AnimatedNumber
-          value={29}
+          value={audienceThousands}
           suffix="K+"
           duration={1800}
           isVisible={isVisible}

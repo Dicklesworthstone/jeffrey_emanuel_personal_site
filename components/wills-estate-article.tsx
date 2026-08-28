@@ -425,7 +425,7 @@ export function WillsEstateArticle() {
       {/* ========== HERO (hgjp.7) ========== */}
       <section
         data-section="hero"
-        className="min-h-screen flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32"
+        className="min-h-dvh flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32"
       >
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full pointer-events-none"

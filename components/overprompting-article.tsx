@@ -138,7 +138,7 @@ export function OverpromptingArticle() {
       />
 
       {/* ========== HERO ========== */}
-      <section data-section="hero" className="min-h-screen flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
+      <section data-section="hero" className="min-h-dvh flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32">
         {/* Warm ambient glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full pointer-events-none"

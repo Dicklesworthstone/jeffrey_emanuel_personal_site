@@ -454,18 +454,33 @@ export function ProcessNexus() {
     updateProcess(id, { state: 'CHOOSING', choosing: true });
     await new Promise(r => setTimeout(r, 800));
     
-    const maxNum = Math.max(...processesRef.current.map(p => p.number)) + 1;
-    updateProcess(id, { state: 'WAITING', number: maxNum, choosing: false });
+    const myNumber = Math.max(...processesRef.current.map(p => p.number)) + 1;
+    updateProcess(id, { state: 'WAITING', number: myNumber, choosing: false });
 
-    // Phase 2: Verifying Consensus (The Ring)
+    const waitUntil = async (pred: () => boolean) => {
+      while (isMountedRef.current && !pred()) {
+        await new Promise(r => setTimeout(r, 150));
+      }
+    };
+
+    // Phase 2: Verifying Consensus (The Ring) — Lamport's actual wait rule:
+    // let each peer finish choosing, then defer to any peer whose
+    // (ticket, id) pair precedes ours until it releases its ticket.
     setCheckingId(id);
     for (let j = 0; j < numProcesses; j++) {
       if (id === j) continue;
       if (!isMountedRef.current) return;
-      
+
       setTargetId(j);
       lightTap();
-      await new Promise(r => setTimeout(r, window.innerWidth < 768 ? 400 : 600)); 
+      await new Promise(r => setTimeout(r, window.innerWidth < 768 ? 400 : 600));
+      await waitUntil(() => !processesRef.current[j]?.choosing);
+      await waitUntil(() => {
+        const peer = processesRef.current[j];
+        if (!peer || peer.number === 0) return true;
+        return peer.number > myNumber || (peer.number === myNumber && j > id);
+      });
+      if (!isMountedRef.current) return;
     }
     setCheckingId(null);
     setTargetId(null);
@@ -642,7 +657,13 @@ export function MemoryResilienceViz() {
                       <Activity className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" />
                       <span className="text-[10px] md:text-xs font-bold text-white uppercase tracking-widest">Bus Contention</span>
                    </div>
-                   <span className="text-[8px] md:text-[10px] font-mono text-rose-500 animate-pulse font-bold tracking-widest">CRITICAL_OVERLOAD</span>
+                   {intensity > 0.7 ? (
+                     <span className="text-[8px] md:text-[10px] font-mono text-rose-500 animate-pulse font-bold tracking-widest">CRITICAL_OVERLOAD</span>
+                   ) : intensity > 0.2 ? (
+                     <span className="text-[8px] md:text-[10px] font-mono text-amber-500 font-bold tracking-widest">BUS_DEGRADED</span>
+                   ) : (
+                     <span className="text-[8px] md:text-[10px] font-mono text-emerald-500 font-bold tracking-widest">BUS_NOMINAL</span>
+                   )}
                 </div>
                 <p className="text-xs md:text-sm text-slate-400 leading-relaxed">
                   A &ldquo;torn read&rdquo; happens when a process reads <code className="text-amber-300">0xFFFF</code> while the bus is 
@@ -719,10 +740,14 @@ export function MemoryResilienceViz() {
 
                  <div className="flex justify-between text-[8px] md:text-[9px] text-slate-400 relative z-10">
                     <span className="flex items-center gap-2">
-                       <span className="w-1 h-1 rounded-full bg-amber-500 animate-ping" />
+                       <span className={`w-1 h-1 rounded-full ${intensity > 0 ? "bg-amber-500 animate-ping" : "bg-emerald-500"}`} />
                        SAMPLING_BUS_0xBA...
                     </span>
-                    <span className="text-amber-500/50 uppercase tracking-widest font-bold">Torn Read Detected</span>
+                    {intensity > 0.15 ? (
+                      <span className="text-amber-500/50 uppercase tracking-widest font-bold">Torn Read Detected</span>
+                    ) : (
+                      <span className="text-emerald-500/50 uppercase tracking-widest font-bold">Signal Clean</span>
+                    )}
                  </div>
               </div>
 

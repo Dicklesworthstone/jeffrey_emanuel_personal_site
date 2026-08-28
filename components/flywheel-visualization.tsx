@@ -61,12 +61,14 @@ const NODE_SIZE = 60;
 // Mobile scale factor - fit 520px into ~300px viewport with padding
 const MOBILE_SCALE = 0.58;
 
-// Calculate node positions in a circle
+// Calculate node positions in a circle.
+// Rounded to 2 decimals: raw trig floats can serialize differently between the
+// server and client engines, causing hydration mismatches in SSR'd SVG.
 function getNodePosition(index: number, total: number) {
   const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
   return {
-    x: CENTER + Math.cos(angle) * RADIUS,
-    y: CENTER + Math.sin(angle) * RADIUS,
+    x: Number((CENTER + Math.cos(angle) * RADIUS).toFixed(2)),
+    y: Number((CENTER + Math.sin(angle) * RADIUS).toFixed(2)),
   };
 }
 
@@ -78,8 +80,8 @@ function getCurvedPath(from: { x: number; y: number }, to: { x: number; y: numbe
 
   // Pull control point toward center for a nice curve
   const pullFactor = 0.3;
-  const controlX = midX + (CENTER - midX) * pullFactor;
-  const controlY = midY + (CENTER - midY) * pullFactor;
+  const controlX = (midX + (CENTER - midX) * pullFactor).toFixed(2);
+  const controlY = (midY + (CENTER - midY) * pullFactor).toFixed(2);
 
   return `M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}`;
 }

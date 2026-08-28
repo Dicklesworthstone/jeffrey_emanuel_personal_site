@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Minimize2, RotateCcw, Layers, Microscope, LayoutTemplate, MousePointer2
 } from "lucide-react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
+// Visibility-gated Canvas: pauses each scene's render loop while offscreen
+import Canvas from "@/components/gated-canvas";
 import { 
   Float, PerspectiveCamera, Stars, MeshTransmissionMaterial, 
   CameraControls, Environment, Grid

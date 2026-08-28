@@ -614,7 +614,7 @@ export function SlackMigrationArticle() {
       {/* ========== HERO ========== */}
       <section
         data-section="hero"
-        className="min-h-screen flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32"
+        className="min-h-dvh flex flex-col justify-start relative overflow-hidden pb-20 pt-24 md:pt-32"
       >
         {/* Ambient glows */}
         <div

@@ -101,7 +101,7 @@ function SynergyPill({
   if (!linkedTool) return null;
 
   return (
-    <div className="group/synergy relative flex min-h-[44px] items-center gap-2 rounded-lg bg-white/5 px-3 py-2.5 ring-1 ring-inset ring-white/5 transition-all hover:bg-white/10 hover:ring-white/15 sm:px-3 sm:py-2">
+    <div className="group/synergy relative flex min-h-[44px] items-center gap-2 rounded-lg bg-white/5 px-3 py-2.5 ring-1 ring-inset ring-white/5 transition-[background-color,box-shadow] hover:bg-white/10 hover:ring-white/15 sm:px-3 sm:py-2">
       <div
         className={cn(
           "flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-gradient-to-br sm:h-6 sm:w-6",
@@ -206,7 +206,7 @@ export const TldrToolCard = memo(function TldrToolCard({
         }}
         className={cn(
           "relative h-full flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm",
-          "transition-all duration-300",
+          "transition-[border-color,background-color,box-shadow] duration-300",
           "hover:border-white/20 hover:bg-slate-900/70",
           isFocused && "ring-2 ring-violet-500/60 border-violet-500/40",
           isSelectedForCompare && "ring-2 ring-violet-400/70 border-violet-400/40",
@@ -251,7 +251,7 @@ export const TldrToolCard = memo(function TldrToolCard({
           >
             <div
               className={cn(
-                "absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all sm:right-4 sm:top-4",
+                "absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-[border-color,background-color,color] sm:right-4 sm:top-4",
                 isSelectedForCompare
                   ? "border-violet-400 bg-violet-500 text-white"
                   : "border-slate-500 bg-slate-900/80"

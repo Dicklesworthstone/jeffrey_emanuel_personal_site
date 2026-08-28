@@ -214,7 +214,7 @@ const Input = forwardRef<
         ref={ref}
         aria-invalid={error}
         className={cn(
-          "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-all duration-200",
+          "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-[border-color,box-shadow] duration-200",
           "focus:border-violet-500/50 focus:outline-none focus:ring-2 focus:ring-violet-500/20",
           Icon && "pl-10",
           error
@@ -237,7 +237,7 @@ const Textarea = forwardRef<
       ref={ref}
       aria-invalid={error}
       className={cn(
-        "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-all duration-200 resize-none",
+        "w-full rounded-xl border bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-500 backdrop-blur-sm transition-[border-color,box-shadow] duration-200 resize-none",
         "focus:border-violet-500/50 focus:outline-none focus:ring-2 focus:ring-violet-500/20",
         error
           ? "border-rose-500/50 focus:border-rose-500/50 focus:ring-rose-500/20"

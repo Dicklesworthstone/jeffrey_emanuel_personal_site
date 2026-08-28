@@ -2,7 +2,9 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
+// Visibility-gated Canvas: pauses each scene's render loop while offscreen
+import Canvas from "@/components/gated-canvas";
 import { 
   PerspectiveCamera, 
   Float, 
@@ -63,18 +65,19 @@ class ProCMAES {
   dim: number;
   mean: number[];
   sigma: number;
-  lambda: number;
-  mu: number;
-  weights: number[];
-  mueff: number;
+  // `!` — assigned in the constructor via setLambda()
+  lambda!: number;
+  mu!: number;
+  weights!: number[];
+  mueff!: number;
   C: number[][];
   pc: number[];
   ps: number[];
-  cc: number;
-  cs: number;
-  c1: number;
-  cmu: number;
-  damps: number;
+  cc!: number;
+  cs!: number;
+  c1!: number;
+  cmu!: number;
+  damps!: number;
   chiN: number;
   generation: number;
   
@@ -87,9 +90,25 @@ class ProCMAES {
     this.sigma = sigma;
     this.generation = 0;
 
-    this.lambda = 4 + Math.floor(3 * Math.log(dim));
-    this.mu = Math.floor(this.lambda / 2);
-    
+    this.setLambda(4 + Math.floor(3 * Math.log(dim)));
+
+    this.C = Array.from({ length: dim }, (_, i) =>
+      Array.from({ length: dim }, (_, j) => (i === j ? 1 : 0))
+    );
+    this.pc = new Array(dim).fill(0);
+    this.ps = new Array(dim).fill(0);
+    this.chiN = Math.sqrt(dim) * (1 - 1 / (4 * dim) + 1 / (21 * dim**2));
+
+    this.syncEigen();
+  }
+
+  // Set population size and re-derive every parameter that depends on it —
+  // mutating `lambda` alone leaves mu/weights/mueff/cc/cs/c1/cmu/damps stale.
+  setLambda(lambda: number) {
+    const dim = this.dim;
+    this.lambda = lambda;
+    this.mu = Math.floor(lambda / 2);
+
     const rawWeights = Array.from({ length: this.mu }, (_, i) => Math.log(this.mu + 0.5) - Math.log(i + 1));
     const sumW = rawWeights.reduce((a, b) => a + b, 0);
     this.weights = rawWeights.map(w => w / sumW);
@@ -100,15 +119,6 @@ class ProCMAES {
     this.c1 = 2 / ((dim + 1.3)**2 + this.mueff);
     this.cmu = Math.min(1 - this.c1, 2 * (this.mueff - 2 + 1/this.mueff) / ((dim + 2)**2 + this.mueff));
     this.damps = 1 + 2 * Math.max(0, Math.sqrt((this.mueff - 1) / (dim + 1)) - 1) + this.cs;
-
-    this.C = Array.from({ length: dim }, (_, i) => 
-      Array.from({ length: dim }, (_, j) => (i === j ? 1 : 0))
-    );
-    this.pc = new Array(dim).fill(0);
-    this.ps = new Array(dim).fill(0);
-    this.chiN = Math.sqrt(dim) * (1 - 1 / (4 * dim) + 1 / (21 * dim**2));
-    
-    this.syncEigen();
   }
 
   private syncEigen() {
@@ -873,28 +883,33 @@ export function RestartViz() {
     let currentPopSize = 6;
     setPopSize(currentPopSize);
     setGeneration(0);
-    
+
+    // Track the live best value locally — reading the `bestVal` state here
+    // would see the stale value captured when the callback was created.
+    let liveBest = Infinity;
+
     for (let restart = 0; restart < 3; restart++) {
       const solver = new ProCMAES(2, [4, 4], 1.0);
-      solver.lambda = currentPopSize;
-      
+      solver.setLambda(currentPopSize);
+
       for (let i = 0; i < 30; i++) {
         const samples = solver.sample();
         const fitnesses = samples.map(objective);
         solver.update(samples, fitnesses);
         const best = Math.min(...fitnesses);
+        liveBest = Math.min(liveBest, best);
         setBestVal(best);
         setGeneration(g => g + 1);
         if (best < 1e-6) break;
         await new Promise(r => setTimeout(r, 40));
       }
-      
-      if (bestVal < 1e-6) break;
+
+      if (liveBest < 1e-6) break;
       currentPopSize *= 2;
       setPopSize(currentPopSize);
     }
     setIsRunning(false);
-  }, [objective, bestVal]);
+  }, [objective]);
 
   return (
     <div className="rq-viz-container !p-8 bg-purple-500/5 border-purple-500/20">
