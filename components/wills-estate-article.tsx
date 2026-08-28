@@ -489,10 +489,14 @@ export function WillsEstateArticle() {
         <EC>
           <div className="text-center relative z-20">
             {/* Badge */}
-            <div className="inline-flex items-center gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-cyan-400 tracking-[0.3em] uppercase backdrop-blur-xl">
+            {/* The label is too wide for one line on phones. Keeping the dot in
+                the text flow (rather than as a flex sibling) lets it stay with
+                the first line and the whole label centre like a sentence; as a
+                vertically-centred flex item it sat lopsided beside two lines. */}
+            <div className="inline-block text-center mb-10 md:mb-12 px-4 md:px-6 py-2.5 rounded-full border border-white/10 bg-white/5 text-[11px] md:text-[12px] font-mono text-cyan-400 tracking-[0.2em] sm:tracking-[0.3em] uppercase backdrop-blur-xl text-balance">
               <span
                 aria-hidden="true"
-                className="w-2 h-2 bg-cyan-400 rounded-full motion-safe:animate-pulse"
+                className="mr-3 inline-block align-middle w-2 h-2 bg-cyan-400 rounded-full motion-safe:animate-pulse"
               />
               AI Agents · Estate Planning · Skills
             </div>

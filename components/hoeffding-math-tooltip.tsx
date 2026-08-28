@@ -89,7 +89,7 @@ function MathTooltipContent({ math, activeColor }: { math: MathTerm; activeColor
         </p>
         {math.analogy && (
           <div 
-            className="rounded-xl border bg-opacity-5 p-3 text-[11px] text-slate-400 leading-relaxed italic"
+            className="rounded-xl border p-3 text-[11px] text-slate-400 leading-relaxed italic"
             style={{ borderColor: `${activeColor}20`, backgroundColor: `${activeColor}05` }}
           >
             <span 
@@ -133,7 +133,7 @@ function MathSheetContent({ math, activeColor }: { math: MathTerm; activeColor: 
 
         {math.analogy && (
           <div 
-            className="rounded-[2rem] border bg-opacity-5 p-8 shadow-inner"
+            className="rounded-[2rem] border p-8 shadow-inner"
             style={{ borderColor: `${activeColor}20`, backgroundColor: `${activeColor}05` }}
           >
             <h4 className="mb-4 text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: activeColor }}>Intuitive Analogy</h4>

@@ -161,9 +161,16 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             </Link>
           </Magnetic>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav.
+              Budget: the container is max-w-7xl (1280px) minus 2x32px padding
+              = 1216px of content, and the brand block occupies ~186px of it.
+              Eight items + search + CTA need ~934px at gap-4/px-3, so the full
+              bar only fits from 1280px up — below that it overflowed its
+              container and body{overflow-x:hidden} silently clipped Contact,
+              Search and the "Let's talk" CTA off the right edge. Narrower
+              viewports get the full-screen menu instead. */}
           <nav
-            className="hidden items-center gap-3 md:flex lg:gap-5 xl:gap-8"
+            className="hidden items-center gap-4 xl:flex"
             aria-label="Main navigation"
           >
             {navItems.map((item) => (
@@ -184,9 +191,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               aria-label={shortcutAriaLabel}
             >
               <Search className="h-4 w-4" />
-              <span className="hidden xl:inline">Search</span>
-              <kbd 
-                className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-slate-300 lg:inline-block"
+              <span className="hidden 2xl:inline">Search</span>
+              <kbd
+                className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-slate-300 xl:inline-block"
                 suppressHydrationWarning
               >
                 {shortcutDisplayKey}K
@@ -197,15 +204,27 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               <Link
                 href="/contact"
                 onTouchStart={mediumTap}
-                className="ml-2 lg:ml-4 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 lg:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+                className="ml-2 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 2xl:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
               >
                 Let&apos;s talk
               </Link>
             </Magnetic>
           </nav>
 
-          {/* Mobile Menu Toggle & Search */}
-          <div className="flex items-center gap-4 md:hidden">
+          {/* Mobile Menu Toggle & Search — mirrors the desktop nav's xl gate.
+              The links collapse into the full-screen menu below xl, but the
+              primary CTA stays in the bar from md up (it fits with ~290px to
+              spare at 768px), so tablet and small-laptop visitors don't have to
+              open a menu to find it. Phones keep search + toggle only. */}
+          <div className="flex items-center gap-3 sm:gap-4 xl:hidden">
+            <Link
+              href="/contact"
+              onTouchStart={mediumTap}
+              onClick={() => setOpen(false)}
+              className="hidden md:inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/10"
+            >
+              Let&apos;s talk
+            </Link>
             <button
               type="button"
               onClick={() => {
@@ -256,7 +275,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeOut" }}
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-[70] flex flex-col bg-slate-950/98 backdrop-blur-lg md:hidden overflow-y-auto will-change-[opacity]"
+            className="fixed inset-0 z-[70] flex flex-col bg-slate-950/98 backdrop-blur-lg xl:hidden overflow-y-auto will-change-[opacity]"
             style={{ transform: "translateZ(0)" }}
             role="dialog"
             aria-modal="true"
