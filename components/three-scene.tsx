@@ -77,9 +77,31 @@ const useTimeSlot = (intervalMinutes = SLOT_MINUTES) => {
   const [slot, setSlot] = useState(() => getSlot());
   useEffect(() => {
     const update = () => setSlot(getSlot());
-    // Update every minute
-    const id = setInterval(update, 60_000);
-    return () => clearInterval(id);
+    // Check once a minute, but only while the tab is visible; resync on return
+    let id: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (id === null) id = setInterval(update, 60_000);
+    };
+    const stop = () => {
+      if (id !== null) {
+        clearInterval(id);
+        id = null;
+      }
+    };
+    const syncToVisibility = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        update();
+        start();
+      }
+    };
+    start();
+    document.addEventListener("visibilitychange", syncToVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", syncToVisibility);
+    };
   }, [getSlot]);
   return slot;
 };

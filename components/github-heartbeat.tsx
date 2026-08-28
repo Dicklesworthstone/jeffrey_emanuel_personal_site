@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
+import { motion, useReducedMotion, useInView, AnimatePresence } from "framer-motion";
 import {
   GitCommit,
   GitPullRequest,
@@ -180,6 +180,9 @@ const colorMap: Record<string, { bg: string; text: string; border: string; glow:
 // Animated heartbeat line component
 function HeartbeatLine() {
   const prefersReducedMotion = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Mount the infinite sweep/pulse loops only while the line is on screen.
+  const isInView = useInView(containerRef, { margin: "100px" });
 
   if (prefersReducedMotion) {
     return (
@@ -198,7 +201,7 @@ function HeartbeatLine() {
   }
 
   return (
-    <div className="relative h-12 w-full overflow-hidden" aria-hidden="true">
+    <div ref={containerRef} className="relative h-12 w-full overflow-hidden" aria-hidden="true">
       {/* Static line background */}
       <svg viewBox="0 0 400 48" className="h-full w-full" preserveAspectRatio="none">
         <path
@@ -211,6 +214,7 @@ function HeartbeatLine() {
       </svg>
 
       {/* Animated heartbeat trace */}
+      {isInView && (
       <motion.div
         className="absolute inset-0"
         initial={{ x: "-100%" }}
@@ -249,8 +253,10 @@ function HeartbeatLine() {
           />
         </svg>
       </motion.div>
+      )}
 
       {/* Pulse dot */}
+      {isInView && (
       <motion.div
         className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400"
         animate={{
@@ -263,6 +269,7 @@ function HeartbeatLine() {
           ease: "easeInOut",
         }}
       />
+      )}
     </div>
   );
 }
@@ -430,10 +437,32 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     fetchEvents();
   }, []);
 
-  // Update relative time labels once per minute
+  // Update relative time labels once per minute; pause while the tab is hidden
   useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 60_000);
-    return () => window.clearInterval(id);
+    let id: number | null = null;
+    const start = () => {
+      if (id === null) id = window.setInterval(() => setNow(new Date()), 60_000);
+    };
+    const stop = () => {
+      if (id !== null) {
+        window.clearInterval(id);
+        id = null;
+      }
+    };
+    const syncToVisibility = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        setNow(new Date());
+        start();
+      }
+    };
+    start();
+    document.addEventListener("visibilitychange", syncToVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", syncToVisibility);
+    };
   }, []);
 
   const getLocalDayKey = useCallback((date: Date) => {

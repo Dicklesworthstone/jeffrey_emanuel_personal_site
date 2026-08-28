@@ -18,6 +18,7 @@ export default function NavItem({ href, label, active, prefersReducedMotion }: N
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "relative rounded-full px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap group",
         active ? "text-white" : "text-slate-400 hover:text-white"

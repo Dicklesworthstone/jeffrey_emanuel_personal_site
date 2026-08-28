@@ -130,7 +130,7 @@ export default function KeyboardShortcutsModal({
           >
             <div
               ref={modalRef}
-              className="rounded-2xl border border-white/10 bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl"
+              className="max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl"
             >
               {/* Header */}
               <div className="mb-6 flex items-center justify-between">
@@ -149,7 +149,7 @@ export default function KeyboardShortcutsModal({
                   ref={closeButtonRef}
                   type="button"
                   onClick={onClose}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
                   aria-label="Close shortcuts modal"
                 >
                   <X className="h-5 w-5" />

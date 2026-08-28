@@ -23,6 +23,7 @@ export default function GlowOrbits() {
     if (mediaQuery.matches) return;
 
     let handleMouseMove: ((e: MouseEvent) => void) | null = null;
+    let tweens: gsap.core.Tween[] = [];
 
     const ctx = gsap.context(() => {
       const rings = gsap.utils.toArray<HTMLElement>(".glow-ring");
@@ -32,51 +33,69 @@ export default function GlowOrbits() {
       // Reduce animation complexity on mobile
       if (isMobile) {
         // Only rotate, no scaling on mobile for better performance
-        gsap.to(rings, {
-          rotate: 360,
-          duration: 60, // Slower on mobile to reduce repaints
-          repeat: -1,
-          ease: "none",
-          transformOrigin: "50% 50%",
-          stagger: 0.3,
-        });
+        tweens = [
+          gsap.to(rings, {
+            rotate: 360,
+            duration: 60, // Slower on mobile to reduce repaints
+            repeat: -1,
+            ease: "none",
+            transformOrigin: "50% 50%",
+            stagger: 0.3,
+          }),
+        ];
       } else {
         // Full animations on desktop
-        gsap.to(rings, {
-          rotate: 360,
-          duration: 48,
-          repeat: -1,
-          ease: "none",
-          transformOrigin: "50% 50%",
-          stagger: 0.2,
-        });
+        tweens = [
+          gsap.to(rings, {
+            rotate: 360,
+            duration: 48,
+            repeat: -1,
+            ease: "none",
+            transformOrigin: "50% 50%",
+            stagger: 0.2,
+          }),
+          gsap.to(rings, {
+            yoyo: true,
+            repeat: -1,
+            duration: 9,
+            ease: "sine.inOut",
+            scale: 1.06,
+            stagger: 0.28,
+          }),
+        ];
 
-        gsap.to(rings, {
-          yoyo: true,
-          repeat: -1,
-          duration: 9,
-          ease: "sine.inOut",
-          scale: 1.06,
-          stagger: 0.28,
-        });
-
-        // Mouse interaction for parallax effect
+        // Mouse interaction for parallax effect. quickTo reuses a single
+        // tween instead of allocating one per mousemove event.
+        const quickX = gsap.quickTo(rootRef.current, "x", { duration: 1.5, ease: "power2.out" });
+        const quickY = gsap.quickTo(rootRef.current, "y", { duration: 1.5, ease: "power2.out" });
         handleMouseMove = (e: MouseEvent) => {
-          const { clientX, clientY } = e;
-          const xPos = (clientX / window.innerWidth - 0.5) * 60;
-          const yPos = (clientY / window.innerHeight - 0.5) * 60;
-
-          gsap.to(rootRef.current, {
-            x: xPos,
-            y: yPos,
-            duration: 1.5,
-            ease: "power2.out",
-          });
+          quickX((e.clientX / window.innerWidth - 0.5) * 60);
+          quickY((e.clientY / window.innerHeight - 0.5) * 60);
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mousemove", handleMouseMove, { passive: true });
       }
     }, rootRef);
+
+    // Pause the infinite tweens whenever the hero is offscreen or the tab is
+    // hidden so they stop consuming frames the user cannot see.
+    const setPaused = (paused: boolean) => {
+      for (const tween of tweens) {
+        if (paused) tween.pause();
+        else tween.play();
+      }
+    };
+    let inView = true;
+    const syncPlayState = () => setPaused(!inView || document.hidden);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        syncPlayState();
+      },
+      { rootMargin: "100px" }
+    );
+    observer.observe(rootRef.current);
+    document.addEventListener("visibilitychange", syncPlayState);
 
     // Listen for changes to prefers-reduced-motion
     const handleMotionPreferenceChange = (e: MediaQueryListEvent) => {
@@ -93,6 +112,8 @@ export default function GlowOrbits() {
     }
 
     return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", syncPlayState);
       ctx.revert();
       if (handleMouseMove) {
         window.removeEventListener("mousemove", handleMouseMove);

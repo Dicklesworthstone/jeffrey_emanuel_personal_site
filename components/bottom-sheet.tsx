@@ -73,11 +73,12 @@ export default function BottomSheet({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, closeOnEscape, onClose]);
 
-  // Focus trap: cycle Tab within the sheet
+  // Focus trap: cycle Tab within the sheet; restore focus on close
   useEffect(() => {
     if (!isOpen || !sheetRef.current) return;
 
     const sheet = sheetRef.current;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
 
     // Focus the first focusable element on open
     const focusFirst = () => {
@@ -117,6 +118,7 @@ export default function BottomSheet({
     return () => {
       cancelAnimationFrame(raf);
       sheet.removeEventListener("keydown", handleTab);
+      previouslyFocused?.focus();
     };
   }, [isOpen]);
 
@@ -221,7 +223,7 @@ export default function BottomSheet({
             type="button"
             onClick={onClose}
             onTouchStart={mediumTap}
-            className="absolute top-4 right-4 z-10 rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+            className="absolute top-4 right-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
             aria-label="Close"
           >
             <X className="h-5 w-5" />

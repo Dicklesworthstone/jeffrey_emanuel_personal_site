@@ -654,6 +654,7 @@ ${data.message}`
                     id="name"
                     type="text"
                     icon={User}
+                    autoComplete="name"
                     placeholder="Your name"
                     error={!!errors.name}
                     aria-describedby={errors.name ? "name-error" : undefined}
@@ -666,6 +667,8 @@ ${data.message}`
                     id="email"
                     type="email"
                     icon={Mail}
+                    autoComplete="email"
+                    inputMode="email"
                     placeholder="you@company.com"
                     error={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
@@ -678,6 +681,7 @@ ${data.message}`
                     id="company"
                     type="text"
                     icon={Building2}
+                    autoComplete="organization"
                     placeholder="Fund or firm name"
                     error={!!errors.company}
                     aria-describedby={errors.company ? "company-error" : undefined}
@@ -689,6 +693,7 @@ ${data.message}`
                   <Input
                     id="role"
                     type="text"
+                    autoComplete="organization-title"
                     placeholder="Your title"
                     {...register("role")}
                   />

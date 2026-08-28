@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { useReducedMotion, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface TypingAnimationProps {
@@ -39,14 +39,17 @@ export default function TypingAnimation({
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const containerRef = useRef<HTMLSpanElement>(null);
+  // Pause the typing loop while the component is offscreen.
+  const isInView = useInView(containerRef, { margin: "100px" });
 
   // Handle empty words array after hooks are called
   const hasWords = words.length > 0;
   const currentWord = hasWords ? words[currentWordIndex] : "";
 
   useEffect(() => {
-    // If reduced motion or no words, we don't need to run the animation logic
-    if (prefersReducedMotion || !hasWords) return;
+    // If reduced motion, offscreen, or no words, don't run the animation logic
+    if (prefersReducedMotion || !hasWords || !isInView) return;
 
     let timeout: NodeJS.Timeout;
 
@@ -96,6 +99,7 @@ export default function TypingAnimation({
     pauseAfterTyping,
     prefersReducedMotion,
     hasWords,
+    isInView,
   ]);
 
   // Handle empty words array - return null after hooks have been called
@@ -109,18 +113,11 @@ export default function TypingAnimation({
   }
 
   return (
-    <span className={cn("inline-flex items-baseline", className)}>
+    <span ref={containerRef} className={cn("inline-flex items-baseline", className)}>
       <span>{currentText}</span>
       {showCursor && (
-        <motion.span
-          className="ml-0.5 inline-block h-[1em] w-[3px] bg-current"
-          animate={{ opacity: [1, 0] }}
-          transition={{
-            duration: 0.8,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut",
-          }}
+        <span
+          className="animate-cursor-blink ml-0.5 inline-block h-[1em] w-[3px] bg-current"
           aria-hidden="true"
         />
       )}

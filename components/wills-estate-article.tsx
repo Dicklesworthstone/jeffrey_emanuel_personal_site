@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import illustration from "@/assets/wills_estate_post_illustration.webp";
 import {
   Crimson_Pro,
@@ -1815,12 +1816,12 @@ export function WillsEstateArticle() {
 
           <p>
             If you want the other concrete proof point, the{" "}
-            <a
+            <Link
               href="/writing/tax_gpt_using_ai_for_tax_prep"
               className="text-cyan-400 underline underline-offset-2"
             >
               tax-preparation article
-            </a>{" "}
+            </Link>{" "}
             is the first place this pattern became obvious to me. Estate
             planning is the second. If you have a frontier-model
             subscription already, the only real barrier to trying this

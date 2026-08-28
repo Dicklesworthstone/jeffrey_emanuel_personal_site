@@ -220,7 +220,7 @@ export function TldrHero({ className, id }: TldrHeroProps) {
             className="mt-6 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-6xl"
           >
             {hero.title}
-            <span className="block bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
               {hero.subtitle}
             </span>
           </motion.h1>
@@ -265,7 +265,7 @@ export function TldrHero({ className, id }: TldrHeroProps) {
                 className="mt-16 flex justify-center"
               >
                 <motion.div
-                  animate={reducedMotion ? {} : { y: [0, 8, 0] }}
+                  animate={reducedMotion || !isInView ? {} : { y: [0, 8, 0] }}
                   transition={{
                     duration: 2,
                     repeat: Infinity,

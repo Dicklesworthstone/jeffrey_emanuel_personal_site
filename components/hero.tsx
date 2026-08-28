@@ -4,7 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Suspense, useState, useEffect, useRef, useCallback } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ArrowRight, Briefcase, Workflow, ChevronDown } from "lucide-react";
 import GlowOrbits from "@/components/glow-orbits";
 import StatsGrid from "@/components/stats-grid";
@@ -143,7 +143,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
             className="flex items-center gap-5"
           >
             <div className="group relative h-16 w-16 overflow-hidden rounded-full shadow-2xl sm:h-20 sm:w-20">
-              <div className="absolute inset-0 motion-safe:animate-pulse bg-sky-500/20 blur-md group-hover:bg-sky-400/30" aria-hidden="true" />
+              <div className="absolute inset-0 bg-sky-500/20 blur-md transition-colors group-hover:bg-sky-400/30" aria-hidden="true" />
               <Image
                 src={headshot}
                 alt={`Headshot photo of ${siteConfig.name}`}
@@ -158,15 +158,9 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               <span className="text-base font-bold tracking-wide text-slate-100">
                 {siteConfig.name}
               </span>
-              <div className="flex items-center gap-2">
-                <span className="flex h-2 w-2" aria-hidden="true">
-                  <span className="absolute inline-flex h-2 w-2 motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                </span>
-                <span className="text-xs font-bold uppercase tracking-widest text-sky-400/90">
-                  Founder & CEO
-                </span>
-              </div>
+              <span className="text-xs font-bold uppercase tracking-widest text-sky-400/90">
+                Founder & CEO
+              </span>
             </div>
           </motion.div>
 
@@ -420,25 +414,29 @@ export default function Hero({ stats = heroStats }: HeroProps) {
         </div>
       </div>
 
-      {/* Scroll indicator - fades out after scrolling */}
-      <motion.div
-        className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
-        initial={{ opacity: hasScrolled ? 0 : 1 }}
-        animate={{ opacity: hasScrolled ? 0 : 1 }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
-        aria-hidden="true"
-      >
-        <motion.div
-          className="flex flex-col items-center gap-2"
-          animate={prefersReducedMotion ? {} : { y: [0, 6, 0] }}
-          transition={prefersReducedMotion ? {} : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <span className="text-xs font-medium uppercase tracking-widest text-slate-500">
-            Scroll
-          </span>
-          <ChevronDown className="h-5 w-5 text-slate-500" />
-        </motion.div>
-      </motion.div>
+      {/* Scroll indicator - unmounts after scrolling so its loop stops running */}
+      <AnimatePresence>
+        {!hasScrolled && (
+          <motion.div
+            className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
+            aria-hidden="true"
+          >
+            <motion.div
+              className="flex flex-col items-center gap-2"
+              animate={prefersReducedMotion ? {} : { y: [0, 6, 0] }}
+              transition={prefersReducedMotion ? {} : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <span className="text-xs font-medium uppercase tracking-widest text-slate-500">
+                Scroll
+              </span>
+              <ChevronDown className="h-5 w-5 text-slate-500" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform, useSpring } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { navItems, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
@@ -90,6 +90,54 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
 
   // Lock body scroll when menu is open
   useBodyScrollLock(open);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
+
+  // Modal semantics for the mobile menu: Escape closes, Tab cycles within,
+  // and focus returns to the toggle after dismissal.
+  useEffect(() => {
+    if (!open) return;
+
+    const menu = menuRef.current;
+    const toggle = menuToggleRef.current;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const focusables = () =>
+      Array.from(
+        menu?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      );
+
+    focusables()[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !menu?.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !menu?.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      (toggle ?? previouslyFocused)?.focus();
+    };
+  }, [open]);
 
   return (
     <>
@@ -182,13 +230,14 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 setOpen(false);
                 onOpenCommandPalette?.();
               }}
-              className="text-slate-400 hover:text-white"
+              className="flex h-11 w-11 items-center justify-center text-slate-400 hover:text-white"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
             </button>
             <button
               type="button"
+              ref={menuToggleRef}
               className="relative z-[95] inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-all active:scale-95"
               onClick={() => setOpen((v) => !v)}
               onTouchStart={lightTap}
@@ -219,6 +268,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={menuRef}
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
@@ -242,7 +292,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 setOpen(false);
               }}
               onTouchStart={mediumTap}
-              className="absolute right-4 top-[max(0.75rem,calc(0.75rem+env(safe-area-inset-top,0px))] z-[90] flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-slate-200 transition-all"
+              className="absolute right-4 top-[max(0.75rem,calc(0.75rem+env(safe-area-inset-top,0px)))] z-[90] flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-slate-200 transition-all"
               aria-label="Close navigation menu"
             >
               <X className="h-5 w-5" />
@@ -276,6 +326,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                     >
                       <Link
                         href={item.href}
+                        aria-current={active ? "page" : undefined}
                         className={cn(
                           "text-4xl font-bold tracking-tight transition-colors",
                           active ? "text-white" : "text-slate-500 active:text-slate-300"

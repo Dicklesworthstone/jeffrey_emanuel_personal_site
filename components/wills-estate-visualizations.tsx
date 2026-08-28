@@ -3767,6 +3767,7 @@ export function InstallFlowViz() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Post-mount flag to trigger entrance animations only on the client
     setMounted(true);
   }, []);
 

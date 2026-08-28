@@ -144,6 +144,8 @@ export function NewsletterSignup({
                   }
                 }}
                 placeholder="your@email.com"
+                autoComplete="email"
+                inputMode="email"
                 disabled={status === "submitting"}
                 className={cn(
                   "flex-1 rounded-lg border bg-slate-950/50 px-3 py-2 text-sm text-white placeholder:text-slate-500",
@@ -255,6 +257,8 @@ export function NewsletterSignup({
                     }
                   }}
                   placeholder="you@example.com"
+                  autoComplete="email"
+                  inputMode="email"
                   disabled={status === "submitting"}
                   aria-label="Email address"
                   aria-describedby={status === "error" ? "email-error" : undefined}

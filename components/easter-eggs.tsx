@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useKonamiCode } from "@/hooks/use-konami";
 
 /**
@@ -13,6 +13,7 @@ import { useKonamiCode } from "@/hooks/use-konami";
  */
 export default function EasterEggs() {
   const [showCelebration, setShowCelebration] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoggedRef = useRef(false);
 
@@ -71,19 +72,19 @@ export default function EasterEggs() {
     <AnimatePresence>
       {showCelebration && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
+          exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
           onClick={() => setShowCelebration(false)}
         >
           <motion.div
-            initial={{ y: 20 }}
+            initial={prefersReducedMotion ? { y: 0 } : { y: 20 }}
             animate={{ y: 0 }}
             className="text-center"
           >
             <motion.div
-              animate={{ rotate: [0, 10, -10, 10, 0] }}
+              animate={prefersReducedMotion ? undefined : { rotate: [0, 10, -10, 10, 0] }}
               transition={{ duration: 0.5 }}
               className="mb-4 text-8xl"
             >

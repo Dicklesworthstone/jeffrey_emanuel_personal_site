@@ -257,22 +257,25 @@ export function EndorsementShowcase({
         </button>
 
         {/* Dots indicator */}
-        <div className="flex gap-2" role="tablist" aria-label="Endorsement navigation">
+        <div className="flex" aria-label="Endorsement navigation">
           {otherItems.map((_, idx) => (
             <button
               type="button"
               key={idx}
               onClick={() => setCarouselIndex(idx)}
-              className={cn(
-                "h-2 w-2 rounded-full transition-all",
-                idx === safeCarouselIndex
-                  ? "w-6 bg-sky-400"
-                  : "bg-slate-600 hover:bg-slate-500"
-              )}
-              role="tab"
-              aria-selected={idx === safeCarouselIndex}
+              className="group/dot flex h-11 min-w-[24px] items-center justify-center px-1.5"
+              aria-current={idx === safeCarouselIndex ? "true" : undefined}
               aria-label={`Go to endorsement ${idx + 1}`}
-            />
+            >
+              <span
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  idx === safeCarouselIndex
+                    ? "w-6 bg-sky-400"
+                    : "w-2 bg-slate-600 group-hover/dot:bg-slate-500"
+                )}
+              />
+            </button>
           ))}
         </div>
 
@@ -421,22 +424,25 @@ export function EndorsementShowcase({
               <ChevronLeft className="h-5 w-5" />
             </button>
 
-            <div className="flex gap-2" role="tablist">
+            <div className="flex" aria-label="Endorsement navigation">
               {filteredEndorsements.map((_, idx) => (
                 <button
                   type="button"
                   key={idx}
                   onClick={() => setCarouselIndex(idx)}
-                  className={cn(
-                    "h-2 w-2 rounded-full transition-all",
-                    idx === safeCarouselIndex
-                      ? "w-6 bg-sky-400"
-                      : "bg-slate-600 hover:bg-slate-500"
-                  )}
-                  role="tab"
-                  aria-selected={idx === safeCarouselIndex}
+                  className="group/dot flex h-11 min-w-[24px] items-center justify-center px-1.5"
+                  aria-current={idx === safeCarouselIndex ? "true" : undefined}
                   aria-label={`Go to endorsement ${idx + 1}`}
-                />
+                >
+                  <span
+                    className={cn(
+                      "h-2 rounded-full transition-all",
+                      idx === safeCarouselIndex
+                        ? "w-6 bg-sky-400"
+                        : "w-2 bg-slate-600 group-hover/dot:bg-slate-500"
+                    )}
+                  />
+                </button>
               ))}
             </div>
 
