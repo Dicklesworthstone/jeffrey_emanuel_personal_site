@@ -230,7 +230,7 @@ test.describe("Wills & Estate Planning Article", () => {
       name: /anti-pattern card: the ex-spouse still on the IRA/i,
     });
     await expect(firstCard).toBeVisible();
-    await expectRevealed(page, 'button[aria-label*="the ex-spouse still on the IRA"]');
+    await expectRevealed(page, 'button[aria-label*="ex-spouse still on the IRA"]');
 
     runtime.assertClean();
   });

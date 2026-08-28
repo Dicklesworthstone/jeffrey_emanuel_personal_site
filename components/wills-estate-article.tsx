@@ -311,8 +311,16 @@ export function WillsEstateArticle() {
 
     const targetOffset = () => getFixedHeaderHeight() + TOC_JUMP_HEADER_GAP_PX;
     const alignAnchor = () => {
-      const top = anchor.getBoundingClientRect().top + window.scrollY - targetOffset();
-      window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
+      const top = Math.max(0, anchor.getBoundingClientRect().top + window.scrollY - targetOffset());
+      // `html { scroll-behavior: smooth }` would animate even a 20,000px jump
+      // (seconds of blurred motion); anything farther than a few screens
+      // jumps instantly, short hops keep the smooth glide.
+      const root = document.documentElement;
+      const farJump = Math.abs(top - window.scrollY) > window.innerHeight * 3;
+      const previous = root.style.scrollBehavior;
+      if (farJump) root.style.scrollBehavior = "auto";
+      window.scrollTo({ top, behavior: "auto" });
+      if (farJump) root.style.scrollBehavior = previous;
     };
     alignAnchor();
 
