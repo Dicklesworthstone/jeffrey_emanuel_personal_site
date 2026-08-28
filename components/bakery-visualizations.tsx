@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import * as THREE from "three";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
+import { supportsWebGL } from "@/lib/utils";
 
 const COLORS = {
   bg: "#020204",
@@ -109,6 +110,7 @@ export function BakeryHero() {
     const mouse = new THREE.Vector2(0, 0);
 
     const init = async () => {
+      if (!supportsWebGL()) return;
       const THREE = await import("three");
       if (!isMounted || !container) return;
 
@@ -117,7 +119,11 @@ export function BakeryHero() {
       const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 2000);
       camera.position.set(0, 0, isMobile ? 140 : 100);
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      } catch {
+        return; // context creation failed — keep the static gradient backdrop
+      }
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(renderer.domElement);

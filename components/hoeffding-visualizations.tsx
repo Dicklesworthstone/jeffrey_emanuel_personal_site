@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import * as d3 from "d3";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
+import { supportsWebGL } from "@/lib/utils";
 import { Activity, Zap, Compass, Info, MousePointer2, Settings2, ShieldCheck } from "lucide-react";
 
 const COLORS = {
@@ -188,7 +189,12 @@ export function HoeffdingHero() {
       camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
       camera.position.z = 45;
 
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      if (!supportsWebGL()) return;
+      try {
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      } catch {
+        return; // context creation failed — leave the static backdrop
+      }
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(renderer.domElement);

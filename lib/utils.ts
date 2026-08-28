@@ -43,8 +43,13 @@ export function supportsWebGL(): boolean {
   if (cachedWebGLSupport !== null) return cachedWebGLSupport;
 
   try {
+    // failIfMajorPerformanceCaveat: software rasterizers (e.g. SwiftShader)
+    // pass a plain probe but fail or crawl under a real three.js scene — treat
+    // them as unsupported and show the static fallback instead.
+    const attrs: WebGLContextAttributes = { failIfMajorPerformanceCaveat: true };
     const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+    const gl =
+      canvas.getContext("webgl2", attrs) ?? canvas.getContext("webgl", attrs);
     cachedWebGLSupport = gl !== null;
     gl?.getExtension("WEBGL_lose_context")?.loseContext();
   } catch {

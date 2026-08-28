@@ -13,6 +13,10 @@ bd.sock
 
 # Beads writer advisory flock (touched on every br open/close, never useful in git)
 .write.lock
+.br-*.lock
+
+# Local recovery snapshots (fixing-beads-problems skill)
+recovery_*/
 
 # Sync runtime/backoff state (created/removed by bd sync)
 sync-state.json
@@ -26,6 +30,9 @@ last-touched
 # Legacy database files
 db.sqlite
 bd.db
+
+# Temporary files (rebuilds, scratch)
+*.tmp
 
 # Merge artifacts (temporary files from 3-way merge)
 beads.base.jsonl

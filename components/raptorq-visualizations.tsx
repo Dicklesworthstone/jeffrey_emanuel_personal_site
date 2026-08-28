@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useDeviceCapabilities } from "@/hooks/use-mobile-optimizations";
+import { supportsWebGL } from "@/lib/utils";
 import { RaptorQMathTooltip } from "./raptorq-math-tooltip";
 
 const COLORS = {
@@ -74,7 +75,12 @@ export function HeroParticles() {
       camera.position.z = 55;
       camera.position.y = 12;
 
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+      if (!supportsWebGL()) return;
+      try {
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+      } catch {
+        return; // context creation failed — leave the static backdrop
+      }
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(renderer.domElement);
