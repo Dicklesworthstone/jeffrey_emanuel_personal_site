@@ -209,9 +209,12 @@ body {
   line-height: 1.6;
 }
 
+/* No z-index on <main>: a z-index here made <main> a stacking context, so
+   every position:fixed reading-progress bar rendered inside an article
+   (z-95) was trapped beneath the sibling fixed header (z-90). body::before's
+   grain is z-index:-1, so main needs no explicit layer to paint above it. */
 main {
   position: relative;
-  z-index: 1;
 }
 } /* end @layer base (resets) */
 
@@ -1371,7 +1374,9 @@ select:focus-visible {
 /* Display title - fluid clamp sizing */
 .overprompting-scope .op-display-title {
   font-family: var(--font-bricolage), system-ui, sans-serif;
-  font-size: clamp(3rem, 10vw, 7.5rem);
+  /* "OVERPROMPTING" is one unbreakable 13-letter word: at the old 3rem floor
+     it was ~390px wide on a 358px phone column and clipped at the right edge. */
+  font-size: clamp(2.25rem, 9.5vw, 7.5rem);
   line-height: 0.85;
   letter-spacing: -0.06em;
   font-weight: 900;
@@ -2991,20 +2996,10 @@ select:focus-visible {
   scroll-margin-top: 6rem;
 }
 
-/*
-  Reserve enough vertical space for the pricing comparison skeleton so a late
-  dynamic mount above the FAQ section is less likely to push the final TOC
-  anchor back below the fold after hash navigation.
-*/
-.sm-scope [data-viz="pricing-comparison"] [role="status"] {
-  min-height: 56rem;
-}
-
-@media (min-width: 768px) {
-  .sm-scope [data-viz="pricing-comparison"] [role="status"] {
-    min-height: 44rem;
-  }
-}
+/* (The pricing-comparison skeleton min-height override was removed: skeleton
+   heights are now computed per breakpoint from the data in
+   components/viz-error-boundary.tsx, and the skeletons are no longer
+   role="status" elements.) */
 
 /* Range slider: a 44px-tall hit box with a 6px painted track, so the thumb
    is comfortably grabbable on phones and vertical page panning still works. */

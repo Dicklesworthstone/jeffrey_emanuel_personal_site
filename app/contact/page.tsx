@@ -58,15 +58,17 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Newsletter Section */}
-            <div className="rounded-2xl border border-slate-800/80 bg-slate-950/50 p-1">
-              <NewsletterSignup
-                compact
-                heading="Or just follow along"
-                description="Get notified about new essays and tools."
-                className="w-full"
-              />
-            </div>
+            {/* Newsletter Section (hidden until a real list exists — see siteConfig.features) */}
+            {siteConfig.features.newsletter && (
+              <div className="rounded-2xl border border-slate-800/80 bg-slate-950/50 p-1">
+                <NewsletterSignup
+                  compact
+                  heading="Or just follow along"
+                  description="Get notified about new essays and tools."
+                  className="w-full"
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 text-sm text-slate-300">

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Minimize2, RotateCcw, Layers, Microscope, LayoutTemplate, Rotate3d, Move3d
 } from "lucide-react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 // Visibility-gated Canvas: pauses each scene's render loop while offscreen
 import Canvas from "@/components/gated-canvas";
 import {
@@ -351,6 +351,28 @@ function ActiveCutsList({ level }: { level: number }) {
   );
 }
 
+/**
+ * camera-controls sets `touch-action: none` on the element R3F connects its
+ * events to (the wrapper div), which makes the scene a vertical-scroll trap on
+ * phones. Rendered after the controls, this hands one-finger drags back to the
+ * page unless rotation has been switched on.
+ */
+function CanvasTouchAction({ value }: { value: "none" | "pan-y" }) {
+  const get = useThree((s) => s.get);
+  useEffect(() => {
+    const apply = () => {
+      const { gl, events } = get();
+      gl.domElement.style.touchAction = value;
+      const connected = events.connected as HTMLElement | undefined;
+      if (connected && connected.style) connected.style.touchAction = value;
+    };
+    apply();
+    const raf = requestAnimationFrame(apply);
+    return () => cancelAnimationFrame(raf);
+  }, [get, value]);
+  return null;
+}
+
 export function ConstraintViz() {
   const [level, setLevel] = useState(0);
   const { high, shadows, maxDpr, particles, frozen } = useSceneQuality();
@@ -411,6 +433,7 @@ export function ConstraintViz() {
               )}
 
               <CameraControls minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 1.5} enabled={rotateAllowed} />
+              <CanvasTouchAction value={rotateAllowed ? "none" : "pan-y"} />
             </Canvas>
           </div>
 

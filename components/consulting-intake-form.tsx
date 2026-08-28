@@ -623,7 +623,7 @@ ${data.message}`;
 
         {composedMessage && (
           <div className="mt-6 text-left">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 pr-14 sm:pr-0">
               <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                 Your message
               </span>

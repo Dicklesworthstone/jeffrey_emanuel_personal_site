@@ -47,7 +47,7 @@ export default function WritingGrid({ featured, archive }: WritingGridProps) {
               return (
                 <div key={post.href} className={post.featured ? "md:col-span-2" : ""}>
                   <div className={entrance.className} style={entrance.style}>
-                    <WritingCard item={post} />
+                    <WritingCard item={post} headingLevel={2} />
                   </div>
                 </div>
               );
@@ -68,7 +68,7 @@ export default function WritingGrid({ featured, archive }: WritingGridProps) {
             const entrance = entranceProps(index, archive.length);
             return (
               <div key={post.href} className={entrance.className} style={entrance.style}>
-                <WritingCard item={post} />
+                <WritingCard item={post} headingLevel={2} />
               </div>
             );
           })}

@@ -166,9 +166,11 @@ export function TldrSectionNav({
                   )}
                   <span className="hidden sm:inline">{section.label}</span>
                   <span className="sm:hidden">{section.shortLabel}</span>
-                  <span className="ml-1 text-slate-500">
-                    ({section.count})
-                  </span>
+                  {section.count > 0 && (
+                    <span className="ml-1 text-slate-500">
+                      ({section.count})
+                    </span>
+                  )}
                 </button>
               );
             })}

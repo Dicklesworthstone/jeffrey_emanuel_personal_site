@@ -659,7 +659,7 @@ export function TldrSynergyDiagram({
           <p className="text-xs text-slate-500" aria-live="polite" aria-atomic="true">
             {hoveredNode
               ? `Showing connections for ${coreTools.find((t) => t.id === hoveredNode)?.shortName ?? "tool"}`
-              : "Hover a tool to see connections · Click to scroll to details"}
+              : "Hover or tap a tool to see its connections · select it to jump to details"}
           </p>
         </div>
       </div>

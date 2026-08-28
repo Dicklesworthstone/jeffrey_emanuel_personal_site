@@ -23,7 +23,7 @@ export default function SiteFooter() {
 
   return (
     <footer
-      className="relative mt-16 md:mt-24 lg:mt-32"
+      className="relative mt-6 md:mt-16 lg:mt-24"
       role="contentinfo"
       aria-label="Site footer"
     >

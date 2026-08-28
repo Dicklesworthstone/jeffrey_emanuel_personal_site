@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect, useId } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import Link from "next/link";
 import {
   LayoutGrid,
@@ -418,8 +418,14 @@ const ToolNode = React.memo(function ToolNode({
 });
 
 const CenterHub = React.memo(function CenterHub({ reducedMotion }: { reducedMotion: boolean }) {
+  // The glow is a JS-driven box-shadow loop; only run it while the hub is on
+  // screen so /projects does not tick a framer frame loop at idle forever.
+  const hubRef = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(hubRef, { margin: "100px" });
+  const animateGlow = !reducedMotion && inView;
   return (
     <div
+      ref={hubRef}
       className="absolute"
       style={{
         left: CENTER - 32,
@@ -431,7 +437,7 @@ const CenterHub = React.memo(function CenterHub({ reducedMotion }: { reducedMoti
       <motion.div
         className="flex h-full w-full items-center justify-center rounded-full border border-violet-500/40 bg-violet-500/20"
         animate={
-          reducedMotion
+          !animateGlow
             ? {}
             : {
                 boxShadow: [
@@ -760,14 +766,7 @@ const EcosystemVitalityBadge = React.memo(function EcosystemVitalityBadge({
 
         {/* Synergy indicator */}
         <div className="flex items-center gap-1">
-          <motion.div
-            className="h-2 w-2 rounded-full bg-emerald-400"
-            animate={reducedMotion ? {} : {
-              scale: [1, 1.3, 1],
-              opacity: [0.7, 1, 0.7],
-            }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
+          <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
           <span className="text-xs text-emerald-400">Active</span>
         </div>
       </div>

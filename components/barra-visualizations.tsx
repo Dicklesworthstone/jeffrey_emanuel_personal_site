@@ -66,8 +66,20 @@ function useCoarsePointer() {
  */
 function CanvasTouchAction({ value }: { value: "none" | "pan-y" }) {
   const get = useThree((s) => s.get);
+  // R3F routes pointer events through `events.connected` (the wrapper div by
+  // default) and the controls set `touch-action: none` THERE, not on the
+  // canvas — so both elements must carry the value, re-applied one frame
+  // later so it lands after the controls' own connect().
   useEffect(() => {
-    get().gl.domElement.style.touchAction = value;
+    const apply = () => {
+      const { gl, events } = get();
+      gl.domElement.style.touchAction = value;
+      const connected = events.connected as HTMLElement | undefined;
+      if (connected && connected.style) connected.style.touchAction = value;
+    };
+    apply();
+    const raf = requestAnimationFrame(apply);
+    return () => cancelAnimationFrame(raf);
   }, [get, value]);
   return null;
 }
@@ -780,9 +792,9 @@ export function FactorCorrelationMatrix() {
                      </ul>
                   </motion.div>
                 ) : (
-                  <motion.p key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-slate-400 mb-0 leading-relaxed">
+                  <p key="empty" className="text-sm text-slate-400 mb-0 leading-relaxed">
                      Pick a factor above (or tap a planet) to read its definition and see how it co-moves with the other five.
-                  </motion.p>
+                  </p>
                 )}
              </AnimatePresence>
           </div>

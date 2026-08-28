@@ -358,6 +358,7 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
     const drift = Math.sin(t * 0.6) * params.wobble;
     // Emissive pulse (0.8 -> 1.6 over 5.6s) lives in the render loop so it
     // stops with the scene instead of keeping a separate ticker alive.
+    // eslint-disable-next-line react-hooks/immutability -- three.js material is mutated in the frame loop by design (same pattern as pos.needsUpdate)
     mat.emissiveIntensity = 1.2 + 0.4 * Math.sin((elapsed / 5.6) * Math.PI * 2);
     for (let i = 0; i < actualCount; i++) {
       const k = (i / actualCount) * Math.PI * 2;
@@ -3763,7 +3764,7 @@ const rotationPlan: { variant: VariantKey; palette: number; seed: number }[] = [
 function TouchActionSync() {
   const gl = useThree((state) => state.gl);
   useEffect(() => {
-    gl.domElement.style.touchAction = "pan-y";
+    gl.domElement.style.setProperty("touch-action", "pan-y");
   }, [gl]);
   return null;
 }

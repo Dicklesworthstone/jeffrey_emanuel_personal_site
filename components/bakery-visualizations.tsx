@@ -347,7 +347,10 @@ export function BakeryHero() {
     >
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020204]/60 to-[#020204] pointer-events-none z-10" />
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20 pointer-events-none w-[90%] max-w-lg">
+      {/* Decorative scene label. Centred in the hero it sat directly behind the
+          headline/subtitle text (visibly overlapping on phones); it now lives in
+          the lower-right corner of the scene on large screens only. */}
+      <div className="absolute z-20 hidden pointer-events-none w-[90%] max-w-sm text-center lg:block lg:bottom-10 lg:right-10 lg:w-auto lg:max-w-xs">
          <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}

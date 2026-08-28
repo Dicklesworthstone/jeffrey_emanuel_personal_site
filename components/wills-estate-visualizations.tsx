@@ -2473,7 +2473,7 @@ export function DeliverablesTreeViz() {
                           <span className="font-mono text-sm">{meta.title}</span>
                         </span>
                         <span className={cn("rounded-full border px-2.5 py-1 text-xs font-semibold", meta.badge)}>
-                          {leaves.length} shown
+                          {shownLeaves.length} of {leaves.length} shown
                         </span>
                       </button>
 

@@ -2118,7 +2118,7 @@ export function CutoverSimulatorViz() {
             disabled={atEnd}
             className={controlBtn}
           >
-            {playing ? (
+            {playing && !atEnd ? (
               <>
                 <PauseCircle className="w-3.5 h-3.5" />
                 Pause

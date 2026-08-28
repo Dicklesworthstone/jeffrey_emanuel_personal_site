@@ -154,7 +154,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                     {siteConfig.location.split(",")[0]}
                   </span>
                 )}
-                <span className="mt-0.5 text-lg font-bold tracking-tight text-slate-100">
+                <span className="mt-0.5 whitespace-nowrap text-lg font-bold tracking-tight text-slate-100">
                   {siteConfig.name}
                 </span>
               </div>
@@ -163,7 +163,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
 
           {/* Desktop Nav */}
           <nav
-            className="hidden items-center gap-4 md:flex lg:gap-8"
+            className="hidden items-center gap-3 md:flex lg:gap-5 xl:gap-8"
             aria-label="Main navigation"
           >
             {navItems.map((item) => (
@@ -184,7 +184,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               aria-label={shortcutAriaLabel}
             >
               <Search className="h-4 w-4" />
-              <span className="hidden lg:inline">Search</span>
+              <span className="hidden xl:inline">Search</span>
               <kbd 
                 className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-slate-300 lg:inline-block"
                 suppressHydrationWarning
@@ -197,7 +197,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               <Link
                 href="/contact"
                 onTouchStart={mediumTap}
-                className="ml-2 lg:ml-4 inline-flex shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 lg:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+                className="ml-2 lg:ml-4 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 lg:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
               >
                 Let&apos;s talk
               </Link>

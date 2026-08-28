@@ -58,7 +58,7 @@ export default function SectionShell({
       className={cn(
         // Sections stack on most pages; 176px+176px per section at lg produced
         // ~700px of dead space between blocks. Keep the rhythm, trim the excess.
-        "relative mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8 lg:py-32",
+        "relative mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-24 lg:px-8 lg:py-28",
         className
       )}
     >
@@ -101,7 +101,7 @@ export default function SectionShell({
               )}
               <HeadingTag
                 id={headingId}
-                className="text-balance-pro font-bold tracking-tighter text-white"
+                className="text-balance-pro font-bold leading-[1.1] tracking-tighter text-white"
                 style={{ fontSize: "clamp(1.875rem, 5vw, 3.75rem)" }}
               >
                 {title}

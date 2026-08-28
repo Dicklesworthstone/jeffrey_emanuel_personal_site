@@ -203,7 +203,10 @@ class ProCMAES {
     }
     const B = this.lastB;
     const invD = this.lastD.map(d => 1 / (d || 1e-10));
-    const diff = this.mean.map((m, i) => (m - oldMean[i]) / (this.sigma || 1e-10));
+    // σ used for normalising this generation's steps is the σ that generated
+    // them; the step-size update below must not leak into the rank-μ term.
+    const sigmaOld = this.sigma || 1e-10;
+    const diff = this.mean.map((m, i) => (m - oldMean[i]) / sigmaOld);
     const Bt_diff = new Array(this.dim).fill(0);
     for (let i = 0; i < this.dim; i++) for (let j = 0; j < this.dim; j++) Bt_diff[i] += B[j][i] * diff[j];
     const zw = Bt_diff.map((v, i) => v * invD[i]);
@@ -223,8 +226,8 @@ class ProCMAES {
         let rankMu = 0;
         for (let k = 0; k < this.mu; k++) {
           const idx = bestIndices[k];
-          const yk_i = (samples[idx][i] - oldMean[i]) / (this.sigma || 1e-10);
-          const yk_j = (samples[idx][j] - oldMean[j]) / (this.sigma || 1e-10);
+          const yk_i = (samples[idx][i] - oldMean[i]) / sigmaOld;
+          const yk_j = (samples[idx][j] - oldMean[j]) / sigmaOld;
           rankMu += this.weights[k] * yk_i * yk_j;
         }
         this.C[i][j] = decay_coeff * this.C[i][j] + this.c1 * (this.pc[i] * this.pc[j] + hsig_delta * this.C[i][j]) + this.cmu * rankMu;
@@ -774,14 +777,14 @@ export function ComparisonViz() {
         <div className="flex flex-wrap items-center gap-3 bg-black/40 p-1.5 rounded-2xl border border-white/10 md:ml-auto" role="group" aria-label="Optimizer">
           <button
             type="button"
-            onClick={() => setActive("cma")}
+            onClick={() => { setActive("cma"); setHistory([]); }}
             aria-pressed={active === "cma"}
             className={cn("min-h-10 px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
             active === "cma" ? "bg-amber-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}
           >CMA-ES</button>
           <button
             type="button"
-            onClick={() => setActive("gd")}
+            onClick={() => { setActive("gd"); setHistory([]); }}
             aria-pressed={active === "gd"}
             className={cn("min-h-10 px-4 md:px-6 py-2.5 rounded-full text-[11px] font-black uppercase transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
             active === "gd" ? "bg-blue-500 text-black shadow-xl scale-105" : "text-slate-500 hover:text-white")}
@@ -1208,6 +1211,7 @@ export function RestartViz() {
     let liveBest = Infinity;
 
     for (let restart = 0; restart < 3; restart++) {
+      setRestarts(restart);
       const solver = new ProCMAES(2, [4, 4], 1.0);
       solver.setLambda(currentPopSize);
 
@@ -1227,7 +1231,6 @@ export function RestartViz() {
       if (liveBest < 1e-6) break;
       currentPopSize *= 2;
       setPopSize(currentPopSize);
-      setRestarts(restart + 1);
     }
     setIsRunning(false);
   }, [objective]);

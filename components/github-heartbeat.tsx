@@ -400,11 +400,6 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
   const [now, setNow] = useState<Date | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Set initial time after hydration to avoid mismatch
-  useEffect(() => {
-    setNow(new Date());
-  }, []);
-
   // Fetch events. Non-OK responses are handled quietly (no throw, no console
   // noise): the card degrades to a labeled "unavailable" state instead.
   useEffect(() => {
@@ -471,8 +466,10 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     };
   }, []);
 
-  // Update relative time labels once per minute; pause while the tab is hidden
+  // Seed the clock after hydration (avoids a server/client mismatch), then
+  // update relative time labels once per minute; pause while the tab is hidden
   useEffect(() => {
+    const hydrationId = window.setTimeout(() => setNow(new Date()), 0);
     let id: number | null = null;
     const start = () => {
       if (id === null) id = window.setInterval(() => setNow(new Date()), 60_000);
@@ -494,6 +491,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     start();
     document.addEventListener("visibilitychange", syncToVisibility);
     return () => {
+      window.clearTimeout(hydrationId);
       stop();
       document.removeEventListener("visibilitychange", syncToVisibility);
     };

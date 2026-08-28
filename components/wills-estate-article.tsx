@@ -258,10 +258,13 @@ function Sub({
 
 // Gap kept between the fixed site header and a jumped-to section's top edge.
 const TOC_JUMP_HEADER_GAP_PX = 12;
-// A single corrective re-alignment after a TOC jump (a skeleton near the
-// target may be swapped for the real visualization within a few hundred ms).
-// It never runs later than this, and any user scroll input cancels it.
-const TOC_JUMP_SETTLE_MS = 450;
+// After a TOC jump, lazily-mounted visualizations above the target can swap
+// their skeleton for the real thing and grow the page, pushing the target
+// away. A ResizeObserver on the document re-aligns the anchor only when the
+// layout actually changed, for at most this long; any user scroll input
+// cancels it immediately (the old version re-scrolled blindly every 160 ms
+// for 2.4 s and hijacked the reader's own scrolling).
+const TOC_JUMP_SETTLE_MS = 2500;
 const TOC_JUMP_CANCEL_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
 
 function getFixedHeaderHeight() {
@@ -313,20 +316,30 @@ export function WillsEstateArticle() {
     };
     alignAnchor();
 
+    const realign = () => {
+      if (!anchor.isConnected) return;
+      const drift = anchor.getBoundingClientRect().top - targetOffset();
+      if (Math.abs(drift) > 8) alignAnchor();
+    };
     let settleTimer: number | null = window.setTimeout(() => {
       settleTimer = null;
-      if (anchor.isConnected) {
-        const drift = anchor.getBoundingClientRect().top - targetOffset();
-        if (Math.abs(drift) > 8) alignAnchor();
-      }
+      realign();
       cancel();
     }, TOC_JUMP_SETTLE_MS);
+    // Re-align only when the document actually changes size (a viz mounting
+    // above the target); cheap and silent when nothing shifts.
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => realign())
+        : null;
+    resizeObserver?.observe(document.body);
 
     const cancel = () => {
       if (settleTimer !== null) {
         window.clearTimeout(settleTimer);
         settleTimer = null;
       }
+      resizeObserver?.disconnect();
       TOC_JUMP_CANCEL_EVENTS.forEach((name) => window.removeEventListener(name, cancel));
       if (tocSettleCancelRef.current === cancel) tocSettleCancelRef.current = null;
     };
@@ -558,10 +571,10 @@ export function WillsEstateArticle() {
         {/* Scroll indicator */}
         <div
           ref={scrollCueRef}
-          className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
+          className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:mt-auto md:pt-16"
           style={{ opacity: 0.5 }}
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/40 font-black">
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white/60 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />

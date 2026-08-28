@@ -270,7 +270,7 @@ export function BakeryArticle() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 1 }}
-          className="z-20 md:absolute md:bottom-16 md:left-0 md:w-full"
+          className="z-20 md:mt-auto md:pt-16"
           aria-hidden="true"
         >
           <div
@@ -278,7 +278,7 @@ export function BakeryArticle() {
             className="mt-12 flex flex-col items-center gap-4 md:mt-0"
             style={{ opacity: 0.5 }}
           >
-            <span className="text-xs uppercase tracking-[0.5em] text-white/30 font-bold">
+            <span className="text-xs uppercase tracking-[0.5em] text-white/60 font-bold">
               Scroll to Discover
             </span>
             <div className="w-px h-16 bg-gradient-to-b from-white/20 via-white/5 to-transparent shadow-[0_0_10px_rgba(255,255,255,0.1)]" />

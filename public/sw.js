@@ -37,15 +37,20 @@ const PRECACHE_ASSETS = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      // Cache precache assets, but don't fail install if some fail
-      await Promise.allSettled(
-        PRECACHE_ASSETS.map((url) =>
-          cache.add(url).catch((err) => {
-            console.warn(`Failed to cache ${url}:`, err);
-          })
-        )
-      );
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        // Cache precache assets, but don't fail install if some fail
+        await Promise.allSettled(
+          PRECACHE_ASSETS.map((url) =>
+            cache.add(url).catch((err) => {
+              console.warn(`Failed to cache ${url}:`, err);
+            })
+          )
+        );
+      } catch (err) {
+        // A precache failure must never block installation.
+        console.warn("Precache skipped:", err);
+      }
       // Skip waiting to activate immediately
       self.skipWaiting();
     })()
@@ -56,13 +61,17 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      // Delete every cache from a previous CACHE_VERSION
-      const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
+      try {
+        // Delete every cache from a previous CACHE_VERSION
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames
+            .filter((name) => name !== CACHE_NAME)
+            .map((name) => caches.delete(name))
+        );
+      } catch (err) {
+        console.warn("Old cache cleanup skipped:", err);
+      }
       // Take control of all clients
       await self.clients.claim();
     })()

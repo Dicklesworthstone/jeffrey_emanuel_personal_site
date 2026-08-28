@@ -69,12 +69,12 @@ export default function ScrollToTop() {
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
           onClick={scrollToTop}
           onTouchStart={mediumTap}
-          className="fixed bottom-[max(1.5rem,calc(1.5rem+env(safe-area-inset-bottom)))] right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 shadow-lg shadow-sky-500/20 backdrop-blur-xl transition-[border-color,background-color,transform] active:scale-95 hover:border-sky-500/60 hover:bg-sky-500/20"
+          className="fixed bottom-[max(1.5rem,calc(1.5rem+env(safe-area-inset-bottom)))] right-4 z-50 flex h-11 w-11 items-center sm:right-6 sm:h-12 sm:w-12 justify-center rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 shadow-lg shadow-sky-500/20 backdrop-blur-xl transition-[border-color,background-color,transform] active:scale-95 hover:border-sky-500/60 hover:bg-sky-500/20"
           aria-label="Scroll to top"
         >
           {/* Progress ring */}
           <svg
-            className="absolute inset-0 h-12 w-12 -rotate-90"
+            className="absolute inset-0 h-full w-full -rotate-90"
             viewBox="0 0 48 48"
             aria-hidden="true"
           >

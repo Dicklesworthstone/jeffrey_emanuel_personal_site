@@ -124,6 +124,20 @@ const markdownComponents: Components = {
   th({ node: _node, children }) {
     return <th className="px-6 py-4">{children}</th>;
   },
+  // Markdown wraps a lone image in <p>; our img override renders a block
+  // <figure>, which the HTML parser cannot keep inside <p> (it closes the
+  // paragraph early and the client tree no longer matches → React #418).
+  // Unwrap paragraphs whose only element children are images.
+  p({ node, children }) {
+    const kids = (node?.children ?? []).filter(
+      (c) => !(c.type === "text" && String((c as { value?: string }).value ?? "").trim() === "")
+    );
+    const imageOnly =
+      kids.length > 0 &&
+      kids.every((c) => c.type === "element" && (c as { tagName?: string }).tagName === "img");
+    if (imageOnly) return <>{children}</>;
+    return <p>{children}</p>;
+  },
   img({ node: _node, src, alt }) {
     const safeSrc = typeof src === "string" ? src : "";
     // Extract optional width/height from alt text if provided in format "alt text | 600x400"

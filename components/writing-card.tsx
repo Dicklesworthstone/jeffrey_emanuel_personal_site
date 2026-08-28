@@ -13,7 +13,29 @@ import { memo } from "react";
 // A touch that travels further than this before lifting is a scroll, not a tap.
 const TAP_MOVE_THRESHOLD_PX = 8;
 
-export const WritingCard = memo(function WritingCard({ item }: { item: WritingItem }) {
+// Readable names for the source codes used in lib/content.ts.
+const SOURCE_LABELS: Record<WritingItem["source"], string> = {
+  YTO: "YouTube Transcript Optimizer",
+  FMD: "Fix My Documents",
+  GitHub: "GitHub",
+  Blog: "Blog",
+};
+
+function formatWritingDate(iso: string): string {
+  const parsed = new Date(iso.includes("T") ? iso : `${iso}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return iso;
+  return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+}
+
+export const WritingCard = memo(function WritingCard({
+  item,
+  headingLevel = 3,
+}: {
+  item: WritingItem;
+  /** h2 on index pages whose only heading above the cards is the h1; h3 inside sections */
+  headingLevel?: 2 | 3;
+}) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
@@ -112,22 +134,30 @@ export const WritingCard = memo(function WritingCard({ item }: { item: WritingIt
         />
 
         <div className="relative z-10 flex flex-1 flex-col">
-          <div className="mb-4 flex items-center gap-3 text-xs font-bold uppercase tracking-widest">
-            <div className="relative overflow-hidden rounded-full bg-white/5 px-2 py-0.5 ring-1 ring-white/10 transition-colors group-hover:bg-white/10 group-hover:ring-white/20">
-               <span className="relative z-10 text-white">{item.source}</span>
-            </div>
+          <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs font-bold uppercase tracking-wider">
+            <span className="rounded-full bg-white/5 px-2 py-0.5 text-white ring-1 ring-white/10 transition-colors group-hover:bg-white/10 group-hover:ring-white/20">
+              {SOURCE_LABELS[item.source] ?? item.source}
+            </span>
             <span className="text-slate-600" aria-hidden="true">•</span>
             <span className={cn("text-slate-500 transition-colors group-hover:text-slate-400")}>
               {item.category}
             </span>
+            {item.date && (
+              <time
+                dateTime={item.date}
+                className="ml-auto whitespace-nowrap font-medium normal-case tracking-normal text-slate-500"
+              >
+                {formatWritingDate(item.date)}
+              </time>
+            )}
           </div>
 
-          <h3 className={cn(
+          <Heading className={cn(
             "font-bold leading-tight text-white transition-colors group-hover:text-white",
             isFeatured ? "text-2xl md:text-4xl mb-4" : "text-lg md:text-xl mb-3"
           )}>
             {item.title}
-          </h3>
+          </Heading>
 
           <p className={cn(
             "leading-relaxed text-slate-400 group-hover:text-slate-300 transition-colors",

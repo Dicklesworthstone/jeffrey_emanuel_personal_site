@@ -244,11 +244,11 @@ export function OverpromptingArticle() {
         {/* Scroll indicator */}
         <div
           ref={scrollHintRef}
-          className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:absolute md:bottom-16 md:left-0 md:w-full md:mt-0"
+          className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:mt-auto md:pt-16"
           style={{ opacity: 0.5 }}
           aria-hidden="true"
         >
-          <span className="text-xs uppercase tracking-[0.4em] text-white/40 font-black">
+          <span className="text-xs uppercase tracking-[0.4em] text-white/60 font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />

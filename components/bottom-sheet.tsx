@@ -149,7 +149,7 @@ export default function BottomSheet({
         animate={{ opacity: 1 }}
         exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
         transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
-        className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm"
+        className="fixed inset-0 z-[96] bg-slate-950/80 backdrop-blur-sm"
         data-testid="bottom-sheet-backdrop"
         onClick={handleBackdropClick}
         onTouchStart={mediumTap}
@@ -181,7 +181,7 @@ export default function BottomSheet({
           }
         }}
         onAnimationComplete={() => onOpenComplete?.()}
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border-t border-slate-700/80 bg-slate-950 shadow-2xl"
+        className="fixed inset-x-0 bottom-0 z-[97] mx-auto flex w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border-t border-slate-700/80 bg-slate-950 shadow-2xl"
         style={{ maxHeight: sheetMaxHeight }}
         role="dialog"
         aria-modal="true"
