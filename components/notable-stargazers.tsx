@@ -436,7 +436,7 @@ export function NotableStargazers({
       {/* Stale data warning */}
       {isStale && (
         <motion.div
-          className="mt-4 flex items-center gap-1 text-xs text-slate-600"
+          className="mt-4 flex items-center gap-1 text-xs text-slate-400"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}

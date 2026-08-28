@@ -690,6 +690,8 @@ function MicroHarmonics() {
     };
   }, [geom, mat]);
 
+  const frameCounter = useRef(0);
+
   useFrame(({ clock }) => {
     if (!ref.current || !originalPositions.current) return;
     ref.current.rotation.y = clock.getElapsedTime() * 0.3;
@@ -708,7 +710,12 @@ function MicroHarmonics() {
       pos.setXYZ(i, x * harmonic, y * harmonic, z * harmonic);
     }
     pos.needsUpdate = true; // eslint-disable-line react-hooks/immutability
-    geom.computeVertexNormals();
+    // Recomputing normals dominates this loop's cost; at a 40px render size a
+    // few frames of normal lag is invisible, so refresh them at ~12fps.
+    frameCounter.current = (frameCounter.current + 1) % 5;
+    if (frameCounter.current === 0) {
+      geom.computeVertexNormals();
+    }
   });
 
   return <mesh ref={ref} geometry={geom} material={mat} />;
@@ -777,7 +784,15 @@ export default function HeaderIcon3D() {
   const [mounted, setMounted] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
   const isMountedRef = useRef(false);
+
+  // Stop the render loop entirely while the tab is hidden
+  useEffect(() => {
+    const sync = () => setPageVisible(!document.hidden);
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -822,6 +837,7 @@ export default function HeaderIcon3D() {
         <Suspense fallback={<StaticFallback />}>
           <Canvas
             camera={{ position: [0, 0, 2], fov: 45 }}
+            frameloop={pageVisible ? "always" : "never"}
             dpr={1}
             gl={{
               antialias: false,

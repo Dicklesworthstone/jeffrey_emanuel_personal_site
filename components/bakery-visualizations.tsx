@@ -382,11 +382,11 @@ function TemporalCard({ label, data, id }: { label: string; data: TemporalProces
 
             <div className="grid grid-cols-2 gap-3 md:gap-4">
                <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
-                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-tight">Ticket</p>
+                  <p className="text-[8px] md:text-[9px] text-slate-400 uppercase mb-1 tracking-tight">Ticket</p>
                   <p className="text-base md:text-xl font-black text-white">{data.val ?? '—'}</p>
                </div>
                <div className="bg-white/[0.02] border border-white/5 rounded-xl md:rounded-2xl p-3 md:p-4 text-center">
-                  <p className="text-[8px] md:text-[9px] text-slate-600 uppercase mb-1 tracking-tight">Priority</p>
+                  <p className="text-[8px] md:text-[9px] text-slate-400 uppercase mb-1 tracking-tight">Priority</p>
                   <p className="text-base md:text-xl font-black text-white/20 group-hover:text-white/40 transition-colors">#{id}</p>
                </div>
             </div>
@@ -690,7 +690,7 @@ export function MemoryResilienceViz() {
                          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                        />
-                       <div className="h-full bg-gradient-to-r from-amber-500/20 to-amber-500/60 transition-all duration-300" style={{ width: `${(1-intensity)*100}%` }} />
+                       <div className="h-full origin-left bg-gradient-to-r from-amber-500/20 to-amber-500/60 transition-transform duration-300" style={{ transform: `scaleX(${1 - intensity})` }} />
                     </div>
                  </div>
 
@@ -717,7 +717,7 @@ export function MemoryResilienceViz() {
                     </div>
                  </div>
 
-                 <div className="flex justify-between text-[8px] md:text-[9px] text-slate-600 relative z-10">
+                 <div className="flex justify-between text-[8px] md:text-[9px] text-slate-400 relative z-10">
                     <span className="flex items-center gap-2">
                        <span className="w-1 h-1 rounded-full bg-amber-500 animate-ping" />
                        SAMPLING_BUS_0xBA...

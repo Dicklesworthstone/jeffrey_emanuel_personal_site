@@ -139,7 +139,7 @@ export default function SiteFooter() {
           </div>
 
           {/* Copyright */}
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-400">
             &copy; {year || 2026} Jeffrey Emanuel. All rights reserved.
           </p>
         </div>

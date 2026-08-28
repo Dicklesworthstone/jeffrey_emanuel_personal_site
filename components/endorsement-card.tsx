@@ -192,7 +192,7 @@ export function EndorsementCard({
             </span>
           </div>
           {date && !isCompact && (
-            <span className="text-xs text-slate-600">{date}</span>
+            <span className="text-xs text-slate-400">{date}</span>
           )}
         </div>
 

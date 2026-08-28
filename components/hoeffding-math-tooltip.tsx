@@ -127,7 +127,7 @@ function MathSheetContent({ math, activeColor }: { math: MathTerm; activeColor: 
       
       <div className="space-y-8">
         <div className="space-y-3">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600">Statistical Context</h4>
+          <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Statistical Context</h4>
           <p className="text-lg leading-relaxed text-slate-200 font-light">{math.long}</p>
         </div>
 

@@ -201,7 +201,7 @@ export function CostCompoundingViz() {
               className="sm-range w-full"
               aria-label="User count"
             />
-            <div className="flex justify-between text-[9px] font-mono text-slate-600 uppercase tracking-widest pt-0.5">
+            <div className="flex justify-between text-[9px] font-mono text-slate-400 uppercase tracking-widest pt-0.5">
               <span>5</span>
               <span>40</span>
               <span>340</span>
@@ -2291,7 +2291,7 @@ function MattermostPanel({ state }: { state: CutoverState }) {
             </p>
             <p className="text-[10px] font-mono text-slate-400 tabular-nums">
               {state.activatedUsers} / {USER_GRID_SIZE}
-              <span className="text-slate-600"> · {Math.round(activatedPct * 100)}%</span>
+              <span className="text-slate-400"> · {Math.round(activatedPct * 100)}%</span>
             </p>
           </div>
           <div className="grid grid-cols-12 gap-1">

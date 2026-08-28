@@ -41,7 +41,7 @@ export default function ProgressiveImage({
         fill={fill}
         sizes={sizes}
         priority={priority}
-        className={`transition-all duration-500 ${
+        className={`transition-[transform,filter] duration-500 ${
           isLoading ? "scale-110 blur-md" : "scale-100 blur-0"
         }`}
         onLoad={() => setIsLoading(false)}

@@ -292,7 +292,7 @@ export function ConstraintViz() {
             </div>
 
             <div className="space-y-1">
-              <div className="text-[9px] md:text-[10px] font-mono text-slate-600 uppercase tracking-widest mb-2">Active Cuts</div>
+              <div className="text-[9px] md:text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-2">Active Cuts</div>
               <AnimatePresence>
                 {level === 0 ? (
                   <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-slate-500 italic text-xs">&gt; Unconstrained...</motion.div>

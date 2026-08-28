@@ -511,7 +511,7 @@ export function EndorsementShowcase({
             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
               More Endorsements
             </h3>
-            <span className="text-xs text-slate-600">
+            <span className="text-xs text-slate-400">
               {safeCarouselIndex + 1} of {otherItems.length}
             </span>
           </div>

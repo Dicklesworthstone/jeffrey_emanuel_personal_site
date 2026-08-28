@@ -187,7 +187,7 @@ export function XStatsCard() {
 
       {/* Hint to expand */}
       <motion.div
-        className="mt-3 flex items-center gap-1 text-[9px] font-medium text-slate-600"
+        className="mt-3 flex items-center gap-1 text-[9px] font-medium text-slate-400"
         animate={{ opacity: isExpanded ? 0 : 1 }}
         transition={{ duration: 0.15 }}
       >
