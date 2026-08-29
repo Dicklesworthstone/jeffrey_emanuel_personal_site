@@ -360,6 +360,21 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     if (!isOpen) return;
 
     const handleTab = (e: KeyboardEvent) => {
+      // Escape is handled here, at the window, not only on the dialog's own
+      // onKeyDown: if focus ever sits outside the palette (the backdrop, or a
+      // browser-focusable scroll container), an element-scoped handler never
+      // sees the key and the modal becomes impossible to dismiss by keyboard.
+      // (handleKeyDown below still has its own Escape case; closing twice is a
+      // no-op, and keeping it means dismissal survives either path failing.)
+      if (e.key === "Escape") {
+        // Mid-composition Escape belongs to the IME — it cancels the candidate
+        // window. Swallowing it here would close the whole palette out from
+        // under someone typing Japanese/Chinese/Korean into the search box.
+        if (e.isComposing) return;
+        e.preventDefault();
+        onClose();
+        return;
+      }
       if (e.key !== "Tab") return;
       const container = paletteRef.current;
       if (!container) return;
@@ -374,13 +389,20 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       const active = document.activeElement as HTMLElement | null;
+      // Index within the tab ring, not just "is it the first/last element".
+      // Focus can legitimately sit on something the ring doesn't list — the
+      // results list is a scroll container, which Chromium makes focusable
+      // without adding a tabindex attribute, so it never matched the selector
+      // below. Wrapping only at `active === last` let Tab walk straight out of
+      // the dialog from there; -1 now wraps too.
+      const index = active ? Array.prototype.indexOf.call(focusable, active) : -1;
 
       if (e.shiftKey) {
-        if (active === first || !container.contains(active)) {
+        if (index <= 0) {
           e.preventDefault();
           last.focus();
         }
-      } else if (active === last) {
+      } else if (index === -1 || index === focusable.length - 1) {
         e.preventDefault();
         first.focus();
       }
@@ -388,11 +410,16 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
     window.addEventListener("keydown", handleTab);
     return () => window.removeEventListener("keydown", handleTab);
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      // While an IME candidate window is open, Enter confirms the candidate and
+      // the arrows move through candidates. Claiming those keys here would fire
+      // a command or move the result selection out from under someone typing
+      // Japanese/Chinese/Korean, so the composition owns them until it commits.
+      if (e.nativeEvent.isComposing) return;
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();

@@ -248,7 +248,9 @@ export function OverpromptingArticle() {
           style={{ opacity: 0.5 }}
           aria-hidden="true"
         >
-          <span className="text-xs uppercase tracking-[0.4em] text-white/60 font-black">
+          {/* Full white: the wrapper's opacity 0.5 already dims this; /60 on top
+              compounded to ~30% white (2.49:1). White through the wrapper ≈ 5.25:1. */}
+          <span className="text-xs uppercase tracking-[0.4em] text-white font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />

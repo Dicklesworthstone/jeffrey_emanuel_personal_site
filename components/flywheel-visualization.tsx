@@ -921,9 +921,13 @@ export default function FlywheelVisualization() {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
         {/* Flywheel visualization */}
+        {/* role="group", not role="img": the diagram contains focusable tool
+            nodes, and "img" promises a single atomic graphic with no interactive
+            descendants (axe: nested-interactive). "group" keeps the accessible
+            name while allowing the controls inside it. */}
         <div
           className="relative flex flex-col items-center justify-center"
-          role="img"
+          role="group"
           aria-label="Interactive flywheel showing tool connections"
         >
           {/* Mobile-responsive wrapper: scales 520px flywheel to fit smaller screens */}

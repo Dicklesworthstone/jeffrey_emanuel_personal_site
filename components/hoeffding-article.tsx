@@ -464,7 +464,8 @@ export function HoeffdingArticle() {
             </p>
           </div>
 
-          <div className="mb-20 overflow-x-auto hd-glass-panel rounded-3xl">
+          {/* tabIndex: the table scrolls sideways on narrow viewports. */}
+          <div tabIndex={0} className="mb-20 overflow-x-auto hd-glass-panel rounded-3xl">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-white/5">
@@ -671,7 +672,8 @@ export function HoeffdingArticle() {
             </p>
             <div className="rounded-3xl border border-white/10 bg-black/40 p-6 md:p-8">
               <div className="hd-instrument-label mb-4 text-cyan-400">Example Output</div>
-              <pre className="overflow-x-auto text-sm md:text-base text-slate-200 font-mono leading-relaxed">
+              {/* tabIndex: horizontal scroll must be keyboard-reachable. */}
+              <pre tabIndex={0} className="overflow-x-auto text-sm md:text-base text-slate-200 font-mono leading-relaxed">
 {`Ranks of Heights (X): [1. 2. 5. 6. 7. 3. 4. 9. 9. 9.]
 Ranks of Weights (Y): [1. 2. 5. 4. 7. 3. 6. 9. 9. 9.]
 Q values: [1.  2.  4.  4.  7.  3.  4.  8.5 8.5 8.5]
@@ -680,7 +682,7 @@ Hoeffding's D for data: 0.4107142857142857`}
             </div>
             <div className="rounded-3xl border border-white/10 bg-black/40 p-6 md:p-8">
               <div className="hd-instrument-label mb-4 text-cyan-400">Reference Python Walkthrough</div>
-              <pre className="overflow-x-auto text-xs md:text-sm text-slate-200 font-mono leading-relaxed">
+              <pre tabIndex={0} className="overflow-x-auto text-xs md:text-sm text-slate-200 font-mono leading-relaxed">
 {`import numpy as np
 from scipy.stats import rankdata
 

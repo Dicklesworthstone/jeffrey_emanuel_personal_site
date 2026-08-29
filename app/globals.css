@@ -924,7 +924,10 @@ select:focus-visible {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--hd-text);
-  opacity: 0.4;
+  /* 0.4 put #f8fafc on #020204 at ~3.50:1 — under AA for 12px bold, and two
+     call sites were already patching it with `opacity-100`. 0.55 keeps the
+     muted instrument-label feel at ~5.95:1. */
+  opacity: 0.55;
 }
 
 .hd-display-title {

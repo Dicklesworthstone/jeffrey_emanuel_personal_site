@@ -84,10 +84,13 @@ function HeroSection() {
         </motion.p>
 
         {/* CTA to read the essay: rendered immediately, no entrance delay */}
+        {/* violet-600, not violet-500: white on Tailwind v4's violet-500
+            (#8e51ff) is 4.4:1 at 14px — just under AA. Hover deepens rather
+            than lightens so the hover state clears 4.5:1 too. */}
         <div className="mt-10">
           <Link
             href={nvidiaStoryData.hero.essayUrl}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-violet-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-violet-400 hover:shadow-lg hover:shadow-violet-500/30"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-500/30"
           >
             <FileText className="h-4 w-4" aria-hidden="true" />
             Read the Essay

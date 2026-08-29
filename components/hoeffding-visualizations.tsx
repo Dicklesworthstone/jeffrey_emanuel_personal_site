@@ -854,7 +854,8 @@ export function CodePlayground() {
         </button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-white/5 bg-black/40">
-        <div className="p-8 font-mono text-xs leading-relaxed text-slate-400 overflow-auto max-h-[450px] scrollbar-thin">
+        {/* tabIndex: this pane scrolls in both axes and must be keyboard-scrollable. */}
+        <div tabIndex={0} className="p-8 font-mono text-xs leading-relaxed text-slate-400 overflow-auto max-h-[450px] scrollbar-thin">
           <pre className="m-0"><code>{CODE_STR}</code></pre>
         </div>
         <div className="p-12 md:p-20 flex flex-col items-center justify-center text-center">

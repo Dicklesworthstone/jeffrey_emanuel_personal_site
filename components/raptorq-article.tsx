@@ -295,7 +295,9 @@ export function RaptorQArticle() {
           style={{ opacity: 0.5 }}
           aria-hidden="true"
         >
-          <span className="text-xs uppercase tracking-[0.4em] text-white/60 font-black">
+          {/* Full white: the wrapper's opacity 0.5 already dims this; /60 on top
+              compounded to ~30% white (2.49:1). White through the wrapper ≈ 5.25:1. */}
+          <span className="text-xs uppercase tracking-[0.4em] text-white font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
@@ -996,7 +998,8 @@ export function RaptorQArticle() {
             </div>
           </div>
 
-          <div className="bg-black/50 border border-white/5 rounded-2xl p-4 md:p-6 my-10 overflow-x-auto">
+          {/* tabIndex: horizontal scroll must be keyboard-reachable. */}
+          <div tabIndex={0} className="bg-black/50 border border-white/5 rounded-2xl p-4 md:p-6 my-10 overflow-x-auto">
             <div className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-4">
               How One ID Becomes An Equation (Simplified)
             </div>
@@ -1273,7 +1276,7 @@ y = XOR(C[i] for i in indices)`}
             RaptorQ vs. The Alternatives
           </h2>
           <p>It helps to see RaptorQ in context.</p>
-          <div className="overflow-x-auto my-12 custom-scrollbar">
+          <div tabIndex={0} className="overflow-x-auto my-12 custom-scrollbar">
             <table className="min-w-[560px] w-full text-sm text-slate-300 border border-white/10 rounded-2xl overflow-hidden">
               <thead className="bg-white/5 text-slate-400 uppercase tracking-widest text-xs">
                 <tr>

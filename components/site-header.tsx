@@ -217,14 +217,15 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               spare at 768px), so tablet and small-laptop visitors don't have to
               open a menu to find it. Phones keep search + toggle only. */}
           <div className="flex items-center gap-3 sm:gap-4 xl:hidden">
-            <Link
-              href="/contact"
-              onTouchStart={mediumTap}
-              onClick={() => setOpen(false)}
-              className="hidden md:inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/10"
-            >
-              Let&apos;s talk
-            </Link>
+            {!open && (
+              <Link
+                href="/contact"
+                onTouchStart={mediumTap}
+                className="hidden md:inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/10"
+              >
+                Let&apos;s talk
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -289,8 +290,12 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             {/* The header's own toggle (z-95, crossfaded to an X) stays on top of
                 this overlay and closes it — a second close button at the same
                 pixels was unreachable by touch and stole initial focus. */}
+            {/* Phones keep the full-bleed column. From sm up the menu is
+                constrained and centred so tablet widths get a deliberate
+                composition instead of a phone layout stretched across 800px
+                with two-thirds of the overlay empty. */}
             <nav
-              className="relative flex flex-1 flex-col justify-center px-8"
+              className="relative flex flex-1 flex-col justify-center px-8 sm:mx-auto sm:w-full sm:max-w-md"
               onClick={(event) => event.stopPropagation()}
             >
               <motion.div

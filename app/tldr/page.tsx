@@ -138,7 +138,15 @@ function FooterCTA({ id }: { id?: string }) {
             {/* The copy button lives outside the horizontal scroll container so it
                 stays on screen on phones even though the command is ~150 chars. */}
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-slate-900/80 p-2 ring-1 ring-slate-700/50 transition-[box-shadow] duration-200 hover:ring-violet-500/30 sm:gap-3">
-              <div className="min-w-0 overflow-x-auto px-2 py-2 sm:px-4">
+              {/* Focusable so keyboard and switch users can scroll the command
+                  horizontally; a scroll container with no focusable content is
+                  unreachable without a pointer (axe: scrollable-region-focusable). */}
+              <div
+                className="min-w-0 overflow-x-auto px-2 py-2 sm:px-4 rounded-lg"
+                tabIndex={0}
+                role="region"
+                aria-label="Install command"
+              >
                 <code
                   ref={codeRef}
                   className="whitespace-nowrap font-mono text-xs text-violet-300 sm:text-sm md:text-base"

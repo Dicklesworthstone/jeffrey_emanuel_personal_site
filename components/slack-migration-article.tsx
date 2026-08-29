@@ -187,7 +187,10 @@ function Divider() {
 // Code block for multi-line commands / snippets
 function Code({ children }: { children: ReactNode }) {
   return (
-    <pre className="sm-code-block">
+    // tabIndex makes the horizontal scroll reachable without a pointer: these
+    // blocks scroll on narrow viewports, and a scroll container with no
+    // focusable content is unusable by keyboard (axe: scrollable-region-focusable).
+    <pre className="sm-code-block" tabIndex={0}>
       <code>{children}</code>
     </pre>
   );
@@ -762,7 +765,9 @@ export function SlackMigrationArticle() {
           className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:mt-auto md:pt-16"
           style={{ opacity: 0.5 }}
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/60 font-black">
+          {/* Full white: the wrapper's opacity 0.5 already dims this; /60 on top
+              compounded to ~30% white (2.49:1). White through the wrapper ≈ 5.25:1. */}
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />

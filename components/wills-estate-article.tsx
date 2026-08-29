@@ -585,8 +585,15 @@ export function WillsEstateArticle() {
           ref={scrollCueRef}
           className="mt-12 flex flex-col items-center gap-4 z-20 transition-opacity duration-500 md:mt-auto md:pt-16"
           style={{ opacity: 0.5 }}
+          // A purely visual affordance hint; the four sibling articles already
+          // hide it from assistive tech, and "Scroll to Explore" is noise to a
+          // screen-reader user who navigates by heading and landmark.
+          aria-hidden="true"
         >
-          <span className="text-[11px] uppercase tracking-[0.4em] text-white/60 font-black">
+          {/* Full white, not white/60: the wrapper already applies opacity 0.5,
+              so /60 compounded to ~30% white = 2.49:1 against the near-black
+              background. Through the same wrapper, white lands at ~5.25:1. */}
+          <span className="text-[11px] uppercase tracking-[0.4em] text-white font-black">
             Scroll to Explore
           </span>
           <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
