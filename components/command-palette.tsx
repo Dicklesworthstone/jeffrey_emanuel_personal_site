@@ -359,7 +359,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleTab = (e: KeyboardEvent) => {
+    // Owns Tab containment AND Escape dismissal for the open palette, so the
+    // name is deliberately broader than the original `handleTab`.
+    const handleWindowKeyDown = (e: KeyboardEvent) => {
       // Escape is handled here, at the window, not only on the dialog's own
       // onKeyDown: if focus ever sits outside the palette (the backdrop, or a
       // browser-focusable scroll container), an element-scoped handler never
@@ -393,7 +395,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       // Focus can legitimately sit on something the ring doesn't list — the
       // results list is a scroll container, which Chromium makes focusable
       // without adding a tabindex attribute, so it never matched the selector
-      // below. Wrapping only at `active === last` let Tab walk straight out of
+      // above. Wrapping only at `active === last` let Tab walk straight out of
       // the dialog from there; -1 now wraps too.
       const index = active ? Array.prototype.indexOf.call(focusable, active) : -1;
 
@@ -408,8 +410,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       }
     };
 
-    window.addEventListener("keydown", handleTab);
-    return () => window.removeEventListener("keydown", handleTab);
+    window.addEventListener("keydown", handleWindowKeyDown);
+    return () => window.removeEventListener("keydown", handleWindowKeyDown);
   }, [isOpen, onClose]);
 
   // Handle keyboard navigation
