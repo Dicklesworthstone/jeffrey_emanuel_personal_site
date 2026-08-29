@@ -917,6 +917,16 @@ select:focus-visible {
   box-shadow: 0 0 40px -10px rgba(245, 158, 11, 0.3);
 }
 
+/* Deliberately UNLAYERED. Moving this into `@layer components` (so the text
+   colour and opacity utilities at the call sites would win) makes Tailwind v4
+   drop the block entirely — measured: the label fell back to Crimson Pro
+   16px/400, no tracking, no uppercase. The authored colour-coding
+   (text-cyan-400, text-amber-500, text-purple-400) and two `opacity-100`
+   patches are therefore dead at every call site; see bead bd-1bpo. Fixing that
+   needs a different mechanism (e.g. @utility or per-call-site CSS vars), not a
+   layer move.
+   Opacity is 0.55, not the original 0.4: 0.4 put #f8fafc on #020204 at ~3.50:1,
+   under AA for 12px bold. 0.55 keeps the muted feel at ~6:1. */
 .hd-instrument-label {
   font-family: var(--font-jetbrains), monospace;
   font-size: 12px; /* labels informative readouts — 12px floor */
@@ -924,9 +934,6 @@ select:focus-visible {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--hd-text);
-  /* 0.4 put #f8fafc on #020204 at ~3.50:1 — under AA for 12px bold, and two
-     call sites were already patching it with `opacity-100`. 0.55 keeps the
-     muted instrument-label feel at ~5.95:1. */
   opacity: 0.55;
 }
 

@@ -91,3 +91,7 @@ lcp-debug.mjs
 
 # Stray numeric files (agent shell output accidentally captured)
 /1
+
+# Audit/QA artifact dumps (overflow-audit, vision-qa screenshot runs default here).
+# 800MB+ of PNGs accumulate; never belongs in the repo.
+/tmp/
