@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useCallback } from "react";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue, useReducedMotion } from "framer-motion";
 import { ArrowRight, BrainCircuit, FlaskConical, ExternalLink } from "lucide-react";
 import { Project } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 const TAP_MOVE_THRESHOLD_PX = 8;
 
 export default function ResearchProjectCard({ project }: { project: Project }) {
+  const prefersReducedMotion = useReducedMotion();
   const { lightTap } = useHapticFeedback();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -51,18 +52,20 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
       )}
     >
         {/* Animated Spotlight Background */}
-        <motion.div
-          className="pointer-events-none absolute -inset-px rounded-[2rem] opacity-0 transition duration-300 group-hover:opacity-100"
-          style={{
-            background: useMotionTemplate`
-              radial-gradient(
-                650px circle at ${mouseX}px ${mouseY}px,
-                rgba(147, 51, 234, 0.15),
-                transparent 80%
-              )
-            `,
-          }}
-        />
+        {!prefersReducedMotion && (
+          <motion.div
+            className="pointer-events-none absolute -inset-px rounded-[2rem] opacity-0 transition duration-300 group-hover:opacity-100"
+            style={{
+              background: useMotionTemplate`
+                radial-gradient(
+                  650px circle at ${mouseX}px ${mouseY}px,
+                  rgba(147, 51, 234, 0.15),
+                  transparent 80%
+                )
+              `,
+            }}
+          />
+        )}
 
         {/* Content Section */}
         <div className="relative z-10 flex flex-1 flex-col p-8 md:p-10">
