@@ -44,6 +44,11 @@ const SLUG_TO_REPO: Record<string, string> = {
   "cass-memory-system": "cass_memory_system",
   "cass": "coding_agent_session_search",
   "ultimate-bug-scanner": "ultimate_bug_scanner",
+  "meta-skill": "meta_skill",
+  "frankentui": "frankentui",
+  "beads-rust": "beads_rust",
+  "agentic-coding-flywheel-setup": "agentic_coding_flywheel_setup",
+  "destructive-command-guard": "destructive_command_guard",
 };
 
 type Params = Promise<{ slug: string }>;

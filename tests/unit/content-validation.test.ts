@@ -747,4 +747,34 @@ describe("Cross-Reference Validation", () => {
 
     testLog.testEnd("Endorsement author uniqueness", 1);
   });
+
+  test("all flywheel tools with projectSlug correspond to an existing project slug", () => {
+    testLog.testStart("Flywheel tool projectSlug validity");
+
+    const projectSlugs = new Set(projects.filter((p) => p.slug).map((p) => p.slug));
+
+    flywheelTools.forEach((tool) => {
+      if (tool.projectSlug) {
+        expect(projectSlugs.has(tool.projectSlug)).toBe(true);
+      }
+    });
+
+    testLog.testEnd("Flywheel tool projectSlug validity", 1);
+  });
+
+  test("all project detail relatedProjects reference existing project slugs", () => {
+    testLog.testStart("Project relatedProjects validity");
+
+    const projectSlugs = new Set(projects.filter((p) => p.slug).map((p) => p.slug));
+
+    projects.forEach((project) => {
+      if (project.details?.relatedProjects) {
+        project.details.relatedProjects.forEach((relSlug) => {
+          expect(projectSlugs.has(relSlug)).toBe(true);
+        });
+      }
+    });
+
+    testLog.testEnd("Project relatedProjects validity", 1);
+  });
 });

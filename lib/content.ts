@@ -767,7 +767,7 @@ export const projects: Project[] = [
   {
     name: "Coding Agent Session Search",
     kind: "oss",
-    badge: "618 stars",
+    badge: "1,105 stars",
     href: "https://github.com/Dicklesworthstone/coding_agent_session_search",
     short: "21K+ lines of Rust. Unified TUI for searching local history across Claude Code, Codex, Cursor, Gemini, and more.",
     description:
@@ -794,7 +794,7 @@ export const projects: Project[] = [
   {
     name: "Claude Code Agent Farm",
     kind: "oss",
-    badge: "739 stars",
+    badge: "916 stars",
     href: "https://github.com/Dicklesworthstone/claude_code_agent_farm",
     short: "Orchestrate an army of Claude Code agents to autonomously improve codebases.",
     description:
@@ -806,7 +806,7 @@ export const projects: Project[] = [
   {
     name: "Agentic Flywheel Setup",
     kind: "oss",
-    badge: "1,315 stars",
+    badge: "1,626 stars",
     href: "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
     short: "One-command setup for a fully-armed agentic coding environment.",
     description:
@@ -814,6 +814,21 @@ export const projects: Project[] = [
     tags: ["DevOps", "Setup", "Agents", "Automation", "Bash", "Flywheel"],
     size: "wide",
     gradient: "from-lime-500/20 via-emerald-500/20 to-teal-500/20",
+    slug: "agentic-coding-flywheel-setup",
+    details: {
+      features: [
+        "One-command turnkey installation for complete agentic VPS",
+        "Configures Claude Code, Codex CLI, and Antigravity CLI",
+        "Installs all 14 Flywheel ecosystem tools with optimized configs",
+        "Language runtime setup for Bun, Python 3.12+, Rust, and Go",
+        "Zsh configuration with powerlevel10k and developer aliases",
+        "Destructive command interceptor hooks pre-installed",
+        "Automated health checks and environment validation",
+      ],
+      installation: "```bash\n# One-command installation on a fresh Ubuntu VPS\ncurl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/agentic_coding_flywheel_setup/main/setup.sh | bash\n```",
+      usage: "```bash\n# Verify flywheel installation\nflywheel-check\n\n# Launch an orchestrated multi-agent session\nntm --help\n```",
+      relatedProjects: ["destructive-command-guard", "named-tmux-manager", "mcp-agent-mail"],
+    },
   },
   {
     name: "Ultimate MCP Client",
@@ -839,7 +854,7 @@ export const projects: Project[] = [
   {
     name: "MCP Agent Mail",
     kind: "oss",
-    badge: "1,837 stars",
+    badge: "2,124 stars",
     href: "https://github.com/Dicklesworthstone/mcp_agent_mail",
     short: "Gmail for your coding agents. A coordination layer with messaging, file leases, and audit trails.",
     description:
@@ -867,7 +882,7 @@ export const projects: Project[] = [
   {
     name: "Beads Viewer",
     kind: "oss",
-    badge: "1,413 stars",
+    badge: "1,673 stars",
     href: "https://github.com/Dicklesworthstone/beads_viewer",
     short: "20K+ lines of Go, shipped in a single day. Terminal UI for Steve Yegge's Beads system with graph analytics for agent task management.",
     description:
@@ -895,7 +910,7 @@ export const projects: Project[] = [
   {
     name: "Named Tmux Manager",
     kind: "oss",
-    badge: "207 stars",
+    badge: "435 stars",
     href: "https://github.com/Dicklesworthstone/ntm",
     short: "Multi-agent tmux orchestration. Spawn and coordinate Claude Code, Codex, and Gemini agents.",
     description:
@@ -922,7 +937,7 @@ export const projects: Project[] = [
   {
     name: "Simultaneous Launch Button",
     kind: "oss",
-    badge: "65 stars",
+    badge: "78 stars",
     href: "https://github.com/Dicklesworthstone/slb",
     short: "Two-person rule for AI agents: peer review before dangerous commands execute.",
     description:
@@ -948,7 +963,7 @@ export const projects: Project[] = [
   {
     name: "CASS Memory System",
     kind: "oss",
-    badge: "290 stars",
+    badge: "433 stars",
     href: "https://github.com/Dicklesworthstone/cass_memory_system",
     short: "ACE-framework persistent memory for coding agents. Stores procedural, episodic, and semantic knowledge.",
     description:
@@ -974,7 +989,7 @@ export const projects: Project[] = [
   {
     name: "Mindmap Generator",
     kind: "oss",
-    badge: "207 stars",
+    badge: "224 stars",
     href: "https://github.com/Dicklesworthstone/mindmap-generator",
     short: "Intelligently distills documents into hierarchical, context-aware mindmaps.",
     description:
@@ -985,7 +1000,7 @@ export const projects: Project[] = [
   {
     name: "LLM-Aided OCR",
     kind: "oss",
-    badge: "2,895 stars",
+    badge: "2,996 stars",
     href: "https://github.com/Dicklesworthstone/llm_aided_ocr",
     short: "Tesseract + LLMs = Perfect PDFs. Corrects OCR errors with language models.",
     description:
@@ -997,7 +1012,7 @@ export const projects: Project[] = [
   {
     name: "Swiss Army Llama",
     kind: "oss",
-    badge: "1,050 stars",
+    badge: "1,055 stars",
     href: "https://github.com/Dicklesworthstone/swiss_army_llama",
     short: "A high-performance 'Swiss Army Knife' FastAPI service for local LLMs.",
     description:
@@ -1019,7 +1034,7 @@ export const projects: Project[] = [
   {
     name: "Your Source to Prompt",
     kind: "oss",
-    badge: "749 stars",
+    badge: "760 stars",
     href: "https://github.com/Dicklesworthstone/your-source-to-prompt.html",
     short: "Secure, browser-based tool to turn codebases into optimized LLM prompts.",
     description:
@@ -1029,7 +1044,7 @@ export const projects: Project[] = [
   {
     name: "Bulk YouTube Transcriber",
     kind: "oss",
-    badge: "661 stars",
+    badge: "687 stars",
     href: "https://github.com/Dicklesworthstone/bulk_transcribe_youtube_videos_from_playlist",
     short: "Convert entire playlists into structured, searchable text with Whisper.",
     description:
@@ -1149,7 +1164,7 @@ export const projects: Project[] = [
   {
     name: "Ultimate Bug Scanner",
     kind: "oss",
-    badge: "206 stars",
+    badge: "287 stars",
     href: "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
     short: "Meta-runner for language-specific bug scanners, tuned for AI coding agents.",
     description:
@@ -1207,7 +1222,7 @@ export const projects: Project[] = [
   {
     name: "Source to Prompt TUI",
     kind: "oss",
-    badge: "Dev Tool",
+    badge: "66 stars",
     href: "https://github.com/Dicklesworthstone/source_to_prompt_tui",
     short: "Convert source code to LLM-ready prompts with real-time token counting.",
     description:
@@ -1247,7 +1262,7 @@ export const projects: Project[] = [
   {
     name: "Repo Updater",
     kind: "oss",
-    badge: "82 stars",
+    badge: "113 stars",
     href: "https://github.com/Dicklesworthstone/repo_updater",
     short: "Keep dozens of GitHub repos in sync with a single command.",
     description:
@@ -1267,7 +1282,7 @@ export const projects: Project[] = [
   {
     name: "Meta Skill",
     kind: "oss",
-    badge: "141 stars",
+    badge: "195 stars",
     href: "https://github.com/Dicklesworthstone/meta_skill",
     short: "Complete skill management platform with MCP server for AI agent integration.",
     description:
@@ -1292,12 +1307,26 @@ export const projects: Project[] = [
   {
     name: "Destructive Command Guard",
     kind: "oss",
-    badge: "726 stars",
+    badge: "5,894 stars",
     href: "https://github.com/Dicklesworthstone/destructive_command_guard",
     short: "Hook for Claude Code and Antigravity CLI that blocks destructive commands.",
     description:
       "High-performance safety hook that intercepts catastrophic commands before they execute. Protects against git reset --hard, rm -rf, DROP TABLE, and other irreversible operations that AI agents occasionally attempt. Works on Linux, macOS, and WSL with clear explanations and safer alternatives.",
     tags: ["Safety", "Claude", "Hooks", "Git", "DevTools", "Flywheel"],
+    slug: "destructive-command-guard",
+    details: {
+      features: [
+        "SIMD-accelerated pattern matching for zero-latency command interception",
+        "Blocks rm -rf, git reset --hard, git clean -fd, DROP TABLE, and format commands",
+        "Safe alternative suggestions provided in real time to the agent",
+        "Seamless hook integration with Claude Code, Codex, and Antigravity CLI",
+        "Cross-platform support across Linux, macOS, and Windows WSL",
+        "Configurable whitelist and custom rule definitions",
+      ],
+      installation: "```bash\n# Install via Cargo\ncargo install destructive_command_guard\n\n# Or install pre-built binary hook\ncurl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/main/install.sh | bash\n```",
+      usage: "```bash\n# Run as command proxy or hook\ndcg --wrap \"git reset --hard HEAD~1\"\n# [BLOCKED] Destructive command detected! Use git stash or git branch instead.\n```",
+      relatedProjects: ["simultaneous-launch-button", "named-tmux-manager", "ultimate-bug-scanner"],
+    },
   },
   {
     name: "JeffreysPrompts.com",
@@ -1312,7 +1341,7 @@ export const projects: Project[] = [
   {
     name: "GIIL",
     kind: "oss",
-    badge: "36 stars",
+    badge: "43 stars",
     href: "https://github.com/Dicklesworthstone/giil",
     short: "Git-backed interactive issue list with dependency tracking.",
     description:
@@ -1354,7 +1383,7 @@ export const projects: Project[] = [
   {
     name: "XF",
     kind: "oss",
-    badge: "83 stars",
+    badge: "104 stars",
     href: "https://github.com/Dicklesworthstone/xf",
     short: "Fast cross-file search and replace tool for codebases.",
     description:
@@ -1375,7 +1404,7 @@ export const projects: Project[] = [
   {
     name: "FrankenTUI",
     kind: "oss",
-    badge: "221 stars",
+    badge: "267 stars",
     href: "https://github.com/Dicklesworthstone/frankentui",
     short: "Minimal, high-performance terminal UI kernel with 850K+ lines of Rust across 20 crates.",
     description:
@@ -1403,7 +1432,7 @@ export const projects: Project[] = [
   {
     name: "Beads Rust",
     kind: "oss",
-    badge: "762 stars",
+    badge: "1,076 stars",
     href: "https://github.com/Dicklesworthstone/beads_rust",
     short: "Fast Rust port of Steve Yegge's beads — a local-first, non-invasive issue tracker for git repos.",
     description:
@@ -1585,7 +1614,7 @@ export const projects: Project[] = [
   {
     name: "FrankenSQLite",
     kind: "oss",
-    badge: "145 stars",
+    badge: "217 stars",
     href: "https://github.com/Dicklesworthstone/frankensqlite",
     short: "Clean-room Rust reimplementation of SQLite with MVCC, concurrent writers, and RaptorQ self-healing. 26-crate workspace.",
     description:
@@ -1597,7 +1626,7 @@ export const projects: Project[] = [
   {
     name: "FrankenTerm",
     kind: "oss",
-    badge: "72 stars",
+    badge: "110 stars",
     href: "https://github.com/Dicklesworthstone/frankenterm",
     short: "Swarm-native terminal platform in Rust with 120+ crates and 45K+ tests, replacing legacy workflows for AI agent fleets.",
     description:
@@ -1608,7 +1637,7 @@ export const projects: Project[] = [
   {
     name: "FrankenSearch",
     kind: "oss",
-    badge: "45 stars",
+    badge: "83 stars",
     href: "https://github.com/Dicklesworthstone/frankensearch",
     short: "Two-tier hybrid local search engine with HNSW ANN, full-text search, and cross-encoder reranking.",
     description:
@@ -1618,7 +1647,7 @@ export const projects: Project[] = [
   {
     name: "FrankenRedis",
     kind: "oss",
-    badge: "6 stars",
+    badge: "26 stars",
     href: "https://github.com/Dicklesworthstone/frankenredis",
     short: "Clean-room Redis reimplementation in Rust targeting full drop-in protocol parity.",
     description:
@@ -1628,7 +1657,7 @@ export const projects: Project[] = [
   {
     name: "FrankenPandas",
     kind: "oss",
-    badge: "8 stars",
+    badge: "21 stars",
     href: "https://github.com/Dicklesworthstone/frankenpandas",
     short: "Full pandas API reimplementation in clean Rust with columnar storage and 1,500+ tests.",
     description:
@@ -1638,7 +1667,7 @@ export const projects: Project[] = [
   {
     name: "FrankenJAX",
     kind: "oss",
-    badge: "5 stars",
+    badge: "10 stars",
     href: "https://github.com/Dicklesworthstone/frankenjax",
     short: "JAX transform semantics in Rust with JAXPR-like IR, 110 primitives, and full AD coverage.",
     description:
@@ -1648,7 +1677,7 @@ export const projects: Project[] = [
   {
     name: "FrankenNumPy",
     kind: "oss",
-    badge: "4 stars",
+    badge: "15 stars",
     href: "https://github.com/Dicklesworthstone/franken_numpy",
     short: "Memory-safe NumPy reimplementation in Rust with 2,282 passing tests and bit-exact RNG parity.",
     description:
@@ -1658,7 +1687,7 @@ export const projects: Project[] = [
   {
     name: "FrankenSciPy",
     kind: "oss",
-    badge: "3 stars",
+    badge: "13 stars",
     href: "https://github.com/Dicklesworthstone/frankenscipy",
     short: "Clean-room SciPy reimplementation with Condition-Aware Solver Portfolio (CASP).",
     description:
