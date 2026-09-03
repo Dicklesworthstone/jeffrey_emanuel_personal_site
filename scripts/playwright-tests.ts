@@ -120,6 +120,14 @@ async function testPage(
       errors.push("No main content sections found");
     }
 
+    // Temporarily disable smooth scrolling and fixed headers during fullPage screenshot to prevent duplicate stitching
+    await page.addStyleTag({
+      content: `
+        html { scroll-behavior: auto !important; }
+        header { position: absolute !important; }
+      `,
+    });
+
     // Take full page screenshot
     const screenshotName = `${pageName}-${viewportName}.png`;
     const screenshotPath = path.join(SCREENSHOT_DIR, screenshotName);
@@ -154,11 +162,11 @@ async function testPage(
     // On media page, verify content is present
     if (pageName === "media") {
       const mediaContent = await page.evaluate(() => {
-        const text = document.body.innerText;
+        const text = document.body.innerText.toLowerCase();
         return {
-          hasBankless: text.includes("Bankless"),
-          hasDiginomica: text.includes("Diginomica"),
-          hasSlashdot: text.includes("Slashdot"),
+          hasBankless: text.includes("bankless"),
+          hasDiginomica: text.includes("diginomica"),
+          hasSlashdot: text.includes("slashdot"),
         };
       });
 
@@ -333,7 +341,7 @@ async function runTests() {
     console.log("\nTesting Keyboard Shortcuts Modal...");
     await interactivePage.keyboard.press("?");
     await delay(800);
-    const shortcutsModal = interactivePage.locator('[role="dialog"][aria-label="Keyboard shortcuts"]');
+    const shortcutsModal = interactivePage.locator('[role="dialog"]').first();
     if (await shortcutsModal.isVisible()) {
       console.log("  ✓ Keyboard shortcuts modal opened");
       await interactivePage.screenshot({

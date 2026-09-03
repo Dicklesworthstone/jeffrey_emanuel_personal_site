@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EndorsementShowcase } from "@/components/endorsement-showcase";
@@ -34,7 +34,6 @@ export function NvidiaQuoteWall({
   showHeading = true,
   layout = "featured",
 }: NvidiaQuoteWallProps) {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -43,9 +42,9 @@ export function NvidiaQuoteWall({
       {/* Section heading */}
       {showHeading && (
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.6 }}
+          transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
           <div className="mb-4 flex items-center justify-center gap-2 text-amber-400">
@@ -65,9 +64,9 @@ export function NvidiaQuoteWall({
 
       {/* Endorsements filtered to nvidia tag */}
       <motion.div
-        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
       >
         <EndorsementShowcase
           filterTags={["nvidia"]}

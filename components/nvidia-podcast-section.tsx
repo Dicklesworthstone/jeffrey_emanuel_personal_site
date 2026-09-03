@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { motion, useReducedMotion, useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { Headphones, Play, Clock, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nvidiaStoryData } from "@/lib/content";
@@ -137,7 +137,6 @@ interface PodcastCardProps {
 }
 
 function PodcastCard({ podcast, featured = false, showEmbed = false }: PodcastCardProps) {
-  const prefersReducedMotion = useReducedMotion();
   const [isHovered, setIsHovered] = useState(false);
 
   // Extract Spotify episode ID if it's a direct Spotify URL
@@ -160,7 +159,7 @@ function PodcastCard({ podcast, featured = false, showEmbed = false }: PodcastCa
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 0.1 : 0 }}
-        transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
+        transition={{ duration: 0.3 }}
         className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600"
       />
 
@@ -263,7 +262,6 @@ export function NvidiaPodcastSection({
   showHeading = true,
   enableEmbeds = true,
 }: NvidiaPodcastSectionProps) {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -276,17 +274,17 @@ export function NvidiaPodcastSection({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.15,
+        staggerChildren: 0.15,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: prefersReducedMotion ? 0 : 0.5 },
+      transition: { duration: 0.5 },
     },
   };
 
@@ -299,9 +297,9 @@ export function NvidiaPodcastSection({
       {/* Section heading */}
       {showHeading && (
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.6 }}
+          transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
           <div className="mb-4 flex items-center justify-center gap-2 text-violet-400">

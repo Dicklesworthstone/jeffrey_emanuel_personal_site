@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence, LayoutGroup, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import SectionShell from "@/components/section-shell";
 import BentoGrid from "@/components/bento-grid";
 import FlywheelVisualization from "@/components/flywheel-visualization";
@@ -37,7 +37,6 @@ const popularTags = Object.entries(tagCounts)
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState<typeof filters[number]["id"]>("all");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const prefersReducedMotion = useReducedMotion();
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {
@@ -117,9 +116,9 @@ export default function ProjectsPage() {
               >
                 {isActive && (
                   <motion.div
-                    layoutId={prefersReducedMotion ? undefined : "activeFilter"}
+                    layoutId="activeFilter"
                     className="absolute inset-0 rounded-full bg-white/10 ring-1 ring-inset ring-white/20"
-                    transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", bounce: 0.2, duration: 0.6 }}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
                 <Icon className="relative z-10 h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
@@ -131,14 +130,14 @@ export default function ProjectsPage() {
       </LayoutGroup>
 
       {/* Flywheel Visualization - only shown for "all" or "flywheel" filters */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {showFlywheel && (
           <motion.div
             key="flywheel-section"
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: "easeOut" }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             className="mb-12 sm:mb-16 overflow-hidden"
           >
             <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-violet-950/20 via-black/40 to-black/20 p-4 sm:p-6 md:p-8 lg:p-12 backdrop-blur-sm">
@@ -225,8 +224,8 @@ export default function ProjectsPage() {
       {/* The Grid - moves up immediately when flywheel is hidden */}
       <motion.div
         id="projects-grid"
-        layout={!prefersReducedMotion}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeInOut" }}
+        layout="position"
+        transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         <ErrorBoundary
           fallback={

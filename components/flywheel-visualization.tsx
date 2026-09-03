@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect, useId } from "react";
-import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import Link from "next/link";
 import {
   LayoutGrid,
@@ -154,7 +154,6 @@ const ConnectionLine = React.memo(function ConnectionLine({
   isActive,
   fromColor,
   toColor,
-  reducedMotion,
   connectionId,
   supportsMotionPath,
   scopeId,
@@ -165,7 +164,6 @@ const ConnectionLine = React.memo(function ConnectionLine({
   isActive: boolean;
   fromColor: string;
   toColor: string;
-  reducedMotion: boolean;
   connectionId: string;
   supportsMotionPath: boolean;
   scopeId: string;
@@ -236,33 +234,31 @@ const ConnectionLine = React.memo(function ConnectionLine({
           opacity: isHighlighted ? 1 : 0.4,
         }}
         transition={{
-          pathLength: { duration: reducedMotion ? 0 : 0.8, ease: "easeOut" },
-          opacity: { duration: reducedMotion ? 0 : 0.3 },
+          pathLength: { duration: 0.8, ease: "easeOut" },
+          opacity: { duration: 0.3 },
         }}
       />
 
       {/* Flowing data pulse */}
-      {!reducedMotion && (
-        <motion.path
-          d={path}
-          fill="none"
-          stroke={`url(#${flowGradientId})`}
-          strokeWidth={isHighlighted ? 3 : 1.5}
-          strokeLinecap="round"
-          strokeDasharray={`4, ${pathLength / 4}`}
-          initial={{ strokeDashoffset: 0 }}
-          animate={{ strokeDashoffset: -pathLength }}
-          transition={{
-            duration: isHighlighted ? 2 : 4,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          style={{ opacity: isHighlighted ? 0.8 : 0.2 }}
-        />
-      )}
+      <motion.path
+        d={path}
+        fill="none"
+        stroke={`url(#${flowGradientId})`}
+        strokeWidth={isHighlighted ? 3 : 1.5}
+        strokeLinecap="round"
+        strokeDasharray={`4, ${pathLength / 4}`}
+        initial={{ strokeDashoffset: 0 }}
+        animate={{ strokeDashoffset: -pathLength }}
+        transition={{
+          duration: isHighlighted ? 2 : 4,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        style={{ opacity: isHighlighted ? 0.8 : 0.2 }}
+      />
 
       {/* Flowing particles */}
-      {isActive && !reducedMotion && supportsMotionPath && (
+      {isActive && supportsMotionPath && (
         <>
           <FlowingParticle path={path} delay={0} duration={2} color={color1} enabled={supportsMotionPath} />
           <FlowingParticle path={path} delay={0.7} duration={2} color={color2} enabled={supportsMotionPath} />
@@ -283,7 +279,6 @@ const ToolNode = React.memo(function ToolNode({
   isDimmed,
   onSelect,
   onHover,
-  reducedMotion,
 }: {
   tool: FlywheelTool;
   position: { x: number; y: number };
@@ -293,7 +288,6 @@ const ToolNode = React.memo(function ToolNode({
   isDimmed: boolean;
   onSelect: (id: string) => void;
   onHover: (id: string, hovering: boolean) => void;
-  reducedMotion: boolean;
 }) {
   const Icon = iconMap[tool.icon] || Zap;
   const { lightTap } = useHapticFeedback();
@@ -319,21 +313,17 @@ const ToolNode = React.memo(function ToolNode({
         height: NODE_SIZE,
         zIndex: isSelected ? 30 : isConnected ? 20 : 10,
       }}
-      initial={{ scale: reducedMotion ? 1 : 0.8, opacity: 0 }}
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{
         scale: 1,
         opacity: isDimmed ? 0.35 : 1,
       }}
-      transition={
-        reducedMotion
-          ? { duration: 0 }
-          : {
-              type: "spring",
-              stiffness: 260,
-              damping: 20,
-              delay: index * 0.05,
-            }
-      }
+      transition={{
+        type: "spring",
+        stiffness: 260,
+        damping: 20,
+        delay: index * 0.05,
+      }}
     >
       <Magnetic strength={0.25}>
         <motion.button
@@ -354,8 +344,8 @@ const ToolNode = React.memo(function ToolNode({
               ? "border-white/30 bg-white/10"
               : "border-white/10 bg-slate-900/80 hover:border-white/25 hover:bg-white/10"
           )}
-          whileHover={reducedMotion ? {} : { scale: 1.05 }}
-          whileTap={reducedMotion ? {} : { scale: 0.95 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           {/* Noise Overlay */}
           <div 
@@ -371,7 +361,7 @@ const ToolNode = React.memo(function ToolNode({
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: isSelected ? 0.6 : isConnected ? 0.35 : isHovered ? 0.3 : 0.15 }}
-            transition={{ duration: reducedMotion ? 0 : 0.3 }}
+            transition={{ duration: 0.3 }}
           />
 
           {/* Icon with Chromatic Aberration on hover */}
@@ -383,7 +373,7 @@ const ToolNode = React.memo(function ToolNode({
             )}
           >
             <AnimatePresence>
-              {isHovered && !reducedMotion && (
+              {isHovered && (
                 <>
                   <motion.div 
                     initial={{ opacity: 0, x: 0 }}
@@ -417,12 +407,12 @@ const ToolNode = React.memo(function ToolNode({
   );
 });
 
-const CenterHub = React.memo(function CenterHub({ reducedMotion }: { reducedMotion: boolean }) {
+const CenterHub = React.memo(function CenterHub() {
   // The glow is a JS-driven box-shadow loop; only run it while the hub is on
   // screen so /projects does not tick a framer frame loop at idle forever.
   const hubRef = React.useRef<HTMLDivElement>(null);
   const inView = useInView(hubRef, { margin: "100px" });
-  const animateGlow = !reducedMotion && inView;
+  const animateGlow = inView;
   return (
     <div
       ref={hubRef}
@@ -460,14 +450,12 @@ const RichTooltip = React.memo(function RichTooltip({
   tool,
   position,
   containerSize,
-  reducedMotion,
   onMouseEnter,
   onMouseLeave,
 }: {
   tool: FlywheelTool;
   position: { x: number; y: number };
   containerSize: number;
-  reducedMotion: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }) {
@@ -491,10 +479,10 @@ const RichTooltip = React.memo(function RichTooltip({
 
   return (
     <motion.div
-      initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: isRightHalf ? 10 : -10 }}
+      initial={{ opacity: 0, x: isRightHalf ? 10 : -10 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: isRightHalf ? 10 : -10 }}
-      transition={{ duration: reducedMotion ? 0.1 : 0.2 }}
+      exit={{ opacity: 0, x: isRightHalf ? 10 : -10 }}
+      transition={{ duration: 0.2 }}
       style={tooltipStyle}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -600,19 +588,17 @@ const RichTooltip = React.memo(function RichTooltip({
 const ToolDetailPanel = React.memo(function ToolDetailPanel({
   tool,
   onClose,
-  reducedMotion,
 }: {
   tool: FlywheelTool;
   onClose: () => void;
-  reducedMotion: boolean;
 }) {
   const Icon = iconMap[tool.icon] || Zap;
 
   return (
     <motion.div
-      initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.3 }}
       className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/90 backdrop-blur-xl"
     >
@@ -729,16 +715,14 @@ function PlaceholderPanel() {
 // Ecosystem vitality badge component
 const EcosystemVitalityBadge = React.memo(function EcosystemVitalityBadge({
   toolCount,
-  reducedMotion,
 }: {
   toolCount: number;
-  reducedMotion: boolean;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : 0.8 }}
+      transition={{ duration: 0.5, delay: 0.8 }}
       className="mt-6 flex justify-center"
     >
       <div className="inline-flex items-center gap-3 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-2 backdrop-blur-sm">
@@ -779,11 +763,9 @@ export default function FlywheelVisualization() {
   const [hoveredToolId, setHoveredToolId] = useState<string | null>(null);
   const [tooltipToolId, setTooltipToolId] = useState<string | null>(null);
   const hoverTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prefersReducedMotion = useReducedMotion();
-  const reducedMotion = prefersReducedMotion ?? false;
   const supportsMotionPath = useSupportsMotionPath();
   const toolById = useMemo(() => new Map(flywheelTools.map((tool) => [tool.id, tool])), []);
-  const scopeId = useId();
+  const scopeId = "flywheel-viz";
 
   const activeToolId = selectedToolId || hoveredToolId;
   // Show detail panel for hovered tool (desktop) or selected tool (mobile/click)
@@ -1006,7 +988,6 @@ export default function FlywheelVisualization() {
                     isActive={highlighted && !!selectedToolId}
                     fromColor={fromTool.color}
                     toColor={toTool.color}
-                    reducedMotion={reducedMotion}
                     connectionId={`${from}-${to}`}
                     supportsMotionPath={supportsMotionPath}
                     scopeId={scopeId}
@@ -1016,7 +997,7 @@ export default function FlywheelVisualization() {
             </svg>
 
             {/* Center hub */}
-            <CenterHub reducedMotion={reducedMotion} />
+            <CenterHub />
 
             {/* Tool nodes */}
             {flywheelTools.map((tool, index) => (
@@ -1030,7 +1011,6 @@ export default function FlywheelVisualization() {
                 isDimmed={!!activeToolId && tool.id !== activeToolId && !isToolConnected(tool.id)}
                 onSelect={handleSelectTool}
                 onHover={handleNodeHover}
-                reducedMotion={reducedMotion}
               />
             ))}
 
@@ -1043,7 +1023,6 @@ export default function FlywheelVisualization() {
                     tool={tooltipTool}
                     position={positions[tooltipToolId]}
                     containerSize={CONTAINER_SIZE}
-                    reducedMotion={reducedMotion}
                     onMouseEnter={handleTooltipEnter}
                     onMouseLeave={handleTooltipLeave}
                   />
@@ -1055,7 +1034,6 @@ export default function FlywheelVisualization() {
           {/* Ecosystem vitality badge */}
           <EcosystemVitalityBadge
             toolCount={flywheelTools.length}
-            reducedMotion={reducedMotion}
           />
         </div>
 
@@ -1067,7 +1045,6 @@ export default function FlywheelVisualization() {
                 key={displayedTool.id}
                 tool={displayedTool}
                 onClose={handleCloseDetail}
-                reducedMotion={reducedMotion}
               />
             ) : (
               <PlaceholderPanel key="placeholder" />

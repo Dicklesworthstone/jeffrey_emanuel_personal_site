@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { ArrowRight, FileText, Calendar } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -17,13 +17,12 @@ import { NvidiaPodcastSection } from "@/components/nvidia-podcast-section";
 // =============================================================================
 
 function HeroSection() {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true });
   // Infinite loops (glow pulse, scroll hint) only run while the hero is on screen,
   // so they stop compositing once the reader has scrolled into the story.
   const isOnScreen = useInView(ref, { amount: 0.1 });
-  const runLoops = !prefersReducedMotion && isOnScreen;
+  const runLoops = isOnScreen;
 
   return (
     <section
@@ -51,7 +50,7 @@ function HeroSection() {
       <div className="relative z-10 mx-auto max-w-4xl text-center">
         {/* Date badge */}
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm text-slate-400"
@@ -62,7 +61,7 @@ function HeroSection() {
 
         {/* Main headline */}
         <motion.h1
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.1 }}
           className="mb-8 text-5xl font-black tracking-tight text-white sm:text-6xl md:text-7xl"
@@ -75,7 +74,7 @@ function HeroSection() {
 
         {/* Subheadline */}
         <motion.p
-          initial={prefersReducedMotion ? {} : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.3 }}
           className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl"
@@ -101,7 +100,7 @@ function HeroSection() {
         {/* Scroll indicator: in normal flow (not absolutely positioned) so it can
             never overlap the CTA on short phone viewports. */}
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-12 flex justify-center"
@@ -133,7 +132,6 @@ function HeroSection() {
 // =============================================================================
 
 function EssaySection() {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -145,7 +143,7 @@ function EssaySection() {
     >
       <div className="mx-auto max-w-4xl">
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-6 md:p-10"
@@ -200,7 +198,6 @@ function EssaySection() {
 // =============================================================================
 
 function AftermathSection() {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -212,7 +209,7 @@ function AftermathSection() {
     >
       <div className="mx-auto max-w-2xl text-center">
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >

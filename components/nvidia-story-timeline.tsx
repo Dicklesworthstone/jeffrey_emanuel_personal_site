@@ -1,15 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import {
-  Cpu,
   FileText,
-  Share2,
-  TrendingUp,
   TrendingDown,
-  Quote,
   Newspaper,
+  Shield,
+  Activity,
+  Award,
   ExternalLink,
   type LucideIcon,
 } from "lucide-react";
@@ -22,13 +21,12 @@ import { nvidiaStoryData, type NvidiaStoryTimelineEvent } from "@/lib/content";
 // =============================================================================
 
 const iconMap: Record<string, LucideIcon> = {
-  Cpu,
   FileText,
-  Share2,
-  TrendingUp,
   TrendingDown,
-  Quote,
   Newspaper,
+  Shield,
+  Activity,
+  Award,
 };
 
 // =============================================================================
@@ -43,7 +41,6 @@ interface TimelineEventProps {
 }
 
 function TimelineEvent({ event, index, isLast }: TimelineEventProps) {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
@@ -54,14 +51,14 @@ function TimelineEvent({ event, index, isLast }: TimelineEventProps) {
   const cardVariants = {
     hidden: {
       opacity: 0,
-      x: prefersReducedMotion ? 0 : isEven ? -30 : 30,
+      x: isEven ? -30 : 30,
     },
     visible: {
       opacity: 1,
       x: 0,
       transition: {
-        duration: prefersReducedMotion ? 0 : 0.5,
-        delay: prefersReducedMotion ? 0 : index * 0.1,
+        duration: 0.5,
+        delay: index * 0.1,
       },
     },
   };
@@ -130,11 +127,11 @@ function TimelineEvent({ event, index, isLast }: TimelineEventProps) {
       <div className="relative flex flex-col items-center">
         {/* Icon circle */}
         <motion.div
-          initial={prefersReducedMotion ? {} : { scale: 0 }}
+          initial={{ scale: 0 }}
           animate={isInView ? { scale: 1 } : {}}
           transition={{
-            duration: prefersReducedMotion ? 0 : 0.3,
-            delay: prefersReducedMotion ? 0 : index * 0.1,
+            duration: 0.3,
+            delay: index * 0.1,
             type: "spring",
             bounce: 0.4,
           }}
@@ -151,11 +148,11 @@ function TimelineEvent({ event, index, isLast }: TimelineEventProps) {
         {/* Connecting line (not for last item) */}
         {!isLast && (
           <motion.div
-            initial={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
+            initial={{ scaleY: 0 }}
             animate={isInView ? { scaleY: 1 } : {}}
             transition={{
-              duration: prefersReducedMotion ? 0 : 0.5,
-              delay: prefersReducedMotion ? 0 : index * 0.1 + 0.2,
+              duration: 0.5,
+              delay: index * 0.1 + 0.2,
             }}
             style={{ originY: 0 }}
             className="w-0.5 flex-1 bg-gradient-to-b from-slate-700 to-slate-800"
@@ -175,7 +172,6 @@ function TimelineEvent({ event, index, isLast }: TimelineEventProps) {
 // =============================================================================
 
 function TimelineProgressLine() {
-  const prefersReducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -184,16 +180,6 @@ function TimelineProgressLine() {
   });
 
   const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
-  if (prefersReducedMotion) {
-    return (
-      <div
-        ref={containerRef}
-        className="absolute left-[19px] top-0 h-full w-0.5 bg-slate-800 md:left-1/2 md:-translate-x-1/2"
-        aria-hidden="true"
-      />
-    );
-  }
 
   return (
     <div
@@ -227,7 +213,6 @@ export function NvidiaStoryTimeline({
   className,
   showHeading = true,
 }: NvidiaStoryTimelineProps) {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -242,9 +227,9 @@ export function NvidiaStoryTimeline({
       {/* Section heading */}
       {showHeading && (
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.6 }}
+          transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
           <h2 className="mb-3 text-3xl font-bold text-white md:text-4xl">
@@ -259,9 +244,9 @@ export function NvidiaStoryTimeline({
 
       {/* Narrative insight callout */}
       <motion.div
-        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
         className="mb-12 rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-center md:p-6"
       >
         <p className="text-sm leading-relaxed text-amber-200/80 md:text-base">

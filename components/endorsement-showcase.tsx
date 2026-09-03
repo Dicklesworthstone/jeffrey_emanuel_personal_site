@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useRef } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -60,7 +60,6 @@ export function EndorsementShowcase({
   heading = "What People Are Saying",
   subheading,
 }: EndorsementShowcaseProps) {
-  const prefersReducedMotion = useReducedMotion();
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -183,17 +182,17 @@ export function EndorsementShowcase({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.1,
+        staggerChildren: 0.1,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: prefersReducedMotion ? 0 : 0.4 },
+      transition: { duration: 0.4 },
     },
   };
 
@@ -349,12 +348,12 @@ export function EndorsementShowcase({
           viewport={{ once: true, margin: "-100px" }}
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="popLayout" initial={false}>
             {filteredEndorsements.map((endorsement) => (
               <motion.div
                 key={endorsement.id}
                 variants={itemVariants}
-                layout={!prefersReducedMotion}
+                layout="position"
                 exit={{ opacity: 0, scale: 0.95 }}
               >
                 <EndorsementCard
@@ -397,14 +396,14 @@ export function EndorsementShowcase({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {currentItem && (
               <motion.div
                 key={currentItem.id}
-                initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 50 }}
+                initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: prefersReducedMotion ? 0 : -50 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
                 className="mx-auto max-w-2xl"
               >
                 <EndorsementCard
@@ -510,14 +509,14 @@ export function EndorsementShowcase({
             </span>
           </div>
 
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {otherItems[safeCarouselIndex] && (
               <motion.div
                 key={otherItems[safeCarouselIndex].id}
-                initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 30 }}
+                initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: prefersReducedMotion ? 0 : -30 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.25 }}
               >
                 <EndorsementCard
                   {...toCardProps(otherItems[safeCarouselIndex])}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/animated-number";
@@ -19,7 +19,6 @@ interface MarketCapDropProps {
 }
 
 export function MarketCapDrop({ showChart = true, className }: MarketCapDropProps) {
-  const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
@@ -33,7 +32,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
       {/* Main stat display */}
       <div className="text-center">
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
           className="mb-2 flex items-center justify-center gap-2 text-rose-400"
@@ -45,7 +44,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
         </motion.div>
 
         <motion.div
-          initial={prefersReducedMotion ? {} : { scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.8, opacity: 0 }}
           animate={isInView ? { scale: 1, opacity: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.1, type: "spring", bounce: 0.3 }}
         >
@@ -61,7 +60,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
         </motion.div>
 
         <motion.p
-          initial={prefersReducedMotion ? {} : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-4 text-lg text-slate-400"
@@ -75,7 +74,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
           in ~1.4s instead of the previous 4s choreography. */}
       {showChart && (
         <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-12"
@@ -100,7 +99,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               stroke="url(#steady-gradient)"
               strokeWidth="3"
               strokeLinecap="round"
-              initial={prefersReducedMotion ? {} : { pathLength: 0 }}
+              initial={{ pathLength: 0 }}
               animate={isInView ? { pathLength: 1 } : {}}
               transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
             />
@@ -113,7 +112,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
-              initial={prefersReducedMotion ? {} : { pathLength: 0 }}
+              initial={{ pathLength: 0 }}
               animate={isInView ? { pathLength: 1 } : {}}
               transition={{ duration: 0.4, delay: 0.9, ease: "easeIn" }}
             />
@@ -124,7 +123,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               cy="40"
               r="6"
               className="fill-rose-500"
-              initial={prefersReducedMotion ? {} : { scale: 0, opacity: 0 }}
+              initial={{ scale: 0, opacity: 0 }}
               animate={isInView ? { scale: 1, opacity: 1 } : {}}
               transition={{ duration: 0.3, delay: 0.9 }}
             />
@@ -135,7 +134,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               cy="150"
               r="6"
               className="fill-rose-600"
-              initial={prefersReducedMotion ? {} : { scale: 0, opacity: 0 }}
+              initial={{ scale: 0, opacity: 0 }}
               animate={isInView ? { scale: 1, opacity: 1 } : {}}
               transition={{ duration: 0.3, delay: 1.3 }}
             />
@@ -158,7 +157,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               y="30"
               className="fill-slate-500 text-[10px]"
               textAnchor="middle"
-              initial={prefersReducedMotion ? {} : { opacity: 0 }}
+              initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
               transition={{ duration: 0.3, delay: 0.6 }}
             >
@@ -169,7 +168,7 @@ export function MarketCapDrop({ showChart = true, className }: MarketCapDropProp
               y="170"
               className="fill-rose-400 text-[10px] font-semibold"
               textAnchor="middle"
-              initial={prefersReducedMotion ? {} : { opacity: 0 }}
+              initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
               transition={{ duration: 0.3, delay: 1.3 }}
             >

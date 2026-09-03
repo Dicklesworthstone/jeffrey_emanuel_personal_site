@@ -494,7 +494,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: -20 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-4 top-[max(4.5rem,8dvh)] z-[101] mx-auto max-w-xl sm:inset-x-auto"
+            className="fixed inset-x-0 top-[max(4.5rem,8dvh)] z-[101] mx-auto w-[calc(100%-2rem)] max-w-xl"
             role="dialog"
             aria-modal="true"
             aria-label="Command palette"
