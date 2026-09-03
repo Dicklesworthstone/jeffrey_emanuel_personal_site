@@ -452,3 +452,33 @@ test.describe("Projects Page - Responsive Design", () => {
     console.log("[E2E] Tablet viewport test passed");
   });
 });
+
+test.describe("Projects Page - Detail Pages", () => {
+  test("should load agentic flywheel setup detail page with features and installation", async ({ page }) => {
+    console.log("[E2E] Testing /projects/agentic-coding-flywheel-setup");
+    await page.goto("/projects/agentic-coding-flywheel-setup");
+
+    await expect(
+      page.getByRole("heading", { name: /Agentic Flywheel Setup/i, level: 1 })
+    ).toBeVisible();
+
+    await expect(page.getByRole("heading", { name: /^features$/i, level: 2 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^installation$/i, level: 2 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^usage$/i, level: 2 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^related projects$/i, level: 2 })).toBeVisible();
+    console.log("[E2E] Flywheel setup detail page verified");
+  });
+
+  test("should load destructive command guard detail page", async ({ page }) => {
+    console.log("[E2E] Testing /projects/destructive-command-guard");
+    await page.goto("/projects/destructive-command-guard");
+
+    await expect(
+      page.getByRole("heading", { name: /Destructive Command Guard/i, level: 1 })
+    ).toBeVisible();
+
+    await expect(page.getByText(/SIMD-accelerated pattern matching/i)).toBeVisible();
+    console.log("[E2E] Destructive command guard detail page verified");
+  });
+});
+
