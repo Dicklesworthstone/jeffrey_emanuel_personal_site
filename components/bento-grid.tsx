@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ProjectCard from "@/components/project-card";
+import ResearchProjectCard from "@/components/research-project-card";
 import type { Project } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +61,11 @@ export default function BentoGrid({ projects, className }: BentoGridProps) {
                 className={animates ? ENTRANCE_CLASS : "h-full"}
                 style={animates ? { transitionDelay: `${(index * stagger).toFixed(3)}s` } : undefined}
               >
-                <ProjectCard project={project} />
+                {project.kind === "research" && (project.size === "large" || project.size === "wide") ? (
+                  <ResearchProjectCard project={project} />
+                ) : (
+                  <ProjectCard project={project} />
+                )}
               </div>
             </motion.div>
           );

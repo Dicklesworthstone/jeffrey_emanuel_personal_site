@@ -1,16 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useCallback } from "react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { ArrowRight, BrainCircuit, FlaskConical, ExternalLink } from "lucide-react";
 import { Project } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 
+const TAP_MOVE_THRESHOLD_PX = 8;
+
 export default function ResearchProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+
+  const tapStartRef = useRef<{ x: number; y: number } | null>(null);
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    tapStartRef.current = e.pointerType === "touch" ? { x: e.clientX, y: e.clientY } : null;
+  }, []);
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    const start = tapStartRef.current;
+    tapStartRef.current = null;
+    if (!start) return;
+    if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < TAP_MOVE_THRESHOLD_PX) lightTap();
+  }, [lightTap]);
+  const handlePointerCancel = useCallback(() => {
+    tapStartRef.current = null;
+  }, []);
 
   function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
     const { left, top } = currentTarget.getBoundingClientRect();
@@ -20,25 +37,19 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
 
   const isBio = project.name.toLowerCase().includes("bio");
   const Icon = isBio ? BrainCircuit : FlaskConical;
+  const isExternal = project.href.startsWith("http");
 
-  return (
-    <Link
-      href={project.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      onTouchStart={lightTap}
-      className="group relative block w-full"
+  const cardContent = (
+    <div
+      onMouseMove={handleMouseMove}
+      className={cn(
+        "relative flex min-h-[300px] h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/50 md:flex-row",
+        "transition-all duration-300 ease-out",
+        "hover:border-white/20 hover:scale-[1.01] hover:shadow-2xl hover:shadow-purple-900/20",
+        "focus-within:scale-[1.01] focus-within:shadow-2xl focus-within:shadow-purple-900/20",
+        "will-change-transform"
+      )}
     >
-      <div
-        onMouseMove={handleMouseMove}
-        className={cn(
-          "relative flex min-h-[300px] flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/50 md:flex-row",
-          "transition-all duration-300 ease-out",
-          "hover:border-white/20 hover:scale-[1.01] hover:shadow-2xl hover:shadow-purple-900/20",
-          "focus-within:scale-[1.01] focus-within:shadow-2xl focus-within:shadow-purple-900/20",
-          "will-change-transform"
-        )}
-      >
         {/* Animated Spotlight Background */}
         <motion.div
           className="pointer-events-none absolute -inset-px rounded-[2rem] opacity-0 transition duration-300 group-hover:opacity-100"
@@ -119,6 +130,33 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
            </div>
         </div>
       </div>
+  );
+
+  if (isExternal) {
+    return (
+      <a
+        href={project.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        className="group relative block w-full h-full"
+      >
+        {cardContent}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      href={project.href}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      className="group relative block w-full h-full"
+    >
+      {cardContent}
     </Link>
   );
 }
