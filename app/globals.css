@@ -32,11 +32,13 @@
     strong   200      #e2e8f0   #1e293b   emphasised text
     heading  100      #f1f5f9   #0f172a   headings
     ink      white    #ffffff   #0f172a   brightest text, alpha tints
+    paper    black    #000000   #ffffff   inset tints (bg-black/20), scrims
 
   So in light mode `bg-slate-900` renders white and `text-white` renders near
   black — write markup in the dark vocabulary and let the tokens flip. Accent
-  colors (sky, violet, emerald, amber, ...) and `black` do not flip; use the
-  `light:` variant for accent tweaks that only make sense on a light surface.
+  colors (sky, violet, emerald, amber, ...) do not flip; use the `light:`
+  variant for accent tweaks that only make sense on a light surface, and never
+  write `light:bg-white` or `light:text-black` (they resolve to ink/paper).
 
   `@theme inline` makes utilities reference the role variable directly
   (`background-color: var(--site-bg-canvas)`) instead of a `:root`-level
@@ -66,6 +68,7 @@
   --color-slate-200: var(--site-text-strong);
   --color-slate-100: var(--site-text-heading);
   --color-white: var(--site-ink);
+  --color-black: var(--site-paper);
 }
 
 :root,
@@ -84,6 +87,7 @@
   --site-text-strong: #e2e8f0;
   --site-text-heading: #f1f5f9;
   --site-ink: #ffffff;
+  --site-paper: #000000;
 }
 
 .light {
@@ -101,6 +105,7 @@
   --site-text-strong: #1e293b;
   --site-text-heading: #0f172a;
   --site-ink: #0f172a;
+  --site-paper: #ffffff;
 }
 
 :root {

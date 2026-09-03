@@ -86,6 +86,7 @@ describe("the slate ramp and white resolve through the per-theme role tokens", (
       "text-slate-100",
       "text-white",
       "border-white/10",
+      "bg-black/20",
     ]);
 
     expect(ruleFor(full, ".bg-slate-950")).toContain("var(--site-bg-canvas)");
@@ -94,6 +95,7 @@ describe("the slate ramp and white resolve through the per-theme role tokens", (
     expect(ruleFor(full, ".text-white")).toContain("var(--site-ink)");
     // Alpha modifiers must go through color-mix on the same variable.
     expect(ruleFor(full, ".border-white\\/10")).toContain("var(--site-ink)");
+    expect(ruleFor(full, ".bg-black\\/20")).toContain("var(--site-paper)");
   });
 
   it("defines every role token for :root/.dark and again for .light", () => {

@@ -69,7 +69,8 @@ export default function ThemeToggle({ variant = "compact", className }: ThemeTog
         )}
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-sky-400 light:bg-white light:shadow-xs">
+          {/* slate-900 is the surface token: white in light mode (never write `light:bg-white` — white is ink there). */}
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-sky-400 light:bg-slate-900 light:shadow-xs">
             <StaticIcon />
           </div>
           <span className="font-medium text-slate-200">Appearance</span>
