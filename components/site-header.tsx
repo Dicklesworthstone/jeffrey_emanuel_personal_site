@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 import NavItem from "@/components/nav-item";
 import Magnetic from "@/components/magnetic";
+import { HapticLink } from "@/components/haptic-link";
 
 // Dynamically import 3D header icon to avoid SSR issues
 const HeaderIcon3D = dynamic(() => import("@/components/header-icon-3d"), {
@@ -200,13 +201,12 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             </button>
 
             <Magnetic strength={0.15}>
-              <Link
+              <HapticLink
                 href="/contact"
-                onTouchStart={mediumTap}
                 className="ml-2 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 2xl:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
               >
                 Let&apos;s talk
-              </Link>
+              </HapticLink>
             </Magnetic>
           </nav>
 
@@ -217,13 +217,12 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               open a menu to find it. Phones keep search + toggle only. */}
           <div className="flex items-center gap-3 sm:gap-4 xl:hidden">
             {!open && (
-              <Link
+              <HapticLink
                 href="/contact"
-                onTouchStart={mediumTap}
                 className="hidden md:inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/10"
               >
                 Let&apos;s talk
-              </Link>
+              </HapticLink>
             )}
             <button
               type="button"
@@ -319,7 +318,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                         visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] } },
                       }}
                     >
-                      <Link
+                      <HapticLink
                         href={item.href}
                         aria-current={active ? "page" : undefined}
                         className={cn(
@@ -327,10 +326,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                           active ? "text-white" : "text-slate-500 active:text-slate-300"
                         )}
                         onClick={() => setOpen(false)}
-                        onTouchStart={lightTap}
                       >
                         {item.label}
-                      </Link>
+                      </HapticLink>
                     </motion.div>
                   );
                 })}
