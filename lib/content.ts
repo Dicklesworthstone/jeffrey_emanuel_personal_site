@@ -477,6 +477,122 @@ export const liveDemos: LiveDemo[] = [
     featured: true,
     githubUrl: "https://github.com/Dicklesworthstone/phage_explorer",
   },
+  {
+    id: "frankentui",
+    title: "FrankenTUI",
+    url: "https://frankentui.com",
+    description: "Terminal UI kernel in Rust with 106 widgets and 46 interactive demo screens",
+    longDescription:
+      "Explore the interactive demo showcase for FrankenTUI, a disciplined terminal UI foundation in Rust featuring inline mode, deterministic diff rendering, and 20-crate modular architecture.",
+    technologies: ["Rust", "WASM", "WebGPU", "Terminal", "TUI"],
+    category: "developer-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/frankentui",
+  },
+  {
+    id: "frankensqlite",
+    title: "FrankenSQLite",
+    url: "https://frankensqlite.com",
+    description: "Clean-room Rust SQLite with MVCC concurrent writers and RaptorQ durability",
+    longDescription:
+      "Interactive tour and benchmarks of FrankenSQLite, a 26-crate clean-room SQLite engine in Rust with page-level MVCC and information-theoretic self-healing.",
+    technologies: ["Rust", "SQLite", "Database", "MVCC", "WASM"],
+    category: "developer-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/frankensqlite",
+  },
+  {
+    id: "asupersync-demo",
+    title: "Asupersync",
+    url: "https://asupersync.com",
+    description: "Cancel-correct structured concurrency async runtime for Rust",
+    longDescription:
+      "Interactive documentation and visualization for Asupersync, introducing regions, cancellation contracts, capability tokens, and deterministic lab replay.",
+    technologies: ["Rust", "Async", "Runtime", "WASM", "Concurrency"],
+    category: "developer-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/asupersync",
+  },
+  {
+    id: "classic-patents-demo",
+    title: "Classic Patents",
+    url: "https://classic-patents.com",
+    description: "Digital museum of landmark patents with plain-English notes and 3D simulations",
+    longDescription:
+      "A digital museum restoring history's greatest technological breakthroughs — from Edison and Tesla to computing pioneers — with verified transcripts and interactive 3D simulations.",
+    technologies: ["Next.js", "Three.js", "WebGL", "History", "TypeScript"],
+    category: "education",
+    featured: true,
+  },
+  {
+    id: "franken-markdown-demo",
+    title: "Franken-Markdown",
+    url: "https://franken-markdown.com",
+    description: "Zero-dependency Markdown to PDF engine compiled to WebAssembly",
+    longDescription:
+      "In-browser Markdown editor and typesetter powered by a ground-up Rust Markdown engine. Generates tagged accessible PDFs entirely client-side without headless browsers.",
+    technologies: ["Rust", "WASM", "Markdown", "PDF", "TypeScript"],
+    category: "developer-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/franken_markdown",
+  },
+  {
+    id: "franken-ocr-demo",
+    title: "Franken-OCR",
+    url: "https://franken-ocr.com",
+    description: "Baidu Unlimited-OCR (3B MoE VLM) running entirely on CPU in the browser",
+    longDescription:
+      "Clean-room implementation of Baidu's 3B MoE Vision-Language model running client-side in pure Rust via WebAssembly with custom int8 inference kernels.",
+    technologies: ["Rust", "WASM", "OCR", "Vision LLM", "int8"],
+    category: "ai-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/franken_ocr",
+  },
+  {
+    id: "frankenmermaid-demo",
+    title: "FrankenMermaid",
+    url: "https://frankenmermaid.com",
+    description: "25+ Mermaid diagram types rendered deterministically with Rust + WASM",
+    longDescription:
+      "Live interactive diagram editor powered by the FrankenMermaid engine in pure Rust, offering deterministic layout and zero JavaScript dependencies.",
+    technologies: ["Rust", "WASM", "Diagrams", "Visualization", "TypeScript"],
+    category: "developer-tools",
+    featured: true,
+    githubUrl: "https://github.com/Dicklesworthstone/frankenmermaid",
+  },
+  {
+    id: "smearedlife-demo",
+    title: "Smeared Life",
+    url: "https://smearedlife.com",
+    description: "Continuous cellular automata and artificial life playground in WebGL2",
+    longDescription:
+      "An interactive artificial life laboratory exploring emergent phenomena in continuous cellular automata with real-time parameter tweaking and GPU shaders.",
+    technologies: ["WebGL2", "GLSL", "ALife", "Simulation", "JavaScript"],
+    category: "education",
+    featured: true,
+  },
+  {
+    id: "jazzchords-demo",
+    title: "JazzChords",
+    url: "https://jazzchords.org",
+    description: "Studio for composing and auditioning jazz chord progressions with audio playback",
+    longDescription:
+      "Interactive music theory studio featuring automated voice leading, rich chord voicings, and real-time Web Audio synthesizer playback.",
+    technologies: ["Web Audio", "Music Theory", "TypeScript", "React"],
+    category: "education",
+    featured: true,
+  },
+  {
+    id: "asimposium-demo",
+    title: "ASImposium",
+    url: "https://asimposium.org",
+    description: "Public scientific ledger for AI agents to publish and peer-review research",
+    longDescription:
+      "An open platform where sponsored AI research agents propose, review, and challenge discoveries in mathematics, physics, and theoretical computer science.",
+    technologies: ["Next.js", "AI Research", "TypeScript", "Peer Review"],
+    category: "ai-tools",
+    featured: true,
+  },
 ];
 
 // Helper to get featured demos
