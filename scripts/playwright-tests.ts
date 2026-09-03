@@ -10,7 +10,7 @@ import { chromium, type BrowserContext } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 
-const BASE_URL = process.env.TEST_URL || "https://jeffreyemanuel.com";
+const BASE_URL = process.env.TEST_URL || "http://localhost:3000";
 const SCREENSHOT_DIR = "./test-screenshots";
 
 const PAGES = [
@@ -18,9 +18,18 @@ const PAGES = [
   { path: "/about", name: "about" },
   { path: "/consulting", name: "consulting" },
   { path: "/projects", name: "projects" },
+  { path: "/projects/mcp-agent-mail", name: "project-detail-mail" },
+  { path: "/tldr", name: "tldr-flywheel" },
   { path: "/writing", name: "writing" },
+  { path: "/writing/wills-and-estate-planning", name: "writing-wills-estate" },
+  { path: "/writing/cmaes_explainer", name: "writing-cmaes" },
+  { path: "/writing/raptorq", name: "writing-raptorq" },
+  { path: "/writing/bakery_algorithm", name: "writing-bakery" },
+  { path: "/writing/barra-factor-model", name: "writing-barra" },
+  { path: "/writing/hoeffdings_d_explainer", name: "writing-hoeffdings" },
   { path: "/media", name: "media" },
   { path: "/contact", name: "contact" },
+  { path: "/nvidia-story", name: "nvidia-story" },
 ];
 
 const VIEWPORTS = {
@@ -86,7 +95,7 @@ async function testPage(
 
     await page.goto(`${BASE_URL}${pagePath}`, {
       waitUntil: "domcontentloaded",
-      timeout: 30000,
+      timeout: 60000,
     });
 
     await delay(3000);
@@ -202,7 +211,7 @@ async function runTests() {
   }
 
   const results: TestResult[] = [];
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ channel: "chrome" });
 
   try {
     for (const [viewportName, viewport] of Object.entries(VIEWPORTS)) {
@@ -214,6 +223,7 @@ async function runTests() {
         isMobile: viewport.isMobile,
         hasTouch: viewport.isMobile,
         serviceWorkers: "block",
+        reducedMotion: "reduce",
       });
 
       for (const pageInfo of PAGES) {
@@ -265,7 +275,7 @@ async function runTests() {
   console.log("INTERACTIVE FEATURES TEST");
   console.log("=".repeat(60) + "\n");
 
-  const browser2 = await chromium.launch();
+  const browser2 = await chromium.launch({ channel: "chrome" });
   const desktopContext = await browser2.newContext({
     viewport: { width: 1440, height: 900 },
   });
@@ -279,7 +289,7 @@ async function runTests() {
     await delay(2000);
 
     const filterButtons = interactivePage.locator(
-      'nav[aria-label="Filter projects by category"] button'
+      '[aria-label="Filter projects by category"] button'
     );
     const filterCount = await filterButtons.count();
     console.log(`  Found ${filterCount} filter buttons`);
@@ -298,6 +308,126 @@ async function runTests() {
     const navLinks = interactivePage.locator('nav[aria-label="Main navigation"] a');
     const navCount = await navLinks.count();
     console.log(`  Found ${navCount} navigation links`);
+
+    // Test Command Palette (Meta+K / /)
+    console.log("\nTesting Command Palette...");
+    await interactivePage.keyboard.press("Meta+k");
+    await delay(800);
+    const searchInput = interactivePage.locator('input[placeholder*="Search"]');
+    if (await searchInput.isVisible()) {
+      console.log("  ✓ Command palette opened via shortcut");
+      await searchInput.fill("mail");
+      await delay(600);
+      await interactivePage.screenshot({
+        path: path.join(SCREENSHOT_DIR, "interactive-command-palette.png"),
+      });
+      console.log("  ✓ Saved interactive-command-palette.png");
+      await interactivePage.keyboard.press("Escape");
+      await delay(500);
+      console.log("  ✓ Command palette closed via Escape");
+    } else {
+      console.log("  ⚠ Command palette input not detected after Meta+k");
+    }
+
+    // Test Keyboard Shortcuts Modal (?)
+    console.log("\nTesting Keyboard Shortcuts Modal...");
+    await interactivePage.keyboard.press("?");
+    await delay(800);
+    const shortcutsModal = interactivePage.locator('[role="dialog"][aria-label="Keyboard shortcuts"]');
+    if (await shortcutsModal.isVisible()) {
+      console.log("  ✓ Keyboard shortcuts modal opened");
+      await interactivePage.screenshot({
+        path: path.join(SCREENSHOT_DIR, "interactive-shortcuts-modal.png"),
+      });
+      console.log("  ✓ Saved interactive-shortcuts-modal.png");
+      await interactivePage.keyboard.press("Escape");
+      await delay(500);
+      console.log("  ✓ Keyboard shortcuts modal closed via Escape");
+    } else {
+      console.log("  ⚠ Shortcuts modal not visible after ?");
+    }
+
+    // Test Consulting intake wizard
+    console.log("\nTesting Consulting intake wizard...");
+    await interactivePage.goto(`${BASE_URL}/consulting`, { waitUntil: "domcontentloaded" });
+    await delay(2000);
+    const advisoryOption = interactivePage.locator('input[type="radio"], [role="radio"]').first();
+    if (await advisoryOption.isVisible()) {
+      await advisoryOption.click();
+      await delay(300);
+      console.log("  ✓ Selected advisory option in consulting wizard");
+    }
+    const continueBtn = interactivePage.locator('button:has-text("Continue"), button:has-text("Next")').first();
+    if (await continueBtn.isVisible()) {
+      await continueBtn.click();
+      await delay(600);
+      console.log("  ✓ Stepped into consulting contact fields");
+      await interactivePage.screenshot({
+        path: path.join(SCREENSHOT_DIR, "interactive-consulting-wizard.png"),
+      });
+      console.log("  ✓ Saved interactive-consulting-wizard.png");
+    }
+
+    // Test TLDR Flywheel Compare Mode
+    console.log("\nTesting TLDR Flywheel Compare Mode...");
+    await interactivePage.goto(`${BASE_URL}/tldr`, { waitUntil: "domcontentloaded" });
+    await delay(2000);
+    const compareToggle = interactivePage.locator('button:has-text("Compare")').first();
+    if (await compareToggle.isVisible()) {
+      await compareToggle.click();
+      await delay(500);
+      console.log("  ✓ Activated Compare Mode");
+      const toolCheckboxes = interactivePage.locator('input[type="checkbox"], button[aria-label*="compare"], button[aria-label*="Compare"]');
+      const boxCount = await toolCheckboxes.count();
+      if (boxCount >= 2) {
+        await toolCheckboxes.nth(0).scrollIntoViewIfNeeded();
+        await toolCheckboxes.nth(0).click();
+        await delay(300);
+        await toolCheckboxes.nth(1).scrollIntoViewIfNeeded();
+        await toolCheckboxes.nth(1).click();
+        await delay(300);
+        console.log("  ✓ Selected 2 tools for comparison");
+        await interactivePage.screenshot({
+          path: path.join(SCREENSHOT_DIR, "interactive-tldr-compare.png"),
+        });
+        console.log("  ✓ Saved interactive-tldr-compare.png");
+      }
+    }
+
+    // Test Wills & Estate Planning Interactive Tools
+    console.log("\nTesting Wills & Estate Planning Interactive Visualizations...");
+    await interactivePage.goto(`${BASE_URL}/writing/wills-and-estate-planning`, { waitUntil: "domcontentloaded" });
+    await delay(2500);
+    // Find anti-pattern card buttons
+    const cardButtons = interactivePage.locator('button[aria-label*="anti-pattern card"]');
+    const cardCount = await cardButtons.count();
+    if (cardCount > 0) {
+      console.log(`  Found ${cardCount} anti-pattern cards`);
+      await cardButtons.first().scrollIntoViewIfNeeded();
+      await cardButtons.first().click();
+      await delay(600);
+      console.log("  ✓ Flipped first anti-pattern card");
+      await interactivePage.screenshot({
+        path: path.join(SCREENSHOT_DIR, "interactive-wills-anti-pattern-flip.png"),
+      });
+      console.log("  ✓ Saved interactive-wills-anti-pattern-flip.png");
+    }
+
+    // Test CMA-ES Explainer Visualizer
+    console.log("\nTesting CMA-ES Explainer Visualizer...");
+    await interactivePage.goto(`${BASE_URL}/writing/cmaes_explainer`, { waitUntil: "domcontentloaded" });
+    await delay(2500);
+    const objectiveButtons = interactivePage.locator('button:has-text("Rosenbrock"), button:has-text("Rastrigin")');
+    if (await objectiveButtons.count() > 0) {
+      await objectiveButtons.first().scrollIntoViewIfNeeded();
+      await objectiveButtons.first().click();
+      await delay(600);
+      console.log("  ✓ Switched CMA-ES objective function");
+      await interactivePage.screenshot({
+        path: path.join(SCREENSHOT_DIR, "interactive-cmaes-objective.png"),
+      });
+      console.log("  ✓ Saved interactive-cmaes-objective.png");
+    }
 
     // Test scroll
     console.log("\nTesting scroll functionality...");

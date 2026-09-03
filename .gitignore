@@ -95,3 +95,5 @@ lcp-debug.mjs
 # Audit/QA artifact dumps (overflow-audit, vision-qa screenshot runs default here).
 # 800MB+ of PNGs accumulate; never belongs in the repo.
 /tmp/
+# br doctor per-run artifacts
+.doctor/
