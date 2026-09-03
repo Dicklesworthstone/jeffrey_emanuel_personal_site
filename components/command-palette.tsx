@@ -19,6 +19,8 @@ import {
   ArrowRight,
   FileText,
   X,
+  Zap,
+  TrendingDown,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { navItems, projects, writingHighlights, siteConfig } from "@/lib/content";
@@ -64,9 +66,11 @@ const pageIcons: Record<string, React.ReactNode> = {
   "/about": <User className="h-4 w-4" />,
   "/consulting": <Briefcase className="h-4 w-4" />,
   "/projects": <FolderGit2 className="h-4 w-4" />,
+  "/tldr": <Zap className="h-4 w-4" />,
   "/writing": <PenSquare className="h-4 w-4" />,
   "/media": <Video className="h-4 w-4" />,
   "/contact": <Mail className="h-4 w-4" />,
+  "/nvidia-story": <TrendingDown className="h-4 w-4" />,
 };
 
 const categoryLabels: Record<CommandCategory, string> = {
@@ -179,6 +183,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
     // Navigation pages
     navItems.forEach((item) => {
+      const extraKeywords =
+        item.href === "/tldr"
+          ? ["flywheel", "tools", "agentic", "agents", "ecosystem"]
+          : [];
       cmds.push({
         id: toCommandId("page", item.href),
         title: item.label,
@@ -189,8 +197,22 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           router.push(item.href);
           onClose();
         },
-        keywords: [item.label.toLowerCase()],
+        keywords: [item.label.toLowerCase(), ...extraKeywords],
       });
+    });
+
+    // Dedicated showcase page: The $600B Drop (Nvidia story)
+    cmds.push({
+      id: "page-nvidia-story",
+      title: "The $600B Drop (Nvidia Story)",
+      subtitle: "The story behind the viral Nvidia short analysis",
+      icon: pageIcons["/nvidia-story"] || <TrendingDown className="h-4 w-4" />,
+      category: "pages",
+      action: () => {
+        router.push("/nvidia-story");
+        onClose();
+      },
+      keywords: ["nvidia", "nvda", "short", "600b", "drop", "deepseek", "markets"],
     });
 
     // Projects

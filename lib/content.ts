@@ -104,7 +104,7 @@ export const heroContent = {
     metric: "20,000+",
     label: "lines of sophisticated Go code",
     context: "BV was conceived, designed, and shipped in a single day",
-    subtext: "Loved by thousands of users with 1,600+ GitHub stars",
+    subtext: `Loved by thousands of users with ${formatStarCount(tldrToolStarsData.bv)}+ GitHub stars`,
   },
   body: [
     "Using these tools and 63 AI coding agent subscriptions (~$13.5K/month), I've made 262,353 GitHub contributions in the past year, the vast majority since January 2026. I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
