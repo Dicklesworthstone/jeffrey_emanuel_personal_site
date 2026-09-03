@@ -58,6 +58,7 @@ next-env.d.ts
 jeffreyemanuel-site/
 .stargazer-cache.json
 test-results/
+test-screenshots/
 
 # bv (beads viewer) local config and caches
 .bv/

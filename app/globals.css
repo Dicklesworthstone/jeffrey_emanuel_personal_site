@@ -9,11 +9,50 @@
   slate-800). slate-600 stays reserved for decorative/borders only.
 */
 @theme {
-  --color-slate-500: #8390a5;
+  --color-slate-950: var(--site-bg-canvas);
+  --color-slate-900: var(--site-bg-surface);
+  --color-slate-800: var(--site-bg-elevated);
+  --color-slate-700: var(--site-border-subtle);
+  --color-slate-600: var(--site-border-muted);
+  --color-slate-500: var(--site-text-muted);
+  --color-slate-400: var(--site-text-subtle);
+  --color-slate-300: var(--site-text-body);
+  --color-slate-200: var(--site-text-strong);
+  --color-slate-100: var(--site-text-heading);
+}
+
+:root,
+html.dark {
+  color-scheme: dark;
+  --site-bg-canvas: #020617;
+  --site-bg-surface: #0f172a;
+  --site-bg-elevated: #1e293b;
+  --site-border-subtle: #334155;
+  --site-border-muted: #475569;
+  --site-text-muted: #8390a5;
+  --site-text-subtle: #94a3b8;
+  --site-text-body: #cbd5e1;
+  --site-text-strong: #e2e8f0;
+  --site-text-heading: #f8fafc;
+  --site-hero-fade: #020617;
+}
+
+html.light {
+  color-scheme: light;
+  --site-bg-canvas: #f8fafc;
+  --site-bg-surface: #ffffff;
+  --site-bg-elevated: #f1f5f9;
+  --site-border-subtle: #e2e8f0;
+  --site-border-muted: #cbd5e1;
+  --site-text-muted: #64748b;
+  --site-text-subtle: #64748b;
+  --site-text-body: #334155;
+  --site-text-strong: #1e293b;
+  --site-text-heading: #090d16;
+  --site-hero-fade: #f8fafc;
 }
 
 :root {
-  color-scheme: dark;
 
   /* ========================================
      FONT STACKS
@@ -266,6 +305,149 @@ body::after {
     radial-gradient(circle at 85% 25%, rgba(124, 58, 237, 0.04), transparent 45%),
     linear-gradient(to bottom, #020617, #0B1120);
   pointer-events: none;
+}
+
+/* Light Mode Background & Surface System */
+html.light body {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+html.light body::before {
+  mix-blend-mode: multiply;
+  opacity: 0.12;
+}
+
+html.light body::after {
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08), transparent 45%),
+    radial-gradient(circle at 85% 25%, rgba(124, 58, 237, 0.05), transparent 45%),
+    linear-gradient(to bottom, #ffffff, #f8fafc);
+}
+
+/* Light Mode Card & Glass Overrides */
+html.light .glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.04),
+    0 2px 4px -1px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html.light .glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+html.light .glass-card:hover {
+  background: #ffffff;
+  border-color: rgba(203, 213, 225, 1);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Light Mode Typography Hierarchy */
+html.light h1:not([data-theme-ignore]),
+html.light h2:not([data-theme-ignore]),
+html.light h3:not([data-theme-ignore]),
+html.light h4:not([data-theme-ignore]) {
+  color: #090d16;
+}
+
+html.light [data-section] h1,
+html.light [data-section] h2,
+html.light h1.text-white,
+html.light h2.text-white,
+html.light h3.text-white,
+html.light h4.text-white {
+  color: #090d16 !important;
+}
+
+/* Selective text-white inversion for card headings and labels on light backgrounds */
+html.light .text-white:not(
+  button *,
+  a.rounded-full *,
+  [class*="bg-sky-"] *,
+  [class*="bg-violet-"] *,
+  [class*="bg-emerald-"] *,
+  [class*="bg-purple-"] *,
+  [class*="bg-amber-"] *,
+  [class*="bg-blue-"] *,
+  [class*="bg-indigo-"] *,
+  [class*="bg-rose-"] *,
+  [class*="bg-red-"] *,
+  [class*="bg-slate-900"] *,
+  [class*="bg-slate-950"] *,
+  pre *,
+  code *,
+  [data-theme-ignore]
+) {
+  color: #090d16 !important;
+}
+
+/* Light Mode Border and Background Alpha Adjustments */
+html.light [class*="border-white/5"],
+html.light [class*="border-white/10"],
+html.light [class*="border-white/15"],
+html.light [class*="border-white/20"] {
+  border-color: rgba(15, 23, 42, 0.09) !important;
+}
+
+html.light [class*="hover:border-white/"]:hover {
+  border-color: rgba(15, 23, 42, 0.18) !important;
+}
+
+html.light [class*="bg-white/5"] {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+html.light [class*="hover:bg-white/"]:hover {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Light Mode Editorial Prose */
+html.light .prose {
+  color: #334155;
+}
+
+html.light .prose p {
+  color: #334155;
+}
+
+html.light .prose h1, 
+html.light .prose h2, 
+html.light .prose h3, 
+html.light .prose h4 {
+  color: #090d16;
+}
+
+html.light .prose h2 {
+  border-bottom-color: rgba(148, 163, 184, 0.25);
+}
+
+html.light .prose a {
+  color: #0284c7;
+}
+
+html.light .prose a:hover {
+  color: #0369a1;
+}
+
+html.light .prose strong {
+  color: #0f172a;
+}
+
+html.light .prose blockquote {
+  color: #475569;
+  border-left-color: #0284c7;
+  background-color: rgba(2, 132, 199, 0.04);
+}
+
+html.light .prose code:not(pre code) {
+  color: #0f172a;
+  background-color: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 /* 

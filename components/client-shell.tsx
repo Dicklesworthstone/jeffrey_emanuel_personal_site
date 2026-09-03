@@ -13,6 +13,7 @@ import ServiceWorkerRegistration from "@/components/service-worker-registration"
 import { useMobileOptimizations } from "@/hooks/use-mobile-optimizations";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useScroll, useSpring } from "framer-motion";
+import { useTheme } from "@/components/theme-provider";
 
 // Lazy load modals to reduce initial bundle size
 const CommandPalette = dynamic(() => import("@/components/command-palette"), {
@@ -87,9 +88,12 @@ export default function ClientShell({ children }: { children: React.ReactNode })
     setIsShortcutsModalOpen(false);
   }, []);
 
+  const { toggleTheme } = useTheme();
+
   useKeyboardShortcuts({
     onOpenCommandPalette: openCommandPalette,
     onOpenHelp: openShortcutsModal,
+    onToggleTheme: toggleTheme,
     enabled: !isCommandPaletteOpen && !isShortcutsModalOpen,
   });
 

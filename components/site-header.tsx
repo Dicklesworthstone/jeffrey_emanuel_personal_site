@@ -14,6 +14,7 @@ import { NOISE_SVG_DATA_URI } from "@/lib/constants";
 import NavItem from "@/components/nav-item";
 import Magnetic from "@/components/magnetic";
 import { HapticLink } from "@/components/haptic-link";
+import ThemeToggle from "@/components/theme-toggle";
 
 // Dynamically import 3D header icon to avoid SSR issues
 const HeaderIcon3D = dynamic(() => import("@/components/header-icon-3d"), {
@@ -127,7 +128,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
         data-scrolled={scrolled ? "true" : "false"}
         className={cn(
           "fixed top-0 left-0 right-0 z-[90] border-b transition-[padding,background-color,border-color] duration-300 ease-out",
-          scrolled ? "border-white/30 bg-slate-950/[0.995]" : "border-white/[0.22] bg-slate-950/[0.985]"
+          scrolled
+            ? "border-slate-200/80 bg-slate-50/[0.98] shadow-xs dark:border-white/30 dark:bg-slate-950/[0.995]"
+            : "border-slate-200/50 bg-slate-50/[0.95] dark:border-white/[0.22] dark:bg-slate-950/[0.985]"
         )}
         style={{
           paddingTop: `calc(${scrolled ? 8 : 12}px + env(safe-area-inset-top, 0px))`,
@@ -150,25 +153,18 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               </div>
               <div className="flex flex-col leading-none">
                 {siteConfig.location && (
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-400 transition-colors group-hover:text-sky-400">
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors group-hover:text-sky-500 dark:text-slate-400 dark:group-hover:text-sky-400">
                     {siteConfig.location.split(",")[0]}
                   </span>
                 )}
-                <span className="mt-0.5 whitespace-nowrap text-lg font-bold tracking-tight text-slate-100">
+                <span className="mt-0.5 whitespace-nowrap text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
                   {siteConfig.name}
                 </span>
               </div>
             </Link>
           </Magnetic>
 
-          {/* Desktop Nav.
-              Budget: the container is max-w-7xl (1280px) minus 2x32px padding
-              = 1216px of content, and the brand block occupies ~186px of it.
-              Eight items + search + CTA need ~934px at gap-4/px-3, so the full
-              bar only fits from 1280px up — below that it overflowed its
-              container and body{overflow-x:hidden} silently clipped Contact,
-              Search and the "Let's talk" CTA off the right edge. Narrower
-              viewports get the full-screen menu instead. */}
+          {/* Desktop Nav */}
           <nav
             className="hidden items-center gap-4 xl:flex"
             aria-label="Main navigation"
@@ -187,50 +183,52 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             <button
               type="button"
               onClick={onOpenCommandPalette}
-              className="group flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="group flex items-center gap-2 rounded-full border border-slate-200/80 bg-slate-100/80 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-200/70 hover:text-slate-900 dark:border-transparent dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
               aria-label={shortcutAriaLabel}
             >
               <Search className="h-4 w-4" />
               <span className="hidden 2xl:inline">Search</span>
               <kbd
-                className="hidden rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-xs font-bold text-slate-300 xl:inline-block"
+                className="hidden rounded border border-slate-300 bg-white px-1.5 py-0.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 xl:inline-block"
                 suppressHydrationWarning
               >
                 {shortcutDisplayKey}K
               </kbd>
             </button>
 
+            {/* Theme Toggle (Light / Dark) */}
+            <ThemeToggle variant="compact" />
+
             <Magnetic strength={0.15}>
               <HapticLink
                 href="/contact"
-                className="ml-2 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 2xl:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+                className="ml-1 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-slate-300/80 bg-slate-900 px-4 2xl:px-5 py-2 text-sm font-semibold text-white shadow-xs backdrop-blur-md transition-all hover:bg-slate-800 hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
               >
                 Let&apos;s talk
               </HapticLink>
             </Magnetic>
           </nav>
 
-          {/* Mobile Menu Toggle & Search — mirrors the desktop nav's xl gate.
-              The links collapse into the full-screen menu below xl, but the
-              primary CTA stays in the bar from md up (it fits with ~290px to
-              spare at 768px), so tablet and small-laptop visitors don't have to
-              open a menu to find it. Phones keep search + toggle only. */}
-          <div className="flex items-center gap-3 sm:gap-4 xl:hidden">
+          {/* Mobile Menu Toggle, Theme Toggle & Search */}
+          <div className="flex items-center gap-2.5 sm:gap-3 xl:hidden">
             {!open && (
               <HapticLink
                 href="/contact"
-                className="hidden md:inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/10"
+                className="hidden md:inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-slate-300/80 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-xs backdrop-blur-md transition-colors hover:bg-slate-800 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
               >
                 Let&apos;s talk
               </HapticLink>
             )}
+
+            <ThemeToggle variant="compact" />
+
             <button
               type="button"
               onClick={() => {
                 setOpen(false);
                 onOpenCommandPalette?.();
               }}
-              className="flex h-11 w-11 items-center justify-center text-slate-400 hover:text-white"
+              className="flex h-11 w-11 items-center justify-center text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
@@ -238,7 +236,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             <button
               type="button"
               ref={menuToggleRef}
-              className="relative z-[95] inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-all active:scale-95"
+              className="relative z-[95] inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-800 transition-all active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
               onClick={() => setOpen((v) => !v)}
               onTouchStart={lightTap}
               aria-label={open ? "Close navigation menu" : "Open navigation menu"}
@@ -323,7 +321,9 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                         aria-current={active ? "page" : undefined}
                         className={cn(
                           "text-4xl font-bold tracking-tight transition-colors",
-                          active ? "text-white" : "text-slate-500 active:text-slate-300"
+                          active
+                            ? "text-slate-900 dark:text-white"
+                            : "text-slate-500 hover:text-slate-900 active:text-slate-950 dark:text-slate-500 dark:hover:text-slate-300 dark:active:text-white"
                         )}
                         onClick={() => setOpen(false)}
                       >
@@ -335,14 +335,16 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               </motion.div>
 
               <motion.div
-                className="mt-16"
+                className="mt-12 flex flex-col gap-4"
                 initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: [0.33, 1, 0.68, 1], delay: 0.1 + navItems.length * 0.06 }}
               >
+                <ThemeToggle variant="labeled" />
+
                 <Link
                   href="/contact"
-                  className="flex w-full items-center justify-center rounded-full bg-white py-4 text-lg font-bold text-slate-950 shadow-lg shadow-white/10 transition-transform active:scale-95"
+                  className="flex w-full items-center justify-center rounded-full bg-slate-900 py-4 text-lg font-bold text-white shadow-lg shadow-slate-900/10 transition-transform active:scale-95 dark:bg-white dark:text-slate-950 dark:shadow-white/10"
                   onClick={() => setOpen(false)}
                 >
                   Get in touch

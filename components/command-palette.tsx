@@ -21,11 +21,14 @@ import {
   X,
   Zap,
   TrendingDown,
+  Sun,
+  Moon,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { navItems, projects, writingHighlights, siteConfig } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
+import { useTheme } from "@/components/theme-provider";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -88,6 +91,7 @@ const categoryLabels: Record<CommandCategory, string> = {
  */
 export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const router = useRouter();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const paletteRef = useRef<HTMLDivElement>(null);
@@ -215,6 +219,20 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       keywords: ["nvidia", "nvda", "short", "600b", "drop", "deepseek", "markets"],
     });
 
+    // Theme Toggle Action
+    cmds.push({
+      id: "action-toggle-theme",
+      title: resolvedTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode",
+      subtitle: `Currently in ${resolvedTheme} mode (Shortcut: T)`,
+      icon: resolvedTheme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-sky-400" />,
+      category: "actions",
+      action: () => {
+        toggleTheme();
+        onClose();
+      },
+      keywords: ["theme", "light", "dark", "mode", "color", "appearance", "toggle theme", "switch theme"],
+    });
+
     // Projects
     projects.forEach((project) => {
       cmds.push({
@@ -298,7 +316,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     });
 
     return cmds;
-  }, [router, onClose, openExternal]);
+  }, [router, onClose, openExternal, resolvedTheme, toggleTheme]);
 
   // Combined results (Static + Fuse)
   const filteredCommands = useMemo(() => {
@@ -523,10 +541,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           >
             <div
               ref={paletteRef}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/95 shadow-2xl backdrop-blur-xl"
+              className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/95"
             >
               {/* Search Input */}
-              <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+              <div className="flex items-center gap-3 border-b border-slate-200/80 px-4 py-3 dark:border-white/10">
                 <Search className="h-5 w-5 text-slate-400" />
                 <input
                   ref={inputRef}
@@ -535,7 +553,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Search pages, projects, writing..."
-                  className="flex-1 bg-transparent text-white placeholder-slate-500 outline-none"
+                  className="flex-1 bg-transparent text-slate-900 placeholder-slate-400 outline-none dark:text-white dark:placeholder-slate-500"
                   aria-label="Search commands"
                   aria-activedescendant={activeId}
                   aria-controls="command-results"
@@ -544,7 +562,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                   autoCapitalize="off"
                   spellCheck={false}
                 />
-                <kbd className="hidden rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 sm:inline-block">
+                <kbd className="hidden rounded-md border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 sm:inline-block">
                   ESC
                 </kbd>
                 {/* Touch devices have no Escape key: give them a real close control */}
@@ -612,18 +630,18 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             className={cn(
                               "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                               isSelected
-                                ? "bg-violet-500/20 text-white"
-                                : "text-slate-300 hover:bg-white/5"
+                                ? "bg-violet-500/15 text-slate-900 font-medium dark:bg-violet-500/20 dark:text-white"
+                                : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5"
                             )}
                             role="option"
                             aria-selected={isSelected}
                           >
                             <span
                               className={cn(
-                                "flex h-8 w-8 items-center justify-center rounded-lg",
+                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
                                 isSelected
-                                  ? "bg-violet-500 text-white"
-                                  : "bg-slate-800 text-slate-400"
+                                  ? "border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300"
+                                  : "border-slate-200 bg-slate-100 text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400"
                               )}
                             >
                               {cmd.icon}
@@ -645,8 +663,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                 className={cn(
                                   "h-4 w-4 transition-transform",
                                   isSelected
-                                    ? "translate-x-1 text-violet-400"
-                                    : "text-slate-500"
+                                    ? "translate-x-1 text-violet-500 dark:text-violet-400"
+                                    : "text-slate-400 dark:text-slate-500"
                                 )}
                               />
                             )}
@@ -659,23 +677,23 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-xs text-slate-500">
+              <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-xs text-slate-500 dark:border-white/10">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-slate-300">
+                    <kbd className="rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                       ↑↓
                     </kbd>
                     <span>Navigate</span>
                   </span>
                   <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-slate-300">
+                    <kbd className="rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                       ↵
                     </kbd>
                     <span>Select</span>
                   </span>
                 </div>
                 <span className="flex items-center gap-1">
-                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-slate-300">
+                  <kbd className="rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     ESC
                   </kbd>
                   <span>Close</span>

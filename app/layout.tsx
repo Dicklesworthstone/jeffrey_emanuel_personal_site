@@ -6,6 +6,8 @@ import { siteConfig } from "@/lib/content";
 import ClientShell from "@/components/client-shell";
 import { GoogleAnalytics } from "@/components/analytics";
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const sourceSerif = Source_Serif_4({ subsets: ["latin"], variable: "--font-serif" });
 
@@ -91,6 +93,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* GitHub for project links and avatars */}
         <link rel="dns-prefetch" href="https://github.com" />
         <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
+        {/* Synchronous anti-FOUC theme detector to eliminate flicker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;var r=t==="light"||t==="dark"?t:(d?"dark":"light");var cl=document.documentElement.classList;if(r==="light"){cl.add("light");cl.remove("dark");document.documentElement.style.colorScheme="light";}else{cl.add("dark");cl.remove("light");document.documentElement.style.colorScheme="dark";}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body
         className={`${inter.variable} ${sourceSerif.variable} flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased`}
@@ -103,7 +111,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={null}>
           <GoogleAnalytics gaId={gaId} />
         </Suspense>
-        <ClientShell>{children}</ClientShell>
+        <ThemeProvider>
+          <ClientShell>{children}</ClientShell>
+        </ThemeProvider>
       </body>
     </html>
   );

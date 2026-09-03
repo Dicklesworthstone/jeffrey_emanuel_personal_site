@@ -7,6 +7,7 @@ import { navItems } from "@/lib/content";
 interface UseKeyboardShortcutsOptions {
   onOpenCommandPalette?: () => void;
   onOpenHelp?: () => void;
+  onToggleTheme?: () => void;
   enabled?: boolean;
 }
 
@@ -14,15 +15,17 @@ interface UseKeyboardShortcutsOptions {
  * Hook for global keyboard shortcuts.
  *
  * Default shortcuts:
- * - 1-7: Navigate to sections (Home, About, Consulting, Projects, Writing, Media, Contact)
+ * - 1-8: Navigate to sections (Home, About, Consulting, Projects, TLDR, Writing, Media, Contact)
  * - /: Open command palette (search)
  * - ?: Open keyboard shortcuts help
+ * - T: Toggle light / dark mode
  * - Cmd/Ctrl+K: Open command palette
  * - Escape: Close modals
  */
 export function useKeyboardShortcuts({
   onOpenCommandPalette,
   onOpenHelp,
+  onToggleTheme,
   enabled = true,
 }: UseKeyboardShortcutsOptions = {}) {
   const router = useRouter();
@@ -75,6 +78,13 @@ export function useKeyboardShortcuts({
         return;
       }
 
+      // T: Toggle light / dark mode
+      if (event.key.toLowerCase() === "t" && !event.shiftKey) {
+        event.preventDefault();
+        onToggleTheme?.();
+        return;
+      }
+
       // Number keys 1-9: Navigate to pages based on navItems order
       const keyNum = parseInt(event.key);
       if (keyNum >= 1 && keyNum <= navItems.length) {
@@ -86,7 +96,7 @@ export function useKeyboardShortcuts({
       // G + key combinations for quick navigation
       // (Could add "go to" shortcuts like gh for GitHub, etc.)
     },
-    [enabled, onOpenCommandPalette, onOpenHelp, router]
+    [enabled, onOpenCommandPalette, onOpenHelp, onToggleTheme, router]
   );
 
   useEffect(() => {
@@ -114,6 +124,7 @@ export const keyboardShortcutsList: Array<{
   // Actions
   { keys: ["⌘", "K"], description: "Open command palette", category: "actions" },
   { keys: ["/"], description: "Quick search", category: "actions" },
+  { keys: ["T"], description: "Toggle light / dark mode", category: "actions" },
   // General
   { keys: ["?"], description: "Show keyboard shortcuts", category: "general" },
   { keys: ["Esc"], description: "Close modals", category: "general" },

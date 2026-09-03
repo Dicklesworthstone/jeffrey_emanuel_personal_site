@@ -450,8 +450,8 @@ export default function Hero({ stats = heroStats }: HeroProps) {
           aria-hidden="true"
           className="pointer-events-none relative mt-12 h-[280px] w-full sm:h-[380px] md:h-[420px] lg:absolute lg:-right-[10%] lg:top-1/2 lg:mt-0 lg:h-[460px] lg:w-[1000px] lg:-translate-y-[450px]"
         >
-           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-l from-transparent via-[#020617]/20 to-[#020617] lg:via-[#020617]/60" />
-           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[#020617] to-transparent lg:hidden" />
+           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-l from-transparent via-slate-950/20 to-slate-950 lg:via-slate-950/60" />
+           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-slate-950 to-transparent lg:hidden" />
 
            <div className="h-full w-full">
              <ErrorBoundary fallback={<ThreeSceneFallback className={SCENE_HEIGHT_CLASSES} />}>
