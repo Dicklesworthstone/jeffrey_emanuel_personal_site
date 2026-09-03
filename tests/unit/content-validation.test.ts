@@ -11,6 +11,7 @@ import { describe, test, expect, beforeAll, afterAll } from "vitest";
 import {
   projects,
   heroStats,
+  heroContent,
   navItems,
   endorsements,
   liveDemos,
@@ -413,6 +414,52 @@ describe("Hero Stats Validation", () => {
     });
 
     testLog.testEnd("Hero stats value validation", heroStats.length);
+  });
+});
+
+// =============================================================================
+// HERO CONTENT VALIDATION
+// =============================================================================
+
+describe("Hero Content Validation", () => {
+  test("hero content has required fields", () => {
+    testLog.testStart("Hero content required fields");
+
+    expect(heroContent.title).toBeDefined();
+    expect(heroContent.title.length).toBeGreaterThan(0);
+    expect(heroContent.intro).toBeDefined();
+    expect(heroContent.intro.length).toBeGreaterThan(0);
+    expect(Array.isArray(heroContent.tools)).toBe(true);
+    expect(heroContent.tools.length).toBeGreaterThanOrEqual(4);
+
+    expect(heroContent.highlight.metric).toBeDefined();
+    expect(heroContent.highlight.label).toBeDefined();
+    expect(heroContent.highlight.context).toBeDefined();
+    expect(heroContent.highlight.subtext).toBeDefined();
+
+    expect(heroContent.primaryCta.href.startsWith("/")).toBe(true);
+    expect(heroContent.secondaryCta.href.startsWith("/")).toBe(true);
+
+    testLog.testEnd("Hero content required fields", 10);
+  });
+
+  test("all hero tools map to existing TLDR flywheel tools", () => {
+    testLog.testStart("Hero tools TLDR mapping");
+
+    heroContent.tools.forEach((tool) => {
+      const lowerName = tool.name.toLowerCase();
+      const match = tldrFlywheelTools.find(
+        (t) =>
+          t.name === tool.name ||
+          t.id === lowerName ||
+          ("tagline" in tool && tool.tagline !== undefined && t.name === tool.tagline)
+      );
+
+      expect(match).toBeDefined();
+      expect(match?.id).toBeDefined();
+    });
+
+    testLog.testEnd("Hero tools TLDR mapping", heroContent.tools.length);
   });
 });
 
