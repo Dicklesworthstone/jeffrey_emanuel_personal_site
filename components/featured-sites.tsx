@@ -1,7 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Sparkles, Workflow, Microscope, BookOpen, Mail, Terminal, Database, Zap, ChevronDown } from "lucide-react";
+import {
+  ExternalLink,
+  Sparkles,
+  Workflow,
+  Microscope,
+  BookOpen,
+  Mail,
+  Terminal,
+  Database,
+  Zap,
+  ChevronDown,
+  FileText,
+  ScanText,
+  GraduationCap,
+  Network,
+  Activity,
+  Music,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FeaturedSite } from "@/lib/content";
 
@@ -18,6 +35,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Terminal,
   Database,
   Zap,
+  FileText,
+  ScanText,
+  GraduationCap,
+  Network,
+  Activity,
+  Music,
 };
 
 // On phones the single-column grid of eight OG cards is ~2.6k px tall, so

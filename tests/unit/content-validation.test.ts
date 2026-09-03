@@ -21,6 +21,7 @@ import {
   writingHighlights,
   tldrFlywheelTools,
   siteConfig,
+  featuredSites,
 } from "@/lib/content";
 import { testLog } from "@/tests/utils/tldr-test-helpers";
 
@@ -534,6 +535,55 @@ describe("Live Demos Validation", () => {
     expect(uniqueIds.size).toBe(ids.length);
 
     testLog.testEnd("Duplicate demo ID check", 1);
+  });
+});
+
+// =============================================================================
+// FEATURED SITES VALIDATION
+// =============================================================================
+
+describe("Featured Sites Validation", () => {
+  test("all featured sites have required fields", () => {
+    testLog.testStart("Featured sites validation");
+
+    featuredSites.forEach((site) => {
+      expect(site.id).toBeDefined();
+      expect(site.id.length).toBeGreaterThan(0);
+      expect(site.title).toBeDefined();
+      expect(site.title.length).toBeGreaterThan(0);
+      expect(site.tagline).toBeDefined();
+      expect(site.tagline.length).toBeGreaterThan(0);
+      expect(site.url).toBeDefined();
+      expect(isValidUrl(site.url)).toBe(true);
+      expect(site.ogImage).toBeDefined();
+      expect(isValidUrl(site.ogImage)).toBe(true);
+      expect(site.gradient).toBeDefined();
+      expect(site.icon).toBeDefined();
+    });
+
+    testLog.testEnd("Featured sites validation", featuredSites.length * 7);
+  });
+
+  test("no duplicate featured site IDs", () => {
+    testLog.testStart("Duplicate featured site ID check");
+
+    const ids = featuredSites.map((s) => s.id);
+    const uniqueIds = new Set(ids);
+
+    expect(uniqueIds.size).toBe(ids.length);
+
+    testLog.testEnd("Duplicate featured site ID check", 1);
+  });
+
+  test("no duplicate featured site URLs", () => {
+    testLog.testStart("Duplicate featured site URL check");
+
+    const urls = featuredSites.map((s) => s.url);
+    const uniqueUrls = new Set(urls);
+
+    expect(uniqueUrls.size).toBe(urls.length);
+
+    testLog.testEnd("Duplicate featured site URL check", 1);
   });
 });
 
