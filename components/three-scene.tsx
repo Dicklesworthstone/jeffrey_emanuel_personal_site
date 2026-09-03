@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, PerformanceMonitor } from "@react-three/drei";
-import { useEffect, useMemo, useRef, useState, useCallback, createContext, useContext } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, createContext, useContext, useSyncExternalStore } from "react";
 import type { JSX } from "react";
 import * as THREE from "three";
 import {
@@ -1008,7 +1008,7 @@ function SceneMobius({ palette, seed }: { palette: Palette; seed: number }) {
 // ---------------------------------------------------------------------------
 // Variant: Möbius Loom (multi-band weave)
 // ---------------------------------------------------------------------------
-function mobiusPoint(u: number, v: number, radius: number, width: number, twist: number, target?: THREE.Vector3) {
+function mobiusPoint(u: number, v: number, radius: number, width: number, twist: number, target: THREE.Vector3) {
   const half = (twist * u) / 2;
   const cosHalf = Math.cos(half);
   const sinHalf = Math.sin(half);
@@ -1016,11 +1016,8 @@ function mobiusPoint(u: number, v: number, radius: number, width: number, twist:
   const x = r * Math.cos(u);
   const y = r * Math.sin(u);
   const z = v * width * sinHalf;
-  if (target) {
-    target.set(x, y, z);
-    return target;
-  }
-  return new THREE.Vector3(x, y, z);
+  target.set(x, y, z);
+  return target;
 }
 
 function MobiusLoom({ palette, seed, bands = 3, points = 420 }: { palette: Palette; seed: number; bands?: number; points?: number }) {
@@ -1029,29 +1026,31 @@ function MobiusLoom({ palette, seed, bands = 3, points = 420 }: { palette: Palet
   const particlesRef = useRef<THREE.InstancedMesh>(null);
   const dummyRef = useRef(new THREE.Object3D());
   const pointRef = useRef(new THREE.Vector3());
-  const rand = useMemo(() => seededRandom(seed), [seed]);
 
   const bandDefs = useMemo(
     () =>
-      Array.from({ length: bands }).map((_, i) => ({
-        radius: 0.95 + i * 0.35 + rand() * 0.08,
-        width: 0.55 + rand() * 0.25,
-        twist: i % 2 === 0 ? 1 : -1,
-        phase: rand() * Math.PI * 2,
+      Array.from({ length: bands }, (_, i) => ({
+        radius: 2.2 + i * 0.42,
+        width: 0.38 + i * 0.08,
+        twist: 1 + (i % 2),
+        phase: (i * Math.PI) / bands,
+        speed: (i % 2 === 0 ? 1 : -1) * (0.16 + i * 0.03),
       })),
-    [bands, rand],
+    [bands]
   );
 
   const lineGeoms = useMemo(() => {
     const segments = 220;
+    const tmp = new THREE.Vector3();
     return bandDefs.map((band) => {
       const positions: number[] = [];
       for (let i = 0; i < segments; i++) {
         const u0 = (i / segments) * Math.PI * 2 + band.phase;
         const u1 = ((i + 1) / segments) * Math.PI * 2 + band.phase;
-        const p0 = mobiusPoint(u0, 0, band.radius, band.width, band.twist);
-        const p1 = mobiusPoint(u1, 0, band.radius, band.width, band.twist);
-        positions.push(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+        mobiusPoint(u0, 0, band.radius, band.width, band.twist, tmp);
+        positions.push(tmp.x, tmp.y, tmp.z);
+        mobiusPoint(u1, 0, band.radius, band.width, band.twist, tmp);
+        positions.push(tmp.x, tmp.y, tmp.z);
       }
       const g = new THREE.BufferGeometry();
       g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
@@ -2589,12 +2588,7 @@ function ReactionDiffusionImpostor({ palette, seed, size = 34 }: { palette: Pale
   const grid = Math.max(24, Math.floor(size * quality.geometryDetail));
   const total = grid * grid;
 
-  const uRef = useRef<Float32Array | null>(null);
-  const vRef = useRef<Float32Array | null>(null);
-  const uNextRef = useRef<Float32Array | null>(null);
-  const vNextRef = useRef<Float32Array | null>(null);
-
-  if (!uRef.current || uRef.current.length !== total) {
+  const buffers = useMemo(() => {
     const rand = seededRandom(seed);
     const u = new Float32Array(total);
     const v = new Float32Array(total);
@@ -2617,11 +2611,25 @@ function ReactionDiffusionImpostor({ palette, seed, size = 34 }: { palette: Pale
         }
       }
     }
-    uRef.current = u;
-    vRef.current = v;
-    uNextRef.current = new Float32Array(total);
-    vNextRef.current = new Float32Array(total);
-  }
+    return {
+      u,
+      v,
+      uNext: new Float32Array(total),
+      vNext: new Float32Array(total),
+    };
+  }, [total, seed, grid]);
+
+  const uRef = useRef<Float32Array>(buffers.u);
+  const vRef = useRef<Float32Array>(buffers.v);
+  const uNextRef = useRef<Float32Array>(buffers.uNext);
+  const vNextRef = useRef<Float32Array>(buffers.vNext);
+
+  useEffect(() => {
+    uRef.current = buffers.u;
+    vRef.current = buffers.v;
+    uNextRef.current = buffers.uNext;
+    vNextRef.current = buffers.vNext;
+  }, [buffers]);
 
   const geometry = useMemo(() => new THREE.PlaneGeometry(3.1, 3.1, grid - 1, grid - 1), [grid]);
   const material = useMemo(
@@ -3771,6 +3779,20 @@ function TouchActionSync() {
 
 const FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 
+function subscribeFinePointer(callback: () => void) {
+  const query = window.matchMedia(FINE_POINTER_QUERY);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
+
+function getFinePointerSnapshot(): boolean {
+  return window.matchMedia(FINE_POINTER_QUERY).matches;
+}
+
+function getFinePointerServerSnapshot(): boolean {
+  return false;
+}
+
 export default function ThreeScene({
   isActive = true,
   onContextLost,
@@ -3806,15 +3828,11 @@ export default function ThreeScene({
   // Rotation (and pointer events on the canvas) only for fine pointers. Touch
   // devices keep the canvas inert so a finger drag scrolls the page instead
   // of spinning the scene; this also covers iPadOS, whose UA says "Macintosh".
-  const [finePointer, setFinePointer] = useState(
-    () => typeof window !== "undefined" && window.matchMedia(FINE_POINTER_QUERY).matches,
+  const finePointer = useSyncExternalStore(
+    subscribeFinePointer,
+    getFinePointerSnapshot,
+    getFinePointerServerSnapshot,
   );
-  useEffect(() => {
-    const query = window.matchMedia(FINE_POINTER_QUERY);
-    const sync = () => setFinePointer(query.matches);
-    query.addEventListener("change", sync);
-    return () => query.removeEventListener("change", sync);
-  }, []);
 
   // Dynamic DPR state for performance scaling
   const [currentDpr, setCurrentDpr] = useState<number>(maxDpr);

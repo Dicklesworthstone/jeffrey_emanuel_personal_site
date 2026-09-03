@@ -1210,6 +1210,14 @@ select:focus-visible {
   transform: translateY(0);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .raptorq-scope .rq-fade-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @media (max-width: 768px) {
   .raptorq-scope .rq-viz-container {
     border-radius: 1rem;
@@ -2251,6 +2259,14 @@ select:focus-visible {
 .cmaes-scope .rq-fade-section.rq-visible {
   opacity: 1;
   transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmaes-scope .rq-fade-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /*
