@@ -249,7 +249,7 @@ export function RaptorQArticle() {
   return (
     <div
       ref={articleRef}
-      className={`raptorq-scope rq-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
+      className={`dark raptorq-scope rq-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* Scroll Progress */}

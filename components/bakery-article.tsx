@@ -213,7 +213,7 @@ export function BakeryArticle() {
   return (
     <div
       ref={articleRef}
-      className={`bakery-scope ba-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
+      className={`dark bakery-scope ba-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       <div

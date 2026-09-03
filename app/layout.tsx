@@ -31,10 +31,9 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover", // For iPhone X+ notch
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#020617" },
-    { media: "(prefers-color-scheme: light)", color: "#020617" },
-  ],
+  // A single (media-less) tag: the theme is chosen by the site's own toggle,
+  // not the OS, and ThemeProvider rewrites this value when it changes.
+  themeColor: "#020617",
 };
 
 export const metadata: Metadata = {
@@ -93,10 +92,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* GitHub for project links and avatars */}
         <link rel="dns-prefetch" href="https://github.com" />
         <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
-        {/* Synchronous anti-FOUC theme detector to eliminate flicker */}
+        {/* Pre-paint theme stamp. Runs synchronously so a light-mode visitor
+            never sees a dark first frame. Dark is the default for everyone;
+            only an explicitly stored "light" opts in (never the OS setting).
+            Must stay in lockstep with resolveStoredTheme() in theme-provider. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;var r=t==="light"||t==="dark"?t:(d?"dark":"light");var cl=document.documentElement.classList;if(r==="light"){cl.add("light");cl.remove("dark");document.documentElement.style.colorScheme="light";}else{cl.add("dark");cl.remove("light");document.documentElement.style.colorScheme="dark";}}catch(e){}})();`,
+            __html: `(function(){var t="dark";try{if(localStorage.getItem("theme")==="light")t="light"}catch(e){}document.documentElement.classList.add(t)})();`,
           }}
         />
       </head>

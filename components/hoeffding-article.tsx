@@ -198,7 +198,7 @@ export function HoeffdingArticle() {
   return (
     <div
       ref={articleRef}
-      className={`hoeffding-scope hd-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable} selection:bg-cyan-500/30`}
+      className={`dark hoeffding-scope hd-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable} selection:bg-cyan-500/30`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* HUD Progress Bar */}

@@ -180,7 +180,11 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   return (
     <section
       data-section
-      className="relative min-h-[min(95dvh,95vh)] w-full overflow-hidden bg-[#020617]"
+      // `dark` makes the hero a theme island: the 3D scene clears to #020617
+      // and the glow/orbit layers are composed against it, so the hero keeps
+      // its dark tokens in light mode instead of a light band around a dark
+      // canvas. The fades below resolve to that same dark canvas.
+      className="dark relative min-h-[min(95dvh,95vh)] w-full overflow-hidden bg-slate-950"
     >
       <GlowOrbits />
 

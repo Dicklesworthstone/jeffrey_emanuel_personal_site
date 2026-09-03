@@ -1,171 +1,147 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 
-export type Theme = "dark" | "light" | "system";
-export type ResolvedTheme = "dark" | "light";
+export type Theme = "dark" | "light";
+
+/** localStorage key read by the pre-paint script in app/layout.tsx. */
+export const THEME_STORAGE_KEY = "theme";
+
+/**
+ * The site is designed dark-first, so dark is the default for every visitor
+ * regardless of OS preference. Light mode is strictly opt-in via the toggle.
+ * (Following `prefers-color-scheme` shipped once and put light-OS visitors on
+ * an untested surface — keep this explicit.)
+ */
+export const DEFAULT_THEME: Theme = "dark";
+
+const THEME_COLOR: Record<Theme, string> = {
+  dark: "#020617",
+  light: "#f8fafc",
+};
+
+/** Mirrors the selection logic of the inline script: only a stored "light" wins. */
+export function resolveStoredTheme(stored: string | null | undefined): Theme {
+  return stored === "light" ? "light" : DEFAULT_THEME;
+}
+
+/**
+ * The <html> class is the single source of truth. The inline script stamps it
+ * before first paint, so reading it back here means React state can never
+ * disagree with what is already on screen.
+ */
+function readDocumentTheme(): Theme {
+  return document.documentElement.classList.contains("light") ? "light" : "dark";
+}
+
+function applyThemeToDocument(theme: Theme) {
+  const root = document.documentElement;
+  root.classList.toggle("dark", theme === "dark");
+  root.classList.toggle("light", theme === "light");
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", THEME_COLOR[theme]);
+}
+
+// Tiny external store: subscribers re-render when the document theme changes.
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function notify() {
+  listeners.forEach((listener) => listener());
+}
+
+function getServerSnapshot(): Theme {
+  return DEFAULT_THEME;
+}
+
+const noopSubscribe = () => () => {};
+const getHydratedSnapshot = () => true;
+const getHydratedServerSnapshot = () => false;
 
 interface ThemeContextValue {
+  /** Theme currently applied to the document (the server always assumes dark). */
   theme: Theme;
-  resolvedTheme: ResolvedTheme;
+  /**
+   * False during SSR and hydration, when `theme` is the server assumption
+   * rather than the real document state. Consumers that must be correct on
+   * the very first paint should render CSS-driven (`light:` / `dark:`)
+   * markup until this flips to true.
+   */
+  hydrated: boolean;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const THEME_STORAGE_KEY = "theme";
-
-function getSystemTheme(): ResolvedTheme {
-  if (typeof window === "undefined") return "dark";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-function applyThemeToDocument(resolved: ResolvedTheme) {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  
-  if (resolved === "light") {
-    root.classList.add("light");
-    root.classList.remove("dark");
-    root.setAttribute("data-theme", "light");
-    root.style.colorScheme = "light";
-  } else {
-    root.classList.add("dark");
-    root.classList.remove("light");
-    root.setAttribute("data-theme", "dark");
-    root.style.colorScheme = "dark";
-  }
-
-  // Update meta theme-color for mobile status bar
-  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-  if (metaThemeColor) {
-    metaThemeColor.setAttribute("content", resolved === "light" ? "#f8fafc" : "#020617");
-  }
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("dark");
-  const [mounted, setMounted] = useState(false);
+  const theme = useSyncExternalStore(subscribe, readDocumentTheme, getServerSnapshot);
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    getHydratedSnapshot,
+    getHydratedServerSnapshot
+  );
 
-  // Initialize theme from localStorage or document class set by the anti-FOUC script
-  useEffect(() => {
-    let initialTheme: Theme = "system";
+  const setTheme = useCallback((next: Theme) => {
+    applyThemeToDocument(next);
     try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-      if (stored === "light" || stored === "dark") {
-        initialTheme = stored;
-      }
+      localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {
-      // Storage access blocked or unavailable
+      // Storage blocked (private mode, disabled cookies): the choice still
+      // applies for this page view.
     }
-
-    const system = getSystemTheme();
-    const resolved = initialTheme === "system" ? system : initialTheme;
-
-    // Check if inline script already set a class
-    const isDocumentLight = document.documentElement.classList.contains("light");
-    const activeResolved = isDocumentLight ? "light" : resolved;
-
-    setThemeState(initialTheme);
-    setResolvedTheme(activeResolved);
-    applyThemeToDocument(activeResolved);
-    setMounted(true);
+    notify();
   }, []);
 
-  // Set theme with persistence
-  const setTheme = useCallback((newTheme: Theme) => {
-    setThemeState(newTheme);
-    const resolved = newTheme === "system" ? getSystemTheme() : newTheme;
-    setResolvedTheme(resolved);
-    applyThemeToDocument(resolved);
-
-    try {
-      if (newTheme === "system") {
-        localStorage.removeItem(THEME_STORAGE_KEY);
-      } else {
-        localStorage.setItem(THEME_STORAGE_KEY, newTheme);
-      }
-    } catch {
-      // Storage access blocked
-    }
-  }, []);
-
-  // Quick toggle between light and dark
   const toggleTheme = useCallback(() => {
-    const nextTheme: ResolvedTheme = resolvedTheme === "dark" ? "light" : "dark";
-    setTheme(nextTheme);
-  }, [resolvedTheme, setTheme]);
+    setTheme(readDocumentTheme() === "dark" ? "light" : "dark");
+  }, [setTheme]);
 
-  // Listen for system theme changes when in system mode
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    // Re-apply once on mount so the theme-color meta tag (server-rendered as
+    // dark) matches whatever the inline script chose, and so a blocked script
+    // still leaves the document explicitly marked dark.
+    applyThemeToDocument(readDocumentTheme());
 
-    const handleChange = (e: MediaQueryListEvent) => {
-      try {
-        const stored = localStorage.getItem(THEME_STORAGE_KEY);
-        if (!stored || stored === "system") {
-          const next = e.matches ? "dark" : "light";
-          setResolvedTheme(next);
-          applyThemeToDocument(next);
-        }
-      } catch {
-        // Ignore
-      }
-    };
-
-    media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
-  }, []);
-
-  // Listen for cross-tab storage changes
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === THEME_STORAGE_KEY) {
-        const nextStored = e.newValue as Theme | null;
-        if (nextStored === "light" || nextStored === "dark") {
-          setThemeState(nextStored);
-          setResolvedTheme(nextStored);
-          applyThemeToDocument(nextStored);
-        } else {
-          setThemeState("system");
-          const sys = getSystemTheme();
-          setResolvedTheme(sys);
-          applyThemeToDocument(sys);
-        }
-      }
+    // Cross-tab sync: another tab changed (or cleared) the stored preference.
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== null && event.key !== THEME_STORAGE_KEY) return;
+      const next = resolveStoredTheme(event.newValue);
+      if (next === readDocumentTheme()) return;
+      applyThemeToDocument(next);
+      notify();
     };
 
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  const value = useMemo(
-    () => ({
-      theme,
-      resolvedTheme: mounted ? resolvedTheme : "dark",
-      setTheme,
-      toggleTheme,
-    }),
-    [theme, resolvedTheme, mounted, setTheme, toggleTheme]
+  const value = useMemo<ThemeContextValue>(
+    () => ({ theme, hydrated, setTheme, toggleTheme }),
+    [theme, hydrated, setTheme, toggleTheme]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export function useTheme() {
+export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (!context) {
-    return {
-      theme: "dark" as const,
-      resolvedTheme: "dark" as const,
-      setTheme: () => {},
-      toggleTheme: () => {},
-    };
+    throw new Error("useTheme must be used within a <ThemeProvider>");
   }
   return context;
 }

@@ -223,7 +223,7 @@ export function CMAESArticle() {
   return (
     <div
       ref={articleRef}
-      className={`cmaes-scope rq-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
+      className={`dark cmaes-scope rq-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* Scroll Progress */}

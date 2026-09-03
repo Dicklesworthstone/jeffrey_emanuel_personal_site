@@ -21,15 +21,13 @@ export default function NavItem({ href, label, active, prefersReducedMotion }: N
       aria-current={active ? "page" : undefined}
       className={cn(
         "relative rounded-full px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap group",
-        active
-          ? "text-slate-900 font-semibold dark:text-white"
-          : "text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
+        active ? "text-white" : "text-slate-400 hover:text-white"
       )}
       onClick={() => lightTap()}
     >
       {/* Background glow on hover */}
       <motion.div
-        className="absolute inset-0 rounded-full bg-slate-900/0 opacity-0 group-hover:bg-slate-900/[0.05] group-hover:opacity-100 dark:group-hover:bg-white/[0.03] transition-all duration-300"
+        className="absolute inset-0 rounded-full bg-white/0 opacity-0 group-hover:bg-white/[0.03] group-hover:opacity-100 transition-all duration-300"
         aria-hidden="true"
       />
 
@@ -37,7 +35,7 @@ export default function NavItem({ href, label, active, prefersReducedMotion }: N
       {active && (
         <motion.div
           layoutId={prefersReducedMotion ? undefined : "nav-pill"}
-          className="absolute inset-0 rounded-full bg-slate-900/10 ring-1 ring-slate-900/15 shadow-xs dark:bg-white/[0.08] dark:ring-white/15 dark:shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+          className="absolute inset-0 rounded-full bg-white/[0.08] ring-1 ring-white/15 shadow-[0_0_15px_rgba(255,255,255,0.05)] light:shadow-none"
           transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 350, damping: 25 }}
         />
       )}

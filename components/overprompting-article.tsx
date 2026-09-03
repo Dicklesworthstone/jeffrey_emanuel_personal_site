@@ -173,7 +173,7 @@ export function OverpromptingArticle() {
     <div
       ref={articleRef}
       role="main"
-      className={`overprompting-scope op-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
+      className={`dark overprompting-scope op-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* Scroll Progress */}

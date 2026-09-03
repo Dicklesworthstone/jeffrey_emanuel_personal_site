@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SiteHeader from "../site-header";
+import { ThemeProvider } from "../theme-provider";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -10,7 +11,11 @@ vi.mock("next/navigation", () => ({
 describe("SiteHeader", () => {
   it("closes mobile menu when search is clicked", async () => {
     const onOpenCommandPalette = vi.fn();
-    render(<SiteHeader onOpenCommandPalette={onOpenCommandPalette} />);
+    render(
+      <ThemeProvider>
+        <SiteHeader onOpenCommandPalette={onOpenCommandPalette} />
+      </ThemeProvider>
+    );
 
     // 1. Open mobile menu
     const menuToggle = screen.getByLabelText(/Open navigation menu/i);

@@ -458,7 +458,7 @@ export function WillsEstateArticle() {
   return (
     <div
       ref={articleRef}
-      className={`sm-scope sm-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
+      className={`dark sm-scope sm-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* Scroll progress (driven through the ref by the scroll effect) */}

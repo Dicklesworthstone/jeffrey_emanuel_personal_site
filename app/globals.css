@@ -1,14 +1,60 @@
 @import "tailwindcss";
 
 /*
-  Design-system token override.
-  `text-slate-500` is the site's "muted" role at 10–14px in ~275 places, but the
-  stock value (#64748b) is 4.24:1 on slate-950 and 3.75:1 on slate-900 — below
-  WCAG AA (4.5:1) for small text. This value keeps the muted feel while passing
-  on every site surface (6.2:1 on slate-950, 5.5:1 on slate-900, 4.5:1 on
-  slate-800). slate-600 stays reserved for decorative/borders only.
+  Theme switching is class-driven, never OS-driven. The inline script in
+  app/layout.tsx stamps `dark` or `light` on <html> before first paint and the
+  ThemeProvider keeps it in sync afterwards. Tailwind v4's stock `dark:`
+  variant is a `prefers-color-scheme` media query, which would ignore the
+  toggle entirely, so both variants are bound to the class here. `:where`
+  keeps them at zero specificity and also matches nested `.dark` / `.light`
+  islands (see below).
 */
-@theme {
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
+
+/*
+  ========================================
+  ADAPTIVE COLOR TOKENS
+  ========================================
+  The site was designed dark-first: ~3,000 utilities hardcode the slate ramp
+  and white-alpha tints (`bg-slate-900`, `text-slate-400`, `border-white/10`,
+  `text-white`, ...). Rather than touching every call site, the slate ramp and
+  `white` are re-pointed at role variables that swap per theme:
+
+    role              dark      light     typical utilities
+    canvas   950      #020617   #f8fafc   page/section backgrounds
+    surface  900      #0f172a   #ffffff   cards, panels, palette
+    elevated 800      #1e293b   #f1f5f9   kbd, chips, inset panels
+    border   700/600  #334155   #e2e8f0   borders, dividers
+    muted    500      #8390a5   #64748b   captions, metadata
+    subtle   400      #94a3b8   #475569   secondary text
+    body     300      #cbd5e1   #334155   paragraphs
+    strong   200      #e2e8f0   #1e293b   emphasised text
+    heading  100      #f1f5f9   #0f172a   headings
+    ink      white    #ffffff   #0f172a   brightest text, alpha tints
+
+  So in light mode `bg-slate-900` renders white and `text-white` renders near
+  black — write markup in the dark vocabulary and let the tokens flip. Accent
+  colors (sky, violet, emerald, amber, ...) and `black` do not flip; use the
+  `light:` variant for accent tweaks that only make sense on a light surface.
+
+  `@theme inline` makes utilities reference the role variable directly
+  (`background-color: var(--site-bg-canvas)`) instead of a `:root`-level
+  `--color-slate-950`, so a nested `.dark` island re-resolves every token for
+  its subtree. The 3D hero and the interactive long-form articles are such
+  islands: they are composed against a hardcoded near-black and stay dark.
+
+  Dark values match Tailwind's stock slate ramp (slate-500 excepted, see
+  below), so dark mode renders exactly as it did before light mode existed.
+
+  slate-500 note: `text-slate-500` is the site's "muted" role at 10–14px in
+  ~275 places, but the stock value (#64748b) is 4.24:1 on slate-950 and 3.75:1
+  on slate-900 — below WCAG AA (4.5:1) for small text. #8390a5 keeps the muted
+  feel while passing on every dark surface (6.2:1 on slate-950, 5.5:1 on
+  slate-900, 4.5:1 on slate-800). On light surfaces #64748b passes (4.6:1 on
+  the canvas, 4.8:1 on white). slate-600 stays reserved for decorative/borders.
+*/
+@theme inline {
   --color-slate-950: var(--site-bg-canvas);
   --color-slate-900: var(--site-bg-surface);
   --color-slate-800: var(--site-bg-elevated);
@@ -19,37 +65,42 @@
   --color-slate-300: var(--site-text-body);
   --color-slate-200: var(--site-text-strong);
   --color-slate-100: var(--site-text-heading);
+  --color-white: var(--site-ink);
 }
 
 :root,
-html.dark {
+.dark {
   color-scheme: dark;
   --site-bg-canvas: #020617;
+  --site-bg-canvas-deep: #0b1120;
   --site-bg-surface: #0f172a;
   --site-bg-elevated: #1e293b;
   --site-border-subtle: #334155;
   --site-border-muted: #475569;
+  --site-border-hairline: rgba(255, 255, 255, 0.08);
   --site-text-muted: #8390a5;
   --site-text-subtle: #94a3b8;
   --site-text-body: #cbd5e1;
   --site-text-strong: #e2e8f0;
-  --site-text-heading: #f8fafc;
-  --site-hero-fade: #020617;
+  --site-text-heading: #f1f5f9;
+  --site-ink: #ffffff;
 }
 
-html.light {
+.light {
   color-scheme: light;
   --site-bg-canvas: #f8fafc;
+  --site-bg-canvas-deep: #eef2f7;
   --site-bg-surface: #ffffff;
   --site-bg-elevated: #f1f5f9;
   --site-border-subtle: #e2e8f0;
   --site-border-muted: #cbd5e1;
+  --site-border-hairline: rgba(15, 23, 42, 0.08);
   --site-text-muted: #64748b;
-  --site-text-subtle: #64748b;
+  --site-text-subtle: #475569;
   --site-text-body: #334155;
   --site-text-strong: #1e293b;
-  --site-text-heading: #090d16;
-  --site-hero-fade: #f8fafc;
+  --site-text-heading: #0f172a;
+  --site-ink: #0f172a;
 }
 
 :root {
@@ -213,12 +264,12 @@ html.light {
 @layer base {
 ::selection {
   background-color: rgba(56, 189, 248, 0.2); /* Softer sky blue selection */
-  color: #ffffff;
+  color: var(--site-ink);
 }
 
 * {
   box-sizing: border-box;
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--site-border-hairline);
 }
 
 html {
@@ -237,8 +288,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
-  background-color: #020617;
-  color: #e2e8f0;
+  background-color: var(--site-bg-canvas);
+  color: var(--site-text-strong);
   position: relative;
   isolation: isolate;
   overflow-x: hidden;
@@ -303,148 +354,80 @@ body::after {
   background: 
     radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.04), transparent 45%),
     radial-gradient(circle at 85% 25%, rgba(124, 58, 237, 0.04), transparent 45%),
-    linear-gradient(to bottom, #020617, #0B1120);
+    linear-gradient(to bottom, var(--site-bg-canvas), var(--site-bg-canvas-deep));
   pointer-events: none;
 }
 
-/* Light Mode Background & Surface System */
-html.light body {
-  background-color: #f8fafc;
-  color: #1e293b;
-}
-
-html.light body::before {
+/*
+  Light mode surface adjustments. Everything colour-related flips through the
+  role tokens above; the rules here cover the handful of hand-tuned rgba()
+  surfaces (grain blend, glass, prose) whose dark values are baked in below.
+*/
+.light body::before {
   mix-blend-mode: multiply;
   opacity: 0.12;
 }
 
-html.light body::after {
-  background: 
-    radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08), transparent 45%),
-    radial-gradient(circle at 85% 25%, rgba(124, 58, 237, 0.05), transparent 45%),
-    linear-gradient(to bottom, #ffffff, #f8fafc);
-}
-
-/* Light Mode Card & Glass Overrides */
-html.light .glass-panel {
+.light .glass-panel {
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 
+  box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.04),
     0 2px 4px -1px rgba(0, 0, 0, 0.02),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-html.light .glass-card {
+.light .glass-card {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(226, 232, 240, 0.85);
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
 }
 
-html.light .glass-card:hover {
+.light .glass-card:hover {
   background: #ffffff;
   border-color: rgba(203, 213, 225, 1);
   box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
 }
 
-/* Light Mode Typography Hierarchy */
-html.light h1:not([data-theme-ignore]),
-html.light h2:not([data-theme-ignore]),
-html.light h3:not([data-theme-ignore]),
-html.light h4:not([data-theme-ignore]) {
-  color: #090d16;
-}
-
-html.light [data-section] h1,
-html.light [data-section] h2,
-html.light h1.text-white,
-html.light h2.text-white,
-html.light h3.text-white,
-html.light h4.text-white {
-  color: #090d16 !important;
-}
-
-/* Selective text-white inversion for card headings and labels on light backgrounds */
-html.light .text-white:not(
-  button *,
-  a.rounded-full *,
-  [class*="bg-sky-"] *,
-  [class*="bg-violet-"] *,
-  [class*="bg-emerald-"] *,
-  [class*="bg-purple-"] *,
-  [class*="bg-amber-"] *,
-  [class*="bg-blue-"] *,
-  [class*="bg-indigo-"] *,
-  [class*="bg-rose-"] *,
-  [class*="bg-red-"] *,
-  [class*="bg-slate-900"] *,
-  [class*="bg-slate-950"] *,
-  pre *,
-  code *,
-  [data-theme-ignore]
-) {
-  color: #090d16 !important;
-}
-
-/* Light Mode Border and Background Alpha Adjustments */
-html.light [class*="border-white/5"],
-html.light [class*="border-white/10"],
-html.light [class*="border-white/15"],
-html.light [class*="border-white/20"] {
-  border-color: rgba(15, 23, 42, 0.09) !important;
-}
-
-html.light [class*="hover:border-white/"]:hover {
-  border-color: rgba(15, 23, 42, 0.18) !important;
-}
-
-html.light [class*="bg-white/5"] {
-  background-color: rgba(15, 23, 42, 0.04) !important;
-}
-
-html.light [class*="hover:bg-white/"]:hover {
-  background-color: rgba(15, 23, 42, 0.08) !important;
-}
-
 /* Light Mode Editorial Prose */
-html.light .prose {
+.light .prose {
   color: #334155;
 }
 
-html.light .prose p {
+.light .prose p {
   color: #334155;
 }
 
-html.light .prose h1, 
-html.light .prose h2, 
-html.light .prose h3, 
-html.light .prose h4 {
-  color: #090d16;
-}
-
-html.light .prose h2 {
-  border-bottom-color: rgba(148, 163, 184, 0.25);
-}
-
-html.light .prose a {
-  color: #0284c7;
-}
-
-html.light .prose a:hover {
-  color: #0369a1;
-}
-
-html.light .prose strong {
+.light .prose h1, 
+.light .prose h2, 
+.light .prose h3, 
+.light .prose h4 {
   color: #0f172a;
 }
 
-html.light .prose blockquote {
+.light .prose h2 {
+  border-bottom-color: rgba(148, 163, 184, 0.25);
+}
+
+.light .prose a {
+  color: #0284c7;
+}
+
+.light .prose a:hover {
+  color: #0369a1;
+}
+
+.light .prose strong {
+  color: #0f172a;
+}
+
+.light .prose blockquote {
   color: #475569;
   border-left-color: #0284c7;
   background-color: rgba(2, 132, 199, 0.04);
 }
 
-html.light .prose code:not(pre code) {
+.light .prose code:not(pre code) {
   color: #0f172a;
   background-color: rgba(15, 23, 42, 0.06);
   border: 1px solid rgba(15, 23, 42, 0.1);

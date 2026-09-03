@@ -290,7 +290,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       {/* Table of contents (sticky sidebar on wide desktops, floating elsewhere) */}
       <TableOfContents headings={headings} />
 
-      <article className="min-h-screen bg-[#020617]">
+      <article className="min-h-screen bg-slate-950">
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-28 pb-20 md:pt-36">
           <div className="reading-surface mx-auto max-w-3xl">
             <Link

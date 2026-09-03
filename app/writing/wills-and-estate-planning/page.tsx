@@ -123,7 +123,7 @@ export default function WillsEstatePlanningPage() {
   return (
     <>
       <JsonLd data={articleSchema} />
-      <div className="bg-[#020204] border-b border-white/6">
+      <div className="dark bg-[#020204] border-b border-white/6">
         <div className="mx-auto flex max-w-[800px] flex-wrap items-center gap-x-3 gap-y-1 px-4 py-4 text-xs uppercase tracking-[0.24em] text-slate-400 md:px-6">
           <span>By Jeffrey Emanuel</span>
           <span aria-hidden="true" className="text-slate-600">

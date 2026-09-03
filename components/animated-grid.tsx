@@ -126,7 +126,7 @@ export default function AnimatedGrid({
       {scrollIndicator && (
         <div
           className={cn(
-            "pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#020617] to-transparent md:hidden transition-opacity duration-300",
+            "pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-950 to-transparent md:hidden transition-opacity duration-300",
             atEnd ? "opacity-0" : "opacity-100"
           )}
           aria-hidden="true"
