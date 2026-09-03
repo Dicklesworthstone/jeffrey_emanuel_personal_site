@@ -183,7 +183,7 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
             {getKindIconNode(project.kind, "h-4 w-4")}
             {project.kind.replace("-", " ")}
           </span>
-          {starCount && (
+          {Boolean(starCount) && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-500/20">
               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
               {starCount} stars

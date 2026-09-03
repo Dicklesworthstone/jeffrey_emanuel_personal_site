@@ -193,11 +193,12 @@ export async function GET() {
     });
   });
 
-  writingHighlights.filter((item) => !item.draft).forEach((item) => {
+  for (const item of writingHighlights) {
+    if (item.draft) continue;
     const date = parseKnownDate(item.date);
     if (!date) {
       console.warn(`[rss] skipping ${item.href}: missing or invalid date`);
-      return;
+      continue;
     }
 
     if (item.href.startsWith("http")) {
@@ -211,7 +212,7 @@ export async function GET() {
         date,
         category: [{ name: item.category || "" }, { name: item.source || "" }],
       });
-      return;
+      continue;
     }
 
     if (item.href.startsWith("/writing/")) {
@@ -228,7 +229,7 @@ export async function GET() {
         category: [{ name: item.category || "Essay" }, { name: item.source || "Blog" }],
       });
     }
-  });
+  }
 
   const allItems = Array.from(itemsByLink.values()).sort((a, b) => {
     const t1 = a.date.getTime();

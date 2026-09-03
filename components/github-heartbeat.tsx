@@ -18,6 +18,14 @@ import { siteConfig } from "@/lib/content";
 
 export const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop() || "Dicklesworthstone";
 
+const ALLOWED_EVENT_TYPES = new Set([
+  "PushEvent",
+  "PullRequestEvent",
+  "CreateEvent",
+  "WatchEvent",
+  "ForkEvent",
+]);
+
 // Event types we care about
 type GitHubEventType =
   | "PushEvent"
@@ -123,6 +131,12 @@ function parseEvent(event: GitHubEvent): HeartbeatEvent {
   }
 }
 
+const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
 // Relative time formatter
 function formatRelativeTime(date: Date, now: Date): string {
   const diffMs = now.getTime() - date.getTime();
@@ -134,7 +148,7 @@ function formatRelativeTime(date: Date, now: Date): string {
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return SHORT_DATE_FORMATTER.format(date);
 }
 
 // Color utilities
@@ -441,13 +455,9 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
         return;
       }
 
-      const parsed = (rawEvents as GitHubEvent[])
-        .filter((e) =>
-          ["PushEvent", "PullRequestEvent", "CreateEvent", "WatchEvent", "ForkEvent"].includes(
-            e.type
-          )
-        )
-        .map(parseEvent);
+      const parsed = (rawEvents as GitHubEvent[]).flatMap((e) =>
+        ALLOWED_EVENT_TYPES.has(e.type) ? [parseEvent(e)] : []
+      );
 
       const fetchedAtRaw =
         data && typeof data === "object" && typeof (data as { fetchedAt?: unknown }).fetchedAt === "string"

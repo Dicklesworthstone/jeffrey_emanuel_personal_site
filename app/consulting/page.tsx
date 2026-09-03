@@ -7,6 +7,61 @@ import { Cpu, LineChart, Users, MessageSquare, CheckCircle2 } from "lucide-react
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+const CONSULTING_OFFERINGS = [
+  {
+    title: "Market & risk analysis",
+    icon: LineChart,
+    iconColor: "text-sky-400",
+    iconBg: "bg-sky-500/10",
+    checkColor: "text-sky-500/60",
+    hoverBorder: "hover:border-sky-500/20",
+    items: [
+      "Deep dives on AI-sensitive names across the stack.",
+      "Scenario work around shifts like DeepSeek, cheaper inference, and new architectures.",
+      "Identifying where Nvidia-style over-earning risk might show up next.",
+    ],
+  },
+  {
+    title: "Workflow & automation design",
+    icon: Cpu,
+    iconColor: "text-violet-400",
+    iconBg: "bg-violet-500/10",
+    checkColor: "text-violet-500/60",
+    hoverBorder: "hover:border-violet-500/20",
+    items: [
+      "Mapping where LLMs and agents can safely sit in your process.",
+      "Designing agentic pipelines around SmartEdgar, MCP Agent Mail, and bespoke tools.",
+      "Building guardrails so humans stay in the loop on the decisions that matter.",
+    ],
+  },
+  {
+    title: "Staff enablement",
+    icon: Users,
+    iconColor: "text-emerald-400",
+    iconBg: "bg-emerald-500/10",
+    checkColor: "text-emerald-500/60",
+    hoverBorder: "hover:border-emerald-500/20",
+    items: [
+      "Playbooks for analysts and PMs using frontier models and coding agents effectively.",
+      "Concrete examples of using AI tools to refactor large codebases.",
+      "Pragmatic guidance on where AI is genuinely accretive vs. distracting.",
+    ],
+  },
+  {
+    title: "IC and boardroom sessions",
+    icon: MessageSquare,
+    iconColor: "text-fuchsia-400",
+    iconBg: "bg-fuchsia-500/10",
+    checkColor: "text-fuchsia-500/60",
+    hoverBorder: "hover:border-fuchsia-500/20",
+    items: [
+      "One-off or recurring briefings on the state of AI.",
+      "Sector-specific sessions for PMs or PE deal teams.",
+      "Written memos that can be circulated to LPs and internal stakeholders.",
+    ],
+  },
+] as const;
+
 export default function ConsultingPage() {
   const prefersReducedMotion = useReducedMotion();
 
@@ -46,101 +101,38 @@ export default function ConsultingPage() {
           className="grid gap-6 md:grid-cols-2"
           staggerDelay={0.12}
         >
-          <motion.div 
-            whileHover={{ y: -4 }}
-            className="group relative rounded-3xl border border-slate-800/80 bg-slate-900/40 p-8 backdrop-blur-sm transition-colors hover:bg-slate-900/60 hover:border-sky-500/20"
-          >
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-400 group-hover:scale-110 transition-transform">
-              <LineChart className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-50">
-              Market & risk analysis
-            </h3>
-            <ul className="mt-6 space-y-4">
-              {[
-                "Deep dives on AI-sensitive names across the stack.",
-                "Scenario work around shifts like DeepSeek, cheaper inference, and new architectures.",
-                "Identifying where Nvidia-style over-earning risk might show up next."
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-base text-slate-400">
-                  <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-sky-500/60" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div 
-            whileHover={{ y: -4 }}
-            className="group relative rounded-3xl border border-slate-800/80 bg-slate-900/40 p-8 backdrop-blur-sm transition-colors hover:bg-slate-900/60 hover:border-violet-500/20"
-          >
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-400 group-hover:scale-110 transition-transform">
-              <Cpu className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-50">
-              Workflow & automation design
-            </h3>
-            <ul className="mt-6 space-y-4">
-              {[
-                "Mapping where LLMs and agents can safely sit in your process.",
-                "Designing agentic pipelines around SmartEdgar, MCP Agent Mail, and bespoke tools.",
-                "Building guardrails so humans stay in the loop on the decisions that matter."
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-base text-slate-400">
-                  <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-violet-500/60" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div 
-            whileHover={{ y: -4 }}
-            className="group relative rounded-3xl border border-slate-800/80 bg-slate-900/40 p-8 backdrop-blur-sm transition-colors hover:bg-slate-900/60 hover:border-emerald-500/20"
-          >
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
-              <Users className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-50">
-              Staff enablement
-            </h3>
-            <ul className="mt-6 space-y-4">
-              {[
-                "Playbooks for analysts and PMs using frontier models and coding agents effectively.",
-                "Concrete examples of using AI tools to refactor large codebases.",
-                "Pragmatic guidance on where AI is genuinely accretive vs. distracting."
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-base text-slate-400">
-                  <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-500/60" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div 
-            whileHover={{ y: -4 }}
-            className="group relative rounded-3xl border border-slate-800/80 bg-slate-900/40 p-8 backdrop-blur-sm transition-colors hover:bg-slate-900/60 hover:border-fuchsia-500/20"
-          >
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500/10 text-fuchsia-400 group-hover:scale-110 transition-transform">
-              <MessageSquare className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-50">
-              IC and boardroom sessions
-            </h3>
-            <ul className="mt-6 space-y-4">
-              {[
-                "One-off or recurring briefings on the state of AI.",
-                "Sector-specific sessions for PMs or PE deal teams.",
-                "Written memos that can be circulated to LPs and internal stakeholders."
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-base text-slate-400">
-                  <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-fuchsia-500/60" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {CONSULTING_OFFERINGS.map((offering) => {
+            const Icon = offering.icon;
+            return (
+              <motion.div
+                key={offering.title}
+                whileHover={{ y: -4 }}
+                className={cn(
+                  "group relative rounded-3xl border border-slate-800/80 bg-slate-900/40 p-8 backdrop-blur-sm transition-colors hover:bg-slate-900/60",
+                  offering.hoverBorder
+                )}
+              >
+                <div className={cn(
+                  "mb-6 flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
+                  offering.iconBg,
+                  offering.iconColor
+                )}>
+                  <Icon className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-50">
+                  {offering.title}
+                </h3>
+                <ul className="mt-6 space-y-4">
+                  {offering.items.map((item) => (
+                    <li key={item} className="flex items-start gap-3 text-base text-slate-400">
+                      <CheckCircle2 className={cn("mt-1 h-4 w-4 shrink-0", offering.checkColor)} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            );
+          })}
         </AnimatedGrid>
       </SectionShell>
 

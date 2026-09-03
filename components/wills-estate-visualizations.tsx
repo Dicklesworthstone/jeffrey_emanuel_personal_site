@@ -2078,16 +2078,17 @@ export function DeliverablesTreeViz() {
   const selectedStyles = selectedLeaf ? DELIVERABLE_FOLDER_META[selectedLeaf.folder] : DELIVERABLE_FOLDER_META.deliverables;
   const groupedLeaves = useMemo(
     () =>
-      DELIVERABLE_FOLDERS.map((folder) => {
+      DELIVERABLE_FOLDERS.flatMap((folder) => {
         const leaves = filteredLeaves.filter((leaf) => leaf.folder === folder);
+        if (leaves.length === 0) return [];
         const capped = isCompact && !showAllFolders[folder];
         const shownLeaves = capped
           ? leaves.filter(
               (leaf, index) => index < COMPACT_LEAF_CAP || deliverablePath(leaf) === selectedLeafPath,
             )
           : leaves;
-        return { folder, leaves, shownLeaves, hiddenCount: leaves.length - shownLeaves.length };
-      }).filter((group) => group.leaves.length > 0),
+        return [{ folder, leaves, shownLeaves, hiddenCount: leaves.length - shownLeaves.length }];
+      }),
     [filteredLeaves, isCompact, showAllFolders, selectedLeafPath],
   );
   const spotlightLeaves = deliverableTreeLeaves.filter((leaf) => leaf.spotlight);
@@ -2998,6 +2999,8 @@ export function AntiPatternCardsViz() {
     focusCardByIndex(nextIndex);
   };
 
+  const flippedSet = useMemo(() => new Set(flippedCards), [flippedCards]);
+
   const hintText = isCompact
     ? "Tap to expand, tap again to close, or press Space"
     : hasFinePointer
@@ -3051,7 +3054,7 @@ export function AntiPatternCardsViz() {
 
         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {antiPatterns.map((pattern, index) => {
-            const flipped = flippedCards.includes(pattern.name);
+            const flipped = flippedSet.has(pattern.name);
             const icon = antiPatternIconMap[pattern.icon] ?? <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
             const statusId = `anti-pattern-card-status-${index}`;
             const backPanelId = `anti-pattern-card-back-${index}`;
@@ -3300,21 +3303,35 @@ function roundAttorneyEstimate(value: number) {
   return Math.round(value / 250) * 250;
 }
 
+const CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+const COMPACT_CURRENCY_FORMATTER_MILLIONS = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+const COMPACT_CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 0,
+});
+
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return CURRENCY_FORMATTER.format(value);
 }
 
 function formatCompactCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    notation: "compact",
-    maximumFractionDigits: value >= 1_000_000 ? 1 : 0,
-  }).format(value);
+  return (value >= 1_000_000
+    ? COMPACT_CURRENCY_FORMATTER_MILLIONS
+    : COMPACT_CURRENCY_FORMATTER
+  ).format(value);
 }
 
 function getNetWorthBucket(value: number) {
@@ -3375,8 +3392,9 @@ export function PricingComparisonViz() {
   }, [netWorth, numChips]);
 
   const savingsVsAttorney = Math.max(0, attorneyEstimate - PRICING_STACK_MONTHLY_MIN);
+  const selectedChipSet = useMemo(() => new Set(selectedChips), [selectedChips]);
   const selectedComplexityLabels = PRICING_COMPLEXITY_CHIPS.filter((chip) =>
-    selectedChips.includes(chip.id),
+    selectedChipSet.has(chip.id),
   ).map((chip) => chip.label);
   const isDefaultScenario = netWorth === defaultNetWorth && numChips === 0;
 

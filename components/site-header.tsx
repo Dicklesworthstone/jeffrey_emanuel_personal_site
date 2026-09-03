@@ -136,7 +136,6 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
           boxShadow: "0 12px 36px -26px rgba(2, 6, 23, 0.95)",
           paddingRight: "var(--scrollbar-width, 0px)",
         }}
-        role="banner"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Magnetic strength={0.1}>

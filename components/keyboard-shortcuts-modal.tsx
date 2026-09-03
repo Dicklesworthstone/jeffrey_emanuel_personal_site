@@ -45,16 +45,21 @@ export default function KeyboardShortcutsModal({
     }
   }, []);
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   // Close on Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
-        onClose();
+        onCloseRef.current();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // Prevent body scroll when open
   useBodyScrollLock(isOpen);
@@ -126,6 +131,7 @@ export default function KeyboardShortcutsModal({
             className="fixed inset-x-4 top-[max(4rem,7dvh)] z-[101] mx-auto max-w-lg sm:inset-x-auto"
             role="dialog"
             aria-modal="true"
+            aria-label="Keyboard shortcuts"
             aria-labelledby="shortcuts-title"
           >
             <div

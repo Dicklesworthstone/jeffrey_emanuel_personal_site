@@ -22,6 +22,28 @@ import Magnetic from "@/components/magnetic";
 import { SnapshotCard } from "@/components/homepage-snapshot";
 import { cn } from "@/lib/utils";
 
+const PERSON_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: siteConfig.name,
+  jobTitle: "Founder & CEO",
+  worksFor: {
+    "@type": "Organization",
+    name: "Lumera Network",
+  },
+  url: "https://jeffreyemanuel.com",
+  sameAs: [
+    siteConfig.social.x,
+    siteConfig.social.github,
+    siteConfig.social.linkedin,
+  ],
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "Reed College",
+  },
+  knowsAbout: ["AI Agents", "Markets", "Software Engineering", "Mathematics", "Finance"],
+};
+
 export default async function HomePage() {
   const featuredProjects = projects.slice(0, 6);
   const featuredWriting = writingHighlights.filter((item) => !item.draft).slice(0, 6);
@@ -36,31 +58,9 @@ export default async function HomePage() {
     return stat;
   }) : heroStats;
 
-  const personSchema = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: siteConfig.name,
-    jobTitle: "Founder & CEO",
-    worksFor: {
-      "@type": "Organization",
-      name: "Lumera Network",
-    },
-    url: "https://jeffreyemanuel.com",
-    sameAs: [
-      siteConfig.social.x,
-      siteConfig.social.github,
-      siteConfig.social.linkedin,
-    ],
-    alumniOf: {
-      "@type": "CollegeOrUniversity",
-      name: "Reed College",
-    },
-    knowsAbout: ["AI Agents", "Markets", "Software Engineering", "Mathematics", "Finance"],
-  };
-
   return (
     <>
-      <JsonLd data={personSchema} />
+      <JsonLd data={PERSON_SCHEMA} />
       <Hero stats={liveStats} />
 
       <SectionShell
@@ -112,7 +112,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.08),transparent_70%)]" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="group relative isolate rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-black/40 to-black/20 p-8 sm:p-12 transition-all duration-300 hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 focus-within:border-violet-500/40">
+          <div className="group relative isolate rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-black/40 to-black/20 p-8 sm:p-12 transition-[border-color,box-shadow] duration-300 hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 focus-within:border-violet-500/40">
             {/* Decorative elements */}
             <div className="absolute -right-20 -top-20 -z-10 h-60 w-60 rounded-full bg-violet-500/10 blur-3xl" aria-hidden="true" />
             <div className="absolute -bottom-10 -left-10 -z-10 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" aria-hidden="true" />

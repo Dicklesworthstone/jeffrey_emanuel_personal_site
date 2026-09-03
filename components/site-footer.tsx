@@ -3,7 +3,6 @@
 import { Github, Twitter, Mail, Linkedin, ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { siteConfig, navItems } from "@/lib/content";
-import { useState, useEffect } from "react";
 import Magnetic from "@/components/magnetic";
 
 const socialLinks = [
@@ -14,17 +13,9 @@ const socialLinks = [
 ];
 
 export default function SiteFooter() {
-  const [year, setYear] = useState<number | null>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration-safe: server renders null, client sets real year
-    setYear(new Date().getFullYear());
-  }, []);
-
   return (
     <footer
       className="relative mt-6 md:mt-16 lg:mt-24"
-      role="contentinfo"
       aria-label="Site footer"
     >
       {/* Gradient divider */}
@@ -44,7 +35,7 @@ export default function SiteFooter() {
             <p className="text-sm leading-relaxed text-slate-500">
               Building durable infrastructure for the agentic future.
               <br />
-              &copy; {year || 2026} Jeffrey Emanuel. All rights reserved.
+              &copy; 2026 Jeffrey Emanuel. All rights reserved.
             </p>
           </div>
 
@@ -141,7 +132,7 @@ export default function SiteFooter() {
 
           {/* Copyright */}
           <p className="text-xs text-slate-400">
-            &copy; {year || 2026} Jeffrey Emanuel. All rights reserved.
+            &copy; 2026 Jeffrey Emanuel. All rights reserved.
           </p>
         </div>
       </div>

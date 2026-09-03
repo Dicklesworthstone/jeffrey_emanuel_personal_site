@@ -6,6 +6,7 @@ import {
   useRef,
   useEffect,
   useLayoutEffect,
+  useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
 } from "react";
@@ -17,6 +18,10 @@ import {
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 import BottomSheet from "@/components/bottom-sheet";
+
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 interface TooltipShellProps {
   /** The content to show as the trigger */
@@ -59,7 +64,11 @@ export function TooltipShell({
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const prefersReducedMotion = useReducedMotion();
 
-  const canUsePortal = typeof document !== "undefined";
+  const canUsePortal = useSyncExternalStore(
+    emptySubscribe,
+    getClientSnapshot,
+    getServerSnapshot
+  );
 
   const updatePosition = useCallback(() => {
     if (!triggerRef.current || isMobile) return;

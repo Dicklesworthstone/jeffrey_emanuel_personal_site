@@ -22,6 +22,11 @@ export const metadata: Metadata = {
   },
 };
 
+function dateValue(value: string | undefined) {
+  const time = value ? new Date(value).getTime() : Number.NaN;
+  return Number.isNaN(time) ? Number.NEGATIVE_INFINITY : time;
+}
+
 export default function WritingPage() {
   const allPosts = getPublishedPostsMeta();
 
@@ -38,15 +43,22 @@ export default function WritingPage() {
     draft: isDraftPost(post),
   }));
 
-  // Combine MDX items and writing highlights to find all featured items
-  // Manual highlights take precedence for duplicates
-  const allItems = [...mdxItems, ...writingHighlights.filter((item) => !item.draft)];
-  
-  // Use a map to handle duplicates by href
+  // Merge writingHighlights with MDX posts, giving precedence to manual writingHighlights for metadata
   const itemsByHref = new Map<string, WritingItem>();
-  allItems.forEach(item => {
+
+  // Add all MDX posts first
+  mdxItems.forEach((item) => {
+    itemsByHref.set(item.href, item);
+  });
+
+  // Then merge/override with writingHighlights
+  writingHighlights.forEach((item) => {
     const canonicalHref = canonicalizeWritingHref(item.href);
-    const normalizedItem: WritingItem = { ...item, href: canonicalHref };
+    const normalizedItem: WritingItem = {
+      ...item,
+      href: canonicalHref,
+      draft: item.draft || false,
+    };
 
     // If we already have this href, merge it (manual highlights win)
     const existing = itemsByHref.get(canonicalHref);
@@ -58,11 +70,6 @@ export default function WritingPage() {
   });
 
   const mergedItems = Array.from(itemsByHref.values()).filter((item) => !item.draft);
-
-  const dateValue = (value: string | undefined) => {
-    const time = value ? new Date(value).getTime() : Number.NaN;
-    return Number.isNaN(time) ? Number.NEGATIVE_INFINITY : time;
-  };
 
   // Get featured items
   const featured = mergedItems.filter((item) => item.featured)
@@ -76,9 +83,11 @@ export default function WritingPage() {
     .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 
   // Data eyebrow: "31 essays · 2024–2026" (year range only from items with real dates)
-  const years = mergedItems
-    .map((item) => (item.date ? new Date(item.date).getUTCFullYear() : Number.NaN))
-    .filter((year) => Number.isFinite(year));
+  const years = mergedItems.flatMap((item) => {
+    if (!item.date) return [];
+    const year = new Date(item.date).getUTCFullYear();
+    return Number.isFinite(year) ? [year] : [];
+  });
   const essayCount = mergedItems.length;
   const yearRange =
     years.length > 0

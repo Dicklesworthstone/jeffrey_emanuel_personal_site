@@ -26,6 +26,8 @@ const KindIcon = ({ kind, className }: { kind: Project["kind"]; className?: stri
   }
 };
 
+const SPRING_CONFIG = { stiffness: 150, damping: 20 };
+
 export const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
   const { lightTap } = useHapticFeedback();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -38,9 +40,8 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const springConfig = { stiffness: 150, damping: 20 };
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [7, -7]), springConfig);
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-7, 7]), springConfig);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [7, -7]), SPRING_CONFIG);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-7, 7]), SPRING_CONFIG);
 
   const spotlightOpacity = useSpring(0, { stiffness: 300, damping: 30 });
 
@@ -205,7 +206,7 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
               </h3>
             </div>
             <div className="flex flex-col items-end gap-2">
-              {starCount && (
+              {Boolean(starCount) && (
                 <span className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 group-hover:ring-amber-400/50 group-hover:shadow-amber-500/20">
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1500ms] ease-in-out motion-reduce:transition-none motion-safe:group-hover:translate-x-full" aria-hidden="true" />
                   <Star className="relative h-3.5 w-3.5 fill-amber-400 text-amber-400 drop-shadow-[0_0_3px_rgba(251,191,36,0.5)]" aria-hidden="true" />

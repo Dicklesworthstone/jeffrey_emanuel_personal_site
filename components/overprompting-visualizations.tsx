@@ -530,7 +530,7 @@ function HologramMesh({ specificity, frozen }: { specificity: number; frozen: bo
     []
   );
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!shaderRef.current || !meshRef.current) return;
     const t = frozen ? 0 : state.clock.elapsedTime;
 
@@ -569,9 +569,10 @@ function HologramMesh({ specificity, frozen }: { specificity: number; frozen: bo
       u.uColor.value.copy(color);
       return;
     }
-    u.uDistortion.value = THREE.MathUtils.lerp(u.uDistortion.value, distortion, 0.1);
-    u.uOpacity.value = THREE.MathUtils.lerp(u.uOpacity.value, opacity, 0.1);
-    u.uColor.value.lerp(color, 0.1);
+    const lerpFactor = 1 - Math.exp(-6 * Math.min(delta, 0.1));
+    u.uDistortion.value = THREE.MathUtils.lerp(u.uDistortion.value, distortion, lerpFactor);
+    u.uOpacity.value = THREE.MathUtils.lerp(u.uOpacity.value, opacity, lerpFactor);
+    u.uColor.value.lerp(color, lerpFactor);
   });
 
   return (

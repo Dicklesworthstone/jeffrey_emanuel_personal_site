@@ -564,9 +564,10 @@ Areas of Interest:
 ${
       data.interests.length > 0
         ? data.interests
-            .map((interest) => interestOptions.find((opt) => opt.id === interest)?.label)
-            .filter(Boolean)
-            .map((label) => `- ${label}`)
+            .flatMap((interest) => {
+              const label = interestOptions.find((opt) => opt.id === interest)?.label;
+              return label ? [`- ${label}`] : [];
+            })
             .join("\n")
         : "None specified"
     }
@@ -661,8 +662,10 @@ ${data.message}`;
   const currentStep = steps[stepIndex];
 
   const summaryInterests = selectedInterests
-    .map((interest) => interestOptions.find((opt) => opt.id === interest)?.label)
-    .filter(Boolean);
+    .flatMap((interest) => {
+      const label = interestOptions.find((opt) => opt.id === interest)?.label;
+      return label ? [label] : [];
+    });
 
   return (
     <form

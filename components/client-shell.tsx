@@ -137,7 +137,6 @@ export default function ClientShell({ children }: { children: React.ReactNode })
                 }}
                 className="flex-1 min-h-screen"
                 tabIndex={-1}
-                role="main"
               >
                 {children}
               </motion.main>

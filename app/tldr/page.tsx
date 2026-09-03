@@ -157,7 +157,7 @@ function FooterCTA({ id }: { id?: string }) {
               <button
                 type="button"
                 onClick={handleCopy}
-                className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg bg-slate-800 p-2.5 text-slate-400 transition-all duration-200 hover:bg-violet-600 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60"
+                className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg bg-slate-800 p-2.5 text-slate-400 transition-[background-color,color,transform] duration-200 hover:bg-violet-600 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60"
                 aria-label={copyState === "copied" ? "Copied install command" : "Copy install command"}
               >
                 {copyState === "copied" ? (

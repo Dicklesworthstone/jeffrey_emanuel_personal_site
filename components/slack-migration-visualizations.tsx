@@ -1122,12 +1122,11 @@ export function PhasePipelineViz() {
   const [selected, setSelected] = useState<PipelineSelection>({ kind: "node", id: "ready" });
 
   const flow = useMemo<Array<{ node: PipelineNode; edgeIn?: PipelineEdge }>>(() => {
-    const byId = new Map(PIPELINE_NODES.map((n) => [n.id, n]));
     const edgesByTo = new Map(PIPELINE_EDGES.map((e) => [e.to, e]));
     return PIPELINE_NODES.map((n) => ({
       node: n,
       edgeIn: edgesByTo.get(n.id),
-    })).filter((f) => byId.has(f.node.id));
+    }));
   }, []);
 
   return (

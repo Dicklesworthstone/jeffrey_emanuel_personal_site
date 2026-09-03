@@ -198,10 +198,13 @@ function ArticleBody({ content }: { content: string }) {
 
 export async function generateStaticParams() {
   const posts = getAllPostsMeta();
-  return posts
-    .map((post) => String(post.slug))
-    .filter((slug) => !STATIC_WRITING_ROUTE_SLUGS.has(getCanonicalWritingSlug(slug)))
-    .map((slug) => ({ slug }));
+  return posts.flatMap((post) => {
+    const slug = String(post.slug);
+    if (STATIC_WRITING_ROUTE_SLUGS.has(getCanonicalWritingSlug(slug))) {
+      return [];
+    }
+    return [{ slug }];
+  });
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

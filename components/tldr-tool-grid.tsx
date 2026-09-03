@@ -216,6 +216,9 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("");
+  }, []);
 
   // Keyboard navigation state
   const [focusedToolId, setFocusedToolId] = useState<string | null>(null);
@@ -482,7 +485,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
       {isSearching && !hasResults && (
         <EmptySearchState
           query={searchQuery}
-          onClear={() => setSearchQuery("")}
+          onClear={handleClearSearch}
           reducedMotion={reducedMotion}
         />
       )}
@@ -504,10 +507,10 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                   key={tool.id}
                   id={`tool-card-${tool.id}`}
                   layout={!reducedMotion}
-                  initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  exit={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
-                  viewport={{ once: true, margin: "-40px" }}
+                  initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  exit={reducedMotion ? {} : { opacity: 0, scale: 0.95 }}
+                  viewport={{ once: true, margin: "120px" }}
                   transition={{
                     duration: reducedMotion ? 0 : 0.3,
                     delay: reducedMotion ? 0 : index * 0.05,
@@ -547,10 +550,10 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
                   key={tool.id}
                   id={`tool-card-${tool.id}`}
                   layout={!reducedMotion}
-                  initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  exit={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
-                  viewport={{ once: true, margin: "-40px" }}
+                  initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  exit={reducedMotion ? {} : { opacity: 0, scale: 0.95 }}
+                  viewport={{ once: true, margin: "120px" }}
                   transition={{
                     duration: reducedMotion ? 0 : 0.3,
                     delay: reducedMotion ? 0 : index * 0.05,

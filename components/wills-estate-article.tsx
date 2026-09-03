@@ -442,17 +442,24 @@ export function WillsEstateArticle() {
     };
   }, []);
 
+  useEffect(() => {
+    const article = articleRef.current;
+    if (!article) return;
+    const handleClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest?.("a[href]") as HTMLAnchorElement | null;
+      if (a?.href?.includes("jeffreys-skills.md")) {
+        emitArticleEvent("jsm_skill_page_outbound_clicked", { target: a.href });
+      }
+    };
+    article.addEventListener("click", handleClick);
+    return () => article.removeEventListener("click", handleClick);
+  }, []);
+
   return (
     <div
       ref={articleRef}
       className={`sm-scope sm-body ${crimsonPro.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable}`}
       style={{ background: "#020204", color: "#f8fafc" }}
-      onClick={(e) => {
-        const a = (e.target as HTMLElement).closest?.("a[href]") as HTMLAnchorElement | null;
-        if (a?.href?.includes("jeffreys-skills.md")) {
-          emitArticleEvent("jsm_skill_page_outbound_clicked", { target: a.href });
-        }
-      }}
     >
       {/* Scroll progress (driven through the ref by the scroll effect) */}
       <div

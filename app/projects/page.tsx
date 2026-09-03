@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence, LayoutGroup, useReducedMotion } from "framer-motion";
 import SectionShell from "@/components/section-shell";
 import BentoGrid from "@/components/bento-grid";
@@ -37,15 +37,7 @@ const popularTags = Object.entries(tagCounts)
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState<typeof filters[number]["id"]>("all");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [mountKey, setMountKey] = useState(0);
   const prefersReducedMotion = useReducedMotion();
-
-  // Force re-animation on client-side navigation by incrementing key on mount
-  // This is intentional to re-trigger AnimatePresence animations on navigation
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional one-time trigger on navigation
-    setMountKey((k) => k + 1);
-  }, []);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {
@@ -142,11 +134,11 @@ export default function ProjectsPage() {
       <AnimatePresence mode="wait">
         {showFlywheel && (
           <motion.div
-            key={`flywheel-${mountKey}`}
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeInOut" }}
+            key="flywheel-section"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: "easeOut" }}
             className="mb-12 sm:mb-16 overflow-hidden"
           >
             <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-violet-950/20 via-black/40 to-black/20 p-4 sm:p-6 md:p-8 lg:p-12 backdrop-blur-sm">

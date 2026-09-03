@@ -63,15 +63,20 @@ export default function BottomSheet({
   // Lock body scroll when open
   useBodyScrollLock(isOpen);
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   // Close on escape key
   useEffect(() => {
     if (!closeOnEscape || !isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [isOpen, closeOnEscape, onClose]);
+  }, [isOpen, closeOnEscape]);
 
   // Focus trap: cycle Tab within the sheet; restore focus on close
   useEffect(() => {

@@ -256,7 +256,8 @@ class ProCMAES {
         for (let j = i + 1; j < n; j++) {
           if (Math.abs(D_mat[i][j]) > maxVal) {
             maxVal = Math.abs(D_mat[i][j]);
-            p = i; q = j;
+            p = i;
+            q = j;
           }
         }
       }
@@ -317,7 +318,7 @@ function LiquidGlassDistribution() {
   const meshRef = useRef<THREE.Mesh>(null);
   const pointsRef = useRef<THREE.Points>(null);
   const { capabilities } = useDeviceCapabilities();
-  const count = useMemo(() => capabilities.tier === "low" ? 600 : 2000, [capabilities.tier]);
+  const count = capabilities.tier === "low" ? 600 : 2000;
   const positions = useMemo(() => new Float32Array(count * 3), [count]);
   const reducedMotion = capabilities.prefersReducedMotion;
 
@@ -679,13 +680,15 @@ function PathLine({ points, color, objective }: { points: number[][], color: str
   // Points are expressed in the landscape's local frame (x, y, height) and the
   // parent group applies the same -90° X rotation as the terrain, so the path
   // lies on the surface instead of in a perpendicular plane.
-  const linePoints = useMemo(
-    () =>
-      points
-        .filter((p) => p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1]))
-        .map((p) => new THREE.Vector3(p[0], p[1], 0.05 + displayHeight(objective(p[0], p[1])))),
-    [points, objective]
-  );
+  const linePoints = useMemo(() => {
+    const pts: THREE.Vector3[] = [];
+    for (const p of points) {
+      if (p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1])) {
+        pts.push(new THREE.Vector3(p[0], p[1], 0.05 + displayHeight(objective(p[0], p[1]))));
+      }
+    }
+    return pts;
+  }, [points, objective]);
 
   // drei/Line requires at least two points; otherwise it can throw in LineGeometry.setPositions.
   if (linePoints.length < 2) {
@@ -913,7 +916,12 @@ export function BenchmarkRunner() {
       const svg = container.append("svg").attr("width", w).attr("height", h).attr("aria-hidden", "true");
       const margin = { left: 70, right: 24, top: 24, bottom: 54 };
       const x = d3.scaleLinear().domain([0, Math.max(1, results.length - 1)]).range([margin.left, w - margin.right]);
-      const values = results.flatMap(d => [d.best, d.sigma]).filter(v => Number.isFinite(v) && v > 0);
+      const values = results.flatMap((d) => {
+        const arr: number[] = [];
+        if (Number.isFinite(d.best) && d.best > 0) arr.push(d.best);
+        if (Number.isFinite(d.sigma) && d.sigma > 0) arr.push(d.sigma);
+        return arr;
+      });
       const lo = Math.max(1e-10, d3.min(values) ?? 1e-10);
       const hi = Math.max(lo * 10, d3.max(values) ?? 100);
       // Domain follows the data (Rosenbrock starts in the tens of thousands)

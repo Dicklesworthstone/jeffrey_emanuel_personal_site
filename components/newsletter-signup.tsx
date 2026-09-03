@@ -75,6 +75,7 @@ export function NewsletterSignup({
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion ?? false;
   const { lightTap, mediumTap } = useHapticFeedback();
+  const isSubmittingRef = useRef(false);
   const inputId = useId();
   const errorId = useId();
   // The success state stays put: it is the confirmation and should not
@@ -83,6 +84,8 @@ export function NewsletterSignup({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+
+      if (isSubmittingRef.current || status === "submitting") return;
 
       // Basic validation
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -93,6 +96,7 @@ export function NewsletterSignup({
         return;
       }
 
+      isSubmittingRef.current = true;
       setStatus("submitting");
       mediumTap();
 
@@ -126,9 +130,11 @@ export function NewsletterSignup({
         setErrorMessage(NETWORK_FAILURE.message);
         setErrorSuggestsEmail(NETWORK_FAILURE.suggestEmail);
         lightTap();
+      } finally {
+        isSubmittingRef.current = false;
       }
     },
-    [email, buttondownId, lightTap, mediumTap]
+    [email, buttondownId, status, lightTap, mediumTap]
   );
 
   if (compact) {

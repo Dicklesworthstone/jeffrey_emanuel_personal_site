@@ -97,6 +97,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [hasError, setHasError] = useState(false);
   const hasPrefetchedRef = useRef(false);
   const hasFetchedThisOpenCycleRef = useRef(false);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   const openExternal = useCallback((url: string) => {
     const newWindow = window.open(url, "_blank", "noopener,noreferrer");
@@ -213,7 +217,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     });
 
     // Featured Writing (Keep these as they are high priority)
-    writingHighlights.filter((item) => !item.draft).forEach((item) => {
+    for (const item of writingHighlights) {
+      if (item.draft) continue;
       cmds.push({
         id: toCommandId("writing", item.title),
         title: item.title,
@@ -230,7 +235,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         },
         keywords: [item.title.toLowerCase(), item.category.toLowerCase()],
       });
-    });
+    }
 
     // Social links
     cmds.push({
@@ -374,7 +379,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         // under someone typing Japanese/Chinese/Korean into the search box.
         if (e.isComposing) return;
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab") return;
@@ -412,7 +417,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
     window.addEventListener("keydown", handleWindowKeyDown);
     return () => window.removeEventListener("keydown", handleWindowKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback(

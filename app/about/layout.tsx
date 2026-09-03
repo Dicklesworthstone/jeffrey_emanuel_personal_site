@@ -11,32 +11,32 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AboutLayout({ children }: { children: React.ReactNode }) {
-  const personSchema = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: siteConfig.name,
-    jobTitle: "Founder & CEO",
-    worksFor: {
-      "@type": "Organization",
-      name: "Lumera Network",
-    },
-    url: "https://jeffreyemanuel.com/about",
-    sameAs: [
-      siteConfig.social.x,
-      siteConfig.social.github,
-      siteConfig.social.linkedin,
-    ],
-    alumniOf: {
-      "@type": "CollegeOrUniversity",
-      name: "Reed College",
-    },
-    knowsAbout: ["AI Agents", "Markets", "Software Engineering", "Mathematics", "Finance"],
-  };
+const PERSON_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: siteConfig.name,
+  jobTitle: "Founder & CEO",
+  worksFor: {
+    "@type": "Organization",
+    name: "Lumera Network",
+  },
+  url: "https://jeffreyemanuel.com/about",
+  sameAs: [
+    siteConfig.social.x,
+    siteConfig.social.github,
+    siteConfig.social.linkedin,
+  ],
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "Reed College",
+  },
+  knowsAbout: ["AI Agents", "Markets", "Software Engineering", "Mathematics", "Finance"],
+};
 
+export default function AboutLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <JsonLd data={personSchema} />
+      <JsonLd data={PERSON_SCHEMA} />
       {children}
     </>
   );

@@ -158,8 +158,17 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm 2xl:hidden"
+              className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm 2xl:hidden cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label="Close table of contents"
               onClick={() => setIsOpen(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
+                  e.preventDefault();
+                  setIsOpen(false);
+                }
+              }}
             />
 
             {/* Panel */}

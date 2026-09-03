@@ -291,8 +291,8 @@ const ToolNode = React.memo(function ToolNode({
   isSelected: boolean;
   isConnected: boolean;
   isDimmed: boolean;
-  onSelect: () => void;
-  onHover: (hovering: boolean) => void;
+  onSelect: (id: string) => void;
+  onHover: (id: string, hovering: boolean) => void;
   reducedMotion: boolean;
 }) {
   const Icon = iconMap[tool.icon] || Zap;
@@ -301,13 +301,13 @@ const ToolNode = React.memo(function ToolNode({
 
   const handleClick = useCallback(() => {
     lightTap();
-    onSelect();
-  }, [lightTap, onSelect]);
+    onSelect(tool.id);
+  }, [lightTap, onSelect, tool.id]);
 
   const handleHoverInternal = useCallback((hovering: boolean) => {
     setIsHovered(hovering);
-    onHover(hovering);
-  }, [onHover]);
+    onHover(tool.id, hovering);
+  }, [onHover, tool.id]);
 
   return (
     <motion.div
@@ -319,7 +319,7 @@ const ToolNode = React.memo(function ToolNode({
         height: NODE_SIZE,
         zIndex: isSelected ? 30 : isConnected ? 20 : 10,
       }}
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: reducedMotion ? 1 : 0.8, opacity: 0 }}
       animate={{
         scale: 1,
         opacity: isDimmed ? 0.35 : 1,
@@ -827,6 +827,14 @@ export default function FlywheelVisualization() {
     }, 150);
   }, []);
 
+  const handleNodeHover = useCallback((toolId: string, hovering: boolean) => {
+    if (hovering) {
+      handleNodeHoverStart(toolId);
+    } else {
+      handleNodeHoverEnd();
+    }
+  }, [handleNodeHoverStart, handleNodeHoverEnd]);
+
   const handleTooltipEnter = useCallback(() => {
     // Cancel the hide timeout when mouse enters tooltip
     if (hoverTimeoutRef.current) {
@@ -1020,10 +1028,8 @@ export default function FlywheelVisualization() {
                 isSelected={tool.id === selectedToolId}
                 isConnected={isToolConnected(tool.id)}
                 isDimmed={!!activeToolId && tool.id !== activeToolId && !isToolConnected(tool.id)}
-                onSelect={() => handleSelectTool(tool.id)}
-                onHover={(hovering) =>
-                  hovering ? handleNodeHoverStart(tool.id) : handleNodeHoverEnd()
-                }
+                onSelect={handleSelectTool}
+                onHover={handleNodeHover}
                 reducedMotion={reducedMotion}
               />
             ))}

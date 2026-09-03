@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Simple in-memory cache for OG images
-const imageCache = new Map<string, { data: ArrayBuffer; contentType: string; timestamp: number }>();
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-const MAX_CACHE_SIZE = 20; // Reduced to 20 to prevent memory pressure in lambda
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB max per image
-const UPSTREAM_TIMEOUT_MS = 8000; // Don't let a slow upstream hold the lambda open
-
 // Allowed domains for security (including www subdomains)
 const ALLOWED_DOMAINS = [
   "jeffreysprompts.com",
@@ -26,6 +19,49 @@ const ALLOWED_DOMAINS = [
   "asupersync.com",
   "www.asupersync.com",
 ];
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB max per image
+const UPSTREAM_TIMEOUT_MS = 8000; // Don't let a slow upstream hold the lambda open
+
+const FETCH_HEADERS: HeadersInit = {
+  "User-Agent": "OpenAI File Downloader, XaiImageApiFetch/1.0",
+  "Accept": "image/*",
+};
+
+async function fetchAllowedImage(initialUrl: string) {
+  let currentUrl = initialUrl;
+  const maxRedirects = 3;
+
+  for (let i = 0; i <= maxRedirects; i += 1) {
+    const response = await fetch(currentUrl, {
+      headers: FETCH_HEADERS,
+      redirect: "manual",
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location) {
+        throw new Error("Redirect without location");
+      }
+
+      const nextUrl = new URL(location, currentUrl);
+      if (!["https:", "http:"].includes(nextUrl.protocol)) {
+        throw new Error("Redirect protocol not allowed");
+      }
+      if (!ALLOWED_DOMAINS.includes(nextUrl.hostname)) {
+        throw new Error("Redirect domain not allowed");
+      }
+
+      currentUrl = nextUrl.toString();
+      continue;
+    }
+
+    return response;
+  }
+
+  throw new Error("Too many redirects");
+}
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url");
@@ -48,59 +84,6 @@ export async function GET(request: NextRequest) {
 
   if (!ALLOWED_DOMAINS.includes(parsedUrl.hostname)) {
     return NextResponse.json({ error: "Domain not allowed" }, { status: 403 });
-  }
-
-  const headers: HeadersInit = {
-    "User-Agent": "Mozilla/5.0 (compatible; JeffreySiteBot/1.0)",
-    "Accept": "image/*",
-  };
-
-  async function fetchAllowedImage(initialUrl: string) {
-    let currentUrl = initialUrl;
-    const maxRedirects = 3;
-
-    for (let i = 0; i <= maxRedirects; i += 1) {
-      const response = await fetch(currentUrl, {
-        headers,
-        redirect: "manual",
-        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-      });
-
-      if (response.status >= 300 && response.status < 400) {
-        const location = response.headers.get("location");
-        if (!location) {
-          throw new Error("Redirect without location");
-        }
-
-        const nextUrl = new URL(location, currentUrl);
-        if (!["https:", "http:"].includes(nextUrl.protocol)) {
-          throw new Error("Redirect protocol not allowed");
-        }
-        if (!ALLOWED_DOMAINS.includes(nextUrl.hostname)) {
-          throw new Error("Redirect domain not allowed");
-        }
-
-        currentUrl = nextUrl.toString();
-        continue;
-      }
-
-      return response;
-    }
-
-    throw new Error("Too many redirects");
-  }
-
-// Check cache
-  const cacheKey = url;
-  const cached = imageCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return new NextResponse(cached.data, {
-      headers: {
-        "Content-Type": cached.contentType,
-        "Cache-Control": "public, max-age=86400, immutable",
-        "X-Cache": "HIT",
-      },
-    });
   }
 
   // Fetch the image
@@ -130,26 +113,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Image too large" }, { status: 413 });
     }
 
-    // Cache the result
-    imageCache.set(cacheKey, {
-      data: arrayBuffer,
-      contentType,
-      timestamp: Date.now(),
-    });
-
-    // Clean up old cache entries to prevent unbounded growth
-    if (imageCache.size > MAX_CACHE_SIZE) {
-      const firstKey = imageCache.keys().next().value;
-      if (firstKey) {
-        imageCache.delete(firstKey);
-      }
-    }
-
     return new NextResponse(arrayBuffer, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=86400, immutable",
-        "X-Cache": "MISS",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400",
       },
     });
   } catch (error) {

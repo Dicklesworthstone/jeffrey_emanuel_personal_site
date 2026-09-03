@@ -88,7 +88,7 @@ export default function ContactPage() {
                     href={s.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-white/5 text-sky-300 transition-all active:ring-2 active:ring-sky-500/30 hover:bg-white/10"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-white/5 text-sky-300 transition-colors active:ring-2 active:ring-sky-500/30 hover:bg-white/10"
                     aria-label={s.label}
                   >
                     <s.icon className="h-4 w-4" />

@@ -75,8 +75,17 @@ export default function EasterEggs() {
           initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-pointer"
+          role="button"
+          tabIndex={0}
+          aria-label="Dismiss easter egg celebration"
           onClick={() => setShowCelebration(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
+              e.preventDefault();
+              setShowCelebration(false);
+            }
+          }}
         >
           <motion.div
             initial={prefersReducedMotion ? { y: 0 } : { y: 20 }}

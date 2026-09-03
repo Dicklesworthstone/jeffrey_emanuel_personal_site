@@ -1,9 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { Canvas, type CanvasProps } from "@react-three/fiber";
 import { useInView, useReducedMotion } from "framer-motion";
 import { cn, supportsWebGL } from "@/lib/utils";
+
+const emptySubscribe = () => () => {};
+const getWebGLClientSnapshot = () => supportsWebGL();
+const getWebGLServerSnapshot = () => true;
 
 type GatedCanvasProps = CanvasProps & {
   /** Class for the wrapper div that carries the visibility sentinel */
@@ -27,10 +31,11 @@ export default function GatedCanvas({
   // Under prefers-reduced-motion the scene still renders (so user-driven state
   // changes show), but only on demand — no continuous time-based motion.
   const prefersReducedMotion = useReducedMotion();
+  const hasWebGL = useSyncExternalStore(emptySubscribe, getWebGLClientSnapshot, getWebGLServerSnapshot);
 
   // Without WebGL, mounting a Canvas throws an uncatchable async
   // context-creation error — render an empty placeholder instead.
-  if (typeof window !== "undefined" && !supportsWebGL()) {
+  if (!hasWebGL) {
     return <div className={cn("h-full w-full", wrapperClassName)} aria-hidden="true" />;
   }
 
