@@ -5,7 +5,7 @@ export const siteConfig = {
   name: "Jeffrey Emanuel",
   title: "Jeffrey Emanuel: Agentic Coding Tooling, AI Infrastructure & Markets",
   description:
-    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 14 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. Builder of the FrankenSuite: clean-room Rust reimplementations of foundational software (SQLite, Redis, NumPy, SciPy, PyTorch, and more). 170+ open-source projects with 20K+ GitHub stars.",
+    "Founder & CEO of Lumera Network. Creator of the Agentic Coding Tooling Flywheel, a self-reinforcing ecosystem of 14 core tools (MCP Agent Mail, Beads Viewer, CASS, and more) that transform how AI coding agents collaborate. Builder of the FrankenSuite: clean-room Rust reimplementations of foundational software (SQLite, Redis, NumPy, SciPy, PyTorch, and more). 198 open-source projects with 31,430+ GitHub stars.",
   email: "jeffreyemanuel@gmail.com",
   location: "",
   social: {
@@ -45,8 +45,8 @@ export type Stat = { label: string; value: string; helper?: string };
 export const heroStats: Stat[] = [
   {
     label: "GitHub Stars",
-    value: "20K+",
-    helper: "Across 170+ open-source agent tools and infrastructure.",
+    value: "31K+",
+    helper: "Across 198 open-source agent tools, runtimes, and infrastructure.",
   },
   {
     label: "Flywheel Tools",
@@ -55,13 +55,13 @@ export const heroStats: Stat[] = [
   },
   {
     label: "Contributions (1yr)",
-    value: "85K+",
-    helper: "85,434 GitHub contributions in the past year, powered by 52+ AI agent subscriptions (~$12K/mo).",
+    value: "262K+",
+    helper: "262,353 GitHub contributions in the past year, powered by 63 AI agent subscriptions (~$13.5K/mo).",
   },
   {
     label: "Audience on X",
-    value: "41K+",
-    helper: "Analysts, founders, researchers, and engineers.",
+    value: "48K+",
+    helper: "48.7K followers: analysts, founders, researchers, and engineers.",
   },
 ];
 
@@ -104,11 +104,11 @@ export const heroContent = {
     metric: "20,000+",
     label: "lines of sophisticated Go code",
     context: "BV was conceived, designed, and shipped in a single day",
-    subtext: "Loved by thousands of users with 500+ GitHub stars in under a month",
+    subtext: "Loved by thousands of users with 1,600+ GitHub stars",
   },
   body: [
-    "Using these tools and 52+ AI coding agent subscriptions (~$12K/month), I've made 85,434 GitHub contributions in the past year, the vast majority since January 2026. I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
-    "My 170+ open-source projects span agent infrastructure, the FrankenSuite of clean-room Rust reimplementations, static analysis, memory systems, and research tools. The flywheel keeps spinning faster: my GitHub commit volume has grown month over month since October 2025 because each tool amplifies the others.",
+    "Using these tools and 63 AI coding agent subscriptions (~$13.5K/month), I've made 262,353 GitHub contributions in the past year, the vast majority since January 2026. I've been able to conceive, design, architect, and implement completely some extraordinarily powerful and complex software systems in extremely accelerated timelines.",
+    "My 198 open-source projects span agent infrastructure, the FrankenSuite of clean-room Rust reimplementations, static analysis, memory systems, and research tools. The flywheel keeps spinning faster: my GitHub commit volume has grown month over month since October 2025 because each tool amplifies the others.",
     "I also founded Lumera Network (formerly Pastel), a Cosmos L1 for storage and AI verification. I consult to PE and hedge funds on AI automation after a decade as a long/short equity analyst at various funds, including Millennium and Balyasny.",
   ],
   primaryCta: {
@@ -238,6 +238,25 @@ export const endorsements: Endorsement[] = [
     featured: false,
     context: "Analysis of the Nvidia short thesis",
   },
+  {
+    id: "steve-yegge",
+    quote:
+      "A top-tier engineer, mathematician, AI researcher, and hedge-fund financier, equally rarified-air at all of them.",
+    author: {
+      name: "Steve Yegge",
+      title: "Creator of Beads, Ex-Google / Ex-Amazon",
+      company: "Medium",
+    },
+    source: {
+      type: "other",
+      url: "https://steve-yegge.medium.com/",
+      platform: "Medium",
+    },
+    date: "2026",
+    tags: ["flywheel", "ai", "engineering"],
+    featured: true,
+    context: "Reviewing the Agentic Coding Flywheel & Beads Viewer",
+  },
 ];
 
 // Helper to get featured endorsements
@@ -268,7 +287,7 @@ export const featuredSites: FeaturedSite[] = [
   {
     id: "agent-flywheel",
     title: "Agent-Flywheel.com",
-    tagline: "Home of the Flywheel methodology. Includes a comprehensive guide, a beginner-friendly core guide, and the Flywheel Hub Discord with ~800 members.",
+    tagline: "Home of the Flywheel methodology. Includes a comprehensive guide, a beginner-friendly core guide, and the Flywheel Hub Discord with ~975 members.",
     url: "https://agent-flywheel.com",
     ogImage: "https://agent-flywheel.com/opengraph-image?e848472d7b8eaaf0",
     gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
@@ -336,6 +355,69 @@ export const featuredSites: FeaturedSite[] = [
     ogImage: "https://brennerbot.org/opengraph-image?a523997cd907b722",
     gradient: "from-emerald-500 via-teal-500 to-cyan-500",
     icon: "Microscope",
+  },
+  {
+    id: "classic-patents",
+    title: "Classic-Patents.com",
+    tagline: "Digital museum of landmark patents restored, explained in plain English, and simulated in interactive 3D.",
+    url: "https://classic-patents.com",
+    ogImage: "https://classic-patents.com/opengraph-image?caa522ea22643bd9",
+    gradient: "from-amber-500 via-stone-500 to-slate-600",
+    icon: "BookOpen",
+  },
+  {
+    id: "franken-markdown",
+    title: "Franken-Markdown.com",
+    tagline: "Zero-dependency Markdown to HTML and tagged PDF engine compiled to WebAssembly running live in the browser.",
+    url: "https://franken-markdown.com",
+    ogImage: "https://franken-markdown.com/assets/img/og.png?v=2",
+    gradient: "from-emerald-500 via-teal-500 to-cyan-500",
+    icon: "FileText",
+  },
+  {
+    id: "franken-ocr",
+    title: "Franken-OCR.com",
+    tagline: "A 3-billion-parameter OCR vision-language model running client-side in a browser tab with pure Rust CPU inference.",
+    url: "https://franken-ocr.com",
+    ogImage: "https://franken-ocr.com/assets/og.jpg",
+    gradient: "from-blue-600 via-indigo-600 to-violet-600",
+    icon: "ScanText",
+  },
+  {
+    id: "asimposium",
+    title: "ASImposium.org",
+    tagline: "A public scientific ledger where sponsored AI agents propose, review, and challenge work in mathematics and physics.",
+    url: "https://asimposium.org",
+    ogImage: "https://asimposium.org/og.jpg",
+    gradient: "from-sky-500 via-blue-500 to-indigo-600",
+    icon: "GraduationCap",
+  },
+  {
+    id: "frankenmermaid",
+    title: "FrankenMermaid.com",
+    tagline: "Deterministic Mermaid-compatible diagrams rendered live in the browser by Rust and WebAssembly.",
+    url: "https://frankenmermaid.com",
+    ogImage: "https://frankenmermaid.com/gh_og_share_image.png",
+    gradient: "from-purple-500 via-pink-500 to-rose-500",
+    icon: "Network",
+  },
+  {
+    id: "smearedlife",
+    title: "SmearedLife.com",
+    tagline: "WebGL2 laboratory for continuous cellular automata and emergent artificial life.",
+    url: "https://smearedlife.com",
+    ogImage: "https://smearedlife.com/og-image.png?v=3",
+    gradient: "from-green-500 via-emerald-500 to-teal-500",
+    icon: "Activity",
+  },
+  {
+    id: "jazzchords",
+    title: "JazzChords.org",
+    tagline: "Offline-first studio for composing, auditioning, and sharing jazz chord progressions.",
+    url: "https://jazzchords.org",
+    ogImage: "https://jazzchords.org/og-image.png",
+    gradient: "from-amber-500 via-yellow-500 to-orange-500",
+    icon: "Music",
   },
 ];
 
@@ -1231,17 +1313,19 @@ export const projects: Project[] = [
   {
     name: "Pi Agent Rust",
     kind: "oss",
-    badge: "590 stars",
+    badge: "1,691 stars",
     href: "https://github.com/Dicklesworthstone/pi_agent_rust",
     short: "High-performance AI coding agent CLI with sub-100ms startup and native SSE streaming.",
     description:
       "A lightweight AI coding agent written in Rust with instant startup, a ~15MB binary, and 7 built-in tools. Features session branching, structured concurrency via asupersync, and beautiful terminal output via rich_rust. Designed for speed-critical agentic workflows.",
     tags: ["Rust", "CLI", "Agents", "AI", "Performance"],
+    size: "large",
+    gradient: "from-blue-600/20 via-cyan-500/20 to-teal-500/20",
   },
   {
     name: "Remote Compilation Helper",
     kind: "oss",
-    badge: "41 stars",
+    badge: "59 stars",
     href: "https://github.com/Dicklesworthstone/remote_compilation_helper",
     short: "Transparent compilation offloading for AI agents via Claude Code hooks.",
     description:
@@ -1251,7 +1335,7 @@ export const projects: Project[] = [
   {
     name: "Automated Plan Reviser Pro",
     kind: "oss",
-    badge: "52 stars",
+    badge: "68 stars",
     href: "https://github.com/Dicklesworthstone/automated_plan_reviser_pro",
     short: "Iterative specification refinement using GPT Pro Extended Reasoning.",
     description:
@@ -1261,7 +1345,7 @@ export const projects: Project[] = [
   {
     name: "Process Triage",
     kind: "oss",
-    badge: "23 stars",
+    badge: "27 stars",
     href: "https://github.com/Dicklesworthstone/process_triage",
     short: "Bayesian zombie process detection and safe cleanup for dev environments.",
     description:
@@ -1271,12 +1355,14 @@ export const projects: Project[] = [
   {
     name: "ASupersync",
     kind: "oss",
-    badge: "131 stars",
+    badge: "268 stars",
     href: "https://github.com/Dicklesworthstone/asupersync",
     short: "Spec-first, cancel-correct, capability-secure async runtime for Rust.",
     description:
       "A structured concurrency runtime with regions, cancel-correct protocols with bounded cleanup, and capability-based context. Features two-phase effects, a deterministic lab runtime for testing, and guarantees no orphan tasks. Used as the async foundation for pi_agent_rust and fastmcp_rust.",
     tags: ["Rust", "Async", "Concurrency", "Runtime", "Systems"],
+    size: "wide",
+    gradient: "from-teal-500/20 via-emerald-500/20 to-green-500/20",
   },
   {
     name: "TOON Rust",
@@ -1464,7 +1550,7 @@ export const projects: Project[] = [
   {
     name: "FrankenTorch",
     kind: "oss",
-    badge: "6 stars",
+    badge: "16 stars",
     href: "https://github.com/Dicklesworthstone/frankentorch",
     short: "PyTorch reimplementation in Rust with Deterministic Autograd Contract (DAC).",
     description:
@@ -1474,7 +1560,7 @@ export const projects: Project[] = [
   {
     name: "FrankenMermaid",
     kind: "oss",
-    badge: "4 stars",
+    badge: "51 stars",
     href: "https://github.com/Dicklesworthstone/frankenmermaid",
     short: "Rust-first Mermaid-compatible diagram engine with 25+ diagram types and deterministic layout.",
     description:
@@ -1484,7 +1570,7 @@ export const projects: Project[] = [
   {
     name: "FrankenFS",
     kind: "oss",
-    badge: "12 stars",
+    badge: "21 stars",
     href: "https://github.com/Dicklesworthstone/frankenfs",
     short: "Memory-safe filesystem in Rust with RaptorQ fountain codes. Corrupted blocks are reconstructed mathematically, not just detected.",
     description:
@@ -1496,7 +1582,7 @@ export const projects: Project[] = [
   {
     name: "FrankenLibC",
     kind: "oss",
-    badge: "17 stars",
+    badge: "49 stars",
     href: "https://github.com/Dicklesworthstone/frankenlibc",
     short: "Rust-based libc that retrofits memory safety onto any C program via LD_PRELOAD. No recompilation, no source changes.",
     description:
@@ -1508,7 +1594,7 @@ export const projects: Project[] = [
   {
     name: "FrankenEngine",
     kind: "oss",
-    badge: "16 stars",
+    badge: "30 stars",
     href: "https://github.com/Dicklesworthstone/franken_engine",
     short: "Native Rust runtime for adversarial extension workloads. Deterministic replay, cryptographic decision receipts, fleet quarantine.",
     description:
@@ -1520,7 +1606,7 @@ export const projects: Project[] = [
   {
     name: "FrankenNode",
     kind: "oss",
-    badge: "15 stars",
+    badge: "29 stars",
     href: "https://github.com/Dicklesworthstone/franken_node",
     short: "Trust-native JS/TS runtime on FrankenEngine. Compatibility oracle, migration autopilot, per-extension trust cards, incident replay.",
     description:
@@ -1532,6 +1618,7 @@ export const projects: Project[] = [
   {
     name: "FrankenNetworkX",
     kind: "oss",
+    badge: "23 stars",
     href: "https://github.com/Dicklesworthstone/franken_networkx",
     short: "NetworkX graph library drop-in replacement in Rust with Python bindings.",
     description:
@@ -1541,7 +1628,7 @@ export const projects: Project[] = [
   {
     name: "FrankenWhisper",
     kind: "oss",
-    badge: "15 stars",
+    badge: "89 stars",
     href: "https://github.com/Dicklesworthstone/franken_whisper",
     short: "Clean-room Whisper speech recognition model in Rust.",
     description:
@@ -1551,7 +1638,7 @@ export const projects: Project[] = [
   {
     name: "Cross Agent Session Resumer",
     kind: "oss",
-    badge: "60 stars",
+    badge: "111 stars",
     href: "https://github.com/Dicklesworthstone/cross_agent_session_resumer",
     short: "Convert and resume AI sessions across Claude Code, Codex, Gemini, and other providers.",
     description:
@@ -1561,7 +1648,7 @@ export const projects: Project[] = [
   {
     name: "MCP Agent Mail Rust",
     kind: "oss",
-    badge: "46 stars",
+    badge: "158 stars",
     href: "https://github.com/Dicklesworthstone/mcp_agent_mail_rust",
     short: "High-performance Rust rewrite of MCP Agent Mail with 12-crate workspace and FrankenSearch integration.",
     description:
@@ -1571,12 +1658,103 @@ export const projects: Project[] = [
   {
     name: "Cloud Benchmarker",
     kind: "oss",
-    badge: "37 stars",
+    badge: "39 stars",
     href: "https://github.com/Dicklesworthstone/cloud_benchmarker",
     short: "Automated multi-cloud VPS benchmarking for finding the best price/performance ratio.",
     description:
       "Automatically provisions, benchmarks, and compares VPS instances across cloud providers. Tests CPU, memory, disk I/O, and network performance to find the optimal compute for agentic coding workloads.",
     tags: ["DevOps", "Benchmarking", "Cloud", "Automation"],
+  },
+  {
+    name: "FrankenOCR",
+    kind: "oss",
+    badge: "315 stars",
+    href: "https://github.com/Dicklesworthstone/franken_ocr",
+    short: "Baidu Unlimited-OCR (3B MoE VLM) on CPU in pure Rust without Python dependencies.",
+    description:
+      "A clean-room implementation of Baidu's 3B MoE Vision-Language OCR model running entirely on CPU in pure Rust. Features five supported model architectures, custom int8 inference kernels, and zero Python dependencies.",
+    tags: ["Rust", "OCR", "Vision", "ML", "FrankenSuite"],
+    size: "wide",
+    gradient: "from-sky-500/20 via-blue-500/20 to-indigo-500/20",
+  },
+  {
+    name: "FrankenMarkdown",
+    kind: "oss",
+    badge: "96 stars",
+    href: "https://github.com/Dicklesworthstone/franken_markdown",
+    short: "Zero-dependency Markdown to HTML and tagged PDF engine with custom typesetter and font subsetter.",
+    description:
+      "A ground-up Markdown engine in pure Rust with its own parser, typesetter, font subsetter, and PDF writer. Compiles to WebAssembly for client-side document generation without headless browsers or external tools.",
+    tags: ["Rust", "Markdown", "PDF", "WASM", "FrankenSuite"],
+  },
+  {
+    name: "FrankenSim",
+    kind: "oss",
+    badge: "49 stars",
+    href: "https://github.com/Dicklesworthstone/frankensim",
+    short: "Simulation workspace for geometry, numerics, meshing, solvers, and rendering across 126 contract crates.",
+    description:
+      "A comprehensive scientific and engineering simulation workspace in Rust with 126 contract-backed crates spanning computational geometry, finite-element meshing, iterative solvers, and real-time visualization.",
+    tags: ["Rust", "Simulation", "Math", "Physics", "FrankenSuite"],
+  },
+  {
+    name: "FrankenGit",
+    kind: "oss",
+    badge: "24 stars",
+    href: "https://github.com/Dicklesworthstone/frankengit",
+    short: "Git-compatible forge in Rust for human and AI coding agents with verifiable recovery.",
+    description:
+      "A source-available, Git-compatible forge built in Rust with verifiable recovery, self-hosting support, and an immutable decision stream designed specifically for high-velocity multi-agent coding workflows.",
+    tags: ["Rust", "Git", "Forge", "Systems", "FrankenSuite"],
+  },
+  {
+    name: "FrankenLean",
+    kind: "oss",
+    badge: "16 stars",
+    href: "https://github.com/Dicklesworthstone/franken_lean",
+    short: "Lean 4 theorem prover toolchain reimplemented in Rust with dual-engine kernel and .olean compatibility.",
+    description:
+      "A clean-room Rust implementation of the Lean 4 interactive theorem prover toolchain with .olean file support, C ABI compatibility, Language Server Protocol (LSP), and a dual-engine kernel capped at 12 KLOC.",
+    tags: ["Rust", "Math", "Theorem Proving", "Lean", "FrankenSuite"],
+  },
+  {
+    name: "FrankenGraphDB",
+    kind: "oss",
+    badge: "23 stars",
+    href: "https://github.com/Dicklesworthstone/frankengraphdb",
+    short: "Property-graph database in Rust with MVCC, time travel, and fountain-coded commit replication.",
+    description:
+      "A high-performance property-graph database in Rust featuring multi-version concurrency control, branching, time-travel queries, factorized execution, and fountain-coded commit stream replication.",
+    tags: ["Rust", "Database", "Graph", "Systems", "FrankenSuite"],
+  },
+  {
+    name: "FrankenTTS",
+    kind: "oss",
+    badge: "40 stars",
+    href: "https://github.com/Dicklesworthstone/franken_tts",
+    short: "Qwen3-TTS zero-shot voice cloning on CPU in pure Rust with custom int8 kernels.",
+    description:
+      "Zero-shot voice cloning and speech synthesis on CPU in pure Rust. Features custom int8 matrix kernels, voice cards, and zero external dependencies with WebAssembly and iOS targets.",
+    tags: ["Rust", "Audio", "TTS", "ML", "FrankenSuite"],
+  },
+  {
+    name: "Classic Patents",
+    kind: "product",
+    badge: "100+ stars",
+    href: "https://classic-patents.com",
+    short: "Digital museum of landmark patents with corrected transcripts, engineering notes, and 3D simulations.",
+    description:
+      "A digital museum restoring and explaining history's greatest patents — from Edison and Tesla to computing pioneers — featuring verified transcripts, plain-English engineering breakdowns, and interactive 3D simulations.",
+    tags: ["TypeScript", "Next.js", "Three.js", "History", "Education"],
+  },
+  {
+    name: "ASImposium",
+    kind: "product",
+    href: "https://asimposium.org",
+    short: "Public scientific ledger where sponsored AI agents propose, review, and challenge work in math and physics.",
+    description:
+      "A public scientific ledger where human-sponsored AI agents submit, review, and challenge research contributions in mathematics, physics, and theoretical computer science with cryptographic provenance.",
+    tags: ["TypeScript", "Science", "AI", "Research"],
   },
 ];
 
@@ -1619,7 +1797,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Duplicate detection and session history search",
       bv: "Dashboard shows beads status; --robot-triage for dispatch",
     },
-    stars: 207,
+    stars: tldrToolStarsData.ntm,
     projectSlug: "named-tmux-manager",
     features: [
       "Spawn 10+ Claude/Codex/Gemini agents in parallel",
@@ -1640,7 +1818,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Notifications sent to reviewer inboxes",
       ubs: "Pre-flight scans before execution",
     },
-    stars: 65,
+    stars: tldrToolStarsData.slb,
     projectSlug: "simultaneous-launch-button",
     features: [
       "Three-tier risk classification (CRITICAL/DANGEROUS/CAUTION)",
@@ -1662,7 +1840,7 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Shared context across agent sessions",
       slb: "Approval requests delivered to inboxes",
     },
-    stars: 1837,
+    stars: tldrToolStarsData.mail,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "mcp-agent-mail",
     features: [
@@ -1685,7 +1863,7 @@ export const flywheelTools: FlywheelTool[] = [
       ubs: "Bug scanner results create blocking issues",
       cass: "Search prior sessions for task context",
     },
-    stars: 1413,
+    stars: tldrToolStarsData.bv,
     demoUrl: "https://dicklesworthstone.github.io/beads_viewer-pages/",
     projectSlug: "beads-viewer",
     features: [
@@ -1707,7 +1885,7 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Creates issues for discovered bugs",
       slb: "Validates code before risky commits",
     },
-    stars: 206,
+    stars: tldrToolStarsData.ubs,
     projectSlug: "ultimate-bug-scanner",
     features: [
       "1,000+ custom detection patterns across languages",
@@ -1729,7 +1907,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Semantic search over stored memories",
       bv: "Remembers task patterns and solutions",
     },
-    stars: 290,
+    stars: tldrToolStarsData.cm,
     demoUrl: "https://dicklesworthstone.github.io/cass-memory-system-agent-mailbox-viewer/viewer/",
     projectSlug: "cass-memory-system",
     features: [
@@ -1753,7 +1931,7 @@ export const flywheelTools: FlywheelTool[] = [
       bv: "Links search results to related tasks",
       mail: "Agents query history before asking colleagues",
     },
-    stars: 618,
+    stars: tldrToolStarsData.cass,
     projectSlug: "cass",
     features: [
       "11 formats: Claude Code, Codex, Cursor, Gemini, ChatGPT, Aider, etc.",
@@ -1775,7 +1953,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Sets up Agent Mail MCP server",
       dcg: "Installs DCG safety hooks",
     },
-    stars: 1315,
+    stars: tldrToolStarsData.acfs,
     projectSlug: "agentic-coding-flywheel-setup",
     features: [
       "30-minute zero-to-hero setup",
@@ -1796,7 +1974,7 @@ export const flywheelTools: FlywheelTool[] = [
       slb: "Works alongside SLB for layered command safety",
       ntm: "Guards all commands in NTM-managed sessions",
     },
-    stars: 726,
+    stars: tldrToolStarsData.dcg,
     projectSlug: "destructive-command-guard",
     features: [
       "Intercepts rm -rf, git reset --hard, etc.",
@@ -1817,7 +1995,7 @@ export const flywheelTools: FlywheelTool[] = [
       ubs: "Run bug scans across all synced repos",
       ntm: "NTM integration for agent-driven sweeps",
     },
-    stars: 81,
+    stars: tldrToolStarsData.ru,
     features: [
       "One-command multi-repo sync",
       "Parallel operations with conflict detection",
@@ -1837,7 +2015,7 @@ export const flywheelTools: FlywheelTool[] = [
       mail: "Downloaded images can be referenced in Agent Mail",
       cass: "Image analysis sessions are searchable",
     },
-    stars: 36,
+    stars: tldrToolStarsData.giil,
     features: [
       "iCloud share link support",
       "CLI-based image download",
@@ -1857,7 +2035,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Similar search architecture and patterns",
       cm: "Found tweets can become memories",
     },
-    stars: 83,
+    stars: tldrToolStarsData.xf,
     features: [
       "Sub-second search over large archives",
       "Semantic + keyword hybrid search",
@@ -1877,7 +2055,7 @@ export const flywheelTools: FlywheelTool[] = [
       cass: "Generated prompts can be searched later",
       cm: "Effective prompts stored as memories",
     },
-    stars: 16,
+    stars: tldrToolStarsData.s2p,
     features: [
       "Interactive file selection TUI",
       "Real-time token counting",
@@ -1898,7 +2076,7 @@ export const flywheelTools: FlywheelTool[] = [
       cm: "Skills and CM memories are complementary layers",
       bv: "Graph analysis for skill dependency insights",
     },
-    stars: 141,
+    stars: tldrToolStarsData.ms,
     features: [
       "MCP server for native AI agent integration",
       "Thompson sampling optimizes suggestions",
