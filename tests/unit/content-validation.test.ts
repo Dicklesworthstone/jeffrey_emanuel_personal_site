@@ -24,6 +24,7 @@ import {
   siteConfig,
   featuredSites,
 } from "@/lib/content";
+import { GET as getSearchIndex } from "@/app/api/search/route";
 import { testLog } from "@/tests/utils/tldr-test-helpers";
 
 // =============================================================================
@@ -823,5 +824,41 @@ describe("Cross-Reference Validation", () => {
     });
 
     testLog.testEnd("Project relatedProjects validity", 1);
+  });
+});
+
+// =============================================================================
+// SEARCH API ROUTE VALIDATION
+// =============================================================================
+
+describe("Search API Route Validation", () => {
+  test("GET returns a valid search index including posts and interactive writing", async () => {
+    testLog.testStart("Search API index validation");
+
+    const response = await getSearchIndex();
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(Array.isArray(data)).toBe(true);
+    expect(data.length).toBeGreaterThanOrEqual(25);
+
+    // Verify each item has title, slug, excerpt, category, tags, and content
+    data.forEach((item: { title: string; slug: string; excerpt: string; category: string; tags: string[]; content: string }) => {
+      expect(typeof item.title).toBe("string");
+      expect(item.title.length).toBeGreaterThan(0);
+      expect(typeof item.slug).toBe("string");
+      expect(item.slug.length).toBeGreaterThan(0);
+      expect(typeof item.content).toBe("string");
+      expect(Array.isArray(item.tags)).toBe(true);
+    });
+
+    // Verify interactive writing articles are included
+    const slugs = new Set(data.map((item: { slug: string }) => item.slug));
+    expect(slugs.has("wills-and-estate-planning")).toBe(true);
+    expect(slugs.has("slack-mattermost-migration")).toBe(true);
+    expect(slugs.has("overprompting")).toBe(true);
+    expect(slugs.has("raptorq")).toBe(true);
+
+    testLog.testEnd("Search API index validation", data.length);
   });
 });
