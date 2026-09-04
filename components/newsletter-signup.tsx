@@ -19,7 +19,7 @@ type SubmitStatus = "idle" | "submitting" | "success" | "error";
  * newsletter not set up" case, so it points at the direct-email fallback.
  */
 function describeSubscribeFailure(status: number): { message: string; suggestEmail: boolean } {
-  if (status === 404) {
+  if (status === 404 || status === 503) {
     return { message: "Newsletter signup isn't available yet — email me instead.", suggestEmail: true };
   }
   if (status === 400 || status === 422) {
@@ -101,18 +101,14 @@ export function NewsletterSignup({
       mediumTap();
 
       try {
-        // Submit to Buttondown's embed endpoint (public, no API key needed)
-        // We use FormData to mimic a form submission
-        const formData = new FormData();
-        formData.append("email", email);
-
-        const response = await fetch(
-          `https://buttondown.email/api/emails/embed-subscribe/${buttondownId}`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+        // Same-origin proxy (app/api/newsletter/route.ts). Buttondown's embed
+        // endpoint never answers XHR with CORS headers, so posting to it
+        // directly rejected every time — even successful subscriptions.
+        const response = await fetch("/api/newsletter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, list: buttondownId }),
+        });
 
         if (response.ok) {
           setStatus("success");
@@ -149,8 +145,8 @@ export function NewsletterSignup({
           </div>
 
           {status === "success" ? (
-            <div className="flex items-center gap-2 text-sm text-emerald-400">
-              <Check className="h-4 w-4" />
+            <div role="status" className="flex items-center gap-2 text-sm text-emerald-400">
+              <Check className="h-4 w-4" aria-hidden="true" />
               <span>You&apos;re subscribed!</span>
             </div>
           ) : (
@@ -243,6 +239,7 @@ export function NewsletterSignup({
           {/* Form or success state */}
           {status === "success" ? (
             <motion.div
+              role="status"
               initial={reducedMotion ? {} : { scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-3 rounded-full bg-emerald-500/10 px-6 py-3 ring-1 ring-emerald-500/30"
