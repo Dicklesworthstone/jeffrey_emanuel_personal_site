@@ -3874,6 +3874,9 @@ export default function ThreeScene({
   }, [onContextLost]);
   const handleCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
     gl.domElement.setAttribute("aria-hidden", "true");
+    // Transparent clear colour: the section behind the canvas provides the
+    // (theme-aware) background, so light mode gets a light hero too.
+    gl.setClearColor(0x000000, 0);
     gl.domElement.addEventListener(
       "webglcontextlost",
       (event) => {
@@ -3935,6 +3938,7 @@ export default function ThreeScene({
         // MSAA on a 1000x460 canvas at dpr 2 is the single largest fill-rate
         // cost here; low-tier devices trade it for a stable frame rate.
         gl={{
+          alpha: true,
           antialias: tier !== "low",
           powerPreference: tier === "low" ? "low-power" : "high-performance",
         }}
@@ -3954,7 +3958,9 @@ export default function ThreeScene({
           />
         )}
         <QualityContext.Provider value={contextValue}>
-          <color attach="background" args={["#020617"]} />
+          {/* No scene background: the canvas clears to transparent (see
+              handleCreated) so the hero's adaptive canvas token shows through
+              in both themes instead of a hardcoded near-black. */}
           <ambientLight intensity={0.18} />
           <hemisphereLight intensity={0.2} color="#dbeafe" groundColor="#0b1120" />
           <MathematicalHalo palette={palette} />

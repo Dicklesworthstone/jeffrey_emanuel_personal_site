@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, Profiler } from "react";
+import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-motion";
+import { MotionConfig, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
@@ -44,13 +45,14 @@ function ScrollProgressBar() {
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  // Pathname of the first render (captured once): that paint is never animated in.
+  const [initialPathname] = useState(pathname);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   // The modal chunks (fuse.js etc.) only download once each modal has been
   // opened for the first time; the flags never reset so close animations work.
   const [hasOpenedPalette, setHasOpenedPalette] = useState(false);
   const [hasOpenedShortcuts, setHasOpenedShortcuts] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
   const isDev = process.env.NODE_ENV === "development";
 
   const handleProfiler = useCallback(
@@ -168,28 +170,26 @@ export default function ClientShell({ children }: { children: React.ReactNode })
         <SiteHeader onOpenCommandPalette={openCommandPalette} />
         {(() => {
           const pageTransition = (
-            // initial={false}: the first paint is never animated in. The
-            // transition is opacity + a small rise only: animating `filter` on
-            // <main> left `filter: blur(0px)` behind, which turned <main> into
-            // the containing block for every position:fixed descendant (the
-            // reading-progress bars) and re-rasterised the whole page on phones.
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.main
-                id="main-content"
-                key={pathname}
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : {
-                  opacity: { duration: 0.22 },
-                  y: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
-                }}
-                className="flex-1"
-                tabIndex={-1}
-              >
-                {children}
-              </motion.main>
-            </AnimatePresence>
+            // The page-enter fade is a CSS animation (`.page-enter` in
+            // globals.css), replayed by remounting <main> per pathname. It used
+            // to be a framer-motion `motion.main` inside AnimatePresence, but
+            // framer never started its opacity tween on /projects after a
+            // client-side navigation (no WAAPI animation was ever created; the
+            // page sat at opacity:0 until a scroll kicked framer's frame loop),
+            // leaving the route blank. A CSS animation cannot stall on JS.
+            // The first paint is never animated in (no class until the first
+            // client-side navigation), matching the old `initial={false}`.
+            // Opacity + a small rise only: animating `filter` on <main> left
+            // `filter: blur(0px)` behind, which made <main> the containing
+            // block for every position:fixed descendant.
+            <main
+              id="main-content"
+              key={pathname}
+              className={cn("flex-1", pathname !== initialPathname && "page-enter")}
+              tabIndex={-1}
+            >
+              {children}
+            </main>
           );
           return isDev ? (
             <Profiler id="route" onRender={handleProfiler}>

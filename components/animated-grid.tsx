@@ -43,7 +43,10 @@ export function RevealOnView({
           el.dataset.reveal = "pending";
         }
       },
-      { threshold: 0.1 }
+      // Any visible pixel counts (framer's whileInView default). A fraction
+      // threshold can never be met by a section taller than ten viewports
+      // (/projects is ~26,000px), which left it "pending" forever.
+      { threshold: 0 }
     );
     observer.observe(observeParent && el.parentElement ? el.parentElement : el);
     return () => observer.disconnect();

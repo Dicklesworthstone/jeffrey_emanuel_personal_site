@@ -97,13 +97,23 @@ test.describe("theme", () => {
     await expect.poll(async () => (await readTheme(page)).html).toContain("dark");
   });
 
-  test("the 3D hero stays a dark island in light mode", async ({ page }) => {
+  test("the hero follows the theme like every other section", async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("theme", "light"));
     await page.goto("/");
     const heroBg = await page.evaluate(() => {
       const hero = document.querySelector("section[data-section]");
       return hero ? getComputedStyle(hero).backgroundColor : null;
     });
-    expect(heroBg).toBe(DARK_CANVAS);
+    expect(heroBg).toBe(LIGHT_CANVAS);
+  });
+
+  test("a client-side navigation paints the new route without a scroll", async ({ page }) => {
+    // Regression: the framer-driven <main> transition once left /projects at
+    // opacity 0 after a nav click until the user scrolled.
+    await page.goto("/");
+    await page.getByRole("link", { name: "Projects", exact: true }).first().click();
+    await page.waitForURL("**/projects");
+    await expect.poll(async () => page.evaluate(() => getComputedStyle(document.querySelector("main")!).opacity), { timeout: 3000 }).toBe("1");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 });

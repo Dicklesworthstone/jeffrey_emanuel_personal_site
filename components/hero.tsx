@@ -204,11 +204,11 @@ export default function Hero({ stats = heroStats }: HeroProps) {
   return (
     <section
       data-section
-      // `dark` makes the hero a theme island: the 3D scene clears to #020617
-      // and the glow/orbit layers are composed against it, so the hero keeps
-      // its dark tokens in light mode instead of a light band around a dark
-      // canvas. The fades below resolve to that same dark canvas.
-      className="dark relative min-h-[min(95dvh,95vh)] w-full overflow-hidden bg-slate-950"
+      // The hero follows the active theme like every other section: the 3D
+      // canvas renders with a transparent clear colour, so the scene's stars,
+      // rings and glow orbits sit on the adaptive canvas token, and the fades
+      // below resolve to that same token in both themes.
+      className="relative min-h-[min(95dvh,95vh)] w-full overflow-hidden bg-slate-950"
     >
       <GlowOrbits />
 
@@ -320,7 +320,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                                 {tool.name}
                               </span>
                               {"highlight" in tool && tool.highlight && (
-                                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-400/30">
+                                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-200 ring-1 ring-inset ring-amber-400/30 light:text-amber-800 light:ring-amber-500/50">
                                   <svg className="h-3 w-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                   </svg>
