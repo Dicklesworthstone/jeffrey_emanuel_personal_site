@@ -5,7 +5,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Mail, Check, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
-import { siteConfig } from "@/lib/content";
+// Only siteConfig is needed: import from the small site-config module, not
+// lib/content, so routes using this form don't ship the full content chunk.
+import { siteConfig } from "@/lib/site-config";
 
 // =============================================================================
 // TYPES

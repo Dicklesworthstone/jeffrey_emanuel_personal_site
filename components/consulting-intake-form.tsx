@@ -20,7 +20,9 @@ import { Controller, useForm, useWatch, type DefaultValues } from "react-hook-fo
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
-import { siteConfig } from "@/lib/content";
+// Only siteConfig is needed: import from the small site-config module, not
+// lib/content, so /consulting doesn't ship the full content chunk (see lib/site-config.ts).
+import { siteConfig } from "@/lib/site-config";
 import CopyButton from "@/components/copy-button";
 
 /** Keeps the mailto: URL under the ~2,000-char limit of common mail clients. */

@@ -14,7 +14,9 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { siteConfig } from "@/lib/content";
+// Only siteConfig is needed: import from the small site-config module, not
+// lib/content, so this widget doesn't pin the full content chunk onto its routes.
+import { siteConfig } from "@/lib/site-config";
 
 export const GITHUB_USERNAME = siteConfig.social.github.split("/").filter(Boolean).pop() || "Dicklesworthstone";
 

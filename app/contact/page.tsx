@@ -1,7 +1,9 @@
 "use client";
 
 import SectionShell, { Eyebrow } from "@/components/section-shell";
-import { siteConfig } from "@/lib/content";
+// Only siteConfig is needed: import from the small site-config module, not
+// lib/content, so /contact doesn't ship the full content chunk (see lib/site-config.ts).
+import { siteConfig } from "@/lib/site-config";
 import { Mail, MessageCircle, Github, Linkedin } from "lucide-react";
 import NewsletterSignup from "@/components/newsletter-signup";
 import CopyButton from "@/components/copy-button";
