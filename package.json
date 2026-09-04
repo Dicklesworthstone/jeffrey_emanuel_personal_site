@@ -17,6 +17,7 @@
     "prerender:og": "bun run scripts/prerender-og.ts",
     "start": "next start",
     "check:interactive-article-scopes": "bun run scripts/validate-interactive-article-scopes.ts",
+    "check:links": "bun run scripts/check-links.ts",
     "lint": "bun run check:interactive-article-scopes && eslint --max-warnings=0",
     "test": "vitest run",
     "test:unit": "vitest run",
