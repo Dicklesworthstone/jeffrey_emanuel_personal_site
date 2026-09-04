@@ -1,0 +1,236 @@
+/* CMA-ES article styles (.cmaes-scope; reuses the .rq-* class names).
+   Moved verbatim from app/globals.css (INTERACTIVE ARTICLE SCOPES block) so only the
+   routes that render this scope download it. Deliberately UNLAYERED (same as before).
+   Validated by scripts/validate-interactive-article-scopes.ts */
+
+/* Duplicated verbatim from components/raptorq-article.css: this rule targets both scopes
+   (:is(.raptorq-scope, .cmaes-scope)) and each article loads only its own file. Keep the
+   two copies identical. */
+:is(.raptorq-scope, .cmaes-scope) .rq-progress-bar {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(to right, #22d3ee, #a855f7);
+  z-index: 95;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  :is(.raptorq-scope, .cmaes-scope) .rq-progress-bar {
+    top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/*
+  ========================================
+  CMA-ES ARTICLE - SCOPED STYLES
+  Hyper-polished world-class UI/UX
+  ========================================
+*/
+
+.cmaes-scope {
+  --cma-amber: #f59e0b;
+  --cma-orange: #f97316;
+  --cma-red: #ef4444;
+  --cma-glass: rgba(8, 10, 20, 0.7);
+  --cma-border: rgba(255, 255, 255, 0.08);
+  --cma-glow: rgba(245, 158, 11, 0.15);
+  
+  font-family: var(--font-crimson), Georgia, serif;
+  background: #020204;
+  color: #f1f5f9;
+  line-height: 1.6;
+  position: relative;
+}
+
+/* (The per-article fixed grain layer was removed: the site already paints one
+   grain via body::before, and a second full-viewport fixed layer only added
+   compositing cost + moiré.) */
+
+/* Sophisticated Typography */
+.cmaes-scope .rq-display-title {
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: clamp(3rem, 8.5vw, 7rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+  background: linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.4) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+}
+
+.cmaes-scope .rq-section-title {
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: clamp(2.75rem, 7vw, 5rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin-top: clamp(8rem, 20vw, 16rem);
+  margin-bottom: 4rem;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.cmaes-scope .rq-section-title::after {
+  content: "";
+  width: 80px;
+  height: 4px;
+  background: var(--cma-amber);
+  margin-top: 1.5rem;
+  border-radius: 2px;
+  box-shadow: 0 0 20px var(--cma-amber);
+}
+
+/* Editorial Content */
+.cmaes-scope.rq-body p:not([class*="text-"]):not(.text-sm):not(.text-base) {
+  font-size: clamp(1.35rem, 2.8vw, 1.875rem);
+  line-height: 1.65;
+  color: #94a3b8;
+  margin-bottom: 3rem;
+  max-width: 68ch;
+  font-weight: 400;
+}
+
+.cmaes-scope.rq-body strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Hyper-Polished Glass Container */
+.cmaes-scope .rq-viz-container {
+  background: var(--cma-glass);
+  backdrop-filter: blur(32px);
+  border: 1px solid var(--cma-border);
+  border-radius: 3rem;
+  box-shadow: 
+    0 40px 80px -20px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.2);
+  margin: 6rem 0;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 10;
+}
+
+.cmaes-scope .rq-viz-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 3rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent 40%, rgba(245,158,11,0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.cmaes-scope .rq-viz-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 2rem 3rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--cma-border);
+}
+
+/* Action UI */
+.cmaes-scope .rq-btn-action {
+  background: #fff;
+  color: #000;
+  font-weight: 900;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 1rem 2.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px -10px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cmaes-scope .rq-btn-action:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 15px 40px -10px rgba(255, 255, 255, 0.4);
+}
+
+.cmaes-scope .rq-btn-secondary {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.9rem 2rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+
+.cmaes-scope .rq-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Bento Cards */
+.cmaes-scope .rq-insight-card {
+  background: rgba(15, 17, 26, 0.4);
+  border: 1px solid var(--cma-border);
+  border-radius: 2rem;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Mobile Specifics */
+@media (max-width: 768px) {
+  .cmaes-scope .rq-viz-container {
+    border-radius: 2rem;
+    margin: 3rem -1rem;
+    width: calc(100% + 2rem);
+  }
+  
+  .cmaes-scope .rq-viz-header {
+    padding: 1.5rem;
+  }
+  
+  .cmaes-scope .rq-btn-action {
+    padding: 0.8rem 1.5rem;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Smooth Reveal Transitions */
+.cmaes-scope .rq-fade-section {
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: 
+    opacity 1s cubic-bezier(0.2, 0, 0, 1),
+    transform 1s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.cmaes-scope .rq-fade-section.rq-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmaes-scope .rq-fade-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+

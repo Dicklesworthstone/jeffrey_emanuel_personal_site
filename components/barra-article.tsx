@@ -1,5 +1,7 @@
 "use client";
 
+import "./barra-article.css";
+import "./interactive-article-shared.css";
 import "katex/dist/katex.min.css";
 
 import { useEffect, useRef } from "react";

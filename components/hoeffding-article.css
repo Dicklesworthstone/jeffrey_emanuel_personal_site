@@ -1,0 +1,234 @@
+/* Hoeffding article styles (.hoeffding-scope / .hd-*).
+   Moved verbatim from app/globals.css (INTERACTIVE ARTICLE SCOPES block) so only the
+   routes that render this scope download it. Deliberately UNLAYERED (same as before).
+   Validated by scripts/validate-interactive-article-scopes.ts */
+
+/*
+  ========================================
+  HOEFFDING ARTICLE - ADVANCED POLISH
+  ========================================
+*/
+
+.hoeffding-scope {
+  --hd-bg: #020204;
+  --hd-text: #f8fafc;
+  --hd-cyan: #22d3ee;
+  --hd-purple: #a855f7;
+  --hd-emerald: #10b981;
+  --hd-glass: rgba(255, 255, 255, 0.03);
+  --hd-glass-border: rgba(255, 255, 255, 0.08);
+  font-family: var(--font-crimson), Georgia, serif;
+}
+
+.hd-glass-panel {
+  background: var(--hd-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 0.5px solid var(--hd-glass-border);
+  box-shadow: 
+    0 4px 24px -1px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.hd-glow-cyan {
+  box-shadow: 0 0 40px -10px rgba(34, 211, 238, 0.3);
+}
+
+.hd-glow-purple {
+  box-shadow: 0 0 40px -10px rgba(168, 85, 247, 0.3);
+}
+
+.hd-glow-amber {
+  box-shadow: 0 0 40px -10px rgba(245, 158, 11, 0.3);
+}
+
+/* Deliberately UNLAYERED. Moving this into `@layer components` (so the text
+   colour and opacity utilities at the call sites would win) makes Tailwind v4
+   drop the block entirely — measured: the label fell back to Crimson Pro
+   16px/400, no tracking, no uppercase. The authored colour-coding
+   (text-cyan-400, text-amber-500, text-purple-400) and two `opacity-100`
+   patches are therefore dead at every call site; see bead bd-1bpo. Fixing that
+   needs a different mechanism (e.g. @utility or per-call-site CSS vars), not a
+   layer move.
+   Opacity is 0.55, not the original 0.4: 0.4 put #f8fafc on #020204 at ~3.50:1,
+   under AA for 12px bold. 0.55 keeps the muted feel at ~6:1. */
+.hd-instrument-label {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 12px; /* labels informative readouts — 12px floor */
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hd-text);
+  opacity: 0.55;
+}
+
+.hd-display-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(3.5rem, 12vw, 8rem);
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.hd-section-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  letter-spacing: -0.04em;
+  font-weight: 900;
+  color: white;
+  margin-top: 10rem;
+  margin-bottom: 5rem;
+}
+
+.hd-drop-cap::first-letter {
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: clamp(3rem, 10vw, 5rem);
+  font-weight: 900;
+  color: var(--hd-cyan);
+  float: left;
+  margin-right: 1rem;
+  line-height: 0.7;
+}
+
+.hd-math-inline .katex {
+  font-size: 1.1em;
+  color: var(--hd-purple);
+  opacity: 0.9;
+}
+
+.hoeffding-scope .hd-callout {
+  border-left: 4px solid var(--hd-purple);
+  padding: 3rem;
+  margin: 5rem 0;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.05) 0%, transparent 100%);
+  font-style: italic;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  line-height: 1.4;
+  color: #e2e8f0;
+  border-radius: 0 2rem 2rem 0;
+}
+
+.hd-viz-container {
+  width: 100%;
+  margin: 6rem 0;
+  border-radius: 2.5rem;
+  background: #08080a;
+  border: 1px solid var(--hd-glass-border);
+  overflow: hidden;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+}
+
+.hd-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
+  font-size: 1.625rem;
+  line-height: 1.85;
+  color: #cbd5e1;
+  margin-bottom: 2.5rem;
+}
+
+.hd-body strong {
+  color: white;
+  font-weight: 800;
+}
+
+.hd-fade-section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hd-fade-section.hd-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/*
+  ========================================
+  HOEFFDING ARTICLE - CONTROLS & COMPONENTS
+  (base .hd-* typography/surfaces are defined once, earlier in this file)
+  ========================================
+*/
+
+.hoeffding-scope .hd-btn-action {
+  padding: 0.625rem 1.25rem;
+  background: var(--hd-cyan);
+  color: black;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+  min-height: 44px;
+}
+
+.hoeffding-scope .hd-btn-action:hover {
+  background: #67e8f9;
+  transform: scale(1.05);
+}
+
+.hoeffding-scope .hd-btn-secondary {
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+  min-height: 44px;
+}
+
+.hoeffding-scope .hd-btn-secondary:hover {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hoeffding-scope .hd-insight-card {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  /* Not `all`: that included backdrop-filter and re-blurred per frame. */
+  transition: transform 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, background-color 0.5s ease;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+.hoeffding-scope .hd-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, #22d3ee, #a855f7);
+  z-index: 95;
+  transform-origin: 0 0;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.hoeffding-scope .hd-math-block {
+  text-align: center;
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+}
+
+.hoeffding-scope .hd-math-block .katex {
+  font-size: 1.5em;
+  color: var(--hd-cyan);
+}
+

@@ -1,0 +1,199 @@
+/* Barra factor model article styles (.barra-scope / .barra-*).
+   Moved verbatim from app/globals.css (INTERACTIVE ARTICLE SCOPES block) so only the
+   routes that render this scope download it. Deliberately UNLAYERED (same as before).
+   Validated by scripts/validate-interactive-article-scopes.ts */
+
+/*
+  ========================================
+  BARRA FACTOR MODEL ARTICLE - SCOPED STYLES
+  All styles scoped under .barra-scope
+  ========================================
+*/
+
+.barra-scope {
+  --barra-bg: #020204;
+  --barra-text: #f8fafc;
+  --barra-emerald: #10b981;
+  --barra-cyan: #22d3ee;
+  --barra-blue: #3b82f6;
+  font-family: var(--font-crimson), Georgia, "Times New Roman", serif;
+}
+
+.barra-scope .barra-display-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.barra-scope .barra-section-title {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 8rem;
+  margin-bottom: 4rem;
+  color: white;
+}
+
+.barra-scope .barra-section-title::before {
+  content: "";
+  width: 0.375rem;
+  height: 2rem;
+  background-color: var(--barra-emerald);
+  border-radius: 9999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.barra-scope .barra-drop-cap::first-letter {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--barra-emerald);
+  float: left;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+.barra-scope .barra-callout {
+  border-left: 4px solid rgba(16, 185, 129, 0.5);
+  padding-left: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  font-style: italic;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  line-height: 1.4;
+  color: #e2e8f0;
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.barra-scope .barra-viz-container {
+  width: 100%;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #08080a;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 100px -20px rgba(16, 185, 129, 0.05);
+}
+
+.barra-scope .barra-viz-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+}
+
+.barra-scope .barra-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, #10b981, #22d3ee, #3b82f6);
+  z-index: 95;
+  transform-origin: 0 0;
+  will-change: transform;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .barra-scope .barra-progress-bar {
+    top: env(safe-area-inset-top, 0px);
+  }
+}
+
+.barra-scope.barra-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
+  font-size: 1.625rem;
+  line-height: 1.85;
+  color: #f1f5f9;
+  margin-bottom: 2.25rem;
+  margin-top: 0;
+  max-width: 72ch;
+  text-wrap: pretty;
+  letter-spacing: -0.015em;
+  font-weight: 450;
+}
+
+.barra-scope .barra-math-block {
+  text-align: center;
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+}
+
+.barra-scope .barra-math-inline .katex {
+  font-size: 1.2em;
+  color: #22d3ee;
+}
+
+.barra-scope .barra-math-block .katex {
+  font-size: 1.5em;
+  color: #10b981;
+}
+
+.barra-scope .barra-insight-card {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  /* Not `all`: that included backdrop-filter and re-blurred per frame. */
+  transition: transform 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, background-color 0.5s ease;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+.barra-scope .barra-fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.barra-scope .barra-fade-section.barra-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .barra-scope .barra-viz-container {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+  }
+
+  .barra-scope .barra-drop-cap::first-letter {
+    font-size: 3.25rem;
+  }
+
+  .barra-scope.barra-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {
+    font-size: 1.375rem;
+    line-height: 1.85;
+  }
+}
+

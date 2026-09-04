@@ -1,5 +1,7 @@
 "use client";
 
+import "./hoeffding-article.css";
+import "./interactive-article-shared.css";
 import "katex/dist/katex.min.css";
 
 import { useEffect, useRef, memo } from "react";

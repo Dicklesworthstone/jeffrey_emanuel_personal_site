@@ -1,0 +1,213 @@
+/* Rules shared by several interactive-article scopes (viz-container type scale, .custom-scrollbar, stability guardrails).
+   Moved verbatim from app/globals.css (INTERACTIVE ARTICLE SCOPES block) so only the
+   routes that render this scope download it. Deliberately UNLAYERED (same as before).
+   Validated by scripts/validate-interactive-article-scopes.ts */
+
+.overprompting-scope .op-viz-container,
+.raptorq-scope .rq-viz-container,
+.cmaes-scope .rq-viz-container,
+.hoeffding-scope .hd-viz-container,
+.bakery-scope .ba-viz-container,
+.barra-scope .barra-viz-container {
+  font-size: 1rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[7px]"] {
+  font-size: 0.625rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[8px]"] {
+  font-size: 0.67rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[9px]"] {
+  font-size: 0.75rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[10px]"] {
+  font-size: 0.8rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[11px]"] {
+  font-size: 0.85rem;
+}
+
+:is(.overprompting-scope .op-viz-container,
+    .raptorq-scope .rq-viz-container,
+    .cmaes-scope .rq-viz-container,
+    .hoeffding-scope .hd-viz-container,
+    .bakery-scope .ba-viz-container,
+    .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="text-[12px]"] {
+  font-size: 0.9rem;
+}
+
+@media (min-width: 768px) {
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[8px]"] {
+    font-size: 0.75rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[9px]"] {
+    font-size: 0.8rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[10px]"] {
+    font-size: 0.875rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[11px]"] {
+    font-size: 0.93rem;
+  }
+
+  :is(.overprompting-scope .op-viz-container,
+      .raptorq-scope .rq-viz-container,
+      .cmaes-scope .rq-viz-container,
+      .hoeffding-scope .hd-viz-container,
+      .bakery-scope .ba-viz-container,
+      .barra-scope .barra-viz-container,
+    .sm-scope .sm-viz-container) [class~="md:text-[12px]"] {
+    font-size: 1rem;
+  }
+}
+
+/* Custom scrollbar for visualizations */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/*
+  ========================================
+  INTERACTIVE ARTICLE STABILITY GUARDRAILS
+  ========================================
+*/
+
+.overprompting-scope,
+.raptorq-scope,
+.hoeffding-scope,
+.bakery-scope,
+.cmaes-scope,
+.barra-scope {
+  overflow-x: clip;
+}
+
+@media (max-width: 768px) {
+  .overprompting-scope section[data-section="hero"],
+  .raptorq-scope section[data-section="hero"],
+  .bakery-scope section[data-section="hero"],
+  .barra-scope section[data-section="hero"],
+  .cmaes-scope section[data-section="hero"],
+  .hoeffding-scope section[data-section="hero"] {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 7rem) !important;
+  }
+
+  .overprompting-scope .op-viz-container,
+  .raptorq-scope .rq-viz-container,
+  .bakery-scope .ba-viz-container,
+  .cmaes-scope .rq-viz-container,
+  .barra-scope .barra-viz-container,
+  .hoeffding-scope .hd-viz-container {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 1rem !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .overprompting-scope .op-viz-header,
+  .raptorq-scope .rq-viz-header,
+  .cmaes-scope .rq-viz-header,
+  .barra-scope .barra-viz-header,
+  .hoeffding-scope .hd-viz-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+
+  .overprompting-scope .op-viz-header > *,
+  .raptorq-scope .rq-viz-header > *,
+  .cmaes-scope .rq-viz-header > *,
+  .barra-scope .barra-viz-header > *,
+  .hoeffding-scope .hd-viz-header > * {
+    min-width: 0;
+  }
+
+  .overprompting-scope .op-viz-container,
+  .raptorq-scope .rq-viz-container,
+  .cmaes-scope .rq-viz-container,
+  .hoeffding-scope .hd-viz-container,
+  .bakery-scope .ba-viz-container,
+  .barra-scope .barra-viz-container {
+    font-size: 0.9rem;
+  }
+}
+

@@ -1,0 +1,206 @@
+/* Bakery algorithm article styles (.bakery-scope / .ba-*).
+   Moved verbatim from app/globals.css (INTERACTIVE ARTICLE SCOPES block) so only the
+   routes that render this scope download it. Deliberately UNLAYERED (same as before).
+   Validated by scripts/validate-interactive-article-scopes.ts */
+
+/*
+  ========================================
+  BAKERY ALGORITHM ARTICLE - SCOPED STYLES
+  All styles scoped under .bakery-scope
+  to avoid leaking to the rest of the site.
+  ========================================
+*/
+
+/*
+  ========================================
+  BAKERY ALGORITHM ARTICLE - SCOPED STYLES
+  Hyper-optimized for world-class UI/UX (Stripe-level polish)
+  ========================================
+*/
+
+.bakery-scope {
+  --ba-amber: #f59e0b;
+  --ba-orange: #f97316;
+  --ba-rose: #f43f5e;
+  --ba-emerald: #10b981;
+  --ba-cyan: #22d3ee;
+  --ba-glass: rgba(15, 23, 42, 0.6);
+  --ba-border: rgba(255, 255, 255, 0.08);
+  
+  font-family: var(--font-crimson), Georgia, serif;
+  background: #020204;
+  color: #f8fafc;
+  line-height: 1.6;
+}
+
+/* Fluid Typography with Sophisticated Weighting */
+.bakery-scope .ba-display-title {
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: clamp(2rem, 8vw, 8.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 30px rgba(245, 158, 11, 0.2));
+}
+
+.bakery-scope .ba-section-title {
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: clamp(1.75rem, 5vw, 4rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-top: clamp(6rem, 15vw, 10rem);
+  margin-bottom: 3rem;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.bakery-scope .ba-section-title::before {
+  content: "";
+  width: clamp(0.25rem, 1vw, 0.5rem);
+  height: 0.8em;
+  background: linear-gradient(to bottom, var(--ba-amber), var(--ba-orange));
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* Editorial Content - Stripe-level clarity */
+.bakery-scope.ba-body p:not([class*="text-"]):not(.text-sm):not(.text-base) {
+  font-size: clamp(1.125rem, 2.5vw, 1.625rem);
+  line-height: 1.7;
+  color: #cbd5e1;
+  margin-bottom: 2.5rem;
+  max-width: 70ch;
+  text-wrap: pretty;
+  font-weight: 450;
+}
+
+.bakery-scope .ba-drop-cap::first-letter {
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: clamp(4rem, 15vw, 7rem);
+  font-weight: 900;
+  color: var(--ba-amber);
+  float: left;
+  line-height: 0.7;
+  margin-right: 1rem;
+  margin-top: 0.5rem;
+  text-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
+}
+
+/* Advanced Interaction Cards */
+.bakery-scope .ba-viz-container {
+  background: var(--ba-glass);
+  backdrop-filter: blur(32px);
+  border: 1px solid var(--ba-border);
+  border-radius: clamp(1.5rem, 5vw, 3rem);
+  overflow: hidden;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  margin: 4rem 0;
+  transition: all 0.5s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (min-width: 1024px) {
+  .bakery-scope .ba-viz-container:hover {
+    border-color: rgba(245, 158, 11, 0.2);
+    box-shadow: 
+      0 40px 80px -15px rgba(0, 0, 0, 0.7),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Logic Tooltips - BetterExplained style */
+.bakery-scope .ba-math-inline {
+  color: var(--ba-amber);
+  font-weight: 600;
+  border-bottom: 1px dashed rgba(245, 158, 11, 0.4);
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.bakery-scope .ba-math-inline:hover {
+  background: rgba(245, 158, 11, 0.1);
+  border-bottom-color: var(--ba-amber);
+}
+
+/* Custom Scrollbar for IDE-style blocks */
+.bakery-scope ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.bakery-scope ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bakery-scope ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+
+.bakery-scope ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Section Reveal Physics */
+.bakery-scope .ba-fade-section {
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: 
+    opacity 1s cubic-bezier(0.2, 0, 0, 1),
+    transform 1s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.bakery-scope .ba-fade-section.ba-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.bakery-scope .ba-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(to right, #f59e0b, #f97316, #f43f5e);
+  z-index: 95;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bakery-scope .ba-fade-section {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Mobile Hyper-Optimization */
+@media (max-width: 768px) {
+  .bakery-scope .ba-viz-container {
+    border-radius: 1.5rem;
+    margin: 2rem -1rem;
+    width: calc(100% + 2rem);
+    border-left: none;
+    border-right: none;
+  }
+  
+  .bakery-scope.ba-body p:not([class*="text-"]):not(.text-sm):not(.text-base) {
+    font-size: 1.125rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .bakery-scope .ba-progress-bar {
+    top: env(safe-area-inset-top, 0px);
+  }
+}
+

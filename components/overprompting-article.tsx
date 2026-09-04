@@ -1,5 +1,7 @@
 "use client";
 
+import "./overprompting-article.css";
+import "./interactive-article-shared.css";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";

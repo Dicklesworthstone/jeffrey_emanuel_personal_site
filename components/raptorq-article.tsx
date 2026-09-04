@@ -1,5 +1,7 @@
 "use client";
 
+import "./raptorq-article.css";
+import "./interactive-article-shared.css";
 import "katex/dist/katex.min.css";
 
 import { memo, useEffect, useRef } from "react";

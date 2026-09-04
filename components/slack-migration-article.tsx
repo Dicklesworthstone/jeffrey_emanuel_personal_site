@@ -1,5 +1,7 @@
 "use client";
 
+import "./interactive-article-shared.css";
+import "./sm-article.css";
 import { useEffect, useRef, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";

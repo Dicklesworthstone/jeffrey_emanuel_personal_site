@@ -1,5 +1,7 @@
 "use client";
 
+import "./interactive-article-shared.css";
+import "./sm-article.css";
 import {
   useCallback,
   useEffect,

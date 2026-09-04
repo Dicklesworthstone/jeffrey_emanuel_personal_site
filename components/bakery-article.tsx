@@ -1,5 +1,7 @@
 "use client";
 
+import "./bakery-article.css";
+import "./interactive-article-shared.css";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
