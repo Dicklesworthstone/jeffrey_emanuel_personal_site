@@ -2,7 +2,59 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { type ReactNode, Children, useState, useRef, useEffect, useCallback } from "react";
+import { type CSSProperties, type ReactNode, Children, useState, useRef, useEffect, useCallback } from "react";
+
+/**
+ * Post-hydration in-view flag for CSS-driven entrances (the `[data-reveal]`
+ * rules in app/globals.css). Renders a plain div: no motion values, no state,
+ * no re-render — the attribute is written straight to the DOM once the
+ * IntersectionObserver reports, so the server HTML and first paint are the
+ * settled markup. States: (none) → "pending" (mounted, out of view, offset
+ * applied) → "in" (entered view once; observer disconnected).
+ * `observeParent` watches the parent instead of the div itself, so SectionShell
+ * keeps its original trigger geometry (10 % of the padded <section>).
+ */
+export function RevealOnView({
+  children,
+  className,
+  style,
+  observeParent = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+  observeParent?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      el.dataset.reveal = "in"; // no observer support (and jsdom): render settled
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.dataset.reveal = "in";
+          observer.disconnect();
+        } else {
+          el.dataset.reveal = "pending";
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(observeParent && el.parentElement ? el.parentElement : el);
+    return () => observer.disconnect();
+  }, [observeParent]);
+
+  return (
+    <div ref={ref} className={className} style={style}>
+      {children}
+    </div>
+  );
+}
 
 interface AnimatedGridProps {
   children: ReactNode;

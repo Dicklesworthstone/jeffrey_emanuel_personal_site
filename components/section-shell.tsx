@@ -1,9 +1,5 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import { RevealOnView } from "@/components/animated-grid";
 import { cn } from "@/lib/utils";
 
 /*
@@ -69,6 +65,14 @@ type Props = {
   headingLevel?: 1 | 2;
 };
 
+/*
+  Server component. The entrance (slide up from a subtle offset once the
+  section scrolls into view, icon glow) is CSS: the `[data-reveal]` rules in
+  app/globals.css, keyed off the attribute RevealOnView writes after
+  hydration. Content is NEVER hidden — the server markup is the settled
+  state (the inline `opacity:1;transform:none` / base box-shadow below are
+  exactly what the previous framer-motion wrappers emitted).
+*/
 export default function SectionShell({
   id,
   icon: Icon,
@@ -81,27 +85,12 @@ export default function SectionShell({
   headingLevel = 2,
 }: Props) {
   const HeadingTag = `h${headingLevel}` as const;
-  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
-  const prefersReducedMotion = useReducedMotion();
-
-  // Track if we've mounted on client to avoid hydration mismatch
-  const [hasMounted, setHasMounted] = useState(false);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard hydration detection pattern
-    setHasMounted(true);
-  }, []);
 
   // Generate a unique heading ID for aria-labelledby
   const headingId = id ? `${id}-heading` : undefined;
 
-  // Always start visible to prevent flash of invisible content
-  // Only animate from slightly offset position when intersection triggers
-  // Content is NEVER hidden - we just animate from a subtle offset
-  const animateIn = hasMounted && isIntersecting && !prefersReducedMotion;
-
   return (
     <section
-      ref={ref as React.RefObject<HTMLElement>}
       data-section
       id={id}
       aria-labelledby={headingId}
@@ -112,16 +101,7 @@ export default function SectionShell({
         className
       )}
     >
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: 1,
-          y: animateIn ? 0 : (hasMounted ? 20 : 0)
-        }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10"
-        style={{ opacity: 1 }}
-      >
+      <RevealOnView observeParent className="relative z-10" style={{ opacity: 1, transform: "none" }}>
         <div className="mb-12 max-w-3xl md:mb-16">
           {eyebrow && (
             <div className="mb-6 flex items-center gap-3">
@@ -135,19 +115,13 @@ export default function SectionShell({
           <div className="flex flex-col gap-6">
             <div className="flex items-start gap-5 md:items-center">
               {(Icon || iconNode) && (
-                <motion.div
+                <div
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/80 to-slate-800/50 text-sky-400 shadow-lg shadow-sky-900/10 backdrop-blur-sm"
-                  initial={false}
-                  animate={animateIn ? {
-                    boxShadow: "0 0 20px -5px rgba(56, 189, 248, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-                  } : {
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-                  }}
-                  transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: 0.2 }}
                   aria-hidden="true"
+                  style={{ boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                 >
                   {iconNode || (Icon && <Icon className="h-5 w-5" />)}
-                </motion.div>
+                </div>
               )}
               <HeadingTag
                 id={headingId}
@@ -166,19 +140,10 @@ export default function SectionShell({
           </div>
         </div>
 
-        <motion.div
-          className="relative"
-          initial={false}
-          animate={{
-            opacity: 1,
-            y: animateIn ? 0 : (hasMounted ? 12 : 0)
-          }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-          style={{ opacity: 1 }}
-        >
+        <div className="relative" style={{ opacity: 1, transform: "none" }}>
           {children}
-        </motion.div>
-      </motion.div>
+        </div>
+      </RevealOnView>
     </section>
   );
 }
