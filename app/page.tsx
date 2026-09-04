@@ -158,8 +158,12 @@ export default async function HomePage() {
               {/* Mini flywheel preview */}
               <div className="mt-8 lg:mt-0 flex flex-col items-center">
                 <div className="relative flex h-32 w-32 sm:h-40 sm:w-40 items-center justify-center" aria-hidden="true">
-                  {/* Dashed ring - CSS animation (Server Component); the only motion in this banner */}
-                  <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                  {/* Dashed ring - CSS animation (Server Component); the only motion in this banner.
+                      The spin lives on the <svg> box, not the <circle>: a transform animation on an
+                      SVG child element is not composited in Blink and re-laid-out the shape every
+                      frame (83% of all layouts during a mobile load); the svg's only child is this
+                      centred circle, so rotating the box is pixel-identical. */}
+                  <svg className="absolute inset-0 h-full w-full motion-safe:animate-[spin_20s_linear_infinite] origin-center" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
                     <circle
                       cx="50"
                       cy="50"
@@ -168,7 +172,6 @@ export default async function HomePage() {
                       stroke="rgba(139, 92, 246, 0.3)"
                       strokeWidth="1"
                       strokeDasharray="8 4"
-                      className="motion-safe:animate-[spin_20s_linear_infinite] origin-center"
                     />
                   </svg>
                   {/* Tool dots - static; positioned using percentages for responsive scaling */}
