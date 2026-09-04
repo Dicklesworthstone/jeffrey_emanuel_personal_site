@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { navItems, siteConfig } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
@@ -16,16 +16,48 @@ import Magnetic from "@/components/magnetic";
 import { HapticLink } from "@/components/haptic-link";
 import ThemeToggle from "@/components/theme-toggle";
 
-// Dynamically import 3D header icon to avoid SSR issues
-const HeaderIcon3D = dynamic(() => import("@/components/header-icon-3d"), {
-  ssr: false,
-  loading: () => (
+// The static brand icon (the pre-3D Sparkles tile). It is what the server
+// renders, the dynamic loader's placeholder, and the permanent icon on touch
+// and reduced-motion devices — one definition, deliberately identical to
+// header-icon-3d's private StaticFallback, so it lives here without importing
+// that module (which pulls three.js in at its top level).
+export function StaticHeaderIcon() {
+  return (
     <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 via-violet-500 to-emerald-400 shadow-lg shadow-sky-500/20">
       <Sparkles className="h-5 w-5 text-white" />
       <div className="absolute inset-0 rounded-xl bg-white/20 mix-blend-overlay" />
     </div>
-  ),
+  );
+}
+
+// Dynamically import 3D header icon to avoid SSR issues
+const HeaderIcon3D = dynamic(() => import("@/components/header-icon-3d"), {
+  ssr: false,
+  loading: () => <StaticHeaderIcon />,
 });
+
+// "Use the static icon" as an external store over the two media queries on
+// which header-icon-3d bails out to its fallback anyway. Deciding here, before
+// <HeaderIcon3D /> is ever rendered, is what keeps the three.js chunk (~155 KB
+// raw) off phones: next/dynamic only requests its chunk once the lazy
+// component renders, and React client-renders an `ssr: false` boundary
+// during the hydration pass itself, so the server snapshot must already say
+// "static" (true) — the server always rendered the static icon. Fine-pointer
+// clients see the snapshot differ right after hydration and re-render once
+// into the 3D icon, as before; header-icon-3d keeps its WebGL probe and its
+// own identical bail-outs.
+const STATIC_ICON_QUERIES = ["(pointer: coarse)", "(prefers-reduced-motion: reduce)"];
+function subscribeStaticIconPreference(onChange: () => void) {
+  const lists = STATIC_ICON_QUERIES.map((query) => window.matchMedia(query));
+  lists.forEach((mq) => mq.addEventListener?.("change", onChange));
+  return () => lists.forEach((mq) => mq.removeEventListener?.("change", onChange));
+}
+function getStaticIconPreferenceSnapshot() {
+  return STATIC_ICON_QUERIES.some((query) => window.matchMedia(query).matches);
+}
+function getStaticIconServerSnapshot() {
+  return true;
+}
 
 interface SiteHeaderProps {
   onOpenCommandPalette?: () => void;
@@ -38,6 +70,13 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
   const [shortcutModifier, setShortcutModifier] = useState<"Cmd" | "Ctrl">("Cmd");
   const { lightTap } = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
+  // Touch / reduced-motion visitors get the static icon without ever
+  // rendering (and therefore downloading) the 3D module.
+  const wantsStaticIcon = useSyncExternalStore(
+    subscribeStaticIconPreference,
+    getStaticIconPreferenceSnapshot,
+    getStaticIconServerSnapshot
+  );
   const resolvedPath = pathname ?? "";
   const shortcutDisplayKey = shortcutModifier === "Cmd" ? "⌘" : "Ctrl+";
   const shortcutAriaLabel = `Search site (${shortcutModifier}+K)`;
@@ -148,7 +187,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               onClick={() => setOpen(false)}
             >
               <div className="transition-transform group-hover:scale-105">
-                <HeaderIcon3D />
+                {wantsStaticIcon ? <StaticHeaderIcon /> : <HeaderIcon3D />}
               </div>
               <div className="flex flex-col leading-none">
                 {siteConfig.location && (
