@@ -45,10 +45,30 @@ export default function ScrollToTop() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    measure();
+    // The initial measure reads scrollHeight/clientHeight; doing that inside
+    // the hydration commit forces a synchronous layout of the still-dirty
+    // page. Defer it to an idle slice after the browser's own first layout;
+    // a real scroll event still measures via the listener immediately.
+    let initialMeasure: { id: number; type: "idle" | "timeout" } | null = null;
+    const runInitialMeasure = () => {
+      initialMeasure = null;
+      measure();
+    };
+    if ("requestIdleCallback" in window) {
+      initialMeasure = { id: window.requestIdleCallback(runInitialMeasure, { timeout: 500 }), type: "idle" };
+    } else {
+      initialMeasure = { id: setTimeout(runInitialMeasure, 200) as unknown as number, type: "timeout" };
+    }
 
     return () => {
       window.removeEventListener("scroll", onScroll);
+      if (!initialMeasure) return;
+      if (initialMeasure.type === "idle") {
+        window.cancelIdleCallback?.(initialMeasure.id);
+      } else {
+        clearTimeout(initialMeasure.id);
+      }
+      initialMeasure = null;
     };
   }, [progress]);
 

@@ -128,10 +128,32 @@ export default function Hero({ stats = heroStats }: HeroProps) {
         setHasScrolled(true);
       }
     };
-    // Check initial scroll position (e.g., page refresh while scrolled)
-    handleScroll();
+    // Check initial scroll position (e.g., page refresh while scrolled), but
+    // not synchronously here: reading `scrollY` inside the hydration commit
+    // forces a style+layout of the whole still-dirty page (~0.5 s at 4x CPU
+    // throttle). Defer it to an idle slice after the browser has laid out on
+    // its own; a real scroll event still hits the listener immediately.
+    let initialCheck: { id: number; type: "idle" | "timeout" } | null = null;
+    const runInitialCheck = () => {
+      initialCheck = null;
+      handleScroll();
+    };
+    if ("requestIdleCallback" in window) {
+      initialCheck = { id: window.requestIdleCallback(runInitialCheck, { timeout: 500 }), type: "idle" };
+    } else {
+      initialCheck = { id: setTimeout(runInitialCheck, 200) as unknown as number, type: "timeout" };
+    }
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (!initialCheck) return;
+      if (initialCheck.type === "idle") {
+        window.cancelIdleCallback?.(initialCheck.id);
+      } else {
+        clearTimeout(initialCheck.id);
+      }
+      initialCheck = null;
+    };
   }, []);
 
   // A lost WebGL context (Safari backgrounding, GPU reset, context eviction)
