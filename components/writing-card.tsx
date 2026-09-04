@@ -112,7 +112,9 @@ export const WritingCard = memo(function WritingCard({
         onMouseLeave={handleMouseLeave}
         className={cn(
           // card-flat owns radius, tint, border, shadow and the hover lift
-          "card-flat group relative flex h-full flex-col overflow-hidden p-6 md:p-8"
+          "card-flat group relative flex h-full flex-col overflow-hidden p-6 md:p-8",
+          // Skip rendering work while offscreen; hint = median height (526px @1280, 468px @390)
+          "cv-auto [--cv-height:500px]"
         )}
       >
         {/* Featured Gradient Background */}

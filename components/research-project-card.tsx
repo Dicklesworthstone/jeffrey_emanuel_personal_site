@@ -45,7 +45,9 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
       onMouseMove={handleMouseMove}
       className={cn(
         // card-raised owns radius, tint, border, shadow and the hover lift/scale
-        "card-raised relative flex min-h-[300px] h-full flex-col overflow-hidden md:flex-row"
+        "card-raised relative flex min-h-[300px] h-full flex-col overflow-hidden md:flex-row",
+        // Skip rendering work while offscreen
+        "cv-auto"
       )}
     >
         {/* Animated Spotlight Background */}

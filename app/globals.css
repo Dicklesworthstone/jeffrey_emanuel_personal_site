@@ -1121,6 +1121,23 @@ select:focus-visible {
   scrollbar-width: none;  /* Firefox */
 }
 
+/*
+  Rendering containment for card roots in long grids (/projects mounts 102
+  cards; the homepage ~40). The browser skips style/layout/paint for cards
+  outside the viewport (+ its look-ahead margin) while the DOM, a11y tree,
+  find-in-page and hash targets stay identical. It goes on the card root,
+  which already has `overflow-hidden`, so the paint containment this implies
+  clips nothing new (an element's own hover shadow/transform is never clipped
+  by its own containment). `auto` keeps the last rendered size once a card
+  has been laid out, so scrolling back never jumps; the estimate (per-tier
+  `--cv-height`, set to the measured median card height) only sizes cards
+  that have not rendered yet, keeping the scrollbar steady on first paint.
+*/
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--cv-height, 420px);
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
   height: 6px;

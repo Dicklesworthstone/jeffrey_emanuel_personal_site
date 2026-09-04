@@ -120,6 +120,8 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
         className={cn(
           // card-raised owns radius, tint, border, shadow and the hover lift/scale
           "card-raised group relative flex h-full flex-col overflow-hidden",
+          // Skip rendering work while offscreen; hint = median height (265px @1280, 223px @390)
+          "cv-auto [--cv-height:250px]",
           config.hoverBorder,
           featured ? "p-6 md:p-8" : "p-5 md:p-6"
         )}

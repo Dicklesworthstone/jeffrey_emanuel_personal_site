@@ -75,6 +75,8 @@ function OgLinkCard({ site, className }: OgLinkCardProps) {
       className={cn(
         // card-raised owns radius, tint, border, shadow and the hover lift/scale
         "card-raised group relative flex flex-col overflow-hidden pointer-fine:backdrop-blur-sm",
+        // Skip rendering work while offscreen; hint = median height (351px @1280, 332px @390)
+        "cv-auto [--cv-height:350px]",
         className
       )}
     >

@@ -169,6 +169,8 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
           // No backdrop blur here: a backdrop filter inside a preserve-3d tilt
           // is re-sampled every frame the card rotates.
           "card-flat group relative flex h-full flex-col overflow-hidden p-4 sm:p-6 md:p-8",
+          // Skip rendering work while offscreen (median card height is the 420px default)
+          "cv-auto",
           "active:scale-[0.98] active:brightness-110",
           "focus-within:border-white/20",
           hoverBorder

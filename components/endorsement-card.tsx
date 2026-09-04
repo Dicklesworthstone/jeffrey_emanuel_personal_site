@@ -141,6 +141,8 @@ export function EndorsementCard({
       className={cn(
         // card-raised owns radius, tint, border, shadow and the hover lift/scale
         "card-raised group relative flex flex-col overflow-hidden",
+        // Skip rendering work while offscreen; hint = median height (220px @1280, 259px @390)
+        "cv-auto [--cv-height:240px]",
         config.hoverBorder,
         // Variant-specific padding and sizing
         isCompact && "p-4",
