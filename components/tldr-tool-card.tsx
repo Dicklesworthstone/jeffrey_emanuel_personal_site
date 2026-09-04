@@ -314,7 +314,7 @@ export const TldrToolCard = memo(function TldrToolCard({
               <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 {tool.stars && (
                   <motion.span
-                    className="relative inline-flex items-center gap-1 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-1 text-xs font-bold text-amber-100 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 transition-all duration-300 hover:ring-amber-400/50 hover:shadow-amber-500/20 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
+                    className="relative inline-flex items-center gap-1 overflow-hidden rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 px-2 py-1 text-xs font-bold text-amber-100 light:text-amber-800 shadow-lg shadow-amber-500/10 ring-1 ring-inset ring-amber-400/30 light:ring-amber-500/50 transition-all duration-300 hover:ring-amber-400/50 hover:shadow-amber-500/20 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
                     aria-label={`${formatStarCountFull(tool.stars)} GitHub stars`}
                     title={`${formatStarCountFull(tool.stars)} stars`}
                     initial={reducedMotion ? {} : { scale: 1, opacity: 0 }}

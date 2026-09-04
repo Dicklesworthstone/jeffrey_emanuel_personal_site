@@ -220,7 +220,7 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
             {/* CTA */}
             <div
               className={cn(
-                "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors",
+                "flex items-center gap-1.5 whitespace-nowrap text-xs font-bold uppercase tracking-wider transition-colors",
                 config.accentColor,
                 "group-hover:text-white"
               )}
