@@ -193,6 +193,17 @@ The site has a Cmd+K command palette using Fuse.js for fuzzy search:
 * Implemented in `components/command-palette.tsx`
 * Uses keyboard shortcuts and focus management
 
+### Light / Dark Theme
+
+The site is **dark by default for everyone**; light mode is opt-in via the header toggle (or `T`), stored in `localStorage["theme"]`. The OS `prefers-color-scheme` is deliberately ignored. Read the token table at the top of `app/globals.css` before touching colours.
+
+* The inline script in `app/layout.tsx` stamps `dark`/`light` on `<html>` before first paint; `components/theme-provider.tsx` owns the state and must stay in lockstep with it.
+* `dark:` and `light:` are **class-bound** custom variants (never the media query). `tests/unit/theme-css-binding.test.ts` compiles the real stylesheet and fails if that binding regresses.
+* The slate ramp, `white` and `black` are remapped to role tokens that flip per theme (`@theme inline`). **Write markup in the dark vocabulary** (`bg-slate-900`, `text-white`, `border-white/10`, `bg-black/20`) and let the tokens flip. Do not write `dark:`/light-mode class pairs, and never `light:bg-white` or `light:text-black` — `white` is *ink* and `black` is *paper* in light mode.
+* Accent colours (sky, violet, amber, ...) do not flip; use `light:` only for accent tweaks.
+* Anything composed against a hardcoded near-black (the 3D hero, the interactive article components with `background: "#020204"`) gets `className="dark ..."` on its root so it stays a dark island in light mode.
+* Verify visually in both themes; `tests/e2e/theme-toggle.spec.ts` covers the contract.
+
 ---
 
 ## Static Analysis & Type Safety
