@@ -112,6 +112,11 @@ export default function StatsGrid({ stats }: { stats: Stat[] }) {
                   {stat.helper}
                 </p>
               )}
+              {stat.asOf && (
+                <p className="mt-1 text-[11px] font-medium tracking-normal text-slate-500">
+                  as of {stat.asOf}
+                </p>
+              )}
             </dd>
           </div>
         );

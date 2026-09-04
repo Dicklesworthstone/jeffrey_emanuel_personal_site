@@ -205,12 +205,13 @@ export const TldrToolCard = memo(function TldrToolCard({
           }
         }}
         className={cn(
-          "relative h-full flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-sm",
-          "transition-[border-color,background-color,box-shadow] duration-300",
-          "hover:border-white/20 hover:bg-slate-900/70",
+          // card-raised owns radius, tint, border and shadow. The inline
+          // perspective/tilt transform below wins over the tier's hover lift,
+          // so this card lifts by tilting toward the cursor instead.
+          "card-raised relative h-full flex flex-col overflow-hidden",
           isFocused && "ring-2 ring-violet-500/60 border-violet-500/40",
           isSelectedForCompare && "ring-2 ring-violet-400/70 border-violet-400/40",
-          "motion-safe:hover:scale-[1.01] motion-safe:hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4),0_0_40px_-14px_rgba(var(--accent-rgb),0.35)]",
+          "motion-safe:hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4),0_0_40px_-14px_rgba(var(--accent-rgb),0.35)]",
           "active:scale-[0.98] active:border-white/25"
         )}
         style={{

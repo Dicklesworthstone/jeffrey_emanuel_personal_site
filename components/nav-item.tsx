@@ -20,7 +20,7 @@ export default function NavItem({ href, label, active, prefersReducedMotion }: N
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "relative rounded-full px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap group",
+        "relative rounded-full px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap group xl:px-3",
         active ? "text-white" : "text-slate-400 hover:text-white"
       )}
       onClick={() => lightTap()}

@@ -322,11 +322,12 @@ export function useDeviceCapabilities() {
  */
 export function useMobileOptimizations() {
   useEffect(() => {
-    // Only run on mobile devices
     if (typeof window === "undefined") return;
 
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (!isMobile) return;
+    // Everything below is viewport-metric work, so gate on the API rather than
+    // a UA sniff: iPadOS reports itself as a Mac and narrow desktop windows
+    // still benefit from --mobile-viewport-height tracking the visual viewport.
+    if (!("visualViewport" in window)) return;
 
     // Skip the style writes when the rounded values haven't changed: visualViewport
     // fires scroll/resize continuously while the URL bar collapses.

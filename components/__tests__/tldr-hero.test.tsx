@@ -15,6 +15,8 @@ vi.mock("@/lib/content", () => ({
       ],
     },
   },
+  // Null = no "as of" caption under the star total in these tests.
+  tldrToolStarsFetchedAt: null,
 }));
 
 describe("TldrHero", () => {

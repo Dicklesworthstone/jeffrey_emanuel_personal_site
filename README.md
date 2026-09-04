@@ -58,6 +58,8 @@ cp .env.example .env.local
 
 **Note:** You don't need to wait for your domain transfer to complete. GA will track whatever domain your site runs on (localhost, Vercel preview URLs, or your custom domain once configured).
 
+**Live stats:** `bun run build:with-stats` refreshes the GitHub star/repo counts before building and needs `GITHUB_TOKEN` set. Vercel's build command is plain `bun run build`, which uses the frozen numbers in `lib/content.ts` (labelled "as of" on the homepage). To get live stats at build time, add `GITHUB_TOKEN` in Vercel Project Settings > Environment Variables and switch the Vercel build command to `bun run build:with-stats`.
+
 ## Available Scripts
 
 ```bash

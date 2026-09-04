@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, type MotionStyle } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import Magnetic from "@/components/magnetic";
@@ -63,10 +63,13 @@ export default function ThreadCard({
     tapStartRef.current = null;
   }, []);
 
-  const spotlightBackground = useTransform(
-    [mouseX, mouseY],
-    ([x, y]) => `radial-gradient(600px circle at ${x}px ${y}px, rgba(56, 189, 248, 0.06), transparent 40%)`
-  );
+  // Static gradient string; only the two custom properties move on mousemove.
+  // (useTransform rather than useMotionTemplate: the tagged template makes the
+  // React Compiler bail on this component, which silently drops lint coverage.)
+  const mouseXPx = useTransform(mouseX, (v) => `${v}px`);
+  const mouseYPx = useTransform(mouseY, (v) => `${v}px`);
+  const spotlightBackground =
+    "radial-gradient(600px circle at var(--mx) var(--my), rgba(56, 189, 248, 0.06), transparent 40%)";
 
   return (
     <a
@@ -83,12 +86,11 @@ export default function ThreadCard({
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        whileHover={isTouchDevice ? {} : { y: -4 }}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/5 bg-slate-900/40 p-8",
-          "pointer-fine:backdrop-blur-sm pointer-coarse:bg-slate-900/70",
-          "transition-colors duration-500 ease-out",
-          "hover:bg-slate-900/60 hover:border-sky-500/30"
+          // card-flat owns radius, tint, border, shadow and the hover lift
+          "card-flat group relative flex h-full flex-col overflow-hidden p-8",
+          "pointer-fine:backdrop-blur-sm",
+          "hover:border-sky-500/30"
         )}
       >
         {/* Dynamic Spotlight Effect */}
@@ -97,7 +99,9 @@ export default function ThreadCard({
           style={{
             opacity: spotlightOpacity,
             background: spotlightBackground,
-          }}
+            "--mx": mouseXPx,
+            "--my": mouseYPx,
+          } as MotionStyle}
           aria-hidden="true"
         />
 
@@ -121,7 +125,7 @@ export default function ThreadCard({
                 <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
               </span>
               <span className="sr-only"> (opens in a new tab)</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
             </div>
           </Magnetic>
         </div>

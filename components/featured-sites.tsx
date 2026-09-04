@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import {
-  ExternalLink,
+  ArrowUpRight,
   Sparkles,
   Workflow,
   Microscope,
@@ -73,7 +73,8 @@ function OgLinkCard({ site, className }: OgLinkCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-slate-700/60 bg-slate-900/90 shadow-lg shadow-slate-950/50 transition-[border-color,box-shadow] duration-300 pointer-fine:backdrop-blur-sm hover:border-slate-600/80 hover:shadow-xl hover:shadow-violet-500/10",
+        // card-raised owns radius, tint, border, shadow and the hover lift/scale
+        "card-raised group relative flex flex-col overflow-hidden pointer-fine:backdrop-blur-sm",
         className
       )}
     >
@@ -119,13 +120,18 @@ function OgLinkCard({ site, className }: OgLinkCardProps) {
                 </div>
               </div>
             </div>
+            {/* Only when a real preview failed to load, not when the site has no ogImage. */}
+            {imageError && (
+              <span className="absolute bottom-2 right-2 rounded-md bg-slate-950/70 px-1.5 py-0.5 text-[11px] text-slate-400">
+                Preview unavailable
+              </span>
+            )}
           </>
         )}
         {/* Overlay gradient for better text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
-        {/* Decorative corner elements */}
-        <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/[0.02] blur-3xl" />
-        <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-white/[0.02] blur-3xl" />
+        {/* The two 2%-white blurred corner glows that used to sit here were
+            invisible on both themes and cost a blur pass per card; removed. */}
       </div>
 
       {/* Content area - like OG link previews */}
@@ -141,7 +147,7 @@ function OgLinkCard({ site, className }: OgLinkCardProps) {
             <Icon className="h-2.5 w-2.5 text-white" />
           </div>
           <span className="font-medium">{domain}</span>
-          <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5" aria-hidden="true" />
+          <ArrowUpRight className="ml-auto h-3.5 w-3.5 opacity-0 transition-[opacity,transform] duration-200 pointer-coarse:opacity-100 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
         </div>
 
         {/* Title */}
@@ -159,7 +165,7 @@ function OgLinkCard({ site, className }: OgLinkCardProps) {
       {/* Hover border glow effect */}
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 rounded-xl opacity-0 ring-1 ring-inset transition-opacity duration-300 group-hover:opacity-100",
+          "pointer-events-none absolute inset-0 rounded-2xl opacity-0 ring-1 ring-inset transition-opacity duration-300 group-hover:opacity-100",
           site.id === "jeffreysprompts" && "ring-amber-500/30",
           site.id === "agent-flywheel" && "ring-violet-500/30",
           site.id === "brennerbot" && "ring-teal-500/30",

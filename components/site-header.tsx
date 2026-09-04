@@ -167,12 +167,13 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
               Budget: the container is max-w-7xl (1280px) minus 2x32px padding
               = 1216px of content, and the brand block occupies ~186px of it.
               Eight items + search + theme toggle + CTA need ~980px at
-              gap-4/px-3, so the full bar only fits from 1280px up — below that
-              it overflowed its container and body{overflow-x:hidden} silently
-              clipped Contact, Search and the "Let's talk" CTA off the right
-              edge. Narrower viewports get the full-screen menu instead. */}
+              gap-4/px-3, so the full bar only fits from 1280px up (xl).
+              Tablet-landscape and small laptops (lg, 1024-1279px) get a
+              compact tier instead of the phone drawer: gap-2, px-2 pills, no
+              kbd hint, and no CTA (Contact is already a nav item). That is
+              ~745px of a ~774px budget at 1024px — measured, not guessed. */}
           <nav
-            className="hidden items-center gap-4 xl:flex"
+            className="hidden items-center gap-2 lg:flex xl:gap-4"
             aria-label="Main navigation"
           >
             {navItems.map((item) => (
@@ -208,7 +209,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             <Magnetic strength={0.15}>
               <HapticLink
                 href="/contact"
-                className="ml-1 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 2xl:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
+                className="ml-1 hidden shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 2xl:px-5 py-2 text-sm font-semibold text-white backdrop-blur-md transition-[background-color,transform] hover:bg-white/10 hover:scale-105 active:scale-95 xl:inline-flex"
               >
                 Let&apos;s talk
               </HapticLink>
@@ -216,12 +217,12 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
           </nav>
 
           {/* Mobile Menu Toggle, Theme Toggle & Search — mirrors the desktop
-              nav's xl gate. The links collapse into the full-screen menu below
-              xl, but the primary CTA stays in the bar from md up (it fits with
-              ~250px to spare at 768px), so tablet and small-laptop visitors
-              don't have to open a menu to find it. Phones keep theme toggle,
-              search and menu toggle only. */}
-          <div className="flex items-center gap-2.5 sm:gap-3 xl:hidden">
+              nav's lg gate. The links collapse into the full-screen menu below
+              lg, but the primary CTA stays in the bar from md up (it fits with
+              ~250px to spare at 768px), so tablet-portrait visitors don't have
+              to open a menu to find it. Phones keep theme toggle, search and
+              menu toggle only. */}
+          <div className="flex items-center gap-2.5 sm:gap-3 lg:hidden">
             {!open && (
               <HapticLink
                 href="/contact"
@@ -247,7 +248,7 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             <button
               type="button"
               ref={menuToggleRef}
-              className="relative z-[95] inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-all active:scale-95"
+              className="relative z-[95] inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition-transform active:scale-95"
               onClick={() => setOpen((v) => !v)}
               onTouchStart={lightTap}
               aria-label={open ? "Close navigation menu" : "Open navigation menu"}

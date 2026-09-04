@@ -213,7 +213,7 @@ export default function ConsultingPage() {
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-[2rem] border border-slate-800/60 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 p-6 backdrop-blur-xl sm:p-10 shadow-2xl"
+            className="relative overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 p-6 backdrop-blur-xl sm:p-10 shadow-2xl"
           >
             {/* Background effects */}
             <div className="pointer-events-none absolute inset-0">

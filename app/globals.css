@@ -384,6 +384,40 @@ body::after {
   box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
 }
 
+/* Card tiers (defined next to .glass-card below): the dark elevation tokens
+   carry white-alpha ring highlights that read as dirt on a light canvas, so
+   the same soft black shadows as .glass-card stand in for them here. */
+@layer components {
+  .light .card-flat {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(226, 232, 240, 0.9);
+  }
+
+  .light .card-raised,
+  .light .card-feature {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(226, 232, 240, 0.9);
+  }
+
+  .light .card-feature {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  }
+
+  .light .card-flat:hover,
+  .light .card-raised:hover {
+    border-color: rgba(203, 213, 225, 1);
+  }
+
+  .light .card-flat:hover {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  }
+
+  .light .card-raised:hover,
+  .light .card-feature:hover {
+    box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  }
+}
+
 /* Light Mode Editorial Prose */
 /* Body and heading colours flip through the role tokens on .prose itself;
    only the accent-specific rules need light overrides. */
@@ -568,7 +602,7 @@ body::after {
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
   text-decoration-color: rgba(125, 211, 252, 0.3);
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .prose a:hover {
@@ -644,11 +678,23 @@ body::after {
   text-wrap: pretty;
 }
 
+/*
+  Brand gradient text (hero H1). Solid heading colour first so a browser
+  without background-clip:text shows readable text rather than an invisible
+  transparent span; the gradient fill only applies where it is supported.
+*/
 .text-gradient {
-  background: linear-gradient(to right, #38bdf8, #a78bfa, #34d399);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--site-text-heading);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .text-gradient {
+    background-image: var(--gradient-hero);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
 }
 
 /* 
@@ -678,7 +724,12 @@ body::after {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: var(--elevation-0);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Scoped: `all` also transitioned the backdrop-filter, which forced a
+     re-blur on every frame of the hover lift. */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    background 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glass-card:hover {
@@ -691,6 +742,69 @@ body::after {
 .glass-card:active {
   transform: translateY(0) scale(1);
   box-shadow: var(--elevation-0);
+}
+
+/*
+  ========================================
+  CARD TIERS
+  ========================================
+  Three named surfaces replace the ad-hoc `rounded-* border-white/5
+  bg-slate-900/40 hover:…` recipes that used to differ per component:
+
+    .card-flat     list/grid cards (projects, writing, threads, media rows,
+                   skeletons) — quiet tint, hairline border, 2px lift
+    .card-raised   interactive feature cards (demos, endorsements, TLDR
+                   tools, OG link cards, research) — stronger tint, 4px lift
+                   plus a hint of scale, elevation-2 on hover
+    .card-feature  hero/featured panels — solid-ish surface that rests at
+                   elevation-1 and rises to elevation-3
+
+  The tiers own radius, background, border, shadow, lift and their
+  transitions. Per-card accents (a coloured `hover:border-*`, a focus ring,
+  padding, `overflow-hidden`) stay as utilities on the element. They live in
+  the `components` layer so those utilities keep winning the cascade, and
+  they read the role tokens so light mode flips them without a `light:`
+  variant (see the `.light` overrides near `.light .glass-card`).
+*/
+@layer components {
+  .card-flat,
+  .card-raised,
+  .card-feature {
+    border-radius: var(--radius-2xl);
+    border: 1px solid color-mix(in srgb, var(--site-ink) 5%, transparent);
+    transition: border-color 0.3s ease-out, box-shadow 0.3s ease-out, transform 0.3s ease-out;
+  }
+
+  .card-flat {
+    background: color-mix(in srgb, var(--site-bg-surface) 40%, transparent);
+  }
+
+  .card-flat:hover {
+    border-color: color-mix(in srgb, var(--site-ink) 12%, transparent);
+    transform: translateY(-2px);
+    box-shadow: var(--elevation-1);
+  }
+
+  .card-raised {
+    background: color-mix(in srgb, var(--site-bg-surface) 55%, transparent);
+    border-color: color-mix(in srgb, var(--site-ink) 10%, transparent);
+  }
+
+  .card-raised:hover {
+    border-color: color-mix(in srgb, var(--site-ink) 18%, transparent);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--elevation-2);
+  }
+
+  .card-feature {
+    background: color-mix(in srgb, var(--site-bg-surface) 70%, transparent);
+    border-color: color-mix(in srgb, var(--site-ink) 12%, transparent);
+    box-shadow: var(--elevation-1);
+  }
+
+  .card-feature:hover {
+    box-shadow: var(--elevation-3);
+  }
 }
 
 .floating-chip {
@@ -1157,7 +1271,7 @@ select:focus-visible {
 .hd-fade-section {
   opacity: 0;
   transform: translateY(40px);
-  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hd-fade-section.hd-visible {
@@ -1285,7 +1399,7 @@ select:focus-visible {
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
   text-transform: uppercase;
   min-height: 44px;
 }
@@ -1304,7 +1418,7 @@ select:focus-visible {
   letter-spacing: 0.15em;
   border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
   text-transform: uppercase;
   min-height: 44px;
 }
@@ -1420,7 +1534,7 @@ select:focus-visible {
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
   min-height: 44px;
 }
 
@@ -1440,7 +1554,7 @@ select:focus-visible {
   letter-spacing: 0.15em;
   border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
   min-height: 44px;
 }
 
@@ -1459,7 +1573,8 @@ select:focus-visible {
   backdrop-filter: blur(24px);
   position: relative;
   overflow: hidden;
-  transition: all 0.5s ease;
+  /* Not `all`: that included backdrop-filter and re-blurred per frame. */
+  transition: transform 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, background-color 0.5s ease;
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
 }
 
@@ -1634,7 +1749,7 @@ select:focus-visible {
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  transition: all 0.15s ease-out;
+  transition: color 0.15s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out, box-shadow 0.15s ease-out, transform 0.15s ease-out, opacity 0.15s ease-out;
   text-transform: uppercase;
 }
 
@@ -1662,7 +1777,7 @@ select:focus-visible {
   letter-spacing: 0.15em;
   border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.15s ease-out;
+  transition: color 0.15s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out, box-shadow 0.15s ease-out, transform 0.15s ease-out, opacity 0.15s ease-out;
   text-transform: uppercase;
 }
 
@@ -2578,7 +2693,8 @@ select:focus-visible {
   backdrop-filter: blur(24px);
   position: relative;
   overflow: hidden;
-  transition: all 0.5s ease;
+  /* Not `all`: that included backdrop-filter and re-blurred per frame. */
+  transition: transform 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, background-color 0.5s ease;
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
 }
 

@@ -40,7 +40,16 @@ export const navItems: NavItem[] = [
   { href: "/contact", label: "Contact" },
 ];
 
-export type Stat = { label: string; value: string; helper?: string };
+export type Stat = {
+  label: string;
+  value: string;
+  helper?: string;
+  /**
+   * Month the figure was last hand-updated ("Sep 2026"). Set on stats that are
+   * frozen in this file; leave undefined when the value is fetched live.
+   */
+  asOf?: string;
+};
 
 export const heroStats: Stat[] = [
   {
@@ -57,11 +66,13 @@ export const heroStats: Stat[] = [
     label: "Contributions (1yr)",
     value: "262K+",
     helper: "262,353 GitHub contributions in the past year, powered by 63 AI agent subscriptions (~$13.5K/mo).",
+    asOf: "Sep 2026",
   },
   {
     label: "Audience on X",
     value: "48K+",
     helper: "48.7K followers: analysts, founders, researchers, and engineers.",
+    asOf: "Sep 2026",
   },
 ];
 
@@ -249,7 +260,9 @@ export const endorsements: Endorsement[] = [
     },
     source: {
       type: "other",
-      url: "https://steve-yegge.medium.com/",
+      // The specific post the quote comes from ("Beads Best Practices"), not
+      // the blog root, so the claim stays verifiable as newer posts land.
+      url: "https://steve-yegge.medium.com/beads-best-practices-2db636b9760c",
       platform: "Medium",
     },
     date: "2026",
@@ -3579,7 +3592,12 @@ export const tldrFlywheelTools: TldrFlywheelTool[] = [
 
 // Star counts come from lib/data/tldr-tool-stars.json (written by scripts/fetch-tldr-stars.ts).
 // There are deliberately no literal `stars:` values above so the page cannot drift from the data file.
-const _starsMap = tldrToolStarsData as Record<string, number>;
+// The file also carries a top-level `fetchedAt` ISO string; only numeric entries are tool stars.
+const _starsMap: Record<string, number> = Object.fromEntries(
+  Object.entries(tldrToolStarsData).filter(
+    (entry): entry is [string, number] => typeof entry[1] === "number"
+  )
+);
 for (const tool of tldrFlywheelTools) {
   if (_starsMap[tool.id] !== undefined) {
     tool.stars = _starsMap[tool.id];
@@ -3596,6 +3614,16 @@ export const tldrToolStarTotals = {
     .filter((t) => t.category === "core")
     .reduce((sum, t) => sum + (t.stars ?? 0), 0),
 };
+
+/**
+ * ISO timestamp of the last `bun run fetch-tldr-stars` run that produced
+ * lib/data/tldr-tool-stars.json, or null for a file written before the
+ * script recorded it. Lets the UI caption the star totals honestly.
+ */
+export const tldrToolStarsFetchedAt: string | null =
+  typeof (tldrToolStarsData as { fetchedAt?: unknown }).fetchedAt === "string"
+    ? (tldrToolStarsData as { fetchedAt: string }).fetchedAt
+    : null;
 
 const _tldrCoreCount = tldrFlywheelTools.filter((t) => t.category === "core").length;
 const _tldrSupportingCount = tldrFlywheelTools.length - _tldrCoreCount;

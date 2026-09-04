@@ -8,6 +8,7 @@ import { TldrHero } from "@/components/tldr-hero";
 import { TldrToolGrid } from "@/components/tldr-tool-grid";
 import { TldrSynergyDiagram } from "@/components/tldr-synergy-diagram";
 import { TldrSectionNav } from "@/components/tldr-section-nav";
+import { SectionSubhead } from "@/components/section-shell";
 import { tldrFlywheelTools, tldrPageData } from "@/lib/content";
 
 // =============================================================================
@@ -49,9 +50,7 @@ function FlywheelExplanation() {
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: reducedMotion ? 0 : 0.5 }}
           >
-            <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
-              {flywheelExplanation.title}
-            </h2>
+            <SectionSubhead>{flywheelExplanation.title}</SectionSubhead>
             <div className="mt-4 space-y-3 sm:mt-6 sm:space-y-4">
               {flywheelExplanation.paragraphs.map((paragraph, index) => (
                 <motion.p
@@ -128,9 +127,7 @@ function FooterCTA({ id }: { id?: string }) {
   return (
     <section id={id} className="scroll-mt-32 border-t border-white/5 py-12 md:py-16">
       <div className="container mx-auto px-4 text-center">
-        <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
-          Get Started
-        </h2>
+        <SectionSubhead>Get Started</SectionSubhead>
         <p className="mx-auto mt-4 max-w-xl text-sm text-slate-400 sm:text-base">
           The fastest way to set up the entire flywheel ecosystem is with ACFS.
           One command, 30 minutes, and you&apos;re ready to go.

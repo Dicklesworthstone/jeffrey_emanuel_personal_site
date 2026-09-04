@@ -1,6 +1,6 @@
 "use client";
 
-import SectionShell from "@/components/section-shell";
+import SectionShell, { Eyebrow } from "@/components/section-shell";
 import { siteConfig } from "@/lib/content";
 import { Mail, MessageCircle, Github, Linkedin } from "lucide-react";
 import NewsletterSignup from "@/components/newsletter-signup";
@@ -35,9 +35,7 @@ export default function ContactPage() {
             {/* Primary contact card with gradient border */}
             <div className="relative rounded-2xl p-px bg-gradient-to-br from-sky-500/30 via-violet-500/20 to-sky-500/30">
               <div className="rounded-2xl bg-slate-950/90 p-6 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                  Primary contact
-                </p>
+                <Eyebrow className="block">Primary contact</Eyebrow>
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                   <a
                     href={`mailto:${siteConfig.email}`}
@@ -73,9 +71,7 @@ export default function ContactPage() {
 
           <div className="space-y-4 text-sm text-slate-300">
             <div className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                Social
-              </p>
+              <Eyebrow className="block">Social</Eyebrow>
               {/* Mobile: horizontal icon row; Desktop: vertical list */}
               <div className="mt-3 flex gap-3 md:hidden">
                 {[

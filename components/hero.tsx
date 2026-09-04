@@ -244,7 +244,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
               ))}
               <br className="hidden sm:block" />
               <motion.span
-                className="bg-gradient-to-r from-sky-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent inline-block"
+                className="text-gradient inline-block"
                 initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={
@@ -413,7 +413,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
                 onPointerCancel={handleCtaPointerCancel}
                 onClick={handlePrimaryCtaClick}
                 className={cn(
-                  "btn-glow-primary group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white transition-all active:scale-95",
+                  "btn-glow-primary group relative inline-flex h-14 items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 text-sm font-bold tracking-wide text-white transition-[transform,box-shadow] active:scale-95",
                 )}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100" aria-hidden="true" />
@@ -426,7 +426,7 @@ export default function Hero({ stats = heroStats }: HeroProps) {
             <Magnetic strength={0.15}>
               <Link
                 href={heroContent.secondaryCta.href}
-                className="btn-glow-secondary group inline-flex h-14 items-center gap-2.5 rounded-full border border-slate-700/50 bg-slate-900/40 px-8 text-sm font-bold tracking-wide text-white pointer-fine:backdrop-blur-md pointer-coarse:bg-slate-900/70 transition-all hover:border-slate-600 hover:bg-slate-800/60 hover:shadow-[0_0_20px_rgba(56,189,248,0.15)] active:scale-95"
+                className="btn-glow-secondary group inline-flex h-14 items-center gap-2.5 rounded-full border border-slate-700/50 bg-slate-900/40 px-8 text-sm font-bold tracking-wide text-white pointer-fine:backdrop-blur-md pointer-coarse:bg-slate-900/70 transition-[background-color,border-color,box-shadow,transform] hover:border-slate-600 hover:bg-slate-800/60 hover:shadow-[0_0_20px_rgba(56,189,248,0.15)] active:scale-95"
               >
                 <Briefcase className="h-4 w-4 text-slate-400 transition-colors motion-reduce:transition-none group-hover:text-sky-300" aria-hidden="true" />
                 <span>{heroContent.secondaryCta.label}</span>

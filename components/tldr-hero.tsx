@@ -4,7 +4,17 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useReducedMotion, useInView, AnimatePresence } from "framer-motion";
 import { Cog, Zap, GitBranch, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { tldrPageData } from "@/lib/content";
+import { tldrPageData, tldrToolStarsFetchedAt } from "@/lib/content";
+
+// "Sep 2026" caption for the star total, which is a committed snapshot rather
+// than a live figure. Pinned locale + UTC so server and client agree.
+const STARS_AS_OF = tldrToolStarsFetchedAt
+  ? new Date(tldrToolStarsFetchedAt).toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+  : null;
 
 // =============================================================================
 // TYPES
@@ -32,12 +42,14 @@ function parseStatValue(value: string): { numeric: number; suffix: string } {
 function AnimatedStat({
   label,
   value,
+  caption,
   index,
   reducedMotion,
   isInView,
 }: {
   label: string;
   value: string;
+  caption?: string | null;
   index: number;
   reducedMotion: boolean;
   isInView: boolean;
@@ -87,6 +99,9 @@ function AnimatedStat({
       <div className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-400">
         {label}
       </div>
+      {caption && (
+        <div className="mt-0.5 text-[11px] font-medium text-slate-500">{caption}</div>
+      )}
     </motion.div>
   );
 }
@@ -248,6 +263,7 @@ export function TldrHero({ className, id }: TldrHeroProps) {
                 key={stat.label}
                 label={stat.label}
                 value={stat.value}
+                caption={stat.label === "GitHub Stars" && STARS_AS_OF ? `as of ${STARS_AS_OF}` : null}
                 index={i}
                 reducedMotion={reducedMotion}
                 isInView={isInView}

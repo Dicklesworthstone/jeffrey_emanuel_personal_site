@@ -7,7 +7,7 @@ export default function SkeletonStats() {
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-2xl border border-slate-800/80 bg-slate-900/70 px-4 py-4 shadow-lg shadow-slate-950/70 backdrop-blur"
+          className="animate-pulse rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-4 shadow-lg shadow-slate-950/70 backdrop-blur"
         >
           <div className="h-3 w-24 rounded bg-slate-800/80" />
           <div className="mt-3 h-8 w-16 rounded bg-slate-800/60" />

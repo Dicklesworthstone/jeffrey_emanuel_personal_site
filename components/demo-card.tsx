@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import { ExternalLink, Play, Cpu, GraduationCap, Wrench } from "lucide-react";
+import { ArrowUpRight, Play, Cpu, GraduationCap, Wrench } from "lucide-react";
 import type { LiveDemo, DemoCategory } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
@@ -118,10 +118,8 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-black/20",
-          "transition-all duration-300 ease-out",
-          "hover:bg-black/40 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50",
-          "focus-within:scale-[1.02] focus-within:shadow-2xl focus-within:shadow-black/50",
+          // card-raised owns radius, tint, border, shadow and the hover lift/scale
+          "card-raised group relative flex h-full flex-col overflow-hidden",
           config.hoverBorder,
           featured ? "p-6 md:p-8" : "p-5 md:p-6"
         )}
@@ -229,7 +227,7 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
             >
               <Play className="h-3 w-3 fill-current" aria-hidden="true" />
               <span className="hidden sm:inline">Try It</span>
-              <ExternalLink className="h-3 w-3 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
             </div>
           </div>
         </div>

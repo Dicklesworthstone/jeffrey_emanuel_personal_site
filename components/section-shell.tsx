@@ -6,6 +6,56 @@ import type { LucideIcon } from "lucide-react";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 
+/*
+  Section header ladder. SectionShell below is the canonical eyebrow / icon /
+  title / kicker stack; pages that need a piece of it outside a SectionShell
+  (a feature banner's eyebrow, a sub-section heading inside a section) use the
+  two small components exported here instead of hand-rolling the classes, so
+  the sizes and colours stay on one ladder:
+
+    Eyebrow          text-xs bold uppercase tracking-widest, sky (default) or violet
+    SectionShell h   clamp(1.875rem, 5vw, 3.75rem)   page / section title
+    SectionSubhead   text-xl sm:text-2xl              sub-section heading
+*/
+const EYEBROW_BASE_CLASSES = "text-xs font-bold uppercase tracking-widest";
+const EYEBROW_SKY_CLASSES = "text-sky-400/90 shadow-sky-500/20 drop-shadow-sm";
+const EYEBROW_VIOLET_CLASSES = "text-violet-400";
+
+type EyebrowProps = {
+  children: React.ReactNode;
+  className?: string;
+  color?: "sky" | "violet";
+};
+
+export function Eyebrow({ children, className, color = "sky" }: EyebrowProps) {
+  return (
+    <span
+      className={cn(
+        EYEBROW_BASE_CLASSES,
+        color === "sky" ? EYEBROW_SKY_CLASSES : EYEBROW_VIOLET_CLASSES,
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+type SectionSubheadProps = {
+  children: React.ReactNode;
+  className?: string;
+  as?: "h2" | "h3" | "h4";
+  id?: string;
+};
+
+export function SectionSubhead({ children, className, as: Tag = "h2", id }: SectionSubheadProps) {
+  return (
+    <Tag id={id} className={cn("text-xl font-bold tracking-tight text-white sm:text-2xl", className)}>
+      {children}
+    </Tag>
+  );
+}
+
 type Props = {
   id?: string;
   icon?: LucideIcon;
@@ -76,7 +126,7 @@ export default function SectionShell({
           {eyebrow && (
             <div className="mb-6 flex items-center gap-3">
               <div className="h-px w-6 bg-gradient-to-r from-sky-500/80 to-transparent" />
-              <p className="text-xs font-bold uppercase tracking-widest text-sky-400/90 shadow-sky-500/20 drop-shadow-sm">
+              <p className={cn(EYEBROW_BASE_CLASSES, EYEBROW_SKY_CLASSES)}>
                 {eyebrow}
               </p>
             </div>

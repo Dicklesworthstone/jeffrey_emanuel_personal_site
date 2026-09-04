@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { getProjectBySlug, getProjectSlugs, type Project } from "@/lib/content";
 import { JsonLd } from "@/components/json-ld";
-import SectionShell from "@/components/section-shell";
+import SectionShell, { SectionSubhead } from "@/components/section-shell";
 import { cn, formatDate } from "@/lib/utils";
 import NotableStargazersWrapper from "@/components/notable-stargazers-wrapper";
 import type { StargazerIntelligence } from "@/lib/stargazer-types";
@@ -209,16 +209,16 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
         {/* Notable stargazers - only rendered when the CI data actually has entries for this repo */}
         {stargazerRepoKey && stargazerInfo && (
           <div className="mb-12">
-            <h2 className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-xl font-bold text-white">
+            <SectionSubhead className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1">
               <Users className={cn("h-5 w-5", accentColor)} aria-hidden="true" />
               Notable stargazers
               {stargazerInfo.lastUpdated && (
-                <span className="text-sm font-medium text-slate-400">
+                <span className="text-sm font-medium tracking-normal text-slate-400">
                   · as of{" "}
                   <time dateTime={stargazerInfo.lastUpdated}>{formatDate(stargazerInfo.lastUpdated)}</time>
                 </span>
               )}
-            </h2>
+            </SectionSubhead>
             <NotableStargazersWrapper
               variant="project"
               repoSlug={stargazerRepoKey}
@@ -231,10 +231,10 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
         {/* Features */}
         {details?.features && details.features.length > 0 && (
           <div className="mb-12">
-            <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-white">
+            <SectionSubhead className="mb-6 flex items-center gap-3">
               <Check className={cn("h-5 w-5", accentColor)} />
               Features
-            </h2>
+            </SectionSubhead>
             <ul className="grid gap-3 sm:grid-cols-2">
               {details.features.map((feature) => (
                 <li
@@ -252,10 +252,10 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
         {/* Installation */}
         {details?.installation && (
           <div className="mb-12">
-            <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-white">
+            <SectionSubhead className="mb-6 flex items-center gap-3">
               <Terminal className={cn("h-5 w-5", accentColor)} />
               Installation
-            </h2>
+            </SectionSubhead>
             <div className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
               <div className="border-b border-white/10 bg-white/5 px-4 py-2">
                 <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -274,10 +274,10 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
         {/* Usage */}
         {details?.usage && (
           <div className="mb-12">
-            <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-white">
+            <SectionSubhead className="mb-6 flex items-center gap-3">
               <BookOpen className={cn("h-5 w-5", accentColor)} />
               Usage
-            </h2>
+            </SectionSubhead>
             <div className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
               <div className="border-b border-white/10 bg-white/5 px-4 py-2">
                 <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -311,10 +311,10 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
         {/* Related Projects */}
         {relatedProjects.length > 0 && (
           <div className="mb-12">
-            <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-white">
+            <SectionSubhead className="mb-6 flex items-center gap-3">
               <LinkIcon className={cn("h-5 w-5", accentColor)} />
               Related Projects
-            </h2>
+            </SectionSubhead>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {relatedProjects.map((related) => (
                 <Link

@@ -149,14 +149,17 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       (async () => {
-        const cachedResponse = await caches.match(request);
+        // Scope the lookup to the current cache (like the SWR branch below)
+        // rather than the global caches.match(), so a stale entry from a
+        // previous CACHE_VERSION can never be served mid-activation.
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(request);
         if (cachedResponse) {
           return cachedResponse;
         }
         try {
           const networkResponse = await fetch(request);
           if (networkResponse.ok) {
-            const cache = await caches.open(CACHE_NAME);
             cache.put(request, networkResponse.clone());
             trimCache(cache);
           }

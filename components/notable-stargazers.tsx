@@ -443,7 +443,7 @@ export function NotableStargazers({
         >
           <ExternalLink className="h-3 w-3" />
           Data last updated{" "}
-          <time dateTime={stargazerData.lastUpdated} suppressHydrationWarning>
+          <time dateTime={stargazerData.lastUpdated}>
             {new Date(stargazerData.lastUpdated).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",

@@ -69,8 +69,9 @@ async function main() {
 
   console.log("[STARS] Fetching star counts for /tldr tools...\n");
 
-  // Load existing data as fallback
-  let existing: Record<string, number> = {};
+  // Load existing data as fallback. The file is per-tool star counts plus a
+  // top-level `fetchedAt` ISO string (not a tool entry).
+  let existing: Record<string, number | string> = {};
   try {
     existing = JSON.parse(readFileSync(OUTPUT_FILE, "utf-8"));
   } catch {
@@ -81,18 +82,20 @@ async function main() {
 
   for (const [toolId, repo] of Object.entries(TOOL_REPOS)) {
     const stars = await fetchRepoStars(repo);
+    const cached = existing[toolId];
     if (stars !== null) {
       results[toolId] = stars;
       console.log(`  ${toolId}: ${stars}`);
-    } else if (existing[toolId] !== undefined) {
-      results[toolId] = existing[toolId];
-      console.log(`  ${toolId}: ${existing[toolId]} (cached)`);
+    } else if (typeof cached === "number") {
+      results[toolId] = cached;
+      console.log(`  ${toolId}: ${cached} (cached)`);
     }
   }
 
   // Ensure output directory exists
   mkdirSync(dirname(OUTPUT_FILE), { recursive: true });
-  writeFileSync(OUTPUT_FILE, JSON.stringify(results, null, 2) + "\n");
+  const output = { ...results, fetchedAt: new Date().toISOString() };
+  writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2) + "\n");
   console.log(`\n[STARS] Written ${Object.keys(results).length} entries to ${OUTPUT_FILE}`);
 }
 

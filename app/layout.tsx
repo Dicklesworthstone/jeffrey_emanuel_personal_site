@@ -83,12 +83,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="scroll-smooth bg-slate-950 text-slate-100" suppressHydrationWarning>
       <head>
         {/* Preconnect to external domains for faster resource loading */}
-        {/* Google Analytics - preconnect with crossorigin for faster script loading */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        {/* Google Analytics additional domain for data collection */}
-        <link rel="preconnect" href="https://www.google-analytics.com" />
-        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        {/* Google Analytics - only when a measurement ID is configured, so a
+            build without GA opens no idle sockets to Google. */}
+        {gaId && (
+          <>
+            <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+            <link rel="preconnect" href="https://www.google-analytics.com" />
+            <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+          </>
+        )}
         {/* GitHub for project links and avatars */}
         <link rel="dns-prefetch" href="https://github.com" />
         <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />

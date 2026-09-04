@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Star, GitFork, Box, Beaker, Repeat } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, type MotionStyle } from "framer-motion";
 import type { Project } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
@@ -133,10 +133,13 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
     hoverBorder = "group-hover:border-orange-500/30";
   }
 
-  const spotlightBackground = useTransform(
-    [mouseX, mouseY],
-    ([mx, my]) => `radial-gradient(600px circle at ${mx}px ${my}px, rgba(${spotlightColor}, 0.15), transparent 40%)`
-  );
+  // The gradient string is static; only the two custom properties move, so a
+  // mousemove updates two vars instead of allocating a new background string.
+  // (useTransform rather than useMotionTemplate: the tagged template makes the
+  // React Compiler bail on this component, which silently drops lint coverage.)
+  const mouseXPx = useTransform(mouseX, (v) => `${v}px`);
+  const mouseYPx = useTransform(mouseY, (v) => `${v}px`);
+  const spotlightBackground = `radial-gradient(600px circle at var(--mx) var(--my), rgba(${spotlightColor}, 0.15), transparent 40%)`;
 
   const isLarge = project.size === "large";
   const isInternalLink = Boolean(project.slug);
@@ -162,11 +165,10 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
           transformStyle: "preserve-3d",
         }}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-slate-900/40 p-4 sm:p-6 md:p-8",
-          // Backdrop blur only for fine pointers; touch devices get a solid tint instead
-          "pointer-fine:backdrop-blur-sm pointer-coarse:bg-slate-900/70",
-          "transition-colors duration-500 ease-out",
-          "hover:bg-slate-900/60 hover:border-white/10",
+          // card-flat owns radius, tint, border, shadow and the hover lift.
+          // No backdrop blur here: a backdrop filter inside a preserve-3d tilt
+          // is re-sampled every frame the card rotates.
+          "card-flat group relative flex h-full flex-col overflow-hidden p-4 sm:p-6 md:p-8",
           "active:scale-[0.98] active:brightness-110",
           "focus-within:border-white/20",
           hoverBorder
@@ -183,7 +185,9 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
           style={{
             opacity: spotlightOpacity,
             background: spotlightBackground,
-          }}
+            "--mx": mouseXPx,
+            "--my": mouseYPx,
+          } as MotionStyle}
           aria-hidden="true"
         />
 

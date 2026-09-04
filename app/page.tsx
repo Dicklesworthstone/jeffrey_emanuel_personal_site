@@ -1,5 +1,5 @@
 import Hero from "@/components/hero";
-import SectionShell from "@/components/section-shell";
+import SectionShell, { Eyebrow } from "@/components/section-shell";
 import ProjectCard from "@/components/project-card";
 import Timeline from "@/components/timeline";
 import AnimatedGrid from "@/components/animated-grid";
@@ -63,7 +63,11 @@ export default async function HomePage() {
       };
     }
     return stat;
-  }) : heroStats;
+  }) : heroStats.map((stat) =>
+    // Without live GitHub data the committed star count is as frozen as the
+    // other hand-updated stats, so label it the same way.
+    stat.label === "GitHub Stars" ? { ...stat, asOf: "Sep 2026" } : stat
+  );
 
   return (
     <>
@@ -130,9 +134,7 @@ export default async function HomePage() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/30">
                     <Workflow className="h-5 w-5 text-white" aria-hidden="true" />
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-violet-400">
-                    Featured Ecosystem
-                  </span>
+                  <Eyebrow color="violet">Featured Ecosystem</Eyebrow>
                 </div>
 
                 <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">

@@ -139,10 +139,8 @@ export function EndorsementCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-black/20",
-        "transition-all duration-300 ease-out",
-        "hover:bg-black/40 hover:scale-[1.01] hover:shadow-xl hover:shadow-black/40",
-        "focus-within:scale-[1.01] focus-within:shadow-xl focus-within:shadow-black/40",
+        // card-raised owns radius, tint, border, shadow and the hover lift/scale
+        "card-raised group relative flex flex-col overflow-hidden",
         config.hoverBorder,
         // Variant-specific padding and sizing
         isCompact && "p-4",
@@ -286,7 +284,7 @@ export function EndorsementCard({
         href={sourceUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-2xl sm:rounded-3xl"
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-2xl"
         aria-label={
           source === "other"
             ? `View the source of ${author}'s endorsement (opens in a new tab)`

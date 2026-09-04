@@ -1,7 +1,7 @@
 export default function SkeletonCard() {
   return (
     <div
-      className="skeleton-shimmer rounded-2xl border border-slate-800/80 bg-slate-950/80 p-6 shadow-lg shadow-slate-950/80 md:p-8"
+      className="card-flat skeleton-shimmer p-6 md:p-8"
       aria-hidden="true"
     >
       {/* Header */}

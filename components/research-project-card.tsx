@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef, useCallback } from "react";
 import { motion, useMotionTemplate, useMotionValue, useReducedMotion } from "framer-motion";
-import { ArrowRight, BrainCircuit, FlaskConical, ExternalLink } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BrainCircuit, FlaskConical, ExternalLink } from "lucide-react";
 import { Project } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
@@ -44,17 +44,14 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
     <div
       onMouseMove={handleMouseMove}
       className={cn(
-        "relative flex min-h-[300px] h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/50 md:flex-row",
-        "transition-all duration-300 ease-out",
-        "hover:border-white/20 hover:scale-[1.01] hover:shadow-2xl hover:shadow-purple-900/20",
-        "focus-within:scale-[1.01] focus-within:shadow-2xl focus-within:shadow-purple-900/20",
-        "will-change-transform"
+        // card-raised owns radius, tint, border, shadow and the hover lift/scale
+        "card-raised relative flex min-h-[300px] h-full flex-col overflow-hidden md:flex-row"
       )}
     >
         {/* Animated Spotlight Background */}
         {!prefersReducedMotion && (
           <motion.div
-            className="pointer-events-none absolute -inset-px rounded-[2rem] opacity-0 transition duration-300 group-hover:opacity-100"
+            className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100"
             style={{
               background: useMotionTemplate`
                 radial-gradient(
@@ -114,7 +111,11 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
             
             <div className="flex items-center gap-2 text-sm font-bold text-purple-400 transition-all group-hover:text-purple-300">
               View Research
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              {isExternal ? (
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+              ) : (
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              )}
             </div>
           </div>
         </div>
@@ -128,7 +129,7 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
            <div className="absolute -right-40 bottom-0 h-[500px] w-[500px] rounded-full border-[1px] border-purple-500/10 opacity-30 blur-3xl" />
            
            {/* Interactive elements that could go here in V2: 3D canvas or WebGL */}
-           <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+           <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-500 pointer-coarse:opacity-100 group-hover:opacity-100">
               <ExternalLink className="h-12 w-12 text-white/10" />
            </div>
         </div>

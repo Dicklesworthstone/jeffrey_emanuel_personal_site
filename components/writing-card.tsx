@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, type MotionStyle } from "framer-motion";
 import type { WritingItem } from "@/lib/content";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { cn } from "@/lib/utils";
@@ -85,14 +85,14 @@ export const WritingCard = memo(function WritingCard({
   }, []);
 
   const isFeatured = item.featured;
-  const spotlightBackground = useTransform(
-    [mouseX, mouseY],
-    ([x, y]) => `radial-gradient(600px circle at ${x}px ${y}px, rgba(255, 255, 255, 0.06), transparent 40%)`
-  );
-
-  const borderClass = item.featured
-    ? "border-white/10 group-hover:border-white/20"
-    : "border-white/5 group-hover:border-white/10";
+  // Static gradient string; only the two custom properties move on mousemove.
+  // The wash reads the ink token so it stays a 6% tint in light mode too.
+  // (useTransform rather than useMotionTemplate: the tagged template makes the
+  // React Compiler bail on this component, which silently drops lint coverage.)
+  const mouseXPx = useTransform(mouseX, (v) => `${v}px`);
+  const mouseYPx = useTransform(mouseY, (v) => `${v}px`);
+  const spotlightBackground =
+    "radial-gradient(600px circle at var(--mx) var(--my), color-mix(in srgb, var(--site-ink) 6%, transparent), transparent 40%)";
 
   return (
     <Link 
@@ -110,12 +110,9 @@ export const WritingCard = memo(function WritingCard({
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        whileHover={isTouchDevice ? {} : { y: -4 }}
         className={cn(
-          "group relative flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border p-6 md:p-8",
-          "transition-colors duration-500 ease-out",
-          borderClass,
-          item.featured ? "bg-slate-900/40 hover:bg-slate-900/60" : "bg-slate-950/40 hover:bg-slate-950/60"
+          // card-flat owns radius, tint, border, shadow and the hover lift
+          "card-flat group relative flex h-full flex-col overflow-hidden p-6 md:p-8"
         )}
       >
         {/* Featured Gradient Background */}
@@ -129,7 +126,9 @@ export const WritingCard = memo(function WritingCard({
           style={{
             opacity: spotlightOpacity,
             background: spotlightBackground,
-          }}
+            "--mx": mouseXPx,
+            "--my": mouseYPx,
+          } as MotionStyle}
           aria-hidden="true"
         />
 

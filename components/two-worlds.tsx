@@ -159,12 +159,14 @@ export default function TwoWorlds() {
           className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-amber-500/10 via-white/5 to-violet-500/10 blur-[100px]"
         />
 
-        {/* Subtle grid pattern */}
+        {/* Subtle grid pattern. Lines are drawn in the ink token (white on dark,
+            near-black on light) so the grid stays a faint texture on both
+            canvases instead of a white-on-white no-op in light mode. */}
         <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(color-mix(in srgb, var(--site-ink) 10%, transparent) 1px, transparent 1px),
+              linear-gradient(90deg, color-mix(in srgb, var(--site-ink) 10%, transparent) 1px, transparent 1px)`,
             backgroundSize: "60px 60px",
           }}
         />
@@ -195,11 +197,13 @@ export default function TwoWorlds() {
             className="text-balance-pro text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl"
           >
             From{" "}
-            <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent light:from-amber-600 light:to-amber-700">
+            {/* Solid accents: a 400→500 same-hue gradient is perceptually flat,
+                so it cost the clip-text fallback risk for no visible shift. */}
+            <span className="text-amber-400 light:text-amber-700">
               Wall Street
             </span>{" "}
             to{" "}
-            <span className="bg-gradient-to-r from-violet-400 to-violet-500 bg-clip-text text-transparent light:from-violet-600 light:to-violet-700">
+            <span className="text-violet-400 light:text-violet-700">
               AI Infrastructure
             </span>
           </motion.h2>

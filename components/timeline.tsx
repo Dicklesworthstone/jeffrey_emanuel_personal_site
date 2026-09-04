@@ -52,7 +52,7 @@ export default function Timeline({ items: rawItems }: { items: TimelineItem[] })
               
               {/* Desktop Node Indicator */}
               <div className={cn(
-                "hidden md:flex absolute left-[8.5px] top-1 h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-slate-950/50 shadow-lg backdrop-blur-md z-10 transition-all duration-500",
+                "hidden md:flex absolute left-[8.5px] top-1 h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-slate-950/50 shadow-lg backdrop-blur-md z-10 transition-[border-color,box-shadow] duration-500",
                 "group-hover:border-sky-500/30 group-hover:shadow-[0_0_20px_-5px_rgba(56,189,248,0.3)]"
               )}>
                 {isLatest ? (

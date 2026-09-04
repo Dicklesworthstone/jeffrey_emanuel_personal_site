@@ -55,10 +55,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 // Star total derived from the same snapshot the TLDR diagram uses, so the
 // badge cannot drift from the per-tool numbers shown elsewhere.
-const FLYWHEEL_TOTAL_STARS = Object.values(tldrToolStars as Record<string, number>).reduce(
-  (sum, stars) => sum + stars,
-  0
-);
+// Skip the file's top-level `fetchedAt` ISO string: only numeric entries are tool stars.
+const FLYWHEEL_TOTAL_STARS = Object.values(tldrToolStars)
+  .filter((stars): stars is number => typeof stars === "number")
+  .reduce((sum, stars) => sum + stars, 0);
 
 // Layout constants - base values for desktop (scaled down on mobile via CSS transform)
 const CONTAINER_SIZE = 520;

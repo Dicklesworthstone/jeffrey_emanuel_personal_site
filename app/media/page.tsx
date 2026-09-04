@@ -1,9 +1,9 @@
 "use client";
 
-import SectionShell from "@/components/section-shell";
+import SectionShell, { SectionSubhead } from "@/components/section-shell";
 import { MediaItem, mediaItems } from "@/lib/content";
 import { formatDate } from "@/lib/utils";
-import { Newspaper, Podcast, PenLine, User, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Newspaper, Podcast, PenLine, User, type LucideIcon } from "lucide-react";
 
 // Icon lookup object defined at module level
 const mediaIconMap: Record<MediaItem["kind"], LucideIcon> = {
@@ -20,7 +20,7 @@ function MediaRow({ item }: { item: MediaItem }) {
       href={item.href}
       target="_blank"
       rel="noreferrer noopener"
-      className="group flex flex-col rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4 text-sm shadow-lg shadow-slate-950/80 transition hover:-translate-y-1 hover:border-sky-500/70"
+      className="card-flat group flex flex-col p-4 text-sm hover:border-sky-500/70"
     >
       <div className="flex items-center gap-3">
         <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900/80 text-sky-300">
@@ -44,8 +44,9 @@ function MediaRow({ item }: { item: MediaItem }) {
         </div>
       </div>
       <p className="mt-3 text-xs text-slate-400">{item.blurb}</p>
-      <span className="mt-3 text-xs font-semibold text-sky-300 group-hover:text-sky-200">
-        Open →
+      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-300 group-hover:text-sky-200">
+        Open
+        <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
       </span>
     </a>
   );
@@ -74,7 +75,7 @@ function MediaSection({
   if (items.length === 0) return null;
   return (
     <div className="mb-10">
-      <h2 className="mb-5 text-lg font-semibold text-slate-200">{title}</h2>
+      <SectionSubhead className="mb-5">{title}</SectionSubhead>
       <div className="grid gap-5 md:grid-cols-2">
         {sortByDateDesc(items).map((item) => (
           <MediaRow key={item.title} item={item} />
