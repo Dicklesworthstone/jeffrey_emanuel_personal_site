@@ -2,7 +2,9 @@
 
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { navItems } from "@/lib/content";
+// Root-layout hook: import from the small site-config module, not lib/content,
+// so every route doesn't ship the full content chunk (see lib/site-config.ts).
+import { navItems } from "@/lib/site-config";
 
 interface UseKeyboardShortcutsOptions {
   onOpenCommandPalette?: () => void;

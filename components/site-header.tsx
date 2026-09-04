@@ -6,7 +6,9 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X, Sparkles, Search } from "lucide-react";
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
-import { navItems, siteConfig } from "@/lib/content";
+// Root-layout chrome: import from the small site-config module, not lib/content,
+// so every route doesn't ship the full content chunk (see lib/site-config.ts).
+import { navItems, siteConfig } from "@/lib/site-config";
 import { useHapticFeedback } from "@/hooks/use-haptic-feedback";
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 import { cn } from "@/lib/utils";

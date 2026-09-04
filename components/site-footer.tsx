@@ -2,7 +2,9 @@
 
 import { Github, Twitter, Mail, Linkedin, ArrowUp } from "lucide-react";
 import Link from "next/link";
-import { siteConfig, navItems } from "@/lib/content";
+// Root-layout chrome: import from the small site-config module, not lib/content,
+// so every route doesn't ship the full content chunk (see lib/site-config.ts).
+import { siteConfig, navItems } from "@/lib/site-config";
 import Magnetic from "@/components/magnetic";
 
 const socialLinks = [
