@@ -20,7 +20,7 @@ function MediaRow({ item }: { item: MediaItem }) {
       href={item.href}
       target="_blank"
       rel="noreferrer noopener"
-      className="group flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 text-sm shadow-lg shadow-slate-950/80 transition hover:-translate-y-1 hover:border-sky-500/70"
+      className="group flex flex-col rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4 text-sm shadow-lg shadow-slate-950/80 transition hover:-translate-y-1 hover:border-sky-500/70"
     >
       <div className="flex items-center gap-3">
         <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900/80 text-sky-300">

@@ -147,6 +147,7 @@ export default function ResearchProjectCard({ project }: { project: Project }) {
         className="group relative block w-full h-full"
       >
         {cardContent}
+        <span className="sr-only"> (opens in a new tab)</span>
       </a>
     );
   }

@@ -271,7 +271,9 @@ export function TooltipShell({
         aria-expanded={isOpen}
       >
         {children}
-        <span id={descriptionId} className="sr-only">
+        {/* aria-hidden keeps this out of the role="button" accessible name;
+            aria-describedby still resolves hidden text for the description. */}
+        <span id={descriptionId} className="sr-only" aria-hidden="true">
           {ariaLabel ?? "Definition available"}
         </span>
       </span>

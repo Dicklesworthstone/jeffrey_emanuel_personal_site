@@ -90,7 +90,8 @@ export default function ThemeToggle({ variant = "compact", className }: ThemeTog
       title={`${actionLabel} (T)`}
       onClick={handleClick}
       className={cn(
-        "group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
+        // 44px on the phone/tablet bar (touch target), 40px in the desktop nav where it sits between 36px pills.
+        "group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300 xl:h-10 xl:w-10",
         "border-white/10 bg-white/5 text-slate-300 backdrop-blur-md hover:border-white/20 hover:bg-white/10 hover:text-white",
         "active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-500",
         className

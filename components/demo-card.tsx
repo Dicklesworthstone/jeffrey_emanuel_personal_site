@@ -183,6 +183,7 @@ export default function DemoCard({ demo, featured = false, className }: DemoCard
           >
             {demo.title}
           </h3>
+          <span className="sr-only"> (opens in a new tab)</span>
 
           {/* Description */}
           <p

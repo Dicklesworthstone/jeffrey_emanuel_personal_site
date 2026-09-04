@@ -23,6 +23,7 @@ import {
   TrendingDown,
   Sun,
   Moon,
+  Keyboard,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { navItems, projects, writingHighlights, siteConfig } from "@/lib/content";
@@ -33,6 +34,8 @@ import { useTheme } from "@/components/theme-provider";
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Opens the keyboard-shortcuts help; keeps it reachable when single-key shortcuts are off. */
+  onOpenHelp?: () => void;
 }
 
 type CommandCategory = "pages" | "projects" | "writing" | "social" | "actions" | "search_results";
@@ -89,7 +92,7 @@ const categoryLabels: Record<CommandCategory, string> = {
  * Command palette for quick navigation and search.
  * Supports fuzzy search across pages, projects, writing, and actions.
  */
-export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
+export default function CommandPalette({ isOpen, onClose, onOpenHelp }: CommandPaletteProps) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -233,6 +236,21 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       keywords: ["theme", "light", "dark", "mode", "color", "appearance", "toggle theme", "switch theme"],
     });
 
+    if (onOpenHelp) {
+      cmds.push({
+        id: "action-keyboard-shortcuts",
+        title: "Keyboard Shortcuts",
+        subtitle: "See every shortcut, or turn single-key shortcuts off",
+        icon: <Keyboard className="h-4 w-4 text-slate-300" />,
+        category: "actions",
+        action: () => {
+          onClose();
+          onOpenHelp();
+        },
+        keywords: ["keyboard", "shortcuts", "hotkeys", "keys", "help", "accessibility"],
+      });
+    }
+
     // Projects
     projects.forEach((project) => {
       cmds.push({
@@ -316,7 +334,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     });
 
     return cmds;
-  }, [router, onClose, openExternal, theme, toggleTheme]);
+  }, [router, onClose, onOpenHelp, openExternal, theme, toggleTheme]);
 
   // Combined results (Static + Fuse)
   const filteredCommands = useMemo(() => {

@@ -13,6 +13,8 @@ interface AnimatedGridProps {
   initialDelay?: number;
   /** Show scroll progress dots on mobile for horizontal-scroll containers */
   scrollIndicator?: boolean;
+  /** Accessible name for the keyboard-focusable scroll container (scrollIndicator only) */
+  ariaLabel?: string;
   /**
    * Stagger the children in when the grid scrolls into view. Reserve this for
    * the first section of a page; later sections should render settled
@@ -65,6 +67,7 @@ export default function AnimatedGrid({
   staggerDelay = 0.1,
   initialDelay = 0.05,
   scrollIndicator = false,
+  ariaLabel = "Scrollable cards",
   animateIn = true,
 }: AnimatedGridProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -113,7 +116,15 @@ export default function AnimatedGrid({
         initial={shouldAnimate ? "hidden" : false}
         whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
-        className={cn(className)}
+        className={cn(
+          className,
+          scrollIndicator &&
+            "rounded-xl focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-500"
+        )}
+        // Horizontal-scroll containers must be keyboard reachable to scroll
+        {...(scrollIndicator
+          ? { tabIndex: 0, role: "group", "aria-label": ariaLabel }
+          : {})}
       >
         {Children.map(children, (child, index) => (
           <motion.div key={index} variants={variants}>
@@ -140,7 +151,7 @@ export default function AnimatedGrid({
             <div
               key={i}
               className={cn(
-                "h-1.5 rounded-full transition-all duration-200",
+                "h-1.5 rounded-full transition-[width,background-color] duration-200",
                 i === activeDot
                   ? "w-4 bg-sky-400"
                   : "w-1.5 bg-slate-700"

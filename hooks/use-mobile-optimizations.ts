@@ -328,11 +328,18 @@ export function useMobileOptimizations() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (!isMobile) return;
 
+    // Skip the style writes when the rounded values haven't changed: visualViewport
+    // fires scroll/resize continuously while the URL bar collapses.
+    let lastViewportHeight: number | null = null;
+    let lastViewportWidth: number | null = null;
     const updateViewportMetrics = () => {
-      const viewportHeight = window.visualViewport?.height || window.innerHeight;
-      const viewportWidth = window.visualViewport?.width || window.innerWidth;
-      document.documentElement.style.setProperty("--mobile-viewport-height", `${Math.round(viewportHeight)}px`);
-      document.documentElement.style.setProperty("--mobile-viewport-width", `${Math.round(viewportWidth)}px`);
+      const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight);
+      const viewportWidth = Math.round(window.visualViewport?.width || window.innerWidth);
+      if (viewportHeight === lastViewportHeight && viewportWidth === lastViewportWidth) return;
+      lastViewportHeight = viewportHeight;
+      lastViewportWidth = viewportWidth;
+      document.documentElement.style.setProperty("--mobile-viewport-height", `${viewportHeight}px`);
+      document.documentElement.style.setProperty("--mobile-viewport-width", `${viewportWidth}px`);
     };
 
     // NOTE: Removed preventBounce touchmove handler as it was blocking scroll
@@ -340,8 +347,14 @@ export function useMobileOptimizations() {
 
     updateViewportMetrics();
 
+    // Coalesce bursts of viewport events into one write per animation frame.
+    let viewportFrame: number | null = null;
     const handleViewportResize = () => {
-      updateViewportMetrics();
+      if (viewportFrame !== null) return;
+      viewportFrame = requestAnimationFrame(() => {
+        viewportFrame = null;
+        updateViewportMetrics();
+      });
     };
 
     // Add orientation change listener for better UX
@@ -364,6 +377,10 @@ export function useMobileOptimizations() {
       window.visualViewport?.removeEventListener("resize", handleViewportResize);
       window.visualViewport?.removeEventListener("scroll", handleViewportResize);
       window.removeEventListener("orientationchange", handleOrientationChange);
+      if (viewportFrame !== null) {
+        cancelAnimationFrame(viewportFrame);
+        viewportFrame = null;
+      }
       if (orientationTimeout) {
         clearTimeout(orientationTimeout);
         orientationTimeout = null;

@@ -6,7 +6,6 @@ import Image from "next/image";
 import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Briefcase, Workflow, ChevronDown } from "lucide-react";
-import GlowOrbits from "@/components/glow-orbits";
 import StatsGrid from "@/components/stats-grid";
 import ErrorBoundary from "@/components/error-boundary";
 import ThreeSceneLoading from "@/components/three-scene-loading";
@@ -25,6 +24,9 @@ const ThreeScene = dynamic(() => import("@/components/three-scene"), {
   ssr: false,
   loading: () => <ThreeSceneLoading />,
 });
+
+// GlowOrbits is the only GSAP consumer; keep it off the eager homepage bundle.
+const GlowOrbits = dynamic(() => import("@/components/glow-orbits"), { ssr: false });
 
 // Shared by the loading placeholder, the fallback and the canvas so the
 // `ssr: false` boundary never shifts layout.

@@ -26,6 +26,8 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>(defaultHeadingId);
   const [isOpen, setIsOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   // Scroll-spy: track which heading is currently in view
   const visibleIds = useRef<Set<string>>(new Set());
@@ -114,6 +116,20 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
+  // Dialog focus management: move focus into the panel on open and hand it
+  // back to whatever opened it (the toggle button) on close.
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      closeButtonRef.current?.focus();
+      return;
+    }
+    const previous = previousFocusRef.current;
+    previousFocusRef.current = null;
+    if (previous && previous.isConnected) previous.focus();
+  }, [isOpen]);
+
   // Don't render if no headings
   if (headings.length === 0) return null;
 
@@ -159,16 +175,8 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm 2xl:hidden cursor-pointer"
-              role="button"
-              tabIndex={0}
-              aria-label="Close table of contents"
+              aria-hidden="true"
               onClick={() => setIsOpen(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
-                  e.preventDefault();
-                  setIsOpen(false);
-                }
-              }}
             />
 
             {/* Panel */}
@@ -178,12 +186,16 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.2 }}
               className="fixed bottom-[calc(3rem+env(safe-area-inset-bottom))] right-4 z-40 w-72 rounded-2xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl 2xl:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Table of contents"
             >
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
                   Contents
                 </h3>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={() => setIsOpen(false)}
                   className="-m-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 hover:text-white"

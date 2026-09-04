@@ -95,7 +95,7 @@ describe("TldrToolCard", () => {
   describe("interactions", () => {
     it("renders a link to the GitHub repo", () => {
       render(<TldrToolCard tool={mockTool} allTools={allTools} />);
-      const link = screen.getByLabelText(`View ${mockTool.name} on GitHub`);
+      const link = screen.getByLabelText(new RegExp(`^View ${mockTool.name} on GitHub`));
       expect(link).toHaveAttribute("href", mockTool.href);
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
@@ -129,7 +129,7 @@ describe("TldrToolCard", () => {
   describe("accessibility", () => {
     it("has visible focus indicator on github link", () => {
       render(<TldrToolCard tool={mockTool} allTools={allTools} />);
-      const link = screen.getByLabelText(`View ${mockTool.name} on GitHub`);
+      const link = screen.getByLabelText(new RegExp(`^View ${mockTool.name} on GitHub`));
       link.focus();
       expect(link).toHaveFocus();
     });

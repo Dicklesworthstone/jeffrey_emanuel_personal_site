@@ -214,7 +214,7 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
                 </span>
               )}
               {displayBadge && (
-                <span className="inline-flex items-center rounded-full bg-slate-800/50 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-slate-300 ring-1 ring-inset ring-slate-700/50">
+                <span className="inline-flex items-center rounded-full bg-slate-800/50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-slate-300 ring-1 ring-inset ring-slate-700/50">
                   {displayBadge}
                 </span>
               )}
@@ -248,7 +248,7 @@ export const ProjectCard = memo(function ProjectCard({ project }: { project: Pro
               <div className={cn("flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors group-hover:text-white", accentColor)}>
                 <span className="relative">
                   {isInternalLink ? "Details" : "View"}
-                  <span className="absolute -bottom-1 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
                 </span>
                 <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
               </div>

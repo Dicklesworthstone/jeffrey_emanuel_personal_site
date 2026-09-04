@@ -335,7 +335,7 @@ export const TldrToolCard = memo(function TldrToolCard({
                     lightTap();
                   }}
                   className="group/github flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 sm:h-11 sm:w-11"
-                  aria-label={`View ${tool.name} on GitHub`}
+                  aria-label={`View ${tool.name} on GitHub (opens in a new tab)`}
                 >
                   <ExternalLink className="h-4 w-4 transition-transform group-hover/github:translate-x-0.5" />
                 </Link>

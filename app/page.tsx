@@ -53,7 +53,14 @@ export default async function HomePage() {
   const githubStats = await fetchGitHubStats();
   const liveStats = githubStats ? heroStats.map((stat) => {
     if (stat.label === "GitHub Stars") {
-      return { ...stat, value: formatStarsDisplay(githubStats.totalStars) };
+      return {
+        ...stat,
+        value: formatStarsDisplay(githubStats.totalStars),
+        // Keep the helper's repo count in step with the live star count.
+        helper: githubStats.repoCount > 0
+          ? `Across ${githubStats.repoCount.toLocaleString("en-US")} open-source agent tools, runtimes, and infrastructure.`
+          : stat.helper,
+      };
     }
     return stat;
   }) : heroStats;

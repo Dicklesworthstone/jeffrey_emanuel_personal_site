@@ -88,6 +88,8 @@
   --site-text-heading: #f1f5f9;
   --site-ink: #ffffff;
   --site-paper: #000000;
+  /* Focus indicator: sky-400 is 7:1 on the dark canvas. */
+  --site-focus-ring: #38bdf8;
 }
 
 .light {
@@ -106,6 +108,8 @@
   --site-text-heading: #0f172a;
   --site-ink: #0f172a;
   --site-paper: #ffffff;
+  /* sky-400 is only 1.9:1 on the light canvas; sky-700 clears WCAG 1.4.11's 3:1. */
+  --site-focus-ring: #0369a1;
 }
 
 :root {
@@ -130,22 +134,6 @@
   --type-body-sm: 0.875rem;                        /* 14px */
   --type-caption: 0.75rem;                         /* 12px - MINIMUM */
 
-  /* Line Heights */
-  --leading-none: 1;
-  --leading-tight: 1.2;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --leading-loose: 1.75;
-
-  /* Letter Spacing */
-  --tracking-tighter: -0.04em;
-  --tracking-tight: -0.02em;
-  --tracking-normal: 0;
-  --tracking-wide: 0.025em;
-  --tracking-wider: 0.05em;
-  --tracking-widest: 0.1em;
-
   /* ========================================
      SPACING SCALE (8px base rhythm)
      ======================================== */
@@ -168,16 +156,6 @@
   --section-py: clamp(4rem, 10vw, 7rem);           /* 64px → 112px */
   --section-px: clamp(1rem, 5vw, 2rem);            /* 16px → 32px */
 
-  /* ========================================
-     ELEVATION/SHADOW SCALE
-     ======================================== */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-
   /* Glow Shadows (for dark theme) */
   --glow-sm: 0 0 10px -3px;
   --glow-md: 0 0 20px -5px;
@@ -192,31 +170,12 @@
   --elevation-2: 0 12px 32px -8px rgba(0,0,0,0.5), 0 4px 12px -4px rgba(56,189,248,0.08), 0 0 0 1px rgba(255,255,255,0.06);
   --elevation-3: 0 24px 48px -12px rgba(0,0,0,0.6), 0 8px 24px -8px rgba(56,189,248,0.12), 0 0 0 1px rgba(255,255,255,0.08);
 
-  /* ========================================
-     EASING FUNCTIONS (Stripe-level polish)
-     ======================================== */
-  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-bounce: cubic-bezier(0.68, -0.6, 0.32, 1.6);
-  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
   /* Animation Durations */
   --duration-instant: 0.1s;
   --duration-fast: 0.15s;
   --duration-normal: 0.25s;
   --duration-slow: 0.4s;
   --duration-slower: 0.6s;
-
-  /* ========================================
-     BORDER RADIUS SCALE
-     ======================================== */
-  --radius-sm: 0.375rem;   /* 6px - buttons, inputs */
-  --radius-md: 0.5rem;     /* 8px - small cards */
-  --radius-lg: 0.75rem;    /* 12px - cards */
-  --radius-xl: 1rem;       /* 16px - large cards */
-  --radius-2xl: 1.5rem;    /* 24px - hero cards */
-  --radius-full: 9999px;   /* pills, avatars */
 
   /* ========================================
      BRAND GRADIENTS
@@ -251,13 +210,44 @@
   --z-toast: 80;
   --z-max: 9999;
 
-  /* ========================================
-     BACKDROP BLUR SCALE
-     ======================================== */
-  --blur-sm: 8px;
-  --blur-md: 12px;
-  --blur-lg: 16px;
-  --blur-xl: 24px;
+}
+
+/*
+  Tailwind-facing scale overrides. These names are Tailwind v4 theme keys, so
+  they must live in `@theme` (not an unlayered `:root`, which used to shadow
+  the framework's own values silently). Values are unchanged from the original
+  design: the radius ramp runs one step larger than stock (rounded-lg = 12px),
+  which is why `rounded-2xl` and `rounded-3xl` both resolve to 24px today.
+  The stock shadow-* and blur-* scales were byte-identical duplicates and
+  have been dropped rather than restated.
+*/
+@theme {
+  --leading-none: 1;
+  --leading-tight: 1.2;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 1.75;
+
+  --tracking-tighter: -0.04em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  --radius-sm: 0.375rem;   /* 6px - buttons, inputs */
+  --radius-md: 0.5rem;     /* 8px - small cards */
+  --radius-lg: 0.75rem;    /* 12px - cards */
+  --radius-xl: 1rem;       /* 16px - large cards */
+  --radius-2xl: 1.5rem;    /* 24px - hero cards */
+  --radius-full: 9999px;   /* pills, avatars */
 }
 
 /*
@@ -395,21 +385,8 @@ body::after {
 }
 
 /* Light Mode Editorial Prose */
-.light .prose {
-  color: #334155;
-}
-
-.light .prose p {
-  color: #334155;
-}
-
-.light .prose h1, 
-.light .prose h2, 
-.light .prose h3, 
-.light .prose h4 {
-  color: #0f172a;
-}
-
+/* Body and heading colours flip through the role tokens on .prose itself;
+   only the accent-specific rules need light overrides. */
 .light .prose h2 {
   border-bottom-color: rgba(148, 163, 184, 0.25);
 }
@@ -450,7 +427,7 @@ body::after {
   /* Optimal reading width */
   max-width: 68ch; 
   font-family: var(--font-serif-stack);
-  color: #cbd5e1; /* Slate-300 - slightly softer than pure white */
+  color: var(--site-text-body); /* slate-300 role: softer than pure white; slate-700 in light */
   font-size: 1.125rem; /* 18px base size for better readability */
   line-height: 1.75;
 }
@@ -468,7 +445,7 @@ body::after {
 .prose h3, 
 .prose h4 {
   font-family: var(--font-sans);
-  color: #f1f5f9; /* Slate-100 */
+  color: var(--site-text-heading); /* slate-100 role */
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.3;
@@ -868,37 +845,38 @@ section[data-section] {
    keyboard focus. The outline follows the element's own radius. */
 @layer base {
 :focus-visible {
-  outline: 2px solid #38bdf8;
+  outline: 2px solid var(--site-focus-ring);
   outline-offset: 3px;
   transition: outline-offset 0.15s ease-out;
 }
 
 a:focus-visible,
 button:focus-visible {
-  outline: 2px solid #38bdf8;
+  outline: 2px solid var(--site-focus-ring);
   outline-offset: 3px;
 }
 
-/* Form inputs - inset ring style */
+/* Form inputs - inset ring style. The gap ring takes the canvas colour so
+   it reads as a halo on both themes instead of a dark band on white inputs. */
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #020617, 0 0 0 4px #38bdf8;
-  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px var(--site-bg-canvas), 0 0 0 4px var(--site-focus-ring);
+  border-color: var(--site-focus-ring);
 }
 }
 
 /* Skip link for keyboard users */
 .skip-link {
-  position: absolute;
+  position: fixed;
   top: -100px;
   left: 16px;
   z-index: 9999;
   padding: 12px 24px;
-  background: #020617;
-  color: #38bdf8;
-  border: 2px solid #38bdf8;
+  background: var(--site-bg-canvas);
+  color: var(--site-focus-ring);
+  border: 2px solid var(--site-focus-ring);
   border-radius: 8px;
   font-weight: 600;
   transition: top 0.2s ease-out;
@@ -2550,6 +2528,12 @@ select:focus-visible {
   transform-origin: 0 0;
   will-change: transform;
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .barra-scope .barra-progress-bar {
+    top: env(safe-area-inset-top, 0px);
+  }
 }
 
 .barra-scope.barra-body p:not([class*="text-"]):not(.text-sm):not(.text-base):not(.text-xl) {

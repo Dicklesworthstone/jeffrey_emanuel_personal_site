@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Must stay in lockstep with resolveStoredTheme() in theme-provider. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t="dark";try{if(localStorage.getItem("theme")==="light")t="light"}catch(e){}document.documentElement.classList.add(t)})();`,
+            __html: `(function(){var t="dark";try{if(localStorage.getItem("theme")==="light")t="light"}catch(e){}document.documentElement.classList.add(t);if(t==="light"){var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content","#f8fafc")}})();`,
           }}
         />
       </head>

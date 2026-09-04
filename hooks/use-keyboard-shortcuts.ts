@@ -9,17 +9,25 @@ interface UseKeyboardShortcutsOptions {
   onOpenHelp?: () => void;
   onToggleTheme?: () => void;
   enabled?: boolean;
+  /**
+   * Single-key (unmodified) shortcuts can fire from speech input or a tremor,
+   * so WCAG 2.1.4 requires a way to switch them off. Cmd/Ctrl+K stays on.
+   */
+  singleKeyEnabled?: boolean;
 }
+
+/** localStorage key holding "off" when the visitor disabled single-key shortcuts. */
+export const SINGLE_KEY_SHORTCUTS_STORAGE_KEY = "shortcuts";
 
 /**
  * Hook for global keyboard shortcuts.
  *
  * Default shortcuts:
- * - 1-8: Navigate to sections (Home, About, Consulting, Projects, TLDR, Writing, Media, Contact)
+ * - 1-8: Navigate to sections in navItems order (Home, About, Consulting, Projects, Flywheel, Writing, Media, Contact)
  * - /: Open command palette (search)
  * - ?: Open keyboard shortcuts help
  * - T: Toggle light / dark mode
- * - Cmd/Ctrl+K: Open command palette
+ * - Cmd/Ctrl+K: Open command palette (always on)
  * - Escape: Close modals
  */
 export function useKeyboardShortcuts({
@@ -27,6 +35,7 @@ export function useKeyboardShortcuts({
   onOpenHelp,
   onToggleTheme,
   enabled = true,
+  singleKeyEnabled = true,
 }: UseKeyboardShortcutsOptions = {}) {
   const router = useRouter();
 
@@ -64,6 +73,9 @@ export function useKeyboardShortcuts({
       // Don't trigger single-key shortcuts with modifiers (except ?)
       if (event.ctrlKey || event.metaKey || event.altKey) return;
 
+      // Visitor opted out of single-key shortcuts (see the shortcuts modal).
+      if (!singleKeyEnabled) return;
+
       // /: Open command palette (search mode)
       if (event.key === "/" && !event.shiftKey) {
         event.preventDefault();
@@ -96,7 +108,7 @@ export function useKeyboardShortcuts({
       // G + key combinations for quick navigation
       // (Could add "go to" shortcuts like gh for GitHub, etc.)
     },
-    [enabled, onOpenCommandPalette, onOpenHelp, onToggleTheme, router]
+    [enabled, singleKeyEnabled, onOpenCommandPalette, onOpenHelp, onToggleTheme, router]
   );
 
   useEffect(() => {

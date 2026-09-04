@@ -145,7 +145,7 @@ export function TldrSectionNav({
                   onClick={() => handleNavigate(section.id)}
                   aria-current={isActive ? "true" : undefined}
                   className={cn(
-                    "relative whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm",
+                    "relative min-h-11 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm",
                     "focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50",
                     isActive
                       ? "text-white"

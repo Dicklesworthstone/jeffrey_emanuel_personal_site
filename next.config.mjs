@@ -13,6 +13,9 @@ const nextConfig = {
   },
   outputFileTracingRoot: projectRoot,
   images: {
+    // The OG-preview proxy is same-origin but carries a `?url=` query, which
+    // next/image refuses unless the local path is explicitly allowed.
+    localPatterns: [{ pathname: "/api/og-image" }],
     remotePatterns: [
       {
         protocol: "https",

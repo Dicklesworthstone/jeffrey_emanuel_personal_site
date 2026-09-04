@@ -128,13 +128,14 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
         data-scrolled={scrolled ? "true" : "false"}
         className={cn(
           "fixed top-0 left-0 right-0 z-[90] border-b transition-[padding,background-color,border-color] duration-300 ease-out",
+          // The viewport-wide blur is re-sampled on every scroll frame; the bar
+          // is 98%+ opaque anyway, so touch devices get the flat tint instead.
+          "pointer-fine:backdrop-blur-[22px] pointer-fine:backdrop-saturate-125",
           scrolled ? "border-white/30 bg-slate-950/[0.995]" : "border-white/[0.22] bg-slate-950/[0.985]"
         )}
         style={{
           paddingTop: `calc(${scrolled ? 8 : 12}px + env(safe-area-inset-top, 0px))`,
           paddingBottom: scrolled ? 8 : 12,
-          backdropFilter: "blur(22px) saturate(1.25)",
-          WebkitBackdropFilter: "blur(22px) saturate(1.25)",
           boxShadow: "0 12px 36px -26px rgba(2, 6, 23, 0.95)",
           paddingRight: "var(--scrollbar-width, 0px)",
         }}
@@ -294,8 +295,11 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
             />
 
             {/* The header's own toggle (z-95, crossfaded to an X) stays on top of
-                this overlay and closes it — a second close button at the same
-                pixels was unreachable by touch and stole initial focus. */}
+                this overlay and closes it for pointer users — a second close
+                button at the same pixels was unreachable by touch and stole
+                initial focus. It sits outside this dialog subtree, though, so
+                aria-modal hides it from assistive tech: the "Close menu" button
+                at the foot of the list is the in-dialog close control. */}
             {/* Phones keep the full-bleed column. From sm up the menu is
                 constrained and centred so tablet widths get a deliberate
                 composition instead of a phone layout stretched across 800px
@@ -357,6 +361,15 @@ export default function SiteHeader({ onOpenCommandPalette }: SiteHeaderProps) {
                 >
                   Get in touch
                 </Link>
+
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="mx-auto inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold text-slate-400 transition-colors hover:text-white"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                  Close menu
+                </button>
               </motion.div>
             </nav>
 

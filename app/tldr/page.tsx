@@ -34,7 +34,9 @@ function FlywheelExplanation() {
           background: [
             "radial-gradient(circle at 30% 40%, rgba(139, 92, 246, 0.12), transparent 50%)",
             "radial-gradient(circle at 70% 60%, rgba(52, 211, 153, 0.08), transparent 50%)",
-            "radial-gradient(ellipse 100% 60% at 50% 50%, rgba(15, 23, 42, 0.4), transparent 70%)",
+            // Surface token so the wash deepens the dark canvas but lifts the light one
+            // (a fixed slate-900 read as a grey smudge in light mode).
+            "radial-gradient(ellipse 100% 60% at 50% 50%, color-mix(in srgb, var(--site-bg-surface) 40%, transparent), transparent 70%)",
           ].join(", "),
         }}
       />
@@ -214,7 +216,8 @@ export default function TldrPage() {
   return (
     <ErrorBoundary>
       {/* ClientShell already renders the page's single <main id="main-content"> */}
-      <div className="min-h-screen overflow-x-hidden">
+      {/* clip, not hidden: hidden would make this the scrollport and unpin the sticky section nav */}
+      <div className="min-h-screen overflow-x-clip">
         {/* Hero Section */}
         <TldrHero id="tldr-hero" />
 

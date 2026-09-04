@@ -79,7 +79,6 @@ const crimsonPro = Crimson_Pro({
   subsets: ["latin"],
   variable: "--font-crimson",
   display: "swap",
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -202,7 +201,11 @@ export function HoeffdingArticle() {
       style={{ background: "#020204", color: "#f8fafc" }}
     >
       {/* HUD Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-1 z-40 bg-white/5 pointer-events-none" aria-hidden="true">
+      <div
+        className="fixed left-0 w-full h-1 z-[95] bg-white/5 pointer-events-none"
+        style={{ top: "env(safe-area-inset-top, 0px)" }}
+        aria-hidden="true"
+      >
         <div
           ref={progressBarRef}
           className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-blue-500 origin-left"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   ExternalLink,
   Sparkles,
@@ -72,21 +73,23 @@ function OgLinkCard({ site, className }: OgLinkCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/90 shadow-lg shadow-slate-950/50 transition-all duration-300 pointer-fine:backdrop-blur-sm hover:border-slate-600/80 hover:shadow-xl hover:shadow-violet-500/10",
+        "group relative flex flex-col overflow-hidden rounded-xl border border-slate-700/60 bg-slate-900/90 shadow-lg shadow-slate-950/50 transition-[border-color,box-shadow] duration-300 pointer-fine:backdrop-blur-sm hover:border-slate-600/80 hover:shadow-xl hover:shadow-violet-500/10",
         className
       )}
     >
       {/* OG Image Area - Twitter/Discord style */}
       <div className="relative aspect-[1.91/1] w-full overflow-hidden bg-slate-950">
         {proxiedImageUrl && !imageError ? (
-          // Actual OG Image via proxy
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          // Actual OG Image via proxy. next/image resizes the 1200x630 source
+          // down to the card width and negotiates AVIF/WebP; the raw <img> was
+          // shipping fifteen full-size PNGs into ~380px slots.
+          <Image
             src={proxiedImageUrl}
             alt={`${site.title} preview`}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             onError={() => setImageError(true)}
-            loading="lazy"
           />
         ) : (
           // Fallback: Gradient with icon
@@ -150,6 +153,7 @@ function OgLinkCard({ site, className }: OgLinkCardProps) {
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-400">
           {site.tagline}
         </p>
+        <span className="sr-only"> (opens in a new tab)</span>
       </div>
 
       {/* Hover border glow effect */}

@@ -25,6 +25,7 @@ import {
   featuredSites,
 } from "@/lib/content";
 import { GET as getSearchIndex } from "@/app/api/search/route";
+import { isAllowedOgHost } from "@/app/api/og-image/route";
 import { testLog } from "@/tests/utils/tldr-test-helpers";
 
 // =============================================================================
@@ -860,5 +861,29 @@ describe("Search API Route Validation", () => {
     expect(slugs.has("raptorq")).toBe(true);
 
     testLog.testEnd("Search API index validation", data.length);
+  });
+});
+
+// =============================================================================
+// OG IMAGE PROXY ALLOWLIST
+// =============================================================================
+
+describe("OG Image Proxy Allowlist", () => {
+  test("every featuredSites ogImage hostname is accepted by /api/og-image", () => {
+    testLog.testStart("OG image proxy allowlist");
+
+    let checked = 0;
+    featuredSites.forEach((site) => {
+      if (!site.ogImage) return;
+      const { hostname } = new URL(site.ogImage);
+      expect(isAllowedOgHost(hostname), `${site.id}: ${hostname} should be allowed by /api/og-image`).toBe(true);
+      checked++;
+    });
+    expect(checked).toBeGreaterThan(0);
+
+    // Unrelated hosts must still be rejected.
+    expect(isAllowedOgHost("example.com")).toBe(false);
+
+    testLog.testEnd("OG image proxy allowlist", checked);
   });
 });

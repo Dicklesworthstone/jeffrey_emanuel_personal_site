@@ -195,11 +195,11 @@ export default function TwoWorlds() {
             className="text-balance-pro text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl"
           >
             From{" "}
-            <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent light:from-amber-600 light:to-amber-700">
               Wall Street
             </span>{" "}
             to{" "}
-            <span className="bg-gradient-to-r from-violet-400 to-violet-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-violet-400 to-violet-500 bg-clip-text text-transparent light:from-violet-600 light:to-violet-700">
               AI Infrastructure
             </span>
           </motion.h2>

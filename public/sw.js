@@ -9,10 +9,13 @@
 //     background, so an image replaced in place after a deploy is picked up on
 //     the next visit instead of being cache-first forever.
 //   - /api/*: never intercepted.
-// Bump CACHE_VERSION when the caching contract changes; activate() deletes
-// every cache that does not match the current name.
+// Bump CACHE_VERSION when the caching contract changes OR when precached HTML
+// must not survive a deploy (e.g. a global stylesheet/theme change); activate()
+// deletes every cache that does not match the current name.
+//   v3 — class-driven light/dark theme (2026-09-03): pre-theme HTML/CSS in the
+//        v2 precache would render without the theme tokens.
 
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const CACHE_NAME = `jeffrey-emanuel-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline";
 // Bound the asset cache so months of hashed chunks cannot accumulate.

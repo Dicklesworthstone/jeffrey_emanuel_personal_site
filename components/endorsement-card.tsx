@@ -289,8 +289,8 @@ export function EndorsementCard({
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-2xl sm:rounded-3xl"
         aria-label={
           source === "other"
-            ? `View the source of ${author}'s endorsement`
-            : `View ${author}'s endorsement on ${config.label}`
+            ? `View the source of ${author}'s endorsement (opens in a new tab)`
+            : `View ${author}'s endorsement on ${config.label} (opens in a new tab)`
         }
       >
         {cardContent}

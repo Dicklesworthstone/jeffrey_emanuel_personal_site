@@ -9,6 +9,9 @@ import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Whether the unmodified single-key shortcuts (1-8, /, ?, T) are active. */
+  singleKeyEnabled?: boolean;
+  onToggleSingleKey?: () => void;
 }
 
 /**
@@ -18,6 +21,8 @@ interface KeyboardShortcutsModalProps {
 export default function KeyboardShortcutsModal({
   isOpen,
   onClose,
+  singleKeyEnabled = true,
+  onToggleSingleKey,
 }: KeyboardShortcutsModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const lastActiveElement = useRef<HTMLElement | null>(null);
@@ -174,9 +179,49 @@ export default function KeyboardShortcutsModal({
                 <ShortcutSection title="General" shortcuts={generalShortcuts} modifier={modifier} />
               </div>
 
+              {/* Opt-out for single-key shortcuts (WCAG 2.1.4): speech input
+                  and tremors can fire bare keys. Cmd/Ctrl+K stays available and
+                  the command palette lists this help, so it remains reachable. */}
+              {onToggleSingleKey && (
+                <div className="mt-6 flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                  <span id="single-key-shortcuts-label" className="text-sm text-slate-300">
+                    Single-key shortcuts
+                    <span className="block text-xs text-slate-500">
+                      Turn off if bare keys get triggered by dictation or accidental presses.
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={singleKeyEnabled}
+                    aria-labelledby="single-key-shortcuts-label"
+                    onClick={onToggleSingleKey}
+                    className="relative inline-flex h-11 w-16 shrink-0 items-center justify-center"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`relative inline-block h-6 w-11 rounded-full transition-colors ${
+                        singleKeyEnabled ? "bg-sky-500" : "bg-slate-600"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform light:bg-slate-950 ${
+                          singleKeyEnabled ? "translate-x-5.5" : "translate-x-0.5"
+                        }`}
+                      />
+                    </span>
+                    <span className="sr-only">{singleKeyEnabled ? "On" : "Off"}</span>
+                  </button>
+                </div>
+              )}
+
               {/* Footer hint */}
               <p className="mt-6 text-center text-xs text-slate-500">
-                Press <Kbd>?</Kbd> anytime to show this help
+                {singleKeyEnabled ? (
+                  <>Press <Kbd>?</Kbd> anytime to show this help</>
+                ) : (
+                  <>Open the command palette (<Kbd>{modifier}</Kbd> <Kbd>K</Kbd>) and search “shortcuts” to show this help</>
+                )}
               </p>
             </div>
           </motion.div>

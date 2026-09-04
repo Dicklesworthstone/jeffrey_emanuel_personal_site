@@ -90,6 +90,8 @@ test.describe("theme", () => {
     await page.keyboard.type("theme toggle test");
     expect((await readTheme(page)).html).toContain("light");
     await page.keyboard.press("Escape");
+    // Shortcuts stay suspended until the palette has fully closed and released focus.
+    await expect(page.getByRole("dialog", { name: /command palette/i })).toBeHidden();
 
     await page.keyboard.press("t");
     await expect.poll(async () => (await readTheme(page)).html).toContain("dark");

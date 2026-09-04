@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, Suspense, Component, type ReactNode } from "react";
 import * as THREE from "three";
 import { Sparkles } from "lucide-react";
@@ -761,9 +761,25 @@ function HourlyAnimation() {
 // ---------------------------------------------------------------------------
 // Main 3D Icon Component
 // ---------------------------------------------------------------------------
+// The icon is a fixed 40px brand mark that never leaves the viewport, so it
+// was the one loop on the site that ran at 60fps on every desktop page for
+// the whole session. Every micro-animation samples the clock rather than
+// counting frames, so ticking at 30fps halves the work with no visible change.
+const ICON_FPS = 30;
+
+function FrameTicker() {
+  const invalidate = useThree((state) => state.invalidate);
+  useEffect(() => {
+    const id = window.setInterval(() => invalidate(), 1000 / ICON_FPS);
+    return () => window.clearInterval(id);
+  }, [invalidate]);
+  return null;
+}
+
 function Scene() {
   return (
     <>
+      <FrameTicker />
       <ambientLight intensity={0.6} />
       <pointLight position={[2, 2, 2]} intensity={0.8} color="#ffffff" />
       <HourlyAnimation />
@@ -862,7 +878,7 @@ export default function HeaderIcon3D() {
         <Suspense fallback={<StaticFallback />}>
           <Canvas
             camera={{ position: [0, 0, 2], fov: 45 }}
-            frameloop={pageVisible ? "always" : "never"}
+            frameloop={pageVisible ? "demand" : "never"}
             dpr={1}
             gl={{
               antialias: false,

@@ -43,7 +43,7 @@ export default function NavItem({ href, label, active, prefersReducedMotion }: N
       {/* Subtle bottom line indicator on hover (non-active items) */}
       {!active && (
         <motion.div 
-          className="absolute bottom-1.5 left-1/2 h-px w-0 -translate-x-1/2 bg-sky-400/50 transition-all duration-300 group-hover:w-4"
+          className="absolute bottom-1.5 left-1/2 h-px w-4 origin-center -translate-x-1/2 scale-x-0 bg-sky-400/50 transition-transform duration-300 group-hover:scale-x-100"
           aria-hidden="true"
         />
       )}

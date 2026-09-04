@@ -150,17 +150,26 @@ export function EndorsementShowcase({
 
   // Touch/swipe support
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   }, []);
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      if (touchStartX.current === null) return;
+      if (touchStartX.current === null || touchStartY.current === null) return;
 
       const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
       const diff = touchStartX.current - touchEndX;
+      const dy = touchStartY.current - touchEndY;
+      touchStartX.current = null;
+      touchStartY.current = null;
+
+      // Mostly-vertical gestures are scrolls, not swipes
+      if (Math.abs(dy) > Math.abs(diff)) return;
 
       // Require minimum swipe distance
       if (Math.abs(diff) > 50) {
@@ -170,8 +179,6 @@ export function EndorsementShowcase({
           goToPrev();
         }
       }
-
-      touchStartX.current = null;
     },
     [goToNext, goToPrev]
   );
@@ -496,7 +503,7 @@ export function EndorsementShowcase({
       {otherItems.length > 0 && (
         <div
           ref={carouselRef}
-          className="relative"
+          className="relative touch-pan-y"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -504,27 +511,30 @@ export function EndorsementShowcase({
             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
               More Endorsements
             </h3>
-            <span className="text-xs text-slate-400" aria-live="polite">
+            <span className="text-xs text-slate-400">
               {safeCarouselIndex + 1} of {otherItems.length}
             </span>
           </div>
 
-          <AnimatePresence mode="wait" initial={false}>
-            {otherItems[safeCarouselIndex] && (
-              <motion.div
-                key={otherItems[safeCarouselIndex].id}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.25 }}
-              >
-                <EndorsementCard
-                  {...toCardProps(otherItems[safeCarouselIndex])}
-                  variant="standard"
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Polite live region wraps the quote itself so AT hears the new endorsement */}
+          <div aria-live="polite">
+            <AnimatePresence mode="wait" initial={false}>
+              {otherItems[safeCarouselIndex] && (
+                <motion.div
+                  key={otherItems[safeCarouselIndex].id}
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -30 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <EndorsementCard
+                    {...toCardProps(otherItems[safeCarouselIndex])}
+                    variant="standard"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {renderCarouselNav()}
         </div>

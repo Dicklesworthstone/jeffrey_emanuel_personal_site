@@ -414,7 +414,9 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
   }
 
   return (
-    <div className={cn("space-y-16", className)}>
+    // data-shortcuts-off: the grid owns j/k/g/c/G roving-focus keys, so the
+    // global single-key shortcuts must not fire while a card has focus.
+    <div className={cn("space-y-16", className)} data-shortcuts-off>
       {/* Search Bar */}
       <ToolSearchBar
         query={searchQuery}
@@ -437,7 +439,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
             }
           }}
           className={cn(
-            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all sm:text-sm",
+            "inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all sm:text-sm",
             compareMode
               ? "bg-violet-500/20 text-violet-300 ring-1 ring-violet-500/40"
               : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
@@ -464,7 +466,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
               <button
                 type="button"
                 onClick={() => setShowComparison(true)}
-                className="rounded-full bg-violet-500 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-violet-400"
+                className="inline-flex min-h-11 items-center rounded-full bg-violet-500 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-violet-400"
               >
                 Compare
               </button>
@@ -472,7 +474,7 @@ export function TldrToolGrid({ tools, className }: TldrToolGridProps) {
             <button
               type="button"
               onClick={exitCompareMode}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
               aria-label="Exit compare mode"
             >
               <X className="h-4 w-4" />

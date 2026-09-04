@@ -45,7 +45,7 @@ export default function SiteFooter() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm text-slate-500 transition-colors hover:text-slate-200"
+                className="inline-flex min-h-11 items-center text-sm text-slate-500 transition-colors hover:text-slate-200"
               >
                 {item.label}
               </Link>
@@ -63,7 +63,7 @@ export default function SiteFooter() {
                     target={social.href.startsWith("mailto:") ? undefined : "_blank"}
                     rel={social.href.startsWith("mailto:") ? undefined : "noreferrer noopener"}
                     className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-[border-color,background-color,color,transform] hover:border-white/10 hover:bg-white/10 hover:text-white hover:scale-110"
-                    aria-label={social.label}
+                    aria-label={social.href.startsWith("mailto:") ? social.label : `${social.label} (opens in a new tab)`}
                   >
                     <social.icon className="h-4 w-4 transition-transform group-hover:rotate-12" aria-hidden="true" />
                   </a>
@@ -100,7 +100,7 @@ export default function SiteFooter() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm text-slate-500 transition-colors hover:text-slate-200"
+                className="inline-flex min-h-11 items-center text-sm text-slate-500 transition-colors hover:text-slate-200"
               >
                 {item.label}
               </Link>
@@ -117,12 +117,12 @@ export default function SiteFooter() {
                   target={social.href.startsWith("mailto:") ? undefined : "_blank"}
                   rel={social.href.startsWith("mailto:") ? undefined : "noreferrer noopener"}
                   className="group flex flex-col items-center gap-1.5"
-                  aria-label={social.label}
+                  aria-label={social.href.startsWith("mailto:") ? social.label : `${social.label} (opens in a new tab)`}
                 >
                   <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-all active:ring-2 active:ring-sky-500/30 group-hover:border-white/10 group-hover:bg-white/10 group-hover:text-white">
                     <social.icon className="h-5 w-5" aria-hidden="true" />
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:hidden">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 sm:hidden">
                     {social.label}
                   </span>
                 </a>

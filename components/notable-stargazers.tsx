@@ -124,7 +124,7 @@ const StargazerAvatar = memo(function StargazerAvatar({
         duration: prefersReducedMotion ? 0 : 0.3,
       }}
       whileHover={prefersReducedMotion ? {} : { scale: 1.1, zIndex: 10 }}
-      aria-label={`${stargazer.name} from ${stargazer.company || "GitHub"} - view profile`}
+      aria-label={`${stargazer.name} from ${stargazer.company || "GitHub"} - view profile (opens in a new tab)`}
     >
       {/* Avatar image */}
       <Image

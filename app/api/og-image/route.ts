@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { featuredSites } from "@/lib/content";
 
 // Allowed domains for security (including www subdomains)
-const ALLOWED_DOMAINS = [
+const STATIC_ALLOWED_DOMAINS = [
   "jeffreysprompts.com",
   "www.jeffreysprompts.com",
   "agent-flywheel.com",
@@ -19,6 +20,25 @@ const ALLOWED_DOMAINS = [
   "asupersync.com",
   "www.asupersync.com",
 ];
+
+// Every featuredSites ogImage host is allowed too (plus its www/bare twin, matching
+// the literal list above), so adding a site in lib/content.ts can't 403 its preview.
+const ALLOWED_DOMAINS = new Set<string>(STATIC_ALLOWED_DOMAINS);
+for (const site of featuredSites) {
+  if (!site.ogImage) continue;
+  try {
+    const { hostname } = new URL(site.ogImage);
+    ALLOWED_DOMAINS.add(hostname);
+    ALLOWED_DOMAINS.add(hostname.startsWith("www.") ? hostname.slice(4) : `www.${hostname}`);
+  } catch {
+    // Malformed ogImage URLs are caught by the content validation tests.
+  }
+}
+
+/** Exact-hostname allowlist check shared by the initial URL and every redirect hop. */
+export function isAllowedOgHost(hostname: string): boolean {
+  return ALLOWED_DOMAINS.has(hostname);
+}
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB max per image
 const UPSTREAM_TIMEOUT_MS = 8000; // Don't let a slow upstream hold the lambda open
@@ -49,7 +69,7 @@ async function fetchAllowedImage(initialUrl: string) {
       if (!["https:", "http:"].includes(nextUrl.protocol)) {
         throw new Error("Redirect protocol not allowed");
       }
-      if (!ALLOWED_DOMAINS.includes(nextUrl.hostname)) {
+      if (!isAllowedOgHost(nextUrl.hostname)) {
         throw new Error("Redirect domain not allowed");
       }
 
@@ -82,7 +102,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid URL protocol" }, { status: 400 });
   }
 
-  if (!ALLOWED_DOMAINS.includes(parsedUrl.hostname)) {
+  if (!isAllowedOgHost(parsedUrl.hostname)) {
     return NextResponse.json({ error: "Domain not allowed" }, { status: 403 });
   }
 
@@ -96,7 +116,7 @@ export async function GET(request: NextRequest) {
 
     // Verify final URL after redirects
     const finalUrl = new URL(response.url);
-    if (!["https:", "http:"].includes(finalUrl.protocol) || !ALLOWED_DOMAINS.includes(finalUrl.hostname)) {
+    if (!["https:", "http:"].includes(finalUrl.protocol) || !isAllowedOgHost(finalUrl.hostname)) {
       return NextResponse.json({ error: "Final redirect domain not allowed" }, { status: 403 });
     }
 

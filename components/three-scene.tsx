@@ -3884,8 +3884,18 @@ export default function ThreeScene({
     );
   }, []);
 
+  // The IntersectionObserver in the host only tracks scroll position; a hidden
+  // tab with the hero in view would otherwise keep every useFrame registered.
+  const [pageVisible, setPageVisible] = useState(true);
+  useEffect(() => {
+    const sync = () => setPageVisible(!document.hidden);
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+
   const autoRotateSpeed = tier === "low" ? 0.08 : tier === "medium" ? 0.18 : 0.28;
-  const allowAnimation = isActive && !prefersReducedMotion;
+  const allowAnimation = isActive && pageVisible && !prefersReducedMotion;
   const enableRotate = finePointer && !prefersReducedMotion;
 
   const variant = useMemo(() => {
@@ -3922,6 +3932,12 @@ export default function ThreeScene({
         dpr={currentDpr}
         style={{ touchAction: "pan-y" }}
         frameloop={allowAnimation ? "always" : "demand"}
+        // MSAA on a 1000x460 canvas at dpr 2 is the single largest fill-rate
+        // cost here; low-tier devices trade it for a stable frame rate.
+        gl={{
+          antialias: tier !== "low",
+          powerPreference: tier === "low" ? "low-power" : "high-performance",
+        }}
         onCreated={handleCreated}
       >
         {/* Performance monitoring - automatically scales DPR based on FPS */}

@@ -377,14 +377,16 @@ function StatsDisplay({
             aria-hidden="true"
           />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            {status === "loading" && "Loading"}
-            {status === "error" && "Feed unavailable"}
-            {status === "ready" && (hasFreshness ? (
-              <>
-                Updated{" "}
-                <time dateTime={fetchedAt.toISOString()}>{formatRelativeTime(fetchedAt, now)}</time>
-              </>
-            ) : "Recent")}
+            <span role="status" aria-live="polite">
+              {status === "loading" && "Loading"}
+              {status === "error" && "Feed unavailable"}
+              {status === "ready" && (hasFreshness ? (
+                <>
+                  Updated{" "}
+                  <time dateTime={fetchedAt.toISOString()}>{formatRelativeTime(fetchedAt, now)}</time>
+                </>
+              ) : "Recent")}
+            </span>
           </span>
         </div>
 
@@ -410,9 +412,20 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [fetchedAt, setFetchedAt] = useState<Date | null>(null);
   const fetchedRef = useRef(false);
+  // Bumped to re-run the fetch effect: once automatically after a 429 (honouring
+  // Retry-After), and on demand from the "Try again" button in the error state.
+  const [fetchAttempt, setFetchAttempt] = useState(0);
+  const autoRetriedRef = useRef(false);
+  const retryTimeoutRef = useRef<number | null>(null);
   // Initialize with null to avoid hydration mismatch, set after mount
   const [now, setNow] = useState<Date | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const retryFetch = useCallback(() => {
+    fetchedRef.current = false;
+    setStatus("loading");
+    setFetchAttempt((attempt) => attempt + 1);
+  }, []);
 
   // Fetch events. Non-OK responses are handled quietly (no throw, no console
   // noise): the card degrades to a labeled "unavailable" state instead.
@@ -431,7 +444,20 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
       }
 
       if (!response.ok) {
-        if (!cancelled) setStatus("error");
+        if (cancelled) return;
+        setStatus("error");
+        // Rate limited: schedule a single automatic retry after Retry-After (capped).
+        if (response.status === 429 && !autoRetriedRef.current) {
+          autoRetriedRef.current = true;
+          const retryAfterSeconds = Number(response.headers.get("retry-after"));
+          const delaySeconds = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+            ? Math.min(retryAfterSeconds, 120)
+            : 30;
+          retryTimeoutRef.current = window.setTimeout(() => {
+            retryTimeoutRef.current = null;
+            retryFetch();
+          }, delaySeconds * 1000);
+        }
         return;
       }
 
@@ -473,8 +499,12 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
     fetchEvents();
     return () => {
       cancelled = true;
+      if (retryTimeoutRef.current !== null) {
+        window.clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
     };
-  }, []);
+  }, [fetchAttempt, retryFetch]);
 
   // Seed the clock after hydration (avoids a server/client mismatch), then
   // update relative time labels once per minute; pause while the tab is hidden
@@ -536,6 +566,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
         "relative min-h-[608px] overflow-hidden rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 p-6",
         className
       )}
+      aria-busy={status === "loading"}
     >
       {/* Background effects */}
       <div className="pointer-events-none absolute inset-0">
@@ -563,6 +594,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
             className="flex min-h-11 items-center gap-1.5 rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2.5 text-xs font-medium text-slate-400 transition-all hover:border-slate-600 hover:bg-slate-800 hover:text-white"
           >
             <span>@{GITHUB_USERNAME}</span>
+            <span className="sr-only"> (opens in a new tab)</span>
             <ExternalLink className="h-3 w-3" aria-hidden="true" />
           </a>
         </div>
@@ -586,7 +618,11 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
         {/* Events list */}
         <div className="space-y-2">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
+            <div
+              className="flex items-center justify-center py-8"
+              role="status"
+              aria-label="Loading GitHub activity"
+            >
               <motion.div
                 animate={prefersReducedMotion ? {} : { rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -594,7 +630,10 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
               />
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+            <div
+              className="flex flex-col items-center justify-center gap-2 py-8 text-center"
+              role="alert"
+            >
               <Clock className="h-8 w-8 text-slate-600" aria-hidden="true" />
               <p className="text-sm text-slate-400">Activity feed unavailable</p>
               <a
@@ -604,8 +643,16 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
                 className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-emerald-400 hover:text-emerald-300"
               >
                 See activity on GitHub
+                <span className="sr-only"> (opens in a new tab)</span>
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
+              <button
+                type="button"
+                onClick={retryFetch}
+                className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-emerald-400 hover:text-emerald-300"
+              >
+                Try again
+              </button>
             </div>
           ) : events.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
@@ -631,6 +678,7 @@ export default function GitHubHeartbeat({ className }: { className?: string }) {
               className="group flex min-h-11 items-center justify-center gap-2 text-sm font-medium text-slate-400 transition-colors hover:text-emerald-400"
             >
               <span>View full activity</span>
+              <span className="sr-only"> (opens in a new tab)</span>
               <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </a>
           </div>
