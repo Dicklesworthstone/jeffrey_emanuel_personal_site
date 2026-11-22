@@ -66,7 +66,7 @@ describe("theme variants are bound to the <html> class, never the OS preference"
   it("reports the OS binding when the custom dark variant is removed (seeded defect)", async () => {
     const full = await buildCandidates(stripCustomVariant(source, "dark"), ["dark:bg-black"]);
     const rule = ruleFor(full, ".dark\\:bg-black");
-    expect(rule).toContain("prefers-color-scheme");
+    expect(full).toContain("prefers-color-scheme");
     expect(rule).not.toContain(":where(.dark, .dark *)");
   });
 

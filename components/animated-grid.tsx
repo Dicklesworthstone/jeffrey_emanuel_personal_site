@@ -151,7 +151,6 @@ export default function AnimatedGrid({
     const el = scrollRef.current;
     if (!scrollIndicator || !el) return;
     el.addEventListener("scroll", handleScroll, { passive: true });
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Initial scroll position sync on mount
     handleScroll();
     return () => el.removeEventListener("scroll", handleScroll);
   }, [scrollIndicator, handleScroll]);

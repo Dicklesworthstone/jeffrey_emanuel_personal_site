@@ -358,8 +358,10 @@ function LissajousSwarm({ palette, seed, count = 550 }: { palette: Palette; seed
     const drift = Math.sin(t * 0.6) * params.wobble;
     // Emissive pulse (0.8 -> 1.6 over 5.6s) lives in the render loop so it
     // stops with the scene instead of keeping a separate ticker alive.
-    // eslint-disable-next-line react-hooks/immutability -- three.js material is mutated in the frame loop by design (same pattern as pos.needsUpdate)
-    mat.emissiveIntensity = 1.2 + 0.4 * Math.sin((elapsed / 5.6) * Math.PI * 2);
+    const activeMat = ref.current.material;
+    if (activeMat instanceof THREE.MeshStandardMaterial) {
+      activeMat.emissiveIntensity = 1.2 + 0.4 * Math.sin((elapsed / 5.6) * Math.PI * 2);
+    }
     for (let i = 0; i < actualCount; i++) {
       const k = (i / actualCount) * Math.PI * 2;
       const x = Math.sin((params.ax + drift) * k + t) * Math.cos(params.bx * k + params.phase) * 2.1
@@ -860,21 +862,20 @@ function GyroidSurface({ palette, seed: _, resolution = 70 }: { palette: Palette
   useEffect(() => () => mat.dispose(), [mat]);
 
   useFrame(({ clock }) => {
+    if (!meshRef.current) return;
     const t = clock.getElapsedTime();
-    const pos = geom.attributes.position as THREE.BufferAttribute;
+    const activeGeom = meshRef.current.geometry;
+    const pos = activeGeom.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const y = pos.getY(i);
       const g = Math.sin(x + t * 0.8) * Math.cos(y + t * 0.6) + Math.sin(y + t * 0.4) * Math.cos(x + t * 0.5);
       pos.setZ(i, g * 0.6);
     }
-    // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
-    geom.computeVertexNormals();
-    if (meshRef.current) {
-      meshRef.current.rotation.x = -Math.PI / 2.4;
-      meshRef.current.rotation.z = t * 0.08;
-    }
+    activeGeom.computeVertexNormals();
+    meshRef.current.rotation.x = -Math.PI / 2.4;
+    meshRef.current.rotation.z = t * 0.08;
   });
 
   return <mesh ref={meshRef} geometry={geom} material={mat} />;
@@ -1338,7 +1339,8 @@ function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
-    const pos = geom.attributes.position as THREE.BufferAttribute;
+    const activeGeom = meshRef.current.geometry;
+    const pos = activeGeom.attributes.position as THREE.BufferAttribute;
     const { original, theta, phi, sinThetaPowM } = vertexData;
 
     for (let i = 0; i < pos.count; i++) {
@@ -1355,13 +1357,12 @@ function SphericalHarmonics({ palette, seed }: { palette: Palette; seed: number 
 
       pos.setXYZ(i, ox * displacement, oy * displacement, oz * displacement);
     }
-    // eslint-disable-next-line react-hooks/immutability
     pos.needsUpdate = true;
     // Normals are the expensive half of the update; every third frame is
     // visually indistinguishable at these displacement rates.
     normalsFrame.current = (normalsFrame.current + 1) % 3;
     if (normalsFrame.current === 0) {
-      geom.computeVertexNormals();
+      activeGeom.computeVertexNormals();
     }
 
     meshRef.current.rotation.y = t * 0.2;
@@ -2430,6 +2431,7 @@ function AizawaAttractor({ palette, seed: _ }: { palette: Palette; seed: number 
   }, []);
 
   const material = useMemo(() => makeLineMaterial(palette[1], 0.85), [palette]);
+  const lineRef = useRef<THREE.LineSegments>(null);
 
   useEffect(() => () => { geometry.dispose(); material.dispose(); }, [geometry, material]);
 
@@ -2438,13 +2440,15 @@ function AizawaAttractor({ palette, seed: _ }: { palette: Palette; seed: number 
     const t = clock.getElapsedTime();
     groupRef.current.rotation.y = t * 0.15;
     groupRef.current.rotation.x = Math.sin(t * 0.4) * 0.3;
-    // eslint-disable-next-line react-hooks/immutability
-    material.opacity = 0.7 + Math.sin(t * 0.8) * 0.2;
+    const lineMat = lineRef.current?.material;
+    if (lineMat instanceof THREE.Material) {
+      lineMat.opacity = 0.7 + Math.sin(t * 0.8) * 0.2;
+    }
   });
 
   return (
     <group ref={groupRef}>
-      <lineSegments geometry={geometry} material={material} />
+      <lineSegments ref={lineRef} geometry={geometry} material={material} />
     </group>
   );
 }
@@ -2636,6 +2640,7 @@ function ReactionDiffusionImpostor({ palette, seed, size = 34 }: { palette: Pale
     () => new THREE.MeshStandardMaterial({ color: palette[0], emissive: palette[1], emissiveIntensity: 0.7, roughness: 0.4, metalness: 0.3, side: THREE.DoubleSide }),
     [palette],
   );
+  const meshRef = useRef<THREE.Mesh>(null);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
@@ -2685,14 +2690,16 @@ function ReactionDiffusionImpostor({ palette, seed, size = 34 }: { palette: Pale
     }
 
     // Update mesh z displacement
-    const pos = geometry.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < total; i++) {
-      const height = (u[i] - v[i]) * 0.35;
-      pos.setZ(i, height);
+    const activeGeom = meshRef.current?.geometry;
+    if (activeGeom) {
+      const pos = activeGeom.attributes.position as THREE.BufferAttribute;
+      for (let i = 0; i < total; i++) {
+        const height = (u[i] - v[i]) * 0.35;
+        pos.setZ(i, height);
+      }
+      pos.needsUpdate = true;
+      activeGeom.computeVertexNormals();
     }
-    // eslint-disable-next-line react-hooks/immutability
-    pos.needsUpdate = true;
-    geometry.computeVertexNormals();
 
     if (groupRef.current) {
       const t = clock.getElapsedTime();
@@ -2703,7 +2710,7 @@ function ReactionDiffusionImpostor({ palette, seed, size = 34 }: { palette: Pale
 
   return (
     <group ref={groupRef}>
-      <mesh geometry={geometry} material={material} />
+      <mesh ref={meshRef} geometry={geometry} material={material} />
     </group>
   );
 }

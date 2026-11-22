@@ -697,7 +697,8 @@ function MicroHarmonics() {
     if (!ref.current || !originalPositions.current) return;
     ref.current.rotation.y = clock.getElapsedTime() * 0.3;
 
-    const pos = geom.attributes.position as THREE.BufferAttribute;
+    const activeGeom = ref.current.geometry;
+    const pos = activeGeom.attributes.position as THREE.BufferAttribute;
     const orig = originalPositions.current;
     const t = clock.getElapsedTime();
 
@@ -710,12 +711,12 @@ function MicroHarmonics() {
       const harmonic = 1 + 0.15 * Math.sin(2 * theta) * Math.cos(3 * phi + t * 2);
       pos.setXYZ(i, x * harmonic, y * harmonic, z * harmonic);
     }
-    pos.needsUpdate = true; // eslint-disable-line react-hooks/immutability
+    pos.needsUpdate = true;
     // Recomputing normals dominates this loop's cost; at a 40px render size a
     // few frames of normal lag is invisible, so refresh them at ~12fps.
     frameCounter.current = (frameCounter.current + 1) % 5;
     if (frameCounter.current === 0) {
-      geom.computeVertexNormals();
+      activeGeom.computeVertexNormals();
     }
   });
 

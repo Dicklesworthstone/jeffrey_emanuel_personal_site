@@ -392,10 +392,14 @@ export default function CommandPalette({ isOpen, onClose, onOpenHelp }: CommandP
     return groups;
   }, [filteredCommands]);
 
-  // Reset selection when results change
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
+    if (isOpen) {
+      setQuery("");
+      setSelectedIndex(0);
+    }
+  }
 
   const lastActiveElement = useRef<HTMLElement | null>(null);
 
@@ -405,12 +409,10 @@ export default function CommandPalette({ isOpen, onClose, onOpenHelp }: CommandP
       // Save currently focused element
       lastActiveElement.current = document.activeElement as HTMLElement;
 
-      setQuery("");
-      setSelectedIndex(0);
       const timeoutId = setTimeout(() => inputRef.current?.focus(), 50);
       return () => clearTimeout(timeoutId);
-    } 
-    
+    }
+
     // Restore focus when closed
     if (lastActiveElement.current) {
       lastActiveElement.current.focus();
@@ -568,7 +570,10 @@ export default function CommandPalette({ isOpen, onClose, onOpenHelp }: CommandP
                   ref={inputRef}
                   type="text"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setSelectedIndex(0);
+                  }}
                   onKeyDown={handleKeyDown}
                   placeholder="Search pages, projects, writing..."
                   className="flex-1 bg-transparent text-white placeholder-slate-500 outline-none"

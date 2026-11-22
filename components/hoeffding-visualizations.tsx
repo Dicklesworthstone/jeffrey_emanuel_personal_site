@@ -408,8 +408,16 @@ export function DependencyLab() {
   }, [data]);
 
   useEffect(() => {
-    setData(GENERATORS[type](400));
-  }, [type]);
+    const frameId = requestAnimationFrame(() => {
+      setData(GENERATORS.ring(400));
+    });
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  const handleSelectType = (nextType: keyof typeof GENERATORS) => {
+    setType(nextType);
+    setData(GENERATORS[nextType](400));
+  };
 
   useEffect(() => {
     if (!data.length) return;
@@ -501,7 +509,7 @@ export function DependencyLab() {
             <button
               type="button"
               key={s}
-              onClick={() => setType(s)}
+              onClick={() => handleSelectType(s)}
               aria-pressed={type === s}
               className={`min-h-10 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap border focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 ${type === s ? "bg-cyan-400 text-black border-cyan-400" : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}
             >

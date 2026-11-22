@@ -1171,7 +1171,18 @@ export function PeelingViz() {
   const linksRef = useRef<PeelingLink[]>([]);
   const simRef = useRef<Simulation<PeelingNode, PeelingLink> | null>(null);
   const d3Ref = useRef<D3 | null>(null);
-  const [, forceRender] = useState(0);
+  const [graphState, setGraphState] = useState<{
+    nodes: PeelingNode[];
+    links: PeelingLink[];
+    tick: number;
+  }>({ nodes: [], links: [], tick: 0 });
+  const syncGraphState = useCallback(() => {
+    setGraphState((prev) => ({
+      nodes: [...nodesRef.current],
+      links: [...linksRef.current],
+      tick: prev.tick + 1,
+    }));
+  }, []);
   const [phase, setPhase] = useState<PeelPhase>("loading");
   const { capabilities } = useDeviceCapabilities();
   const staticRef = useRef(capabilities.tier === "low");
@@ -1220,7 +1231,7 @@ export function PeelingViz() {
         // Low tier: fixed two-column layout, no force simulation.
         layoutStatic(nodes, w, h);
         simRef.current = null;
-        forceRender((c) => c + 1);
+        syncGraphState();
       } else {
         simRef.current = d3
           .forceSimulation<PeelingNode>(nodes)
@@ -1230,11 +1241,11 @@ export function PeelingViz() {
           )
           .force("charge", d3.forceManyBody().strength(-500))
           .force("center", d3.forceCenter(w / 2, h / 2))
-          .on("tick", () => forceRender((c) => c + 1));
+          .on("tick", syncGraphState);
       }
       evaluatePhase();
     });
-  }, [evaluatePhase]);
+  }, [evaluatePhase, syncGraphState]);
 
   const containerRef = useIntersectionInit(
     useCallback(() => {
@@ -1257,9 +1268,9 @@ export function PeelingViz() {
         simRef.current.force("center", d3.forceCenter(w / 2, h / 2)).alpha(0.3).restart();
       } else {
         layoutStatic(nodesRef.current, w, h);
-        forceRender((c) => c + 1);
+        syncGraphState();
       }
-    }, [])
+    }, [syncGraphState])
   );
 
   const step = useCallback(() => {
@@ -1302,9 +1313,9 @@ export function PeelingViz() {
     });
     pivot.deg = 0;
     simRef.current?.alpha(0.5).restart();
-    forceRender((c) => c + 1);
+    syncGraphState();
     evaluatePhase();
-  }, [evaluatePhase]);
+  }, [evaluatePhase, syncGraphState]);
 
   const resetViz = useCallback(() => {
     simRef.current?.stop();
@@ -1312,8 +1323,7 @@ export function PeelingViz() {
     initGraph();
   }, [initGraph]);
 
-  const nodes = nodesRef.current;
-  const links = linksRef.current;
+  const { nodes, links } = graphState;
   const solvedCount = nodes.filter((n) => n.type === "src" && n.solved).length;
   const srcCount = nodes.filter((n) => n.type === "src").length;
   const rippleCount = nodes.filter((n) => n.type === "pkt" && n.deg === 1).length;

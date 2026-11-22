@@ -46,7 +46,6 @@ export const WritingCard = memo(function WritingCard({
   const spotlightOpacity = useSpring(0, { stiffness: 300, damping: 30 });
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional one-time browser feature detection
     setIsTouchDevice(window.matchMedia("(hover: none)").matches);
   }, []);
 
